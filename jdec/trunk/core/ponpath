@@ -1,0 +1,3 @@
+#/bin/bash
+export LD_LIBRARY_PATH=.:/usr/local/share/jde-robot/:$LD_LIBRARY_PATH
+echo Adding /usr/local/share/jde-robot/ to LD_LIBRARY_PATH
