@@ -1,4 +1,4 @@
-#define thisrelease "JDE 4.1"
+#define thisrelease "JDE 4.1-svn"
 
 #include "jde.h"
 #include "dlfcn.h"
@@ -6,11 +6,11 @@
 #define MAX_BUFFER 1024
 
 /* sensor and motor variables */
-char *greyA;
-char greyAA[SIFNTSC_COLUMNS*SIFNTSC_ROWS*1]; /* sifntsc image itself */
+char *greyA; 
+char greyAA[SIFNTSC_COLUMNS*SIFNTSC_ROWS*1]; /**< sifntsc image itself */
 
 char *colorA;
-char colorAA[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /* sifntsc image itself */
+char colorAA[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /**< sifntsc image itself */
 unsigned long int imageA_clock;
 float fpsA=0;
 int kA=0;
@@ -20,7 +20,7 @@ fn imageA_suspend;
 fn imageA_resume;
 
 char *colorB;
-char colorBB[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /* sifntsc image itself */
+char colorBB[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /**< sifntsc image itself */
 unsigned long int imageB_clock;
 float fpsB=0;
 int kB=0;
@@ -30,7 +30,7 @@ fn imageB_suspend;
 fn imageB_resume;
 
 char *colorC;
-char colorCC[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /* sifntsc image itself */
+char colorCC[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /**< sifntsc image itself */
 unsigned long int imageC_clock;
 float fpsC=0;
 int kC=0;
@@ -40,7 +40,7 @@ fn imageC_suspend;
 fn imageC_resume;
 
 char *colorD;
-char colorDD[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /* sifntsc image itself */
+char colorDD[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /**< sifntsc image itself */
 unsigned long int imageD_clock;
 float fpsD=0;
 int kD=0;
@@ -49,7 +49,8 @@ int imageD_users=0;
 fn imageD_suspend;
 fn imageD_resume;
 
-float pan_angle, tilt_angle;  /* degs */
+float pan_angle; /**< pan angle of the pantilt in degrees */
+float tilt_angle;   /**< tilt angle of the pantilt in degrees */
 unsigned long int pantiltencoders_clock;
 float fpspantiltencoders=0;
 int kpantiltencoders=0;
@@ -107,11 +108,11 @@ fn motors_resume;
 /* sensor positions in the Robot FrameOfReference */
 float laser_coord[5];
 float us_coord[NUM_SONARS][5]; 
-   /* Estructura para poder cambiar medidas de sensor a coordenadas locales al robot, y de estas al sist ref inicial: xsensor, ysensor, orientsensor,cossensor y sinsensor del sensor respecto del sistema solidario con el robot. Es fija. */
+/**< Estructura para poder cambiar medidas de sensor a coordenadas locales al robot, y de estas al sist ref inicial: xsensor, ysensor, orientsensor,cossensor y sinsensor del sensor respecto del sistema solidario con el robot. Es fija. */
 float camera_coord[5];
 
 
-/* coordinate transformations from one FrameOfReference to another */
+/** coordinate transformations from one FrameOfReference to another. */
 void us2xy(int numsensor, float d,float phi, Tvoxel *point) 
 
 /*  Calcula la posicion respecto de sistema de referencia inicial (sistema odometrico) del punto detectado en el sistema de coordenadas solidario al sensor. OJO depende de estructura posiciones y de por el sensor, sabiendo que:
