@@ -359,7 +359,8 @@ int serve_keyboardmessage(char *mensaje)
     }
   else if (sscanf(mensaje,"%s",word)==1) 
     {
-      if (strcmp(word,"quit")==0)
+      if ((strcmp(word,"quit")==0) ||
+	  (strcmp(word,"QUIT")==0))
 	jdeshutdown(0);
       else if (strcmp(word,"help")==0)
 	{ printf("this is the shell of jde. Available commands:\n  quit\n  mastergui [on|off]\n  sensorsmotorsgui [on|off]\n");

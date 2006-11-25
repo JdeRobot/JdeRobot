@@ -1601,8 +1601,11 @@ void mastergui_buttons(FL_OBJECT *obj)
 	  if (obj == act[i]) 
 	    {if (fl_get_button(act[i])==RELEASED) 
 	      {(*all[associated_ID[i]].suspend)();
-		fl_set_button(vis[i],RELEASED);
-		(*all[associated_ID[i]].guisuspend)();
+		if (fl_get_button(vis[i])==PUSHED)
+		  {
+		    fl_set_button(vis[i],RELEASED);
+		    (*all[associated_ID[i]].guisuspend)();
+		  }
 	      }
 	    else 
 	      (*all[associated_ID[i]].resume)(GUIHUMAN,NULL,null_arbitration);

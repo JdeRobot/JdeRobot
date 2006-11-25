@@ -3,7 +3,7 @@
 #include "hsitunergui.h"
 #include <math.h>
 
-#define HSItunerVER "HSItuner 2.4"
+#define HSItunerVER "HSItuner 2.7"
 
 int hsituner_id=0;
 int hsituner_brothers[MAX_SCHEMAS];
@@ -401,21 +401,63 @@ void drawcheese (char *img,int x_centro,int y_centro, double h_max, double h_min
 int hsitunergui_setupDisplay(void) 
      /* Inicializa las ventanas, la paleta de colores y memoria compartida para visualizacion*/ 
 {
+  int vmode;
   XGCValues gc_values;
 
   gc_values.graphics_exposures = False;
   hsituner_gc = XCreateGC(display,hsituner_win, GCGraphicsExposures, &gc_values); 
    
-  /* Imagen principal */
-  imagenOrig = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+  vmode= fl_get_vclass();
 
-  /*Imagen filtrada */
-  hsifiltrada = XCreateImage(display, DefaultVisual(display,screen),24, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
-
-  /* Mapa HSI */
-  histograma = XCreateImage(display, DefaultVisual(display,screen),24, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
- 
-  return 1;
+  if ((vmode==TrueColor)&&(fl_state[vmode].depth==16))
+	{
+		/* Imagen principal */
+		imagenOrig = XCreateImage(display,DefaultVisual(display,screen),16, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+	
+		/*Imagen filtrada */
+		hsifiltrada = XCreateImage(display, DefaultVisual(display,screen),16, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+	
+		/* Mapa HSI */
+		histograma = XCreateImage(display, DefaultVisual(display,screen),16, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
+	}
+	else if ((vmode==TrueColor)&&(fl_state[vmode].depth==24))
+	{
+		/* Imagen principal */
+		imagenOrig = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+	
+		/*Imagen filtrada */
+		hsifiltrada = XCreateImage(display, DefaultVisual(display,screen),24, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+	
+		/* Mapa HSI */
+		histograma = XCreateImage(display, DefaultVisual(display,screen),24, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
+ 	}
+	else if ((vmode==TrueColor)&&(fl_state[vmode].depth==32))
+	{
+		/* Imagen principal */
+		imagenOrig = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+	
+		/*Imagen filtrada */
+		hsifiltrada = XCreateImage(display, DefaultVisual(display,screen),32, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+	
+		/* Mapa HSI */
+		histograma = XCreateImage(display, DefaultVisual(display,screen),32, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
+	}
+	else if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8)) 
+	{
+		/* Imagen principal */
+		imagenOrig = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+		
+		/*Imagen filtrada */
+		hsifiltrada = XCreateImage(display, DefaultVisual(display,screen),8, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+		
+		/* Mapa HSI */
+		histograma = XCreateImage(display, DefaultVisual(display,screen),8, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
+	}
+  else 
+  {
+		perror("Unsupported color mode in X server");exit(1);
+  }
+	return 1;
 }
 
 
@@ -423,7 +465,6 @@ int hsitunergui_setupDisplay(void)
 void hsituner_iteration()
 {  
   int i;
-  static int d;
   double r,g,b,I,H,S;
   unsigned int X, Y;
   double x,y;
@@ -699,7 +740,7 @@ void hsituner_guibuttons(FL_OBJECT *obj)
 void hsituner_guidisplay()
 {
    drawcheese(histograma_buf,centro_x,centro_y,h_max,h_min,s_max,s_min,FL_PALEGREEN);
-   
+  
   XPutImage(display,hsituner_win,hsituner_gc,imagenOrig,0,0,fd_hsitunergui->oculo_orig->x, fd_hsitunergui->oculo_orig->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
   
   XPutImage(display,hsituner_win,hsituner_gc,hsifiltrada,0,0,fd_hsitunergui->oculo_modif->x, fd_hsitunergui->oculo_modif->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
