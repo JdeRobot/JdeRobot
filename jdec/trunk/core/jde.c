@@ -381,7 +381,7 @@ int jde_loadschema(char *name)
   int i;
   char *error;
 
-  strcpy(n,name); strcat(n,".so");
+  strcpy(n,name); strcat(n,".so.1.0");
   /*  all[num_schemas].handle = dlopen(n,RTLD_LAZY|RTLD_GLOBAL);*/
   /* Schemas don't share their global variables, to avoid symbol collisions */
   all[num_schemas].handle = dlopen(n,RTLD_LAZY);
@@ -459,7 +459,7 @@ int jde_loaddriver(char *name)
   char n[200];
   char *error;
 
-  strcpy(n,name); strcat(n,".so");
+  strcpy(n,name); strcat(n,".so.1.0");
  /* Drivers don't share their global variables, to avoid the symbol collisions */
   mydrivers[num_drivers].handle = dlopen(n,RTLD_LAZY);
   if (!(mydrivers[num_drivers].handle))
