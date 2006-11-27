@@ -33,6 +33,7 @@ clean:
 install:
 	cp jde $(INSTALLDIR)/bin/
 	cp jde.h $(INSTALLDIR)/include/jde-robot/
+	cp jdegui.h $(INSTALLDIR)/include/jde-robot/	
 
 release:
 	tar -zcvf newrelease.tgz *h *c *fd *.conf README makefile
