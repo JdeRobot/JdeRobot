@@ -5,52 +5,57 @@
 #define DISPLAY_ROBOT 0x01UL
 #define DISPLAY_SONARS 0x04UL
 #define DISPLAY_LASER 0x08UL
-#define BASE_TELEOPERATOR 0x100UL
 
 int introrob_id=0; 
 int introrob_brothers[MAX_SCHEMAS];
 arbitration introrob_callforarbitration;
 int introrob_cycle=100; /* ms */
 
+enum introrobstates {teleoperated,vff,deliberative,hybrid};
+int introrob_state;
+
 FD_introrobgui *fd_introrobgui;
 GC introrobgui_gc;
-Window  canvas_win;
-unsigned long display_state;
-int visual_refresh=FALSE;
-int iteracion_display=0;
+Window  introrob_canvas_win;
+unsigned long introrob_display_state;
+int introrob_visual_refresh=FALSE;
+int introrob_iteracion_display=0;
+int introrob_canvas_mouse_button_pressed=0;
+int introrob_mouse_button=0;
+int introrob_robot_mouse_motion=0;
+FL_Coord introrob_x_canvas,introrob_y_canvas,old_introrob_x_canvas,old_introrob_y_canvas;
+float introrob_mouse_x, introrob_mouse_y;
+int introrob_mouse_new=0;
 
 #define PUSHED 1
 #define RELEASED 0 
 #define FORCED_REFRESH 5000 /* ms */
 /*Every forced_refresh the display is drawn from scratch. If it is too small it will cause flickering with grid display. No merece la pena una hebra de "display_lento" solo para repintar completamente la pantalla. */
 
-char fpstext[80]="";
-
-float   escala, jde_width, jde_height;
-int track_robot=FALSE;
-float odometrico[5];
+float   introrob_escala, introrob_width, introrob_height;
+int introrob_trackrobot=FALSE;
+float introrob_odometrico[5];
 #define RANGO_MAX 20000. /* en mm */
 #define RANGO_MIN 500. /* en mm */ 
 #define RANGO_INICIAL 4000. /* en mm */
-float rango=(float)RANGO_INICIAL; /* Rango de visualizacion en milimetros */
+float introrob_rango=(float)RANGO_INICIAL; /* Rango de visualizacion en milimetros */
 
 #define EGOMAX NUM_SONARS+5
-XPoint ego[EGOMAX];
-float last_heading; /* ultima orientacion visualizada del robot */
-int numego=0;
-int visual_delete_ego=FALSE;
+XPoint introrob_ego[EGOMAX];
+int numintrorob_ego=0;
+int visual_delete_introrob_ego=FALSE;
 
-XPoint laser_dpy[NUM_LASER];
-int visual_delete_laser=FALSE;
+XPoint introrob_laser_dpy[NUM_LASER];
+int visual_delete_introrob_laser=FALSE;
 
-XPoint us_dpy[NUM_SONARS*2];
-int visual_delete_us=FALSE;
+XPoint introrob_us_dpy[NUM_SONARS*2];
+int visual_delete_introrob_us=FALSE;
 
 #define joystick_maxRotVel 30 /* deg/sec */
 #define joystick_maxTranVel 500 /* mm/sec */
-float joystick_x, joystick_y;
+float v_teleop, w_teleop;
 
-const char *rangoenmetros(FL_OBJECT *ob, double value, int prec)
+const char *introrob_range(FL_OBJECT *ob, double value, int prec)
 {
 static char buf[32];
 
@@ -58,44 +63,72 @@ sprintf(buf,"%.1f",value/1000.);
 return buf;
 }
 
-int xy2canvas(Tvoxel point, XPoint* grafico)
+int xy2introrobcanvas(Tvoxel point, XPoint* grafico)
      /* return -1 if point falls outside the canvas */
 {
 float xi, yi;
 
-xi = (point.x * odometrico[3] - point.y * odometrico[4] + odometrico[0])*escala;
-yi = (point.x * odometrico[4] + point.y * odometrico[3] + odometrico[1])*escala;
+xi = (point.x * introrob_odometrico[3] - point.y * introrob_odometrico[4] + introrob_odometrico[0])*introrob_escala;
+yi = (point.x * introrob_odometrico[4] + point.y * introrob_odometrico[3] + introrob_odometrico[1])*introrob_escala;
 /* Con esto cambiamos al sistema de referencia de visualizacion, centrado en algun punto xy y con alguna orientacion definidos por odometrico. Ahora cambiamos de ese sistema al del display, donde siempre hay un desplazamiento a la esquina sup. izda. y que las y se cuentan para abajo. */
 
-grafico->x = xi + jde_width/2;
-grafico->y = -yi + jde_height/2;
+grafico->x = xi + introrob_width/2;
+grafico->y = -yi + introrob_height/2;
 
- if ((grafico->x <0)||(grafico->x>jde_width)) return -1; 
- if ((grafico->y <0)||(grafico->y>jde_height)) return -1; 
+ if ((grafico->x <0)||(grafico->x>introrob_width)) return -1; 
+ if ((grafico->y <0)||(grafico->y>introrob_height)) return -1; 
  return 0;
 }
 
+int absolutas2relativas(Tvoxel in, Tvoxel *out)
+/*  Calcula la posicion relativa respecto del robot de un punto absoluto. El robot se encuentra en robot[0], robot[1] con orientacion robot[2] respecto al sistema de referencia absoluto
+*/ 
+{
+  if (out!=NULL)
+    {
+  (*out).x = in.x*jde_robot[3] + in.y*jde_robot[4] - jde_robot[0];
+  (*out).y = in.y*jde_robot[3] - in.x*jde_robot[4] - jde_robot[1];
+    }
+  return 0;
+}
+
+int relativas2absolutas(Tvoxel in, Tvoxel *out)
+/*  Calcula la posicion absoluta de un punto expresado en el sistema de coordenadas solidario al robot. El robot se encuentra en robot[0], robot[1] con orientacion robot[2] respecto al sistema de referencia absoluto
+*/ 
+{
+  if (out!=NULL)
+    {
+  (*out).x = in.x*jde_robot[3] - in.y*jde_robot[4] + jde_robot[0];
+  (*out).y = in.y*jde_robot[3] + in.x*jde_robot[4] + jde_robot[1];
+    }
+  return 0;
+}
+
+int pintaSegmento(Tvoxel a, Tvoxel b, int color)
+  /* colores: FL_PALEGREEN */
+   {
+     XPoint aa,bb;
+
+     fl_set_foreground(introrobgui_gc,color);
+     xy2introrobcanvas(a,&aa);
+     xy2introrobcanvas(b,&bb);
+     XDrawLine(display,introrob_canvas_win,introrobgui_gc,aa.x,aa.y,bb.x,bb.y);
+     return 0;
+   }
 
 void introrob_iteration()
 {  
   static int d=0;
-  double delta, deltapos;
+ 
 
   speedcounter(introrob_id);
   /*printf("introrob iteration %d\n",d++);*/
 
-  /* ROTACION=ejeX: Ajusta a un % de joystick_maxRotVel. OJO no funcion lineal del desplazamiento visual, sino con el al cuadrado, para aplanarla en el origen y evitar cabeceos, conseguir suavidad en la teleoperacion */
-  delta = (joystick_x-0.5)*2; /* entre +-1 */
-  deltapos = fabs(delta); /* Para que no moleste el signo de delta en el factor de la funcion de control */
-  if (delta<0) w = (float) joystick_maxRotVel*deltapos*deltapos*deltapos; 
-  else w = (float) -1.*joystick_maxRotVel*deltapos*deltapos*deltapos;
-  
-  
-  /* TRASLACION=ejeY: Ajusta a un % de +-joystick_maxTranVel. OJO no funcion lineal del desplazamiento visual, sino con el a la cuarta, para aplanarla en el origen */
-  delta = (joystick_y-0.5)*2; /* entre +-1 */
-  deltapos = fabs(delta);/* Para que no moleste el signo de delta en el factor de la funcion de control */
-  if (delta<0) v = (float) -1.*joystick_maxTranVel*deltapos*deltapos*deltapos;
-  else v = (float) joystick_maxTranVel*deltapos*deltapos*deltapos;
+  if (introrob_state==teleoperated)
+    {v=v_teleop;
+    w=w_teleop;
+    }
+  else;
 }
 
 
@@ -194,54 +227,53 @@ void introrob_startup()
   put_state(introrob_id,slept);
   pthread_create(&(all[introrob_id].mythread),NULL,introrob_thread,NULL);
   pthread_mutex_unlock(&(all[introrob_id].mymutex));
+
+  introrob_state=teleoperated;
 }
 
 void introrob_guibuttons(FL_OBJECT *obj)
 {
+  double delta, deltapos;
+ 
   if (obj == fd_introrobgui->exit) jdeshutdown(0);
   else if (obj == fd_introrobgui->escala)  
-    {  rango=fl_get_slider_value(fd_introrobgui->escala);
-    visual_refresh = TRUE; /* activa el flag que limpia el fondo de la pantalla y repinta todo */ 
-    escala = jde_width /rango;}
+    {  introrob_rango=fl_get_slider_value(fd_introrobgui->escala);
+    introrob_visual_refresh = TRUE; /* activa el flag que limpia el fondo de la pantalla y repinta todo */ 
+    introrob_escala = introrob_width /introrob_rango;}
   else if (obj == fd_introrobgui->track_robot) 
-    {if (fl_get_button(obj)==PUSHED) track_robot=TRUE;
-    else track_robot=FALSE;
+    {if (fl_get_button(obj)==PUSHED) introrob_trackrobot=TRUE;
+    else introrob_trackrobot=FALSE;
     } 
   else if (obj== fd_introrobgui->center)
     /* Se mueve 10%un porcentaje del rango */
     {
-      odometrico[0]+=rango*(fl_get_positioner_xvalue(fd_introrobgui->center)-0.5)*(-2.)*(0.1);
-      odometrico[1]+=rango*(fl_get_positioner_yvalue(fd_introrobgui->center)-0.5)*(-2.)*(0.1);
+      introrob_odometrico[0]+=introrob_rango*(fl_get_positioner_xvalue(fd_introrobgui->center)-0.5)*(-2.)*(0.1);
+      introrob_odometrico[1]+=introrob_rango*(fl_get_positioner_yvalue(fd_introrobgui->center)-0.5)*(-2.)*(0.1);
       fl_set_positioner_xvalue(fd_introrobgui->center,0.5);
       fl_set_positioner_yvalue(fd_introrobgui->center,0.5);
-      visual_refresh=TRUE;  }
+      introrob_visual_refresh=TRUE;  }
   else if (obj == fd_introrobgui->joystick) 
     {
-      if ((display_state & BASE_TELEOPERATOR)!=0) 
-	{
-	  if (fl_get_button(fd_introrobgui->back)==RELEASED)
-	    joystick_y=0.5+0.5*fl_get_positioner_yvalue(fd_introrobgui->joystick);
-	  else 
-	    joystick_y=0.5-0.5*fl_get_positioner_yvalue(fd_introrobgui->joystick);
-	  joystick_x=fl_get_positioner_xvalue(fd_introrobgui->joystick);
-	  fl_redraw_object(fd_introrobgui->joystick);
-	}
-    }    
-   else if (obj == fd_introrobgui->back) 
-    {
-      if (fl_get_button(fd_introrobgui->back)==RELEASED)
-	joystick_y=0.5+0.5*fl_get_positioner_yvalue(fd_introrobgui->joystick);
+      /* ROTACION=ejeX: Ajusta a un % de joystick_maxRotVel. OJO no funcion lineal del desplazamiento visual, sino con el al cuadrado, para aplanarla en el origen y evitar cabeceos, conseguir suavidad en la teleoperacion */
+      delta = (fl_get_positioner_xvalue(fd_introrobgui->joystick)-0.5)*2; /* entre +-1 */
+      deltapos = fabs(delta); /* Para que no moleste el signo de delta en el factor de la funcion de control */
+      if (delta<0) w_teleop = (float) joystick_maxRotVel*deltapos*deltapos*deltapos; 
+      else w_teleop = (float) -1.*joystick_maxRotVel*deltapos*deltapos*deltapos;
+      
+      /* TRASLACION=ejeY: Ajusta a un % de +-joystick_maxTranVel. OJO no funcion lineal del desplazamiento visual, sino con el a la cuarta, para aplanarla en el origen */
+      delta = fl_get_positioner_yvalue(fd_introrobgui->joystick); /* entre 0 y 1 */
+      if (fl_get_button(fd_introrobgui->back)==PUSHED)
+	v_teleop = (float) -1.*joystick_maxTranVel*delta*delta*delta;
       else 
-	joystick_y=0.5-0.5*fl_get_positioner_yvalue(fd_introrobgui->joystick);
-      joystick_x=fl_get_positioner_xvalue(fd_introrobgui->joystick);
-      fl_redraw_object(fd_introrobgui->joystick);
+	v_teleop = (float) joystick_maxTranVel*delta*delta*delta;
     }    
+  else if (obj == fd_introrobgui->back) ;
   else if (obj == fd_introrobgui->stop) 
     {
       fl_set_positioner_xvalue(fd_introrobgui->joystick,0.5);
       fl_set_positioner_yvalue(fd_introrobgui->joystick,0.);
-      joystick_x=0.5;
-      joystick_y=0.5;
+      v_teleop=0.;
+      w_teleop=0.;
     }     
 }
 
@@ -251,123 +283,302 @@ void introrob_guidisplay()
   static float k=0;
   int i;
   Tvoxel kaka;
+  static Tvoxel a,b;
 
   /* slow refresh of the complete introrob gui, needed because incremental refresh misses window occlusions */
-  if (iteracion_display*introrob_cycle>FORCED_REFRESH) 
-    {iteracion_display=0;
-    visual_refresh=TRUE;
+  if (introrob_iteracion_display*introrob_cycle>FORCED_REFRESH) 
+    {introrob_iteracion_display=0;
+    introrob_visual_refresh=TRUE;
     }
-  else iteracion_display++;
+  else introrob_iteracion_display++;
 
 
   k=k+1.;
   sprintf(text,"%.1f",k);
   fl_set_object_label(fd_introrobgui->fps,text);
 
-  fl_winset(canvas_win); 
+  fl_winset(introrob_canvas_win); 
   
-  if ((track_robot==TRUE)&&
-      ((fabs(jde_robot[0]+odometrico[0])>(rango/4.))||
-       (fabs(jde_robot[1]+odometrico[1])>(rango/4.))))
-    {odometrico[0]=-jde_robot[0];
-    odometrico[1]=-jde_robot[1];
-    visual_refresh = TRUE;
+  if ((introrob_trackrobot==TRUE)&&
+      ((fabs(jde_robot[0]+introrob_odometrico[0])>(introrob_rango/4.))||
+       (fabs(jde_robot[1]+introrob_odometrico[1])>(introrob_rango/4.))))
+    {introrob_odometrico[0]=-jde_robot[0];
+    introrob_odometrico[1]=-jde_robot[1];
+    introrob_visual_refresh = TRUE;
     }
     
  
-  if (visual_refresh==TRUE)
+  if (introrob_visual_refresh==TRUE)
     {
-      fl_rectbound(0,0,jde_width,jde_height,FL_WHITE);   
+      fl_rectbound(0,0,introrob_width,introrob_height,FL_WHITE);   
       XFlush(display);
     }
   
   
   /* VISUALIZACION de una instantanea ultrasonica */
-  if ((((display_state&DISPLAY_SONARS)!=0)&&(visual_refresh==FALSE))
-      || (visual_delete_us==TRUE))
+  if ((((introrob_display_state&DISPLAY_SONARS)!=0)&&(introrob_visual_refresh==FALSE))
+      || (visual_delete_introrob_us==TRUE))
     {  
       fl_set_foreground(introrobgui_gc,FL_WHITE); 
       /* clean last sonars, but only if there wasn't a total refresh. In case of total refresh the white rectangle already cleaned all */
-      for(i=0;i<NUM_SONARS*2;i+=2) XDrawLine(display,canvas_win,introrobgui_gc,us_dpy[i].x,us_dpy[i].y,us_dpy[i+1].x,us_dpy[i+1].y);
+      for(i=0;i<NUM_SONARS*2;i+=2) XDrawLine(display,introrob_canvas_win,introrobgui_gc,introrob_us_dpy[i].x,introrob_us_dpy[i].y,introrob_us_dpy[i+1].x,introrob_us_dpy[i+1].y);
       
     }
   
-  if ((display_state&DISPLAY_SONARS)!=0){
+  if ((introrob_display_state&DISPLAY_SONARS)!=0){
     for(i=0;i<NUM_SONARS;i++)
       {us2xy(i,0.,0.,&kaka); /* Da en el Tvoxel kaka las coordenadas del sensor, pues es distancia 0 */
-      xy2canvas(kaka,&us_dpy[2*i]);
+      xy2introrobcanvas(kaka,&introrob_us_dpy[2*i]);
       us2xy(i,us[i],0.,&kaka);
       /*us2xy(i,200,0.,&kaka);
 	if (i==6) us2xy(i,400,0.,&kaka);*/
-      xy2canvas(kaka,&us_dpy[2*i+1]);
+      xy2introrobcanvas(kaka,&introrob_us_dpy[2*i+1]);
       }
     fl_set_foreground(introrobgui_gc,FL_PALEGREEN);
-    for(i=0;i<NUM_SONARS*2;i+=2) XDrawLine(display,canvas_win,introrobgui_gc,us_dpy[i].x,us_dpy[i].y,us_dpy[i+1].x,us_dpy[i+1].y);
+    for(i=0;i<NUM_SONARS*2;i+=2) XDrawLine(display,introrob_canvas_win,introrobgui_gc,introrob_us_dpy[i].x,introrob_us_dpy[i].y,introrob_us_dpy[i+1].x,introrob_us_dpy[i+1].y);
   }
   
   /* VISUALIZACION de una instantanea laser*/
-  if ((((display_state&DISPLAY_LASER)!=0)&&(visual_refresh==FALSE))
-      || (visual_delete_laser==TRUE))
+  if ((((introrob_display_state&DISPLAY_LASER)!=0)&&(introrob_visual_refresh==FALSE))
+      || (visual_delete_introrob_laser==TRUE))
     {  
       fl_set_foreground(introrobgui_gc,FL_WHITE); 
       /* clean last laser, but only if there wasn't a total refresh. In case of total refresh the white rectangle already cleaned all */
-      /*for(i=0;i<NUM_LASER;i++) XDrawPoint(display,canvas_win,introrobgui_gc,laser_dpy[i].x,laser_dpy[i].y);*/
-      XDrawPoints(display,canvas_win,introrobgui_gc,laser_dpy,NUM_LASER,CoordModeOrigin);
+      /*for(i=0;i<NUM_LASER;i++) XDrawPoint(display,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy[i].x,introrob_laser_dpy[i].y);*/
+      XDrawPoints(display,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy,NUM_LASER,CoordModeOrigin);
     }
   
-  if ((display_state&DISPLAY_LASER)!=0){
+  if ((introrob_display_state&DISPLAY_LASER)!=0){
     for(i=0;i<NUM_LASER;i++)
       {
 	laser2xy(i,jde_laser[i],&kaka);
-	xy2canvas(kaka,&laser_dpy[i]);
+	xy2introrobcanvas(kaka,&introrob_laser_dpy[i]);
       }
     fl_set_foreground(introrobgui_gc,FL_BLUE);
-    /*for(i=0;i<NUM_LASER;i++) XDrawPoint(display,canvas_win,introrobgui_gc,laser_dpy[i].x,laser_dpy[i].y);*/
-    XDrawPoints(display,canvas_win,introrobgui_gc,laser_dpy,NUM_LASER,CoordModeOrigin);
+    /*for(i=0;i<NUM_LASER;i++) XDrawPoint(display,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy[i].x,introrob_laser_dpy[i].y);*/
+    XDrawPoints(display,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy,NUM_LASER,CoordModeOrigin);
   }
   
   
   /* VISUALIZACION: pintar o borrar de el PROPIO ROBOT.
      Siempre hay un repintado total. Esta es la ultima estructura que se se pinta, para que ninguna otra se solape encima */
   
-  if ((((display_state&DISPLAY_ROBOT)!=0) &&(visual_refresh==FALSE))
-      || (visual_delete_ego==TRUE))
+  if ((((introrob_display_state&DISPLAY_ROBOT)!=0) &&(introrob_visual_refresh==FALSE))
+      || (visual_delete_introrob_ego==TRUE))
     {  
       fl_set_foreground(introrobgui_gc,FL_WHITE); 
       /* clean last robot, but only if there wasn't a total refresh. In case of total refresh the white rectangle already cleaned all */
-      for(i=0;i<numego;i++) XDrawLine(display,canvas_win,introrobgui_gc,ego[i].x,ego[i].y,ego[i+1].x,ego[i+1].y);
+      for(i=0;i<numintrorob_ego;i++) XDrawLine(display,introrob_canvas_win,introrobgui_gc,introrob_ego[i].x,introrob_ego[i].y,introrob_ego[i+1].x,introrob_ego[i+1].y);
       
     }
   
-  if ((display_state&DISPLAY_ROBOT)!=0){
+  if ((introrob_display_state&DISPLAY_ROBOT)!=0){
     fl_set_foreground(introrobgui_gc,FL_MAGENTA);
     /* relleno los nuevos */
     us2xy(15,0.,0.,&kaka);
-    xy2canvas(kaka,&ego[0]);
+    xy2introrobcanvas(kaka,&introrob_ego[0]);
     us2xy(3,0.,0.,&kaka);
-    xy2canvas(kaka,&ego[1]);
+    xy2introrobcanvas(kaka,&introrob_ego[1]);
     us2xy(4,0.,0.,&kaka);
-    xy2canvas(kaka,&ego[2]);
+    xy2introrobcanvas(kaka,&introrob_ego[2]);
     us2xy(8,0.,0.,&kaka);
-    xy2canvas(kaka,&ego[3]);
+    xy2introrobcanvas(kaka,&introrob_ego[3]);
     us2xy(15,0.,0.,&kaka);
-    xy2canvas(kaka,&ego[EGOMAX-1]);
+    xy2introrobcanvas(kaka,&introrob_ego[EGOMAX-1]);
     for(i=0;i<NUM_SONARS;i++)
       {
 	us2xy((15+i)%NUM_SONARS,0.,0.,&kaka); /* Da en el Tvoxel kaka las coordenadas del sensor, pues es distancia 0 */
-	xy2canvas(kaka,&ego[i+4]);       
+	xy2introrobcanvas(kaka,&introrob_ego[i+4]);       
       }
     
     /* pinto los nuevos */
-    numego=EGOMAX-1;
-    for(i=0;i<numego;i++) XDrawLine(display,canvas_win,introrobgui_gc,ego[i].x,ego[i].y,ego[i+1].x,ego[i+1].y);
+    numintrorob_ego=EGOMAX-1;
+    for(i=0;i<numintrorob_ego;i++) XDrawLine(display,introrob_canvas_win,introrobgui_gc,introrob_ego[i].x,introrob_ego[i].y,introrob_ego[i+1].x,introrob_ego[i+1].y);
   }
 
    /* clear all flags. If they were set at the beginning, they have been already used in this iteration */
-  visual_refresh=FALSE;
-  visual_delete_us=FALSE; 
-  visual_delete_laser=FALSE; 
-  visual_delete_ego=FALSE;
+  introrob_visual_refresh=FALSE;
+  visual_delete_introrob_us=FALSE; 
+  visual_delete_introrob_laser=FALSE; 
+  visual_delete_introrob_ego=FALSE;
+
+  pintaSegmento(a,b,FL_WHITE);
+  kaka.x=500.; kaka.y=500.;
+  relativas2absolutas(kaka,&a);
+  kaka.x=0.; kaka.y=0.;
+  relativas2absolutas(kaka,&b);
+  pintaSegmento(a,b,FL_RED);
+
+}
+
+
+/* callback function for button pressed inside the canvas object*/
+int introrob_button_pressed_on_micanvas(FL_OBJECT *ob, Window win, int win_width, int win_height, XEvent *xev, void *user_data)
+{
+  unsigned int keymap;
+  float ygraf, xgraf;
+ 
+  /* in order to know the mouse button that created the event */
+  introrob_mouse_button=xev->xkey.keycode;
+  if(introrob_canvas_mouse_button_pressed==0){
+    if((introrob_mouse_button==MOUSELEFT)||(introrob_mouse_button==MOUSERIGHT)){
+      /* a button has been pressed */
+      introrob_canvas_mouse_button_pressed=1;
+      
+      /* getting mouse coordenates. win will be always the canvas window, because this callback has been defined only for that canvas */  
+      fl_get_win_mouse(win,&introrob_x_canvas,&introrob_y_canvas,&keymap);
+      old_introrob_x_canvas=introrob_x_canvas;
+      old_introrob_y_canvas=introrob_y_canvas;
+      
+      /* from graphical coordinates to spatial ones */
+      ygraf=((float) (introrob_height/2-introrob_y_canvas))/introrob_escala;
+      xgraf=((float) (introrob_x_canvas-introrob_width/2))/introrob_escala;
+      introrob_mouse_y=(ygraf-introrob_odometrico[1])*introrob_odometrico[3]+(-xgraf+introrob_odometrico[0])*introrob_odometrico[4];
+      introrob_mouse_x=(ygraf-introrob_odometrico[1])*introrob_odometrico[4]+(xgraf-introrob_odometrico[0])*introrob_odometrico[3];
+      introrob_mouse_new=1;
+      
+      /*printf("(%d,%d) Canvas: Click on (%.2f,%.2f)\n",x,y,introrob_mouse_x,introrob_mouse_y);
+	printf("robot_x=%.2f robot_y=%.2f robot_theta=%.2f\n",jde_robot[0],jde_robot[1],jde_robot[2]);*/
+      
+    }else if(introrob_mouse_button==MOUSEWHEELUP){
+      /* a button has been pressed */
+      introrob_canvas_mouse_button_pressed=1;
+
+      /* modifing scale */
+      introrob_rango-=1000;
+      if(introrob_rango<=RANGO_MIN) introrob_rango=RANGO_MIN;
+      fl_set_slider_value(fd_introrobgui->escala,introrob_rango);
+      introrob_visual_refresh = TRUE; /* activa el flag que limpia el fondo de la pantalla y repinta todo */ 
+      introrob_escala = introrob_width /introrob_rango;
+
+    }else if(introrob_mouse_button==MOUSEWHEELDOWN){
+      /* a button has been pressed */
+      introrob_canvas_mouse_button_pressed=1;
+
+      /* modifing scale */
+      introrob_rango+=1000;
+      if(introrob_rango>=RANGO_MAX) introrob_rango=RANGO_MAX;
+      fl_set_slider_value(fd_introrobgui->escala,introrob_rango);
+      introrob_visual_refresh = TRUE; /* activa el flag que limpia el fondo de la pantalla y repinta todo */ 
+      introrob_escala = introrob_width /introrob_rango;
+    }
+  }
+
+  return 0;
+}
+
+/* callback function for mouse motion inside the canvas object*/
+int introrob_mouse_motion_on_micanvas(FL_OBJECT *ob, Window win, int win_width, int win_height, XEvent *xev, void *user_data)
+{  
+  float diff_x,diff_y,diff_w;
+  unsigned int keymap;
+  float sqrt_value,acos_value;
+
+  if(introrob_canvas_mouse_button_pressed==1){
+
+    /* getting mouse coordenates. win will be always the canvas window, because this callback has been defined only for that canvas */  
+    fl_get_win_mouse(win,&introrob_x_canvas,&introrob_y_canvas,&keymap);
+
+    if(introrob_mouse_button==MOUSELEFT){
+      if (introrob_state==teleoperated)
+	{
+	/* robot is being moved using the canvas */
+	introrob_robot_mouse_motion=1;
+	
+	/* getting difference between old and new coordenates */
+	diff_x=(introrob_x_canvas-old_introrob_x_canvas);
+	diff_y=(old_introrob_y_canvas-introrob_y_canvas);
+	
+	sqrt_value=sqrt((diff_x*diff_x)+(diff_y*diff_y));
+	if(diff_y>=0) acos_value=acos(diff_x/sqrt_value);
+	else acos_value=2*PI-acos(diff_x/sqrt_value);
+	diff_w=jde_robot[2]-acos_value;
+	
+	/* shortest way to the robot theta*/
+	if(diff_w>0){
+	  if(diff_w>=2*PI-diff_w){
+	    if(2*PI-diff_w<=PI*0.7) w_teleop=RADTODEG*(diff_w)*(0.3);
+	    else w_teleop=2.;
+	    
+	  }else{
+	    if(diff_w<=PI*0.7) w_teleop=RADTODEG*(diff_w)*(-0.3);
+	    else w_teleop=-2.;
+	  }
+	}else if(diff_w<0){
+	  /* changing signus to diff_w */
+	  diff_w=diff_w*(-1);
+	  if(diff_w>=2*PI-diff_w){
+	    if(2*PI-diff_w<=PI*0.7) w_teleop=RADTODEG*(diff_w)*(-0.3);
+	    else w_teleop=-2.;
+	  }else{
+	    if(diff_w<=2*PI-diff_w) w_teleop=RADTODEG*(diff_w)*(0.3);
+	    else w_teleop=2;
+	  }	  
+	}else w_teleop=0.;
+	if(w_teleop<-joystick_maxRotVel) w_teleop=-joystick_maxRotVel;
+	else if(w_teleop>joystick_maxRotVel) w_teleop=joystick_maxRotVel;
+
+	/* setting new value for v */
+	if((diff_w>=PI/2)&&(2*PI-diff_w>=PI/2)) v_teleop=(-1)*sqrt_value;
+	else v_teleop=sqrt_value;
+	if(v_teleop<-joystick_maxTranVel) v_teleop=-joystick_maxTranVel;
+	else if(v_teleop>joystick_maxTranVel) v_teleop=joystick_maxTranVel;
+
+	/* updating the joystick at GUI */
+	if(v_teleop>=0){
+	  fl_set_positioner_yvalue(fd_introrobgui->joystick,powf(v_teleop/joystick_maxTranVel,1/3.));
+	}else{
+	  fl_set_positioner_yvalue(fd_introrobgui->joystick,powf(v_teleop/-joystick_maxTranVel,1/3.));
+	}
+	if(w_teleop>=0){
+	  fl_set_positioner_xvalue(fd_introrobgui->joystick,(powf(w_teleop/joystick_maxRotVel,1/3.)/2.)+0.5);
+	}else {
+	  fl_set_positioner_xvalue(fd_introrobgui->joystick,(powf(-w_teleop/joystick_maxRotVel,1/3.)/2.)+0.5);
+	}
+      }
+      
+    }else if(introrob_mouse_button==MOUSERIGHT){
+
+      /* getting difference between old and new coordenates */
+      diff_x=(old_introrob_x_canvas-introrob_x_canvas);
+      diff_y=(introrob_y_canvas-old_introrob_y_canvas);
+      old_introrob_x_canvas=introrob_x_canvas;
+      old_introrob_y_canvas=introrob_y_canvas;
+
+      /* changing odometric range */
+      introrob_odometrico[0]+=introrob_rango*(diff_x)*(0.005);
+      introrob_odometrico[1]+=introrob_rango*(diff_y)*(0.005);
+      introrob_visual_refresh=TRUE;
+    }
+  }
+
+  return 0;
+}
+
+/* callback function for button released inside the canvas object*/
+int introrob_button_released_on_micanvas(FL_OBJECT *ob, Window win, int win_width, int win_height, XEvent *xev, void *user_data)
+{
+  
+  if(introrob_canvas_mouse_button_pressed==1){
+
+    if(introrob_mouse_button==MOUSELEFT){
+      if (introrob_state==teleoperated){
+	/* robot is being stopped */
+	introrob_robot_mouse_motion=1;
+
+	/* stopping robot */
+	v_teleop=0.;
+	w_teleop=0.;
+	fl_set_positioner_xvalue(fd_introrobgui->joystick,0.5);
+	fl_set_positioner_yvalue(fd_introrobgui->joystick,0.0);
+      }
+    }
+
+    /* a button has been released */
+    introrob_canvas_mouse_button_pressed=0;
+  }
+
+  return 0;
 }
 
 
@@ -388,49 +599,53 @@ void introrob_guiresume(void)
       k++;
 
       /* Coord del sistema odometrico respecto del visual */
-      odometrico[0]=0.;
-      odometrico[1]=0.;
-      odometrico[2]=0.;
-      odometrico[3]= cos(0.);
-      odometrico[4]= sin(0.);
+      introrob_odometrico[0]=0.;
+      introrob_odometrico[1]=0.;
+      introrob_odometrico[2]=0.;
+      introrob_odometrico[3]= cos(0.);
+      introrob_odometrico[4]= sin(0.);
 
-      display_state = display_state | DISPLAY_LASER;
-      display_state = display_state | DISPLAY_SONARS;
-      display_state = display_state | DISPLAY_ROBOT;
-      display_state = display_state | BASE_TELEOPERATOR;
+      introrob_display_state = introrob_display_state | DISPLAY_LASER;
+      introrob_display_state = introrob_display_state | DISPLAY_SONARS;
+      introrob_display_state = introrob_display_state | DISPLAY_ROBOT;
 
       fd_introrobgui = create_form_introrobgui();
       fl_set_form_position(fd_introrobgui->introrobgui,400,50);
       fl_show_form(fd_introrobgui->introrobgui,FL_PLACE_POSITION,FL_FULLBORDER,"introrob");
-      canvas_win= FL_ObjWin(fd_introrobgui->micanvas);
+      introrob_canvas_win= FL_ObjWin(fd_introrobgui->micanvas);
       gc_values.graphics_exposures = False;
-      introrobgui_gc = XCreateGC(display, canvas_win, GCGraphicsExposures, &gc_values);  
+      introrobgui_gc = XCreateGC(display, introrob_canvas_win, GCGraphicsExposures, &gc_values);  
+
+      /* canvas handlers */
+      fl_add_canvas_handler(fd_introrobgui->micanvas,ButtonPress,introrob_button_pressed_on_micanvas,NULL);
+      fl_add_canvas_handler(fd_introrobgui->micanvas,ButtonRelease,introrob_button_released_on_micanvas,NULL);
+      fl_add_canvas_handler(fd_introrobgui->micanvas,MotionNotify,introrob_mouse_motion_on_micanvas,NULL);
     }
   else 
     {
       fl_show_form(fd_introrobgui->introrobgui,FL_PLACE_POSITION,FL_FULLBORDER,"introrob");
-      canvas_win= FL_ObjWin(fd_introrobgui->micanvas);
+      introrob_canvas_win= FL_ObjWin(fd_introrobgui->micanvas);
     }
 
   /* Empiezo con el canvas en blanco */
-  jde_width = fd_introrobgui->micanvas->w;
-  jde_height = fd_introrobgui->micanvas->h;
-  fl_winset(canvas_win); 
-  fl_rectbound(0,0,jde_width,jde_height,FL_WHITE);   
+  introrob_width = fd_introrobgui->micanvas->w;
+  introrob_height = fd_introrobgui->micanvas->h;
+  fl_winset(introrob_canvas_win); 
+  fl_rectbound(0,0,introrob_width,introrob_height,FL_WHITE);   
   /*  XFlush(display);*/
   
-  track_robot=TRUE;
+  introrob_trackrobot=TRUE;
   fl_set_button(fd_introrobgui->track_robot,PUSHED);
   
   fl_set_slider_bounds(fd_introrobgui->escala,RANGO_MAX,RANGO_MIN);
-  fl_set_slider_filter(fd_introrobgui->escala,rangoenmetros); /* Para poner el valor del slider en metros en pantalla */
+  fl_set_slider_filter(fd_introrobgui->escala,introrob_range); /* Para poner el valor del slider en metros en pantalla */
   fl_set_slider_value(fd_introrobgui->escala,RANGO_INICIAL);
-  escala = jde_width/rango;
+  introrob_escala = introrob_width/introrob_rango;
 
   fl_set_positioner_xvalue(fd_introrobgui->joystick,0.5);
   fl_set_positioner_yvalue(fd_introrobgui->joystick,0.);
-  joystick_x=0.5;
-  joystick_y=0.5;
+  v_teleop=0.;
+  w_teleop=0.;
 
   fl_set_positioner_xvalue(fd_introrobgui->center,0.5);
   fl_set_positioner_yvalue(fd_introrobgui->center,0.5);
