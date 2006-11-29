@@ -6,16 +6,16 @@ CFLAGS = -g -pedantic -Bsymbolic -Wall $(INC-DIR)
 LIBS = -lm -lplayerc
 
 player: player.o 
-	$(GCC) -shared -Bsymbolic -Wl,-soname,player.so.1 $(LIB-DIR) -o player.so.1.0 player.o  $(LIBS)
+	$(GCC) -shared -Bsymbolic -Wl,-soname,player.so $(LIB-DIR) -o player.so player.o  $(LIBS)
 
 player.o: player.c 
 	$(GCC) $(CFLAGS) -fPIC -c player.c
 
 clean:
-	rm -f *.o player.so.1.0 
+	rm -f *.o player.so
 
 install:
-	cp player.so* $(JDEDIR)/share/jde-robot/
+	cp player.so $(JDEDIR)/share/jde-robot/
 
 release:
 	tar -zcvf newrelease.tgz *c makefile
