@@ -5,12 +5,13 @@ Internal Form Definition File
 
 Number of forms: 1
 Unit of measure: FL_COORD_PIXEL
+SnapGrid: 1
 
 =============== FORM ===============
 Name: introrobgui
 Width: 850
 Height: 520
-Number of Objects: 13
+Number of Objects: 19
 
 --------------------
 class: FL_BOX
@@ -141,7 +142,7 @@ argument:
 --------------------
 class: FL_POSITIONER
 type: NORMAL_POSITIONER
-box: 700 420 110 50
+box: 700 412 110 47
 boxtype: FL_DOWN_BOX
 colors: FL_DARKER_COL1 FL_DARKTOMATO
 alignment: FL_ALIGN_TOP
@@ -159,7 +160,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
-box: 760 480 50 20
+box: 760 469 50 21
 boxtype: FL_FRAME_BOX
 colors: FL_DARKER_COL1 FL_DARKGOLD
 alignment: FL_ALIGN_CENTER
@@ -177,7 +178,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: MENU_BUTTON
-box: 700 480 50 20
+box: 700 469 50 21
 boxtype: FL_FRAME_BOX
 colors: FL_DARKER_COL1 FL_DARKGOLD
 alignment: FL_ALIGN_CENTER
@@ -243,6 +244,114 @@ shortcut:
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: center
+callback: 
+argument: 
+
+--------------------
+class: FL_BEGIN_GROUP
+type: 0
+box: 0 10 10 0
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: mode
+callback: 
+argument: 
+
+--------------------
+class: FL_LIGHTBUTTON
+type: RADIO_BUTTON
+box: 700 50 120 28
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_YELLOW
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: vff
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: vff
+callback: 
+argument: 
+
+--------------------
+class: FL_LIGHTBUTTON
+type: RADIO_BUTTON
+box: 700 78 120 30
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_YELLOW
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: deliberative
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: deliberative
+callback: 
+argument: 
+
+--------------------
+class: FL_LIGHTBUTTON
+type: RADIO_BUTTON
+box: 700 108 120 29
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_YELLOW
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: hybrid
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: hybrid
+callback: 
+argument: 
+
+--------------------
+class: FL_LIGHTBUTTON
+type: RADIO_BUTTON
+box: 700 137 120 31
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_YELLOW
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: teleoperated
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: teleoperated
+callback: 
+argument: 
+
+--------------------
+class: FL_END_GROUP
+type: 0
+box: 0 0 0 0
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
 callback: 
 argument: 
 

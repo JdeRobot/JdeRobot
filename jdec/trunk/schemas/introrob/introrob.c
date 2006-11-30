@@ -1,6 +1,7 @@
 #include "jde.h"
 #include "jdegui.h"
 #include "introrobgui.h"
+#include "navegacion.h"
 
 #define DISPLAY_ROBOT 0x01UL
 #define DISPLAY_SONARS 0x04UL
@@ -128,7 +129,10 @@ void introrob_iteration()
     {v=v_teleop;
     w=w_teleop;
     }
-  else;
+  else if (introrob_state==vff) vff_iteration();
+  else if (introrob_state==deliberative) deliberative_iteration();
+  else if (introrob_state==hybrid) hybrid_iteration();
+  else {v=0;w=0;}
 }
 
 
@@ -274,7 +278,32 @@ void introrob_guibuttons(FL_OBJECT *obj)
       fl_set_positioner_yvalue(fd_introrobgui->joystick,0.);
       v_teleop=0.;
       w_teleop=0.;
-    }     
+    } 
+  else if (obj == fd_introrobgui->vff)
+    {
+      if (fl_get_button(fd_introrobgui->vff)==PUSHED) 
+	introrob_state=vff;
+      /*  else {introrob_state=teleoperated;
+      fl_set_button(fd_introrobgui->teleoperated,PUSHED);
+      }*/
+    }
+  else if (obj == fd_introrobgui->deliberative)
+    {
+      if (fl_get_button(fd_introrobgui->deliberative)==PUSHED) 
+	introrob_state=deliberative;
+      /*else {introrob_state=teleoperated;
+      fl_set_button(fd_introrobgui->teleoperated,PUSHED);
+      }*/
+    }
+  else if (obj == fd_introrobgui->hybrid)
+    {
+      if (fl_get_button(fd_introrobgui->hybrid)==PUSHED) 
+	introrob_state=hybrid;
+      /* else {introrob_state=teleoperated;
+      fl_set_button(fd_introrobgui->teleoperated,PUSHED);
+      }*/
+    }
+  else if (obj == fd_introrobgui->teleoperated);
 }
 
 void introrob_guidisplay()
@@ -283,7 +312,8 @@ void introrob_guidisplay()
   static float k=0;
   int i;
   Tvoxel kaka;
-  static Tvoxel a,b;
+
+  fl_redraw_object(fd_introrobgui->joystick);
 
   /* slow refresh of the complete introrob gui, needed because incremental refresh misses window occlusions */
   if (introrob_iteracion_display*introrob_cycle>FORCED_REFRESH) 
@@ -315,28 +345,27 @@ void introrob_guidisplay()
     }
   
   
-  /* VISUALIZACION de una instantanea ultrasonica */
+  /* VISUALIZACION de una instantanea ultrasonica **
   if ((((introrob_display_state&DISPLAY_SONARS)!=0)&&(introrob_visual_refresh==FALSE))
       || (visual_delete_introrob_us==TRUE))
     {  
       fl_set_foreground(introrobgui_gc,FL_WHITE); 
-      /* clean last sonars, but only if there wasn't a total refresh. In case of total refresh the white rectangle already cleaned all */
+      ** clean last sonars, but only if there wasn't a total refresh. In case of total refresh the white rectangle already cleaned all **
       for(i=0;i<NUM_SONARS*2;i+=2) XDrawLine(display,introrob_canvas_win,introrobgui_gc,introrob_us_dpy[i].x,introrob_us_dpy[i].y,introrob_us_dpy[i+1].x,introrob_us_dpy[i+1].y);
       
     }
   
   if ((introrob_display_state&DISPLAY_SONARS)!=0){
     for(i=0;i<NUM_SONARS;i++)
-      {us2xy(i,0.,0.,&kaka); /* Da en el Tvoxel kaka las coordenadas del sensor, pues es distancia 0 */
+      {us2xy(i,0.,0.,&kaka); ** Da en el Tvoxel kaka las coordenadas del sensor, pues es distancia 0 **
       xy2introrobcanvas(kaka,&introrob_us_dpy[2*i]);
       us2xy(i,us[i],0.,&kaka);
-      /*us2xy(i,200,0.,&kaka);
-	if (i==6) us2xy(i,400,0.,&kaka);*/
       xy2introrobcanvas(kaka,&introrob_us_dpy[2*i+1]);
       }
     fl_set_foreground(introrobgui_gc,FL_PALEGREEN);
     for(i=0;i<NUM_SONARS*2;i+=2) XDrawLine(display,introrob_canvas_win,introrobgui_gc,introrob_us_dpy[i].x,introrob_us_dpy[i].y,introrob_us_dpy[i+1].x,introrob_us_dpy[i+1].y);
   }
+  */
   
   /* VISUALIZACION de una instantanea laser*/
   if ((((introrob_display_state&DISPLAY_LASER)!=0)&&(introrob_visual_refresh==FALSE))
@@ -402,13 +431,7 @@ void introrob_guidisplay()
   visual_delete_introrob_laser=FALSE; 
   visual_delete_introrob_ego=FALSE;
 
-  pintaSegmento(a,b,FL_WHITE);
-  kaka.x=500.; kaka.y=500.;
-  relativas2absolutas(kaka,&a);
-  kaka.x=0.; kaka.y=0.;
-  relativas2absolutas(kaka,&b);
-  pintaSegmento(a,b,FL_RED);
-
+  visualizacion(); 
 }
 
 
@@ -642,6 +665,9 @@ void introrob_guiresume(void)
   fl_set_slider_value(fd_introrobgui->escala,RANGO_INICIAL);
   introrob_escala = introrob_width/introrob_rango;
 
+
+  introrob_state=teleoperated;
+  fl_set_button(fd_introrobgui->teleoperated,PUSHED);
   fl_set_positioner_xvalue(fd_introrobgui->joystick,0.5);
   fl_set_positioner_yvalue(fd_introrobgui->joystick,0.);
   v_teleop=0.;
