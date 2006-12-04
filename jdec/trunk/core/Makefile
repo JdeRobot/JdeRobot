@@ -28,12 +28,14 @@ sensorsmotorsgui.o: sensorsmotorsgui.c sensorsmotorsgui.h
 	$(GCC) $(CFLAGS) -c sensorsmotorsgui.c
 
 clean:
-	rm -f *.o *.a *so.1.0
+	rm -f *.o *.a *so
 
 install:
 	cp jde $(INSTALLDIR)/bin/
 	cp jde.h $(INSTALLDIR)/include/jde-robot/
 	cp jdegui.h $(INSTALLDIR)/include/jde-robot/	
+	cp jde.conf $(INSTALLDIR)/share/jde-robot/	
+	cp ponpath $(INSTALLDIR)/share/jde-robot/		
 
 release:
 	tar -zcvf newrelease.tgz *h *c *fd *.conf README makefile

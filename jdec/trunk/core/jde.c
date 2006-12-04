@@ -1,3 +1,23 @@
+/*
+ *  Copyright (C) 2006 José María Cañas Plaza 
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ */
+
 #define thisrelease "JDE 4.1-svn"
 
 #include "jde.h"
@@ -381,7 +401,7 @@ int jde_loadschema(char *name)
   int i;
   char *error;
 
-  strcpy(n,name); strcat(n,".so.1.0");
+  strcpy(n,name); strcat(n,".so");
   /*  all[num_schemas].handle = dlopen(n,RTLD_LAZY|RTLD_GLOBAL);*/
   /* Schemas don't share their global variables, to avoid symbol collisions */
   all[num_schemas].handle = dlopen(n,RTLD_LAZY);
@@ -459,7 +479,7 @@ int jde_loaddriver(char *name)
   char n[200];
   char *error;
 
-  strcpy(n,name); strcat(n,".so.1.0");
+  strcpy(n,name); strcat(n,".so");
  /* Drivers don't share their global variables, to avoid the symbol collisions */
   mydrivers[num_drivers].handle = dlopen(n,RTLD_LAZY);
   if (!(mydrivers[num_drivers].handle))

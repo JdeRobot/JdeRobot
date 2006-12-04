@@ -1,4 +1,4 @@
-/** Header file generated with fdesign on Sat Oct 14 17:53:42 2006.**/
+/** Header file generated with fdesign on Mon Dec  4 12:33:06 2006.**/
 
 #ifndef FD_hsitunergui_h_
 #define FD_hsitunergui_h_
