@@ -22,13 +22,26 @@ void hybrid_iteration(void)
 
 void visualizacion(void)     
 { 
-  Tvoxel kaka;
+  Tvoxel aa;
   static Tvoxel a,b;
+  static Tvoxel c,d;
 
+  /* example of relative segment */
+  /* borra la el segmento pintado en la ultima iteracion */
   pintaSegmento(a,b,FL_WHITE);
-  kaka.x=500.; kaka.y=500.;
-  relativas2absolutas(kaka,&a);
-  kaka.x=0.; kaka.y=0.;
-  relativas2absolutas(kaka,&b);
+
+  /* calcula nueva posicion absoluta del segmento */
+  aa.x=500.; aa.y=500.; /* en mm */
+  relativas2absolutas(aa,&a);
+  aa.x=0.; aa.y=0.;
+  relativas2absolutas(aa,&b);
+  /* pinta la nueva posicion del segmento */
   pintaSegmento(a,b,FL_RED);
+
+  /* ejemplo segmento absoluto */
+  /* borra la el segmento pintado en la ultima iteracion */
+  pintaSegmento(c,d,FL_WHITE); 
+  c.x=0.; c.y=0.; /* en mm */
+  d.x=jde_robot[0]; d.y=jde_robot[1]; /* en mm */
+  pintaSegmento(c,d,FL_BLUE);
 }

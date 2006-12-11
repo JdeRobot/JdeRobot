@@ -46,6 +46,7 @@ int introrob_mouse_button=0;
 int introrob_robot_mouse_motion=0;
 FL_Coord introrob_x_canvas,introrob_y_canvas,old_introrob_x_canvas,old_introrob_y_canvas;
 float introrob_mouse_x, introrob_mouse_y;
+Tvoxel vfftarget,oldvfftarget;
 int introrob_mouse_new=0;
 
 #define PUSHED 1
@@ -143,7 +144,7 @@ void introrob_iteration()
  
 
   speedcounter(introrob_id);
-  /*printf("introrob iteration %d\n",d++);*/
+  /* printf("introrob iteration %d\n",d++);*/
 
   if (introrob_state==teleoperated)
     {v=v_teleop;
@@ -301,29 +302,20 @@ void introrob_guibuttons(FL_OBJECT *obj)
     } 
   else if (obj == fd_introrobgui->vff)
     {
-      if (fl_get_button(fd_introrobgui->vff)==PUSHED) 
-	introrob_state=vff;
-      /*  else {introrob_state=teleoperated;
-      fl_set_button(fd_introrobgui->teleoperated,PUSHED);
-      }*/
+      if (fl_get_button(fd_introrobgui->vff)==PUSHED) introrob_state=vff;
     }
   else if (obj == fd_introrobgui->deliberative)
     {
-      if (fl_get_button(fd_introrobgui->deliberative)==PUSHED) 
-	introrob_state=deliberative;
-      /*else {introrob_state=teleoperated;
-      fl_set_button(fd_introrobgui->teleoperated,PUSHED);
-      }*/
+      if (fl_get_button(fd_introrobgui->deliberative)==PUSHED) introrob_state=deliberative;
     }
   else if (obj == fd_introrobgui->hybrid)
     {
-      if (fl_get_button(fd_introrobgui->hybrid)==PUSHED) 
-	introrob_state=hybrid;
-      /* else {introrob_state=teleoperated;
-      fl_set_button(fd_introrobgui->teleoperated,PUSHED);
-      }*/
+      if (fl_get_button(fd_introrobgui->hybrid)==PUSHED) introrob_state=hybrid;
     }
   else if (obj == fd_introrobgui->teleoperated);
+  {
+    if (fl_get_button(fd_introrobgui->teleoperated)==PUSHED) introrob_state=teleoperated;
+    }
 }
 
 void introrob_guidisplay()
@@ -331,7 +323,9 @@ void introrob_guidisplay()
   char text[80]="";
   static float k=0;
   int i;
-  Tvoxel kaka;
+  Tvoxel aa,bb;
+  static XPoint targetgraf,old;
+  XPoint a,b;
 
   fl_redraw_object(fd_introrobgui->joystick);
 
@@ -349,6 +343,7 @@ void introrob_guidisplay()
 
   fl_winset(introrob_canvas_win); 
   
+  
   if ((introrob_trackrobot==TRUE)&&
       ((fabs(jde_robot[0]+introrob_odometrico[0])>(introrob_rango/4.))||
        (fabs(jde_robot[1]+introrob_odometrico[1])>(introrob_rango/4.))))
@@ -363,7 +358,27 @@ void introrob_guidisplay()
       fl_rectbound(0,0,introrob_width,introrob_height,FL_WHITE);   
       XFlush(display);
     }
-  
+
+  /* the grid at the floor */
+  fl_set_foreground(introrobgui_gc,FL_LEFT_BCOL); 
+  for(i=0;i<31;i++)
+    {
+      aa.x=-15000.+(float)i*1000;
+      aa.y=-15000.;
+      bb.x=-15000.+(float)i*1000;
+      bb.y=15000.;
+      xy2introrobcanvas(aa,&a);
+      xy2introrobcanvas(bb,&b);
+      XDrawLine(display,introrob_canvas_win,introrobgui_gc,a.x,a.y,b.x,b.y);
+      aa.y=-15000.+(float)i*1000;
+      aa.x=-15000.;
+      bb.y=-15000.+(float)i*1000;
+      bb.x=15000.;
+      xy2introrobcanvas(aa,&a);
+      xy2introrobcanvas(bb,&b);
+      XDrawLine(display,introrob_canvas_win,introrobgui_gc,a.x,a.y,b.x,b.y);
+    }
+  /* fl_set_foreground(introrobgui_gc,FL_RIGHT_BCOL); */
   
   /* VISUALIZACION de una instantanea ultrasonica **
   if ((((introrob_display_state&DISPLAY_SONARS)!=0)&&(introrob_visual_refresh==FALSE))
@@ -377,10 +392,10 @@ void introrob_guidisplay()
   
   if ((introrob_display_state&DISPLAY_SONARS)!=0){
     for(i=0;i<NUM_SONARS;i++)
-      {us2xy(i,0.,0.,&kaka); ** Da en el Tvoxel kaka las coordenadas del sensor, pues es distancia 0 **
-      xy2introrobcanvas(kaka,&introrob_us_dpy[2*i]);
-      us2xy(i,us[i],0.,&kaka);
-      xy2introrobcanvas(kaka,&introrob_us_dpy[2*i+1]);
+      {us2xy(i,0.,0.,&aa); ** Da en el Tvoxel aa las coordenadas del sensor, pues es distancia 0 **
+      xy2introrobcanvas(aa,&introrob_us_dpy[2*i]);
+      us2xy(i,us[i],0.,&aa);
+      xy2introrobcanvas(aa,&introrob_us_dpy[2*i+1]);
       }
     fl_set_foreground(introrobgui_gc,FL_PALEGREEN);
     for(i=0;i<NUM_SONARS*2;i+=2) XDrawLine(display,introrob_canvas_win,introrobgui_gc,introrob_us_dpy[i].x,introrob_us_dpy[i].y,introrob_us_dpy[i+1].x,introrob_us_dpy[i+1].y);
@@ -400,8 +415,8 @@ void introrob_guidisplay()
   if ((introrob_display_state&DISPLAY_LASER)!=0){
     for(i=0;i<NUM_LASER;i++)
       {
-	laser2xy(i,jde_laser[i],&kaka);
-	xy2introrobcanvas(kaka,&introrob_laser_dpy[i]);
+	laser2xy(i,jde_laser[i],&aa);
+	xy2introrobcanvas(aa,&introrob_laser_dpy[i]);
       }
     fl_set_foreground(introrobgui_gc,FL_BLUE);
     /*for(i=0;i<NUM_LASER;i++) XDrawPoint(display,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy[i].x,introrob_laser_dpy[i].y);*/
@@ -424,26 +439,45 @@ void introrob_guidisplay()
   if ((introrob_display_state&DISPLAY_ROBOT)!=0){
     fl_set_foreground(introrobgui_gc,FL_MAGENTA);
     /* relleno los nuevos */
-    us2xy(15,0.,0.,&kaka);
-    xy2introrobcanvas(kaka,&introrob_ego[0]);
-    us2xy(3,0.,0.,&kaka);
-    xy2introrobcanvas(kaka,&introrob_ego[1]);
-    us2xy(4,0.,0.,&kaka);
-    xy2introrobcanvas(kaka,&introrob_ego[2]);
-    us2xy(8,0.,0.,&kaka);
-    xy2introrobcanvas(kaka,&introrob_ego[3]);
-    us2xy(15,0.,0.,&kaka);
-    xy2introrobcanvas(kaka,&introrob_ego[EGOMAX-1]);
+    us2xy(15,0.,0.,&aa);
+    xy2introrobcanvas(aa,&introrob_ego[0]);
+    us2xy(3,0.,0.,&aa);
+    xy2introrobcanvas(aa,&introrob_ego[1]);
+    us2xy(4,0.,0.,&aa);
+    xy2introrobcanvas(aa,&introrob_ego[2]);
+    us2xy(8,0.,0.,&aa);
+    xy2introrobcanvas(aa,&introrob_ego[3]);
+    us2xy(15,0.,0.,&aa);
+    xy2introrobcanvas(aa,&introrob_ego[EGOMAX-1]);
     for(i=0;i<NUM_SONARS;i++)
       {
-	us2xy((15+i)%NUM_SONARS,0.,0.,&kaka); /* Da en el Tvoxel kaka las coordenadas del sensor, pues es distancia 0 */
-	xy2introrobcanvas(kaka,&introrob_ego[i+4]);       
+	us2xy((15+i)%NUM_SONARS,0.,0.,&aa); /* Da en el Tvoxel aa las coordenadas del sensor, pues es distancia 0 */
+	xy2introrobcanvas(aa,&introrob_ego[i+4]);       
       }
     
     /* pinto los nuevos */
     numintrorob_ego=EGOMAX-1;
     for(i=0;i<numintrorob_ego;i++) XDrawLine(display,introrob_canvas_win,introrobgui_gc,introrob_ego[i].x,introrob_ego[i].y,introrob_ego[i+1].x,introrob_ego[i+1].y);
   }
+
+
+ 
+  /* visualization of VFF target */
+  if ((introrob_state==vff)||(introrob_state==teleoperated))
+    {
+      if ((oldvfftarget.x!=vfftarget.x)||(oldvfftarget.y!=vfftarget.y))
+	/* the target has changed, do its last position must be cleaned from the canvas */
+	{
+	  fl_set_foreground(introrobgui_gc,FL_WHITE);
+	  XDrawLine(display,introrob_canvas_win,introrobgui_gc,targetgraf.x-5,targetgraf.y,targetgraf.x+5,targetgraf.y);
+	  XDrawLine(display,introrob_canvas_win,introrobgui_gc,targetgraf.x,targetgraf.y-5,targetgraf.x,targetgraf.y+5);
+	}
+      fl_set_foreground(introrobgui_gc,FL_RED);
+      xy2introrobcanvas(vfftarget,&targetgraf);
+      XDrawLine(display,introrob_canvas_win,introrobgui_gc,targetgraf.x-5,targetgraf.y,targetgraf.x+5,targetgraf.y);
+      XDrawLine(display,introrob_canvas_win,introrobgui_gc,targetgraf.x,targetgraf.y-5,targetgraf.x,targetgraf.y+5);
+    }
+  
 
    /* clear all flags. If they were set at the beginning, they have been already used in this iteration */
   introrob_visual_refresh=FALSE;
@@ -460,11 +494,23 @@ int introrob_button_pressed_on_micanvas(FL_OBJECT *ob, Window win, int win_width
 {
   unsigned int keymap;
   float ygraf, xgraf;
- 
+  FL_Coord x,y;
+
   /* in order to know the mouse button that created the event */
   introrob_mouse_button=xev->xkey.keycode;
   if(introrob_canvas_mouse_button_pressed==0){
-    if((introrob_mouse_button==MOUSELEFT)||(introrob_mouse_button==MOUSERIGHT)){
+    if ((introrob_mouse_button==MOUSEMIDDLE))
+      {
+	/* Target for VFF navigation getting mouse coordenates */
+      fl_get_win_mouse(win,&x,&y,&keymap);
+      ygraf=((float) (introrob_height/2-y))/introrob_escala;
+      xgraf=((float) (x-introrob_width/2))/introrob_escala;
+      oldvfftarget.x=vfftarget.x;
+      oldvfftarget.y=vfftarget.y;
+      vfftarget.y=(ygraf-introrob_odometrico[1])*introrob_odometrico[3]+(-xgraf+introrob_odometrico[0])*introrob_odometrico[4];
+      vfftarget.x=(ygraf-introrob_odometrico[1])*introrob_odometrico[4]+(xgraf-introrob_odometrico[0])*introrob_odometrico[3];
+        }
+    else if((introrob_mouse_button==MOUSELEFT)||(introrob_mouse_button==MOUSERIGHT)){
       /* a button has been pressed */
       introrob_canvas_mouse_button_pressed=1;
       
@@ -483,7 +529,7 @@ int introrob_button_pressed_on_micanvas(FL_OBJECT *ob, Window win, int win_width
       /*printf("(%d,%d) Canvas: Click on (%.2f,%.2f)\n",x,y,introrob_mouse_x,introrob_mouse_y);
 	printf("robot_x=%.2f robot_y=%.2f robot_theta=%.2f\n",jde_robot[0],jde_robot[1],jde_robot[2]);*/
       
-    }else if(introrob_mouse_button==MOUSEWHEELUP){
+    }else if(introrob_mouse_button==MOUSEWHEELDOWN){
       /* a button has been pressed */
       introrob_canvas_mouse_button_pressed=1;
 
@@ -494,7 +540,7 @@ int introrob_button_pressed_on_micanvas(FL_OBJECT *ob, Window win, int win_width
       introrob_visual_refresh = TRUE; /* activa el flag que limpia el fondo de la pantalla y repinta todo */ 
       introrob_escala = introrob_width /introrob_rango;
 
-    }else if(introrob_mouse_button==MOUSEWHEELDOWN){
+    }else if(introrob_mouse_button==MOUSEWHEELUP){
       /* a button has been pressed */
       introrob_canvas_mouse_button_pressed=1;
 
