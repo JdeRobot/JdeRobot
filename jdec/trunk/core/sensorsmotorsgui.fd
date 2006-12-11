@@ -8,15 +8,15 @@ Unit of measure: FL_COORD_PIXEL
 
 =============== FORM ===============
 Name: sensorsmotorsgui
-Width: 1150
+Width: 820
 Height: 520
-Number of Objects: 22
+Number of Objects: 23
 
 --------------------
 class: FL_BOX
-type: UP_BOX
-box: 0 0 1150 520
-boxtype: FL_UP_BOX
+type: FRAME_BOX
+box: 0 0 820 520
+boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
@@ -85,24 +85,6 @@ callback:
 argument: 
 
 --------------------
-class: FL_FRAME
-type: ENGRAVED_FRAME
-box: 480 10 323 243
-boxtype: FL_NO_BOX
-colors: FL_COL1 FL_COL1
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_BLACK
-label: colorA
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: ventanaA
-callback: 
-argument: 
-
---------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
 box: 70 10 400 360
@@ -117,24 +99,6 @@ shortcut:
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: micanvas
-callback: 
-argument: 
-
---------------------
-class: FL_FRAME
-type: ENGRAVED_FRAME
-box: 810 10 323 243
-boxtype: FL_NO_BOX
-colors: FL_COL1 FL_COL1
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_BLACK
-label: colorB
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: ventanaB
 callback: 
 argument: 
 
@@ -338,42 +302,6 @@ callback:
 argument: 
 
 --------------------
-class: FL_FRAME
-type: ENGRAVED_FRAME
-box: 480 260 323 243
-boxtype: FL_NO_BOX
-colors: FL_COL1 FL_COL1
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_BLACK
-label: colorC
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: ventanaC
-callback: 
-argument: 
-
---------------------
-class: FL_FRAME
-type: ENGRAVED_FRAME
-box: 810 260 323 243
-boxtype: FL_NO_BOX
-colors: FL_COL1 FL_COL1
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_BLACK
-label: colorD
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: ventanaD
-callback: 
-argument: 
-
---------------------
 class: FL_TEXT
 type: NORMAL_TEXT
 box: 110 380 140 20
@@ -406,6 +334,96 @@ shortcut:
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_FRAME
+type: ENGRAVED_FRAME
+box: 480 10 322 242
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: sample image
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: sampleimage
+callback: 
+argument: 
+
+--------------------
+class: FL_FREE
+type: NORMAL_FREE
+box: 480 260 160 120
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: ventanaA
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: ventanaA
+callback: 
+argument: 
+
+--------------------
+class: FL_FREE
+type: NORMAL_FREE
+box: 650 260 160 120
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: ventanaB
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: ventanaB
+callback: 
+argument: 
+
+--------------------
+class: FL_FREE
+type: NORMAL_FREE
+box: 480 390 160 120
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: ventanaC
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: ventanaC
+callback: 
+argument: 
+
+--------------------
+class: FL_FREE
+type: NORMAL_FREE
+box: 650 390 160 120
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: ventanaD
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: ventanaD
 callback: 
 argument: 
 

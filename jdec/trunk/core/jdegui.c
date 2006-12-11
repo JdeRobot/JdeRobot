@@ -151,12 +151,10 @@ int mouse_new=0;
 int back=0;
 
 int canvas_mouse_button_pressed=0;
-int ventanaA_mouse_button_pressed=0;
-int ventanaB_mouse_button_pressed=0;
-int ventanaC_mouse_button_pressed=0;
-int ventanaD_mouse_button_pressed=0;
 int mouse_button=0;
 int robot_mouse_motion=0;
+
+char *samplesource;
 
 FL_Coord x_canvas,y_canvas,old_x_canvas,old_y_canvas;
 float diff_x,diff_y,diff_w;
@@ -176,13 +174,14 @@ int sensorsmotorsgui_on=FALSE;
 int sensorsmotorsgui_request=FALSE;
 
 FD_mastergui *fd_mastergui;
+Window  hierarchy_win;
 FD_sensorsmotorsgui *fd_sensorsmotorsgui;
 GC sensorsmotorsgui_gc;
 Window  sensorsmotorsgui_win; 
 Window  canvas_win;
 int vmode;
-XImage *imagenA,*imagenB,*imagenC,*imagenD; 
-char *imagenA_buf, *imagenB_buf, *imagenC_buf, *imagenD_buf; /* puntero a memoria para la imagen a visualizar en el servidor X. No compartida con el servidor */
+XImage *imagenA,*imagenB,*imagenC,*imagenD,*sampleimage; 
+char *imagenA_buf, *imagenB_buf, *imagenC_buf, *imagenD_buf, *sampleimage_buf; /* puntero a memoria para la imagen a visualizar en el servidor X. No compartida con el servidor */
 long int tabla[256]; 
 /* tabla con la traduccion de niveles de gris a numero de pixel en Pseudocolor-8bpp. Cada numero de pixel apunta al valor adecuado del ColorMap, con el color adecuado instalado */
 int pixel8bpp_rojo, pixel8bpp_blanco, pixel8bpp_amarillo;
@@ -257,7 +256,6 @@ int image_displaysetup()
     int allocated_colors=0, non_allocated_colors=0;
    
     sensorsmotorsgui_win= FL_ObjWin(fd_sensorsmotorsgui->ventanaA);
-    canvas_win= FL_ObjWin(fd_sensorsmotorsgui->micanvas);
     XGetWindowAttributes(display, sensorsmotorsgui_win, &win_attributes);  
     XMapWindow(display, sensorsmotorsgui_win);
     /*XSelectInput(display, sensorsmotorsgui_win, ButtonPress|StructureNotifyMask);*/   
@@ -268,38 +266,44 @@ int image_displaysetup()
     vmode= fl_get_vclass();
     if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
       {printf("jdegui: truecolor 16 bpp\n");
-      imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2);    
-      imagenA = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
-      imagenB_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2);    
-      imagenB = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
-      imagenC_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2);    
-      imagenC = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
-      imagenD_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2);    
-      imagenD = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+      imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2/4);    
+      imagenA = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenB_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2/4);    
+      imagenB = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenC_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2/4);    
+      imagenC = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenD_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2/4);    
+      imagenD = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
       return win_attributes.depth;
+      sampleimage_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2);    
+      sampleimage = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,sampleimage_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
       }
     else if ((vmode==TrueColor)&&(fl_state[vmode].depth==24)) 
       { printf("jdegui: truecolor 24 bpp\n");
-      imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
-      imagenA = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
-      imagenB_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
-      imagenB = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
-      imagenC_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
-      imagenC = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
-      imagenD_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
-      imagenD = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+      imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
+      imagenA = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenB_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
+      imagenB = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenC_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
+      imagenC = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenD_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
+      imagenD = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      sampleimage_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
+      sampleimage = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,sampleimage_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
       return win_attributes.depth;
       }
     else if ((vmode==TrueColor)&&(fl_state[vmode].depth==32)) 
       { printf("jdegui: truecolor 24 bpp\n");
-      imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
-      imagenA = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
-      imagenB_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
-      imagenB = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
-      imagenC_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
-      imagenC = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
-      imagenD_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
-      imagenD = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+      imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
+      imagenA = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenB_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
+      imagenB = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenC_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
+      imagenC = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenD_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
+      imagenD = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      sampleimage_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
+      sampleimage = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,sampleimage_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
       return win_attributes.depth;
       }
     else if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8)) 
@@ -320,14 +324,16 @@ int image_displaysetup()
 	printf("jdegui: depth= %d\n", fl_state[vmode].depth); 
 	printf("jdegui: colormap got %d colors, %d non_allocated colors\n",allocated_colors,non_allocated_colors);
 
-	imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS);    
-	imagenA = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
-	imagenB_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS);    
-	imagenB = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
-	imagenC_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS);    
-	imagenC = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
-	imagenD_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS);    
-	imagenD = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+	imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS/4);    
+	imagenA = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+	imagenB_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS/4);    
+	imagenB = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+	imagenC_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS/4);    
+	imagenC = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+	imagenD_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS/4);    
+	imagenD = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+	sampleimage_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS);    
+	sampleimage = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,sampleimage_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
 
 	pixel8bpp_rojo = fl_get_pixel(FL_RED);
 	pixel8bpp_blanco = fl_get_pixel(FL_WHITE);
@@ -521,209 +527,31 @@ int button_released_on_micanvas(FL_OBJECT *ob, Window win, int win_width, int wi
   return 0;
 }
 
-/* it will handle the callbacks produced by ventanaA freeobject */
-int ventanaA_callback_handler(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
-
-  /* this is a example of a callback function for the freeobject 'ventanaA'. in this example we have used
-     three events: FL_PUSH (make a click with a button mouse or mouse wheel), FL_MOUSE (move mouse inside
-     the freeobject area), and FL_RELEASE (release the click made previously if any click was made).
-
-     to learn more about freeobjects and check some other events, take a look at the next site:
-
-     * http://www.public.iastate.edu/~xforms/node2.html (see Freeobjects section)
-
-     for the example, we have only use MOUSELEFT button. you can use MOUSERIGHT, MOUSEMIDDLE or MOUSEWHEELUP and
-     MOUSEWHEELDOWN in your own callback function.
-
-     uncomment the 'printf' statements to see the result of the callbacks.
-  */
-
-  int x,y;
-  
-  if((event==FL_PUSH)&&(ventanaA_mouse_button_pressed==0)){
-
-    /* a button has been pressed */
-    ventanaA_mouse_button_pressed=1;
-
-    if(key==MOUSELEFT){
-
-      /* getting coordenates */
-      x=mx-fd_sensorsmotorsgui->ventanaA->x+1;
-      y=my-fd_sensorsmotorsgui->ventanaA->y+1;
-
-      /*printf("ventanaA: click on (%d,%d) of (%d,%d)\n",x,y,SIFNTSC_COLUMNS,SIFNTSC_ROWS);*/
-    }
-
-  }else if((event==FL_MOUSE)&&(ventanaA_mouse_button_pressed==1)){
-
-    if(key==MOUSELEFT){
-
-      /* getting coordenates */
-      x=mx-fd_sensorsmotorsgui->ventanaA->x+1;
-      y=my-fd_sensorsmotorsgui->ventanaA->y+1;
-      
-      /*printf("ventanaA: mouse motion on (%d,%d) of (%d,%d)\n",x,y,SIFNTSC_COLUMNS,SIFNTSC_ROWS);*/
-    }
-
-  }else if((event==FL_RELEASE)&&(ventanaA_mouse_button_pressed==1)){
-
-    /* a button has been released */
-    ventanaA_mouse_button_pressed=0;
-
-    if(key==MOUSELEFT){
-
-      /* getting coordenates */
-      x=mx-fd_sensorsmotorsgui->ventanaA->x+1;
-      y=my-fd_sensorsmotorsgui->ventanaA->y+1;
-
-      /*printf("ventanaA: release on (%d,%d) of (%d,%d)\n",x,y,SIFNTSC_COLUMNS,SIFNTSC_ROWS);*/
-    }
-  }
-
+int freeobj_ventanaA_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
+  if ((event==FL_PUSH)&&(key==MOUSELEFT)&&
+      ((display_state&DISPLAY_COLORIMAGEA)!=0))
+    samplesource=colorA;
   return 0;
 }
 
-/* it will handle the callbacks produced by ventanaB freeobject */
-int ventanaB_callback_handler(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
-
-  int x,y;
-  
-  if((event==FL_PUSH)&&(ventanaB_mouse_button_pressed==0)){
-
-    /* a button has been pressed */
-    ventanaB_mouse_button_pressed=1;
-
-    if(key==MOUSELEFT){
-
-      /* getting coordenates */
-      x=mx-fd_sensorsmotorsgui->ventanaB->x+1;
-      y=my-fd_sensorsmotorsgui->ventanaB->y+1;
-
-      /*printf("ventanaB: click on (%d,%d) of (%d,%d)\n",x,y,SIFNTSC_COLUMNS,SIFNTSC_ROWS);*/
-    }
-
-  }else if((event==FL_MOUSE)&&(ventanaB_mouse_button_pressed==1)){
-
-    if(key==MOUSELEFT){
-
-      /* getting coordenates */
-      x=mx-fd_sensorsmotorsgui->ventanaB->x+1;
-      y=my-fd_sensorsmotorsgui->ventanaB->y+1;
-      
-      /*printf("ventanaB: mouse motion on (%d,%d) of (%d,%d)\n",x,y,SIFNTSC_COLUMNS,SIFNTSC_ROWS);*/
-    }
-
-  }else if((event==FL_RELEASE)&&(ventanaB_mouse_button_pressed==1)){
-
-    /* a button has been released */
-    ventanaB_mouse_button_pressed=0;
-
-    if(key==MOUSELEFT){
-
-      /* getting coordenates */
-      x=mx-fd_sensorsmotorsgui->ventanaB->x+1;
-      y=my-fd_sensorsmotorsgui->ventanaB->y+1;
-
-      /*printf("ventanaB: release on (%d,%d) of (%d,%d)\n",x,y,SIFNTSC_COLUMNS,SIFNTSC_ROWS);*/
-    }
-  }
-
+int freeobj_ventanaB_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
+  if ((event==FL_PUSH)&&(key==MOUSELEFT)&&
+      ((display_state&DISPLAY_COLORIMAGEB)!=0))
+    samplesource=colorB;
   return 0;
 }
 
-/* it will handle the callbacks produced by ventanaC freeobject */
-int ventanaC_callback_handler(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
-
-  int x,y;
-  
-  if((event==FL_PUSH)&&(ventanaC_mouse_button_pressed==0)){
-
-    /* a button has been pressed */
-    ventanaC_mouse_button_pressed=1;
-
-    if(key==MOUSELEFT){
-
-      /* getting coordenates */
-      x=mx-fd_sensorsmotorsgui->ventanaC->x+1;
-      y=my-fd_sensorsmotorsgui->ventanaC->y+1;
-
-      /*printf("ventanaC: click on (%d,%d) of (%d,%d)\n",x,y,SIFNTSC_COLUMNS,SIFNTSC_ROWS);*/
-    }
-
-  }else if((event==FL_MOUSE)&&(ventanaC_mouse_button_pressed==1)){
-
-    if(key==MOUSELEFT){
-
-      /* getting coordenates */
-      x=mx-fd_sensorsmotorsgui->ventanaC->x+1;
-      y=my-fd_sensorsmotorsgui->ventanaC->y+1;
-      
-      /*printf("ventanaC: mouse motion on (%d,%d) of (%d,%d)\n",x,y,SIFNTSC_COLUMNS,SIFNTSC_ROWS);*/
-    }
-
-  }else if((event==FL_RELEASE)&&(ventanaC_mouse_button_pressed==1)){
-
-    /* a button has been released */
-    ventanaC_mouse_button_pressed=0;
-
-    if(key==MOUSELEFT){
-
-      /* getting coordenates */
-      x=mx-fd_sensorsmotorsgui->ventanaC->x+1;
-      y=my-fd_sensorsmotorsgui->ventanaC->y+1;
-
-      /*printf("ventanaC: release on (%d,%d) of (%d,%d)\n",x,y,SIFNTSC_COLUMNS,SIFNTSC_ROWS);*/
-    }
-  }
-
+int freeobj_ventanaC_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
+  if ((event==FL_PUSH)&&(key==MOUSELEFT)&&
+      ((display_state&DISPLAY_COLORIMAGEC)!=0)) 
+    samplesource=colorC;
   return 0;
 }
 
-/* it will handle the callbacks produced by ventanaD freeobject */
-int ventanaD_callback_handler(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
-
-  int x,y;
-  
-  if((event==FL_PUSH)&&(ventanaD_mouse_button_pressed==0)){
-
-    /* a button has been pressed */
-    ventanaD_mouse_button_pressed=1;
-
-    if(key==MOUSELEFT){
-
-      /* getting coordenates */
-      x=mx-fd_sensorsmotorsgui->ventanaD->x+1;
-      y=my-fd_sensorsmotorsgui->ventanaD->y+1;
-
-      /*printf("ventanaD: click on (%d,%d) of (%d,%d)\n",x,y,SIFNTSC_COLUMNS,SIFNTSC_ROWS);*/
-    }
-
-  }else if((event==FL_MOUSE)&&(ventanaD_mouse_button_pressed==1)){
-
-    if(key==MOUSELEFT){
-
-      /* getting coordenates */
-      x=mx-fd_sensorsmotorsgui->ventanaD->x+1;
-      y=my-fd_sensorsmotorsgui->ventanaD->y+1;
-      
-      /*printf("ventanaD: mouse motion on (%d,%d) of (%d,%d)\n",x,y,SIFNTSC_COLUMNS,SIFNTSC_ROWS);*/
-    }
-
-  }else if((event==FL_RELEASE)&&(ventanaD_mouse_button_pressed==1)){
-
-    /* a button has been released */
-    ventanaD_mouse_button_pressed=0;
-
-    if(key==MOUSELEFT){
-
-      /* getting coordenates */
-      x=mx-fd_sensorsmotorsgui->ventanaD->x+1;
-      y=my-fd_sensorsmotorsgui->ventanaD->y+1;
-
-      /*printf("ventanaD: release on (%d,%d) of (%d,%d)\n",x,y,SIFNTSC_COLUMNS,SIFNTSC_ROWS);*/
-    }
-  }
-
+int freeobj_ventanaD_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
+  if ((event==FL_PUSH)&&(key==MOUSELEFT)&&
+      ((display_state&DISPLAY_COLORIMAGED)!=0))
+    samplesource=colorD;
   return 0;
 }
 
@@ -857,7 +685,7 @@ void sensorsmotorsgui_buttons(FL_OBJECT *obj)
 void sensorsmotorsgui_display() 
      /* Siempre hay una estructura grafica con todo lo que debe estar en pantalla. Permite el pintado incremental para los buffers de puntos, borran el incremento viejo y pintan solo el nuevo */
 {
-  int i;
+  int i,c,r,j;
   Tvoxel kaka;
  
   fl_winset(canvas_win); 
@@ -973,28 +801,64 @@ void sensorsmotorsgui_display()
   
   if (jdegui_debug) printf("\n");
   
-  
-  /* color imageA display */
-  if ((display_state&DISPLAY_COLORIMAGEA)!=0)
+   /* sample image display */
     {
-      /* Pasa de la imagen capturada a la imagen para visualizar (imagenA_buf), "cambiando" de formato adecuadamente */
+      /* Pasa de la imagen capturada a la imagen para visualizar (sampleimage_buf), "cambiando" de formato adecuadamente */
       if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8))
 	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-	  { imagenA_buf[i]= (unsigned char)tabla[(unsigned char)(colorA[i*3])];}}
+	  { sampleimage_buf[i]= (unsigned char)tabla[(unsigned char)(samplesource[i*3])];}}
       else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
 	{
 	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++)
-	    { imagenA_buf[i*2+1]=(0xf8&(colorA[i*3+2]))+((0xe0&(colorA[i*3+1]))>>5);
-	    imagenA_buf[i*2]=((0xf8&(colorA[i*3]))>>3)+((0x1c&(colorA[i*3+1]))<<3);
+	    { sampleimage_buf[i*2+1]=(0xf8&(samplesource[i*3+2]))+((0xe0&(samplesource[i*3+1]))>>5);
+	    sampleimage_buf[i*2]=((0xf8&(samplesource[i*3]))>>3)+((0x1c&(samplesource[i*3+1]))<<3);
 	    }
 	}
       else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
 	       ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
 	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-	  { imagenA_buf[i*4]=colorA[i*3]; /* Blue Byte */
-	  imagenA_buf[i*4+1]=colorA[i*3+1]; /* Green Byte */
-	  imagenA_buf[i*4+2]=colorA[i*3+2]; /* Red Byte */
-	  imagenA_buf[i*4+3]=0; /* dummy byte */  }
+	  { sampleimage_buf[i*4]=samplesource[i*3]; /* Blue Byte */
+	  sampleimage_buf[i*4+1]=samplesource[i*3+1]; /* Green Byte */
+	  sampleimage_buf[i*4+2]=samplesource[i*3+2]; /* Red Byte */
+	  sampleimage_buf[i*4+3]=0; /* dummy byte */  }
+	}
+    }
+
+  /* color imageA display */
+  if ((display_state&DISPLAY_COLORIMAGEA)!=0)
+    {
+      /* Pasa de la imagen capturada a la imagen para visualizar (imagenA_buf), "cambiando" de formato adecuadamente */
+      if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8))
+	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
+	  { 
+	    c=i%(SIFNTSC_COLUMNS/2);
+	    r=i/(SIFNTSC_COLUMNS/2);
+	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    imagenA_buf[i]= (unsigned char)tabla[(unsigned char)(colorA[j*3])];
+	  }
+	}
+      else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
+	{
+	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++)
+	    { 
+	      c=i%(SIFNTSC_COLUMNS/2);
+	      r=i/(SIFNTSC_COLUMNS/2);
+	      j=2*r*SIFNTSC_COLUMNS+2*c;
+	      imagenA_buf[i*2+1]=(0xf8&(colorA[j*3+2]))+((0xe0&(colorA[j*3+1]))>>5);
+	      imagenA_buf[i*2]=((0xf8&(colorA[j*3]))>>3)+((0x1c&(colorA[j*3+1]))<<3);
+	    }
+	}
+      else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
+	       ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
+	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
+	  { 
+	    c=i%(SIFNTSC_COLUMNS/2);
+	    r=i/(SIFNTSC_COLUMNS/2);
+	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    imagenA_buf[i*4]=colorA[j*3]; /* Blue Byte */
+	    imagenA_buf[i*4+1]=colorA[j*3+1]; /* Green Byte */
+	    imagenA_buf[i*4+2]=colorA[j*3+2]; /* Red Byte */
+	    imagenA_buf[i*4+3]=0; /* dummy byte */  }
 	}
     }
   
@@ -1004,22 +868,35 @@ void sensorsmotorsgui_display()
     {
       /* Pasa de la imagen capturada a la imagen para visualizar (imagenB_buf), "cambiando" de formato adecuadamente */
       if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-	  { imagenB_buf[i]= (unsigned char)tabla[(unsigned char)(colorB[i*3])];}}
+	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
+	  { 
+	    c=i%(SIFNTSC_COLUMNS/2);
+	    r=i/(SIFNTSC_COLUMNS/2);
+	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    imagenB_buf[i]= (unsigned char)tabla[(unsigned char)(colorB[j*3])];
+	  }}
       else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
 	{
-	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++)
-	    { imagenB_buf[i*2+1]=(0xf8&(colorB[i*3+2]))+((0xe0&(colorB[i*3+1]))>>5);
-	    imagenB_buf[i*2]=((0xf8&(colorB[i*3]))>>3)+((0x1c&(colorB[i*3+1]))<<3);
+	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++)
+	    { 
+	      c=i%(SIFNTSC_COLUMNS/2);
+	      r=i/(SIFNTSC_COLUMNS/2);
+	      j=2*r*SIFNTSC_COLUMNS+2*c;
+	      imagenB_buf[i*2+1]=(0xf8&(colorB[j*3+2]))+((0xe0&(colorB[j*3+1]))>>5);
+	      imagenB_buf[i*2]=((0xf8&(colorB[j*3]))>>3)+((0x1c&(colorB[j*3+1]))<<3);
 	    }
 	}
       else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
 	       ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-	  { imagenB_buf[i*4]=colorB[i*3]; /* Blue Byte */
-	  imagenB_buf[i*4+1]=colorB[i*3+1]; /* Green Byte */
-	  imagenB_buf[i*4+2]=colorB[i*3+2]; /* Red Byte */
-	  imagenB_buf[i*4+3]=0; /* dummy byte */  }
+	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
+	  { 
+	    c=i%(SIFNTSC_COLUMNS/2);
+	    r=i/(SIFNTSC_COLUMNS/2);
+	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    imagenB_buf[i*4]=colorB[j*3]; /* Blue Byte */
+	    imagenB_buf[i*4+1]=colorB[j*3+1]; /* Green Byte */
+	    imagenB_buf[i*4+2]=colorB[j*3+2]; /* Red Byte */
+	    imagenB_buf[i*4+3]=0; /* dummy byte */  }
 	}
     }
   
@@ -1028,22 +905,35 @@ void sensorsmotorsgui_display()
     {
       /* Pasa de la imagen capturada a la imagen para visualizar (imagenC_buf), "cambiando" de formato adecuadamente */
       if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-	  { imagenC_buf[i]= (unsigned char)tabla[(unsigned char)(colorC[i*3])];}}
+	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
+	  { 
+	    c=i%(SIFNTSC_COLUMNS/2);
+	    r=i/(SIFNTSC_COLUMNS/2);
+	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    imagenC_buf[i]= (unsigned char)tabla[(unsigned char)(colorC[j*3])];
+	  }}
       else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
 	{
-	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++)
-	    { imagenC_buf[i*2+1]=(0xf8&(colorC[i*3+2]))+((0xe0&(colorC[i*3+1]))>>5);
-	    imagenC_buf[i*2]=((0xf8&(colorC[i*3]))>>3)+((0x1c&(colorC[i*3+1]))<<3);
+	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++)
+	    { 
+	      c=i%(SIFNTSC_COLUMNS/2);
+	      r=i/(SIFNTSC_COLUMNS/2);
+	      j=2*r*SIFNTSC_COLUMNS+2*c;
+	      imagenC_buf[i*2+1]=(0xf8&(colorC[j*3+2]))+((0xe0&(colorC[j*3+1]))>>5);
+	      imagenC_buf[i*2]=((0xf8&(colorC[j*3]))>>3)+((0x1c&(colorC[j*3+1]))<<3);
 	    }
 	}
       else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
 	       ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-	  { imagenC_buf[i*4]=colorC[i*3]; /* Blue Byte */
-	  imagenC_buf[i*4+1]=colorC[i*3+1]; /* Green Byte */
-	  imagenC_buf[i*4+2]=colorC[i*3+2]; /* Red Byte */
-	  imagenC_buf[i*4+3]=0; /* dummy byte */  }
+	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
+	  { 
+	    c=i%(SIFNTSC_COLUMNS/2);
+	    r=i/(SIFNTSC_COLUMNS/2);
+	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    imagenC_buf[i*4]=colorC[j*3]; /* Blue Byte */
+	    imagenC_buf[i*4+1]=colorC[j*3+1]; /* Green Byte */
+	    imagenC_buf[i*4+2]=colorC[j*3+2]; /* Red Byte */
+	    imagenC_buf[i*4+3]=0; /* dummy byte */  }
 	}
     }
   
@@ -1052,45 +942,61 @@ void sensorsmotorsgui_display()
     {
       /* Pasa de la imagen capturada a la imagen para visualizar (imagenD_buf), "cambiando" de formato adecuadamente */
       if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-	  { imagenD_buf[i]= (unsigned char)tabla[(unsigned char)(colorD[i*3])];}}
+	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
+	  { 
+	    c=i%(SIFNTSC_COLUMNS/2);
+	    r=i/(SIFNTSC_COLUMNS/2);
+	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    imagenD_buf[i]= (unsigned char)tabla[(unsigned char)(colorD[j*3])];
+	  }}
       else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
 	{
-	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++)
-	    { imagenD_buf[i*2+1]=(0xf8&(colorD[i*3+2]))+((0xe0&(colorD[i*3+1]))>>5);
-	    imagenD_buf[i*2]=((0xf8&(colorD[i*3]))>>3)+((0x1c&(colorD[i*3+1]))<<3);
+	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++)
+	    { 
+	      c=i%(SIFNTSC_COLUMNS/2);
+	      r=i/(SIFNTSC_COLUMNS/2);
+	      j=2*r*SIFNTSC_COLUMNS+2*c;
+	      imagenD_buf[i*2+1]=(0xf8&(colorD[j*3+2]))+((0xe0&(colorD[j*3+1]))>>5);
+	      imagenD_buf[i*2]=((0xf8&(colorD[j*3]))>>3)+((0x1c&(colorD[j*3+1]))<<3);
 	    }
 	}
       else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
 	       ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-	  { imagenD_buf[i*4]=colorD[i*3]; /* Blue Byte */
-	  imagenD_buf[i*4+1]=colorD[i*3+1]; /* Green Byte */
-	  imagenD_buf[i*4+2]=colorD[i*3+2]; /* Red Byte */
-	  imagenD_buf[i*4+3]=0; /* dummy byte */  }
+	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
+	  { 
+	    c=i%(SIFNTSC_COLUMNS/2);
+	    r=i/(SIFNTSC_COLUMNS/2);
+	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    imagenD_buf[i*4]=colorD[j*3]; /* Blue Byte */
+	    imagenD_buf[i*4+1]=colorD[j*3+1]; /* Green Byte */
+	    imagenD_buf[i*4+2]=colorD[j*3+2]; /* Red Byte */
+	    imagenD_buf[i*4+3]=0; /* dummy byte */  }
 	}
     }
   
   if ((display_state&DISPLAY_COLORIMAGEA)!=0)
     {    /* Draw screen onto display */
-      XPutImage(display,sensorsmotorsgui_win,sensorsmotorsgui_gc,imagenA,0,0,fd_sensorsmotorsgui->ventanaA->x+1, fd_sensorsmotorsgui->ventanaA->y+1,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+      XPutImage(display,sensorsmotorsgui_win,sensorsmotorsgui_gc,imagenA,0,0,fd_sensorsmotorsgui->ventanaA->x+1, fd_sensorsmotorsgui->ventanaA->y+1, SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2);
     }
   
   if ((display_state&DISPLAY_COLORIMAGEB)!=0)
     {    /* Draw screen onto display */
-      XPutImage(display,sensorsmotorsgui_win,sensorsmotorsgui_gc,imagenB,0,0,fd_sensorsmotorsgui->ventanaB->x+1, fd_sensorsmotorsgui->ventanaB->y+1,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+      XPutImage(display,sensorsmotorsgui_win,sensorsmotorsgui_gc,imagenB,0,0,fd_sensorsmotorsgui->ventanaB->x+1, fd_sensorsmotorsgui->ventanaB->y+1, SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2);
     }
   
   if ((display_state&DISPLAY_COLORIMAGEC)!=0)
     {    /* Draw screen onto display */
-      XPutImage(display,sensorsmotorsgui_win,sensorsmotorsgui_gc,imagenC,0,0,fd_sensorsmotorsgui->ventanaC->x+1, fd_sensorsmotorsgui->ventanaC->y+1,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+      XPutImage(display,sensorsmotorsgui_win,sensorsmotorsgui_gc,imagenC,0,0,fd_sensorsmotorsgui->ventanaC->x+1, fd_sensorsmotorsgui->ventanaC->y+1, SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2);
     }
   
   if ((display_state&DISPLAY_COLORIMAGED)!=0)
     {    /* Draw screen onto display */
-      XPutImage(display,sensorsmotorsgui_win,sensorsmotorsgui_gc,imagenD,0,0,fd_sensorsmotorsgui->ventanaD->x+1, fd_sensorsmotorsgui->ventanaD->y+1,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+      XPutImage(display,sensorsmotorsgui_win,sensorsmotorsgui_gc,imagenD,0,0,fd_sensorsmotorsgui->ventanaD->x+1, fd_sensorsmotorsgui->ventanaD->y+1, SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2);
     }
   
+  /* Draw sample image onto display */
+      XPutImage(display,sensorsmotorsgui_win,sensorsmotorsgui_gc,sampleimage,0,0,fd_sensorsmotorsgui->sampleimage->x+1, fd_sensorsmotorsgui->sampleimage->y+1, SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+
   /* clear all flags. If they were set at the beginning, they have been already used in this iteration */
   visual_refresh=FALSE;
   visual_delete_us=FALSE; 
@@ -1744,8 +1650,8 @@ void mastergui_display()
       (iteracion_display==0))   /* slow refresh of the complete master gui, needed because incremental refresh of the hierarchy misses window occlusions */
     {
       /* clear of the hierarchy "window" */
-      fl_rectbound(fd_mastergui->hierarchy->x-1,fd_mastergui->hierarchy->y-1,fd_mastergui->hierarchy->w,fd_mastergui->hierarchy->h,FL_COL1); 
-      
+      fl_winset(hierarchy_win); 
+      fl_rectbound(fd_mastergui->hierarchy->x-1,fd_mastergui->hierarchy->y-1,fd_mastergui->hierarchy->w,fd_mastergui->hierarchy->h,FL_COL1);         
       /*
       for(i=0;i<num_schemas;i++)
 	{
@@ -1871,11 +1777,9 @@ void jdegui_iteration()
 	      fps[10]=fd_mastergui->fps10;
 	      fps[11]=fd_mastergui->fps11;
 	      fl_set_form_position(fd_mastergui->mastergui,200,50);
-	      fl_show_form(fd_mastergui->mastergui,FL_PLACE_POSITION,FL_FULLBORDER,"jde master gui");
 	    }
-	  else 
-	    /*fl_set_form_position(fd_mastergui->mastergui,200,50);*/
-	    fl_show_form(fd_mastergui->mastergui,FL_PLACE_POSITION,FL_FULLBORDER,"jde master gui");
+	  fl_show_form(fd_mastergui->mastergui,FL_PLACE_POSITION,FL_FULLBORDER,"jde master gui");
+	  hierarchy_win = FL_ObjWin(fd_mastergui->hierarchy);
 	}
     }
 
@@ -1897,8 +1801,6 @@ void jdegui_iteration()
 	      fd_sensorsmotorsgui = create_form_sensorsmotorsgui();
 	      fl_set_form_position(fd_sensorsmotorsgui->sensorsmotorsgui,400,50);
 	      fl_show_form(fd_sensorsmotorsgui->sensorsmotorsgui,FL_PLACE_POSITION,FL_FULLBORDER,"sensors and motors");
-	      sensorsmotorsgui_win = FL_ObjWin(fd_sensorsmotorsgui->ventanaA);
-	      canvas_win = FL_ObjWin(fd_sensorsmotorsgui->micanvas);
 	      image_displaysetup(); /* Tiene que ir despues de la inicializacion de Forms, pues hace uso de informacion que la libreria rellena en tiempo de ejecucion al iniciarse */
 
 	      /* canvas handlers */
@@ -2052,7 +1954,8 @@ void jdegui_startup()
   myargv=&aa;
   display= fl_initialize(&myargc,myargv,"JDE",0,0);
   screen = DefaultScreen(display);
- 
+  samplesource=colorA; 
+
   /*  sensorsmotorsgui_resume(); */
   /* Coord del sistema odometrico respecto del visual */
   odometrico[0]=0.;

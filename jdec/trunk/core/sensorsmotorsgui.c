@@ -9,8 +9,8 @@ FD_sensorsmotorsgui *create_form_sensorsmotorsgui(void)
   FL_OBJECT *obj;
   FD_sensorsmotorsgui *fdui = (FD_sensorsmotorsgui *) fl_calloc(1, sizeof(*fdui));
 
-  fdui->sensorsmotorsgui = fl_bgn_form(FL_NO_BOX, 1150, 520);
-  obj = fl_add_box(FL_UP_BOX,0,0,1150,520,"");
+  fdui->sensorsmotorsgui = fl_bgn_form(FL_NO_BOX, 820, 520);
+  obj = fl_add_box(FL_FRAME_BOX,0,0,820,520,"");
     fl_set_object_lcolor(obj,FL_BLUE);
   fdui->hide = obj = fl_add_button(FL_NORMAL_BUTTON,10,260,50,20,"HIDE");
     fl_set_object_boxtype(obj,FL_FRAME_BOX);
@@ -28,12 +28,8 @@ FD_sensorsmotorsgui *create_form_sensorsmotorsgui(void)
     fl_set_object_boxtype(obj,FL_FRAME_BOX);
     fl_set_object_color(obj,FL_DARKER_COL1,FL_BOTTOM_BCOL);
     fl_set_object_lcolor(obj,FL_YELLOW);
-  fdui->ventanaA = obj = fl_add_frame(FL_ENGRAVED_FRAME,480,10,323,243,"colorA");
-    fl_set_object_color(obj,FL_COL1,FL_COL1);
   fdui->micanvas = obj = fl_add_canvas(FL_NORMAL_CANVAS,70,10,400,360,"canvas");
     fl_set_object_lcolor(obj,FL_RIGHT_BCOL);
-  fdui->ventanaB = obj = fl_add_frame(FL_ENGRAVED_FRAME,810,10,323,243,"colorB");
-    fl_set_object_color(obj,FL_COL1,FL_COL1);
 
   fdui->teleoperator = fl_bgn_group();
   fdui->joystick = obj = fl_add_positioner(FL_NORMAL_POSITIONER,120,410,110,50,"");
@@ -71,10 +67,6 @@ FD_sensorsmotorsgui *create_form_sensorsmotorsgui(void)
     fl_set_slider_size(obj, 0.00);
   fl_end_group();
 
-  fdui->ventanaC = obj = fl_add_frame(FL_ENGRAVED_FRAME,480,260,323,243,"colorC");
-    fl_set_object_color(obj,FL_COL1,FL_COL1);
-  fdui->ventanaD = obj = fl_add_frame(FL_ENGRAVED_FRAME,810,260,323,243,"colorD");
-    fl_set_object_color(obj,FL_COL1,FL_COL1);
   obj = fl_add_text(FL_NORMAL_TEXT,110,380,140,20,"Base Teleoperator");
     fl_set_object_lcolor(obj,FL_DARKTOMATO);
     fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
@@ -83,6 +75,20 @@ FD_sensorsmotorsgui *create_form_sensorsmotorsgui(void)
     fl_set_object_lcolor(obj,FL_DARKTOMATO);
     fl_set_object_lalign(obj,FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
     fl_set_object_lstyle(obj,FL_BOLD_STYLE);
+  fdui->sampleimage = obj = fl_add_frame(FL_ENGRAVED_FRAME,480,10,322,242,"sample image");
+    fl_set_object_color(obj,FL_COL1,FL_COL1);
+  fdui->ventanaA = obj = fl_add_free(FL_NORMAL_FREE,480,260,160,120,"ventanaA",
+			freeobj_ventanaA_handle);
+    fl_set_object_boxtype(obj,FL_FRAME_BOX);
+  fdui->ventanaB = obj = fl_add_free(FL_NORMAL_FREE,650,260,160,120,"ventanaB",
+			freeobj_ventanaB_handle);
+    fl_set_object_boxtype(obj,FL_FRAME_BOX);
+  fdui->ventanaC = obj = fl_add_free(FL_NORMAL_FREE,480,390,160,120,"ventanaC",
+			freeobj_ventanaC_handle);
+    fl_set_object_boxtype(obj,FL_FRAME_BOX);
+  fdui->ventanaD = obj = fl_add_free(FL_NORMAL_FREE,650,390,160,120,"ventanaD",
+			freeobj_ventanaD_handle);
+    fl_set_object_boxtype(obj,FL_FRAME_BOX);
   fl_end_form();
 
   fdui->sensorsmotorsgui->fdui = fdui;
