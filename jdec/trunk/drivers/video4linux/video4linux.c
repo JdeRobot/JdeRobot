@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006 Antonio Pineda Cabello
+ *  Copyright (C) 2006 Antonio Pineda Cabello, Jose Maria Cañas 
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>
+ *  Authors : Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, Jose Maria Cañas <jmplaza@gsyc.escet.urjc.es>
  */
 
 
