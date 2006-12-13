@@ -5,10 +5,13 @@ GCC = gcc
 CFLAGS = -g -pedantic -Wall $(INC-DIR)
 LIBS = -lm -lX11 -lforms 
 
-introrob: introrob.o introrobgui.o navegacion.o
+introrob: introrobgui.o navegacion.o introrob.o 
 	$(GCC) -shared -Wl,-soname,introrob.so $(LIB-DIR) -o introrob.so introrob.o introrobgui.o navegacion.o $(LIBS)
 
-introrobgui.o: introrobgui.c introrobgui.h
+introrobgui.h: introrobgui.fd
+	fdesign -code introrobgui.fd
+
+introrobgui.o: introrobgui.h
 	$(GCC) $(CFLAGS) -fPIC -c introrobgui.c
 
 introrob.o: introrob.c introrob.h navegacion.h
