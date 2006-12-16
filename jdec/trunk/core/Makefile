@@ -18,14 +18,20 @@ jde: jde.o $(OBJS)
 jde.o: jde.c
 	$(GCC) $(CFLAGS) -D CONFIGDIR='$(CFGDIR)' -c jde.c	
 
-jdegui.o: jdegui.c jdegui.h
+jdegui.o: jdegui.c jdegui.h mastergui.o sensorsmotorsgui.o
 	$(GCC) $(CFLAGS) -c jdegui.c
 
 mastergui.o: mastergui.c mastergui.h
 	$(GCC) $(CFLAGS) -c mastergui.c
 
+mastergui.c: mastergui.fd
+	fdesign -convert mastergui.fd
+
 sensorsmotorsgui.o: sensorsmotorsgui.c sensorsmotorsgui.h
 	$(GCC) $(CFLAGS) -c sensorsmotorsgui.c
+
+sensorsmotorsgui.c: sensorsmotorsgui.fd
+	fdesign -convert sensorsmotorsgui.fd
 
 clean:
 	rm -f *.o *.a *so

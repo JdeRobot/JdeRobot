@@ -1,5 +1,13 @@
 Changelog
 
+**** #20, driver pantilt (Roberto Calvo <rocapal@gsyc.escet.urjc.es>  Wed, 13 Dec 2006 01:02:12 +0100)
+- Fix Bug about tilt_angle and pan_angle in 'ptmotors_resume'
+- In pantiltmotor_iteration, only see the pan and tilt position for send the new command. Now, also see pan and tilt speed for send new pantilt command.
+- Change rutine of parser and separated the execution of pantiltmotors and pantiltencorders
+- The 'SendCmd' routine is protected by mutex
+- Delete library depency dc1394 in Makefile
+- Initial version pantilt's driver (Victor Gómez <vmanuel@gsyc.escet.urjc.es>) from the one at jde-3.4
+
 ****4.1: from 4.0
 1.- avoids the "multiply defined symbol" problem, changing the name of different key symbols like robot->jde_robot, laser->jde_laser, width->jde_width, height->jde_height. Those names are used by player library. The name collision is silent when using dynamic libraries, but it exists. (Antonio Pineda)
 2.- schemas are loaded WITHOUT exporting their symbol tables. There is a list of exported variables. Each schema must export the variables it provides, and import the variables it needs during its execution

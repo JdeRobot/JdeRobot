@@ -11,7 +11,10 @@ myschema: myschema.o myschemagui.o
 myschemagui.o: myschemagui.c myschemagui.h
 	$(GCC) $(CFLAGS) -fPIC -c myschemagui.c
 
-myschema.o: myschema.c myschema.h
+myschemagui.c: myschemagui.fd
+	fdesign -convert myschemagui.fd
+
+myschema.o: myschema.c myschema.h myschemagui.o
 	$(GCC) $(CFLAGS) -fPIC -c myschema.c
 
 clean:

@@ -8,13 +8,13 @@ LIBS = -lm -lX11 -lforms
 introrob: introrobgui.o navegacion.o introrob.o 
 	$(GCC) -shared -Wl,-soname,introrob.so $(LIB-DIR) -o introrob.so introrob.o introrobgui.o navegacion.o $(LIBS)
 
-introrobgui.h: introrobgui.fd
+introrobgui.c: introrobgui.fd
 	fdesign -code introrobgui.fd
 
-introrobgui.o: introrobgui.h
+introrobgui.o: introrobgui.c introrobgui.h
 	$(GCC) $(CFLAGS) -fPIC -c introrobgui.c
 
-introrob.o: introrob.c introrob.h navegacion.h
+introrob.o: introrob.c introrob.h navegacion.h introrobgui.o
 	$(GCC) $(CFLAGS) -fPIC -c introrob.c
 
 navegacion.o: navegacion.c utilidades.h

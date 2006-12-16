@@ -11,7 +11,10 @@ opengldemo: opengldemo.o opengldemogui.o
 opengldemogui.o: opengldemogui.c opengldemogui.h
 	$(GCC) $(CFLAGS) -fPIC -c opengldemogui.c
 
-opengldemo.o: opengldemo.c opengldemo.h
+opengldemogui.c: opengldemogui.fd
+	fdesign -convert opengldemogui.fd
+
+opengldemo.o: opengldemo.c opengldemo.h opengldemogui.o
 	$(GCC) $(CFLAGS) -fPIC -c opengldemo.c
 
 clean:

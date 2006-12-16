@@ -3,7 +3,7 @@ INC-DIR = -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/X1
 LIB-DIR = -L. -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib 
 GCC = gcc
 CFLAGS = -g -pedantic -Bsymbolic -Wall $(INC-DIR)
-LIBS = -lm -lraw1394
+LIBS = -lm 
 
 pantilt: pantilt.o 
 	$(GCC) -shared -Bsymbolic -Wl,-soname,pantilt.so $(LIB-DIR) -o pantilt.so pantilt.o  $(LIBS)
@@ -15,5 +15,5 @@ clean:
 	rm -f *.o pantilt.so
 
 release:
-	tar -zcvf newrelease.tgz *c makefile Changelog
+	tar -zcvf newrelease.tgz *c makefile
 

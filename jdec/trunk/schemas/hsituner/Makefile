@@ -11,7 +11,10 @@ hsituner: hsituner.o hsitunergui.o
 hsitunergui.o: hsitunergui.c hsitunergui.h
 	$(GCC) $(CFLAGS) -fPIC -c hsitunergui.c
 
-hsituner.o: hsituner.c hsituner.h
+hsitunergui.c: hsitunergui.fd
+	fdesign -convert hsitunergui.fd
+
+hsituner.o: hsituner.c hsituner.h hsitunergui.o
 	$(GCC) $(CFLAGS) -fPIC -c hsituner.c
 
 clean:

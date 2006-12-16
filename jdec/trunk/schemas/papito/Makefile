@@ -8,11 +8,14 @@ LIBS = -lm  -lX11 -lforms
 papito: papito.o papitogui.o
 	$(GCC) -shared -Wl,-soname,papito.so $(LIB-DIR) -o papito.so papito.o  papitogui.o $(LIBS)
 
-papito.o: papito.c papito.h
+papito.o: papito.c papito.h papitogui.o
 	$(GCC) $(CFLAGS) -fPIC -c papito.c
 
 papitogui.o: papitogui.c papitogui.h
 	$(GCC) $(CFLAGS) -fPIC -c papitogui.c
+
+papitogui.c: papitogui.fd
+	fdesign -convert papitogui.fd
 
 clean:
 	rm -f *.o papito.so 

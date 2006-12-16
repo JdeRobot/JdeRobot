@@ -11,7 +11,10 @@ perceptive1: perceptive1.o perceptive1gui.o
 perceptive1gui.o: perceptive1gui.c perceptive1gui.h
 	$(GCC) $(CFLAGS) -fPIC -c perceptive1gui.c
 
-perceptive1.o: perceptive1.c perceptive1.h
+perceptive1gui.c: perceptive1gui.fd
+	fdesign -convert perceptive1gui.fd
+
+perceptive1.o: perceptive1.c perceptive1.h perceptive1gui.o
 	$(GCC) $(CFLAGS) -fPIC -c perceptive1.c
 
 clean:
