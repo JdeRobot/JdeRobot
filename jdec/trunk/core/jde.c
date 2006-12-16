@@ -193,6 +193,8 @@ typedef struct sharedname{
 static Tsharedname sharedlist[MAX_SHARED]; 
 static int num_shared=0;
 
+#define PROMPT "JDE >>> "
+
 void put_state(int numschema, int newstate)
 {
   all[numschema].state=newstate;
@@ -387,6 +389,7 @@ int serve_keyboardmessage(char *mensaje)
 	}
     }
   else return -1;
+
   return 0;
 }
 
@@ -762,6 +765,7 @@ int main(int argc, char** argv)
   
   /* read commands from keyboard */
   printf("Starting shell...\n");
+  printf(PROMPT);fflush(stdout); 
   for(;;)
     {
       /* leo hasta agotar todo lo que hay en ese descriptor */
@@ -775,6 +779,7 @@ int main(int argc, char** argv)
       while((buff[last]!='\n')||(leidos<=0));
       buff[last]='\0';
       serve_keyboardmessage(buff);
+	printf(PROMPT);fflush(stdout); 
     }
   
   pthread_exit(0); 
