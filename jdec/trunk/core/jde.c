@@ -193,7 +193,7 @@ typedef struct sharedname{
 static Tsharedname sharedlist[MAX_SHARED]; 
 static int num_shared=0;
 
-#define PROMPT "JDE >>> "
+#define PROMPT "JDEC >> "
 
 void put_state(int numschema, int newstate)
 {

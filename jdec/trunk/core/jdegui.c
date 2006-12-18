@@ -26,6 +26,15 @@
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
 #include <X11/Xatom.h>
+#define v3f glVertex3f
+
+#include <GL/gl.h>              
+#include <GL/glx.h>
+#include <GL/glu.h>
+
+#include <forms.h>
+#include <glcanvas.h>
+#include "pioneer.h"
 
 #define DISPLAY_ROBOT 0x01UL
 #define DISPLAY_PANTILTENCODERS 0x20UL
@@ -38,13 +47,31 @@
 #define BASE_TELEOPERATOR 0x100UL
 #define PANTILT_TELEOPERATOR 0x200UL
 
+#define PI 3.141592654
+#define MAXWORLD 30.
+
+typedef struct SoRtype{
+  struct SoRtype *father;
+  float posx;
+  float posy;
+  float posz;
+  float foax;
+  float foay;
+  float foaz;
+  float roll;
+}SofReference;
+
+SofReference mypioneer,virtualcam;
+/* robot and virtual camera in the absolute FrameOfReference */
+static int track_robot=TRUE;
+static int toggle=FALSE;
+
 /* jdegui has the same schema API, but it is not an schema, and so it is not stored at all[]. It is just a service thread. */
 pthread_mutex_t jdegui_mymutex;
 pthread_cond_t jdegui_condition;
 pthread_t jdegui_mythread;
-int jdegui_debug;
+int jdegui_debug=0;
 int jdegui_state;
-
 
 guibuttons buttonscallbacks[MAX_SCHEMAS];
 int num_buttonscallbacks=0;
@@ -138,26 +165,14 @@ int associated_ID[MAX_LOADEDSCHEMAS];
 float fpsgui=0;
 int kgui=0;
 int jdegui_cycle=70; /* ms */
-#define FORCED_REFRESH 5000 /* ms */ 
-/*Every forced_refresh the display is drawn from scratch. If it is too small it will cause flickering with grid display. No merece la pena una hebra de "display_lento" solo para repintar completamente la pantalla. */
+unsigned long display_state;
 
 #define joystick_maxRotVel 30 /* deg/sec */
 #define joystick_maxTranVel 500 /* mm/sec */
 
 float joystick_x, joystick_y;
 float pt_joystick_x, pt_joystick_y;
-float mouse_x, mouse_y;
-int mouse_new=0;
 int back=0;
-
-int canvas_mouse_button_pressed=0;
-int mouse_button=0;
-int robot_mouse_motion=0;
-
-char *samplesource;
-
-FL_Coord x_canvas,y_canvas,old_x_canvas,old_y_canvas;
-float diff_x,diff_y,diff_w;
 
 #define PUSHED 1
 #define RELEASED 0
@@ -178,71 +193,68 @@ Window  hierarchy_win;
 FD_sensorsmotorsgui *fd_sensorsmotorsgui;
 GC sensorsmotorsgui_gc;
 Window  sensorsmotorsgui_win; 
-Window  canvas_win;
+
+char *samplesource;
 int vmode;
 XImage *imagenA,*imagenB,*imagenC,*imagenD,*sampleimage; 
 char *imagenA_buf, *imagenB_buf, *imagenC_buf, *imagenD_buf, *sampleimage_buf; /* puntero a memoria para la imagen a visualizar en el servidor X. No compartida con el servidor */
 long int tabla[256]; 
 /* tabla con la traduccion de niveles de gris a numero de pixel en Pseudocolor-8bpp. Cada numero de pixel apunta al valor adecuado del ColorMap, con el color adecuado instalado */
 int pixel8bpp_rojo, pixel8bpp_blanco, pixel8bpp_amarillo;
-float   escala, jde_width, jde_height;
-
-float odometrico[5];
 
 
-unsigned long display_state;
-int visual_refresh=FALSE;
-int track_robot=FALSE;
-int iteracion_display=0;
-
-#define EGOMAX NUM_SONARS+5
-XPoint ego[EGOMAX];
-float last_heading; /* ultima orientacion visualizada del robot */
-int numego=0;
-int visual_delete_ego=FALSE;
-
-XPoint laser_dpy[NUM_LASER];
-int visual_delete_laser=FALSE;
-
-XPoint us_dpy[NUM_SONARS*2];
-int visual_delete_us=FALSE;
 
 /* to display the hierarchy */
 int state_dpy[MAX_SCHEMAS];
 int sizeY=20;
 int sizeX=20;
-
-#define RANGO_MAX 20000. /* en mm */
-#define RANGO_MIN 500. /* en mm */ 
-#define RANGO_INICIAL 4000. /* en mm */
-float rango=(float)RANGO_INICIAL; /* Rango de visualizacion en milimetros */
-
-char fpstext[80]="";
+int iteracion_display=0;
+#define FORCED_REFRESH 5000 /* ms */ 
+/*Every forced_refresh the hierarchy is drawn from scratch.*/
 
 
-const char *rangoenmetros(FL_OBJECT *ob, double value, int prec)
+
+
+int InitOGL(FL_OBJECT *ob, Window win,int w,int h, XEvent *xev, void *ud)
 {
-static char buf[32];
+  /*  printf("capullo %d %d\n",w,h);*/
 
-sprintf(buf,"%.1f",value/1000.);
-return buf;
-}
+  /* Inicializa OpenGL con los parametros que diran como se visualiza. */
+   GLfloat ambient[] = {1.0, 1.0, 1.0, 1.0};
+   GLfloat diffuse[] = {1.0, 1.0, 1.0, 1.0};
+   GLfloat position[] = {0.0, 3.0, 3.0, 0.0};
+   GLfloat lmodel_ambient[] = {0.2, 0.2, 0.2, 1.0};
+   GLfloat local_view[] = {0.0};
 
-int xy2canvas(Tvoxel point, XPoint* grafico)
-     /* return -1 if point falls outside the canvas */
-{
-float xi, yi;
+  glViewport(0,0,(GLint)w,(GLint)h);
+  /*  glDrawBuffer(GL_FRONT);*/
+  glDrawBuffer(GL_BACK);
+  glClearColor(0.6f, 0.8f, 1.0f, 0.0f);    
+  /* This Will Clear The Background Color To Black */
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClearDepth(1.0);                           /* Enables Clearing Of The Depth Buffer */
 
-xi = (point.x * odometrico[3] - point.y * odometrico[4] + odometrico[0])*escala;
-yi = (point.x * odometrico[4] + point.y * odometrico[3] + odometrico[1])*escala;
-/* Con esto cambiamos al sistema de referencia de visualizacion, centrado en algun punto xy y con alguna orientacion definidos por odometrico. Ahora cambiamos de ese sistema al del display, donde siempre hay un desplazamiento a la esquina sup. izda. y que las y se cuentan para abajo. */
+ 
+ /* Enable Texture Mapping */
+  glEnable(GL_TEXTURE_2D);    
+  glLightfv (GL_LIGHT0, GL_AMBIENT, ambient);
+  glLightfv (GL_LIGHT0, GL_DIFFUSE, diffuse);
+  glLightfv (GL_LIGHT0, GL_POSITION, position);
+  glLightModelfv (GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+  glLightModelfv (GL_LIGHT_MODEL_LOCAL_VIEWER, local_view);
+ 
+  /* With this, the pioneer appears correctly, but the cubes don't */
+  glEnable (GL_LIGHTING);
+  glEnable (GL_LIGHT0);
+  glEnable (GL_AUTO_NORMAL);
+  glEnable (GL_NORMALIZE);  
+  glEnable(GL_DEPTH_TEST);                     /* Enables Depth Testing */
+  glDepthFunc(GL_LESS);  
+  glShadeModel(GL_SMOOTH);                     /* Enables Smooth Color Shading */
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-grafico->x = xi + jde_width/2;
-grafico->y = -yi + jde_height/2;
-
- if ((grafico->x <0)||(grafico->x>jde_width)) return -1; 
- if ((grafico->y <0)||(grafico->y>jde_height)) return -1; 
- return 0;
+  return 0;
 }
 
 
@@ -347,185 +359,6 @@ int image_displaysetup()
     return win_attributes.depth;
 }
 
-/* callback function for button pressed inside the canvas object*/
-int button_pressed_on_micanvas(FL_OBJECT *ob, Window win, int win_width, int win_height, XEvent *xev, void *user_data)
-{
-  
-  unsigned int keymap;
-  float ygraf, xgraf;
-
-  /* in order to know the mouse button that created the event */
-  mouse_button=xev->xkey.keycode;
-  if(canvas_mouse_button_pressed==0){
-    if((mouse_button==MOUSELEFT)||(mouse_button==MOUSERIGHT)){
-	 
-      /* a button has been pressed */
-      canvas_mouse_button_pressed=1;
-      
-      /* getting mouse coordenates. win will be always the canvas window, because this callback has been defined only for that canvas */  
-      fl_get_win_mouse(win,&x_canvas,&y_canvas,&keymap);
-      old_x_canvas=x_canvas;
-      old_y_canvas=y_canvas;
-      
-      /* from graphical coordinates to spatial ones */
-      ygraf=((float) (jde_height/2-y_canvas))/escala;
-      xgraf=((float) (x_canvas-jde_width/2))/escala;
-      mouse_y=(ygraf-odometrico[1])*odometrico[3]+(-xgraf+odometrico[0])*odometrico[4];
-      mouse_x=(ygraf-odometrico[1])*odometrico[4]+(xgraf-odometrico[0])*odometrico[3];
-      mouse_new=1;
-      
-      /*printf("(%d,%d) Canvas: Click on (%.2f,%.2f)\n",x,y,mouse_x,mouse_y);
-	printf("robot_x=%.2f robot_y=%.2f robot_theta=%.2f\n",jde_robot[0],jde_robot[1],jde_robot[2]);*/
-      
-    }else if(mouse_button==MOUSEWHEELUP){
-
-      /* a button has been pressed */
-      canvas_mouse_button_pressed=1;
-
-      /* modifing scale */
-      rango-=1000;
-      if(rango<=RANGO_MIN) rango=RANGO_MIN;
-      fl_set_slider_value(fd_sensorsmotorsgui->escala,rango);
-      visual_refresh = TRUE; /* activa el flag que limpia el fondo de la pantalla y repinta todo */ 
-      escala = jde_width /rango;
-
-    }else if(mouse_button==MOUSEWHEELDOWN){
-
-      /* a button has been pressed */
-      canvas_mouse_button_pressed=1;
-
-      /* modifing scale */
-      rango+=1000;
-      if(rango>=RANGO_MAX) rango=RANGO_MAX;
-      fl_set_slider_value(fd_sensorsmotorsgui->escala,rango);
-      visual_refresh = TRUE; /* activa el flag que limpia el fondo de la pantalla y repinta todo */ 
-      escala = jde_width /rango;
-    }
-  }
-
-  return 0;
-}
-
-/* callback function for mouse motion inside the canvas object*/
-int mouse_motion_on_micanvas(FL_OBJECT *ob, Window win, int win_width, int win_height, XEvent *xev, void *user_data)
-{  
- 
- unsigned int keymap;
-
-  if(canvas_mouse_button_pressed==1){
-
-    /* getting mouse coordenates. win will be always the canvas window, because this callback has been defined only for that canvas */  
-    fl_get_win_mouse(win,&x_canvas,&y_canvas,&keymap);
-
-    if(mouse_button==MOUSELEFT){
-      if ((fl_get_button(fd_mastergui->vismotors)==PUSHED)&&(fl_get_button(fd_mastergui->motors)==PUSHED)){
-      
-
-	float sqrt_value,acos_value,new_w_value,new_v_value;
-	
-	/* robot is being moved using the canvas */
-	robot_mouse_motion=1;
-	
-	/* getting difference between old and new coordenates */
-	diff_x=(x_canvas-old_x_canvas);
-	diff_y=(old_y_canvas-y_canvas);
-	
-	sqrt_value=sqrt((diff_x*diff_x)+(diff_y*diff_y));
-	if(diff_y>=0) acos_value=acos(diff_x/sqrt_value);
-	else acos_value=2*PI-acos(diff_x/sqrt_value);
-	diff_w=jde_robot[2]-acos_value;
-	
-	/* shortest way to the robot theta*/
-	if(diff_w>0){
-	  
-	  if(diff_w>=2*PI-diff_w){
-	    if(2*PI-diff_w<=PI*0.7) new_w_value=RADTODEG*(diff_w)*(0.3);
-	    else new_w_value=2.;
-
-	  }else{
-	    if(diff_w<=PI*0.7) new_w_value=RADTODEG*(diff_w)*(-0.3);
-	    else new_w_value=-2.;
-	  }
-	  	  
-	}else if(diff_w<0){
-	  
-	  /* changing signus to diff_w */
-	  diff_w=diff_w*(-1);
-	  if(diff_w>=2*PI-diff_w){
-	    if(2*PI-diff_w<=PI*0.7) new_w_value=RADTODEG*(diff_w)*(-0.3);
-	    else new_w_value=-2.;
-
-	  }else{
-	    if(diff_w<=2*PI-diff_w) new_w_value=RADTODEG*(diff_w)*(0.3);
-	    else new_w_value=2;
-	  }
-	  
-	}else new_w_value=0.;
-
-	/* setting new value for v*/
-	if((diff_w>=PI/2)&&(2*PI-diff_w>=PI/2)) new_v_value=(-1)*sqrt_value;
-	else new_v_value=sqrt_value;
-
-	/* checking values */
-	if(new_w_value<-30.0) new_w_value=-30.0;
-	else if(new_w_value>30.0) new_w_value=30.0;
-	if(new_v_value<-200.0) new_v_value=-200.0;
-	else if(new_v_value>200.0) new_v_value=200.0;
-
-	w=new_w_value;
-	v=new_v_value;
-
-	if(new_v_value>=0){
-	  fl_set_positioner_yvalue(fd_sensorsmotorsgui->joystick,new_v_value/200.0);
-	}else{
-	  fl_set_positioner_yvalue(fd_sensorsmotorsgui->joystick,new_v_value/-200.0);
-	}
-	fl_set_positioner_xvalue(fd_sensorsmotorsgui->joystick,(-1)*new_w_value/30.0+0.5);
-      }
-      
-    }else if(mouse_button==MOUSERIGHT){
-
-      /* getting difference between old and new coordenates */
-      diff_x=(old_x_canvas-x_canvas);
-      diff_y=(y_canvas-old_y_canvas);
-      old_x_canvas=x_canvas;
-      old_y_canvas=y_canvas;
-
-      /* changing odometric range */
-      odometrico[0]+=rango*(diff_x)*(0.005);
-      odometrico[1]+=rango*(diff_y)*(0.005);
-      visual_refresh=TRUE;
-    }
-  }
-
-  return 0;
-}
-
-/* callback function for button released inside the canvas object*/
-int button_released_on_micanvas(FL_OBJECT *ob, Window win, int win_width, int win_height, XEvent *xev, void *user_data)
-{
-  
-  if(canvas_mouse_button_pressed==1){
-
-    if(mouse_button==MOUSELEFT){
-      if ((fl_get_button(fd_sensorsmotorsgui->joystick)==PUSHED)&&(fl_get_button(fd_mastergui->motors)==PUSHED)){
-	/* robot is being stopped */
-	robot_mouse_motion=1;
-
-	/* stopping robot */
-	v=0.;
-	w=0.;
-	fl_set_positioner_xvalue(fd_sensorsmotorsgui->joystick,0.5);
-	fl_set_positioner_yvalue(fd_sensorsmotorsgui->joystick,0.0);
-      }
-    }
-
-    /* a button has been released */
-    canvas_mouse_button_pressed=0;
-  }
-
-  return 0;
-}
 
 int freeobj_ventanaA_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
   if ((event==FL_PUSH)&&(key==MOUSELEFT)&&
@@ -559,7 +392,7 @@ void sensorsmotorsgui_suspend(void)
 {
   if (sensorsmotorsgui_on==TRUE)
     {
-      /* printf("sensorsmotorsgui suspend\n"); */
+      if (jdegui_debug) printf("sensorsmotorsgui suspend\n");
       sensorsmotorsgui_request=FALSE; 
     }
 }
@@ -577,8 +410,232 @@ void sensorsmotorsgui_resume(void)
 void sensorsmotorsgui_buttons(FL_OBJECT *obj) 
 {
   float dpan=0.5,dtilt=0.5, speed_coef;
+  float r,lati,longi,guix,guiy,guiz;
+  float dx,dy,dz;
 
-  if (obj == fd_sensorsmotorsgui->hide) 
+
+  if (track_robot==TRUE)
+    {  
+      virtualcam.foax=jde_robot[0]/100.;
+      virtualcam.foay=jde_robot[1]/100.;
+      virtualcam.foaz=0.;
+      if ((fl_get_button(fd_sensorsmotorsgui->selectfoa)==PUSHED) ||
+	  (fl_get_button(fd_sensorsmotorsgui->selectfoaRel)==PUSHED))
+	{
+	  if (fl_get_button(fd_sensorsmotorsgui->selectfoa)==PUSHED)
+	    {
+	      guix=virtualcam.foax; 
+	      guiy=virtualcam.foay; 
+	      guiz=virtualcam.foaz;
+	    }
+	  else if (fl_get_button(fd_sensorsmotorsgui->selectfoaRel)==PUSHED)
+	    {
+	      guix=virtualcam.foax-virtualcam.posx;
+	      guiy=virtualcam.foay-virtualcam.posy;
+	      guiz=virtualcam.foaz-virtualcam.posz;
+	    }
+	  fl_set_slider_value(fd_sensorsmotorsgui->posX,(double)guix);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posY,(double)guiy);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posZ,(double)guiz);
+	  r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
+	  lati=(float)asin(guiz/r)*360./(2.*PI);
+	  longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);      
+	  fl_set_positioner_xvalue(fd_sensorsmotorsgui->latlong,(double) longi);
+	  fl_set_positioner_yvalue(fd_sensorsmotorsgui->latlong,(double) lati);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posR,(double)r);  
+	}
+    }
+
+  if (obj==fd_sensorsmotorsgui->posOrigin) 
+    { 
+      guix=0.; guiy=0.; guiz=0.;
+      fl_set_slider_value(fd_sensorsmotorsgui->posX,(double)guix);
+      fl_set_slider_value(fd_sensorsmotorsgui->posY,(double)guiy);
+      fl_set_slider_value(fd_sensorsmotorsgui->posZ,(double)guiz);
+      fl_set_positioner_xvalue(fd_sensorsmotorsgui->latlong,(double)0.);
+      fl_set_positioner_yvalue(fd_sensorsmotorsgui->latlong,(double)90.);
+      fl_set_slider_value(fd_sensorsmotorsgui->posR,(double)0.); 
+      if (fl_get_button(fd_sensorsmotorsgui->selectposition)==PUSHED)
+	{
+	  if (toggle==TRUE)
+	    {
+	      dx=virtualcam.foax - virtualcam.posx;
+	      dy=virtualcam.foay - virtualcam.posy;
+	      dz=virtualcam.foaz - virtualcam.posz;
+	      virtualcam.foax=guix+dx;
+	      virtualcam.foay=guiy+dy;
+	      virtualcam.foaz=guiz+dz;
+	    }
+	  virtualcam.posx=guix; virtualcam.posy=guiy; virtualcam.posz=guiz;
+	} 
+      else if (fl_get_button(fd_sensorsmotorsgui->selectfoa)==PUSHED)
+	{
+	  virtualcam.foax=guix; 
+	  virtualcam.foay=guiy; 
+	  virtualcam.foaz=guiz;
+	}
+      else if (fl_get_button(fd_sensorsmotorsgui->selectfoaRel)==PUSHED)
+	{
+	  virtualcam.foax=virtualcam.posx+guix; 
+	  virtualcam.foay=virtualcam.posy+guiy; 
+	  virtualcam.foaz=virtualcam.posz+guiz;
+	}
+    }
+  else if ((obj==fd_sensorsmotorsgui->posX) ||
+	   (obj==fd_sensorsmotorsgui->posY) || 
+	   (obj==fd_sensorsmotorsgui->posZ))
+    {
+      guix=(float) fl_get_slider_value(fd_sensorsmotorsgui->posX);
+      guiy=(float) fl_get_slider_value(fd_sensorsmotorsgui->posY);
+      guiz=(float) fl_get_slider_value(fd_sensorsmotorsgui->posZ);
+      if (fl_get_button(fd_sensorsmotorsgui->selectposition)==PUSHED)
+	{
+	  if (toggle==TRUE)
+	    {
+	      dx=virtualcam.foax - virtualcam.posx;
+	      dy=virtualcam.foay - virtualcam.posy;
+	      dz=virtualcam.foaz - virtualcam.posz;
+	      virtualcam.foax=guix+dx;
+	      virtualcam.foay=guiy+dy;
+	      virtualcam.foaz=guiz+dz;
+	    }
+	  virtualcam.posx=guix; virtualcam.posy=guiy; virtualcam.posz=guiz;
+	} 
+      else if (fl_get_button(fd_sensorsmotorsgui->selectfoa)==PUSHED)
+	{
+	  virtualcam.foax=guix; 
+	  virtualcam.foay=guiy; 
+	  virtualcam.foaz=guiz;
+	}
+      else if (fl_get_button(fd_sensorsmotorsgui->selectfoaRel)==PUSHED)
+	{
+	  virtualcam.foax=guix+virtualcam.posx;
+	  virtualcam.foay=guiy+virtualcam.posy;
+	  virtualcam.foaz=guiz+virtualcam.posz;
+	}
+      r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
+      lati=(float)asin(guiz/r)*360./(2.*PI);
+      longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);      
+      fl_set_positioner_xvalue(fd_sensorsmotorsgui->latlong,(double) longi);
+      fl_set_positioner_yvalue(fd_sensorsmotorsgui->latlong,(double) lati);
+      fl_set_slider_value(fd_sensorsmotorsgui->posR,(double)r);  
+    }
+  else if ((obj==fd_sensorsmotorsgui->posR) ||
+	   (obj==fd_sensorsmotorsgui->latlong))
+    {
+      longi=2*PI*fl_get_positioner_xvalue(fd_sensorsmotorsgui->latlong)/360.;
+      lati=2*PI*fl_get_positioner_yvalue(fd_sensorsmotorsgui->latlong)/360.;
+      r=fl_get_slider_value(fd_sensorsmotorsgui->posR);
+      guix=r*cos(lati)*cos(longi);
+      guiy=r*cos(lati)*sin(longi);
+      guiz=r*sin(lati);
+      fl_set_slider_value(fd_sensorsmotorsgui->posX,(double)guix);
+      fl_set_slider_value(fd_sensorsmotorsgui->posY,(double)guiy);
+      fl_set_slider_value(fd_sensorsmotorsgui->posZ,(double)guiz);
+      if (fl_get_button(fd_sensorsmotorsgui->selectposition)==PUSHED)
+	{
+	  if (toggle==TRUE)
+	    {
+	      dx=virtualcam.foax - virtualcam.posx;
+	      dy=virtualcam.foay - virtualcam.posy;
+	      dz=virtualcam.foaz - virtualcam.posz;
+	      virtualcam.foax=guix+dx;
+	      virtualcam.foay=guiy+dy;
+	      virtualcam.foaz=guiz+dz;
+	    }
+	  virtualcam.posx=guix; virtualcam.posy=guiy; virtualcam.posz=guiz;
+	} 
+      else if (fl_get_button(fd_sensorsmotorsgui->selectfoa)==PUSHED)
+	{
+	  virtualcam.foax=guix; 
+	  virtualcam.foay=guiy; 
+	  virtualcam.foaz=guiz;
+	}
+      else if (fl_get_button(fd_sensorsmotorsgui->selectfoaRel)==PUSHED)
+	{
+	  virtualcam.foax=guix+virtualcam.posx;
+	  virtualcam.foay=guiy+virtualcam.posy;
+	  virtualcam.foaz=guiz+virtualcam.posz;
+	}
+    }
+  else if (obj == fd_sensorsmotorsgui->track_robot) 
+    {if (fl_get_button(obj)==PUSHED) 
+      {
+	track_robot=TRUE;
+	fl_set_button(fd_sensorsmotorsgui->toggle,RELEASED);
+	toggle=FALSE;
+      }
+    else track_robot=FALSE;
+    } 
+  else if (obj == fd_sensorsmotorsgui->toggle) 
+    {if (fl_get_button(obj)==PUSHED) 
+      {
+	toggle=TRUE;
+	fl_set_button(fd_sensorsmotorsgui->track_robot,RELEASED);
+	track_robot=FALSE;
+      }
+    else toggle=FALSE;
+    } 
+  else if (obj == fd_sensorsmotorsgui->selectposition)
+    {
+      if (fl_get_button(fd_sensorsmotorsgui->selectposition)==PUSHED)
+	{
+	  fl_set_button(fd_sensorsmotorsgui->selectfoa,RELEASED);
+	  fl_set_button(fd_sensorsmotorsgui->selectfoaRel,RELEASED);
+	  guix=virtualcam.posx; guiy=virtualcam.posy; guiz=virtualcam.posz;	  
+	  r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
+	  lati=(float)asin(guiz/r)*360./(2.*PI);
+	  longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);
+	  fl_set_positioner_xvalue(fd_sensorsmotorsgui->latlong,(double) longi);
+	  fl_set_positioner_yvalue(fd_sensorsmotorsgui->latlong,(double) lati);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posR,(double)r); 
+	  fl_set_slider_value(fd_sensorsmotorsgui->posX,(double)guix);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posY,(double)guiy);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posZ,(double)guiz);
+	}
+    }
+  else if (obj == fd_sensorsmotorsgui->selectfoa)
+    {
+      if (fl_get_button(fd_sensorsmotorsgui->selectfoa)==PUSHED)
+	{
+	  fl_set_button(fd_sensorsmotorsgui->selectposition,RELEASED);
+	  fl_set_button(fd_sensorsmotorsgui->selectfoaRel,RELEASED);
+	  guix=virtualcam.foax; 
+	  guiy=virtualcam.foay; 
+	  guiz=virtualcam.foaz;
+	  r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
+	  lati=(float)asin(guiz/r)*360./(2.*PI);
+	  longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);
+	  fl_set_positioner_xvalue(fd_sensorsmotorsgui->latlong,(double) longi);
+	  fl_set_positioner_yvalue(fd_sensorsmotorsgui->latlong,(double) lati);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posR,(double)r); 
+	  fl_set_slider_value(fd_sensorsmotorsgui->posX,(double)guix);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posY,(double)guiy);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posZ,(double)guiz);
+	}
+    }
+  else if (obj == fd_sensorsmotorsgui->selectfoaRel)
+    {
+      if (fl_get_button(fd_sensorsmotorsgui->selectfoaRel)==PUSHED)
+	{
+	  fl_set_button(fd_sensorsmotorsgui->selectposition,RELEASED);
+	  fl_set_button(fd_sensorsmotorsgui->selectfoa,RELEASED);
+	  guix=virtualcam.foax-virtualcam.posx; 
+	  guiy=virtualcam.foay-virtualcam.posy; 
+	  guiz=virtualcam.foaz-virtualcam.posz;
+	  r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
+	  lati=(float)asin(guiz/r)*360./(2.*PI);
+	  longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);
+	  fl_set_positioner_xvalue(fd_sensorsmotorsgui->latlong,(double) longi);
+	  fl_set_positioner_yvalue(fd_sensorsmotorsgui->latlong,(double) lati);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posR,(double)r); 
+	  fl_set_slider_value(fd_sensorsmotorsgui->posX,(double)guix);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posY,(double)guiy);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posZ,(double)guiz);
+	}
+    }
+
+  else if (obj == fd_sensorsmotorsgui->hide) 
     {
       display_state = display_state & ~DISPLAY_LASER;
       if (mastergui_on==TRUE) fl_set_button(fd_mastergui->vislaser,RELEASED);
@@ -600,15 +657,7 @@ void sensorsmotorsgui_buttons(FL_OBJECT *obj)
       display_state = display_state & ~PANTILT_TELEOPERATOR;
       if (mastergui_on==TRUE) fl_set_button(fd_mastergui->vispantiltmotors,RELEASED);
       sensorsmotorsgui_suspend();
-    }
-  else if (obj == fd_sensorsmotorsgui->escala)  
-    {  rango=fl_get_slider_value(fd_sensorsmotorsgui->escala);
-    visual_refresh = TRUE; /* activa el flag que limpia el fondo de la pantalla y repinta todo */ 
-    escala = jde_width /rango;}
-  else if (obj == fd_sensorsmotorsgui->track_robot) 
-    {if (fl_get_button(obj)==PUSHED) track_robot=TRUE;
-    else track_robot=FALSE;
-    } 
+    }  
   else if (obj == fd_sensorsmotorsgui->joystick) 
     {
       if ((display_state & BASE_TELEOPERATOR)!=0) 
@@ -685,145 +734,205 @@ void sensorsmotorsgui_buttons(FL_OBJECT *obj)
 void sensorsmotorsgui_display() 
      /* Siempre hay una estructura grafica con todo lo que debe estar en pantalla. Permite el pintado incremental para los buffers de puntos, borran el incremento viejo y pintan solo el nuevo */
 {
-  int i,c,r,j;
-  Tvoxel kaka;
+  int i,c,row,j,k;
+  Tvoxel start,end;
+  float r,lati,longi,dx,dy,dz;
+  float matColors[4];
+  float  Xp_sensor, Yp_sensor;
+
+  /* resetea el buffer de color y el de profundidad */ 
+  /*  glDrawBuffer(GL_BACK);*/
+  /*  glClearColor(0.9,0.9,0.9,0.0);  */
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  /** Virtual camera **/
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity(); 
+  /* proyección perspectiva */
+  /*gluPerspective(45.,(GLfloat)w/(GLfloat)h,1.0,100.0);
+    glTranslatef(0,0,-15);*/
+  /* proyección ortográfica 
+     glOrtho(-5.0,5.0,-5.0,5.0,1.0,100.0);
+     glTranslatef(0,0,-5);
+  */
+  /* intrinsic parameters + frustrum */
+  gluPerspective(45.,(GLfloat)640/(GLfloat)480,1.0,500.0);
+  /* extrinsic parameters */
  
-  fl_winset(canvas_win); 
+  gluLookAt(virtualcam.posx,virtualcam.posy,virtualcam.posz,virtualcam.foax,virtualcam.foay,virtualcam.foaz,0.,0.,1.);
   
-  if ((track_robot==TRUE)&&
-      ((fabs(jde_robot[0]+odometrico[0])>(rango/4.))||
-       (fabs(jde_robot[1]+odometrico[1])>(rango/4.))))
-    {odometrico[0]=-jde_robot[0];
-    odometrico[1]=-jde_robot[1];
-    visual_refresh = TRUE;
-    if (jdegui_debug) printf("gui: robot tracking, display movement\n"); 
-    }
-  
-  
-  if (iteracion_display==0) visual_refresh=TRUE;
-  /* slow refresh of the complete sensorsmotors gui, needed because incremental refresh misses 
-   window occlusions */
-  
-  if (visual_refresh==TRUE)
+
+  /** Absolute Frame of Reference **/  
+  /* floor */ 
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glColor3f( 0.6, 0.6, 0.6 );
+  glBegin(GL_LINES);
+  for(i=0;i<((int)MAXWORLD+1);i++)
     {
-      if (jdegui_debug) printf(" TOTAL ");
-      fl_rectbound(0,0,jde_width,jde_height,FL_WHITE);   
-      XFlush(display);
-      /*XSync(display,True);*/
+      v3f(-(int)MAXWORLD*10/2.+(float)i*10,-(int)MAXWORLD*10/2.,0.);
+      v3f(-(int)MAXWORLD*10/2.+(float)i*10,(int)MAXWORLD*10/2.,0.);
+      v3f(-(int)MAXWORLD*10/2.,-(int)MAXWORLD*10/2.+(float)i*10,0.);
+      v3f((int)MAXWORLD*10/2.,-(int)MAXWORLD*10/2.+(float)i*10,0.);
     }
+  glEnd();
   
+  /* absolute axis */
+  glLineWidth(3.0f);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glColor3f( 0.7, 0., 0. );
+  glBegin(GL_LINES);
+  v3f( 0.0, 0.0, 0.0 );   
+  v3f( 10.0, 0.0, 0.0 );
+  glEnd();
+  glColor3f( 0.,0.7,0. );
+  glBegin(GL_LINES);
+  v3f( 0.0, 0.0, 0.0 );   
+  v3f( 0.0, 10.0, 0.0 );
+  glEnd();
+  glColor3f( 0.,0.,0.7 );
+  glBegin(GL_LINES);
+  v3f( 0.0, 0.0, 0.0 );   
+  v3f( 0.0, 0.0, 10.0 );
+  glEnd();
+  glLineWidth(1.0f);
+
   
-  /* VISUALIZACION de una instantanea ultrasonica */
-  if ((((display_state&DISPLAY_SONARS)!=0)&&(visual_refresh==FALSE))
-      || (visual_delete_us==TRUE))
-    {  
-      fl_set_foreground(sensorsmotorsgui_gc,FL_WHITE); 
-      /* clean last sonars, but only if there wasn't a total refresh. In case of total refresh the white rectangle already cleaned all */
-      for(i=0;i<NUM_SONARS*2;i+=2) XDrawLine(display,canvas_win,sensorsmotorsgui_gc,us_dpy[i].x,us_dpy[i].y,us_dpy[i+1].x,us_dpy[i+1].y);
-      
-    }
+  /** Robot Frame of Reference **/
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  mypioneer.posx=jde_robot[0]/100.;
+  mypioneer.posy=jde_robot[1]/100.;
+  mypioneer.posz=0.;
+  mypioneer.foax=jde_robot[0]/100.;
+  mypioneer.foay=jde_robot[1]/100.;
+  mypioneer.foaz=10.;
+  mypioneer.roll=jde_robot[2]*RADTODEG;
+  glTranslatef(mypioneer.posx,mypioneer.posy,mypioneer.posz);
+  dx=(mypioneer.foax-mypioneer.posx);
+  dy=(mypioneer.foay-mypioneer.posy);
+  dz=(mypioneer.foaz-mypioneer.posz);
+  longi=(float)atan2(dy,dx)*360./(2.*PI);
+  glRotatef(longi,0.,0.,1.);
+  r=sqrt(dx*dx+dy*dy+dz*dz);
+  if (r<0.00001) lati=0.;
+  else lati=acos(dz/r)*360./(2.*PI);
+  glRotatef(lati,0.,1.,0.);
+  glRotatef(mypioneer.roll,0.,0.,1.);
   
-  if ((display_state&DISPLAY_SONARS)!=0){
-    if (jdegui_debug) printf(" sonars ");
-    for(i=0;i<NUM_SONARS;i++)
-      {us2xy(i,0.,0.,&kaka); /* Da en el Tvoxel kaka las coordenadas del sensor, pues es distancia 0 */
-      xy2canvas(kaka,&us_dpy[2*i]);
-      us2xy(i,us[i],0.,&kaka);
-      /*us2xy(i,200,0.,&kaka);
-	if (i==6) us2xy(i,400,0.,&kaka);*/
-      xy2canvas(kaka,&us_dpy[2*i+1]);
-      }
-    fl_set_foreground(sensorsmotorsgui_gc,FL_PALEGREEN);
-    for(i=0;i<NUM_SONARS*2;i+=2) XDrawLine(display,canvas_win,sensorsmotorsgui_gc,us_dpy[i].x,us_dpy[i].y,us_dpy[i+1].x,us_dpy[i+1].y);
-  }
-  
-  /* VISUALIZACION de una instantanea laser*/
-  if ((((display_state&DISPLAY_LASER)!=0)&&(visual_refresh==FALSE))
-      || (visual_delete_laser==TRUE))
-    {  
-      fl_set_foreground(sensorsmotorsgui_gc,FL_WHITE); 
-      /* clean last laser, but only if there wasn't a total refresh. In case of total refresh the white rectangle already cleaned all */
-      /*for(i=0;i<NUM_LASER;i++) XDrawPoint(display,canvas_win,sensorsmotorsgui_gc,laser_dpy[i].x,laser_dpy[i].y);*/
-      XDrawPoints(display,canvas_win,sensorsmotorsgui_gc,laser_dpy,NUM_LASER,CoordModeOrigin);
-    }
-  
-  if ((display_state&DISPLAY_LASER)!=0){
-    if (jdegui_debug) printf(" laser ");
-    for(i=0;i<NUM_LASER;i++)
-      {
-	laser2xy(i,jde_laser[i],&kaka);
-	xy2canvas(kaka,&laser_dpy[i]);
-      }
-    fl_set_foreground(sensorsmotorsgui_gc,FL_BLUE);
-    /*for(i=0;i<NUM_LASER;i++) XDrawPoint(display,canvas_win,sensorsmotorsgui_gc,laser_dpy[i].x,laser_dpy[i].y);*/
-    XDrawPoints(display,canvas_win,sensorsmotorsgui_gc,laser_dpy,NUM_LASER,CoordModeOrigin);
-  }
-  
-  
-  
-  
-  /* VISUALIZACION: pintar o borrar de el PROPIO ROBOT.
-     Siempre hay un repintado total. Esta es la ultima estructura que se se pinta, para que ninguna otra se solape encima */
-  
-  if ((((display_state&DISPLAY_ROBOT)!=0) &&(visual_refresh==FALSE))
-      || (visual_delete_ego==TRUE))
-    {  
-      fl_set_foreground(sensorsmotorsgui_gc,FL_WHITE); 
-      /* clean last robot, but only if there wasn't a total refresh. In case of total refresh the white rectangle already cleaned all */
-      for(i=0;i<numego;i++) XDrawLine(display,canvas_win,sensorsmotorsgui_gc,ego[i].x,ego[i].y,ego[i+1].x,ego[i+1].y);
-      
-    }
-  
-  if ((display_state&DISPLAY_ROBOT)!=0){
-    if (jdegui_debug) printf(" ego ");
-    fl_set_foreground(sensorsmotorsgui_gc,FL_MAGENTA);
-    /* relleno los nuevos */
-    us2xy(15,0.,0.,&kaka);
-    xy2canvas(kaka,&ego[0]);
-    us2xy(3,0.,0.,&kaka);
-    xy2canvas(kaka,&ego[1]);
-    us2xy(4,0.,0.,&kaka);
-    xy2canvas(kaka,&ego[2]);
-    us2xy(8,0.,0.,&kaka);
-    xy2canvas(kaka,&ego[3]);
-    us2xy(15,0.,0.,&kaka);
-    xy2canvas(kaka,&ego[EGOMAX-1]);
-    for(i=0;i<NUM_SONARS;i++)
-      {
-	us2xy((15+i)%NUM_SONARS,0.,0.,&kaka); /* Da en el Tvoxel kaka las coordenadas del sensor, pues es distancia 0 */
-	xy2canvas(kaka,&ego[i+4]);       
-      }
-    
-    /* pinto los nuevos */
-    numego=EGOMAX-1;
-    for(i=0;i<numego;i++) XDrawLine(display,canvas_win,sensorsmotorsgui_gc,ego[i].x,ego[i].y,ego[i+1].x,ego[i+1].y);
-  }
-  
-  if (jdegui_debug) printf("\n");
-  
-   /* sample image display */
+  /* X axis */
+  glColor3f( 1., 0., 0. );
+  glBegin(GL_LINES);
+  v3f( 0.0, 0.0, 0.0 );   
+  v3f( 5.0, 0.0, 0.0 );
+  glEnd();
+  /* Y axis */
+  glColor3f( 0., 1., 0. );  
+  glBegin(GL_LINES);
+  v3f( 0.0, 0.0, 0.0 );   
+  v3f( 0.0, 5.0, 0.0 );
+  glEnd();
+  /* Z axis */
+  glColor3f( 0., 0., 1.);
+  glBegin(GL_LINES);
+  v3f( 0.0, 0.0, 0.0 );   
+  v3f( 0.0, 0.0, 5.0 );
+  glEnd();
+  /* robot body */
+  if ((display_state & DISPLAY_ROBOT)!=0)
     {
-      /* Pasa de la imagen capturada a la imagen para visualizar (sampleimage_buf), "cambiando" de formato adecuadamente */
-      if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-	  { sampleimage_buf[i]= (unsigned char)tabla[(unsigned char)(samplesource[i*3])];}}
-      else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
-	{
-	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++)
-	    { sampleimage_buf[i*2+1]=(0xf8&(samplesource[i*3+2]))+((0xe0&(samplesource[i*3+1]))>>5);
-	    sampleimage_buf[i*2]=((0xf8&(samplesource[i*3]))>>3)+((0x1c&(samplesource[i*3+1]))<<3);
-	    }
-	}
-      else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
-	       ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-	  { sampleimage_buf[i*4]=samplesource[i*3]; /* Blue Byte */
-	  sampleimage_buf[i*4+1]=samplesource[i*3+1]; /* Green Byte */
-	  sampleimage_buf[i*4+2]=samplesource[i*3+2]; /* Red Byte */
-	  sampleimage_buf[i*4+3]=0; /* dummy byte */  }
-	}
+      glEnable (GL_LIGHTING);
+      glPushMatrix();
+      glTranslatef(1.,0.,0.);
+      /* the body it is not centered. With this translation we center it */  
+      loadModel();
+      glPopMatrix();
+      glDisable (GL_LIGHTING);
     }
 
+  /* sonars */
+  if ((display_state & DISPLAY_SONARS)!=0) 
+    {
+      glColor3f( 0., 0.8, 0. );
+      glLineWidth(2.0f);
+      for (k = 0; k < NUM_SONARS; k++) {
+	start.x=us_coord[k][0];
+	start.y=us_coord[k][1];
+	Xp_sensor = us[k]; /* mm */
+	Yp_sensor = 0.;
+	/* Coordenadas del punto detectado por el US con respecto al sistema del sensor, eje x+ normal al sensor */
+	end.x = us_coord[k][0] + Xp_sensor*us_coord[k][3] - Yp_sensor*us_coord[k][4];
+	end.y = us_coord[k][1] + Yp_sensor*us_coord[k][3] + Xp_sensor*us_coord[k][4];
+	glBegin(GL_LINES);
+	glVertex3f (start.x/100., start.y/100., 2.0f);
+	glVertex3f (end.x/100., end.y/100., 2.0f);
+	glEnd();
+      }
+      glLineWidth(1.0f);
+    }
+
+  /* laser */
+  if ((display_state & DISPLAY_LASER)!=0) 
+    {
+      glEnable (GL_LIGHTING);
+      matColors[0] = 1.0;
+      matColors[1] = 0.0;
+      matColors[2] = 0.0;
+      matColors[3] = 0.5;
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+      /*
+	glBegin(GL_POLYGON); 
+	glVertex3f (laser_coord[0]*10./100., laser_coord[1]/100., 3.2);
+      */
+      start.x=laser_coord[0]*10.;
+      start.y=laser_coord[1];
+      for(k=0;k<NUM_LASER;k++) 
+	{
+	  Xp_sensor = jde_laser[k]*cos(((float)k-90.)*DEGTORAD); 
+	  Yp_sensor = jde_laser[k]*sin(((float)k-90.)*DEGTORAD);
+	  /* Coordenadas del punto detectado por el US con respecto al sistema del sensor, eje x+ normal al sensor */
+	  end.x = laser_coord[0]*10. + Xp_sensor*laser_coord[3] - Yp_sensor*laser_coord[4];
+	  end.y = laser_coord[1] + Yp_sensor*laser_coord[3] + Xp_sensor*laser_coord[4];
+	  glBegin(GL_POLYGON); 
+	  glVertex3f (laser_coord[0]*10./100., laser_coord[1]/100., 3.2);
+	  glVertex3f (start.x/100., start.y/100., 3.2);
+	  glVertex3f (end.x/100., end.y/100., 3.2);
+	  glEnd();
+	  start.x=end.x;
+	  start.y=end.y;
+	  /* glVertex3f (end.x/100., end.y/100., 3.2);*/
+	}
+      /*  glVertex3f (laser_coord[0]*10./100., laser_coord[1]/100., 3.2);*/
+      glDisable (GL_LIGHTING);
+    }
+  
+  /** intercambio de buffers **/
+  glXSwapBuffers(fl_display, fl_get_canvas_id(fd_sensorsmotorsgui->canvas));
+
+  /* sample image display */
+  {
+    /* Pasa de la imagen capturada a la imagen para visualizar (sampleimage_buf), "cambiando" de formato adecuadamente */
+    if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8))
+      {for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
+	{ sampleimage_buf[i]= (unsigned char)tabla[(unsigned char)(samplesource[i*3])];}}
+    else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
+      {
+	for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++)
+	  { sampleimage_buf[i*2+1]=(0xf8&(samplesource[i*3+2]))+((0xe0&(samplesource[i*3+1]))>>5);
+	  sampleimage_buf[i*2]=((0xf8&(samplesource[i*3]))>>3)+((0x1c&(samplesource[i*3+1]))<<3);
+	  }
+      }
+    else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
+	     ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
+      {for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
+	{ sampleimage_buf[i*4]=samplesource[i*3]; /* Blue Byte */
+	sampleimage_buf[i*4+1]=samplesource[i*3+1]; /* Green Byte */
+	sampleimage_buf[i*4+2]=samplesource[i*3+2]; /* Red Byte */
+	sampleimage_buf[i*4+3]=0; /* dummy byte */  }
+      }
+  }
+  
   /* color imageA display */
   if ((display_state&DISPLAY_COLORIMAGEA)!=0)
     {
@@ -832,8 +941,8 @@ void sensorsmotorsgui_display()
 	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
 	  { 
 	    c=i%(SIFNTSC_COLUMNS/2);
-	    r=i/(SIFNTSC_COLUMNS/2);
-	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    row=i/(SIFNTSC_COLUMNS/2);
+	    j=2*row*SIFNTSC_COLUMNS+2*c;
 	    imagenA_buf[i]= (unsigned char)tabla[(unsigned char)(colorA[j*3])];
 	  }
 	}
@@ -842,8 +951,8 @@ void sensorsmotorsgui_display()
 	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++)
 	    { 
 	      c=i%(SIFNTSC_COLUMNS/2);
-	      r=i/(SIFNTSC_COLUMNS/2);
-	      j=2*r*SIFNTSC_COLUMNS+2*c;
+	      row=i/(SIFNTSC_COLUMNS/2);
+	      j=2*row*SIFNTSC_COLUMNS+2*c;
 	      imagenA_buf[i*2+1]=(0xf8&(colorA[j*3+2]))+((0xe0&(colorA[j*3+1]))>>5);
 	      imagenA_buf[i*2]=((0xf8&(colorA[j*3]))>>3)+((0x1c&(colorA[j*3+1]))<<3);
 	    }
@@ -853,8 +962,8 @@ void sensorsmotorsgui_display()
 	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
 	  { 
 	    c=i%(SIFNTSC_COLUMNS/2);
-	    r=i/(SIFNTSC_COLUMNS/2);
-	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    row=i/(SIFNTSC_COLUMNS/2);
+	    j=2*row*SIFNTSC_COLUMNS+2*c;
 	    imagenA_buf[i*4]=colorA[j*3]; /* Blue Byte */
 	    imagenA_buf[i*4+1]=colorA[j*3+1]; /* Green Byte */
 	    imagenA_buf[i*4+2]=colorA[j*3+2]; /* Red Byte */
@@ -871,8 +980,8 @@ void sensorsmotorsgui_display()
 	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
 	  { 
 	    c=i%(SIFNTSC_COLUMNS/2);
-	    r=i/(SIFNTSC_COLUMNS/2);
-	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    row=i/(SIFNTSC_COLUMNS/2);
+	    j=2*row*SIFNTSC_COLUMNS+2*c;
 	    imagenB_buf[i]= (unsigned char)tabla[(unsigned char)(colorB[j*3])];
 	  }}
       else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
@@ -880,8 +989,8 @@ void sensorsmotorsgui_display()
 	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++)
 	    { 
 	      c=i%(SIFNTSC_COLUMNS/2);
-	      r=i/(SIFNTSC_COLUMNS/2);
-	      j=2*r*SIFNTSC_COLUMNS+2*c;
+	      row=i/(SIFNTSC_COLUMNS/2);
+	      j=2*row*SIFNTSC_COLUMNS+2*c;
 	      imagenB_buf[i*2+1]=(0xf8&(colorB[j*3+2]))+((0xe0&(colorB[j*3+1]))>>5);
 	      imagenB_buf[i*2]=((0xf8&(colorB[j*3]))>>3)+((0x1c&(colorB[j*3+1]))<<3);
 	    }
@@ -891,8 +1000,8 @@ void sensorsmotorsgui_display()
 	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
 	  { 
 	    c=i%(SIFNTSC_COLUMNS/2);
-	    r=i/(SIFNTSC_COLUMNS/2);
-	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    row=i/(SIFNTSC_COLUMNS/2);
+	    j=2*row*SIFNTSC_COLUMNS+2*c;
 	    imagenB_buf[i*4]=colorB[j*3]; /* Blue Byte */
 	    imagenB_buf[i*4+1]=colorB[j*3+1]; /* Green Byte */
 	    imagenB_buf[i*4+2]=colorB[j*3+2]; /* Red Byte */
@@ -908,8 +1017,8 @@ void sensorsmotorsgui_display()
 	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
 	  { 
 	    c=i%(SIFNTSC_COLUMNS/2);
-	    r=i/(SIFNTSC_COLUMNS/2);
-	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    row=i/(SIFNTSC_COLUMNS/2);
+	    j=2*row*SIFNTSC_COLUMNS+2*c;
 	    imagenC_buf[i]= (unsigned char)tabla[(unsigned char)(colorC[j*3])];
 	  }}
       else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
@@ -917,8 +1026,8 @@ void sensorsmotorsgui_display()
 	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++)
 	    { 
 	      c=i%(SIFNTSC_COLUMNS/2);
-	      r=i/(SIFNTSC_COLUMNS/2);
-	      j=2*r*SIFNTSC_COLUMNS+2*c;
+	      row=i/(SIFNTSC_COLUMNS/2);
+	      j=2*row*SIFNTSC_COLUMNS+2*c;
 	      imagenC_buf[i*2+1]=(0xf8&(colorC[j*3+2]))+((0xe0&(colorC[j*3+1]))>>5);
 	      imagenC_buf[i*2]=((0xf8&(colorC[j*3]))>>3)+((0x1c&(colorC[j*3+1]))<<3);
 	    }
@@ -928,8 +1037,8 @@ void sensorsmotorsgui_display()
 	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
 	  { 
 	    c=i%(SIFNTSC_COLUMNS/2);
-	    r=i/(SIFNTSC_COLUMNS/2);
-	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    row=i/(SIFNTSC_COLUMNS/2);
+	    j=2*row*SIFNTSC_COLUMNS+2*c;
 	    imagenC_buf[i*4]=colorC[j*3]; /* Blue Byte */
 	    imagenC_buf[i*4+1]=colorC[j*3+1]; /* Green Byte */
 	    imagenC_buf[i*4+2]=colorC[j*3+2]; /* Red Byte */
@@ -945,8 +1054,8 @@ void sensorsmotorsgui_display()
 	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
 	  { 
 	    c=i%(SIFNTSC_COLUMNS/2);
-	    r=i/(SIFNTSC_COLUMNS/2);
-	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    row=i/(SIFNTSC_COLUMNS/2);
+	    j=2*row*SIFNTSC_COLUMNS+2*c;
 	    imagenD_buf[i]= (unsigned char)tabla[(unsigned char)(colorD[j*3])];
 	  }}
       else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
@@ -954,8 +1063,8 @@ void sensorsmotorsgui_display()
 	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++)
 	    { 
 	      c=i%(SIFNTSC_COLUMNS/2);
-	      r=i/(SIFNTSC_COLUMNS/2);
-	      j=2*r*SIFNTSC_COLUMNS+2*c;
+	      row=i/(SIFNTSC_COLUMNS/2);
+	      j=2*row*SIFNTSC_COLUMNS+2*c;
 	      imagenD_buf[i*2+1]=(0xf8&(colorD[j*3+2]))+((0xe0&(colorD[j*3+1]))>>5);
 	      imagenD_buf[i*2]=((0xf8&(colorD[j*3]))>>3)+((0x1c&(colorD[j*3+1]))<<3);
 	    }
@@ -965,8 +1074,8 @@ void sensorsmotorsgui_display()
 	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
 	  { 
 	    c=i%(SIFNTSC_COLUMNS/2);
-	    r=i/(SIFNTSC_COLUMNS/2);
-	    j=2*r*SIFNTSC_COLUMNS+2*c;
+	    row=i/(SIFNTSC_COLUMNS/2);
+	    j=2*row*SIFNTSC_COLUMNS+2*c;
 	    imagenD_buf[i*4]=colorD[j*3]; /* Blue Byte */
 	    imagenD_buf[i*4+1]=colorD[j*3+1]; /* Green Byte */
 	    imagenD_buf[i*4+2]=colorD[j*3+2]; /* Red Byte */
@@ -996,12 +1105,7 @@ void sensorsmotorsgui_display()
   
   /* Draw sample image onto display */
       XPutImage(display,sensorsmotorsgui_win,sensorsmotorsgui_gc,sampleimage,0,0,fd_sensorsmotorsgui->sampleimage->x+1, fd_sensorsmotorsgui->sampleimage->y+1, SIFNTSC_COLUMNS, SIFNTSC_ROWS);
-
-  /* clear all flags. If they were set at the beginning, they have been already used in this iteration */
-  visual_refresh=FALSE;
-  visual_delete_us=FALSE; 
-  visual_delete_laser=FALSE; 
-  visual_delete_ego=FALSE;
+ 
 }
 
 
@@ -1033,7 +1137,6 @@ void mastergui_buttons(FL_OBJECT *obj)
     {
       if (fl_get_button(fd_mastergui->vissonars)==RELEASED)
 	{display_state = display_state & ~DISPLAY_SONARS;
-	visual_delete_us=TRUE;
 	if (((display_state & DISPLAY_SONARS)==0) &&
 	    ((display_state & DISPLAY_LASER)==0) &&
 	    ((display_state & DISPLAY_ROBOT)==0) &&
@@ -1062,7 +1165,6 @@ void mastergui_buttons(FL_OBJECT *obj)
 	if (display_state & DISPLAY_SONARS)
 	  {
 	    display_state = display_state & ~DISPLAY_SONARS;
-	    visual_delete_us=TRUE;
 	    if (((display_state & DISPLAY_SONARS)==0) &&
 		((display_state & DISPLAY_LASER)==0) &&
 		((display_state & DISPLAY_ROBOT)==0) &&
@@ -1083,7 +1185,6 @@ void mastergui_buttons(FL_OBJECT *obj)
     {
       if (fl_get_button(fd_mastergui->vislaser)==RELEASED)
 	{display_state = display_state & ~DISPLAY_LASER;
-	visual_delete_laser=TRUE;
 	if (((display_state & DISPLAY_SONARS)==0) &&
 	    ((display_state & DISPLAY_LASER)==0) &&
 	    ((display_state & DISPLAY_ROBOT)==0) &&
@@ -1110,7 +1211,6 @@ void mastergui_buttons(FL_OBJECT *obj)
 	fl_set_button(fd_mastergui->vislaser,RELEASED);
 	if (display_state & DISPLAY_LASER)
 	  {display_state = display_state & ~DISPLAY_LASER;
-	  visual_delete_laser=TRUE;
 	  if (((display_state & DISPLAY_SONARS)==0) &&
 	      ((display_state & DISPLAY_LASER)==0) &&
 	      ((display_state & DISPLAY_ROBOT)==0) &&
@@ -1131,7 +1231,6 @@ void mastergui_buttons(FL_OBJECT *obj)
     {
       if (fl_get_button(fd_mastergui->visrobot)==RELEASED)
 	{display_state = display_state & ~DISPLAY_ROBOT;
-	visual_delete_ego=TRUE;
 	if (((display_state & DISPLAY_SONARS)==0) &&
 	    ((display_state & DISPLAY_LASER)==0) &&
 	    ((display_state & DISPLAY_ROBOT)==0) &&
@@ -1158,7 +1257,6 @@ void mastergui_buttons(FL_OBJECT *obj)
 	fl_set_button(fd_mastergui->visrobot,RELEASED);
 	if (display_state & DISPLAY_ROBOT)
 	  {display_state = display_state & ~DISPLAY_ROBOT;
-	  visual_delete_ego=TRUE;
 	  if (((display_state & DISPLAY_SONARS)==0) &&
 	      ((display_state & DISPLAY_LASER)==0) &&
 	      ((display_state & DISPLAY_ROBOT)==0) &&
@@ -1580,6 +1678,7 @@ void mastergui_display()
 {
   int i,haschanged,j;
   int xx,yy;
+  char fpstext[80]="";
 
   sprintf(fpstext,"%.1f",fpsA);
   fl_set_object_label(fd_mastergui->frame_rateA,fpstext);
@@ -1714,6 +1813,7 @@ void jdegui_iteration()
   int i;
   static int kmastergui=0;
   static int ksensorsmotorsgui=0;
+  float r,lati,longi,guix,guiy,guiz;
 
   if (jdegui_debug) printf("jdegui iteration\n");
   kgui++;
@@ -1785,6 +1885,7 @@ void jdegui_iteration()
 
   if (sensorsmotorsgui_request!=sensorsmotorsgui_on)
     {
+      if (jdegui_debug) printf("sensorsmotorsgui_suspend request\n");
       if ((sensorsmotorsgui_request==FALSE) && (sensorsmotorsgui_on==TRUE))
 	/* sensorsmotorsgui_suspend request */
 	{
@@ -1802,39 +1903,44 @@ void jdegui_iteration()
 	      fl_set_form_position(fd_sensorsmotorsgui->sensorsmotorsgui,400,50);
 	      fl_show_form(fd_sensorsmotorsgui->sensorsmotorsgui,FL_PLACE_POSITION,FL_FULLBORDER,"sensors and motors");
 	      image_displaysetup(); /* Tiene que ir despues de la inicializacion de Forms, pues hace uso de informacion que la libreria rellena en tiempo de ejecucion al iniciarse */
-
-	      /* canvas handlers */
-	      fl_add_canvas_handler(fd_sensorsmotorsgui->micanvas,ButtonPress,button_pressed_on_micanvas,NULL);
-	      fl_add_canvas_handler(fd_sensorsmotorsgui->micanvas,ButtonRelease,button_released_on_micanvas,NULL);
-	      fl_add_canvas_handler(fd_sensorsmotorsgui->micanvas,MotionNotify,mouse_motion_on_micanvas,NULL);
-	    }
+	      fl_add_canvas_handler(fd_sensorsmotorsgui->canvas,Expose,InitOGL,0);
+  	    }
 	  else 
 	    fl_show_form(fd_sensorsmotorsgui->sensorsmotorsgui,FL_PLACE_POSITION,FL_FULLBORDER,"sensors and motors");
 	  
+	  fl_set_slider_bounds(fd_sensorsmotorsgui->posX,MAXWORLD*10,-MAXWORLD*10);	     
+	  fl_set_slider_bounds(fd_sensorsmotorsgui->posY,MAXWORLD*10,-MAXWORLD*10);
+	  fl_set_slider_bounds(fd_sensorsmotorsgui->posZ,MAXWORLD*10,-MAXWORLD*10);
+	  fl_set_positioner_xbounds(fd_sensorsmotorsgui->latlong,-180,180.);
+	  fl_set_positioner_ybounds(fd_sensorsmotorsgui->latlong,-89.99,89.99); 
+	  fl_set_slider_bounds(fd_sensorsmotorsgui->posR,MAXWORLD*10*2,0.);
+	  fl_set_button(fd_sensorsmotorsgui->selectfoaRel,RELEASED);
+	  fl_set_button(fd_sensorsmotorsgui->selectfoa,RELEASED);
+	  fl_set_button(fd_sensorsmotorsgui->selectposition,PUSHED);
+	  guix=(float) virtualcam.posx;
+	  guiy=(float) virtualcam.posy;
+	  guiz=(float) virtualcam.posz;
+	  r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
+	  lati=(float)asin(guiz/r)*360./(2.*PI);
+	  longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posX,virtualcam.posx);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posY,virtualcam.posy);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posZ,virtualcam.posz);
+	  fl_set_positioner_xvalue(fd_sensorsmotorsgui->latlong,(double) longi);
+	  fl_set_positioner_yvalue(fd_sensorsmotorsgui->latlong,(double) lati);
+	  fl_set_slider_value(fd_sensorsmotorsgui->posR,(double)r); 
+	  if (track_robot==TRUE) fl_set_button(fd_sensorsmotorsgui->track_robot,PUSHED);
+	  else fl_set_button(fd_sensorsmotorsgui->track_robot,RELEASED);
+	  if (toggle==TRUE) fl_set_button(fd_sensorsmotorsgui->toggle,PUSHED);
+	  else fl_set_button(fd_sensorsmotorsgui->toggle,RELEASED);
+	  
 	  sensorsmotorsgui_win = FL_ObjWin(fd_sensorsmotorsgui->ventanaA);
-	  canvas_win = FL_ObjWin(fd_sensorsmotorsgui->micanvas);
-	  /* the windows (sensorsmotorsgui_win and canvas_win) change every time the form is hided and showed again. They need to be updated before displaying anything again */
-	  
-	  /* Empiezo con el canvas en blanco */
-	  jde_width = fd_sensorsmotorsgui->micanvas->w;
-	  jde_height = fd_sensorsmotorsgui->micanvas->h;
-	  fl_winset(canvas_win); 
-	  fl_rectbound(0,0,jde_width,jde_height,FL_WHITE);   
-	  XFlush(display);
-	  
-	  track_robot=TRUE;
-	  fl_set_button(fd_sensorsmotorsgui->track_robot,PUSHED);
-	  
-	  fl_set_slider_bounds(fd_sensorsmotorsgui->escala,RANGO_MAX,RANGO_MIN);
-	  fl_set_slider_filter(fd_sensorsmotorsgui->escala,rangoenmetros); /* Para poner el valor del slider en metros en pantalla */
-	  fl_set_slider_value(fd_sensorsmotorsgui->escala,RANGO_INICIAL);
-	  escala = jde_width/rango;
-	  
+	  /* the window (sensorsmotorsgui_win) changes every time the form is hided and showed again. They need to be updated before displaying anything again */
+
 	  fl_set_positioner_xvalue(fd_sensorsmotorsgui->joystick,0.5);
 	  fl_set_positioner_yvalue(fd_sensorsmotorsgui->joystick,0.);
 	  joystick_x=0.5;
-	  joystick_y=0.5;
-	  
+	  joystick_y=0.5;	  
 	  fl_set_slider_value(fd_sensorsmotorsgui->ptspeed,(double)(1.-latitude_speed/MAX_SPEED_PANTILT));
 	}
     }
@@ -1863,7 +1969,7 @@ void jdegui_iteration()
   if (sensorsmotorsgui_on==TRUE)
     {
       sensorsmotorsgui_display(); 
-      if (((display_state & BASE_TELEOPERATOR)!=0)&&(canvas_mouse_button_pressed==RELEASED))
+      if ((display_state & BASE_TELEOPERATOR)!=0)
 	{
 	  /* ROTACION=ejeX: Ajusta a un % de joystick_maxRotVel. OJO no funcion lineal del desplazamiento visual, sino con el al cuadrado, para aplanarla en el origen y evitar cabeceos, conseguir suavidad en la teleoperacion */
 	  
@@ -1892,13 +1998,7 @@ void jdegui_iteration()
 	  /*printf("JDEGUI: longitude speed %.2f, latitude speed %.2f\n",longitude_speed,latitude_speed);*/
 	}
     }
-  /*
-    for(i=0;i<num_schemas;i++)
-    {
-    if (all[i].gui==TRUE)
-    (*all[i].guidisplay)();
-    }
-  */
+ 
   for(i=0;i<num_displaycallbacks;i++)
     {
       if (displaycallbacks[i]!=NULL)
@@ -1948,6 +2048,14 @@ void jdegui_startup()
   char **myargv;
   char *aa;
   char a[]="myjde";
+ 
+  virtualcam.posx=-150;
+  virtualcam.posy=-150.;
+  virtualcam.posz=150.;
+  virtualcam.foax=0.;
+  virtualcam.foay=0.;
+  virtualcam.foaz=0.;
+  virtualcam.roll=0.;
 
   /* prepara el display */
   aa=a;
@@ -1956,17 +2064,8 @@ void jdegui_startup()
   screen = DefaultScreen(display);
   samplesource=colorA; 
 
-  /*  sensorsmotorsgui_resume(); */
-  /* Coord del sistema odometrico respecto del visual */
-  odometrico[0]=0.;
-  odometrico[1]=0.;
-  odometrico[2]=0.;
-  odometrico[3]= cos(0.);
-  odometrico[4]= sin(0.);
-
   for(i=0;i<MAX_SCHEMAS;i++) state_dpy[i]=slept;
 
-  jdegui_debug=0;
   jdegui_state=slept;
   pthread_mutex_init(&jdegui_mymutex,PTHREAD_MUTEX_TIMED_NP);
   pthread_cond_init(&jdegui_condition,NULL);

@@ -4,8 +4,8 @@ GCC = gcc
 CFLAGS = -g -pedantic -Wall $(INC-DIR)
 #-ansi
 #LIBS = -lpthread -lm -lforms -lX11 -ldc1394_control -lraw1394
-LIBS = -lpthread -lm -lforms -lX11 -ldl
-OBJS = jdegui.o mastergui.o sensorsmotorsgui.o
+LIBS = -lpthread -lm -lforms -lX11 -ldl -lformsGL -lGL -lGLU
+OBJS = jdegui.o mastergui.o sensorsmotorsgui.o pioneer.o 
 INSTALLDIR=/usr/local
 CFGDIR="$(INSTALLDIR)/jde-robot"
 
@@ -33,6 +33,9 @@ sensorsmotorsgui.o: sensorsmotorsgui.c sensorsmotorsgui.h
 sensorsmotorsgui.c: sensorsmotorsgui.fd
 	fdesign -convert sensorsmotorsgui.fd
 
+pioneer.o: pioneer.c pioneer.h
+	$(GCC) $(CFLAGS) -fPIC -c pioneer.c
+
 clean:
 	rm -f *.o *.a *so
 
@@ -44,4 +47,4 @@ install:
 	cp ponpath $(INSTALLDIR)/share/jde-robot/		
 
 release:
-	tar -zcvf newrelease.tgz *h *c *fd *.conf README makefile
+	tar -zcvf newrelease.tgz *h *c *fd *.conf Makefile
