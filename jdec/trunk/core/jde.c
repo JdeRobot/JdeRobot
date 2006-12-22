@@ -289,7 +289,12 @@ void update_greyA(void)
   int i;
   for(i=0; i<(SIFNTSC_COLUMNS*SIFNTSC_ROWS);i++)
     {
-      /* this pixel conversion is a little bit tricky: it MUST pass through the (unsigned char) in order to get the right number for values over 128 in colorA[3*i]. it MUST pass through the (unsigned int) in order to allow the addition of three values, which may overflow the 8 bits limit of chars and unsigned chars */
+      /* this pixel conversion is a little bit tricky: it MUST pass
+	   through the (unsigned char) in order to get the right number
+	   for values over 128 in colorA[3*i]. it MUST pass through the
+	   (unsigned int) in order to allow the addition of three
+	   values, which may overflow the 8 bits limit of chars and
+	   unsigned chars */  
       greyA[i]=(char)(((unsigned int)((unsigned char)(colorA[3*i]))+(unsigned int)((unsigned char)(colorA[3*i+1]))+(unsigned int)((unsigned char)(colorA[3*i+2])))/3);
     }
 }
@@ -408,13 +413,22 @@ int jde_loadschema(char *name)
   /*  all[num_schemas].handle = dlopen(n,RTLD_LAZY|RTLD_GLOBAL);*/
   /* Schemas don't share their global variables, to avoid symbol collisions */
   all[num_schemas].handle = dlopen(n,RTLD_LAZY);
-  if (!(all[num_schemas].handle))
-    { fprintf(stderr,"%s\n",dlerror());
+
+  if (  NULL == all[num_schemas].handle ) {
+    strcpy(n, "./");
+    strcat(n, name) ; 
+    strcat(n, ".so"); 
+    printf("name %s\n", n);
+    all[num_schemas].handle = dlopen(n,RTLD_LAZY);
+  }
+  
+
+  if (!(all[num_schemas].handle)) { 
+    fprintf(stderr,"%s\n",dlerror());
     printf("I can't load the %s schema\n",name);
     exit(1);
-    }
-  else 
-    {
+  }
+  else {
       /* symbols from the plugin: */
       dlerror();
       strcpy(n,name); strcat(n,"_startup");
@@ -483,8 +497,16 @@ int jde_loaddriver(char *name)
   char *error;
 
   strcpy(n,name); strcat(n,".so");
- /* Drivers don't share their global variables, to avoid the symbol collisions */
+  /* Drivers don't share their global variables, to avoid the symbol collisions */
   mydrivers[num_drivers].handle = dlopen(n,RTLD_LAZY);
+
+  if (  NULL == mydrivers[num_drivers].handle ) {
+    strcpy(n, "./");
+    strcat(n, name) ; 
+    strcat(n, ".so"); 
+    mydrivers[num_drivers].handle = dlopen(n,RTLD_LAZY);
+  }
+
   if (!(mydrivers[num_drivers].handle))
     { fprintf(stderr,"%s\n",dlerror());
     printf("I can't load the %s driver\n",name);
@@ -614,20 +636,13 @@ int main(int argc, char** argv)
   signal(SIGINT, &jdeshutdown); /* control-C interrupt handler */
   signal(SIGABRT, &jdeshutdown); /* failed assert handler */
   signal(SIGPIPE, SIG_IGN);
-
- /* Pablo Barrera: Por alguna razón libforms hace que fprintf("%f") ponga 
+  
+  /* Pablo Barrera: Por alguna razón libforms hace que fprintf("%f") ponga 
     una coma en vez de un punto como separador si las locales son españolas. 
-     Con esto las ponemos a POSIX. Al salir el entorno es el normal */
+    Con esto las ponemos a POSIX. Al salir el entorno es el normal */
   /*unsetenv("LANG");*/
   setenv("LC_ALL","POSIX",1);
 
-  /* this doesn't seem to work */
-  /*
-  setenv("LD_LIBRARY_PATH",".",1); 
-  system("export LD_LIBRARY_PATH");
-  system("echo $LD_LIBRARY_PATH");
-  */
- 
   printf("%s\n",thisrelease);
 
   n=1;

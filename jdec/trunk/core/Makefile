@@ -37,7 +37,7 @@ pioneer.o: pioneer.c pioneer.h
 	$(GCC) $(CFLAGS) -fPIC -c pioneer.c
 
 clean:
-	rm -f *.o *.a *so
+	-rm -f *.o *.a *so *~
 
 install:
 	cp jde $(INSTALLDIR)/bin/

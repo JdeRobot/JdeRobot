@@ -1,4 +1,4 @@
-DRIVERS = firewire  imagefile  pantilt  player  video4linux
+DRIVERS = firewire  imagefile  pantilt  player video4linux
 SCHEMAS = hsituner  introrob  myschema  opengldemo  papito  perceptive
 
 all: 
