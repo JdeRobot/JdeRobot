@@ -1,5 +1,5 @@
-DRIVERS = firewire  imagefile  pantilt  player video4linux
-SCHEMAS = hsituner  introrob  myschema  opengldemo  papito  perceptive
+DRIVERS = firewire  imagefile  pantilt  player video4linux networkclient networkserver
+SCHEMAS = hsituner  introrob  myschema  opengldemo  papito  myperceptive
 
 all: 
 	CURDIR=`pwd`;
@@ -11,7 +11,7 @@ all:
 	cd $(CURDIR) ;\
 	cd drivers/$$i && make || exit ; pwd;\
 	done;
-	
+
 	CURDIR=`pwd`;
 	for i in $(SCHEMAS); do (echo "Building " $$i); \
 	cd $(CURDIR) ;\
