@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
-#include "jde.h"
+#include "../../core/jde.h"
 
 /* number of devices */
 #define MAXDEVICE 10

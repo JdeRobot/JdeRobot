@@ -9,7 +9,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include "jde.h"
+#include "../../core/jde.h"
 #include "jdemessages.h"
 
 /* read modes for images */
