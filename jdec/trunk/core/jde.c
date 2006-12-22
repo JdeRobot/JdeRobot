@@ -385,7 +385,7 @@ int serve_keyboardmessage(char *mensaje)
 	  (strcmp(word,"QUIT")==0))
 	jdeshutdown(0);
       else if (strcmp(word,"help")==0)
-	{ printf("this is the shell of jde. Available commands:\n  quit\n  mastergui [on|off]\n  sensorsmotorsgui [on|off]\n");
+	{ printf("This is the shell of %s. Available commands are:\n  quit\n  mastergui [on|off]\n  sensorsmotorsgui [on|off]\n",thisrelease);
 	}
     }
   else return -1;
@@ -635,7 +635,7 @@ int main(int argc, char** argv)
     {
       if ((strcmp(argv[n],"--help")==0) ||
 	  (strcmp(argv[n],"-h")==0))
-	{printf("Use: jde [config.file]\n");
+	{printf("Use: jde [config.file] [--gui]\n\n     [config.file] Sets an specific config file. Don't use this option to read default configuration.\n           [--gui] Starts JDE with the main gui activated.\n\n");
 	exit(0);}
       else if ((strcmp(argv[n],"--version")==0) ||
 	       (strcmp(argv[n],"-v")==0))
