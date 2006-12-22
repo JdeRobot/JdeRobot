@@ -161,7 +161,7 @@ void papito_startup()
 {
   pthread_mutex_lock(&(all[papito_id].mymutex));
   printf("papito schema started up\n");
-  myexport("papito_cycle",&papito_cycle);
+  myexport("papito","papito_cycle",&papito_cycle);
   hijoresume=(resumeFn)myimport("myschema_resume");
   if (hijoresume==NULL) printf("papito: Warning myschema_resume symbol not resolved\n");
   hijosuspend=(suspendFn)myimport("myschema_suspend");

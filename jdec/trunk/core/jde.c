@@ -184,6 +184,7 @@ JDEDriver mydrivers[MAX_SCHEMAS];
 int num_drivers=0;
 
 typedef struct sharedname{
+  char schema[MAX_BUFFER];
   char name[MAX_BUFFER];
   void *pointer;
   /*  Tsharedname next;*/
@@ -211,7 +212,7 @@ void speedcounter(int numschema)
     all[numschema].k++;
 }
 
-int myexport(char *name, void *p)
+int myexport(char *schema, char *name, void *p)
      /* publishes the variable, to make it available to other schemas */
 {
   int i;
@@ -223,6 +224,7 @@ int myexport(char *name, void *p)
 	  {
 	    sharedlist[i].pointer=p;
 	    strcpy(sharedlist[i].name,name);
+	    strcpy(sharedlist[i].schema,schema);
 	    found=1;
 	    break;
 	  }
@@ -230,6 +232,7 @@ int myexport(char *name, void *p)
 	{
 	  sharedlist[num_shared].pointer=p;
 	  strcpy(sharedlist[num_shared].name,name);
+	  strcpy(sharedlist[num_shared].schema,schema);
 	  num_shared++;
 	}
       else if ((found==0)&&(num_shared>=MAX_SHARED))
@@ -238,17 +241,18 @@ int myexport(char *name, void *p)
   return 1;
 }
 
-void *myimport(char *name)
+void *myimport(char *schema, char *name)
      /* returns NULL in case of not finding the requested variable */
 {
   void *value=NULL;
   int i=0;
 
   for(i=0;i<num_shared;i++)
-    if (strcmp(name,sharedlist[i].name)==0) 
-      { value=sharedlist[i].pointer;
-      break;
-      }
+    if ((strcmp(schema,sharedlist[i].schema)==0) &&
+	(strcmp(name,sharedlist[i].name)==0))
+	{ value=sharedlist[i].pointer;
+	break;
+	}
   return value;
 }
 

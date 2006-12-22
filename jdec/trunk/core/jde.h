@@ -48,8 +48,8 @@ typedef void (*suspendFn)(void);
 extern void null_arbitration();
 extern void put_state(int numschema,int newstate);
 extern void speedcounter(int numschema);
-extern int myexport(char *name, void *p);
-extern void *myimport(char *name);
+extern int myexport(char *schema, char *name, void *p);
+extern void *myimport(char *schema, char *name);
 extern void jdeshutdown(int sig);
 #define GUIHUMAN -1 /* when the human activate some schema from the gui */
 

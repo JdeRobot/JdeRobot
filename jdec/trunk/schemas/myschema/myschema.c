@@ -154,10 +154,10 @@ void myschema_startup()
 {
   pthread_mutex_lock(&(all[myschema_id].mymutex));
   printf("myschema schema started up\n");
-  myexport("myschema_cycle",&myschema_cycle);
-  myexport("myschema_resume",(void *)myschema_resume);
-  myexport("myschema_suspend",(void *)myschema_suspend);
-  myc=(int *)myimport("c");
+  myexport("myschema","myschema_cycle",&myschema_cycle);
+  myexport("myschema","myschema_resume",(void *)myschema_resume);
+  myexport("myschema","myschema_suspend",(void *)myschema_suspend);
+  myc=(int *)myimport("myperceptive","c");
   if (myc==NULL) printf("myschema: Warning c symbol not resolved\n");
   put_state(myschema_id,slept);
   pthread_create(&(all[myschema_id].mythread),NULL,myschema_thread,NULL);
