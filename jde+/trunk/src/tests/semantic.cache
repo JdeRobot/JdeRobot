@@ -1,0 +1,15 @@
+;; Object tests/
+;; SEMANTICDB Tags save file
+(semanticdb-project-database-file "tests/"
+  :tables (list 
+   (semanticdb-table "test_pointer.cpp"
+    :major-mode 'c++-mode
+    :tags '(("jde+/pointer.h" include (:system-flag t) nil [1 26]) ("iostream" include (:system-flag t) nil [27 46]) ("A" type (:members (("public" label nil (reparse-symbol classsubparts) [58 65]) ("print" function (:typemodifiers ("virtual") :type "void") (reparse-symbol classsubparts) [67 128])) :type "class") nil [48 131]) ("B" type (:superclasses ("A") :members (("public" label nil (reparse-symbol classsubparts) [154 161]) ("print" function (:typemodifiers ("virtual") :type "void") (reparse-symbol classsubparts) [163 224])) :type "class") nil [133 227]) ("main" function (:type "int") nil [229 428]))
+    :file "test_pointer.cpp"
+    :pointmax 429
+    )
+   )
+  :file "semantic.cache"
+  :semantic-tag-version "2.0pre3"
+  :semanticdb-version "2.0pre3"
+  )

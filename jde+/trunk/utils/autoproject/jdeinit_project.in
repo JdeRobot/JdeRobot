@@ -1,0 +1,52 @@
+#!/bin/bash
+
+#package dirs
+prefix=@prefix@
+pkgdatadir=@datadir@/@PACKAGE@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+
+if [ $# -ne 2 ]; then
+    echo "Usage: `basename $0` <project_xml_file> <project_dir>"
+    exit 1
+fi
+
+PROJECTXML="$1"
+PROJECTNAME=`echo $PROJECTXML | sed 's/\.[^.]*$//'`
+PROJECTDIR="$2"
+
+AUTOPROJECTDATA="${pkgdatadir}/autoproject"
+INFOFILES="AUTHORS ChangeLog COPYING INSTALL NEWS README"
+CFTEMPLATE="configure.in.tpl"
+
+JXMLC=${bindir}/jxmlc
+JXMLCFLAGS="-i -p $PROJECTDIR"
+
+#create project dir if it doesn't exists
+if [ ! -d "$PROJECTDIR" ]; then
+    mkdir -p $PROJECTDIR
+fi
+
+#copy files
+if [ ! -f "$PROJECTDIR/$PROJECTXML" ]; then
+    cp -i "$PROJECTXML" "$PROJECTDIR/"
+fi
+
+for f in $INFOFILES; do
+    cp -i "$AUTOPROJECTDATA/$f" "$PROJECTDIR/$f"
+done
+
+sed -e "s/#PROJECTNAME/$PROJECTNAME/g" -e "s/#PROJECTVERSION/0.0/g" \
+    < "$AUTOPROJECTDATA/$CFTEMPLATE" > $PROJECTDIR/configure.in
+
+OLDPWD=`pwd`
+
+#exec jxmlc and create configure
+$JXMLC $JXMLCFLAGS $PROJECTXML && cd $PROJECTDIR && autoreconf -vfi
+
+if [ $? -eq 0 ]; then
+    echo "Successfull project initialization"
+    echo "When project code ready run configure and then make"
+else
+    echo "XML project file with errors. Check it and run \'$JXMLC $JXMLCFLAGS $PROJECTXML\' again"
+fi

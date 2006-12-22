@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:jdeplus="http://gsyc.escet.urjc.es/robotica"
+        targetNamespace="http://gsyc.escet.urjc.es/robotica"
+        elementFormDefault="qualified">
+
+  <element name="jde" type="jdeplus:jde_t"/>
+
+  <complexType name="interfaceDef_t">
+    <sequence>
+      <element name="perception" type="string" minOccurs="0" maxOccurs="unbounded"/>
+      <element name="modulation" type="string" minOccurs="0" maxOccurs="unbounded"/>
+      <element name="library" type="string"/>
+      <element name="extheader" type="string" minOccurs="0" maxOccurs="unbounded"/>
+      <element name="extsource" type="string" minOccurs="0" maxOccurs="unbounded"/>
+      <element name="extlib" type="string" minOccurs="0" maxOccurs="unbounded"/>
+    </sequence>
+    <attribute name="name" type="string" use="required"/>
+    <attribute name="type" default="PERCEPTIVE">
+      <simpleType>
+	<restriction base="string">
+	  <enumeration value="PERCEPTIVE"/>
+	  <enumeration value="MOTOR"/>
+	</restriction>
+      </simpleType>
+    </attribute>
+  </complexType>
+
+  <complexType name="interface_t">
+    <sequence>
+      <element name="library" type="string"/>
+    </sequence>
+    <attribute name="name" type="string" use="required"/>
+  </complexType>
+
+  <complexType name="child_t">
+    <sequence>
+      <element name="interface" type="jdeplus:interface_t"/>
+      <element name="branch" type="string" minOccurs="0" maxOccurs="unbounded"/>
+    </sequence>
+    <attribute name="nick" type="string" use="optional"/>
+  </complexType>
+
+  <complexType name="schemaDef_t">
+    <sequence>
+      <element name="interface" type="jdeplus:interface_t"/>
+      <element name="child" type="jdeplus:child_t" minOccurs="0" maxOccurs="unbounded"/>
+      <element name="branch" type="string" default="default"/>
+      <element name="extheader" type="string" minOccurs="0" maxOccurs="unbounded"/>
+      <element name="extsource" type="string" minOccurs="0" maxOccurs="unbounded"/>
+      <element name="extlib" type="string" minOccurs="0" maxOccurs="unbounded"/>
+    </sequence>
+    <attribute name="name" type="string" use="required"/>
+  </complexType>
+
+  <complexType name="jde_t">
+    <sequence>
+      <element name="interfaceDef" type="jdeplus:interfaceDef_t" minOccurs="0" maxOccurs="unbounded"/>
+      <element name="schemaDef" type="jdeplus:schemaDef_t" minOccurs="0" maxOccurs="unbounded"/>
+    </sequence>
+  </complexType>
+</schema>
+

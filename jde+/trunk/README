@@ -1,0 +1,18 @@
+JDE+ a middleware for robotics applications
+
+INSTALL
+
+Configure : ./configure
+Compile   : make
+Install   : make install
+Uninstall : make uninstall
+
+Default instalation path /usr/local[bin|include]. It can be changed 
+configuring like this ./configure --prefix=[new-path]. See more options
+with ./configure --help.
+
+EXAMPLES
+
+To compile and test examples you must define environment variable
+JDE_PATH, with jde+ installation path. Go to examples dir, make to
+compile examples. Use "run_hierarchy" script to run each example.

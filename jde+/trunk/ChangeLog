@@ -1,0 +1,39 @@
+ChangeLog for jde+ 0.x
+---------------------------
+- bugfix, + enhancement, * contrib, = RELEASE
+---------------------------------------------
+
+2006/06/08 --dlobato
+	
+	
+= 0.7 2006/06/01
+	+Configuration tools enhaced (jxmlc & autoproject)
+	+Examples adapted to new configuration tools (e1,e2,e3)
+	
+2005/11/16 --dlobato
+	+ singleton : method releaseInstance with counter thar delete
+	instance when 0
+	+ hierarchy : get_state now is const. Return SLEPT if instance not
+	created
+	+ schemainstance : get_child_state
+	
+= 0.6 2005/11/03 -- dlobato
+	+ Headers changed to hide details
+	+ No ccgnu includes dependencies on schemas
+
+2005/09/28 -- dlobato
+	+ libccgnu2 integration
+	+ New message to send instance new state changes
+
+2005/09/16 -- dlobato
+	+ Better compilation schema to examples
+	  Shared code in 'so' libraries
+
+= 0.5 2005/09/14 -- dlobato
+	+ Examples Makefile
+
+= 0.2 2005/06/ -- dlobato
+	* 
+
+= 0.1 2005/04/22 -- dlobato
+	* Initial version

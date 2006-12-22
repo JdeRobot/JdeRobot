@@ -1,0 +1,46 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[latin1]{inputenc}
+\usepackage[spanish]{babel}
+
+%opening
+\title{Manual de usuario de JDE+\\Versión 0.0}
+\author{David Lobato Bravo\\david.lobato@urjc.es}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Este documento describe como instalar y usar la plataforma de desarrollo JDE+. El documento esta orientado a los desarroladores de aplicaciones sobre JDE+, mostrandose las herramientas que ofrece y la forma de usarlas. También se describe el API de programación y se comentan algunos ejemplos.
+\end{abstract}
+
+\section{Introducción}
+TODO
+
+\section{Instalación de JDE+}
+Lo primero es obtener el paquete (FIXME: añadir fuente). Una vez lo tengamos, lo descomprimimos con:
+\begin{verbatim}
+tar zxvf jde+'version'.tar.gz
+\end{verbatim}
+
+Al descomprimirlo, obtendremos un directorio con todo el software. El proyecto JDE+ esta gestionado con AutoTools, por lo que tan solo tendremos que configurarlo, compilarlo e instalarlo con los siguientes comandos:
+\begin{verbatim}
+./configure
+make
+make install
+\end{verbatim}
+
+El directorio de instalación por defecto es \texttt{/usr/local/jde+-'version'}. Si queremos modificarlo, podemos usar el parámetro \texttt{--prefix} de configure con una nueva ruta de instalación.
+
+Por último definiremos las siguientes variables de entorno en nuestro \texttt{.bashrc}:
+\begin{verbatim}
+JDE_DIR=/usr/local/jde+-'version'
+LD_LIBRARY_PATH=$JDE_DIR/lib:$LD_LIBRARY_PATH
+PATH=$JDE_DIR/bin:$PATH
+
+export JDE_DIR LD_LIBRARY_PATH PATH
+\end{verbatim}
+
+Con esto deberiamos poder ejecutar el comando \texttt{jde+}, que nos mostrará la interfaz gráfica de JDE+.
+
+\end{document}
