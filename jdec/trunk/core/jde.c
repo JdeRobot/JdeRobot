@@ -18,7 +18,7 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-#define thisrelease "JDE 4.2.0"
+#define thisrelease "JDE 4.2-svn"
 
 #include "jde.h"
 #include "dlfcn.h"
