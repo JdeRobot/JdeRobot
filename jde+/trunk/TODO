@@ -5,5 +5,4 @@
 * repasar destructores para apagar el sistema correctamente
 * comprobar si Pointer es thread safe
 * pensar que pasa cuando un esquema se muere o lanza una excepción
-* debianizar paquete
 

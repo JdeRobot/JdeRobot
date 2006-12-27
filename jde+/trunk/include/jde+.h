@@ -7,5 +7,6 @@
 #include <jde+/schemaimplementation.h>
 #include <jde+/schematypes.h>
 #include <jde+/schemafactory.h>
+#include <jde+/singleton.h>
 
 #endif /*JDE_H*/
