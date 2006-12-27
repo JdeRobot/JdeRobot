@@ -1,4 +1,4 @@
-#include <jde+/util.h>
+#include "util.h"
 #include <stdexcept>
 
 #include <cc++/thread.h>

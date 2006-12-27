@@ -4,8 +4,8 @@
 #include <jde+/schemainstance.h>
 #include <jde+/schemafactory.h>
 #include <jde+/schemainterface.h>
-#include <jde+/util.h>
-
+#include "util.h"
+#include "loader.h"
 #include <iostream>
 #include <stdexcept>
 #include <cc++/thread.h>

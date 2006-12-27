@@ -1,5 +1,5 @@
 #include <jde+/message.h>
-#include <jde+/util.h>
+#include "util.h"
 
 
 

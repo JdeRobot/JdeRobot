@@ -5,9 +5,11 @@
 #include <jde+/schemafactory.h>
 #include <jde+/schemastate.h>
 #include <jde+/schemaimplementation.h>
-#include <jde+/conditionallock.h>
 #include <jde+/pointer.h>
 #include <jde+/privatedata.h>
+
+#include "conditionallock.h"
+
 #include <stdexcept>
 #include <iostream>
 #include <map>

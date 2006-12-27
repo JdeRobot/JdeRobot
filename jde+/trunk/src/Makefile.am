@@ -19,7 +19,7 @@ bin_PROGRAMS = jdescope
 libjde__la_SOURCES = hierarchy.cpp data.cpp schematypes.cpp \
 			schemainstance.cpp schemastate.cpp \
 			schemaimplementation.cpp isc.cpp util.cpp \
-			message.cpp
+			message.cpp util.h conditionallock.h loader.h
 libjde__la_LIBADD = @LIBLTDL@ 
 libjde__la_LDFLAGS = @LIBJDEDEPS_LIBS@
 
