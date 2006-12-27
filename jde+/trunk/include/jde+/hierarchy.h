@@ -6,7 +6,6 @@
 #include <utility>
 #include <jde+/pointer.h>
 #include <jde+/schematypes.h>
-#include <jde+/loader.h>
 
 /*forward declarations*/
 class Isc;

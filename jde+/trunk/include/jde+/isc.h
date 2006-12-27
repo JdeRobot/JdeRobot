@@ -1,9 +1,6 @@
 #ifndef ISC_HPP
 #define ISC_HPP
-#include <jde+/data.h>
-#include <jde+/schematypes.h>
-#include <jde+/message_processor.h>
-#include <jde+/pointer.h>
+#include <jde+/messageprocessor.h>
 
 #include <string>
 

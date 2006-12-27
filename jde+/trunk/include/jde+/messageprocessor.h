@@ -1,6 +1,5 @@
 #ifndef MESSAGE_PROCESSOR_HPP
 #define MESSAGE_PROCESSOR_HPP
-
 #include <jde+/message.h>
 #include <jde+/pointer.h>
 

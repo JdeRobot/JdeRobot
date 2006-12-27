@@ -1,6 +1,5 @@
 #ifndef SINGLETON_H
 #define SINGLETON_H
-
 #include <cc++/thread.h>
 #ifdef CCXX_NAMESPACES
 using ost::Mutex;

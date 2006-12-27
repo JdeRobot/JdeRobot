@@ -1,8 +1,10 @@
 #ifndef SCHEMAINSTANCE_H
 #define SCHEMAINSTANCE_H
 #include <jde+/schematypes.h>
-#include <jde+/message_processor.h>
+#include <jde+/pointer.h>
+#include <jde+/messageprocessor.h>
 #include <jde+/data.h>
+#include <jde+/privatedata.h>
 #include <string>
 #include <vector>
 

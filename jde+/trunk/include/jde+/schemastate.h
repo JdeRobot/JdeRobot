@@ -5,7 +5,6 @@
 #include <jde+/data.h>
 #include <jde+/schematypes.h>
 #include <jde+/singleton.h>
-#include <jde+/pointer.h>
 
 
 /*forward declaration*/

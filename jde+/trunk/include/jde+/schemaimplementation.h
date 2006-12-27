@@ -3,13 +3,9 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <jde+/schematypes.h>
-#include <jde+/data.h>
 
 /*forward declaration*/
 class Schemainstance;
-//class Schemainterface;
-//class Schemaimplementation_Pimpl;
 
 /*
   Schemaimplementation class is abstract base class 

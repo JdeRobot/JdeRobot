@@ -6,29 +6,12 @@
 
 #ifndef SMART_PTR_H
 #define SMART_PTR_H
+//#include <jde+/atomiccounter.h>
 #include <stdexcept>
-
-/** Wrapper class to avoid include dependencies in pointer.h */
-namespace ost {
-  class AtomicCounter {
-  public:
-    AtomicCounter();
-    AtomicCounter(int value);
-    ~AtomicCounter();
-
-    int operator++(void);
-    int operator--(void);
-    int operator+=(int change);
-    int operator-=(int change);
-    int operator+(int change);
-    int operator-(int change);
-    int operator=(int value);
-    bool operator!(void);
-    operator int();
-  };
-}
+#include <cc++/thread.h>
+#ifdef CCXX_NAMESPACES
 using ost::AtomicCounter;
-
+#endif
 
 /**
   Maintains a count of references and auto-delete when it is 0

@@ -1,6 +1,6 @@
 #ifndef SCHEMAFACTORY_H
 #define SCHEMAFACTORY_H
-#include <jde+/classfactory.h>
+//#include <jde+/classfactory.h>
 #include <jde+/schematypes.h>
 #include <string>
 #include <vector>
@@ -12,7 +12,7 @@ class Schemaimplementation;
 /**
    Base class for schemas factories.
 */
-class Schemafactory : public Classfactory {
+class Schemafactory {
 public:
   typedef struct {
     std::string name;
