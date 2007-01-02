@@ -4,7 +4,7 @@ else
 SUBDIRS_1 = @CONFIG_LIB_DIR@
 endif
 
-SUBDIRS = $(SUBDIRS_1) libltdl include src docs utils
+SUBDIRS = $(SUBDIRS_1) libltdl jde+core docs tools
 
 EXTRA_DIST = AUTHORS ChangeLog NEWS README INSTALL \
 	COPYING TODO examples

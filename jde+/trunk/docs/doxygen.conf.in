@@ -71,8 +71,8 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ../include \
-                         ../src
+INPUT                  = ../jde+core/include \
+                         ../jde+core/src
 FILE_PATTERNS          = 
 RECURSIVE              = YES
 EXCLUDE                = 

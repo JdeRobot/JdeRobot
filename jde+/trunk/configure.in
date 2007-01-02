@@ -60,13 +60,15 @@ AC_DEFINE_UNQUOTED(PIXMAPDIR, "${prefix}/share/AC_PACKAGE_NAME/pixmap")
 
 AC_OUTPUT([
 Makefile
-src/Makefile
-include/Makefile
-include/jde+/Makefile
+jde+core/Makefile
+jde+core/src/Makefile
+jde+core/include/Makefile
+jde+core/include/jde+/Makefile
 docs/Makefile
 docs/doxygen.conf
-utils/Makefile
-utils/autoproject/Makefile
-utils/autoproject/jdeinit_project
-utils/jxmlc/Makefile
+tools/Makefile
+tools/autoproject/Makefile
+tools/autoproject/jdeinit_project
+tools/jxmlc/Makefile
+tools/jde+scope/Makefile
 ])
