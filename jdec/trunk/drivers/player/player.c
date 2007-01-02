@@ -27,7 +27,7 @@
 #include <pthread.h>
 #include <libplayerc/playerc.h>
 #include <jde.h>
-#define MIN_DELAY_BETWEEN_COMMANDS 100 /* ms */
+#define PLAYER_COMMAND_CYCLE 75 /* ms */ 
 
 /* for player support through the player server */
 playerc_client_t *player_client;
@@ -77,12 +77,11 @@ int player_laser_resume(int father, int *brothers, arbitration fn)
 
   if((serve_laser)&&(laser_active==0)){
     laser_active=1;
-    printf("laser schema (player driver) resume\n");
+    put_state(laser_schema_id,winner);
+    printf("laser schema resume (player driver)\n");
     all[laser_schema_id].father = father;
     all[laser_schema_id].fps = 0.;
     all[laser_schema_id].k =0;
-    put_state(laser_schema_id,winner);
-
     /* update the father incorporating this schema as one of its children */
     if (father!=GUIHUMAN)
       {
@@ -90,7 +89,6 @@ int player_laser_resume(int father, int *brothers, arbitration fn)
 	all[father].children[laser_schema_id]=TRUE;
 	pthread_mutex_unlock(&(all[father].mymutex));
       }
-
 
     if((encoders_active==0)&&(sonars_active==0)&&(motors_active==0)){
       /* player thread goes winner */
@@ -108,12 +106,12 @@ int player_laser_suspend(){
 
   if((serve_laser)&&(laser_active)){
     laser_active=0;
-    printf("laser schema (player driver) suspend\n"); 
+    put_state(laser_schema_id,slept);
+    printf("laser schema suspend (player driver)\n"); 
     if((encoders_active==0)&&(sonars_active==0)&&(motors_active==0)){    
       /* player thread goes sleep */
       pthread_mutex_lock(&mymutex);
       state=slept;
-      put_state(laser_schema_id,slept);
       pthread_mutex_unlock(&mymutex);
     }
   }
@@ -125,11 +123,11 @@ int player_encoders_resume(int father, int *brothers, arbitration fn)
 
   if((serve_encoders)&&(encoders_active==0)){
     encoders_active=1;
-    printf("encoders schema (player driver) resume\n");
+    put_state(encoders_schema_id,winner);
+    printf("encoders schema resume (player driver)\n");
     all[encoders_schema_id].father = father;
     all[encoders_schema_id].fps = 0.;
     all[encoders_schema_id].k =0;
-    put_state(encoders_schema_id,winner);
 
     if((laser_active==0)&&(sonars_active==0)&&(motors_active==0)){
       /* player thread goes winner */
@@ -147,13 +145,12 @@ int player_encoders_suspend(){
 
   if((serve_encoders)&&(encoders_active)){
     encoders_active=0;
-    printf("encoders schema (player driver) suspend\n");
+    put_state(encoders_schema_id,slept);
+    printf("encoders schema suspend (player driver)\n");
     if((laser_active==0)&&(sonars_active==0)&&(motors_active==0)){    
-
       /* player thread goes sleep */
       pthread_mutex_lock(&mymutex);
       state=slept;
-      put_state(encoders_schema_id,slept);
       pthread_mutex_unlock(&mymutex);
     }
   }
@@ -163,22 +160,21 @@ int player_encoders_suspend(){
 int player_sonars_resume(int father, int *brothers, arbitration fn)
 {
 
-  all[sonars_schema_id].father = father;
-  all[sonars_schema_id].fps = 0.;
-  all[sonars_schema_id].k =0;
-  put_state(sonars_schema_id,winner);
-
-  if((serve_sonars)&&(sonars_active==0)){
-    sonars_active=1;
-    printf("sonars schema (player driver) resume\n");
-    if((laser_active==0)&&(encoders_active==0)&&(motors_active==0)){
-      /* player thread goes winner */
-      pthread_mutex_lock(&mymutex);
-      state=winner;
-      pthread_cond_signal(&condition);
-      pthread_mutex_unlock(&mymutex);
-    }
-  }
+ if((serve_sonars)&&(sonars_active==0)){
+   all[sonars_schema_id].father = father;
+   all[sonars_schema_id].fps = 0.;
+   all[sonars_schema_id].k =0;
+   put_state(sonars_schema_id,winner);
+   printf("sonars schema resume (player driver)\n");
+   sonars_active=1;
+   if((laser_active==0)&&(encoders_active==0)&&(motors_active==0)){
+     /* player thread goes winner */
+     pthread_mutex_lock(&mymutex);
+     state=winner;
+     pthread_cond_signal(&condition);
+     pthread_mutex_unlock(&mymutex);
+   }
+ }
   return 0;
 }
 
@@ -186,13 +182,12 @@ int player_sonars_suspend(){
 
   if((serve_sonars)&&(sonars_active)){
     sonars_active=0;
-    printf("sonars schema (player driver) suspend\n");
+    put_state(sonars_schema_id,slept); 
+    printf("sonars schema suspend (player driver)\n");
     if((laser_active==0)&&(encoders_active==0)&&(motors_active==0)){
-
-      /* player thread goes sleep */
+      /* player thread goes to sleep */
       pthread_mutex_lock(&mymutex);
       state=slept;
-      put_state(sonars_schema_id,slept);
       pthread_mutex_unlock(&mymutex);
     }
   }
@@ -204,18 +199,17 @@ int player_motors_resume(int father, int *brothers, arbitration fn)
 
   if((serve_motors)&&(motors_active==0)){
     motors_active=1;
-    printf("motors schema (player driver) resume\n");
+    put_state(motors_schema_id,winner);
+    printf("motors schema resume (player driver)\n");
     all[motors_schema_id].father = father;
     all[motors_schema_id].fps = 0.;
     all[motors_schema_id].k =0;
-    put_state(motors_schema_id,winner);
-
-    /*if((laser_active==0)&&(encoders_active==0)&&(sonars_active==0)){
+    if((laser_active==0)&&(encoders_active==0)&&(sonars_active==0)){
       pthread_mutex_lock(&mymutex);
       state=winner;
       pthread_cond_signal(&condition);
       pthread_mutex_unlock(&mymutex);
-      }*/
+      }
   }
   return 0;
 
@@ -225,13 +219,13 @@ int player_motors_suspend(){
 
   if((serve_motors)&&(motors_active)){
     motors_active=0;
-    printf("motors schema (player driver) suspend\n");
     put_state(motors_schema_id,slept);
-    /*if((laser_active==0)&&(encoders_active==0)&&(sonars_active==0)){    
+    printf("motors schema resume (player driver)\n");
+    if((laser_active==0)&&(encoders_active==0)&&(sonars_active==0)){    
       pthread_mutex_lock(&mymutex);
       state=slept;
       pthread_mutex_unlock(&mymutex);
-      }*/
+      }
   }
   return 0;
 }
@@ -240,10 +234,7 @@ void player_motors_iteration(){
 
   float  w_new, v_new;
   static float w_sp=0., v_sp=0.;
-  static unsigned long before;
-  unsigned long now;
   int v_integer=0; int w_integer=0;
-  struct timeval t;
 
   speedcounter(motors_schema_id);  
 
@@ -258,23 +249,23 @@ void player_motors_iteration(){
   else if(w_integer<-MAX_RVEL) w_new=-MAX_RVEL*DEGTORAD;
   else w_new=w*DEGTORAD;
 
-  gettimeofday(&t,NULL);
-  now=t.tv_sec*1000000+t.tv_usec;
-  if (((v_sp!=v_new)||(w_sp!=w_new))&&((now-before)>(MIN_DELAY_BETWEEN_COMMANDS*1000))){
-    v_sp=v_new;
-    w_sp=w_new;
-    before=now;
-     
-    /* sending speed to player server */
-    playerc_position2d_set_cmd_vel(player_position,v_sp,0,w_sp,0);
-  }
+  if ((v_sp!=v_new)||(w_sp!=w_new))
+    {
+      v_sp=v_new;
+      w_sp=w_new;
+      /* sending speed to player server */
+      playerc_position2d_set_cmd_vel(player_position,v_sp,0,w_sp,0);
+    }
 }
 
 void *player_thread(void *not_used){
   struct timeval t;
-  unsigned long now;
+  unsigned long before,now;
+  static unsigned long lastmotor=0;
+  /*
   static unsigned long last=0;
   static int howmany=0;
+  */
 
   printf("player: player thread started up\n");
 
@@ -292,23 +283,35 @@ void *player_thread(void *not_used){
       
       pthread_mutex_unlock(&mymutex);
       
+      gettimeofday(&t,NULL);
+      now=t.tv_sec*1000000+t.tv_usec;   
+      /*printf("%ld, %ld\n",now-before,now-lastmotor);
+      before=now;
+      */
+
       /* sending motors command */
-      if((serve_motors)&&(motors_active)) player_motors_iteration();
+      if((serve_motors)&&(motors_active))
+	{
+	if ((now-lastmotor) > PLAYER_COMMAND_CYCLE*1000)
+	  { lastmotor=now;
+	  player_motors_iteration();
+	  }
+	}
+      /* player_motors_iteration();*/
 
       /* reading from player server */
       playerc_client_read(player_client);
       
-      if (DEBUG==1)
-	{
-	  gettimeofday(&t,NULL);
-	  now=t.tv_sec*1000000+t.tv_usec;      
-	  howmany++;
-	  if ((now-last)>10000000)
-	    {fprintf(stderr,"player: client -> %d iterations in 10 secs\n",howmany);
-	      last = now;
-	      howmany=0;
-	    }
-	}
+      /*
+      gettimeofday(&t,NULL);
+      now=t.tv_sec*1000000+t.tv_usec;
+      howmany++;
+      if ((now-last)>10000000)
+            {fprintf(stderr,"player: client -> %d iterations in 10 secs\n",howmany);
+              last = now;
+              howmany=0;
+            }   
+      */
     }
   }while(player_close_command==0);
   pthread_exit(0);
@@ -464,7 +467,6 @@ int player_init(){
 	printf("player: did you set 'position2d:0' in the robot provides line at Player config file?\n");
 	printf("player: cannot initiate Player connection\n");
 	exit(-1);
-	/*return -1;*/
       }
     playerc_position2d_enable(player_position,1);
 
@@ -481,7 +483,6 @@ int player_init(){
 	printf("player: did you set 'sonar:0' in the robot provides line at Player config file?\n");
 	printf("player: cannot initiate Player connection\n");
 	exit(-1);
-	/*return -1;*/
     }
     playerc_sonar_get_geom(player_sonar);
 
@@ -499,14 +500,13 @@ int player_init(){
 	printf("player: did you set 'laser:0' in the robot provides line at Player config file?\n");
 	printf("player: cannot initiate Player connection\n");
 	exit(-1);
-	/* return -1;*/
       }
 
     /* registering the laser callback to call when new laser data arrived */
     playerc_client_addcallback(player_client,&(player_laser->info),&player_laser_callback,&(player_laser->scan));
   }    
 
-  /*if(serve_motors){
+  /*if(serve_battery){
     player_power=playerc_power_create(player_client, 0);
     if (playerc_power_subscribe(player_power, PLAYER_OPEN_MODE) != 0)
     {
@@ -728,6 +728,9 @@ int player_startup(char *configfile){
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("encoders","jde_robot",&jde_robot);
+      myexport("encoders","resume",(void *)player_encoders_resume);
+      myexport("encoders","suspend",(void *)player_encoders_suspend);
     }
 
   if(serve_sonars)
@@ -744,6 +747,9 @@ int player_startup(char *configfile){
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("sonars","us",&us);
+      myexport("sonars","resume",(void *)player_sonars_resume);
+      myexport("sonars","suspend",(void *)player_sonars_suspend);
     }
 
   if(serve_motors)
@@ -760,6 +766,10 @@ int player_startup(char *configfile){
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("motors","v",&v);
+      myexport("motors","w",&w);
+      myexport("motors","resume",(void *)player_motors_resume);
+      myexport("motors","suspend",(void *)player_motors_suspend);
     }
 
   return 0;
