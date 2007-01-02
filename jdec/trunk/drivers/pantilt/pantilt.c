@@ -57,6 +57,8 @@ char pantilt_in[MAX_MESSAGE];
 char pantilt_out[MAX_MESSAGE];
 int pantilt_marca;
 
+int ptmotors_schema_id, ptencoders_schema_id;
+
 float longitude_last=0., latitude_last=0.;
 float longspeed_last=0., latspeed_last=0.;
 
@@ -205,7 +207,7 @@ void serve_serialpantilt_message(char *mensaje)
     {
       pan_angle=(float)pan_encoders*ENCOD_TO_DEG; 
       //if (source[SCH_PANTILTENCODERS]==serialpantilt)
-      kpantiltencoders++;
+      speedcounter(ptencoders_schema_id);
       /*printf("PAN=%.2f\n",pan_angle);*/
     }
   else if (sscanf(mensaje,"* Current Tilt position is %d",&tilt_encoders)==1)
@@ -310,20 +312,25 @@ int ptencoders_suspend()
   if (activate_pantiltencoders) {
     pthread_mutex_unlock(&mymutex_encoders);
     state_encoders=slept;
-    printf("pantiltencoders driver off\n");
+    put_state(ptencoders_schema_id,slept);
+    printf("ptencoders schema suspend\n");
     pthread_mutex_unlock(&mymutex_encoders);
   }
 
   return 0;
 }
 
-int ptencoders_resume()
+int ptencoders_resume(int father, int *brothers, arbitration fn)
 {
 
   if (activate_pantiltencoders) {
     pthread_mutex_unlock(&mymutex_encoders);
-    state_encoders=active;
-    printf("pantiltencoders driver on\n");
+    state_encoders=active; 
+    all[ptencoders_schema_id].father = father;
+    all[ptencoders_schema_id].fps = 0.;
+    all[ptencoders_schema_id].k =0;
+    put_state(ptencoders_schema_id,winner);
+    printf("ptencoders schema resume\n");
     pthread_cond_signal(&condition_encoders);
     pthread_mutex_unlock(&mymutex_encoders);
   }
@@ -335,7 +342,7 @@ void pantiltmotors_iteration()
 {  
   float longspeed, latspeed, longcommand, latcommand;
 
-  kpantiltmotors++;
+  speedcounter(ptmotors_schema_id);
 
   /* truncate both speed and position inside permited values*/
   if (longitude_speed < 0.0)     longspeed=0.0;
@@ -375,7 +382,8 @@ int ptmotors_suspend()
   if (activate_pantiltmotors) {
     pthread_mutex_lock(&mymutex_motors);
     state_motors=slept;
-    printf("pantiltmotors driver off\n");
+    put_state(ptmotors_schema_id,slept);
+    printf("ptmotors schema suspend\n");
     printf("ptmotors_suspend: pan_angle=%f - tilt_angle=%f\n",pan_angle,tilt_angle); 
     pthread_mutex_unlock(&mymutex_motors);
   }
@@ -383,7 +391,7 @@ int ptmotors_suspend()
   return 0;
 }
 
-int ptmotors_resume()
+int ptmotors_resume(int father, int *brothers, arbitration fn)
 {
 
   if (activate_pantiltmotors) {
@@ -399,7 +407,11 @@ int ptmotors_resume()
 
     pthread_mutex_lock(&mymutex_motors);
     state_motors=winner;
-    printf("pantiltmotors driver on\n");
+    all[ptmotors_schema_id].father = father;
+    all[ptmotors_schema_id].fps = 0.;
+    all[ptmotors_schema_id].k =0;
+    put_state(ptmotors_schema_id,winner);
+    printf("ptmotors schema resume\n");
     pthread_cond_signal(&condition_motors);
     pthread_mutex_unlock(&mymutex_motors);
   }
@@ -650,9 +662,18 @@ void pantilt_startup(char *configfile)
     pthread_create(&pantilt_pollth,NULL,serialpantilt_pollthread,NULL);
     pthread_mutex_unlock(&mymutex_encoders);
 
-    pantiltencoders_resume=ptencoders_resume;
-    pantiltencoders_suspend=ptencoders_suspend;
-
+    all[num_schemas].id = (int *) &ptencoders_schema_id;
+    strcpy(all[num_schemas].name,"ptencoders");
+    all[num_schemas].resume = (resumeFn) ptencoders_resume;
+    all[num_schemas].suspend = (suspendFn) ptencoders_suspend;
+    printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+    (*(all[num_schemas].id)) = num_schemas;
+    all[num_schemas].fps = 0.;
+    all[num_schemas].k =0;
+    all[num_schemas].state=slept;
+    all[num_schemas].close = NULL;
+    all[num_schemas].handle = NULL;
+    num_schemas++;
   }
 
   if (activate_pantiltmotors) {
@@ -663,8 +684,18 @@ void pantilt_startup(char *configfile)
     pthread_create(&pantilt_th,NULL,pantiltmotors_thread,NULL);
     pthread_mutex_unlock(&mymutex_motors);    
 
-    pantiltmotors_resume=ptmotors_resume;
-    pantiltmotors_suspend=ptmotors_suspend;
+    all[num_schemas].id = (int *) &ptmotors_schema_id;
+    strcpy(all[num_schemas].name,"ptmotors");
+    all[num_schemas].resume = (resumeFn) ptmotors_resume;
+    all[num_schemas].suspend = (suspendFn) ptmotors_suspend;
+    printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+    (*(all[num_schemas].id)) = num_schemas;
+    all[num_schemas].fps = 0.;
+    all[num_schemas].k =0;
+    all[num_schemas].state=slept;
+    all[num_schemas].close = NULL;
+    all[num_schemas].handle = NULL;
+    num_schemas++;
   }
 
   printf("pantilt driver started up\n");

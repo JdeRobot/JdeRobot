@@ -44,10 +44,6 @@ typedef void (*guidisplay)(void);
 extern int register_displaycallback(guidisplay f);
 extern int delete_displaycallback(guidisplay f);
 
-/* tabla de asociacion guientry-esquemacargado */
-#define MAX_LOADEDSCHEMAS 12
-extern int associated_ID[MAX_LOADEDSCHEMAS];
-
 /* MOUSE BUTTON MAP */
 #define MOUSELEFT 1
 #define MOUSEMIDDLE 2

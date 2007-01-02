@@ -95,6 +95,7 @@ int serve_color[MAXCAM];
 int color_active[MAXCAM];
 int color_device[MAXCAM]; /* wich device serves wich color */
 int video4linux_close_command=0;
+int colorA_schema_id, colorB_schema_id, colorC_schema_id, colorD_schema_id;
 
 void video4linux_display_fps(){
   display_fps=1;
@@ -107,15 +108,20 @@ void video4linux_close(){
   printf("driver video4linux off\n");
 }
 
-int colorA_resume(){
+int mycolorA_resume(int father, int *brothers, arbitration fn){
   if((serve_color[0]==1)&&(color_active[0]==0)){
     color_active[0]=1;
-    printf("video4linux: colorA resume\n");
 
     /* if any other color is not using the same thread we activate that thread*/
     if((color_active[1])&&(color_device[0]==color_device[1])) return 0;
     if((color_active[2])&&(color_device[0]==color_device[2])) return 0;
     if((color_active[3])&&(color_device[0]==color_device[3])) return 0;
+
+    printf("colorA schema resume (video4linux driver)\n");
+    all[colorA_schema_id].father = father;
+    all[colorA_schema_id].fps = 0.;
+    all[colorA_schema_id].k =0;
+    put_state(colorA_schema_id,winner);
 
     pthread_mutex_lock(&mymutex[color_device[0]]);
     state[color_device[0]]=winner;
@@ -125,17 +131,18 @@ int colorA_resume(){
   return 0;
 }
 
-int colorA_suspend(){
+int mycolorA_suspend(){
       
   if((serve_color[0]==1)&&(color_active[0])){
     color_active[0]=0;
-    printf("video4linux: colorA suspend\n");
+    printf("colorA schema suspend (video4linux driver)\n");
 
     /* if any other color is using that thread it goes to sleep */
     if((color_active[1])&&(color_device[0]==color_device[1])) return 0;
     if((color_active[2])&&(color_device[0]==color_device[2])) return 0;
     if((color_active[3])&&(color_device[0]==color_device[3])) return 0;
 
+    put_state(colorA_schema_id,slept);
     pthread_mutex_lock(&mymutex[color_device[0]]);
     state[color_device[0]]=slept;
     pthread_mutex_unlock(&mymutex[color_device[0]]);
@@ -143,15 +150,20 @@ int colorA_suspend(){
   return 0;
 }
 
-int colorB_resume(){
+int mycolorB_resume(int father, int *brothers, arbitration fn){
   if((serve_color[1]==1)&&(color_active[1]==0)){
     color_active[1]=1;
-    printf("video4linux: colorB resume\n");
 
     /* if any other color is not using the same thread we activate that thread*/
     if((color_active[0])&&(color_device[1]==color_device[0])) return 0;
     if((color_active[2])&&(color_device[1]==color_device[2])) return 0;
     if((color_active[3])&&(color_device[1]==color_device[3])) return 0;
+
+    printf("colorB schema resume (video4linux driver)\n");
+    all[colorB_schema_id].father = father;
+    all[colorB_schema_id].fps = 0.;
+    all[colorB_schema_id].k =0;
+    put_state(colorB_schema_id,winner);
 
     pthread_mutex_lock(&mymutex[color_device[1]]);
     state[color_device[1]]=winner;
@@ -161,17 +173,18 @@ int colorB_resume(){
   return 0;
 }
 
-int colorB_suspend(){
+int mycolorB_suspend(){
       
   if((serve_color[1]==1)&&(color_active[1])){
     color_active[1]=0;
-    printf("video4linux: colorB suspend\n");
+    printf("colorB schema suspend (video4linux driver)\n");
 
     /* if any other color is using that thread it goes to sleep */
     if((color_active[0])&&(color_device[1]==color_device[0])) return 0;
     if((color_active[2])&&(color_device[1]==color_device[2])) return 0;
     if((color_active[3])&&(color_device[1]==color_device[3])) return 0;
 
+    put_state(colorB_schema_id,slept);
     pthread_mutex_lock(&mymutex[color_device[1]]);
     state[color_device[1]]=slept;
     pthread_mutex_unlock(&mymutex[color_device[1]]);
@@ -179,15 +192,20 @@ int colorB_suspend(){
   return 0;
 }
 
-int colorC_resume(){
+int mycolorC_resume(int father, int *brothers, arbitration fn){
   if((serve_color[2]==1)&&(color_active[2]==0)){
     color_active[2]=1;
-    printf("video4linux: colorC resume\n");
 
     /* if any other color is not using the same thread we activate that thread*/
     if((color_active[0])&&(color_device[2]==color_device[0])) return 0;
     if((color_active[1])&&(color_device[2]==color_device[1])) return 0;
     if((color_active[3])&&(color_device[2]==color_device[3])) return 0;
+
+    printf("colorC schema resume (video4linux driver)\n");
+    all[colorC_schema_id].father = father;
+    all[colorC_schema_id].fps = 0.;
+    all[colorC_schema_id].k =0;
+    put_state(colorC_schema_id,winner);
 
     pthread_mutex_lock(&mymutex[color_device[2]]);
     state[color_device[2]]=winner;
@@ -197,17 +215,18 @@ int colorC_resume(){
   return 0;
 }
 
-int colorC_suspend(){
+int mycolorC_suspend(){
       
   if((serve_color[2]==1)&&(color_active[2])){
     color_active[2]=0;
-    printf("video4linux: colorC suspend\n");
+    printf("colorC schema suspend (video4linux driver)\n");
 
     /* if any other color is using that thread it goes to sleep */
     if((color_active[0])&&(color_device[2]==color_device[0])) return 0;
     if((color_active[1])&&(color_device[2]==color_device[1])) return 0;
     if((color_active[3])&&(color_device[2]==color_device[3])) return 0;
 
+    put_state(colorC_schema_id,slept);
     pthread_mutex_lock(&mymutex[color_device[2]]);
     state[color_device[2]]=slept;
     pthread_mutex_unlock(&mymutex[color_device[2]]);
@@ -215,15 +234,20 @@ int colorC_suspend(){
   return 0;
 }
 
-int colorD_resume(){
+int mycolorD_resume(int father, int *brothers, arbitration fn){
   if((serve_color[3]==1)&&(color_active[3]==0)){
     color_active[3]=1;
-    printf("video4linux: colorD resume\n");
 
     /* if any other color is not using the same thread we activate that thread*/
     if((color_active[0])&&(color_device[3]==color_device[0])) return 0;
     if((color_active[1])&&(color_device[3]==color_device[1])) return 0;
     if((color_active[2])&&(color_device[3]==color_device[2])) return 0;
+
+    printf("colorD schema resume (video4linux driver)\n");
+    all[colorD_schema_id].father = father;
+    all[colorD_schema_id].fps = 0.;
+    all[colorD_schema_id].k =0;
+    put_state(colorD_schema_id,winner);
 
     pthread_mutex_lock(&mymutex[color_device[3]]);
     state[color_device[3]]=winner;
@@ -233,17 +257,18 @@ int colorD_resume(){
   return 0;
 }
 
-int colorD_suspend(){
+int mycolorD_suspend(){
       
   if((serve_color[3]==1)&&(color_active[3])){
     color_active[3]=0;
-    printf("video4linux: colorD suspend\n");
+    printf("colorD schema suspend (video4linux driver)\n");
 
     /* if any other color is using that thread it goes to sleep */
     if((color_active[0])&&(color_device[3]==color_device[0])) return 0;
     if((color_active[1])&&(color_device[3]==color_device[1])) return 0;
     if((color_active[2])&&(color_device[3]==color_device[2])) return 0;
 
+    put_state(colorD_schema_id,slept);
     pthread_mutex_lock(&mymutex[color_device[3]]);
     state[color_device[3]]=slept;
     pthread_mutex_unlock(&mymutex[color_device[3]]);
@@ -299,11 +324,11 @@ void *video4linux1_thread(void *not_used){
 
 	if((device_color[0][n])&&(color_active[n])){
 
-	  if(n==0){dest=(unsigned char*)colorA; kA+=1; /*for(j=0;j<imageA_users;j++) if (imageA_callbacks[j]!=NULL) imageA_callbacks[j]();*/}
-	  else if(n==1){ dest=(unsigned char*)colorB; kB+=1; /*for(j=0;j<imageB_users;j++) if (imageB_callbacks[j]!=NULL) imageB_callbacks[j]();*/}
-	  else if(n==2){ dest=(unsigned char*)colorC; kC+=1; /*for(j=0;j<imageC_users;j++) if (imageC_callbacks[j]!=NULL) imageC_callbacks[j]();*/}
-	  else if(n==3){ dest=(unsigned char*)colorD; kD+=1; /*for(j=0;j<imageD_users;j++) if (imageD_callbacks[j]!=NULL) imageD_callbacks[j]();*/}
-	 
+	  if(n==0){dest=(unsigned char*)colorA; speedcounter(colorA_schema_id);  /*for(j=0;j<imageA_users;j++) if (imageA_callbacks[j]!=NULL) imageA_callbacks[j]();*/}
+	  else if(n==1){ dest=(unsigned char*)colorB; speedcounter(colorB_schema_id); /*for(j=0;j<imageB_users;j++) if (imageB_callbacks[j]!=NULL) imageB_callbacks[j]();*/}
+	  else if(n==2){ dest=(unsigned char*)colorC; speedcounter(colorC_schema_id); /*for(j=0;j<imageC_users;j++) if (imageC_callbacks[j]!=NULL) imageC_callbacks[j]();*/}
+	  else if(n==3){ dest=(unsigned char*)colorD; speedcounter(colorD_schema_id); /*for(j=0;j<imageD_users;j++) if (imageD_callbacks[j]!=NULL) imageD_callbacks[j]();*/}
+
 	  if (vpic[cam].palette==VIDEO_PALETTE_YUV420P){
 	    for (j = 0; j < SIFNTSC_COLUMNS*SIFNTSC_ROWS; j++) {
 	      f=j/SIFNTSC_COLUMNS; c=j%SIFNTSC_COLUMNS;
@@ -392,11 +417,11 @@ void *video4linux2_thread(void *not_used){
 
 	if((device_color[1][n])&&(color_active[n])){
 
-	  if(n==0){dest=(unsigned char*)colorA; kA+=1; /*for(j=0;j<imageA_users;j++) if (imageA_callbacks[j]!=NULL) imageA_callbacks[j]();*/}
-	  else if(n==1){ dest=(unsigned char*)colorB; kB+=1; /*for(j=0;j<imageB_users;j++) if (imageB_callbacks[j]!=NULL) imageB_callbacks[j]();*/}
-	  else if(n==2){ dest=(unsigned char*)colorC; kC+=1; /*for(j=0;j<imageC_users;j++) if (imageC_callbacks[j]!=NULL) imageC_callbacks[j]();*/}
-	  else if(n==3){ dest=(unsigned char*)colorD; kD+=1; /*for(j=0;j<imageD_users;j++) if (imageD_callbacks[j]!=NULL) imageD_callbacks[j]();*/}
-	 
+	  if(n==0){dest=(unsigned char*)colorA; speedcounter(colorA_schema_id);  /*for(j=0;j<imageA_users;j++) if (imageA_callbacks[j]!=NULL) imageA_callbacks[j]();*/}
+	  else if(n==1){ dest=(unsigned char*)colorB; speedcounter(colorB_schema_id); /*for(j=0;j<imageB_users;j++) if (imageB_callbacks[j]!=NULL) imageB_callbacks[j]();*/}
+	  else if(n==2){ dest=(unsigned char*)colorC; speedcounter(colorC_schema_id); /*for(j=0;j<imageC_users;j++) if (imageC_callbacks[j]!=NULL) imageC_callbacks[j]();*/}
+	  else if(n==3){ dest=(unsigned char*)colorD; speedcounter(colorD_schema_id); /*for(j=0;j<imageD_users;j++) if (imageD_callbacks[j]!=NULL) imageD_callbacks[j]();*/}
+
 	  if (vpic[cam].palette==VIDEO_PALETTE_YUV420P){
 	    for (j = 0; j < SIFNTSC_COLUMNS*SIFNTSC_ROWS; j++) {
 	      f=j/SIFNTSC_COLUMNS; c=j%SIFNTSC_COLUMNS;
@@ -485,11 +510,11 @@ void *video4linux3_thread(void *not_used){
 
 	if((device_color[2][n])&&(color_active[n])){
 
-	  if(n==0){dest=(unsigned char*)colorA; kA+=1; /*for(j=0;j<imageA_users;j++) if (imageA_callbacks[j]!=NULL) imageA_callbacks[j]();*/}
-	  else if(n==1){ dest=(unsigned char*)colorB; kB+=1; /*for(j=0;j<imageB_users;j++) if (imageB_callbacks[j]!=NULL) imageB_callbacks[j]();*/}
-	  else if(n==2){ dest=(unsigned char*)colorC; kC+=1; /*for(j=0;j<imageC_users;j++) if (imageC_callbacks[j]!=NULL) imageC_callbacks[j]();*/}
-	  else if(n==3){ dest=(unsigned char*)colorD; kD+=1; /*for(j=0;j<imageD_users;j++) if (imageD_callbacks[j]!=NULL) imageD_callbacks[j]();*/}
-	 
+	  if(n==0){dest=(unsigned char*)colorA; speedcounter(colorA_schema_id);  /*for(j=0;j<imageA_users;j++) if (imageA_callbacks[j]!=NULL) imageA_callbacks[j]();*/}
+	  else if(n==1){ dest=(unsigned char*)colorB; speedcounter(colorB_schema_id); /*for(j=0;j<imageB_users;j++) if (imageB_callbacks[j]!=NULL) imageB_callbacks[j]();*/}
+	  else if(n==2){ dest=(unsigned char*)colorC; speedcounter(colorC_schema_id); /*for(j=0;j<imageC_users;j++) if (imageC_callbacks[j]!=NULL) imageC_callbacks[j]();*/}
+	  else if(n==3){ dest=(unsigned char*)colorD; speedcounter(colorD_schema_id); /*for(j=0;j<imageD_users;j++) if (imageD_callbacks[j]!=NULL) imageD_callbacks[j]();*/}
+
 	  if (vpic[cam].palette==VIDEO_PALETTE_YUV420P){
 	    for (j = 0; j < SIFNTSC_COLUMNS*SIFNTSC_ROWS; j++) {
 	      f=j/SIFNTSC_COLUMNS; c=j%SIFNTSC_COLUMNS;
@@ -578,10 +603,10 @@ void *video4linux4_thread(void *not_used){
 
 	if((device_color[3][n])&&(color_active[n])){
 
-	  if(n==0){dest=(unsigned char*)colorA; kA+=1; /*for(j=0;j<imageA_users;j++) if (imageA_callbacks[j]!=NULL) imageA_callbacks[j]();*/}
-	  else if(n==1){ dest=(unsigned char*)colorB; kB+=1; /*for(j=0;j<imageB_users;j++) if (imageB_callbacks[j]!=NULL) imageB_callbacks[j]();*/}
-	  else if(n==2){ dest=(unsigned char*)colorC; kC+=1; /*for(j=0;j<imageC_users;j++) if (imageC_callbacks[j]!=NULL) imageC_callbacks[j]();*/}
-	  else if(n==3){ dest=(unsigned char*)colorD; kD+=1; /*for(j=0;j<imageD_users;j++) if (imageD_callbacks[j]!=NULL) imageD_callbacks[j]();*/}
+	  if(n==0){dest=(unsigned char*)colorA; speedcounter(colorA_schema_id);  /*for(j=0;j<imageA_users;j++) if (imageA_callbacks[j]!=NULL) imageA_callbacks[j]();*/}
+	  else if(n==1){ dest=(unsigned char*)colorB; speedcounter(colorB_schema_id); /*for(j=0;j<imageB_users;j++) if (imageB_callbacks[j]!=NULL) imageB_callbacks[j]();*/}
+	  else if(n==2){ dest=(unsigned char*)colorC; speedcounter(colorC_schema_id); /*for(j=0;j<imageC_users;j++) if (imageC_callbacks[j]!=NULL) imageC_callbacks[j]();*/}
+	  else if(n==3){ dest=(unsigned char*)colorD; speedcounter(colorD_schema_id); /*for(j=0;j<imageD_users;j++) if (imageD_callbacks[j]!=NULL) imageD_callbacks[j]();*/}
 	 
 	  if (vpic[cam].palette==VIDEO_PALETTE_YUV420P){
 	    for (j = 0; j < SIFNTSC_COLUMNS*SIFNTSC_ROWS; j++) {
@@ -904,10 +929,66 @@ int video4linux_init(){
 	ng_clip[k] = 255;
 
 	  
-      if(n==0) pthread_create(&v4l_thread[0],NULL,video4linux1_thread,NULL);
-      else if(n==1) pthread_create(&v4l_thread[1],NULL,video4linux2_thread,NULL);
-      else if(n==2) pthread_create(&v4l_thread[2],NULL,video4linux3_thread,NULL);
-      else if(n==3) pthread_create(&v4l_thread[3],NULL,video4linux4_thread,NULL);
+      if(n==0) {
+	pthread_create(&v4l_thread[0],NULL,video4linux1_thread,NULL);
+	all[num_schemas].id = (int *) &colorA_schema_id;
+	strcpy(all[num_schemas].name,"colorA");
+	all[num_schemas].resume = (resumeFn) mycolorA_resume;
+	all[num_schemas].suspend = (suspendFn) mycolorA_suspend;
+	printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+	(*(all[num_schemas].id)) = num_schemas;
+	all[num_schemas].fps = 0.;
+	all[num_schemas].k =0;
+	all[num_schemas].state=slept;
+	all[num_schemas].close = NULL;
+	all[num_schemas].handle = NULL;
+	num_schemas++;
+      }
+      else if(n==1) {
+	pthread_create(&v4l_thread[1],NULL,video4linux2_thread,NULL);
+	all[num_schemas].id = (int *) &colorB_schema_id;
+	strcpy(all[num_schemas].name,"colorB");
+	all[num_schemas].resume = (resumeFn) mycolorB_resume;
+	all[num_schemas].suspend = (suspendFn) mycolorB_suspend;
+	printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+	(*(all[num_schemas].id)) = num_schemas;
+	all[num_schemas].fps = 0.;
+	all[num_schemas].k =0;
+	all[num_schemas].state=slept;
+	all[num_schemas].close = NULL;
+	all[num_schemas].handle = NULL;
+	num_schemas++;
+      }
+      else if(n==2) {
+	pthread_create(&v4l_thread[2],NULL,video4linux3_thread,NULL);
+	all[num_schemas].id = (int *) &colorC_schema_id;
+	strcpy(all[num_schemas].name,"colorC");
+	all[num_schemas].resume = (resumeFn) mycolorC_resume;
+	all[num_schemas].suspend = (suspendFn) mycolorC_suspend;
+	printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+	(*(all[num_schemas].id)) = num_schemas;
+	all[num_schemas].fps = 0.;
+	all[num_schemas].k =0;
+	all[num_schemas].state=slept;
+	all[num_schemas].close = NULL;
+	all[num_schemas].handle = NULL;
+	num_schemas++;
+      }
+      else if(n==3) {
+	pthread_create(&v4l_thread[3],NULL,video4linux4_thread,NULL);
+	all[num_schemas].id = (int *) &colorD_schema_id;
+	strcpy(all[num_schemas].name,"colorD");
+	all[num_schemas].resume = (resumeFn) mycolorD_resume;
+	all[num_schemas].suspend = (suspendFn) mycolorD_suspend;
+	printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+	(*(all[num_schemas].id)) = num_schemas;
+	all[num_schemas].fps = 0.;
+	all[num_schemas].k =0;
+	all[num_schemas].state=slept;
+	all[num_schemas].close = NULL;
+	all[num_schemas].handle = NULL;
+	num_schemas++;
+      }
     }
   }
   return 0;
@@ -936,16 +1017,6 @@ void video4linux_startup(char *configfile)
     printf("video4linux: cannot initiate driver. cameras not ready or not supported.\n");
     exit(-1);
   }
-
-  /* resume and suspend asignments */
-  imageA_resume=colorA_resume;
-  imageA_suspend=colorA_suspend;
-  imageB_resume=colorB_resume;
-  imageB_suspend=colorB_suspend;
-  imageC_resume=colorC_resume;
-  imageC_suspend=colorC_suspend;
-  imageD_resume=colorD_resume;
-  imageD_suspend=colorD_suspend;
 
   printf("video4linux driver started up\n");
 }

@@ -53,7 +53,7 @@ extern void *myimport(char *schema, char *name);
 extern void jdeshutdown(int sig);
 #define GUIHUMAN -1 /* when the human activate some schema from the gui */
 
-#define MAX_SCHEMAS 100
+#define MAX_SCHEMAS 20
 typedef struct {
   void *handle;
   char name[100];
@@ -87,9 +87,6 @@ typedef struct {
   /* the resume and suspend functions are sensors&motors oriented for schema programmers. Each drivers provides a resume/suspend pair for each sensor or motor it provides */
   void (*close)(void);
 }JDEDriver;
-
-typedef int(*fn)(); /* for resume and suspend funcions of sensors and motors */
-
 
 #ifndef tvoxel
 #define tvoxel
@@ -125,76 +122,36 @@ extern float camera_coord[5]; /* camera position */
 
 /***************** API of variables ***************/
 extern float jde_robot[5]; /* odometry information */
-extern fn encoders_suspend;
-extern fn encoders_resume;
 extern unsigned long int encoders_clock;
-extern float fpsencoders;
-extern int kencoders;
 
 extern int jde_laser[NUM_LASER];
-extern fn laser_suspend;
-extern fn laser_resume;
 extern unsigned long int laser_clock;
-extern float fpslaser;
-extern int klaser;
 
 extern float us[NUM_SONARS];
-extern fn sonars_suspend;
-extern fn sonars_resume;
 extern unsigned long int us_clock[NUM_SONARS];
-extern float fpssonars;
-extern int ksonars;
 
 extern char *colorA; /* sifntsc image itself */
-extern fn imageA_resume;
-extern fn imageA_suspend;
 extern unsigned long int imageA_clock;
-extern float fpsA;
-extern int kA;
 
 extern char *colorB; /* sifntsc image itself */
-extern fn imageB_resume;
-extern fn imageB_suspend;
 extern unsigned long int imageB_clock;
-extern float fpsB;
-extern int kB;
 
 extern char *colorC; /* sifntsc image itself */
-extern fn imageC_resume;
-extern fn imageC_suspend;
 extern unsigned long int imageC_clock;
-extern float fpsC;
-extern int kC;
 
 extern char *colorD; /* sifntsc image itself */
-extern fn imageD_resume;
-extern fn imageD_suspend;
 extern unsigned long int imageD_clock;
-extern float fpsD;
-extern int kD;
 
 extern float pan_angle, tilt_angle;  /* degs */
-extern fn pantiltencoders_resume;
-extern fn pantiltencoders_suspend;
 extern unsigned long int pantiltencoders_clock;
-extern float fpspantiltencoders;
-extern int kpantiltencoders;
 
 extern float v; /* mm/s */
 extern float w; /* deg/s*/
-extern fn motors_suspend;
-extern fn motors_resume;
 extern int motors_cycle;
-extern float fpsmotors;
-extern int kmotors;
 
 extern float longitude; /* degs, pan angle */
 extern float latitude; /* degs, tilt angle */
-extern fn pantiltmotors_suspend;
-extern fn pantiltmotors_resume;
 extern float longitude_speed;
 extern float latitude_speed;
 extern int pantiltmotors_cycle;
-extern float fpspantiltmotors;
-extern int kpantiltmotors;
 

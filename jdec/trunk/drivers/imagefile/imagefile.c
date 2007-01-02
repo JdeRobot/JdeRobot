@@ -32,50 +32,27 @@ char driver_name[256]="imagefile";
 int serve_color[MAXIMAGES];
 char name_color[MAXIMAGES][256];
 
-int mycolorA_resume(void)
-{
-  printf("imagefile: colorA resume\n");
-  return 0;
-}
+int colorA_schema_id, colorB_schema_id, colorC_schema_id, colorD_schema_id;
 
-int mycolorA_suspend(void)
+void load_image(int source)
 {
-  printf("imagefile: colorA suspend\n");
-  return 0;
-}
-
-void imagefile_suspend()
-{
-  printf("driver imagefile off\n");
-}
-
-void imagefile_resume()
-{
-  int i,j,leidos, marca,c,r,last=0;
+  int i,leidos, marca,c,r,last=0;
   int f2;
   char buff[MAX_LINE];
   char *dest;
 
-  printf("driver imagefile on\n");
-  for(j=0;j<MAXIMAGES;j++)
+  if (serve_color[source])
     {
-      if (serve_color[j])
-	{
-	  if (j==0) 
-	    {dest=colorA; 
-	    printf("colorA:%s\n",name_color[j]);
-	    imageA_resume=mycolorA_resume;
-	    imageA_suspend=mycolorA_suspend;
-	    }
-	  else if (j==1) {dest=colorB; printf("colorB:%s\n",name_color[j]);}
-	  else if (j==2) {dest=colorC; printf("colorC:%s\n",name_color[j]);}
-	  else if (j==3) {dest=colorD; printf("colorD:%s\n",name_color[j]);}
-	  
-	  f2=open(name_color[j],O_RDONLY);
-	  /*lseek(f2,SEEK_SET,0);	  */
-	  
-	  if (f2==-1) 
-	    fprintf(stderr,"I can't open the image file %s\n",name_color[j]);
+      if (source==0) dest=colorA;
+      else if (source==1) dest=colorB;
+      else if (source==2) dest=colorC;
+      else if (source==3) dest=colorD;
+      
+      f2=open(name_color[source],O_RDONLY);
+      /*lseek(f2,SEEK_SET,0);	  */
+      
+      if (f2==-1) 
+	fprintf(stderr,"I can't open the image file %s\n",name_color[source]);
 	  else 
 	    {
 	      i=0;
@@ -99,12 +76,12 @@ void imagefile_resume()
 		      if (i==1) 
 			{
 			  if (strcmp(buff,"P6")!=0) 
-			    fprintf(stderr,"file %s: non supported image format, must be raw PPM\n",name_color[j]);
+			    fprintf(stderr,"file %s: non supported image format, must be raw PPM\n",name_color[source]);
 			}
 		      else if (i==2)
 			{
 			  if ((sscanf(buff,"%d %d",&c,&r)!=2)||(c!=SIFNTSC_COLUMNS)||(r!=SIFNTSC_ROWS)) 
-			    fprintf(stderr,"file %s: non supported image size, must be 320x240\n",name_color[j]);
+			    fprintf(stderr,"file %s: non supported image size, must be 320x240\n",name_color[source]);
 			}
 		    }
 		}
@@ -119,9 +96,84 @@ void imagefile_resume()
 		}
 	      close(f2);
 	    }
-	}
     }
 }
+
+
+
+int mycolorA_resume(int father, int *brothers, arbitration fn)
+{
+  printf("colorA schema resume (imagefile driver)\n");
+  load_image(0);
+  all[colorA_schema_id].father = father;
+  all[colorA_schema_id].fps = 0.;
+  all[colorA_schema_id].k =0;
+  put_state(colorA_schema_id,winner);
+  return 0;
+}
+
+int mycolorA_suspend(void)
+{
+  printf("colorA schema suspend (imagefile driver)\n");
+  put_state(colorA_schema_id,slept);
+  return 0;
+}
+
+int mycolorB_resume(int father, int *brothers, arbitration fn)
+{
+  printf("colorB schema resume (imagefile driver)\n");
+  load_image(1);
+  all[colorB_schema_id].father = father;
+  all[colorB_schema_id].fps = 0.;
+  all[colorB_schema_id].k =0;
+  put_state(colorB_schema_id,winner);
+  return 0;
+}
+
+int mycolorB_suspend(void)
+{
+  printf("colorB schema suspend (imagefile driver)\n");
+  put_state(colorB_schema_id,slept);
+  return 0;
+}
+
+int mycolorC_resume(int father, int *brothers, arbitration fn)
+{
+  printf("colorC schema resume (imagefile driver)\n");
+  load_image(2);
+  all[colorC_schema_id].father = father;
+  all[colorC_schema_id].fps = 0.;
+  all[colorC_schema_id].k =0;
+  put_state(colorC_schema_id,winner);
+  return 0;
+}
+
+int mycolorC_suspend(void)
+{
+  printf("colorC schema suspend (imagefile driver)\n");
+  put_state(colorC_schema_id,slept);
+  return 0;
+}
+
+int mycolorD_resume(int father, int *brothers, arbitration fn)
+{
+  printf("colorD schema resume (imagefile driver)\n");
+  load_image(3);
+  all[colorD_schema_id].father = father;
+  all[colorD_schema_id].fps = 0.;
+  all[colorD_schema_id].k =0;
+  put_state(colorD_schema_id,winner);
+  return 0;
+}
+
+int mycolorD_suspend(void)
+{
+  printf("colorD schema suspend (imagefile driver)\n");
+  put_state(colorD_schema_id,slept);
+  return 0;
+}
+
+
 
 int imagefile_parseconf(char *configfile){
 
@@ -266,10 +318,68 @@ void imagefile_startup(char *configfile)
   }
   printf("imagefile driver started up\n");
 
-  imagefile_resume();
+  /* register the sensor schemas that this driver supports */
+  for(i=0;i<MAXIMAGES;i++) 
+    if (serve_color[i])
+      {
+	if (num_schemas>=MAX_SCHEMAS) 
+	  {
+	    if (i==0)
+	      printf("WARNING: No entry available for colorA schema\n");
+	    else if (i==1)
+	      printf("WARNING: No entry available for colorB schema\n");
+	    else if (i==2)
+	      printf("WARNING: No entry available for colorC schema\n");
+	    else if (i==3)
+	      printf("WARNING: No entry available for colorD schema\n");
+	    exit(1);
+	  }
+
+
+	if (i==0)
+	  {
+	    all[num_schemas].id = (int *) &colorA_schema_id;
+	    strcpy(all[num_schemas].name,"colorA");
+	    all[num_schemas].resume = (resumeFn) mycolorA_resume;
+	    all[num_schemas].suspend = (suspendFn) mycolorA_suspend;
+	    printf("colorA:%s\n",name_color[i]);
+	  }
+	else if (i==1)
+	  {
+	    all[num_schemas].id = (int *) &colorB_schema_id;
+	    strcpy(all[num_schemas].name,"colorB");
+	    all[num_schemas].resume = (resumeFn) mycolorB_resume;
+	    all[num_schemas].suspend = (suspendFn) mycolorB_suspend;
+	    printf("colorB:%s\n",name_color[i]);
+	  }
+	else if (i==2)
+	  {
+	    all[num_schemas].id = (int *) &colorC_schema_id;
+	    strcpy(all[num_schemas].name,"colorC");
+	    all[num_schemas].resume = (resumeFn) mycolorC_resume;
+	    all[num_schemas].suspend = (suspendFn) mycolorC_suspend;
+	    printf("colorC:%s\n",name_color[i]);
+	  }
+	else if (i==3)
+	  {
+	    all[num_schemas].id = (int *) &colorD_schema_id;
+	    strcpy(all[num_schemas].name,"colorD");
+	    all[num_schemas].resume = (resumeFn) mycolorD_resume;
+	    all[num_schemas].suspend = (suspendFn) mycolorD_suspend;
+	    printf("colorD:%s\n",name_color[i]);
+	  }
+	printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+	(*(all[num_schemas].id)) = num_schemas;
+	all[num_schemas].fps = 0.;
+	all[num_schemas].k =0;
+	all[num_schemas].state=slept;
+	all[num_schemas].close = NULL;
+	all[num_schemas].handle = NULL;
+	num_schemas++;
+      }
 }
 
 void imagefile_close()
 {
-  printf("driver imagefile close\n");
+  printf("imagefile driver closed\n");
 }

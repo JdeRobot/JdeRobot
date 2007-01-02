@@ -157,10 +157,10 @@ int delete_displaycallback(guidisplay f)
 }
 
 /* GUI entries for dynamically loaded schemas */ 
-FL_OBJECT *vis[MAX_LOADEDSCHEMAS];
-FL_OBJECT *act[MAX_LOADEDSCHEMAS];
-FL_OBJECT *fps[MAX_LOADEDSCHEMAS];
-int associated_ID[MAX_LOADEDSCHEMAS];
+FL_OBJECT *vis[MAX_SCHEMAS];
+FL_OBJECT *act[MAX_SCHEMAS];
+FL_OBJECT *fps[MAX_SCHEMAS];
+FL_OBJECT *stat[MAX_SCHEMAS];
 
 float fpsgui=0;
 int kgui=0;
@@ -392,8 +392,20 @@ void sensorsmotorsgui_suspend(void)
 {
   if (sensorsmotorsgui_on==TRUE)
     {
-      if (jdegui_debug) printf("sensorsmotorsgui suspend\n");
-      sensorsmotorsgui_request=FALSE; 
+      if (((display_state & DISPLAY_SONARS)==0) &&
+	  ((display_state & DISPLAY_LASER)==0) &&
+	  ((display_state & DISPLAY_ROBOT)==0) &&
+	  ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
+	  ((display_state & DISPLAY_COLORIMAGEA)==0) &&
+	  ((display_state & DISPLAY_COLORIMAGEB)==0) &&
+	  ((display_state & DISPLAY_COLORIMAGEC)==0) &&
+	  ((display_state & DISPLAY_COLORIMAGED)==0) &&
+	  ((display_state & BASE_TELEOPERATOR)==0) &&
+	  ((display_state & PANTILT_TELEOPERATOR)==0))
+	{	  
+	  if (jdegui_debug) printf("sensorsmotorsgui suspend\n");
+	  sensorsmotorsgui_request=FALSE; 
+	}
     }
 }
 
@@ -638,24 +650,15 @@ void sensorsmotorsgui_buttons(FL_OBJECT *obj)
   else if (obj == fd_sensorsmotorsgui->hide) 
     {
       display_state = display_state & ~DISPLAY_LASER;
-      if (mastergui_on==TRUE) fl_set_button(fd_mastergui->vislaser,RELEASED);
       display_state = display_state & ~DISPLAY_SONARS;
-      if (mastergui_on==TRUE) fl_set_button(fd_mastergui->vissonars,RELEASED);
       display_state = display_state & ~DISPLAY_ROBOT;
-      if (mastergui_on==TRUE) fl_set_button(fd_mastergui->visrobot,RELEASED);
       display_state = display_state & ~DISPLAY_COLORIMAGEA;
-      if (mastergui_on==TRUE) fl_set_button(fd_mastergui->viscolorimageA,RELEASED);
       display_state = display_state & ~DISPLAY_COLORIMAGEB;
-      if (mastergui_on==TRUE) fl_set_button(fd_mastergui->viscolorimageB,RELEASED);
       display_state = display_state & ~DISPLAY_COLORIMAGEC;
-      if (mastergui_on==TRUE) fl_set_button(fd_mastergui->viscolorimageC,RELEASED);
       display_state = display_state & ~DISPLAY_COLORIMAGED;
-      if (mastergui_on==TRUE) fl_set_button(fd_mastergui->viscolorimageD,RELEASED);
-      if (mastergui_on==TRUE) fl_set_button(fd_mastergui->vispantiltencoders,RELEASED);      
       display_state = display_state & ~BASE_TELEOPERATOR;
-      if (mastergui_on==TRUE) fl_set_button(fd_mastergui->vismotors,RELEASED);
       display_state = display_state & ~PANTILT_TELEOPERATOR;
-      if (mastergui_on==TRUE) fl_set_button(fd_mastergui->vispantiltmotors,RELEASED);
+      /*if (mastergui_on==TRUE) fl_set_button(fd_mastergui->vispantiltmotors,RELEASED);*/
       sensorsmotorsgui_suspend();
     }  
   else if (obj == fd_sensorsmotorsgui->joystick) 
@@ -1130,517 +1133,234 @@ void mastergui_resume(void)
 void mastergui_buttons(FL_OBJECT *obj)
 {
   int i;
-
+ 
   if (obj == fd_mastergui->exit) jdeshutdown(0);
-  else if (obj == fd_mastergui->hide) mastergui_suspend();
-  else if (obj == fd_mastergui->vissonars)
-    {
-      if (fl_get_button(fd_mastergui->vissonars)==RELEASED)
-	{display_state = display_state & ~DISPLAY_SONARS;
-	if (((display_state & DISPLAY_SONARS)==0) &&
-	    ((display_state & DISPLAY_LASER)==0) &&
-	    ((display_state & DISPLAY_ROBOT)==0) &&
-	    ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-	    ((display_state & DISPLAY_COLORIMAGEA)==0) &&
-	    ((display_state & DISPLAY_COLORIMAGEB)==0) &&
-	    ((display_state & DISPLAY_COLORIMAGEC)==0) &&
-	    ((display_state & DISPLAY_COLORIMAGED)==0) &&
-	    ((display_state & BASE_TELEOPERATOR)==0) &&
-	    ((display_state & PANTILT_TELEOPERATOR)==0))
-	  sensorsmotorsgui_suspend();
-	}
-      else 
-	{
-	  display_state=display_state | DISPLAY_SONARS;
-	  sensorsmotorsgui_resume();
-	}
-    }
-  else if (obj == fd_mastergui->sonars)
-    {
-      if (fl_get_button(fd_mastergui->sonars)==RELEASED)
-	{
-	sonars_suspend();
-	/* if visualization is active, turn it off */
-	fl_set_button(fd_mastergui->vissonars,RELEASED);
-	if (display_state & DISPLAY_SONARS)
-	  {
-	    display_state = display_state & ~DISPLAY_SONARS;
-	    if (((display_state & DISPLAY_SONARS)==0) &&
-		((display_state & DISPLAY_LASER)==0) &&
-		((display_state & DISPLAY_ROBOT)==0) &&
-		((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-		((display_state & DISPLAY_COLORIMAGEA)==0) &&
-		((display_state & DISPLAY_COLORIMAGEB)==0) &&
-		((display_state & DISPLAY_COLORIMAGEC)==0) &&
-		((display_state & DISPLAY_COLORIMAGED)==0) &&
-		((display_state & BASE_TELEOPERATOR)==0) &&
-		((display_state & PANTILT_TELEOPERATOR)==0))
-	      sensorsmotorsgui_suspend();
-	  }
-	}
-      else 
-	sonars_resume();
-    }
-  else if (obj == fd_mastergui->vislaser)
-    {
-      if (fl_get_button(fd_mastergui->vislaser)==RELEASED)
-	{display_state = display_state & ~DISPLAY_LASER;
-	if (((display_state & DISPLAY_SONARS)==0) &&
-	    ((display_state & DISPLAY_LASER)==0) &&
-	    ((display_state & DISPLAY_ROBOT)==0) &&
-	    ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-	    ((display_state & DISPLAY_COLORIMAGEA)==0) &&
-	    ((display_state & DISPLAY_COLORIMAGEB)==0) &&
-	    ((display_state & DISPLAY_COLORIMAGEC)==0) &&
-	    ((display_state & DISPLAY_COLORIMAGED)==0) &&
-	    ((display_state & BASE_TELEOPERATOR)==0) &&
-	    ((display_state & PANTILT_TELEOPERATOR)==0))
-	  sensorsmotorsgui_suspend();
-	}
-      else 
-	{	
-	  display_state=display_state | DISPLAY_LASER;
-	  sensorsmotorsgui_resume();
-	}
-    }
-  else if (obj == fd_mastergui->laser)
-    {
-      if (fl_get_button(fd_mastergui->laser)==RELEASED)
-	{laser_suspend();
-	/* if visualization is active, turn it off */
-	fl_set_button(fd_mastergui->vislaser,RELEASED);
-	if (display_state & DISPLAY_LASER)
-	  {display_state = display_state & ~DISPLAY_LASER;
-	  if (((display_state & DISPLAY_SONARS)==0) &&
-	      ((display_state & DISPLAY_LASER)==0) &&
-	      ((display_state & DISPLAY_ROBOT)==0) &&
-	      ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEA)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEB)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEC)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGED)==0) &&
-	      ((display_state & BASE_TELEOPERATOR)==0) &&
-	      ((display_state & PANTILT_TELEOPERATOR)==0))
-	    sensorsmotorsgui_suspend();
-	  }
-	}
-      else 
-	laser_resume();
-    }
-  else if (obj == fd_mastergui->visrobot)
-    {
-      if (fl_get_button(fd_mastergui->visrobot)==RELEASED)
-	{display_state = display_state & ~DISPLAY_ROBOT;
-	if (((display_state & DISPLAY_SONARS)==0) &&
-	    ((display_state & DISPLAY_LASER)==0) &&
-	    ((display_state & DISPLAY_ROBOT)==0) &&
-	    ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-	    ((display_state & DISPLAY_COLORIMAGEA)==0) &&
-	    ((display_state & DISPLAY_COLORIMAGEB)==0) &&
-	    ((display_state & DISPLAY_COLORIMAGEC)==0) &&
-	    ((display_state & DISPLAY_COLORIMAGED)==0) &&
-	    ((display_state & BASE_TELEOPERATOR)==0) &&
-	    ((display_state & PANTILT_TELEOPERATOR)==0))
-	  sensorsmotorsgui_suspend();
-	}
-      else 
-	{
-	  display_state=display_state | DISPLAY_ROBOT;
-	  sensorsmotorsgui_resume();
-	}
-    }
-  else if (obj == fd_mastergui->robot)
-    {
-      if (fl_get_button(fd_mastergui->robot)==RELEASED)
-	{ encoders_suspend();
-	/* if visualization is active, turn it off */
-	fl_set_button(fd_mastergui->visrobot,RELEASED);
-	if (display_state & DISPLAY_ROBOT)
-	  {display_state = display_state & ~DISPLAY_ROBOT;
-	  if (((display_state & DISPLAY_SONARS)==0) &&
-	      ((display_state & DISPLAY_LASER)==0) &&
-	      ((display_state & DISPLAY_ROBOT)==0) &&
-	      ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEA)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEB)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEC)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGED)==0) &&
-	      ((display_state & BASE_TELEOPERATOR)==0) &&
-	      ((display_state & PANTILT_TELEOPERATOR)==0))
-	    sensorsmotorsgui_suspend();
-	  }
-	}
-      else 
-	encoders_resume();
-    }
-  else if (obj == fd_mastergui->vispantiltencoders)
-    {
-      if (fl_get_button(fd_mastergui->vispantiltencoders)==RELEASED)
-	{	
-	  display_state = display_state & ~DISPLAY_PANTILTENCODERS;
-	  if (((display_state & DISPLAY_SONARS)==0) &&
-	      ((display_state & DISPLAY_LASER)==0) &&
-	      ((display_state & DISPLAY_ROBOT)==0) &&
-	      ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEA)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEB)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEC)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGED)==0) &&
-	      ((display_state & BASE_TELEOPERATOR)==0) &&
-	      ((display_state & PANTILT_TELEOPERATOR)==0))
-	    sensorsmotorsgui_suspend();
-	}
-      else 
-	{
-	  display_state=display_state | DISPLAY_PANTILTENCODERS;
-	  sensorsmotorsgui_resume();
-	}
-    }
-  else if (obj == fd_mastergui->pantilt_encoders)
-    {
-      if (fl_get_button(fd_mastergui->pantilt_encoders)==RELEASED)
-	{pantiltencoders_suspend();
-	/* if visualization is active, turn it off */
-	fl_set_button(fd_mastergui->vispantiltencoders,RELEASED);
-	if (display_state & DISPLAY_PANTILTENCODERS)
-	  {display_state = display_state & ~DISPLAY_PANTILTENCODERS;
-	  if (((display_state & DISPLAY_SONARS)==0) &&
-	      ((display_state & DISPLAY_LASER)==0) &&
-	      ((display_state & DISPLAY_ROBOT)==0) &&
-	      ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEA)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEB)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEC)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGED)==0) &&
-	      ((display_state & BASE_TELEOPERATOR)==0) &&
-	      ((display_state & PANTILT_TELEOPERATOR)==0))
-	    sensorsmotorsgui_suspend();
-	  }
-	}
-      else pantiltencoders_resume();
-    }
-  else if (obj == fd_mastergui->viscolorimageA)
-    {
-      if (fl_get_button(fd_mastergui->viscolorimageA)==RELEASED)
-	{
-	  display_state = display_state & ~DISPLAY_COLORIMAGEA;
-	  if (((display_state & DISPLAY_SONARS)==0) &&
-	      ((display_state & DISPLAY_LASER)==0) &&
-	      ((display_state & DISPLAY_ROBOT)==0) &&
-	      ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEA)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEB)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEC)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGED)==0) &&
-	      ((display_state & BASE_TELEOPERATOR)==0) &&
-	      ((display_state & PANTILT_TELEOPERATOR)==0))
-	    sensorsmotorsgui_suspend();
-	}
-      else 
-	{
-	  display_state=display_state | DISPLAY_COLORIMAGEA;
-	  sensorsmotorsgui_resume();
-	}
-    }
-  else if (obj == fd_mastergui->colorimageA)
-    { 
-      if (fl_get_button(fd_mastergui->colorimageA)==PUSHED)
-	imageA_resume();
-      else 
-	{
-	  imageA_suspend();
-	  /* if visualization is active, turn it off */
-	  fl_set_button(fd_mastergui->viscolorimageA,RELEASED);
-	  if (display_state & DISPLAY_COLORIMAGEA)
-	    {display_state = display_state & ~DISPLAY_PANTILTENCODERS;
-	    if (((display_state & DISPLAY_SONARS)==0) &&
-		((display_state & DISPLAY_LASER)==0) &&
-		((display_state & DISPLAY_ROBOT)==0) &&
-		((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-		((display_state & DISPLAY_COLORIMAGEA)==0) &&
-		((display_state & DISPLAY_COLORIMAGEB)==0) &&
-		((display_state & DISPLAY_COLORIMAGEC)==0) &&
-		((display_state & DISPLAY_COLORIMAGED)==0) &&
-		((display_state & BASE_TELEOPERATOR)==0) &&
-		((display_state & PANTILT_TELEOPERATOR)==0))
-	      sensorsmotorsgui_suspend();
-	    }
-	}
-      fpsA=0;
-    }
-  else if (obj == fd_mastergui->viscolorimageB)
-    {
-      if (fl_get_button(fd_mastergui->viscolorimageB)==RELEASED)
-         {
-	   display_state = display_state & ~DISPLAY_COLORIMAGEB;
-	   if (((display_state & DISPLAY_SONARS)==0) &&
-	       ((display_state & DISPLAY_LASER)==0) &&
-	       ((display_state & DISPLAY_ROBOT)==0) &&
-	       ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-	       ((display_state & DISPLAY_COLORIMAGEA)==0) &&
-	       ((display_state & DISPLAY_COLORIMAGEB)==0) &&
-	       ((display_state & DISPLAY_COLORIMAGEC)==0) &&
-	       ((display_state & DISPLAY_COLORIMAGED)==0) &&
-	       ((display_state & BASE_TELEOPERATOR)==0) &&
-	       ((display_state & PANTILT_TELEOPERATOR)==0))
-	     sensorsmotorsgui_suspend();
-	 }
-      else 
-	{
-	  display_state=display_state | DISPLAY_COLORIMAGEB;
-	  sensorsmotorsgui_resume();
-	}
-    }
-  else if (obj == fd_mastergui->colorimageB)
-    {
-      if (fl_get_button(fd_mastergui->colorimageB)==PUSHED)
-	imageB_resume();
-      else 
-	{
-	  imageB_suspend();
-	  /* if visualization is active, turn it off */
-	  fl_set_button(fd_mastergui->viscolorimageB,RELEASED);
-	  if (display_state & DISPLAY_COLORIMAGEB)
-	    {display_state = display_state & ~DISPLAY_PANTILTENCODERS;
-	    if (((display_state & DISPLAY_SONARS)==0) &&
-		((display_state & DISPLAY_LASER)==0) &&
-		((display_state & DISPLAY_ROBOT)==0) &&
-		((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-		((display_state & DISPLAY_COLORIMAGEA)==0) &&
-		((display_state & DISPLAY_COLORIMAGEB)==0) &&
-		((display_state & DISPLAY_COLORIMAGEC)==0) &&
-		((display_state & DISPLAY_COLORIMAGED)==0) &&
-		((display_state & BASE_TELEOPERATOR)==0) &&
-		((display_state & PANTILT_TELEOPERATOR)==0))
-	      sensorsmotorsgui_suspend();
-	    }
-	}
-      fpsB=0;
-    }
-  else if (obj == fd_mastergui->viscolorimageC)
-    {
-      if (fl_get_button(fd_mastergui->viscolorimageC)==RELEASED)
-	{
-	  display_state = display_state & ~DISPLAY_COLORIMAGEC;
-	  if (((display_state & DISPLAY_SONARS)==0) &&
-	      ((display_state & DISPLAY_LASER)==0) &&
-	      ((display_state & DISPLAY_ROBOT)==0) &&
-	      ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEA)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEB)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEC)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGED)==0) &&
-	      ((display_state & BASE_TELEOPERATOR)==0) &&
-	      ((display_state & PANTILT_TELEOPERATOR)==0))
-	    sensorsmotorsgui_suspend();
-	}
-      else 
-	{
-	  display_state=display_state | DISPLAY_COLORIMAGEC;
-	  sensorsmotorsgui_resume();
-	}
-    }
-  else if (obj == fd_mastergui->colorimageC)
-    { 
-      if (fl_get_button(fd_mastergui->colorimageC)==PUSHED)
-	imageC_resume();
-      else 
-	{
-	  imageC_suspend();
-	  /* if visualization is active, turn it off */
-	  fl_set_button(fd_mastergui->viscolorimageC,RELEASED);
-	  if (display_state & DISPLAY_COLORIMAGEC)
-	    {display_state = display_state & ~DISPLAY_PANTILTENCODERS;
-	    if (((display_state & DISPLAY_SONARS)==0) &&
-		((display_state & DISPLAY_LASER)==0) &&
-		((display_state & DISPLAY_ROBOT)==0) &&
-		((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-		((display_state & DISPLAY_COLORIMAGEA)==0) &&
-		((display_state & DISPLAY_COLORIMAGEB)==0) &&
-		((display_state & DISPLAY_COLORIMAGEC)==0) &&
-		((display_state & DISPLAY_COLORIMAGED)==0) &&
-		((display_state & BASE_TELEOPERATOR)==0) &&
-		((display_state & PANTILT_TELEOPERATOR)==0))
-	      sensorsmotorsgui_suspend();
-	    }
-	}
-      fpsC=0;
-    }
-  else if (obj == fd_mastergui->viscolorimageD)
-    {
-      if (fl_get_button(fd_mastergui->viscolorimageD)==RELEASED)
-	{
-	  display_state = display_state & ~DISPLAY_COLORIMAGED;
-	  if (((display_state & DISPLAY_SONARS)==0) &&
-	      ((display_state & DISPLAY_LASER)==0) &&
-	      ((display_state & DISPLAY_ROBOT)==0) &&
-	      ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEA)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEB)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEC)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGED)==0) &&
-	      ((display_state & BASE_TELEOPERATOR)==0) &&
-	      ((display_state & PANTILT_TELEOPERATOR)==0))
-	    sensorsmotorsgui_suspend();
-	}
-      else 
-	{
-	  display_state=display_state | DISPLAY_COLORIMAGED;
-	  sensorsmotorsgui_resume();
-	}
-    }
-  else if (obj == fd_mastergui->colorimageD)
-    { 
-      if (fl_get_button(fd_mastergui->colorimageD)==PUSHED)
-	imageD_resume();
-      else 
-	{
-	  imageD_suspend();
-	  /* if visualization is active, turn it off */
-	  fl_set_button(fd_mastergui->viscolorimageD,RELEASED);
-	  if (display_state & DISPLAY_COLORIMAGED)
-	    {display_state = display_state & ~DISPLAY_PANTILTENCODERS;
-	    if (((display_state & DISPLAY_SONARS)==0) &&
-		((display_state & DISPLAY_LASER)==0) &&
-		((display_state & DISPLAY_ROBOT)==0) &&
-		((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-		((display_state & DISPLAY_COLORIMAGEA)==0) &&
-		((display_state & DISPLAY_COLORIMAGEB)==0) &&
-		((display_state & DISPLAY_COLORIMAGEC)==0) &&
-		((display_state & DISPLAY_COLORIMAGED)==0) &&
-		((display_state & BASE_TELEOPERATOR)==0) &&
-		((display_state & PANTILT_TELEOPERATOR)==0))
-	      sensorsmotorsgui_suspend();
-	    }
-	}
-      fpsD=0;
-    }
-  else if (obj == fd_mastergui->vismotors)
-    {
-      if (fl_get_button(fd_mastergui->vismotors)==RELEASED)
-	{
-	  display_state = display_state & ~BASE_TELEOPERATOR;
-	  v=0.; w=0.; /*safety stop when disabling the teleoperator */
-	  if (((display_state & DISPLAY_SONARS)==0) &&
-	      ((display_state & DISPLAY_LASER)==0) &&
-	      ((display_state & DISPLAY_ROBOT)==0) &&
-	      ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEA)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEB)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEC)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGED)==0) &&
-	      ((display_state & BASE_TELEOPERATOR)==0) &&
-	      ((display_state & PANTILT_TELEOPERATOR)==0))
-	    sensorsmotorsgui_suspend();
-	}
-      else 
-	{
-	  display_state=display_state | BASE_TELEOPERATOR;
-	  sensorsmotorsgui_resume();
-	}
-    }
-  else if (obj == fd_mastergui->motors) 
-    {
-      if (fl_get_button(fd_mastergui->motors)==RELEASED)
-	{
-	  motors_suspend(); /* it makes a safety stop itself before suspending */ 
-	  /* if visualization is active, turn it off */
-	  fl_set_button(fd_mastergui->vismotors,RELEASED);
-	  if (display_state & BASE_TELEOPERATOR)
-	    {display_state = display_state & ~BASE_TELEOPERATOR;
-	    if (((display_state & DISPLAY_SONARS)==0) &&
-		((display_state & DISPLAY_LASER)==0) &&
-		((display_state & DISPLAY_ROBOT)==0) &&
-		((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-		((display_state & DISPLAY_COLORIMAGEA)==0) &&
-		((display_state & DISPLAY_COLORIMAGEB)==0) &&
-		((display_state & DISPLAY_COLORIMAGEC)==0) &&
-		((display_state & DISPLAY_COLORIMAGED)==0) &&
-		((display_state & BASE_TELEOPERATOR)==0) &&
-		((display_state & PANTILT_TELEOPERATOR)==0))
-	      sensorsmotorsgui_suspend();
-	    }
-	}
-      else motors_resume();
-    }
-  else if (obj == fd_mastergui->vispantiltmotors)
-    {
-      if (fl_get_button(fd_mastergui->vispantiltmotors)==RELEASED)
-	{
-	  display_state = display_state & ~PANTILT_TELEOPERATOR;
-	  /*safety stop when disabling the teleoperator */
-	  /* current pantilt position as initial command, to avoid any movement */
-	  if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05) 
-	    pt_joystick_x= 1.-(pan_angle-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
-	  if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05) 
-	    pt_joystick_y= (tilt_angle-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);   
-	  if (((display_state & DISPLAY_SONARS)==0) &&
-	      ((display_state & DISPLAY_LASER)==0) &&
-	      ((display_state & DISPLAY_ROBOT)==0) &&
-	      ((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEA)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEB)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGEC)==0) &&
-	      ((display_state & DISPLAY_COLORIMAGED)==0) &&
-	      ((display_state & BASE_TELEOPERATOR)==0) &&
-	      ((display_state & PANTILT_TELEOPERATOR)==0))
-	    sensorsmotorsgui_suspend();
-	}
-      else 
-	{
-	  display_state=display_state | PANTILT_TELEOPERATOR;
-	  sensorsmotorsgui_resume();
-	}
-    }
-  else if (obj == fd_mastergui->pantiltmotors) 
-  {
-      if (fl_get_button(fd_mastergui->pantiltmotors)==RELEASED)
-	{
-	  pantiltmotors_suspend();
-	  /* if visualization is active, turn it off */
-	  fl_set_button(fd_mastergui->vispantiltmotors,RELEASED);
-	  if (display_state & PANTILT_TELEOPERATOR)
-	    {display_state = display_state & ~PANTILT_TELEOPERATOR;
-	    if (((display_state & DISPLAY_SONARS)==0) &&
-		((display_state & DISPLAY_LASER)==0) &&
-		((display_state & DISPLAY_ROBOT)==0) &&
-		((display_state & DISPLAY_PANTILTENCODERS)==0) &&
-		((display_state & DISPLAY_COLORIMAGEA)==0) &&
-		((display_state & DISPLAY_COLORIMAGEB)==0) &&
-		((display_state & DISPLAY_COLORIMAGEC)==0) &&
-		((display_state & DISPLAY_COLORIMAGED)==0) &&
-		((display_state & BASE_TELEOPERATOR)==0) &&
-		((display_state & PANTILT_TELEOPERATOR)==0))
-	      sensorsmotorsgui_suspend();
-	    } 
-	}
-     else pantiltmotors_resume();
-    }
-
+  else if (obj == fd_mastergui->hide) mastergui_suspend(); 
+ 
   /* GUI entries for loaded schemas */
-  for(i=0;i<MAX_LOADEDSCHEMAS;i++)
+  for(i=0;i<MAX_SCHEMAS;i++)
     {
-      if (associated_ID[i]!=-1)
+      if (i<num_schemas)
 	{
 	  if (obj == act[i]) 
 	    {if (fl_get_button(act[i])==RELEASED) 
-	      {(*all[associated_ID[i]].suspend)();
+	      {(*all[i].suspend)();
+	      if ((strcmp(all[i].name,"sonars")==0) &&
+		  (fl_get_button(vis[i])==PUSHED))
+		    {
+		      /* if visualization is active, turn it off */
+		      fl_set_button(vis[i],RELEASED);
+		      display_state = display_state & ~DISPLAY_SONARS;
+		      sensorsmotorsgui_suspend();
+		    }
+	      else if ((strcmp(all[i].name,"laser")==0) &&
+		  (fl_get_button(vis[i])==PUSHED))
+		    {
+		      /* if visualization is active, turn it off */
+		      fl_set_button(vis[i],RELEASED);
+		      display_state = display_state & ~DISPLAY_LASER;
+		      sensorsmotorsgui_suspend();
+		    }
+	      else if ((strcmp(all[i].name,"encoders")==0) &&
+		  (fl_get_button(vis[i])==PUSHED))
+		    {
+		      /* if visualization is active, turn it off */
+		      fl_set_button(vis[i],RELEASED);
+		      display_state = display_state & ~DISPLAY_ROBOT;
+		      sensorsmotorsgui_suspend();
+		    }
+	      else if ((strcmp(all[i].name,"motors")==0) &&
+		       (fl_get_button(vis[i])==PUSHED))
+		    {
+		      /* if visualization is active, turn it off */
+		      fl_set_button(vis[i],RELEASED);
+		      display_state = display_state & ~BASE_TELEOPERATOR;
+		      sensorsmotorsgui_suspend();
+		    }
+	      else if ((strcmp(all[i].name,"ptmotors")==0) &&
+		       (fl_get_button(vis[i])==PUSHED))
+		    {
+		      /* if visualization is active, turn it off */
+		      fl_set_button(vis[i],RELEASED);
+		      display_state = display_state & ~PANTILT_TELEOPERATOR;
+		      sensorsmotorsgui_suspend();
+		    }
+	      else if ((strcmp(all[i].name,"ptencoders")==0) &&
+		  (fl_get_button(vis[i])==PUSHED))
+		    {
+		      /* if visualization is active, turn it off */
+		      fl_set_button(vis[i],RELEASED);
+		      display_state = display_state & ~DISPLAY_PANTILTENCODERS;
+		      sensorsmotorsgui_suspend();
+		    }
+	      else if ((strcmp(all[i].name,"colorA")==0) &&
+		  (fl_get_button(vis[i])==PUSHED))
+		    {
+		      /* if visualization is active, turn it off */
+		      fl_set_button(vis[i],RELEASED);
+		      display_state = display_state & ~DISPLAY_COLORIMAGEA;
+		      sensorsmotorsgui_suspend();
+		    }
+	      else if ((strcmp(all[i].name,"colorB")==0) &&
+		  (fl_get_button(vis[i])==PUSHED))
+		    {
+		      /* if visualization is active, turn it off */
+		      fl_set_button(vis[i],RELEASED);
+		      display_state = display_state & ~DISPLAY_COLORIMAGEB;
+		      sensorsmotorsgui_suspend();
+		    }
+	      else if ((strcmp(all[i].name,"colorC")==0) &&
+		  (fl_get_button(vis[i])==PUSHED))
+		    {
+		      /* if visualization is active, turn it off */
+		      fl_set_button(vis[i],RELEASED);
+		      display_state = display_state & ~DISPLAY_COLORIMAGEC;
+		      sensorsmotorsgui_suspend();
+		    }
+	      else if ((strcmp(all[i].name,"colorD")==0) &&
+		  (fl_get_button(vis[i])==PUSHED))
+		    {
+		      /* if visualization is active, turn it off */
+		      fl_set_button(vis[i],RELEASED);
+		      display_state = display_state & ~DISPLAY_COLORIMAGED;
+		      sensorsmotorsgui_suspend();
+		    }
+	     
+	      else /* regular schema */
+		{
 		if (fl_get_button(vis[i])==PUSHED)
 		  {
 		    fl_set_button(vis[i],RELEASED);
-		    (*all[associated_ID[i]].guisuspend)();
+		    (*all[i].guisuspend)();
 		  }
+		}
 	      }
 	    else 
-	      (*all[associated_ID[i]].resume)(GUIHUMAN,NULL,null_arbitration);
+	      (*all[i].resume)(GUIHUMAN,NULL,null_arbitration);
 	    }
 	  else if (obj == vis[i])
-	    {if (fl_get_button(vis[i])==RELEASED)
-		(*all[associated_ID[i]].guisuspend)();
-	    else 
-		(*all[associated_ID[i]].guiresume)();
+	    {
+	      if (fl_get_button(vis[i])==RELEASED)
+		{
+		  if (strcmp(all[i].name,"sonars")==0)
+		    {
+		      display_state = display_state & ~DISPLAY_SONARS;
+		      sensorsmotorsgui_suspend();
+		    }
+		  else if (strcmp(all[i].name,"laser")==0)
+		    {
+		      display_state = display_state & ~DISPLAY_LASER;
+		      sensorsmotorsgui_suspend();
+		    }
+		  else if (strcmp(all[i].name,"encoders")==0)
+		    {
+		      display_state = display_state & ~DISPLAY_ROBOT;
+		      sensorsmotorsgui_suspend();
+		    }
+		  else if (strcmp(all[i].name,"motors")==0)
+		    {
+		      v=0.; w=0.; /*safety stop when disabling the teleoperator */
+		      display_state = display_state & ~BASE_TELEOPERATOR;
+		      sensorsmotorsgui_suspend();
+		    }
+		  else if (strcmp(all[i].name,"ptmotors")==0)
+		    {
+		      /*safety stop when disabling the teleoperator */
+		      /* current pantilt position as initial command, to avoid any movement */
+		      if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05) 
+			pt_joystick_x= 1.-(pan_angle-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
+		      if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05) 
+			pt_joystick_y= (tilt_angle-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);   
+		      display_state = display_state & ~PANTILT_TELEOPERATOR;
+		      sensorsmotorsgui_suspend();
+		    }
+		  else if (strcmp(all[i].name,"ptencoders")==0)
+		    {
+		      display_state = display_state & ~DISPLAY_PANTILTENCODERS;
+		      sensorsmotorsgui_suspend();
+		    }
+		  else if (strcmp(all[i].name,"colorA")==0)
+		    {
+		      display_state = display_state & ~DISPLAY_COLORIMAGEA;
+		      sensorsmotorsgui_suspend();
+		    }
+		  else if (strcmp(all[i].name,"colorB")==0)
+		    {
+		      display_state = display_state & ~DISPLAY_COLORIMAGEB;
+		      sensorsmotorsgui_suspend();
+		    }
+		  else if (strcmp(all[i].name,"colorC")==0)
+		    {
+		      display_state = display_state & ~DISPLAY_COLORIMAGEC;
+		      sensorsmotorsgui_suspend();
+		    }
+		  else if (strcmp(all[i].name,"colorD")==0)
+		    {
+		      display_state = display_state & ~DISPLAY_COLORIMAGED;
+		      sensorsmotorsgui_suspend();
+		    }
+		  else /* regular schema */
+		    (*all[i].guisuspend)();
+		}
+	      else /* fl_get_button(vis[i])==PUSHED */
+		{
+		  if (strcmp(all[i].name,"sonars")==0)
+		    {
+		      display_state=display_state | DISPLAY_SONARS;
+		      sensorsmotorsgui_resume();
+		    }
+		  else if (strcmp(all[i].name,"laser")==0)
+		    {
+		      display_state=display_state | DISPLAY_LASER;
+		      sensorsmotorsgui_resume();
+		    }
+		  else if (strcmp(all[i].name,"encoders")==0)
+		    {
+		      display_state=display_state | DISPLAY_ROBOT;
+		      sensorsmotorsgui_resume();
+		    }
+		  else if (strcmp(all[i].name,"motors")==0)
+		    {
+		      display_state=display_state | BASE_TELEOPERATOR;
+		      sensorsmotorsgui_resume();
+		    }
+		  else if (strcmp(all[i].name,"ptmotors")==0)
+		    {
+		      display_state=display_state | PANTILT_TELEOPERATOR;
+		      sensorsmotorsgui_resume();
+		    }
+		  else if (strcmp(all[i].name,"ptencoders")==0)
+		    {
+		      display_state=display_state | DISPLAY_PANTILTENCODERS;
+		      sensorsmotorsgui_resume();
+		    }
+		  else if (strcmp(all[i].name,"colorA")==0)
+		    {
+		      display_state=display_state | DISPLAY_COLORIMAGEA;
+		      sensorsmotorsgui_resume();
+		    }
+		  else if (strcmp(all[i].name,"colorB")==0)
+		    {
+		      display_state=display_state | DISPLAY_COLORIMAGEB;
+		      sensorsmotorsgui_resume();
+		    }
+		  else if (strcmp(all[i].name,"colorC")==0)
+		    {
+		      display_state=display_state | DISPLAY_COLORIMAGEC;
+		      sensorsmotorsgui_resume();
+		    }		    
+		  else if (strcmp(all[i].name,"colorD")==0)
+		    {
+		      display_state=display_state | DISPLAY_COLORIMAGED;
+		      sensorsmotorsgui_resume();
+		    }
+		  
+		  else /* regular schema */
+		      (*all[i].guiresume)();
+		}
 	    }
 	}
+      else break;
     }
 }
 
@@ -1655,9 +1375,7 @@ void navigate(int schema,int *x,int *y)
       if (all[schema].children[i]==TRUE)
 	{  
 	  if (all[i].state==notready) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_BLUE,9,20,all[i].name);
-	  else if (all[i].state==notready) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_BLUE,9,20,all[i].name);
 	  else if (all[i].state==ready) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_GREEN,9,20,all[i].name);
-	  else if (all[i].state==forced) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_RED,9,20,all[i].name);
 	  else if (all[i].state==winner) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_RED,9,20,all[i].name);
 	  
 	  if ((*x+sizeX*strlen(all[i].name)) < (fd_mastergui->hierarchy->x + fd_mastergui->hierarchy->w))
@@ -1680,50 +1398,21 @@ void mastergui_display()
   int xx,yy;
   char fpstext[80]="";
 
-  sprintf(fpstext,"%.1f",fpsA);
-  fl_set_object_label(fd_mastergui->frame_rateA,fpstext);
-  
-  sprintf(fpstext,"%.1f",fpsB);
-  fl_set_object_label(fd_mastergui->frame_rateB,fpstext);
-  
-  sprintf(fpstext,"%.1f",fpsC);
-  fl_set_object_label(fd_mastergui->frame_rateC,fpstext);
-  
-  sprintf(fpstext,"%.1f",fpsD);
-  fl_set_object_label(fd_mastergui->frame_rateD,fpstext);
-  
-  sprintf(fpstext,"%.1f",fpssonars);
-  fl_set_object_label(fd_mastergui->fpssonars,fpstext);
-  
-  sprintf(fpstext,"%.1f",fpslaser);
-  fl_set_object_label(fd_mastergui->fpslaser,fpstext);
-  
-  sprintf(fpstext,"%.1f",fpsencoders);
-  fl_set_object_label(fd_mastergui->fpsencoders,fpstext);
-  
-  sprintf(fpstext,"%.1f",fpspantiltencoders);
-  fl_set_object_label(fd_mastergui->fpspantiltencoders,fpstext);
-  
-  sprintf(fpstext,"%.1f",fpspantiltmotors);
-  fl_set_object_label(fd_mastergui->fpspantiltmotors,fpstext);
-  
-  sprintf(fpstext,"%.1f",fpsmotors);
-  fl_set_object_label(fd_mastergui->fpsmotors,fpstext);
-  
   sprintf(fpstext,"%.1f ips",fpsgui);
   fl_set_object_label(fd_mastergui->guifps,fpstext);  
   
-  /* GUI entries for loaded schemas */
-  for(i=0;i<MAX_LOADEDSCHEMAS; i++)
+  /* GUI entries for loaded schemas (everything but their states which are displayed together with the hierarchy, only if they have changed ) */
+  for(i=0;i<MAX_SCHEMAS; i++)
     {
-      if (associated_ID[i]!=-1)
+      if (i<num_schemas)
 	{ 
 	  fl_show_object(act[i]);
 	  fl_show_object(vis[i]);
 	  fl_show_object(fps[i]);
-	  fl_set_object_label(act[i],all[associated_ID[i]].name);
-	  if (all[associated_ID[i]].state==winner)
-	    sprintf(fpstext,"%.1f",all[associated_ID[i]].fps);
+	  fl_show_object(stat[i]);
+	  fl_set_object_label(act[i],all[i].name);
+	  if (all[i].state==winner)
+	    sprintf(fpstext,"%.1f",all[i].fps);
 	  else sprintf(fpstext," ");
 	  fl_set_object_label(fps[i],fpstext);
 	}
@@ -1732,6 +1421,7 @@ void mastergui_display()
 	  fl_hide_object(act[i]);
 	  fl_hide_object(vis[i]);
 	  fl_hide_object(fps[i]);
+	  fl_hide_object(stat[i]);
 	}
     }
 
@@ -1748,6 +1438,33 @@ void mastergui_display()
   if ((haschanged==TRUE) ||     /* the hierarchy has changed */
       (iteracion_display==0))   /* slow refresh of the complete master gui, needed because incremental refresh of the hierarchy misses window occlusions */
     {
+      for(i=0;i<num_schemas; i++)
+	{
+	  if (all[i].state==slept)
+	    {fl_set_object_label(stat[i],"slept");
+	     fl_set_object_color(stat[i],FL_COL1,FL_GREEN);
+	      fl_set_object_lcol(stat[i],FL_MCOL);
+	    }
+	  else if (all[i].state==notready)
+	    { 
+	      fl_set_object_label(stat[i],"notready");
+	      fl_set_object_color(stat[i],FL_RED,FL_GREEN);
+	      fl_set_object_lcol(stat[i],FL_BLUE);
+	    }
+	  else if (all[i].state==ready)
+	    { 
+	      fl_set_object_label(stat[i],"ready");
+	      fl_set_object_color(stat[i],FL_INDIANRED,FL_GREEN);
+	      fl_set_object_lcol(stat[i],FL_BLUE);
+	    }
+	  else if (all[i].state==winner)
+	    { 
+	      fl_set_object_label(stat[i],"winner");
+	      fl_set_object_color(stat[i],FL_GREEN,FL_GREEN);
+	      fl_set_object_lcol(stat[i],FL_BLUE);
+	    }
+	}
+
       /* clear of the hierarchy "window" */
       fl_winset(hierarchy_win); 
       fl_rectbound(fd_mastergui->hierarchy->x-1,fd_mastergui->hierarchy->y-1,fd_mastergui->hierarchy->w,fd_mastergui->hierarchy->h,FL_COL1);         
@@ -1786,14 +1503,10 @@ void mastergui_display()
 		  if ((yy+5) < (fd_mastergui->hierarchy->y+fd_mastergui->hierarchy->h)) yy+=5;
 		}
 		
-	      if (all[i].state==active) 
-		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_BLUE,9,20,all[i].name);
-	      else if (all[i].state==notready) 
+	      if (all[i].state==notready) 
 		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_BLUE,9,20,all[i].name);
 	      else if (all[i].state==ready) 
 		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_GREEN,9,20,all[i].name);
-	      else if (all[i].state==forced) 
-		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_RED,9,20,all[i].name);
 	      else if (all[i].state==winner) 
 		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_RED,9,20,all[i].name);	      
 
@@ -1852,6 +1565,14 @@ void jdegui_iteration()
 	      vis[9]=fd_mastergui->vis9;
 	      vis[10]=fd_mastergui->vis10;
 	      vis[11]=fd_mastergui->vis11;
+	      vis[12]=fd_mastergui->vis12;
+	      vis[13]=fd_mastergui->vis13;
+	      vis[14]=fd_mastergui->vis14;
+	      vis[15]=fd_mastergui->vis15;
+	      vis[16]=fd_mastergui->vis16;
+	      vis[17]=fd_mastergui->vis17;
+	      vis[18]=fd_mastergui->vis18;
+	      vis[19]=fd_mastergui->vis19;
 	      act[0]=fd_mastergui->act0;
 	      act[1]=fd_mastergui->act1;
 	      act[2]=fd_mastergui->act2;
@@ -1864,6 +1585,14 @@ void jdegui_iteration()
 	      act[9]=fd_mastergui->act9;
 	      act[10]=fd_mastergui->act10;
 	      act[11]=fd_mastergui->act11;
+	      act[12]=fd_mastergui->act12;
+	      act[13]=fd_mastergui->act13;
+	      act[14]=fd_mastergui->act14;
+	      act[15]=fd_mastergui->act15;
+	      act[16]=fd_mastergui->act16;
+	      act[17]=fd_mastergui->act17;
+	      act[18]=fd_mastergui->act18;
+	      act[19]=fd_mastergui->act19;
 	      fps[0]=fd_mastergui->fps0;
 	      fps[1]=fd_mastergui->fps1;
 	      fps[2]=fd_mastergui->fps2;
@@ -1876,6 +1605,34 @@ void jdegui_iteration()
 	      fps[9]=fd_mastergui->fps9;
 	      fps[10]=fd_mastergui->fps10;
 	      fps[11]=fd_mastergui->fps11;
+	      fps[12]=fd_mastergui->fps12;
+	      fps[13]=fd_mastergui->fps13;
+	      fps[14]=fd_mastergui->fps14;
+	      fps[15]=fd_mastergui->fps15;
+	      fps[16]=fd_mastergui->fps16;
+	      fps[17]=fd_mastergui->fps17;
+	      fps[18]=fd_mastergui->fps18;
+	      fps[19]=fd_mastergui->fps19;
+	      stat[0]=fd_mastergui->stat0;
+	      stat[1]=fd_mastergui->stat1;
+	      stat[2]=fd_mastergui->stat2;
+	      stat[3]=fd_mastergui->stat3;
+	      stat[4]=fd_mastergui->stat4;
+	      stat[5]=fd_mastergui->stat5;
+	      stat[6]=fd_mastergui->stat6;
+	      stat[7]=fd_mastergui->stat7;
+	      stat[8]=fd_mastergui->stat8;
+	      stat[9]=fd_mastergui->stat9;
+	      stat[10]=fd_mastergui->stat10;
+	      stat[11]=fd_mastergui->stat11;
+	      stat[12]=fd_mastergui->stat12;
+	      stat[13]=fd_mastergui->stat13;
+	      stat[14]=fd_mastergui->stat14;
+	      stat[15]=fd_mastergui->stat15;
+	      stat[16]=fd_mastergui->stat16;
+	      stat[17]=fd_mastergui->stat17;
+	      stat[18]=fd_mastergui->stat18;
+	      stat[19]=fd_mastergui->stat19;
 	      fl_set_form_position(fd_mastergui->mastergui,200,50);
 	    }
 	  fl_show_form(fd_mastergui->mastergui,FL_PLACE_POSITION,FL_FULLBORDER,"jde master gui");
@@ -2063,6 +1820,9 @@ void jdegui_startup()
   display= fl_initialize(&myargc,myargv,"JDE",0,0);
   screen = DefaultScreen(display);
   samplesource=colorA; 
+  /* fl_set_button(fd_mastergui->state_checking,PUSHED);
+  fl_set_button(fd_mastergui->state_slept,RELEASED);
+  */
 
   for(i=0;i<MAX_SCHEMAS;i++) state_dpy[i]=slept;
 

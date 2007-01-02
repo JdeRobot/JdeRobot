@@ -27,7 +27,7 @@
 #include <pthread.h>
 #include <libplayerc/playerc.h>
 #include <jde.h>
-#define MIN_DELAY_BETWEEN_COMMANDS 50 /* ms */
+#define MIN_DELAY_BETWEEN_COMMANDS 100 /* ms */
 
 /* for player support through the player server */
 playerc_client_t *player_client;
@@ -53,6 +53,8 @@ int player_close_command=0;
 int serve_laser=0; int serve_encoders=0; int serve_sonars=0; int serve_motors=0;
 int laser_active=0; int encoders_active=0; int sonars_active=0; int motors_active=0;
 
+int laser_schema_id, encoders_schema_id, sonars_schema_id, motors_schema_id;
+
 /* player driver attributes */
 int playerport;
 char playerhost[256];
@@ -70,14 +72,27 @@ void player_close(){
   printf("disconnected from Player\n");
 }
 
-int player_laser_resume(){
+int player_laser_resume(int father, int *brothers, arbitration fn)
+{
 
   if((serve_laser)&&(laser_active==0)){
     laser_active=1;
-    printf("player: laser resume\n");
+    printf("laser schema (player driver) resume\n");
+    all[laser_schema_id].father = father;
+    all[laser_schema_id].fps = 0.;
+    all[laser_schema_id].k =0;
+    put_state(laser_schema_id,winner);
+
+    /* update the father incorporating this schema as one of its children */
+    if (father!=GUIHUMAN)
+      {
+	pthread_mutex_lock(&(all[father].mymutex));
+	all[father].children[laser_schema_id]=TRUE;
+	pthread_mutex_unlock(&(all[father].mymutex));
+      }
+
 
     if((encoders_active==0)&&(sonars_active==0)&&(motors_active==0)){
-
       /* player thread goes winner */
       pthread_mutex_lock(&mymutex);
       state=winner;
@@ -88,30 +103,35 @@ int player_laser_resume(){
   return 0;
 }
 
+
 int player_laser_suspend(){
 
   if((serve_laser)&&(laser_active)){
     laser_active=0;
-    printf("player: laser suspend\n");
+    printf("laser schema (player driver) suspend\n"); 
     if((encoders_active==0)&&(sonars_active==0)&&(motors_active==0)){    
-
       /* player thread goes sleep */
       pthread_mutex_lock(&mymutex);
       state=slept;
+      put_state(laser_schema_id,slept);
       pthread_mutex_unlock(&mymutex);
     }
   }
   return 0;
 }
 
-int player_encoders_resume(){
+int player_encoders_resume(int father, int *brothers, arbitration fn)
+{
 
   if((serve_encoders)&&(encoders_active==0)){
     encoders_active=1;
-    printf("player: encoders resume\n");
+    printf("encoders schema (player driver) resume\n");
+    all[encoders_schema_id].father = father;
+    all[encoders_schema_id].fps = 0.;
+    all[encoders_schema_id].k =0;
+    put_state(encoders_schema_id,winner);
 
     if((laser_active==0)&&(sonars_active==0)&&(motors_active==0)){
-
       /* player thread goes winner */
       pthread_mutex_lock(&mymutex);
       state=winner;
@@ -127,26 +147,31 @@ int player_encoders_suspend(){
 
   if((serve_encoders)&&(encoders_active)){
     encoders_active=0;
-    printf("player: encoders suspend\n");
+    printf("encoders schema (player driver) suspend\n");
     if((laser_active==0)&&(sonars_active==0)&&(motors_active==0)){    
 
       /* player thread goes sleep */
       pthread_mutex_lock(&mymutex);
       state=slept;
+      put_state(encoders_schema_id,slept);
       pthread_mutex_unlock(&mymutex);
     }
   }
   return 0;
 }
 
-int player_sonars_resume(){
+int player_sonars_resume(int father, int *brothers, arbitration fn)
+{
+
+  all[sonars_schema_id].father = father;
+  all[sonars_schema_id].fps = 0.;
+  all[sonars_schema_id].k =0;
+  put_state(sonars_schema_id,winner);
 
   if((serve_sonars)&&(sonars_active==0)){
     sonars_active=1;
-    printf("player: sonars resume\n");
-
+    printf("sonars schema (player driver) resume\n");
     if((laser_active==0)&&(encoders_active==0)&&(motors_active==0)){
-
       /* player thread goes winner */
       pthread_mutex_lock(&mymutex);
       state=winner;
@@ -161,23 +186,29 @@ int player_sonars_suspend(){
 
   if((serve_sonars)&&(sonars_active)){
     sonars_active=0;
-    printf("player: sonars suspend\n");
+    printf("sonars schema (player driver) suspend\n");
     if((laser_active==0)&&(encoders_active==0)&&(motors_active==0)){
 
       /* player thread goes sleep */
       pthread_mutex_lock(&mymutex);
       state=slept;
+      put_state(sonars_schema_id,slept);
       pthread_mutex_unlock(&mymutex);
     }
   }
   return 0;
 }
 
-int player_motors_resume(){
+int player_motors_resume(int father, int *brothers, arbitration fn)
+{
 
   if((serve_motors)&&(motors_active==0)){
     motors_active=1;
-    printf("player: motors resume\n");
+    printf("motors schema (player driver) resume\n");
+    all[motors_schema_id].father = father;
+    all[motors_schema_id].fps = 0.;
+    all[motors_schema_id].k =0;
+    put_state(motors_schema_id,winner);
 
     /*if((laser_active==0)&&(encoders_active==0)&&(sonars_active==0)){
       pthread_mutex_lock(&mymutex);
@@ -194,8 +225,8 @@ int player_motors_suspend(){
 
   if((serve_motors)&&(motors_active)){
     motors_active=0;
-    printf("player: motors suspend\n");
-
+    printf("motors schema (player driver) suspend\n");
+    put_state(motors_schema_id,slept);
     /*if((laser_active==0)&&(encoders_active==0)&&(sonars_active==0)){    
       pthread_mutex_lock(&mymutex);
       state=slept;
@@ -214,7 +245,7 @@ void player_motors_iteration(){
   int v_integer=0; int w_integer=0;
   struct timeval t;
 
-  kmotors++;
+  speedcounter(motors_schema_id);  
 
   /* getting speed in integer value */
   v_integer=(int)v; w_integer=(int)w;
@@ -233,7 +264,7 @@ void player_motors_iteration(){
     v_sp=v_new;
     w_sp=w_new;
     before=now;
-    
+     
     /* sending speed to player server */
     playerc_position2d_set_cmd_vel(player_position,v_sp,0,w_sp,0);
   }
@@ -304,7 +335,7 @@ void player_laser_callback(void *not_used)
 	}
     }
   
-  klaser++;
+  speedcounter(laser_schema_id);
   laser_clock=tag;
   tag++;
 
@@ -342,7 +373,7 @@ void player_encoders_callback(void *not_used)
 	}
     }
   
-  kencoders++;
+  speedcounter(encoders_schema_id);
   encoders_clock=tag;
   tag++;
 
@@ -379,8 +410,8 @@ void player_sonar_callback(void *not_used)
 	}
     }
   
-  ksonars++;
-  
+  speedcounter(sonars_schema_id);  
+
   for (j=0;j<player_sonar->pose_count; j++){
     /* for pioneer 16 data per reading */
     us[j]=(float)player_sonar->scan[j]*1000;
@@ -664,10 +695,72 @@ int player_startup(char *configfile){
   pthread_mutex_unlock(&mymutex);
 
   /* resume and suspend asignments */
-  if(serve_laser){laser_resume=player_laser_resume; laser_suspend=player_laser_suspend;}
-  if(serve_encoders){encoders_resume=player_encoders_resume; encoders_suspend=player_encoders_suspend;}
-  if(serve_sonars){sonars_resume=player_sonars_resume;sonars_suspend=player_sonars_suspend;}
-  if(serve_motors){motors_resume=player_motors_resume;motors_suspend=player_motors_suspend;}
+  if(serve_laser)
+    {
+      all[num_schemas].id = (int *) &laser_schema_id;
+      strcpy(all[num_schemas].name,"laser");
+      all[num_schemas].resume = (resumeFn) player_laser_resume;
+      all[num_schemas].suspend = (suspendFn) player_laser_suspend;
+      printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+      (*(all[num_schemas].id)) = num_schemas;
+      all[num_schemas].fps = 0.;
+      all[num_schemas].k =0;
+      all[num_schemas].state=slept;
+      all[num_schemas].close = NULL;
+      all[num_schemas].handle = NULL;
+      num_schemas++;
+      myexport("laser","laser",&jde_laser);
+      myexport("laser","resume",(void *)player_laser_resume);
+      myexport("laser","suspend",(void *)player_laser_suspend);
+    }
+
+  if(serve_encoders)
+    {
+      all[num_schemas].id = (int *) &encoders_schema_id;
+      strcpy(all[num_schemas].name,"encoders");
+      all[num_schemas].resume = (resumeFn) player_encoders_resume;
+      all[num_schemas].suspend = (suspendFn) player_encoders_suspend;
+      printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+      (*(all[num_schemas].id)) = num_schemas;
+      all[num_schemas].fps = 0.;
+      all[num_schemas].k =0;
+      all[num_schemas].state=slept;
+      all[num_schemas].close = NULL;
+      all[num_schemas].handle = NULL;
+      num_schemas++;
+    }
+
+  if(serve_sonars)
+    {
+      all[num_schemas].id = (int *) &sonars_schema_id;
+      strcpy(all[num_schemas].name,"sonars");
+      all[num_schemas].resume = (resumeFn) player_sonars_resume;
+      all[num_schemas].suspend = (suspendFn) player_sonars_suspend;
+      printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+      (*(all[num_schemas].id)) = num_schemas;
+      all[num_schemas].fps = 0.;
+      all[num_schemas].k =0;
+      all[num_schemas].state=slept;
+      all[num_schemas].close = NULL;
+      all[num_schemas].handle = NULL;
+      num_schemas++;
+    }
+
+  if(serve_motors)
+    {
+      all[num_schemas].id = (int *) &motors_schema_id;
+      strcpy(all[num_schemas].name,"motors");
+      all[num_schemas].resume = (resumeFn) player_motors_resume;
+      all[num_schemas].suspend = (suspendFn) player_motors_suspend;
+      printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+      (*(all[num_schemas].id)) = num_schemas;
+      all[num_schemas].fps = 0.;
+      all[num_schemas].k =0;
+      all[num_schemas].state=slept;
+      all[num_schemas].close = NULL;
+      all[num_schemas].handle = NULL;
+      num_schemas++;
+    }
 
   return 0;
 }

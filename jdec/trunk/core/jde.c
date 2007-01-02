@@ -32,97 +32,57 @@ char greyAA[SIFNTSC_COLUMNS*SIFNTSC_ROWS*1]; /**< sifntsc image itself */
 char *colorA;
 char colorAA[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /**< sifntsc image itself */
 unsigned long int imageA_clock;
-float fpsA=0;
-int kA=0;
 arbitration imageA_callbacks[MAX_SCHEMAS];
 int imageA_users=0;
-fn imageA_suspend;
-fn imageA_resume;
 
 char *colorB;
 char colorBB[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /**< sifntsc image itself */
 unsigned long int imageB_clock;
-float fpsB=0;
-int kB=0;
 arbitration imageB_callbacks[MAX_SCHEMAS];
 int imageB_users=0;
-fn imageB_suspend;
-fn imageB_resume;
 
 char *colorC;
 char colorCC[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /**< sifntsc image itself */
 unsigned long int imageC_clock;
-float fpsC=0;
-int kC=0;
 arbitration imageC_callbacks[MAX_SCHEMAS];
 int imageC_users=0;
-fn imageC_suspend;
-fn imageC_resume;
 
 char *colorD;
 char colorDD[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /**< sifntsc image itself */
 unsigned long int imageD_clock;
-float fpsD=0;
-int kD=0;
 arbitration imageD_callbacks[MAX_SCHEMAS];
 int imageD_users=0;
-fn imageD_suspend;
-fn imageD_resume;
 
 float pan_angle; /**< pan angle of the pantilt in degrees */
 float tilt_angle;   /**< tilt angle of the pantilt in degrees */
 unsigned long int pantiltencoders_clock;
-float fpspantiltencoders=0;
-int kpantiltencoders=0;
 arbitration pantiltencoders_callbacks[MAX_SCHEMAS];
 int pantiltencoders_users=0;
-fn pantiltencoders_suspend;
-fn pantiltencoders_resume;
 
 int jde_laser[NUM_LASER];
 unsigned long int laser_clock;
-int klaser=0;
-float fpslaser=0.;
 arbitration laser_callbacks[MAX_SCHEMAS];
 int laser_users=0;
-fn laser_suspend;
-fn laser_resume;
 
 float us[NUM_SONARS];
 unsigned long int us_clock[NUM_SONARS];
-int ksonars=0;
-float fpssonars=0.;
 intcallback sonars_callbacks[MAX_SCHEMAS];
 int sonars_users=0;
-fn sonars_suspend;
-fn sonars_resume;
 
 float jde_robot[5]; /* mm, mm, rad */
 unsigned long int encoders_clock;
 float tspeed, rspeed; /* mm/s, deg/s */
 unsigned long lasttime; /* microsecs */
-int kencoders=0;
-float fpsencoders=0.;
 arbitration encoders_callbacks[MAX_SCHEMAS];
 int encoders_users=0;
-fn encoders_suspend;
-fn encoders_resume;
 
 float latitude,longitude;
 float latitude_speed,longitude_speed;
 int pantiltmotors_cycle=100; /* ms */
-float fpspantiltmotors=0;
-int kpantiltmotors=0;
-fn pantiltmotors_suspend;
-fn pantiltmotors_resume;
 
 float v,w;
 int motors_cycle=100; /* ms */
 float ac=0.;
-float fpsmotors=0;
-int kmotors=0;
-fn motors_suspend;
-fn motors_resume;
 
 
 /* sensor positions in the Robot FrameOfReference */
@@ -272,14 +232,13 @@ void jdeshutdown(int sig)
   for(i=0;i<num_schemas;i++)
     {
       if (all[i].close!=NULL) all[i].close();
-      dlclose(all[i].handle);
+      if (all[i].handle!=NULL) dlclose(all[i].handle);
     }
   
   /* unload all the drivers loaded as plugins */
   for(i=0;i<num_drivers;i++)
     {
       if (mydrivers[i].close!=NULL) mydrivers[i].close();
-      dlclose(all[i].handle); 
     }
 
   jdegui_close();
@@ -321,24 +280,6 @@ void *cronos_thread(void *not_used)
       gettimeofday(&tnow,NULL); 
       diff = (tnow.tv_sec-tlast.tv_sec)*1000000+tnow.tv_usec-tlast.tv_usec;
       
-      fpsA=kA*1000000/diff; 
-      kA=0.; 
-      fpsB=kB*1000000/diff;
-      kB=0.;
-      fpssonars=ksonars*1000000/(NUM_SONARS*diff);
-      ksonars=0;
-      fpslaser=klaser*1000000/diff;
-      klaser=0;
-      fpsencoders=kencoders*1000000/diff;
-      kencoders=0;
-      fpspantiltencoders=kpantiltencoders*1000000/diff;
-      kpantiltencoders=0;
-
-      fpsmotors=kmotors*1000000/diff;
-      kmotors=0;
-      fpspantiltmotors=kpantiltmotors*1000000/diff;
-      kpantiltmotors=0;
-
       fpsgui=kgui*1000000/diff;
       kgui=0;
       for(i=0;i<num_schemas;i++)
@@ -412,6 +353,12 @@ int jde_loadschema(char *name)
   char n[200];
   int i;
   char *error;
+  
+  if (num_schemas>=MAX_SCHEMAS) 
+    {
+      printf("WARNING: No entry available for %s schema\n",name);
+      exit(1);
+    }
 
   strcpy(n,name); strcat(n,".so");
   /*  all[num_schemas].handle = dlopen(n,RTLD_LAZY|RTLD_GLOBAL);*/
@@ -478,16 +425,6 @@ int jde_loadschema(char *name)
       pthread_mutex_init(&all[num_schemas].mymutex,PTHREAD_MUTEX_TIMED_NP);
       pthread_cond_init(&all[num_schemas].condition,NULL);
       /* the thread is created on startup. This is the load */
-
-      for(i=0;i<MAX_LOADEDSCHEMAS;i++)
-	{
-	  if (associated_ID[i]==-1)
-	    {
-	    associated_ID[i]=num_schemas;
-	    break;
-	    }
-	}    
-      if (i==MAX_LOADEDSCHEMAS) printf("WARNING: No guientry available for %s schema\n",all[num_schemas].name);
 
       printf("%s schema loaded (id %d)\n",name,(*(all[num_schemas].id)));
       num_schemas++;
@@ -614,28 +551,7 @@ int main(int argc, char** argv)
   int n=1; /* argument number in the console for the configuration file parameter */
   int filenameatconsole=FALSE;
 
-  /* I give them an initial dummy value to avoid the "segmentation fault" if no driver gives them a value. Good drivers will create proper resume and suspend functions for the sensors and actuators they support in the current configuration selected by the human user */
-   encoders_suspend=dummy;
-   encoders_resume=dummy;
-   laser_suspend=dummy; 
-   laser_resume=dummy;
-   sonars_suspend=dummy;
-   sonars_resume=dummy;
-   imageA_resume=dummy;
-   imageA_suspend=dummy;
-   imageB_resume=dummy;
-   imageB_suspend=dummy;
-   imageC_resume=dummy;
-   imageC_suspend=dummy;
-   imageD_resume=dummy;
-   imageD_suspend=dummy;
-   pantiltencoders_resume=dummy;
-   pantiltencoders_suspend=dummy;
-   motors_suspend=dummy;
-   motors_resume=dummy;
-   pantiltmotors_suspend=dummy;
-   pantiltmotors_resume=dummy;
-  
+ 
   signal(SIGTERM, &jdeshutdown); /* kill interrupt handler */
   signal(SIGINT, &jdeshutdown); /* control-C interrupt handler */
   signal(SIGABRT, &jdeshutdown); /* failed assert handler */
@@ -757,13 +673,6 @@ int main(int argc, char** argv)
     colorD[i*3+2]= 0;/* red */ 
     }
   v=0.; w=0;
-
-
-  /* reset the guientries-loadeschemas table before the 
-     loading of the schemas (while parsing the conf file) 
-     updates such table */
-  for(i=0;i<MAX_LOADEDSCHEMAS;i++)
-    associated_ID[i]=-1;
   
   /* read the configuration file: load drivers and schemas */
   printf("Reading configuration...\n");
