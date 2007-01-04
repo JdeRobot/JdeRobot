@@ -79,7 +79,6 @@ pthread_cond_t condition;
 int firewire_thread_created=0;
 int firewire_cleaned_up=0;
 int firewire_setup=0;
-int display_fps=0;
 int firewire_close_command=0;
 
 /* firewire driver API options */
@@ -114,10 +113,6 @@ void uyvy2rgb (unsigned char *src, unsigned char *dest, unsigned long long int N
     dest[j--] = g;
     dest[j--] = b;
   }
-}
-
-void firewire_display_fps(){
-  display_fps=1;
 }
 
 void firewire_clean_up() {
@@ -156,16 +151,16 @@ void set_default_firewire_camera_config(void){
 int mycolorA_resume(int father, int *brothers, arbitration fn){
   if((serve_color[0]==1)&&(color_active[0]==0)){
     color_active[0]=1;
-    if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
-      
-      printf("colorA schema resume (firewire driver)\n");
-      all[colorA_schema_id].father = father;
-      all[colorA_schema_id].fps = 0.;
-      all[colorA_schema_id].k =0;
-      put_state(colorA_schema_id,winner);
+    printf("colorA schema resume (firewire driver)\n");
+    all[colorA_schema_id].father = father;
+    all[colorA_schema_id].fps = 0.;
+    all[colorA_schema_id].k =0;
+    put_state(colorA_schema_id,winner);
 
+    if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
       /* firewire thread goes winner */
       pthread_mutex_lock(&mymutex);
+      state=winner;
       pthread_cond_signal(&condition);
       pthread_mutex_unlock(&mymutex);
     }
@@ -177,12 +172,12 @@ int mycolorA_suspend(){
 
   if((serve_color[0]==1)&&(color_active[0]==1)){
     color_active[0]=0;
+    put_state(colorA_schema_id,slept);
     printf("colorA schema suspend (firewire driver)\n");
     if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){    
-
-      put_state(colorA_schema_id,slept);
       /* firewire thread goes sleep */
       pthread_mutex_lock(&mymutex);
+      state=slept;
       pthread_mutex_unlock(&mymutex);
     }
   }
@@ -192,16 +187,16 @@ int mycolorA_suspend(){
 int mycolorB_resume(int father, int *brothers, arbitration fn){
   if((serve_color[1]==1)&&(color_active[1]==0)){
     color_active[1]=1;
-    if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
-      
-      printf("colorB schema resume (firewire driver)\n");
-      all[colorB_schema_id].father = father;
-      all[colorB_schema_id].fps = 0.;
-      all[colorB_schema_id].k =0;
-      put_state(colorB_schema_id,winner);
+    printf("colorB schema resume (firewire driver)\n");
+    all[colorB_schema_id].father = father;
+    all[colorB_schema_id].fps = 0.;
+    all[colorB_schema_id].k =0;
+    put_state(colorB_schema_id,winner);
 
+    if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
       /* firewire thread goes winner */
       pthread_mutex_lock(&mymutex);
+      state=winner;
       pthread_cond_signal(&condition);
       pthread_mutex_unlock(&mymutex);
     }
@@ -214,11 +209,12 @@ int mycolorB_suspend(){
   if((serve_color[1]==1)&&(color_active[1]==1)){
     color_active[1]=0;
     printf("colorB schema suspend (firewire driver)\n");
+    put_state(colorB_schema_id,slept);
+
     if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){    
-   
-      put_state(colorB_schema_id,slept);
       /* firewire thread goes sleep */
       pthread_mutex_lock(&mymutex);
+      state=slept;
       pthread_mutex_unlock(&mymutex);
     }
   }
@@ -228,16 +224,16 @@ int mycolorB_suspend(){
 int mycolorC_resume(int father, int *brothers, arbitration fn){
   if((serve_color[2]==1)&&(color_active[2]==0)){
     color_active[2]=1;
-    if((color_active[1]==0)&&(color_active[0]==0)&&(color_active[3]==0)){
-      
-      printf("colorC schema resume (firewire driver)\n");
-      all[colorC_schema_id].father = father;
-      all[colorC_schema_id].fps = 0.;
-      all[colorC_schema_id].k =0;
-      put_state(colorC_schema_id,winner);
+    printf("colorC schema resume (firewire driver)\n");
+    all[colorC_schema_id].father = father;
+    all[colorC_schema_id].fps = 0.;
+    all[colorC_schema_id].k =0;
+    put_state(colorC_schema_id,winner);
 
+    if((color_active[1]==0)&&(color_active[0]==0)&&(color_active[3]==0)){
       /* firewire thread goes winner */
       pthread_mutex_lock(&mymutex);
+      state=winner;
       pthread_cond_signal(&condition);
       pthread_mutex_unlock(&mymutex);
     }
@@ -250,11 +246,12 @@ int mycolorC_suspend(){
   if((serve_color[2]==1)&&(color_active[2]==1)){
     color_active[2]=0;
     printf("colorC schema suspend (firewire driver)\n");
+    put_state(colorC_schema_id,slept);
+
     if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[3]==0)){    
-   
-      put_state(colorC_schema_id,slept);
       /* firewire thread goes sleep */
       pthread_mutex_lock(&mymutex);
+      state=slept;
       pthread_mutex_unlock(&mymutex);
     }
   }
@@ -264,16 +261,16 @@ int mycolorC_suspend(){
 int mycolorD_resume(int father, int *brothers, arbitration fn){
   if((serve_color[3]==1)&&(color_active[3]==0)){
     color_active[3]=1;
-    if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[0]==0)){
-      
-      printf("colorD schema resume (firewire driver)\n");
-      all[colorD_schema_id].father = father;
-      all[colorD_schema_id].fps = 0.;
-      all[colorD_schema_id].k =0;
-      put_state(colorD_schema_id,winner);
+    printf("colorD schema resume (firewire driver)\n");
+    all[colorD_schema_id].father = father;
+    all[colorD_schema_id].fps = 0.;
+    all[colorD_schema_id].k =0;
+    put_state(colorD_schema_id,winner);
 
+    if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[0]==0)){
       /* firewire thread goes winner */
       pthread_mutex_lock(&mymutex);
+      state=winner;
       pthread_cond_signal(&condition);
       pthread_mutex_unlock(&mymutex);
     }
@@ -286,11 +283,12 @@ int mycolorD_suspend(){
   if((serve_color[3]==1)&&(color_active[3]==1)){
     color_active[3]=0;
     printf("colorD schema suspend (firewire driver)\n");
+    put_state(colorD_schema_id,slept);
+
     if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[2]==0)){    
-   
-      put_state(colorD_schema_id,slept);
       /* firewire thread goes sleep */
       pthread_mutex_lock(&mymutex);
+      state=slept;
       pthread_mutex_unlock(&mymutex);
     }
   }
@@ -299,11 +297,6 @@ int mycolorD_suspend(){
 
 void *firewire_thread(void *not_used)
 {
-  static float fps=0, fpsold=0;
-  struct timeval t;
-  static unsigned long int then;
-  unsigned long int now;
-
   printf("firewire driver started up\n");
 
   do{
@@ -353,20 +346,6 @@ void *firewire_thread(void *not_used)
 	if(dc1394_dma_done_with_buffer(&cameras[number_color[3]])==DC1394_FAILURE) perror("firewire_thread");
 	else speedcounter(colorD_schema_id);  
       }
-
-      /* to get firewire fps */
-      gettimeofday(&t,NULL);
-      now=t.tv_sec*1000000+t.tv_usec;
-      lastimage = now;
-      if ((now-then)>2000000) /* periodo de integracion, de cuenta de imagenes: 2 segundos, mas o menos */
-	{fps=fps*1000000/(now-then); 
-	  if ((fps>fpsold+1)||(fps<fpsold-1)) 
-	    {if(display_fps==1) printf("firewire: %.1f fps\n",fps);
-	      fpsold=fps;}
-	  fps=0.;
-	  then=now;
-	}
-      else fps++;
     }
   }while(firewire_close_command==0);
 
@@ -688,7 +667,9 @@ void firewire_startup(char *configfile)
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
-
+      myexport("colorA","colorA",&colorA);
+      myexport("colorA","resume",(void *)mycolorA_resume);
+      myexport("colorA","suspend",(void *)mycolorA_suspend);
     }else{
       serve_color[0]=0;
       printf("cannot find firewire camera for colorA\n");
@@ -712,7 +693,9 @@ void firewire_startup(char *configfile)
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
-
+      myexport("colorB","colorB",&colorB);
+      myexport("colorB","resume",(void *)mycolorB_resume);
+      myexport("colorB","suspend",(void *)mycolorB_suspend);
     }else{
       serve_color[1]=0;
       printf("cannot find firewire camera for colorB\n");
@@ -736,7 +719,9 @@ void firewire_startup(char *configfile)
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
-
+      myexport("colorC","colorC",&colorC);
+      myexport("colorC","resume",(void *)mycolorC_resume);
+      myexport("colorC","suspend",(void *)mycolorC_suspend);
     }else{
       serve_color[2]=0;
       printf("cannot find firewire camera for colorC\n");
@@ -760,7 +745,9 @@ void firewire_startup(char *configfile)
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
-
+      myexport("colorD","colorD",&colorD);
+      myexport("colorD","resume",(void *)mycolorD_resume);
+      myexport("colorD","suspend",(void *)mycolorD_suspend);
     }else{
       serve_color[3]=0;
       printf("cannot find firewire camera for colorD\n");
