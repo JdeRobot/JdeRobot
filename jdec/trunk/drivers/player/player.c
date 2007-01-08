@@ -62,6 +62,8 @@ float correcting_x=0.;
 float correcting_y=0.;
 float correcting_theta=0.;
 
+/* last commands sent to the motors. Here to allow the reset by motors_suspend */
+static float w_sp=0., v_sp=0.;
 
 /* PLAYER DRIVER FUNCTIONS */
 void player_close(){
@@ -82,14 +84,7 @@ int player_laser_resume(int father, int *brothers, arbitration fn)
     all[laser_schema_id].father = father;
     all[laser_schema_id].fps = 0.;
     all[laser_schema_id].k =0;
-    /* update the father incorporating this schema as one of its children */
-    if (father!=GUIHUMAN)
-      {
-	pthread_mutex_lock(&(all[father].mymutex));
-	all[father].children[laser_schema_id]=TRUE;
-	pthread_mutex_unlock(&(all[father].mymutex));
-      }
-
+    
     if((encoders_active==0)&&(sonars_active==0)&&(motors_active==0)){
       /* player thread goes winner */
       pthread_mutex_lock(&mymutex);
@@ -161,12 +156,13 @@ int player_sonars_resume(int father, int *brothers, arbitration fn)
 {
 
  if((serve_sonars)&&(sonars_active==0)){
+   sonars_active=1;
+   put_state(sonars_schema_id,winner);
+   printf("sonars schema resume (player driver)\n");
    all[sonars_schema_id].father = father;
    all[sonars_schema_id].fps = 0.;
    all[sonars_schema_id].k =0;
-   put_state(sonars_schema_id,winner);
-   printf("sonars schema resume (player driver)\n");
-   sonars_active=1;
+
    if((laser_active==0)&&(encoders_active==0)&&(motors_active==0)){
      /* player thread goes winner */
      pthread_mutex_lock(&mymutex);
@@ -204,6 +200,7 @@ int player_motors_resume(int father, int *brothers, arbitration fn)
     all[motors_schema_id].father = father;
     all[motors_schema_id].fps = 0.;
     all[motors_schema_id].k =0;
+
     if((laser_active==0)&&(encoders_active==0)&&(sonars_active==0)){
       pthread_mutex_lock(&mymutex);
       state=winner;
@@ -218,6 +215,10 @@ int player_motors_resume(int father, int *brothers, arbitration fn)
 int player_motors_suspend(){
 
   if((serve_motors)&&(motors_active)){
+    /* security stop */
+    v_sp=0; w_sp=0;
+    playerc_position2d_set_cmd_vel(player_position,v_sp,0,w_sp,0);
+
     motors_active=0;
     put_state(motors_schema_id,slept);
     printf("motors schema resume (player driver)\n");
@@ -233,7 +234,7 @@ int player_motors_suspend(){
 void player_motors_iteration(){
 
   float  w_new, v_new;
-  static float w_sp=0., v_sp=0.;
+
   int v_integer=0; int w_integer=0;
 
   speedcounter(motors_schema_id);  
@@ -319,24 +320,7 @@ void *player_thread(void *not_used){
 
 void player_laser_callback(void *not_used)
 {
-  static unsigned long last=0;
-  unsigned long now;
-  struct timeval t;
   int j=0,cont=0;
-  static int howmany=0;
-  
-  if (DEBUG==1)
-    {
-      gettimeofday(&t,NULL);
-      now=t.tv_sec*1000000+t.tv_usec;
-      howmany++;
-      if ((now-last)>10000000) 
-	{
-	  printf ("player: laser -> %d readings in 10 secs\n",howmany);
-	  last=now;
-	  howmany=0;
-	}
-    }
   
   speedcounter(laser_schema_id);
   laser_clock=tag;
@@ -356,26 +340,8 @@ void player_laser_callback(void *not_used)
 
 void player_encoders_callback(void *not_used)
 {
-
- static unsigned long last=0;
-  unsigned long now;
-  struct timeval t;
-  static int howmany=0;
   float robotx,roboty,robottheta;
-
-  if (DEBUG==1)
-    {
-      gettimeofday(&t,NULL);
-      now=t.tv_sec*1000000+t.tv_usec;
-      howmany++;
-      if ((now-last)>10000000) 
-	{
-	  printf ("player: encoders -> %d readings in 10 secs\n",howmany);
-	  last=now;
-	  howmany=0;
-	}
-    }
-  
+ 
   speedcounter(encoders_schema_id);
   encoders_clock=tag;
   tag++;
@@ -394,24 +360,7 @@ void player_encoders_callback(void *not_used)
 
 void player_sonar_callback(void *not_used)
 {
-  static unsigned long last=0;
-  unsigned long now;
-  struct timeval t;
   int j;
-  static int howmany=0;
-        
-  if (DEBUG==1)
-    {
-      gettimeofday(&t,NULL);
-      now=t.tv_sec*1000000+t.tv_usec;
-      howmany++;
-      if ((now-last)>10000000) 
-	{
-	  printf ("player: sonars -> %d readings in 10 secs\n",howmany);
-	  last=now;
-	  howmany=0;
-	}
-    }
   
   speedcounter(sonars_schema_id);  
 
@@ -425,24 +374,6 @@ void player_sonar_callback(void *not_used)
 
 void player_battery_callback(void *not_used)
 {
- static unsigned long last=0;
-  unsigned long now;
-  struct timeval t;
-  static int howmany=0;
-
-  if (DEBUG==1)
-    {
-      gettimeofday(&t,NULL);
-      now=t.tv_sec*1000000+t.tv_usec;
-      howmany++;
-      if ((now-last)>10000000) 
-	{
-	  printf ("player: battery -> %d readings in 10 secs\n",howmany);
-	  last=now;
-	  howmany=0;
-	}
-    }
-
   /* this is unused in JDE since we don't use the charge battery sensor.
      if you want to use this option you only have to use the 'player_power->charge' */
   tag++;
@@ -709,9 +640,10 @@ int player_startup(char *configfile){
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("laser","id",&laser_schema_id);
       myexport("laser","laser",&jde_laser);
-      myexport("laser","resume",(void *)player_laser_resume);
-      myexport("laser","suspend",(void *)player_laser_suspend);
+      myexport("laser","resume",(void *) &player_laser_resume);
+      myexport("laser","suspend",(void *) &player_laser_suspend);
     }
 
   if(serve_encoders)
@@ -728,9 +660,10 @@ int player_startup(char *configfile){
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("encoders","id",&encoders_schema_id);
       myexport("encoders","jde_robot",&jde_robot);
-      myexport("encoders","resume",(void *)player_encoders_resume);
-      myexport("encoders","suspend",(void *)player_encoders_suspend);
+      myexport("encoders","resume",(void *)&player_encoders_resume);
+      myexport("encoders","suspend",(void *)&player_encoders_suspend);
     }
 
   if(serve_sonars)
@@ -747,9 +680,10 @@ int player_startup(char *configfile){
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("sonars","id",&sonars_schema_id);
       myexport("sonars","us",&us);
-      myexport("sonars","resume",(void *)player_sonars_resume);
-      myexport("sonars","suspend",(void *)player_sonars_suspend);
+      myexport("sonars","resume",(void *)&player_sonars_resume);
+      myexport("sonars","suspend",(void *)&player_sonars_suspend);
     }
 
   if(serve_motors)
@@ -766,10 +700,11 @@ int player_startup(char *configfile){
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("motors","id",&motors_schema_id);
       myexport("motors","v",&v);
       myexport("motors","w",&w);
-      myexport("motors","resume",(void *)player_motors_resume);
-      myexport("motors","suspend",(void *)player_motors_suspend);
+      myexport("motors","resume",(void *)&player_motors_resume);
+      myexport("motors","suspend",(void *)&player_motors_suspend);
     }
 
   return 0;

@@ -52,6 +52,7 @@ extern int myexport(char *schema, char *name, void *p);
 extern void *myimport(char *schema, char *name);
 extern void jdeshutdown(int sig);
 #define GUIHUMAN -1 /* when the human activate some schema from the gui */
+#define SHELLHUMAN -2 /* when the human activate some schema from the shell */
 
 #define MAX_SCHEMAS 20
 typedef struct {

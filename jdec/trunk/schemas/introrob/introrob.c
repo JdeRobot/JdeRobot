@@ -32,6 +32,19 @@ int introrob_brothers[MAX_SCHEMAS];
 arbitration introrob_callforarbitration;
 int introrob_cycle=100; /* ms */
 
+int *mylaser;
+resumeFn laserresume;
+suspendFn lasersuspend;
+
+float *myencoders;
+resumeFn encodersresume;
+suspendFn encoderssuspend;
+
+float *myv;
+float *myw;
+resumeFn motorsresume;
+suspendFn motorssuspend;
+
 enum introrobstates {teleoperated,vff,deliberative,hybrid};
 int introrob_state;
 
@@ -161,6 +174,12 @@ void introrob_suspend()
 {
   pthread_mutex_lock(&(all[introrob_id].mymutex));
   put_state(introrob_id,slept);
+  all[introrob_id].children[(*(int *)myimport("laser","id"))]=FALSE;
+  all[introrob_id].children[(*(int *)myimport("motors","id"))]=FALSE;
+  all[introrob_id].children[(*(int *)myimport("encoders","id"))]=FALSE;
+  lasersuspend();
+  encoderssuspend();
+  motorssuspend();
   printf("introrob: off\n");
   pthread_mutex_unlock(&(all[introrob_id].mymutex));
 }
@@ -169,18 +188,11 @@ void introrob_suspend()
 void introrob_resume(int father, int *brothers, arbitration fn)
 {
   int i;
-
-  /* update the father incorporating this schema as one of its children */
-  if (father!=GUIHUMAN) 
-    {
-      pthread_mutex_lock(&(all[father].mymutex));
-      all[father].children[introrob_id]=TRUE;
-      pthread_mutex_unlock(&(all[father].mymutex));
-    }
-
+ 
   pthread_mutex_lock(&(all[introrob_id].mymutex));
   /* this schema resumes its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[introrob_id].children[i]=FALSE;
+ 
   all[introrob_id].father=father;
   if (brothers!=NULL)
     {
@@ -190,6 +202,20 @@ void introrob_resume(int father, int *brothers, arbitration fn)
     }
   introrob_callforarbitration=fn;
   put_state(introrob_id,notready);
+
+  mylaser=(int *)myimport("laser","jde_laser");
+  laserresume=(resumeFn)myimport("laser","resume");
+  lasersuspend=(suspendFn *)myimport("laser","suspend");
+
+  myencoders=(float *)myimport("encoders","jde_robot");
+  encodersresume=(resumeFn)myimport("encoders","resume");
+  encoderssuspend=(suspendFn)myimport("encoders","suspend");
+
+  myv=(float *)myimport("motors","v");
+  myw=(float *)myimport("motors","w");
+  motorsresume=(resumeFn)myimport("motors","resume");
+  motorssuspend=(suspendFn)myimport("motors","suspend");
+
   printf("introrob: on\n");
   pthread_cond_signal(&(all[introrob_id].condition));
   pthread_mutex_unlock(&(all[introrob_id].mymutex));
@@ -214,10 +240,20 @@ void *introrob_thread(void *not_used)
 	{
 	  /* check preconditions. For now, preconditions are always satisfied*/
 	  if (all[introrob_id].state==notready) put_state(introrob_id,ready);
-	  else all[introrob_id].state=ready;
-	  /* check brothers and arbitrate. For now this is the only winner */
-	  if (all[introrob_id].state==ready) put_state(introrob_id,winner);
-
+	  else if (all[introrob_id].state==ready)	  /* check brothers and arbitrate. For now this is the only winner */
+	    { 
+	      put_state(introrob_id,winner);
+	      v=0; w=0; 
+	      v_teleop=0; w_teleop=0;
+	      /* start the winner state from controlled motor values */ 
+	      all[introrob_id].children[(*(int *)myimport("laser","id"))]=TRUE;
+	      all[introrob_id].children[(*(int *)myimport("motors","id"))]=TRUE;
+	      all[introrob_id].children[(*(int *)myimport("encoders","id"))]=TRUE;
+	      laserresume(introrob_id,NULL,NULL);
+	      encodersresume(introrob_id,NULL,NULL);
+	      motorsresume(introrob_id,NULL,NULL);
+	    }	  
+	  else if (all[introrob_id].state==winner);
 
 	  if (all[introrob_id].state==winner)
 	    /* I'm the winner and must execute my iteration */
@@ -229,14 +265,16 @@ void *introrob_thread(void *not_used)
 
 	      diff = (b.tv_sec-a.tv_sec)*1000000+b.tv_usec-a.tv_usec;
 	      next = introrob_cycle*1000-diff-10000; 
-	      /* discounts 10ms taken by calling usleep itself */
-	      if (next>0) usleep(introrob_cycle*1000-diff);
+	      if (next>0) 
+		/* discounts 10ms taken by calling usleep itself */
+		usleep(introrob_cycle*1000-diff);
 	      else 
-		{printf("time interval violated: introrob\n"); usleep(introrob_cycle*1000);
+		/* just let this iteration go away. overhead time negligible */
+		{printf("time interval violated: introrob\n"); 
+		usleep(introrob_cycle*1000);
 		}
 	    }
 	  else 
-	    /* just let this iteration go away. overhead time negligible */
 	    {
 	      pthread_mutex_unlock(&(all[introrob_id].mymutex));
 	      usleep(introrob_cycle*1000);
@@ -248,6 +286,9 @@ void *introrob_thread(void *not_used)
 void introrob_startup()
 {
   pthread_mutex_lock(&(all[introrob_id].mymutex));
+  myexport("introrob","id",&introrob_id);
+  myexport("introrob","resume",(void *) &introrob_resume);
+  myexport("introrob","suspend",(void *) &introrob_suspend);
   printf("introrob schema started up\n");
   put_state(introrob_id,slept);
   pthread_create(&(all[introrob_id].mythread),NULL,introrob_thread,NULL);
@@ -673,6 +714,8 @@ int introrob_button_released_on_micanvas(FL_OBJECT *ob, Window win, int win_widt
 
 void introrob_guisuspend(void)
 {
+  v_teleop=0; w_teleop=0; 
+  /* to make a safety stop when the robot is being teleoperated from GUI */
   delete_buttonscallback(introrob_guibuttons);
   delete_displaycallback(introrob_guidisplay);
   fl_hide_form(fd_introrobgui->introrobgui);

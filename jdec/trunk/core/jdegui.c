@@ -1374,9 +1374,9 @@ void navigate(int schema,int *x,int *y)
     {
       if (all[schema].children[i]==TRUE)
 	{  
-	  if (all[i].state==notready) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_BLUE,9,20,all[i].name);
-	  else if (all[i].state==ready) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_GREEN,9,20,all[i].name);
-	  else if (all[i].state==winner) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_RED,9,20,all[i].name);
+	  if (all[i].state==notready) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_RED,9,20,all[i].name);
+	  else if (all[i].state==ready) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_DARKGOLD,9,20,all[i].name);
+	  else if (all[i].state==winner) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_GREEN,9,20,all[i].name);
 	  
 	  if ((*x+sizeX*strlen(all[i].name)) < (fd_mastergui->hierarchy->x + fd_mastergui->hierarchy->w))
 	    (*x)+=sizeX*strlen(all[i].name);
@@ -1454,7 +1454,7 @@ void mastergui_display()
 	  else if (all[i].state==ready)
 	    { 
 	      fl_set_object_label(stat[i],"ready");
-	      fl_set_object_color(stat[i],FL_INDIANRED,FL_GREEN);
+	      fl_set_object_color(stat[i],FL_DARKGOLD,FL_GREEN);
 	      fl_set_object_lcol(stat[i],FL_BLUE);
 	    }
 	  else if (all[i].state==winner)
@@ -1474,14 +1474,10 @@ void mastergui_display()
 	  state_dpy[i]=all[i].state;
 	  if (all[i].state==slept)  
 	    fl_drw_text(FL_ALIGN_LEFT,fd_mastergui->hierarchy->x+10,fd_mastergui->hierarchy->y+0+i*30,40,30,FL_BLACK,9,20,all[i].name);
-	  else if (all[i].state==active) 
-	    fl_drw_text(FL_ALIGN_LEFT,fd_mastergui->hierarchy->x+10,fd_mastergui->hierarchy->y+0+i*30,40,30,FL_BLUE,9,20,all[i].name);
 	  else if (all[i].state==notready) 
 	    fl_drw_text(FL_ALIGN_LEFT,fd_mastergui->hierarchy->x+10,fd_mastergui->hierarchy->y+0+i*30,40,30,FL_BLUE,9,20,all[i].name);
 	  else if (all[i].state==ready) 
 	    fl_drw_text(FL_ALIGN_LEFT,fd_mastergui->hierarchy->x+10,fd_mastergui->hierarchy->y+0+i*30,40,30,FL_GREEN,9,20,all[i].name);
-	  else if (all[i].state==forced) 
-	    fl_drw_text(FL_ALIGN_LEFT,fd_mastergui->hierarchy->x+10,fd_mastergui->hierarchy->y+0+i*30,40,30,FL_RED,9,20,all[i].name);
 	  else if (all[i].state==winner) 
 	    fl_drw_text(FL_ALIGN_LEFT,fd_mastergui->hierarchy->x+10,fd_mastergui->hierarchy->y+0+i*30,40,30,FL_RED,9,20,all[i].name);
 	}
@@ -1492,7 +1488,7 @@ void mastergui_display()
 	{
 	  state_dpy[i]=all[i].state;
 	  if ((all[i].state!=slept) && 
-	      ((all[i].father==(*all[i].id)) || (all[i].father==GUIHUMAN)))
+	      ((all[i].father==(*all[i].id)) || (all[i].father==GUIHUMAN) || (all[i].father==SHELLHUMAN)))
 	    {
 	      /* the root of one hierarchy */
 	      j++;
@@ -1504,11 +1500,11 @@ void mastergui_display()
 		}
 		
 	      if (all[i].state==notready) 
-		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_BLUE,9,20,all[i].name);
+		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_RED,9,20,all[i].name);
 	      else if (all[i].state==ready) 
-		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_GREEN,9,20,all[i].name);
+		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_DARKGOLD,9,20,all[i].name);
 	      else if (all[i].state==winner) 
-		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_RED,9,20,all[i].name);	      
+		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_GREEN,9,20,all[i].name);	      
 
 	      if ((yy+sizeY) < (fd_mastergui->hierarchy->y+fd_mastergui->hierarchy->h)) yy+=sizeY;
 	      navigate(i,&xx,&yy); 

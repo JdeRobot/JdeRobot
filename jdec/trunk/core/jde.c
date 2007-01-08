@@ -298,17 +298,21 @@ void *cronos_thread(void *not_used)
 int serve_keyboardmessage(char *mensaje)
 {
  char word[256],word2[256];
+ resumeFn r;
+ suspendFn s;
 
  /*printf("Command from keyboard: %s\n",mensaje); */
   if (sscanf(mensaje,"%s %s",word,word2)==2) 
     {
       if (strcmp(word,"resume")==0)
 	{
-	  if (strcmp(word2,"myschema")==0);
+	  r=(resumeFn)myimport(word2,"resume");
+	  if (r!=NULL) r(SHELLHUMAN,NULL,NULL);
 	}
       else if (strcmp(word,"suspend")==0)
 	{
-	  if (strcmp(word2,"myschema")==0);
+	  s=(suspendFn)myimport(word2,"suspend");
+	  if (s!=NULL) s();
 	}
       else if ((strcmp(word,"mastergui")==0) ||
 	       (strcmp(word,"gui")==0))
@@ -485,8 +489,9 @@ int jde_readline(FILE *myfile)
   char word[limit];
   int i=0,j=0;
   char buffer_file[limit]; 
- 
-
+  resumeFn r;
+  suspendFn s;
+  
   buffer_file[0]=fgetc(myfile);
   if (buffer_file[0]==EOF) return EOF;
   if (buffer_file[0]==255) return EOF; 
@@ -518,6 +523,20 @@ int jde_readline(FILE *myfile)
 	jde_loadschema(word);
 	(*all[num_schemas-1].startup)();
       }
+    else if (strcmp(word,"resume")==0)
+      {
+	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
+	sscanf(&buffer_file[j],"%s",word);
+	r=(resumeFn)myimport(word,"resume");
+	if (r!=NULL) r(SHELLHUMAN,NULL,NULL);
+	}
+    else if (strcmp(word,"suspend")==0)
+	{
+	  while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
+	  sscanf(&buffer_file[j],"%s",word);
+	  s=(suspendFn)myimport(word,"suspend");
+	  if (s!=NULL) s();
+	}
     else if (strcmp(word,"driver")==0)
       {
 	if(driver_section==0){
