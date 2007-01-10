@@ -182,11 +182,11 @@ Display* display;
 int screen;
 
 /* necesarias para los sensorsmotorsgui y mastergui */
-int mastergui_on=FALSE;
-int mastergui_request=FALSE;
+static int mastergui_on=FALSE;
+static int mastergui_request=FALSE;
 
-int sensorsmotorsgui_on=FALSE;
-int sensorsmotorsgui_request=FALSE;
+static int sensorsmotorsgui_on=FALSE;
+static int sensorsmotorsgui_request=FALSE;
 
 FD_mastergui *fd_mastergui;
 Window  hierarchy_win;
@@ -205,60 +205,56 @@ int pixel8bpp_rojo, pixel8bpp_blanco, pixel8bpp_amarillo;
 
 
 /* to display the hierarchy */
-int state_dpy[MAX_SCHEMAS];
-int sizeY=20;
-int sizeX=20;
-int iteracion_display=0;
+static int state_dpy[MAX_SCHEMAS];
+static int sizeY=20;
+static int sizeX=20;
+static int iteracion_display=0;
 #define FORCED_REFRESH 5000 /* ms */ 
 /*Every forced_refresh the hierarchy is drawn from scratch.*/
 
 
 
 
-int InitOGL(FL_OBJECT *ob, Window win,int w,int h, XEvent *xev, void *ud)
+static int InitOGL(FL_OBJECT *ob, Window win,int w,int h, XEvent *xev, void *ud)
+ /* Inicializa OpenGL con los parametros que diran como se visualiza. */
 {
-  /*  printf("capullo %d %d\n",w,h);*/
-
-  /* Inicializa OpenGL con los parametros que diran como se visualiza. */
    GLfloat ambient[] = {1.0, 1.0, 1.0, 1.0};
    GLfloat diffuse[] = {1.0, 1.0, 1.0, 1.0};
    GLfloat position[] = {0.0, 3.0, 3.0, 0.0};
    GLfloat lmodel_ambient[] = {0.2, 0.2, 0.2, 1.0};
    GLfloat local_view[] = {0.0};
-
-  glViewport(0,0,(GLint)w,(GLint)h);
-  /*  glDrawBuffer(GL_FRONT);*/
-  glDrawBuffer(GL_BACK);
-  glClearColor(0.6f, 0.8f, 1.0f, 0.0f);    
-  /* This Will Clear The Background Color To Black */
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glClearDepth(1.0);                           /* Enables Clearing Of The Depth Buffer */
-
  
- /* Enable Texture Mapping */
-  glEnable(GL_TEXTURE_2D);    
-  glLightfv (GL_LIGHT0, GL_AMBIENT, ambient);
-  glLightfv (GL_LIGHT0, GL_DIFFUSE, diffuse);
-  glLightfv (GL_LIGHT0, GL_POSITION, position);
-  glLightModelfv (GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
-  glLightModelfv (GL_LIGHT_MODEL_LOCAL_VIEWER, local_view);
- 
-  /* With this, the pioneer appears correctly, but the cubes don't */
-  glEnable (GL_LIGHTING);
-  glEnable (GL_LIGHT0);
-  glEnable (GL_AUTO_NORMAL);
-  glEnable (GL_NORMALIZE);  
-  glEnable(GL_DEPTH_TEST);                     /* Enables Depth Testing */
-  glDepthFunc(GL_LESS);  
-  glShadeModel(GL_SMOOTH);                     /* Enables Smooth Color Shading */
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   glViewport(0,0,(GLint)w,(GLint)h);  
+   /*  glDrawBuffer(GL_FRONT);*/
+   glDrawBuffer(GL_BACK);
+   glClearColor(0.6f, 0.8f, 1.0f, 0.0f);  
+   glClearDepth(1.0);                           /* Enables Clearing Of The Depth Buffer */
+   /* This Will Clear The Background Color To Light Blue */
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+   /* With this, the pioneer appears correctly, but the cubes don't */
+   glLightfv (GL_LIGHT0, GL_AMBIENT, ambient);
+   glLightfv (GL_LIGHT0, GL_DIFFUSE, diffuse);
+   glLightfv (GL_LIGHT0, GL_POSITION, position);
+   glLightModelfv (GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
+   glLightModelfv (GL_LIGHT_MODEL_LOCAL_VIEWER, local_view);
+   glEnable (GL_LIGHT0);
+   /*glEnable (GL_LIGHTING);*/
+   
+   glEnable(GL_TEXTURE_2D);     /* Enable Texture Mapping */
+   glEnable (GL_AUTO_NORMAL);
+   glEnable (GL_NORMALIZE);  
+   glEnable(GL_DEPTH_TEST);     /* Enables Depth Testing */
+   glDepthFunc(GL_LESS);  
+   glShadeModel(GL_SMOOTH);     /* Enables Smooth Color Shading */
+   glEnable(GL_BLEND);
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  return 0;
+   return 0;
 }
 
 
-int image_displaysetup() 
+static int image_displaysetup() 
 /* Inicializa las ventanas, la paleta de colores y memoria compartida para visualizacion*/ 
 {
     XGCValues gc_values;
@@ -419,7 +415,7 @@ void sensorsmotorsgui_resume(void)
 }
 
 
-void sensorsmotorsgui_buttons(FL_OBJECT *obj) 
+static void sensorsmotorsgui_buttons(FL_OBJECT *obj) 
 {
   float dpan=0.5,dtilt=0.5, speed_coef;
   float r,lati,longi,guix,guiy,guiz;
@@ -734,7 +730,7 @@ void sensorsmotorsgui_buttons(FL_OBJECT *obj)
 }
 
 
-void sensorsmotorsgui_display() 
+static void sensorsmotorsgui_display() 
      /* Siempre hay una estructura grafica con todo lo que debe estar en pantalla. Permite el pintado incremental para los buffers de puntos, borran el incremento viejo y pintan solo el nuevo */
 {
   int i,c,row,j,k;
@@ -743,25 +739,20 @@ void sensorsmotorsgui_display()
   float matColors[4];
   float  Xp_sensor, Yp_sensor;
 
-  /* resetea el buffer de color y el de profundidad */ 
-  /*  glDrawBuffer(GL_BACK);*/
-  /*  glClearColor(0.9,0.9,0.9,0.0);  */
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  /** Virtual camera **/
+  fl_activate_glcanvas(fd_sensorsmotorsgui->canvas);
+  /* Set the OpenGL state machine to the right context for this display */
+  /* reset of the depth and color buffers */
+  InitOGL(fd_sensorsmotorsgui->canvas, FL_ObjWin(fd_sensorsmotorsgui->canvas),fd_sensorsmotorsgui->canvas->w,fd_sensorsmotorsgui->canvas->h,NULL,NULL);
+    
+  /* Virtual camera */
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity(); 
-  /* proyección perspectiva */
-  /*gluPerspective(45.,(GLfloat)w/(GLfloat)h,1.0,100.0);
-    glTranslatef(0,0,-15);*/
   /* proyección ortográfica 
      glOrtho(-5.0,5.0,-5.0,5.0,1.0,100.0);
-     glTranslatef(0,0,-5);
-  */
-  /* intrinsic parameters + frustrum */
+     glTranslatef(0,0,-5); */
+  /* perspective projection. intrinsic parameters + frustrum */
   gluPerspective(45.,(GLfloat)640/(GLfloat)480,1.0,500.0);
   /* extrinsic parameters */
- 
   gluLookAt(virtualcam.posx,virtualcam.posy,virtualcam.posz,virtualcam.foax,virtualcam.foay,virtualcam.foaz,0.,0.,1.);
   
 
@@ -1130,7 +1121,7 @@ void mastergui_resume(void)
     }
 }
 
-void mastergui_buttons(FL_OBJECT *obj)
+static void mastergui_buttons(FL_OBJECT *obj)
 {
   int i;
  
@@ -1365,7 +1356,7 @@ void mastergui_buttons(FL_OBJECT *obj)
 }
 
 
-void navigate(int schema,int *x,int *y)
+static void navigate(int schema,int *x,int *y)
 {
   int i;
 
@@ -1392,7 +1383,7 @@ void navigate(int schema,int *x,int *y)
     }
 }
 
-void mastergui_display()
+static void mastergui_display()
 {
   int i,haschanged,j;
   int xx,yy;
@@ -1514,7 +1505,7 @@ void mastergui_display()
 }
 
 
-void jdegui_iteration()
+static void jdegui_iteration()
 { 
   FL_OBJECT *obj; 
   double delta, deltapos;
@@ -1760,7 +1751,7 @@ void jdegui_iteration()
 
 }
 
-void *jdegui_thread(void *not_used) 
+static void *jdegui_thread(void *not_used) 
 {
   struct timeval a,b;
   long diff, next;

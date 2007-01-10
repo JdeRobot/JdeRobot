@@ -173,29 +173,31 @@ int InitOGL2(FL_OBJECT *ob, Window win,int w,int h, XEvent *xev, void *ud)
 int InitOGL(FL_OBJECT *ob, Window win,int w,int h, XEvent *xev, void *ud)
 {
 
-/* La primera parte de esta funcion inicializa OpenGL con los parametros
-   que diran como se visualiza. */
+  /* La primera parte de esta funcion inicializa OpenGL con los parametros
+     que diran como se visualiza. */
+  fl_activate_glcanvas(fd_opengldemogui->canvas);  
+  glViewport(0,0,(GLint)w,(GLint)h);
 
-        glViewport(0,0,(GLint)w,(GLint)h);
-        glDrawBuffer(GL_FRONT);
-        glClearColor(0.0,0.0,0.0,0.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
+  /* resetea el buffer de color y el de profundidad */ 
+  glDrawBuffer(GL_BACK);
+  glClearColor(1.,1.,1.,0.0);  
+  glClearDepth(1.0);
+  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_DEPTH_TEST);      
+  /*  
+      glCullFace(GL_BACK);
+      glEnable(GL_CULL_FACE);
+      glScalef(2.0,2.0,2.0);
+      glShadeModel(GL_SMOOTH);
+  */
 
-
-	glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-
-	/* proyección ortográfica 
-        glOrtho(-5.0,5.0,-5.0,5.0,1.0,100.0);
-	glTranslatef(0,0,-5);
-	*/
-
-	/* proyección perspectiva */
-	gluPerspective(45.,(GLfloat)w/(GLfloat)h,1.0,100.0);
-        glTranslatef(0,0,-15);
-	
-        return 0;
+  /*
+    glDrawBuffer(GL_FRONT);
+    glClearColor(0.0,0.0,0.0,0.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+  */	
+  return 0;
 }
 
 
@@ -257,31 +259,7 @@ void PintaEscenaCubos()
  int i;
 
   if(rotar)
-    {
-      /* proyección perspectiva */
-      glMatrixMode(GL_PROJECTION);
-      glLoadIdentity();
-     
-      gluPerspective(45.,(GLfloat)640/(GLfloat)480,1.0,100.0);
-      gluLookAt(xcam,ycam,zcam,foax,foay,foaz,0.,1.,0.);
-
-      /* glTranslatef(-xcam,-ycam,-zcam); 
-	 OJO que esta transformación hay que "ponerle el menos"
-      */
-
-      /* resetea el buffer de color y el de profundidad */ 
-      glDrawBuffer(GL_BACK);
-      glClearColor(0.9,0.9,0.9,0.0);  
-      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-      glEnable(GL_DEPTH_TEST);      
-      /*  
-      glCullFace(GL_BACK);
-      glEnable(GL_CULL_FACE);
-      glScalef(2.0,2.0,2.0);
-      glShadeModel(GL_SMOOTH);
-      */
-
-      /* rendering */
+    {     
       /* cada vez que se llama a esta función rota un poquito */
       /* se va acumulando sobre la anterior que hubiera */
 
@@ -340,9 +318,6 @@ void PintaEscenaCubos()
 	  v3f(30.,0.,-30.+(float)i);
 	}
       glEnd();
-
-      /* intercambio de buffers */
-      glXSwapBuffers(fl_display, fl_get_canvas_id(fd_opengldemogui->canvas));
     }
 }
 
@@ -406,6 +381,27 @@ void opengldemo_guidisplay()
   static int d=0;
   /*  printf("it %d\n",d++);    */
 
+
+  fl_activate_glcanvas(fd_opengldemogui->canvas);
+  /* Set the OpenGL state machine to the right context for this display */
+  /* reset of the depth and color buffers */
+  InitOGL(fd_opengldemogui->canvas, FL_ObjWin(fd_opengldemogui->canvas),fd_opengldemogui->canvas->w,fd_opengldemogui->canvas->h,NULL,NULL);
+  /* proyección perspectiva */
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(45.,(GLfloat)640/(GLfloat)480,1.0,100.0);
+  gluLookAt(xcam,ycam,zcam,foax,foay,foaz,0.,1.,0.);
+  /* gluPerspective(45.,(GLfloat)w/(GLfloat)h,1.0,100.0);
+     glTranslatef(0,0,-15); */
+  /* glTranslatef(-xcam,-ycam,-zcam); 
+     OJO que esta transformación hay que "ponerle el menos"
+  */
+  /* proyección ortográfica 
+     glOrtho(-5.0,5.0,-5.0,5.0,1.0,100.0);
+     glTranslatef(0,0,-5);
+  */
+
+  /* rendering */
   PintaEscenaCubos();
 
   /*
