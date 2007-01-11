@@ -188,19 +188,19 @@ static int mastergui_request=FALSE;
 static int sensorsmotorsgui_on=FALSE;
 static int sensorsmotorsgui_request=FALSE;
 
-FD_mastergui *fd_mastergui;
-Window  hierarchy_win;
-FD_sensorsmotorsgui *fd_sensorsmotorsgui;
-GC sensorsmotorsgui_gc;
-Window  sensorsmotorsgui_win; 
+static FD_mastergui *fd_mastergui;
+static Window  hierarchy_win;
+static FD_sensorsmotorsgui *fd_sensorsmotorsgui;
+static GC sensorsmotorsgui_gc;
+static Window  sensorsmotorsgui_win; 
 
-char *samplesource;
-int vmode;
-XImage *imagenA,*imagenB,*imagenC,*imagenD,*sampleimage; 
-char *imagenA_buf, *imagenB_buf, *imagenC_buf, *imagenD_buf, *sampleimage_buf; /* puntero a memoria para la imagen a visualizar en el servidor X. No compartida con el servidor */
-long int tabla[256]; 
+static char *samplesource;
+static int vmode;
+static XImage *imagenA,*imagenB,*imagenC,*imagenD,*sampleimage; 
+static char *imagenA_buf, *imagenB_buf, *imagenC_buf, *imagenD_buf, *sampleimage_buf; /* puntero a memoria para la imagen a visualizar en el servidor X. No compartida con el servidor */
+static long int tabla[256]; 
 /* tabla con la traduccion de niveles de gris a numero de pixel en Pseudocolor-8bpp. Cada numero de pixel apunta al valor adecuado del ColorMap, con el color adecuado instalado */
-int pixel8bpp_rojo, pixel8bpp_blanco, pixel8bpp_amarillo;
+static int pixel8bpp_rojo, pixel8bpp_blanco, pixel8bpp_amarillo;
 
 
 
