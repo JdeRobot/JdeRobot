@@ -1,5 +1,8 @@
 Changelog
 
+**** #68, driver pantilt  (Roberto Calvo <rocapal@gsyc.escet.urjc.es> Tue, 23 Jan 2007 23:07:58 +0100)
+- Fix Bug, In pantiltmotors_iteration, it's send the data in this order longcommand-longspeed  and  latcommand-latspeed. Besides if the speed is 0.0, no command of position is sent.
+	
 **** #20, driver pantilt (Roberto Calvo <rocapal@gsyc.escet.urjc.es>  Wed, 13 Dec 2006 01:02:12 +0100)
 - Fix Bug about tilt_angle and pan_angle in 'ptmotors_resume'
 - In pantiltmotor_iteration, only see the pan and tilt position for send the new command. Now, also see pan and tilt speed for send new pantilt command.

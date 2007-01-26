@@ -352,27 +352,41 @@ void pantiltmotors_iteration()
   else if (latitude_speed > MAX_SPEED_PANTILT) latspeed=MAX_SPEED_PANTILT;
   else latspeed=latitude_speed;
  
-
-  if (longitude > max_pan) longcommand = max_pan;
-  else if (longitude < min_pan) longcommand = min_pan;
-  else longcommand=longitude;
-  if (latitude > max_tilt)  latcommand = max_tilt;
-  else if (latitude < min_tilt) latcommand = min_tilt;
-  else latcommand=latitude;
-
-  if ( (longcommand!=longitude_last) || (longspeed != longspeed_last) ) {
-    sprintf(pantilt_out,"PS%d PP%d\n",(int)(longspeed/ENCOD_TO_DEG),(int)(longcommand/ENCOD_TO_DEG));    
+  if (longspeed==0.0) {
+    sprintf(pantilt_out,"PS0\n");
     SendCmd(pantilt_out);
-    longitude_last=longcommand;
-    longspeed_last=longspeed;
   }
-  if( (latcommand!=latitude_last) || (latspeed!=latspeed_last) )  {
-    sprintf(pantilt_out,"TS%d TP%d\n",(int)(latspeed/ENCOD_TO_DEG),(int)(latcommand/ENCOD_TO_DEG));
+  else {
+
+    if (longitude > max_pan) longcommand = max_pan;
+    else if (longitude < min_pan) longcommand = min_pan;
+    else longcommand=longitude;
+    
+    if ( (longcommand!=longitude_last) || (longspeed != longspeed_last) ) {
+      sprintf(pantilt_out,"PP%d PS%d\n",(int)(longcommand/ENCOD_TO_DEG),(int)(longspeed/ENCOD_TO_DEG));
+      SendCmd(pantilt_out);
+      longitude_last=longcommand;
+      longspeed_last=longspeed;
+    }
+  }
+  
+  if (latspeed==0.0) {
+    sprintf(pantilt_out,"TS0\n");
     SendCmd(pantilt_out);
-    latitude_last=latcommand;
-    latspeed_last=latspeed;
+  } 
+  else {
+
+    if (latitude > max_tilt)  latcommand = max_tilt;
+    else if (latitude < min_tilt) latcommand = min_tilt;
+    else latcommand=latitude;
+    
+    if( (latcommand!=latitude_last) || (latspeed!=latspeed_last) )  {
+      sprintf(pantilt_out,"TP%d TS%d\n",(int)(latcommand/ENCOD_TO_DEG),(int)(latspeed/ENCOD_TO_DEG));
+      SendCmd(pantilt_out);
+      latitude_last=latcommand;
+      latspeed_last=latspeed;
+    }
   }
- 
   //if (debug[SCH_PANTILTMOTORS]) printf("pantiltmotors:  %1.1f %1.1f %1.1f %1.1f \n",latitude,longitude,latitude_speed,longitude_speed); 
 }
 
