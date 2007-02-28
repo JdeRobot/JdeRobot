@@ -121,8 +121,8 @@ int absolutas2relativas(Tvoxel in, Tvoxel *out)
 {
   if (out!=NULL)
     {
-  (*out).x = in.x*jde_robot[3] + in.y*jde_robot[4] - jde_robot[0];
-  (*out).y = in.y*jde_robot[3] - in.x*jde_robot[4] - jde_robot[1];
+  (*out).x = in.x*jde_robot[3] + in.y*jde_robot[4] - jde_robot[0]*jde_robot[3] - jde_robot[1]*jde_robot[4];
+  (*out).y = in.y*jde_robot[3] - in.x*jde_robot[4] + jde_robot[0]*jde_robot[4] - jde_robot[1]*jde_robot[3];
     }
   return 0;
 }
