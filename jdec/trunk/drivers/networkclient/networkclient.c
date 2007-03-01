@@ -461,7 +461,7 @@ int networkclient_colorC_resume(int father, int *brothers, arbitration fn){
     all[colorC_schema_id].father = father;
     all[colorC_schema_id].fps = 0.;
     all[colorC_schema_id].k =0;
-    put_state(colorD_schema_id,winner);
+    put_state(colorC_schema_id,winner);
     device_active[COLORC_DEVICE]=1;
     pthread_mutex_lock(&mymutex[COLORC_DEVICE]);
     sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORC_DEVICE]);
