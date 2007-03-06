@@ -61,7 +61,7 @@ typedef struct SoRtype{
   float roll;
 }SofReference;
 
-SofReference mypioneer,virtualcam;
+static SofReference mypioneer,virtualcam;
 /* robot and virtual camera in the absolute FrameOfReference */
 static int track_robot=TRUE;
 static int toggle=FALSE;
