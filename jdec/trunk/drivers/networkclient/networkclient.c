@@ -944,7 +944,7 @@ void *networkclient_motors_thread(void *not_used){
 void *networkclient_colorA_thread(void *not_used){
   int j=0;
   long int readn=0,bytes_readn=0,start=0;
-  int read_mode=MESSAGES; int colorA_trac;
+  int read_mode=MESSAGES; int colorA_trac=0;
   /* the next buffer is used to receive the image that enters through the socket. the buffer is a bit greater because of the
      asynchronous read in chunks that is made in the socket in order to receive the incoming data. */
   char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
@@ -979,7 +979,7 @@ void *networkclient_colorA_thread(void *not_used){
 	readn=read(device_socket[COLORA_DEVICE],&(mmbuf[colorA_trac]),SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE-colorA_trac);
       }
 
-      bytes_readn=readn;      
+      bytes_readn=readn;
       switch(readn){
       case 0: exit(1); break;
       case -1: break; /* nothing to read */
@@ -1073,7 +1073,7 @@ void *networkclient_colorA_thread(void *not_used){
 void *networkclient_colorB_thread(void *not_used){
   int j=0;
   long int readn=0,bytes_readn=0,start=0;
-  int read_mode=MESSAGES; int colorB_trac;
+  int read_mode=MESSAGES; int colorB_trac=0;
   /* the next buffer is used to receive the image that enters through the socket. the buffer is a bit greater because of the
      asynchronous read in chunks that is made in the socket in order to receive the incoming data. */
   char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
@@ -1202,7 +1202,7 @@ void *networkclient_colorB_thread(void *not_used){
 void *networkclient_colorC_thread(void *not_used){
   int j=0;
   long int readn=0,bytes_readn=0,start=0;
-  int read_mode=MESSAGES; int colorC_trac;
+  int read_mode=MESSAGES; int colorC_trac=0;
   /* the next buffer is used to receive the image that enters through the socket. the buffer is a bit greater because of the
      asynchronous read in chunks that is made in the socket in order to receive the incoming data. */
   char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
@@ -1331,7 +1331,7 @@ void *networkclient_colorC_thread(void *not_used){
 void *networkclient_colorD_thread(void *not_used){
   int j=0;
   long int readn=0,bytes_readn=0,start=0;
-  int read_mode=MESSAGES; int colorD_trac;
+  int read_mode=MESSAGES; int colorD_trac=0;
   /* the next buffer is used to receive the image that enters through the socket. the buffer is a bit greater because of the
      asynchronous read in chunks that is made in the socket in order to receive the incoming data. */
   char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];

@@ -957,6 +957,33 @@ Y para compilar sencillamente ejecutamos:
 
 \texttt{make}
 
+\subsubsection{Player/Stage}
+
+La más reciente probada es la 2.0.3. 
+
+Para player:
+\texttt{./configure  --disable-camerauvc --disable-canonvcc4}
+\texttt{make} 
+\texttt{make install}
+
+Para stage:
+\texttt{make} 
+\texttt{make install}
+\texttt{ln -sf sitiodondeeste/rgb.txt /usr/X11R6/lib/X11/rgb.txt}
+
+Necesita tener opengl instalado.
+
+\subsubsection{XForms}
+
+Paquetes (en ubuntu): libforms-bin, libforms-dev, libforms1, libformsgl1, libformsgl-dev, 
+
+\subsubsection{Opengl}
+
+Paquetes (en ubuntu): libgl1-mesa, libgl1-mesa-dev, libglu1-mesa-dev, glutg3-dev
+Aceleración gráfica, mejor con soporte hardware.
+
+\subsubsection{Firewire}
+
 \subsection{Configuración}
 La configuración de jdec se especifica en un fichero de texto plano
 (normalmente con extensión .conf) que indica qué drivers se desean
