@@ -58,7 +58,7 @@
 
 \pagestyle{headings}
 
-\author{José M. Cañas, A. Pineda, P. Barrera, J. Ruíz-Ayucar\\
+\author{José M. Cañas, A. Pineda, P. Barrera, J. Ruíz-Ayucar,\\ Javier Martín Ramos ,José A. Santos Cadenas\\
 Universidad Rey Juan Carlos}
 \title{Programación de robots con la plataforma jde.c}
 \date{\today}
@@ -793,206 +793,121 @@ Se le incorpora
 ¿Cómo pintar una recta en el canvas? ¿Como pintar un punto en el canvas? ¿Cómo recibir el click del ratón en el canvas? ¿Cómo recibir el click del ratón en una imagen? ¿Cómo visualizar imágenes?
 
 De coordenadas gráficas GUI a posición en el mundo. Viceversa
-De coordenadas gráficas GUI a píxel en imagen. Vicevers.
+De coordenadas gráficas GUI a píxel en imagen. Viceversa.
 
 \section{Instalación}
 
-\subsection{Descripción de las aplicaciones}
-\subsubsection{Aplicaciones propias}
-Actualmente tenemos varias aplicaciones desarrolladas por nosotros mismos, las cuales pueden ser descargadas desde la página web oficial:
+Actualmente \texttt{jdec} está organizado de forma jerárquica mediante plugins. Existen esquemas y drivers. Los drivers proporcionan un acceso simplificado a los sensores y actuadores para la aplicación. Los esquemas (schemas) son las aplicaciones de usuario.
+Tanto unos como otros se cargan de forma dinámica al lanzar la plataforma según indique el fichero del directorio actual \texttt{jde.conf}, o el especificado como argumento.
 
-\vspace{5 mm}
+\subsection{Descarga}
+La última versión de \texttt{jdec} siempre está disponible en línea mediante subversion. Para descargarla se necesita un cliente de subversion, que podemos obtener así:
+      \begin{verbatim}
+      apt-get install subversion
+      \end{verbatim}
+Una vez que se dispone de cliente subversion, para descargar la última versión de \texttt{jde.c} basta ejecutar:
+      \begin{verbatim}
+      svn co http://svn.robotica-urjc.es/jde/jdec/trunk <directorio_destino>
+      \end{verbatim}
+Para más información acerca de \texttt{jdec} puedes visitar su página (repara en el https://):
+      
+      \vspace{5 mm}
+      
+      \texttt{https://trac.robotica-urjc.es/jde/}
+      
+      \vspace{5 mm}
 
-\texttt{http://gsyc.escet.urjc.es/jmplaza/research-arch.html\#jde.c}
+\subsection{Descripción de drivers y esquemas}
+\subsubsection{Drivers}
+En esta sección ofrecemos una versión resumida de lo que proporciona cada driver. Para más información consulta la sección de configuración.
+   \begin{enumerate}
+      \item \textit{firewire}: este driver nos proporciona acceso a las imágenes de las cámaras conectadas en el bus firewire (ieee1394), hasta un total de 4 cámaras.
+      \item \textit{imagefile}: este driver permite cargar imágenes en formato \textit{.ppm} para trabajar con ellas en la plataforma.
+      \item \textit{networkclient}: este driver permite acceder de forma remota a sensores y actuadores servidos por cierta máquina o proceso que tiene acceso a ellos.
+      \item \textit{networkserver}: este driver permite el uso a otras máquinas o procesos de los sensores y actuadores a los que tiene acceso.
+      \item \textit{pantilt}: este driver proporciona acceso al cuello mecánico del robot.
+      \item \textit{player}: este driver conecta con la aplicación player, que nos da acceso a un robot simulado con \textit{stage} o real.
+      \item \textit{video4linux}: este driver nos proporciona acceso a las imágenes de las cámaras conectadas por usb.
+   \end{enumerate}
+\subsubsection{Schemas}
+   \begin{enumerate}
+      \item \textit{hsituner}: este esquema es un ejemplo de como trabajar sobre imágenes y hacer un filtro de color.
+      \item \textit{introrob}: este esquema es el utilizado en las asignaturas de \textit{robótica} e \textit{introducción a la robótica}. Permite una programación sencilla del robot para desarrollar algoritmos de navegación simplemente editando el archivo \texttt{navegacion.c}.
+      \item \textit{myschema}: esquema sencillo para observar la estructura básica de un esquema.
+      \item \textit{opengldemo}: este esquema es una demostración de opengl, podemos mover una cámara y observar objetos sintéticos en 3D generados con esta librería. Sirve como ejemplo para ver algunas posibilidades de OpenGL.
+   \end{enumerate}
 
-\vspace{5 mm}
+\subsection{Compilación e instalación}
+   \subsubsection{Seleccionar esquemas y drivers}
+      Antes de nada hay que seleccionar los esquemas y drivers de interés. Para ello hay que editar el fichero \textit{Makefile} que se encuentra en el directorio en el que se ha descargado \texttt{jde.c}. En las lineas:
 
-\begin{enumerate}
-\item
-\texttt{jde.c} -- Es el programa principal. Desde \texttt{jde.c} tendremos fácil acceso a los recursos del robot, y con él podremos añadir nuestros esquemas.
-\item
-\texttt{otos} -- \texttt{Otos} es el servidor encargado del acceso a los sensores, sónares, laser y ruedas, entre otras cosas. Incluye así mismo el cliente de prueba \texttt{otosclient}
-\item
-\texttt{oculo} -- \texttt{Oculo} es el servidor que nos permite acceder a la visión del robot, incluyendo cámaras usb o firewire, y la unidad pantilt.
-\item
-\texttt{hsituner} -- Con esta aplicación podremos seleccionar fácilmente rangos de color en el espacio hsi conectándonos a un servidor oculo.
-\end{enumerate}
-\subsubsection{Third party}
-\begin{enumerate}
-\item
-libAria -- Ésta es la biblioteca con la que accedemos al robot Pioneer. Pese a ser GPL (esto es, software libre), no están disponibles de forma libre. Se permite su distribución y modificación,
-pero Activemedia, el fabricante, no permite descargarlo de forma libre desde su página web. Por tanto, si deseas una copia del código debes ponerte en contacto con el grupo de robótica.
-\item
-player/stage -- Es uno de los simuladores que utilizamos para poder modelar un mundo virtual en el que se sitúe el robot.
-\item
-firewire -- Son una serie de bibliotecas necesarias para programar aplicaciones que accedan directamente a cámaras firewire, como por ejemplo iSight, las que a menudo usamos con los robot Pioneer.
-\item
-libforms -- Actualmente las aplicaciones tienen su interfaz desarrollada con estas bibliotecas gráficas. Si lo deseas, también puedes instalarte libforms-bin, que son un conjunto de aplicaciones que permiten desarrollar de forma muy intuitiva una interfaz gráfica con estas bibliotecas.
-\item
-Otros -- También utilizamos más bibliotecas dinámicas propias del kernel de Linux, como por ejemplo libpthread, libm, libdl, libstdc, etc.
-\end{enumerate}
-\subsection{Instalación del binario en Debian/Ubuntu}
-\label{apt}
-Con este método podremos instalar sencillamente todos los paquetes ya compilados y listos para funcionar en nuestro sistema.
-\begin{enumerate}
-\item
-Actualizar \texttt{/etc/apt/sources.list} -- Para poder instalar los binarios debemos añadir dos nuevos repositorios a nuestro \texttt{/etc/apt/sources.list}:
-\begin{verbatim}
-deb http://veo.dat.escet.urjc.es/debian dist main
-deb-src http://veo.dat.escet.urjc.es/debian dist main\end{verbatim}
-Sustituyendo \emph{dist} por tu versión, por ejemplo \emph{sarge} o \emph{breezy}.
-\item
-Actualizar lista de paquetes -- Ahora actualizamos la copia local de la lista de paquetes ejecutando:
+      \begin{verbatim}
+DRIVERS = firewire imagefile pantilt player video4linux networkclient\
+          networkserver
+SCHEMAS = hsituner introrob myschema opengldemo papito myperceptive
+      \end{verbatim}
 
-\texttt{apt-get update}
-\item
-Y finalmente instalamos el entorno de desarrollo y la plataforma completa:
+      Dejamos únicamente aquellos elementos que vayamos a necesitar. De esta forma, compilaremos únicamente los que hemos dejado. Más adelante, podríamos compilar manualmente cualquiera de ellos si lo deseásemos.
+      
+   \subsubsection{Resolver dependencias}
+      Antes de compilar, hay que asegurarse de que en nuestra máquina estén instalados y disponibles todos los paquetes de los que depende tanto la plataforma, como los drivers y schemas que se vayan a utilizar.
+      \vspace{5 mm}
 
-\texttt{apt-get install robotica robotica-dev}
-\end{enumerate}
+      Para instalar los paquetes necesarios en Ubuntu:
+      \begin{verbatim}
+sudo aptitude update
+sudo aptitude install <paquetes>
+      \end{verbatim}
 
-\subsection{Instalación desde el código fuente}
-Si tu intención es programar y/o modificar el código fuente de alguna de las aplicaciones del entorno, entonces deberás poder instalarla a partir del código fuente. A continuación están las instrucciones para cada una de ellas.
-\subsubsection{jde.c -- 3.4}
-Para poder compilar necesitas tener instaladas unas determinadas bibliotecas de desarrollo. En concreto son las siguientes:
+      \begin{enumerate}
+      \item \textit{Dependencias de la plataforma}:
+      \begin{verbatim}
+libforms-bin libforms-dev libforms1 libformsgl1 libx11-dev
+x11proto-core-dev libgl1-mesa libgl1-mesa-dev libglu1-mesa-dev
+mesa-common-dev glutg3-dev libformsgl-dev
+      \end{verbatim}
 
-\vspace{5 mm}
+Además, son necesarias las cabeceras del núcleo. Para conseguirlas:
+      \begin{verbatim}
+sudo apt-get install linux-headers-$(uname -r)
+      \end{verbatim}
 
-\texttt{libpthread, libforms, libX11, libm}
+      \item \textit{firewire}:
+      \begin{verbatim}
+libraw1394-13-dev libdc1394-13-dev
+      \end{verbatim}
 
-\vspace{5 mm}
+      \item \textit{player}: para soportar el driver de player es necesario instalar player. Para ello, hay dos posibilidades:\\
 
-Todas ellas son estándar, y se puede instalar fácilmente desde cualquier distribución.
-
-Ahora debemos descomprimir el tar.gz:
-
-\vspace{5 mm}
-
-\texttt{tar xzf jde-3.4.tgz}
-
-\vspace{5 mm}
-
-Si no usas Debian o Ubuntu, entonces es posible que debas modificar el fichero \texttt{makefile} para que asegurarte de que \texttt{INC-DIR} y \texttt{LIB-DIR} apunten a los sitios correctos.
-
-Por último, ejecuta \texttt{make} para generar el binario.
-\subsubsection{Otos -- 5.3}
-Para compilar otos necesitamos las siguientes bibliotecas:
-
-\vspace{5 mm}
-
-\texttt{libpthread, libforms, libX11, libm, libdl, libstdc++, libAria}
-
-\vspace{5 mm}
-
-Todas ellas son estándar y se puede instalar fácilmente, a excepción de libAria. Si necesitas instalar libAria lo más sencillo es hacerlo con apt desde el repositorio de robótica (Ver apartado \ref{apt}) ejecutando:
-
-\vspace{5 mm}
-
-\texttt{aptitude install aria-robot aria-robot-dev}
-
-\vspace{5 mm}
-
-Importante: Para poder compilar otos es \emph{necesario} utilizar la versión 3.3 tanto de gcc como de g++. Para ello debes instalarlo, y actualizar el \texttt{makefile} para que utilize \texttt{gcc-3.3} y \texttt{g++-3.3}. Ya sólo nos queda compilarlo:
-
-\vspace{5 mm}
-
-\texttt{make}
-
-\subsubsection{Otos con soporte para player/stage -- 1.4rc2}
-Otos podemos compilarlo también con soporte para player/stage. Para ello debemos tener player instalado y si fuera necesario tendríamos que modificar \texttt{makefile} para poder enlazar correctamente con la biblioteca de player. Para instalarlo lo más sencillo es hacerlo desde apt:
-
-\vspace{5 mm}
-
-\texttt{aptitude install player stage}
-
-\vspace{5 mm}
-
-Alternativamente también podríamos instalarlo desde el código fuente original. Para ello nos dirigimos a la página del desarrollador y descargamos el tarball de la versión 1.4rc2 y seguimos las siguientes instrucciones:
-
-\begin{verbatim}
-tar xzf player-src-1.4rc2.tar.gz
-cd player-src-1.4rc2
-./configure --disable-cmvision --bindir=/usr/bin \
---includedir=/usr/include --libdir=/usr/lib
+Descargar e instalar los paquetes de este modo
+      \begin{verbatim}
+wget http://gsyc.es/~chuso/player_2.0.3-1_i386.deb
+wget http://gsyc.es/~chuso/stage_2.0.3-1_i386.deb
+sudo dpkg -i stage_2.0.3-1_i386.deb player_2.0.3-1_i386.deb
+      \end{verbatim}
+o seguir los pasos detallados en el \htlink{manual oficial}{http://playerstage.sourceforge.net/doc/ps_getting_started-1.6.txt} para la compilación e instalación manual.
+      \end{enumerate}
+      
+   \subsubsection{Compilación}
+	En el directorio de descarga de \texttt{jdec} ejecuta
+      \begin{verbatim}
 make
-make install\end{verbatim}
+      \end{verbatim}
+	Ese mismo comando, en el directorio de cualquier esquema o driver, te servirá para compilarlo.
 
-Finalmente, para decirle a otos que se compile compile con soporte para player, debemos ejecutar:
-
-\vspace{5 mm}
-
-\texttt{make psg}
-
-\vspace{5 mm}
-\subsubsection{Oculo -- 3.10}
-Para compilar oculo necesitamos las siguientes bibliotecas de desarrollo:
-
-\vspace{5 mm}
-
-\texttt{libpthread, libXext, libX11, libm, libdc1394, libraw1394}
-
-\vspace{5 mm}
-
-Todas estas bibliotecas son estandar, por lo que podremos instalarlas cómodamente desde cualquier distribución.
-
-Si fuera necesario, modificaríamos las rutas a las bibliotecas en las variables \texttt{INC-DIR} y en \texttt{INC-LIB} de \texttt{makefile}.
-
-Finalmente, para compilarlo ejecutamos
-
-\vspace{5 mm}
-
-\texttt{make}
-
-\subsubsection{hsituner -- 2.1}
-hsituner depende de las siguientes bibliotecas:
-
-\vspace{5 mm}
-
-\texttt{libpthread, libforms, libX11, libm}
-
-\vspace{5 mm}
-Y para compilar sencillamente ejecutamos:
-
-\vspace{5 mm}
-
-\texttt{make}
-
-\subsubsection{Player/Stage}
-
-La más reciente probada es la 2.0.3. 
-
-Para player:
-\texttt{./configure  --disable-camerauvc --disable-canonvcc4}
-\texttt{make} 
-\texttt{make install}
-
-Para stage:
-\texttt{make} 
-\texttt{make install}
-\texttt{ln -sf sitiodondeeste/rgb.txt /usr/X11R6/lib/X11/rgb.txt}
-
-Necesita tener opengl instalado.
-
-\subsubsection{XForms}
-
-Paquetes (en ubuntu): libforms-bin, libforms-dev, libforms1, libformsgl1, libformsgl-dev, 
-
-\subsubsection{Opengl}
-
-Paquetes (en ubuntu): libgl1-mesa, libgl1-mesa-dev, libglu1-mesa-dev, glutg3-dev
-Aceleración gráfica, mejor con soporte hardware.
-
-\subsubsection{Firewire}
 
 \subsection{Configuración}
 La configuración de jdec se especifica en un fichero de texto plano
 (normalmente con extensión .conf) que indica qué drivers se desean
-cargar con la plataforma y qué esquemas desean utilizarse.\\
+cargar con la plataforma y qué esquemas desean utilizarse. Recuerda que
+en \texttt{jdec} los drivers proveen sensores y actuadores y los esquemas
+son las aplicaciones de usuario.\\
 
 Por defecto, el fichero de configuración utilizado es
 \textit{jde.conf}, el cual se encuentra ubicado en el directorio de
 configuración de jdec (dependiendo de si se ha instalado mediante
-paquetes o compilado directamente puede variar).\\
+paquetes o compilado directamente puede variar). El símbolo \textit{\#} indica
+que, de ahí en adelante, hay un comentario de línea.\\
 
 Los esquemas que se desean cargar se especifican indicando la palabra
 \textit{load} seguida del nombre del esquema. Este debe ser
@@ -1060,7 +975,7 @@ end_driver
   es obligatorio usar todos.
 \item \textit{initial position}: indica la posición inicial del robot
   en el mundo de coordenadas relativas de jdec. Se precisa una
-  posición X, una posición Y y una orientación en radianes Theta. No
+  posición X (en mm), una posición Y (en mm) y una orientación Theta (en grados). No
   es obligatorio utilizar esta opción.
 \end{itemize}
 
@@ -1275,7 +1190,7 @@ end_driver
 
 driver player
 hostname localhost port 6665
-initial position X(mm) Y(mm) Theta(deg)
+#initial position X(mm) Y(mm) Theta(deg)
 initial_position -6500 -6500 45
 provides laser
 provides sonars
@@ -1350,7 +1265,7 @@ Use: jde [config.file] [--gui]
 
      [config.file] Sets an specific config file. Don't use this option
                    to read default configuration.
-           [--gui] Starts JDE with the main gui activated.
+           [--gui] Starts JDE with the master gui activated.
 
 \end{verbatim}
 
@@ -1366,41 +1281,6 @@ This is the shell of JDE 4.2. Available commands are:
   sensorsmotorsgui [on|off]
 
 \end{verbatim}
-
-\subsection{Cuadro resumen de aplicaciones y dependencias}
-\begin{center}
-\begin{tabular}{|l|l||l||l|l|}
-\hline
-Aplicación  & Versión      & Compiladores válidos  & Dependencias    & Versión   \\
-\hline
-jde.c       & 3.4          & gcc-4.0               & libforms        &           \\
-            &              & gcc-3.3               & libX11          &           \\
-            &              & gcc-2.95              & libm            &           \\
-            &              &                       & libpthread      &           \\
-\hline
-otos        & 5.3          & gcc-4.0 y g++4.0      & libpthread      &           \\
-            &              &                       & libforms        &           \\
-            &              &                       & libX11          &           \\
-            &              &                       & libm            &           \\
-            &              &                       & libdl           &           \\
-            &              &                       & libstdc++       &           \\
-            &              &                       & libAria         & 1.3.2     \\
-            &              &                       & libplayerc *    & 1.4rc2    \\
-\hline
-oculo       & 3.10         & gcc-4.0               & libpthread      &           \\
-            &              & gcc-3.3               & libXext         &           \\
-            &              & gcc-2.95              & libX11          &           \\
-            &              &                       & libm            &           \\
-            &              &                       & libdc1394       &           \\
-            &              &                       & libraw1394      &           \\
-\hline
-hsituner    & 2.1          & gcc-4.0               & libforms        &           \\
-            &              & gcc-3.3               & libm            &           \\
-            &              & gcc-2.95              & libpthread      &           \\
-\hline
-\end{tabular}
-\end{center}
-* libplayerc es opcional
 
 \section{Biblioteca de esquemas}
 

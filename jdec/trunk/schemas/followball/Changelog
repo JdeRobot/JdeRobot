@@ -1,0 +1,25 @@
+
+followball (0.4) stable: urgency=low
+
+	* Add flag -O2 for full optimize code
+	* [FIX-BUG] The search is realized with speed_latitude=0.0
+	* Increase the pan and tilt speeds.
+
+ -- Roberto Calvo <rocapal@gsyc.escet.urjc.es>  Fri, 23 Mar 2007 21:15:29 +0100
+
+
+followball (0.3) stable: urgency=low
+
+	* Change the cycle of scheme=70ms
+	* Change value of PAN Speed (see followball.c)
+	* Add buttons for activate/desactivate the visualization of histogram
+	and filter HSI image.
+
+  -- Roberto Calvo <rocapal@gsyc.escet.urjc.es>  Sat, 10 Mar 2007 20:58:50 +0100
+
+followball (0.2) stable: urgency=low
+
+	* The control of pantilt is realized "in speed"
+
+  -- Roberto Calvo <rocapal@gsyc.escet.urjc.es>  Tue, 23 Jan 2007 23:07:58 +0100
+

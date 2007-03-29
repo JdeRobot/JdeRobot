@@ -32,17 +32,20 @@ or maintain some goal. They order motor commands or activate new
 schemas, because the schemas can be combined forming hierarchies.
 Several schemas are included in the official release. 
 
+For further information, go to docs/manual, type "make" and get it  
+at jdecmanual.pdf
+
 
 COMPILE:
 
 To compile jde.c you need to satisfy the following dependences:
 
-* Kernel headers, for video4linux support. 
-* libraw1394-dev and libdc1394-dev, for firewire support. 
-* Player/Stage packages for Player/Stage support (only simulator available right now) 
-* XForms (libforms-dev, libformsgls-dev and libforms-bin), for GUI support. 
-* OpenGL headers and glu headers (libgl1-mesa-dev, libglu1-mesa-dev), for opengl support (necessary in visualization)
+* Kernel headers.
+* libraw1394-13-dev and libdc1394-13-dev, for firewire support. 
+* Player/Stage packages for Player/Stage support (only simulator available right now).
+* XForms (libforms-bin libforms-dev libforms1 libformsgl1 libx11-dev x11proto-core-dev libformsgl-dev), for GUI support. 
+* OpenGL headers and glu headers (libgl1-mesa libgl1-mesa-dev, libglu1-mesa-dev mesa-common-dev glutg3-dev), for opengl support (necessary in visualization)
 
 Then just type 
 
-$ make ; make install 
+$ make
