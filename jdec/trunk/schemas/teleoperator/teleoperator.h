@@ -18,37 +18,9 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-#include <forms.h>
-extern Display* display;
-extern int screen;
-
-extern void jdegui_startup();
-extern void jdegui_close();
-extern void jdegui_resume();
-extern void jdegui_suspend();
-extern int jdegui_cycle;
-extern float fpsgui;
-extern int kgui;
-
-extern void mastergui_resume();
-extern void mastergui_suspend();
-
-/* for visualization of the schemas */
-typedef void (*guibuttons)(FL_OBJECT *obj);
-extern int register_buttonscallback(guibuttons f);
-extern int delete_buttonscallback(guibuttons f);
-typedef void (*guidisplay)(void);
-extern int register_displaycallback(guidisplay f);
-extern int delete_displaycallback(guidisplay f);
-
-/* MOUSE BUTTON MAP */
-#define MOUSELEFT 1
-#define MOUSEMIDDLE 2
-#define MOUSERIGHT 3
-#define MOUSEWHEELUP 4
-#define MOUSEWHEELDOWN 5
-
-/* PI definition */
-#define PI 3.141592654
-
+extern void teleoperator_startup();
+extern void teleoperator_suspend();
+extern void teleoperator_resume(int father, int *brothers, arbitration fn);
+extern void teleoperator_guiresume();
+extern void teleoperator_guisuspend();
 

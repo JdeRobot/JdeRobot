@@ -5,7 +5,7 @@ CFLAGS = -g -pedantic -Wall $(INC-DIR)
 #-ansi
 #LIBS = -lpthread -lm -lforms -lX11 -ldc1394_control -lraw1394
 LIBS = -lpthread -lm -lforms -lX11 -ldl -lformsGL -lGL -lGLU
-OBJS = jdegui.o mastergui.o sensorsmotorsgui.o pioneer.o 
+OBJS = jdegui.o mastergui.o pioneer.o 
 INSTALLDIR=/usr/local
 CFGDIR="$(INSTALLDIR)/jde-robot"
 
@@ -18,23 +18,17 @@ jde: jde.o $(OBJS)
 jde.o: jde.c
 	$(GCC) $(CFLAGS) -D CONFIGDIR='$(CFGDIR)' -c jde.c	
 
-jdegui.o: jdegui.c jdegui.h mastergui.o sensorsmotorsgui.o
+jdegui.o: jdegui.c jdegui.h mastergui.o 
 	$(GCC) $(CFLAGS) -c jdegui.c
+
+pioneer.o: pioneer.c pioneer.h
+	$(GCC) $(CFLAGS) -c pioneer.c
 
 mastergui.o: mastergui.c mastergui.h
 	$(GCC) $(CFLAGS) -c mastergui.c
 
 mastergui.c: mastergui.fd
 	fdesign -convert mastergui.fd
-
-sensorsmotorsgui.o: sensorsmotorsgui.c sensorsmotorsgui.h
-	$(GCC) $(CFLAGS) -c sensorsmotorsgui.c
-
-sensorsmotorsgui.c: sensorsmotorsgui.fd
-	fdesign -convert sensorsmotorsgui.fd
-
-pioneer.o: pioneer.c pioneer.h
-	$(GCC) $(CFLAGS) -fPIC -c pioneer.c
 
 clean:
 	-rm -f *.o *.a *so *~

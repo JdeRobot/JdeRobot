@@ -7,15 +7,15 @@ Number of forms: 1
 Unit of measure: FL_COORD_PIXEL
 
 =============== FORM ===============
-Name: sensorsmotorsgui
+Name: teleoperatorgui
 Width: 880
-Height: 540
-Number of Objects: 32
+Height: 500
+Number of Objects: 42
 
 --------------------
 class: FL_BOX
 type: FRAME_BOX
-box: 0 0 880 540
+box: 0 0 880 500
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -33,7 +33,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 10 400 50 20
+box: 10 370 50 20
 boxtype: FL_FRAME_BOX
 colors: FL_DARKCYAN FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -62,14 +62,14 @@ label:
 shortcut: 
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
-name: teleoperator
+name: basejoystick
 callback: 
 argument: 
 
 --------------------
 class: FL_POSITIONER
 type: NORMAL_POSITIONER
-box: 280 430 110 50
+box: 280 400 110 50
 boxtype: FL_DOWN_BOX
 colors: FL_DARKER_COL1 FL_DARKTOMATO
 alignment: FL_ALIGN_TOP
@@ -87,7 +87,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
-box: 340 490 50 20
+box: 340 460 50 20
 boxtype: FL_FRAME_BOX
 colors: FL_DARKER_COL1 FL_DARKGOLD
 alignment: FL_ALIGN_CENTER
@@ -105,7 +105,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: MENU_BUTTON
-box: 280 490 50 20
+box: 280 460 50 20
 boxtype: FL_FRAME_BOX
 colors: FL_DARKER_COL1 FL_DARKGOLD
 alignment: FL_ALIGN_CENTER
@@ -159,7 +159,7 @@ argument:
 --------------------
 class: FL_POSITIONER
 type: NORMAL_POSITIONER
-box: 420 430 110 50
+box: 430 400 110 50
 boxtype: FL_DOWN_BOX
 colors: FL_DARKER_COL1 FL_DARKTOMATO
 alignment: FL_ALIGN_TOP
@@ -177,7 +177,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: MENU_BUTTON
-box: 480 490 50 20
+box: 490 460 50 20
 boxtype: FL_FRAME_BOX
 colors: FL_DARKER_COL1 FL_DARKGOLD
 alignment: FL_ALIGN_CENTER
@@ -195,7 +195,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: MENU_BUTTON
-box: 420 490 50 20
+box: 430 460 50 20
 boxtype: FL_FRAME_BOX
 colors: FL_DARKER_COL1 FL_DARKGOLD
 alignment: FL_ALIGN_CENTER
@@ -213,7 +213,7 @@ argument:
 --------------------
 class: FL_SLIDER
 type: VERT_SLIDER
-box: 400 430 10 70
+box: 410 400 10 70
 boxtype: FL_FRAME_BOX
 colors: FL_LIGHTER_COL1 FL_DARKTOMATO
 alignment: FL_ALIGN_BOTTOM
@@ -250,14 +250,14 @@ argument:
 --------------------
 class: FL_TEXT
 type: NORMAL_TEXT
-box: 270 400 140 20
+box: 280 370 110 20
 boxtype: FL_FLAT_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_LEFT|FL_ALIGN_INSIDE
 style: FL_BOLD_STYLE
 size: FL_DEFAULT_SIZE
 lcol: FL_DARKTOMATO
-label: Base Teleoperator
+label: Base Joystick
 shortcut: 
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
@@ -268,14 +268,14 @@ argument:
 --------------------
 class: FL_TEXT
 type: NORMAL_TEXT
-box: 400 400 150 20
+box: 420 370 120 20
 boxtype: FL_FLAT_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_LEFT|FL_ALIGN_INSIDE
 style: FL_BOLD_STYLE
 size: FL_DEFAULT_SIZE
 lcol: FL_DARKTOMATO
-label: Pantilt Teleoperator
+label: Pantilt Joystick
 shortcut: 
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
@@ -286,7 +286,7 @@ argument:
 --------------------
 class: FL_FRAME
 type: ENGRAVED_FRAME
-box: 550 10 322 242
+box: 553 5 322 242
 boxtype: FL_NO_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -304,7 +304,7 @@ argument:
 --------------------
 class: FL_FREE
 type: NORMAL_FREE
-box: 550 260 160 120
+box: 555 250 160 120
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_CENTER
@@ -318,11 +318,12 @@ gravity: FL_NoGravity FL_NoGravity
 name: ventanaA
 callback: 
 argument: 
+   handler: freeobj_ventanaAA_handle
 
 --------------------
 class: FL_FREE
 type: NORMAL_FREE
-box: 710 260 160 120
+box: 715 250 160 120
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_CENTER
@@ -336,11 +337,12 @@ gravity: FL_NoGravity FL_NoGravity
 name: ventanaB
 callback: 
 argument: 
+   handler: freeobj_ventanaBB_handle
 
 --------------------
 class: FL_FREE
 type: NORMAL_FREE
-box: 550 380 160 120
+box: 555 370 160 120
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_CENTER
@@ -354,11 +356,12 @@ gravity: FL_NoGravity FL_NoGravity
 name: ventanaC
 callback: 
 argument: 
+   handler: freeobj_ventanaCC_handle
 
 --------------------
 class: FL_FREE
 type: NORMAL_FREE
-box: 710 380 160 120
+box: 715 370 160 120
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_CENTER
@@ -372,12 +375,13 @@ gravity: FL_NoGravity FL_NoGravity
 name: ventanaD
 callback: 
 argument: 
+   handler: freeobj_ventanaDD_handle
 
 --------------------
 class: FL_GLCANVAS
 type: NORMAL_CANVAS
-box: 10 10 530 380
-boxtype: FL_DOWN_BOX
+box: 5 5 544 306
+boxtype: FL_FRAME_BOX
 colors: FL_NoColor FL_BLACK
 alignment: FL_ALIGN_CENTER
 style: FL_NORMAL_STYLE
@@ -394,7 +398,7 @@ argument:
 --------------------
 class: FL_SLIDER
 type: VERT_SLIDER
-box: 70 400 10 110
+box: 70 370 10 110
 boxtype: FL_FRAME_BOX
 colors: FL_LIGHTER_COL1 FL_DARKTOMATO
 alignment: FL_ALIGN_BOTTOM
@@ -413,7 +417,7 @@ argument:
 --------------------
 class: FL_SLIDER
 type: VERT_SLIDER
-box: 80 400 10 110
+box: 80 370 10 110
 boxtype: FL_FRAME_BOX
 colors: FL_LIGHTER_COL1 FL_DARKTOMATO
 alignment: FL_ALIGN_BOTTOM
@@ -432,7 +436,7 @@ argument:
 --------------------
 class: FL_SLIDER
 type: VERT_SLIDER
-box: 90 400 10 110
+box: 90 370 10 110
 boxtype: FL_FRAME_BOX
 colors: FL_LIGHTER_COL1 FL_DARKTOMATO
 alignment: FL_ALIGN_BOTTOM
@@ -451,7 +455,7 @@ argument:
 --------------------
 class: FL_SLIDER
 type: VERT_SLIDER
-box: 100 400 10 110
+box: 100 370 10 110
 boxtype: FL_FRAME_BOX
 colors: FL_LIGHTER_COL1 FL_DARKTOMATO
 alignment: FL_ALIGN_BOTTOM
@@ -470,7 +474,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: MENU_BUTTON
-box: 10 490 50 20
+box: 10 460 50 20
 boxtype: FL_FRAME_BOX
 colors: FL_DARKER_COL1 FL_DARKGOLD
 alignment: FL_ALIGN_CENTER
@@ -488,7 +492,7 @@ argument:
 --------------------
 class: FL_POSITIONER
 type: NORMAL_POSITIONER
-box: 120 400 150 90
+box: 120 370 150 90
 boxtype: FL_DOWN_BOX
 colors: FL_DARKER_COL1 FL_DARKTOMATO
 alignment: FL_ALIGN_TOP
@@ -506,7 +510,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
-box: 170 490 50 20
+box: 170 460 50 20
 boxtype: FL_FRAME_BOX
 colors: FL_DARKER_COL1 FL_BOTTOM_BCOL
 alignment: FL_ALIGN_CENTER
@@ -524,7 +528,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
-box: 220 490 50 20
+box: 220 460 50 20
 boxtype: FL_FRAME_BOX
 colors: FL_DARKER_COL1 FL_BOTTOM_BCOL
 alignment: FL_ALIGN_CENTER
@@ -542,7 +546,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
-box: 120 490 50 20
+box: 120 460 50 20
 boxtype: FL_FRAME_BOX
 colors: FL_DARKER_COL1 FL_BOTTOM_BCOL
 alignment: FL_ALIGN_CENTER
@@ -560,7 +564,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
-box: 10 440 50 30
+box: 10 410 50 30
 boxtype: FL_FRAME_BOX
 colors: FL_DARKER_COL1 FL_BOTTOM_BCOL
 alignment: FL_ALIGN_CENTER
@@ -578,7 +582,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
-box: 10 470 50 20
+box: 10 440 50 20
 boxtype: FL_FRAME_BOX
 colors: FL_DARKER_COL1 FL_BOTTOM_BCOL
 alignment: FL_ALIGN_CENTER
@@ -590,6 +594,186 @@ shortcut:
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: toggle
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 10 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: laser
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: laser
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 60 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: sonars
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: sonars
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 110 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: encod
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: encoders
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 160 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: motors
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: motors
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 220 320 60 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: PTencod
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: PTencoders
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 280 320 60 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: PTmotors
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: PTmotors
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 350 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: colorA
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: colorA
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 400 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: colorB
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: colorB
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 450 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: colorC
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: colorC
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 500 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: colorD
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: colorD
 callback: 
 argument: 
 

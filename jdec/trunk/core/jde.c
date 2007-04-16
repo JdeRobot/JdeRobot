@@ -18,123 +18,12 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-#define thisrelease "JDE 4.2-svn"
+#define thisrelease "jdec 4.2-svn"
 
 #include "jde.h"
 #include "dlfcn.h"
 #include "jdegui.h"
 #define MAX_BUFFER 1024
-
-/* sensor and motor variables */
-char *greyA; 
-char greyAA[SIFNTSC_COLUMNS*SIFNTSC_ROWS*1]; /**< sifntsc image itself */
-
-char *colorA;
-char colorAA[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /**< sifntsc image itself */
-unsigned long int imageA_clock;
-arbitration imageA_callbacks[MAX_SCHEMAS];
-int imageA_users=0;
-
-char *colorB;
-char colorBB[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /**< sifntsc image itself */
-unsigned long int imageB_clock;
-arbitration imageB_callbacks[MAX_SCHEMAS];
-int imageB_users=0;
-
-char *colorC;
-char colorCC[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /**< sifntsc image itself */
-unsigned long int imageC_clock;
-arbitration imageC_callbacks[MAX_SCHEMAS];
-int imageC_users=0;
-
-char *colorD;
-char colorDD[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]; /**< sifntsc image itself */
-unsigned long int imageD_clock;
-arbitration imageD_callbacks[MAX_SCHEMAS];
-int imageD_users=0;
-
-float pan_angle; /**< pan angle of the pantilt in degrees */
-float tilt_angle;   /**< tilt angle of the pantilt in degrees */
-unsigned long int pantiltencoders_clock;
-arbitration pantiltencoders_callbacks[MAX_SCHEMAS];
-int pantiltencoders_users=0;
-
-int jde_laser[NUM_LASER];
-unsigned long int laser_clock;
-arbitration laser_callbacks[MAX_SCHEMAS];
-int laser_users=0;
-
-float us[NUM_SONARS];
-unsigned long int us_clock[NUM_SONARS];
-intcallback sonars_callbacks[MAX_SCHEMAS];
-int sonars_users=0;
-
-float jde_robot[5]; /* mm, mm, rad */
-unsigned long int encoders_clock;
-float tspeed, rspeed; /* mm/s, deg/s */
-unsigned long lasttime; /* microsecs */
-arbitration encoders_callbacks[MAX_SCHEMAS];
-int encoders_users=0;
-
-float latitude,longitude;
-float latitude_speed,longitude_speed;
-int pantiltmotors_cycle=100; /* ms */
-
-float v,w;
-int motors_cycle=100; /* ms */
-float ac=0.;
-
-
-/* sensor positions in the Robot FrameOfReference */
-float laser_coord[5];
-float us_coord[NUM_SONARS][5]; 
-/**< Estructura para poder cambiar medidas de sensor a coordenadas locales al robot, y de estas al sist ref inicial: xsensor, ysensor, orientsensor,cossensor y sinsensor del sensor respecto del sistema solidario con el robot. Es fija. */
-float camera_coord[5];
-
-
-/** coordinate transformations from one FrameOfReference to another. */
-void us2xy(int numsensor, float d,float phi, Tvoxel *point) 
-
-/*  Calcula la posicion respecto de sistema de referencia inicial (sistema odometrico) del punto detectado en el sistema de coordenadas solidario al sensor. OJO depende de estructura posiciones y de por el sensor, sabiendo que:
-   a) el robot se encuentra en robot[0], robot[1] con orientacion robot[2] respecto al sistema de referencia externo,
-   b) que el sensor se encuentra en xsen, ysen con orientacion asen respecto del sistema centrado en el robot apuntando hacia su frente, 
-   c) el punto esta a distancia d del sensor en el angulo phi 
-*/ 
-{
-  float  Xp_sensor, Yp_sensor, Xp_robot, Yp_robot;
-
-  Xp_sensor = d*cos(DEGTORAD*phi);
-  Yp_sensor = d*sin(DEGTORAD*phi);
-  /* Coordenadas del punto detectado por el US con respecto al sistema del sensor, eje x+ normal al sensor */
-  Xp_robot = us_coord[numsensor][0] + Xp_sensor*us_coord[numsensor][3] - Yp_sensor*us_coord[numsensor][4];
-  Yp_robot = us_coord[numsensor][1] + Yp_sensor*us_coord[numsensor][3] + Xp_sensor*us_coord[numsensor][4];
-  /* Coordenadas del punto detectado por el US con respecto al robot */
-  (*point).x = Xp_robot*jde_robot[3] - Yp_robot*jde_robot[4] + jde_robot[0];
-  (*point).y = Yp_robot*jde_robot[3] + Xp_robot*jde_robot[4] + jde_robot[1];
-  /* Coordenadas del punto con respecto al origen del SdeR */
-}
-
-
-void laser2xy(int reading, float d, Tvoxel *point)
-
-/*  Calcula la posicion respecto de sistema de referencia inicial (sistema odometrico) del punto detectado en el sistema de coordenadas solidario al sensor. OJO depende de estructura posiciones y de por el sensor, sabiendo que:
-   a) el robot se encuentra en robot[0], robot[1] con orientacion robot[2] respecto al sistema de referencia externo,
-   b) que el sensor se encuentra en xsen, ysen con orientacion asen respecto del sistema centrado en el robot apuntando hacia su frente, 
-*/ 
-{
-  float  Xp_sensor, Yp_sensor, Xp_robot, Yp_robot,phi;
-  
-  phi=-90.+180.*reading/NUM_LASER;
-  Xp_sensor = d*cos(DEGTORAD*phi);
-  Yp_sensor = d*sin(DEGTORAD*phi);
-  Xp_robot = laser_coord[0] + Xp_sensor*laser_coord[3] - Yp_sensor*laser_coord[4];
-  Yp_robot = laser_coord[1] + Yp_sensor*laser_coord[3] + Xp_sensor*laser_coord[4];
-  /* Coordenadas del punto detectado por el laser con respecto al robot */
-  (*point).x = Xp_robot*jde_robot[3] - Yp_robot*jde_robot[4] + jde_robot[0];
-  (*point).y = Yp_robot*jde_robot[3] + Xp_robot*jde_robot[4] + jde_robot[1];
-  /* Coordenadas del punto con respecto al origen del SdeR */
-}
-
 
 /* hierarchy */
 JDESchema all[MAX_SCHEMAS];
@@ -154,7 +43,7 @@ typedef struct sharedname{
 static Tsharedname sharedlist[MAX_SHARED]; 
 static int num_shared=0;
 
-#define PROMPT "JDEC >> "
+#define PROMPT "jdec$ "
 
 void put_state(int numschema, int newstate)
 {
@@ -163,6 +52,8 @@ void put_state(int numschema, int newstate)
   if ((newstate==winner) || 
       (newstate==slept) || 
       (newstate==forced)|| 
+      (newstate==notready)|| 
+      (newstate==ready)|| 
       (newstate==active));
 }
 
@@ -247,21 +138,6 @@ void jdeshutdown(int sig)
   exit(0);
 }
 
-void update_greyA(void)
-{
-  int i;
-  for(i=0; i<(SIFNTSC_COLUMNS*SIFNTSC_ROWS);i++)
-    {
-      /* this pixel conversion is a little bit tricky: it MUST pass
-	   through the (unsigned char) in order to get the right number
-	   for values over 128 in colorA[3*i]. it MUST pass through the
-	   (unsigned int) in order to allow the addition of three
-	   values, which may overflow the 8 bits limit of chars and
-	   unsigned chars */  
-      greyA[i]=(char)(((unsigned int)((unsigned char)(colorA[3*i]))+(unsigned int)((unsigned char)(colorA[3*i+1]))+(unsigned int)((unsigned char)(colorA[3*i+2])))/3);
-    }
-}
-
 
 /* Cronos thread, to measure the real rythm of different schemas and drivers, in iterations per second */
 static pthread_t cronos_th;
@@ -284,7 +160,7 @@ void *cronos_thread(void *not_used)
       kgui=0;
       for(i=0;i<num_schemas;i++)
 	{
-	  (all[i].fps)=(all[i].k) *1000000/diff;
+	  (all[i].fps)=(float)(all[i].k)*(float)1000000./(float)diff;
 	  (all[i].k)=0;
 	}
       tlast=tnow;
@@ -294,59 +170,142 @@ void *cronos_thread(void *not_used)
 
 }
 
-
+/* jde shell */
 int serve_keyboardmessage(char *mensaje)
 {
  char word[256],word2[256];
  resumeFn r;
  suspendFn s;
+ int i,j,k;
 
  /*printf("Command from keyboard: %s\n",mensaje); */
-  if (sscanf(mensaje,"%s %s",word,word2)==2) 
-    {
-      if (strcmp(word,"resume")==0)
+ if (sscanf(mensaje,"%s ",word)==1) 
+   {
+     if ((strcmp(word,"resume")==0) ||
+	 (strcmp(word,"run")==0)||
+	 (strcmp(word,"on")==0))
 	{
-	  r=(resumeFn)myimport(word2,"resume");
-	  if (r!=NULL) r(SHELLHUMAN,NULL,NULL);
+	  if (sscanf(mensaje,"%s %s",word,word2)==2) 
+	    {	  
+	      r=(resumeFn)myimport(word2,"resume");
+	      if (r!=NULL) r(SHELLHUMAN,NULL,NULL);
+	    }
+	  else printf("What schema do you want to resume?\n");
 	}
-      else if (strcmp(word,"suspend")==0)
+     else if ((strcmp(word,"suspend")==0)||
+	      (strcmp(word,"kill")==0) ||
+	      (strcmp(word,"off")==0))
 	{
-	  s=(suspendFn)myimport(word2,"suspend");
-	  if (s!=NULL) s();
+	  if (sscanf(mensaje,"%s %s",word,word2)==2) 
+	    {	
+	      s=(suspendFn)myimport(word2,"suspend");
+	      if (s!=NULL) s();
+	    }
+	   else printf("What schema do you want to suspend?\n");
+	}
+     else if ((strcmp(word,"guiresume")==0)||
+	      (strcmp(word,"guion")==0))
+       {
+	  if (sscanf(mensaje,"%s %s",word,word2)==2) 
+	    {	  
+	      for(i=0;i<num_schemas;i++)
+		{if (strcmp(all[i].name,word2)==0) 
+		  {all[i].guistate=pending_on;
+		  break;
+		  }
+		}
+	    }
+	  else printf("What schema do you want to resume its GUI?\n");
+	}
+     else if ((strcmp(word,"guisuspend")==0)||
+	      (strcmp(word,"guioff")==0))
+	{
+	  if (sscanf(mensaje,"%s %s",word,word2)==2) 
+	    {	
+	     for(i=0;i<num_schemas;i++)
+		{if (strcmp(all[i].name,word2)==0) 
+		  {all[i].guistate=pending_off;
+		  break;
+		  }
+		}
+	    }
+	  else printf("What schema do you want to suspend its GUI?\n");
 	}
       else if ((strcmp(word,"mastergui")==0) ||
 	       (strcmp(word,"gui")==0))
 	{
-	if (strcmp(word2,"on")==0)
-	  mastergui_resume();
-	else if (strcmp(word2,"off")==0)
-	  mastergui_suspend();
+	  if (sscanf(mensaje,"%s %s",word,word2)==2) 
+	    {
+	      if (strcmp(word2,"on")==0)
+		mastergui_resume();
+	      else if (strcmp(word2,"off")==0)
+		mastergui_suspend();
+	    }
 	}
-      else if ((strcmp(word,"sensorsmotorsgui")==0) ||
-		(strcmp(word,"sensorsgui")==0) ||
-		(strcmp(word,"motorsgui")==0))
-		
-	{
-	  if (strcmp(word2,"on")==0) 
-	    sensorsmotorsgui_resume();
-	  else if (strcmp(word2,"off")==0)
-	    sensorsmotorsgui_suspend();
-	}
-    }
-  else if (sscanf(mensaje,"%s",word)==1) 
-    {
-      if ((strcmp(word,"quit")==0) ||
-	  (strcmp(word,"QUIT")==0))
-	jdeshutdown(0);
-      else if (strcmp(word,"help")==0)
-	{ printf("This is the shell of %s. Available commands are:\n  quit\n  mastergui [on|off]\n  sensorsmotorsgui [on|off]\n",thisrelease);
-	}
-    }
-  else return -1;
-
-  return 0;
+     else if ((strcmp(word,"quit")==0) ||
+	      (strcmp(word,"QUIT")==0) || 
+	      (strcmp(word,"exit")==0) ||
+	      (strcmp(word,"EXIT")==0))
+       jdeshutdown(0);
+     else if ((strcmp(word,"help")==0) || 
+	      (strcmp(word,"?")==0))
+       printf("This is the shell of %s. Available commands:\n  * quit\n  * help\n  * ls\n      list the loaded schemas\n  * ps\n      print the non-slept schemas, their state and speed\n  * mastergui [on|off]\n      show the master GUI of jdec, to visually manage the schema set\n\n  * [schemaname]\n      run the schema\n  * kill [schemaname]\n      move the schema to slept state\n  * guion [schemaname]\n      show the GUI of the schema\n  * guioff [schemaname]\n      hide the GUI of the schema\n",thisrelease);
+     else if ((strcmp(word,"ls")==0)||
+	      (strcmp(word,"list")==0) ||
+	      (strcmp(word,"LS")==0) ||
+	      (strcmp(word,"LIST")==0))
+       {
+	 for(i=0;i<num_schemas;i++)
+	       printf("%s\n",all[i].name);
+       }
+     else if ((strcmp(word,"ps")==0)||
+	      (strcmp(word,"PS")==0))
+       {
+	 for(i=0;i<num_schemas;i++)
+	   {
+	     if ((all[i].state==winner) ||
+		 (all[i].state==notready) ||
+		 (all[i].state==ready))
+	       {
+		 printf("%s: %.0f ips, ",all[i].name,all[i].fps);
+		 if (all[i].state==winner) 
+		   {
+		     printf("winner ( ");
+		     k=0;
+		     for (j=0;j<num_schemas;j++)
+		       if (all[i].children[j]==TRUE) 
+			 {
+			   if (k==0) {printf("\b");k++;}
+			   printf("%s ",all[j].name);
+			 }
+		     printf("\b)");
+		   }
+		 else if (all[i].state==slept) printf("slept");
+		 else if (all[i].state==notready) printf("notready");
+		 else if (all[i].state==ready) printf("ready");
+		 else if (all[i].state==forced) printf("forced");
+		 printf("\n");
+	       }
+	   }
+       }
+     else 
+       {
+	 /* to activate an schema, just type its name on the jdec shell */
+	 for(i=0;i<num_schemas;i++)
+	   {
+	     if (strcmp(all[i].name,word)==0)
+	       {
+		 r=(resumeFn)myimport(word,"resume");
+		 if (r!=NULL) r(SHELLHUMAN,NULL,NULL);
+		 return 0;
+	       }
+	   }
+	 return -1;
+       }
+   }
+ return 0;
+   
 }
-
 
 /* Reading the configuration file */
 static char configfile[MAX_BUFFER]; /* name of the configuration file used */
@@ -355,7 +314,6 @@ static int startwithgui=FALSE;
 int jde_loadschema(char *name)
 {
   char n[200];
-  int i;
   char *error;
   
   if (num_schemas>=MAX_SCHEMAS) 
@@ -426,6 +384,7 @@ int jde_loadschema(char *name)
       all[num_schemas].fps = 0.;
       all[num_schemas].k =0;
       all[num_schemas].state=slept;
+      all[num_schemas].guistate=off;
       pthread_mutex_init(&all[num_schemas].mymutex,PTHREAD_MUTEX_TIMED_NP);
       pthread_cond_init(&all[num_schemas].condition,NULL);
       /* the thread is created on startup. This is the load */
@@ -464,13 +423,13 @@ int jde_loaddriver(char *name)
       strcpy(n,name); strcat(n,"_startup");
       mydrivers[num_drivers].startup = (void (*)(char *)) dlsym(mydrivers[num_drivers].handle,n); 
       if ((error=dlerror()) != NULL)
-	printf("WARNING: Unresolved symbol %s in %s schema\n",n,name);
+	printf("WARNING: Unresolved symbol %s in %s driver\n",n,name);
 
       dlerror();
       strcpy(n,name); strcat(n,"_close");
       mydrivers[num_drivers].close = (void (*)()) dlsym(mydrivers[num_drivers].handle,n); 
       if ((error=dlerror()) != NULL)
-	printf("WARNING: Unresolved symbol %s in %s schema\n",n,name);
+	printf("WARNING: Unresolved symbol %s in %s driver\n",n,name);
 
       mydrivers[num_drivers].id = num_drivers;
       strcpy(mydrivers[num_drivers].name,name);
@@ -494,14 +453,14 @@ int jde_readline(FILE *myfile)
   
   buffer_file[0]=fgetc(myfile);
   if (buffer_file[0]==EOF) return EOF;
-  if (buffer_file[0]==255) return EOF; 
+  if (buffer_file[0]==(char)255) return EOF; 
   if (buffer_file[0]=='#') {while(fgetc(myfile)!='\n'); return 0;}
   if (buffer_file[0]==' ') {while(buffer_file[0]==' ') buffer_file[0]=fgetc(myfile);}
   if (buffer_file[0]=='\t') {while(buffer_file[0]=='\t') buffer_file[0]=fgetc(myfile);}
 
   /* Captura la linea y luego leeremos de la linea con sscanf, comprobando en la linea que el ultimo caracter es \n. No lo podemos hacer directamente con fscanf porque esta funcion no distingue espacio en blanco de \n */
   while((buffer_file[i]!='\n') && 
-	  (buffer_file[i] != 255) &&  
+	  (buffer_file[i] != (char)255) &&  
 	  (i<limit-1) ) {
     buffer_file[++i]=fgetc(myfile);
   }
@@ -554,7 +513,17 @@ int jde_readline(FILE *myfile)
     else if(strcmp(word,"end_driver")==0){
       while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
       driver_section=0;
-    }else{
+    }
+
+    else if ((strcmp(word,"mastergui")==0) ||
+	     (strcmp(word,"gui")==0))
+      {
+	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
+	sscanf(&buffer_file[j],"%s",word);
+	if (strcmp(word,"on")==0) startwithgui=TRUE;   
+      }
+
+    else{
       if(driver_section==0) printf("i don't know what to do with: %s\n",buffer_file);
     }
     return 0;
@@ -564,7 +533,7 @@ int jde_readline(FILE *myfile)
 
 int main(int argc, char** argv)
 {
-  int i,j,marca,leidos,last=0;
+  int i,marca,leidos,last=0;
   char buff[MAX_BUFFER];
   FILE *config;
   int n=1; /* argument number in the console for the configuration file parameter */
@@ -633,66 +602,9 @@ int main(int argc, char** argv)
       }
     }
   
-  
+  /* init the pioneer robot */
+  init_pioneer(); 
  
- 
-/*  Posicion y orientacion de los sensores con respecto al centro del eje trasero del robot. Dado un sistema de coordenadas con la X en la direccion de movimiento del robot, los angulos se miden considerando que el eje X toma valor 0 y siendo positivos cuando se gira en sentido contrario al de movimiento de las agujas del reloj. Se utiliza para cambiar las distancias sensoriales al sistema de referencia local, solidario con el robot-enclosure. la rellena con milimetros y grados.   */ 
-  us_coord[0][0]=115.; us_coord[0][1]=130.; us_coord[0][2]=90.; 
-  us_coord[1][0]=155.; us_coord[1][1]=115.; us_coord[1][2]=50.; 
-  us_coord[2][0]=190.; us_coord[2][1]=80.; us_coord[2][2]=30.; 
-  us_coord[3][0]=210.; us_coord[3][1]=25.; us_coord[3][2]=10.; 
-  us_coord[4][0]=210.; us_coord[4][1]=-25.; us_coord[4][2]=350.; 
-  us_coord[5][0]=190.; us_coord[5][1]=-80.; us_coord[5][2]=330.; 
-  us_coord[6][0]=155.; us_coord[6][1]=-115.; us_coord[6][2]=310;
-  us_coord[7][0]=115.; us_coord[7][1]=-130.; us_coord[7][2]=270.; 
-  us_coord[8][0]=-115.; us_coord[8][1]=-130.; us_coord[8][2]=270.; 
-  us_coord[9][0]=-155.; us_coord[9][1]=-115.; us_coord[9][2]=230.; 
-  us_coord[10][0]=-190.; us_coord[10][1]=-80.; us_coord[10][2]=210.; 
-  us_coord[11][0]=-210.; us_coord[11][1]=-25.; us_coord[11][2]=190.; 
-  us_coord[12][0]=-210.; us_coord[12][1]=25.; us_coord[12][2]=170.; 
-  us_coord[13][0]=-190.; us_coord[13][1]=80.; us_coord[13][2]=150.;  
-  us_coord[14][0]=-155.; us_coord[14][1]=115.; us_coord[14][2]=130.; 
-  us_coord[15][0]=-115.; us_coord[15][1]=130.; us_coord[15][2]=90.; 
-
-  for(j=0;j<NUM_SONARS;j++)
-    { 
-      us_coord[j][3]= cos(us_coord[j][2]*DEGTORAD);
-      us_coord[j][4]= sin(us_coord[j][2]*DEGTORAD);
-    }
-
-  laser_coord[0]=19.; laser_coord[1]=0.; laser_coord[2]=0.; 
-  laser_coord[3]=cos(laser_coord[2]*DEGTORAD);
-  laser_coord[4]=sin(laser_coord[2]*DEGTORAD);
-
-  camera_coord[0]=190.; 
-  camera_coord[1]=0.; 
-  camera_coord[2]=0.; 
-  camera_coord[3]= cos(camera_coord[2]*DEGTORAD);
-  camera_coord[4]= sin(camera_coord[2]*DEGTORAD);
-
-
-  /* initial values for sensor variables*/
-  colorA=colorAA;
-  colorB=colorBB;
-  colorC=colorCC;
-  colorD=colorDD;
-  greyA=greyAA;
-  for(i=0; i<(SIFNTSC_COLUMNS*SIFNTSC_ROWS);i++)
-    {colorA[i*3]=(char) 0; /* blue */ 
-    colorA[i*3+1]=(char)(((i%SIFNTSC_COLUMNS)%30)*255/30); /* green */
-    colorA[i*3+2]=(char)(((i%SIFNTSC_COLUMNS)%30)*255/30); /* red */
-    colorB[i*3]= 0;/* blue */ 
-    colorB[i*3+1]=0; /* green */
-    colorB[i*3+2]=(char)(((i%SIFNTSC_COLUMNS)%30)*255/30);/* red */
-    colorC[i*3]= 0;/* blue */ 
-    colorC[i*3+1]=(char)(((i%SIFNTSC_COLUMNS)%30)*255/30);/* green */
-    colorC[i*3+2]=0; /* red */
-    colorD[i*3]=(char)(((i%SIFNTSC_COLUMNS)%30)*255/30);/* blue */
-    colorD[i*3+1]=0; /* green */
-    colorD[i*3+2]= 0;/* red */ 
-    }
-  v=0.; w=0;
-  
   /* read the configuration file: load drivers and schemas */
   printf("Reading configuration...\n");
   do {
