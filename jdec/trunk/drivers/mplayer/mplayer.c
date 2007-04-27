@@ -28,6 +28,7 @@
 #include "jde.h"
 #include <unistd.h>
 #include <errno.h>
+#include <signal.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -62,7 +63,6 @@ int pid_mplayer[MAXVIDS];
 int pid_mencoder[MAXVIDS];
 char fifo1[MAXVIDS][100]; /* Data from mplayer to menconder */
 char fifo2[MAXVIDS][100]; /* Data from mencoder to this driver */
-char fifoc[MAXVIDS][100]; /* Control */
 
 
 int colorA_schema_id, colorB_schema_id, colorC_schema_id, colorD_schema_id;
@@ -74,6 +74,15 @@ void mplayer_close(){
    int i;
 
    //Hacer unlink los fifos y matar a los hijos mplayer y  mencoder
+   for (i=0; i<MAXVIDS; i++){
+      if (serve_color[i]==1){
+	 kill (pid_mplayer[i], 9);
+	 kill (pid_mencoder[i], 9);
+
+	 unlink (fifo1[i]);
+	 unlink (fifo2[i]);
+      }
+   }
    mplayer_close_command=1;
    printf("driver mplayer off\n");
 }
@@ -91,7 +100,6 @@ int mycolorA_resume(int father, int *brothers, arbitration fn){
       if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
 	 /* mplayer thread goes winner */
 	 pthread_mutex_lock(&mymutex);
-/* aquÃ­ habrÃ¡ que escribir en el fifo de control para que quite la pausa */
 	 state=winner;
 	 pthread_cond_signal(&condition);
 	 pthread_mutex_unlock(&mymutex);
@@ -110,7 +118,6 @@ int mycolorA_suspend(){
       if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
 	 /* mplayer thread goes sleep */
 	 pthread_mutex_lock(&mymutex);
-/* aquÃ­ habrÃ¡ que escribir en el fifo de control para que pause */
 	 state=slept;
 	 pthread_mutex_unlock(&mymutex);
       }
@@ -239,7 +246,7 @@ void lanzar_mplayer (int i){
    int file;
    char str[100];
    char str2[100];
-      
+
    umask (0000);
 	 
    unlink (fifo1[i]);
@@ -248,7 +255,8 @@ void lanzar_mplayer (int i){
 	 (mkfifo (fifo2[i], 0600) != 0) )
       exit (1);
 
-	 if ((pid_mencoder[i]=fork()) == 0) { // Same procedure to exec mencoder:
+   if ((pid_mencoder[i]=fork()) == 0) {/* We create a new process...
+                           // ... close its stdin, stdout & stderr ...*/
 	    file = open("/dev/null",O_RDWR);
 	    close(0); dup(file);
 	    close(1); dup(file);
@@ -260,16 +268,15 @@ void lanzar_mplayer (int i){
 	    exit(1);
 	 }
 
-	 if ((pid_mplayer[i]=fork()) == 0) { // We create a new process...
-                           // ... close its stdin, stdout & stderr ...
+	 if ((pid_mplayer[i]=fork()) == 0) { /* We create a new process...
+                           // ... close its stdin, stdout & stderr ...*/
 	    file = open("/dev/null",O_RDWR);
 	    close(0); dup(file);
 	    close(1); dup(file);
 	    close(2); dup(file);
-            // ... and exec the mplayer command.
+            /* ... and exec the mplayer command.*/
 	    sprintf(str,"scale=%d:%d",SIFNTSC_COLUMNS,SIFNTSC_ROWS);
 	    sprintf (str2, "yuv4mpeg:file=%s", fifo1[i]);
-	    // opción para la velocidad -speed <0.01-100>
 	    execlp("mplayer","mplayer",fichero_video[i],"-vo", str2,
 		   "-vf", str, "-ao","null","-slave",NULL);
 	    printf("Error executing mplayer\n");
@@ -291,83 +298,65 @@ void *mplayer_thread(void *id)
 	}
    do{
 
-      pthread_mutex_lock(&mymutex);
+      pthread_mutex_lock(&color_mutex[i]); //Si está bloqueado se queda ahí
+      pthread_mutex_unlock (&color_mutex[i]);
+	       /*Simplemente lee del fifo y lo coloca en colorX*/
+      int leidos=0;
+      int leidos_tmp=0;
+      char buff[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3];
+      while (leidos<SIFNTSC_COLUMNS*SIFNTSC_ROWS*3){
+	 leidos_tmp=read (fifo, buff+leidos,
+			  SIFNTSC_COLUMNS*SIFNTSC_ROWS*3 - leidos);
+	 if (leidos_tmp==0){
 
-/*      if (state==slept){
-	 printf("mplayer thread in sleep mode\n");
-	 pthread_cond_wait(&condition,&mymutex);
-	 printf("mplayer thread woke up\n");
-	 pthread_mutex_unlock(&mymutex);
-      
-      }else*/{
-      
-	 pthread_mutex_unlock(&mymutex);
-	 pthread_mutex_lock(&color_mutex[i]); //Si estÃ¡ bloqueado se queda ahÃ­
-	 /*Obain images from videos*/
-	    pthread_mutex_unlock (&color_mutex[i]);
-	       //Simplemente lee del fifo y lo coloca en colorX
-	    int leidos=0;
-	    int leidos_tmp=0;
-	    char buff[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3];
-	    while (leidos<SIFNTSC_COLUMNS*SIFNTSC_ROWS*3){
-	       leidos_tmp=read (fifo, buff+leidos,
-				SIFNTSC_COLUMNS*SIFNTSC_ROWS*3 - leidos);
-	       if (leidos_tmp==0){
 
-		  if (1/*leidos==0*/){
-		     if (repeat[i]==1){
+	    if (repeat[i]==1){
 		     //Lanzar otro mplayer si hay repeat
 		     //Se matan mplayer y mencoder, se ignoran errores porque
 		     //Seguramente ya hayan muerto y eso devuelve error
-			close(fifo);
+	       close(fifo);
 
-			kill (pid_mplayer[i], 9);
-			kill (pid_mencoder[i], 9);
-			lanzar_mplayer(i);
-			if ((fifo=open (fifo2[i],O_RDONLY))==-1){
-			   perror("");
-			   exit(1);
-			}
-			leidos=0;
-			leidos_tmp=0;
-		     }
-		     else{
-		     //En otro caso matar el hilo liberando el recurso
-// 			pthread_mutex_unlock (&color_mutex[i]);
-		       /*return;*/
-		       break;
-		     }
-		  }
-		  else{
-		     printf ("Se ha producido un error al leer del fifo\n");
-		  }
-		  
+	       kill (pid_mplayer[i], 9);
+	       wait (NULL);
+	       kill (pid_mencoder[i], 9);
+	       wait (NULL);
+	       lanzar_mplayer(i);
+	       if ((fifo=open (fifo2[i],O_RDONLY))==-1){
+		  perror("");
+		  exit(1);
 	       }
-	       leidos+=leidos_tmp;
+	       leidos=0;
+	       leidos_tmp=0;
 	    }
-	       //Se ha leido todo un frame
-	    switch (i){
-	       case 0:
-		  memcpy(colorA, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-		  speedcounter(colorA_schema_id);
-		  break;
-	       case 1:
-		  memcpy(colorB, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-		  speedcounter(colorB_schema_id);
-		  break;
-	       case 2:
-		  memcpy(colorC, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-		  speedcounter(colorC_schema_id);
-		  break;
-	       case 3:
-		  memcpy(colorD, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-		  speedcounter(colorD_schema_id);
-		  break;
-	       default:
-		  fprintf(stderr, "mplayer_thread: Unknown option %d.\n", i);
+	    else{
+	       break;
 	    }
 
+	 }
+	 leidos+=leidos_tmp;
       }
+	       //Se ha leido todo un frame
+      switch (i){
+	 case 0:
+	    memcpy(colorA, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+	    speedcounter(colorA_schema_id);
+	    break;
+	 case 1:
+	    memcpy(colorB, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+	    speedcounter(colorB_schema_id);
+	    break;
+	 case 2:
+	    memcpy(colorC, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+	    speedcounter(colorC_schema_id);
+	    break;
+	 case 3:
+	    memcpy(colorD, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+	    speedcounter(colorD_schema_id);
+	    break;
+	 default:
+	    fprintf(stderr, "mplayer_thread: Unknown option %d.\n", i);
+      }
+
    }while(mplayer_close_command==0);
    close(fifo);
    pthread_exit(0);
@@ -474,7 +463,7 @@ int mplayer_parseconf(char *configfile){
 			   }else if(strcmp(word3,"provides")==0){
 			      while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
 			      printf ("%s\n",buffer_file2);
-			      if(sscanf(buffer_file2,"%s %s %s %s",word3,word4,word5,word6)>3){
+			      if(sscanf(buffer_file2,"%s %s %s %s",word3,word4,word5,word6)==4){
 
 				 if(strcmp(word4,"colorA")==0){
 				    serve_color[0]=1;
@@ -538,16 +527,12 @@ void mplayer_startup(char *configfile)
    //inicializar los nombres de los fifos
    strcpy(fifo1[0], "/tmp/fifo-mplayer-colorA-1");
    strcpy(fifo2[0], "/tmp/fifo-mplayer-colorA-2");
-   strcpy(fifoc[0], "/tmp/fifo-mplayer-colorA-c");
    strcpy(fifo1[1], "/tmp/fifo-mplayer-colorB-1");
    strcpy(fifo2[1], "/tmp/fifo-mplayer-colorB-2");
-   strcpy(fifo2[0], "/tmp/fifo-mplayer-colorB-c");
    strcpy(fifo1[2], "/tmp/fifo-mplayer-colorC-1");
    strcpy(fifo2[2], "/tmp/fifo-mplayer-colorC-2");
-   strcpy(fifo2[0], "/tmp/fifo-mplayer-colorC-c");
    strcpy(fifo1[3], "/tmp/fifo-mplayer-colorD-1");
    strcpy(fifo2[3], "/tmp/fifo-mplayer-colorD-2");
-   strcpy(fifo2[0], "/tmp/fifo-mplayer-colorD-c");
 
    if(mplayer_thread_created==0){
       static int args[MAXVIDS];
