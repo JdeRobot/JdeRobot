@@ -1,0 +1,216 @@
+Magic: 13000
+
+Internal Form Definition File
+    (do not change)
+
+Number of forms: 1
+Unit of measure: FL_COORD_PIXEL
+
+=============== FORM ===============
+Name: opflowgui
+Width: 910
+Height: 400
+Number of Objects: 10
+
+--------------------
+class: FL_BOX
+type: UP_BOX
+box: 0 0 910 400
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLUE
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_FRAME
+type: ENGRAVED_FRAME
+box: 570 20 320 240
+boxtype: FL_NO_BOX
+colors: FL_BLACK FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: old image
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: old_img
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 570 270 320 40
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_BLACK
+alignment: FL_ALIGN_CENTER
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Show op. flow
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: show_arrows
+callback: 
+argument: 
+
+--------------------
+class: FL_VALSLIDER
+type: HOR_SLIDER
+box: 20 340 320 30
+boxtype: FL_DOWN_BOX
+colors: FL_LIGHTER_COL1 FL_LIGHTER_COL1
+alignment: FL_ALIGN_BOTTOM
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Min_eig
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: min_eig
+callback: 
+argument: 
+	bounds: 0 4
+	value: 0,8
+	slsize: 0,05
+
+--------------------
+class: FL_VALSLIDER
+type: VERT_SLIDER
+box: 370 20 30 280
+boxtype: FL_DOWN_BOX
+colors: FL_LIGHTER_COL1 FL_LIGHTER_COL1
+alignment: FL_ALIGN_BOTTOM
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Layers
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: layers
+callback: 
+argument: 
+	bounds: 20 1
+	precision: 0
+	value: 5
+	slsize: 0,15
+	step: 1
+
+--------------------
+class: FL_VALSLIDER
+type: VERT_SLIDER
+box: 440 20 30 280
+boxtype: FL_DOWN_BOX
+colors: FL_LIGHTER_COL1 FL_LIGHTER_COL1
+alignment: FL_ALIGN_BOTTOM
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Num. iter.
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: num_iters
+callback: 
+argument: 
+	bounds: 20 1
+	precision: 0
+	value: 7
+	slsize: 0,15
+	step: 1
+
+--------------------
+class: FL_TEXT
+type: NORMAL_TEXT
+box: 20 270 320 40
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER|FL_ALIGN_INSIDE
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: no_arrows
+callback: 
+argument: 
+
+--------------------
+class: FL_FRAME
+type: ENGRAVED_FRAME
+box: 20 20 320 240
+boxtype: FL_NO_BOX
+colors: FL_BLACK FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: new image
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: new_img
+callback: 
+argument: 
+
+--------------------
+class: FL_VALSLIDER
+type: HOR_SLIDER
+box: 570 340 320 30
+boxtype: FL_DOWN_BOX
+colors: FL_LIGHTER_COL1 FL_LIGHTER_COL1
+alignment: FL_ALIGN_BOTTOM
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Max_eig
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: max_eig
+callback: 
+argument: 
+	bounds: 0 3
+	value: 0,8
+	slsize: 0,05
+
+--------------------
+class: FL_VALSLIDER
+type: VERT_SLIDER
+box: 510 20 30 280
+boxtype: FL_DOWN_BOX
+colors: FL_LIGHTER_COL1 FL_LIGHTER_COL1
+alignment: FL_ALIGN_BOTTOM
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Min. mov.
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: min_mov
+callback: 
+argument: 
+	bounds: 5 0,01
+	value: 1,5
+	slsize: 0,15
+	step: 0,01
+
+==============================
+create_the_forms
