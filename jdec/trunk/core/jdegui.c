@@ -28,14 +28,8 @@
 #include <forms.h>
 
 #define PI 3.141592654
-#define MAXWORLD 30.
 
-/* jdegui has the same schema API, but it is not an schema, and so it is not stored at all[]. It is just a service thread. */
-pthread_mutex_t jdegui_mymutex;
-pthread_cond_t jdegui_condition;
 pthread_t jdegui_mythread;
-int jdegui_debug=0;
-int jdegui_state;
 
 guibuttons buttonscallbacks[MAX_SCHEMAS];
 int num_buttonscallbacks=0;
@@ -137,38 +131,31 @@ int jdegui_cycle=70; /* ms */
 Display* display;
 int screen;
 
-/* necesarias para mastergui */
 static int mastergui_on=FALSE;
 static int mastergui_request=FALSE;
+static int kmastergui=0;
 
 static FD_mastergui *fd_mastergui;
 static Window  hierarchy_win;
 
 /* to display the hierarchy */
 static int state_dpy[MAX_SCHEMAS];
-static int sizeY=20;
-static int sizeX=20;
+static int FontSize=18; /* font size in hierarchy canvas */
 static int iteracion_display=0;
 #define FORCED_REFRESH 5000 /* ms */ 
-/*Every forced_refresh the hierarchy is drawn from scratch.*/
+/* every "forced_refresh" the hierarchy is drawn from scratch.*/
 
 
 void mastergui_suspend(void)
 {
   if (mastergui_on==TRUE)
-    {
-      /* printf("mastergui suspend\n"); */
       mastergui_request=FALSE;
-    }
 }
 
 void mastergui_resume(void)
 {
   if (mastergui_on==FALSE)
-    {
-      /*  printf("mastergui resume\n");*/
       mastergui_request=TRUE;
-    }
 }
 
 static void mastergui_buttons(FL_OBJECT *obj)
@@ -184,28 +171,23 @@ static void mastergui_buttons(FL_OBJECT *obj)
       if (i<num_schemas)
 	{
 	  if (obj == act[i]) 
-	    {if (fl_get_button(act[i])==RELEASED) 
-	      {(*all[i].suspend)();
-	      /* if visualization is active, turn it off */
-		if (fl_get_button(vis[i])==PUSHED)
-		  {
-		    fl_set_button(vis[i],RELEASED);
-		    if (all[i].guisuspend!=NULL) (*all[i].guisuspend)();
-		  }
-	      }
-	    else 
-	      (*all[i].resume)(GUIHUMAN,NULL,null_arbitration);
+	    { 
+	      if (all[i].state==slept)
+		(*all[i].resume)(GUIHUMAN,NULL,null_arbitration);
+	      else
+		{
+		  (*all[i].suspend)();
+		  /* if visualization is active, turn it off */
+		  if ((all[i].guistate==on)||(all[i].guistate==pending_on))
+		    all[i].guistate=pending_off;
+		}
 	    }
 	  else if (obj == vis[i])
 	    {
-	      if (fl_get_button(vis[i])==RELEASED)
-		{
-		  if (all[i].guisuspend!=NULL) (*all[i].guisuspend)();
-		}
+	      if ((all[i].guistate==on)||(all[i].guistate==pending_on))
+		all[i].guistate=pending_off;
 	      else 
-		{
-		  if (all[i].guiresume!=NULL) (*all[i].guiresume)();
-		}
+		all[i].guistate=pending_on;
 	    }
 	}
       else break;
@@ -213,84 +195,77 @@ static void mastergui_buttons(FL_OBJECT *obj)
 }
 
 
-static void navigate(int schema,int *x,int *y)
+static void draw_children(int schema,int *x,int *y)
 {
   int i;
+  int somechild=FALSE;
+  int sizeX,boxY;
+
+  boxY=FontSize+2;
+  sizeX=(int)((float)FontSize*0.7);
 
   /* print the names of all the children of "schema" */
   for (i=0;i<MAX_SCHEMAS;i++)
     {
       if (all[schema].children[i]==TRUE)
 	{  
-	  if (all[i].state==notready) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_RED,9,20,all[i].name);
-	  else if (all[i].state==ready) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_DARKGOLD,9,20,all[i].name);
-	  else if (all[i].state==winner) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),40,sizeY,FL_GREEN,9,20,all[i].name);
+	  somechild=TRUE;
+ 	  if (all[i].state==notready) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),sizeX*strlen(all[i].name),boxY,FL_RED,9,FontSize,all[i].name);
+	  else if (all[i].state==ready) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),sizeX*strlen(all[i].name),boxY,FL_DARKGOLD,9,FontSize,all[i].name);
+	  else if (all[i].state==winner) fl_drw_text(FL_ALIGN_LEFT,(*x),(*y),sizeX*strlen(all[i].name),boxY,FL_GREEN,9,FontSize,all[i].name);
 	  
-	  if ((*x+sizeX*strlen(all[i].name)) < (fd_mastergui->hierarchy->x + fd_mastergui->hierarchy->w))
-	    (*x)+=sizeX*strlen(all[i].name);
+	  if ((*x+sizeX*(strlen(all[i].name)+2)) < (fd_mastergui->hierarchy->x + fd_mastergui->hierarchy->w))
+	    (*x)+=sizeX*(strlen(all[i].name)+2);
 	}
     }
+
+  /* update the cursor position. Only if some child were displayed */
+  if (somechild==TRUE)
+    if (((*y)+boxY) < (fd_mastergui->hierarchy->y+fd_mastergui->hierarchy->h)) 
+      (*y)+=boxY;
 
   /* expand the winner children of "schema", hopefully there will be only one */
   for (i=0;i<MAX_SCHEMAS;i++)
     {
       if ((all[schema].children[i]==TRUE) &&
 	  (all[i].state==winner))
-	navigate(i,x,y);
+	{
+	  draw_children(i,x,y);    
+	}
     }
 }
 
 static void mastergui_display()
 {
   int i,haschanged,j;
-  int xx,yy;
+  int cursorX,cursorY;
   char fpstext[80]="";
+  int sizeX,boxY;
+
+  boxY=FontSize+2;
+  sizeX=(int)((float)FontSize*0.7);  
 
   sprintf(fpstext,"%.1f ips",fpsgui);
   fl_set_object_label(fd_mastergui->guifps,fpstext);  
-  
-  /* GUI entries for loaded schemas (everything but their states which are displayed together with the hierarchy, only if they have changed ) */
+
+  /* GUI entries for loaded schemas: their guistate, measured frequency 
+     and state (the state is also displayed in the hierarchy) */
   for(i=0;i<MAX_SCHEMAS; i++)
     {
       if (i<num_schemas)
 	{ 
-	  fl_show_object(act[i]);
-	  fl_show_object(vis[i]);
-	  fl_show_object(fps[i]);
-	  fl_show_object(stat[i]);
 	  fl_set_object_label(act[i],all[i].name);
 	  if (all[i].state==winner)
-	    sprintf(fpstext,"%.1f",all[i].fps);
-	  else sprintf(fpstext," ");
+	      sprintf(fpstext,"%.1f",all[i].fps);
+	  else 
+	      sprintf(fpstext," ");
+
 	  fl_set_object_label(fps[i],fpstext);
-	}
-      else 
-	{
-	  fl_hide_object(act[i]);
-	  fl_hide_object(vis[i]);
-	  fl_hide_object(fps[i]);
-	  fl_hide_object(stat[i]);
-	}
-    }
 
-  /* hierarchy oscilloscope */
-  haschanged=FALSE;
-  for(i=0;i<num_schemas;i++) 
-    {
-      if (all[i].state!=state_dpy[i]) 
-	{haschanged=TRUE;
-	break;
-	}
-    }
-
-  if ((haschanged==TRUE) ||     /* the hierarchy has changed */
-      (iteracion_display==0))   /* slow refresh of the complete master gui, needed because incremental refresh of the hierarchy misses window occlusions */
-    {
-      for(i=0;i<num_schemas; i++)
-	{
 	  if (all[i].state==slept)
-	    {fl_set_object_label(stat[i],"slept");
-	     fl_set_object_color(stat[i],FL_COL1,FL_GREEN);
+	    {
+	      fl_set_object_label(stat[i],"slept");
+	      fl_set_object_color(stat[i],FL_COL1,FL_GREEN);
 	      fl_set_object_lcol(stat[i],FL_MCOL);
 	    }
 	  else if (all[i].state==notready)
@@ -311,51 +286,75 @@ static void mastergui_display()
 	      fl_set_object_color(stat[i],FL_GREEN,FL_GREEN);
 	      fl_set_object_lcol(stat[i],FL_BLUE);
 	    }
-	}
 
+	  if (all[i].guistate==on) ;
+	  else if (all[i].guistate==off) ;
+	  /* In case of fl_set_button(vis[i],RELEASED) (or PUSHED) issued
+	     at each iteration here, the graphical button does not change 
+	     its state properly. It is only issued once, at jdegui_iteration,
+	     when guistate upgraded or downgraded */
+
+	  fl_show_object(act[i]);
+	  fl_show_object(vis[i]);
+	  fl_show_object(fps[i]);
+	  fl_show_object(stat[i]);
+	}
+      else 
+	{
+	  fl_hide_object(act[i]);
+	  fl_hide_object(vis[i]);
+	  fl_hide_object(fps[i]);
+	  fl_hide_object(stat[i]);
+	}
+    }
+
+  /* hierarchy oscilloscope */
+  haschanged=FALSE;
+  for(i=0;i<num_schemas;i++) 
+    {
+      if (all[i].state!=state_dpy[i]) 
+	{haschanged=TRUE;
+	break;
+	}
+    }
+  if (iteracion_display*jdegui_cycle>FORCED_REFRESH) 
+    iteracion_display=0;
+  else iteracion_display++;
+
+  if ((haschanged==TRUE) ||     /* the hierarchy has changed */
+      (iteracion_display==0))   /* slow refresh of the complete master gui, needed because incremental refresh of the hierarchy misses window occlusions */
+    {
       /* clear of the hierarchy "window" */
       fl_winset(hierarchy_win); 
       fl_rectbound(fd_mastergui->hierarchy->x-1,fd_mastergui->hierarchy->y-1,fd_mastergui->hierarchy->w,fd_mastergui->hierarchy->h,FL_COL1);         
-      /*
-      for(i=0;i<num_schemas;i++)
-	{
-	  state_dpy[i]=all[i].state;
-	  if (all[i].state==slept)  
-	    fl_drw_text(FL_ALIGN_LEFT,fd_mastergui->hierarchy->x+10,fd_mastergui->hierarchy->y+0+i*30,40,30,FL_BLACK,9,20,all[i].name);
-	  else if (all[i].state==notready) 
-	    fl_drw_text(FL_ALIGN_LEFT,fd_mastergui->hierarchy->x+10,fd_mastergui->hierarchy->y+0+i*30,40,30,FL_BLUE,9,20,all[i].name);
-	  else if (all[i].state==ready) 
-	    fl_drw_text(FL_ALIGN_LEFT,fd_mastergui->hierarchy->x+10,fd_mastergui->hierarchy->y+0+i*30,40,30,FL_GREEN,9,20,all[i].name);
-	  else if (all[i].state==winner) 
-	    fl_drw_text(FL_ALIGN_LEFT,fd_mastergui->hierarchy->x+10,fd_mastergui->hierarchy->y+0+i*30,40,30,FL_RED,9,20,all[i].name);
-	}
-      */
   
-      j=0; xx=fd_mastergui->hierarchy->x+5; yy=fd_mastergui->hierarchy->y+5;
+      j=0; cursorX=fd_mastergui->hierarchy->x+5; cursorY=fd_mastergui->hierarchy->y+5;
       for(i=0;i<num_schemas;i++)
 	{
 	  state_dpy[i]=all[i].state;
 	  if ((all[i].state!=slept) && 
-	      ((all[i].father==(*all[i].id)) || (all[i].father==GUIHUMAN) || (all[i].father==SHELLHUMAN)))
+	      ((all[i].father==(*all[i].id)) 
+	       || (all[i].father==GUIHUMAN) 
+	       || (all[i].father==SHELLHUMAN)))
 	    {
 	      /* the root of one hierarchy */
 	      j++;
+	      cursorX=fd_mastergui->hierarchy->x+5; /* "carriage return" */		
 	      if (j!=1)
-		{
-		  if ((yy+5) < (fd_mastergui->hierarchy->y+fd_mastergui->hierarchy->h)) yy+=5;
-		  fl_line(xx,yy,xx+fd_mastergui->hierarchy->w-15,yy,FL_BLACK);
-		  if ((yy+5) < (fd_mastergui->hierarchy->y+fd_mastergui->hierarchy->h)) yy+=5;
+		{ /* horizontal line */
+		  if ((cursorY+5) < (fd_mastergui->hierarchy->y+fd_mastergui->hierarchy->h)) cursorY+=5;
+		  fl_line(cursorX,cursorY,cursorX+fd_mastergui->hierarchy->w-15,cursorY,FL_BLACK);
+		  if ((cursorY+5) < (fd_mastergui->hierarchy->y+fd_mastergui->hierarchy->h)) cursorY+=5;
 		}
-		
 	      if (all[i].state==notready) 
-		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_RED,9,20,all[i].name);
+		fl_drw_text(FL_ALIGN_LEFT,cursorX,cursorY,sizeX*strlen(all[i].name),boxY,FL_RED,9,FontSize,all[i].name);
 	      else if (all[i].state==ready) 
-		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_DARKGOLD,9,20,all[i].name);
+		fl_drw_text(FL_ALIGN_LEFT,cursorX,cursorY,sizeX*strlen(all[i].name),boxY,FL_DARKGOLD,9,FontSize,all[i].name);
 	      else if (all[i].state==winner) 
-		fl_drw_text(FL_ALIGN_LEFT,xx,yy,40,sizeY,FL_GREEN,9,20,all[i].name);	      
+		fl_drw_text(FL_ALIGN_LEFT,cursorX,cursorY,sizeX*strlen(all[i].name),boxY,FL_GREEN,9,FontSize,all[i].name);	      
 
-	      if ((yy+sizeY) < (fd_mastergui->hierarchy->y+fd_mastergui->hierarchy->h)) yy+=sizeY;
-	      navigate(i,&xx,&yy); 
+	      if ((cursorY+boxY) < (fd_mastergui->hierarchy->y+fd_mastergui->hierarchy->h)) cursorY+=boxY;
+	      draw_children(i,&cursorX,&cursorY); 
 	    }     
 	}
     }
@@ -366,37 +365,32 @@ static void jdegui_iteration()
 { 
   FL_OBJECT *obj; 
   int i;
-  static int kmastergui=0;
 
-  if (jdegui_debug) printf("jdegui iteration\n");
   kgui++;
-
-  if (iteracion_display*jdegui_cycle>FORCED_REFRESH) 
-    iteracion_display=0;
-  else iteracion_display++;
-
-  /* requests for change of schema visualization state from the shell*/
+ 
+  /* asynchronous requests for change of schema visualization state,
+     both from the jdec-shell or clicking into the masterGUI */
    for(i=0;i<num_schemas;i++)
      {
        if (all[i].guistate==pending_on)
 	 {
 	   all[i].guistate=on;
-	   if (kmastergui!=0)   /* mastergui already initalized */
-	      fl_set_button(vis[i],PUSHED);
+	   if (kmastergui!=0)   /* mastergui already initialized */
+	     fl_set_button(vis[i],PUSHED); 
 	   if (all[i].guiresume!=NULL)
 	     (*all[i].guiresume)();
 	 }
        if (all[i].guistate==pending_off)
 	 {
 	   all[i].guistate=off;
-	   if (kmastergui!=0) /* mastergui already initalized */
+	   if (kmastergui!=0) /* mastergui already initialized */
 	     fl_set_button(vis[i],RELEASED);
 	   if (all[i].guisuspend!=NULL)
 	     (*all[i].guisuspend)();
 	 } 
      }
 
-  /* requests for change of visualization state in mastergui from the shell*/
+  /* asynchronous requests for change of visualization state of mastergui from the shell*/
   if (mastergui_request!=mastergui_on)
     {
       if ((mastergui_request==FALSE) && (mastergui_on==TRUE))
@@ -496,23 +490,15 @@ static void jdegui_iteration()
 	      stat[19]=fd_mastergui->stat19;
 	      fl_set_form_position(fd_mastergui->mastergui,200,50);
 	    }
-	  fl_show_form(fd_mastergui->mastergui,FL_PLACE_POSITION,FL_FULLBORDER,"jde master gui");
+	  fl_show_form(fd_mastergui->mastergui,FL_PLACE_POSITION,FL_FULLBORDER,"jdec master gui");
 	  hierarchy_win = FL_ObjWin(fd_mastergui->hierarchy);
 	}
     }
-
 
   /* buttons check (polling) */
   /* Puesto que el control no se cede al form, sino que se hace polling de sus botones pulsados, debemos proveer el enlace para los botones que no tengan callback asociada, en esta rutina de polling. OJO aquellos que tengan callback asociada jamas se veran con fl_check_forms, la libreria llamara automaticamente a su callback sin que fl_check_forms o fl_do_forms se enteren en absoluto.*/
   obj = fl_check_forms();
   if (mastergui_on==TRUE) mastergui_buttons(obj);
-  /*
-  for(i=0;i<num_schemas;i++)
-    {
-      if (all[i].gui==TRUE)
-	(*all[i].guibuttons)(obj);
-    }
-  */
   for(i=0;i<num_buttonscallbacks;i++)
     {
       if (buttonscallbacks[i]!=NULL)
@@ -521,13 +507,11 @@ static void jdegui_iteration()
 
   /* display iteration */
   if (mastergui_on==TRUE) mastergui_display();
- 
   for(i=0;i<num_displaycallbacks;i++)
     {
       if (displaycallbacks[i]!=NULL)
 	(displaycallbacks[i])();
     }
-
 }
 
 static void *jdegui_thread(void *not_used) 
@@ -537,31 +521,18 @@ static void *jdegui_thread(void *not_used)
 
   for(;;)
     {
-      pthread_mutex_lock(&(jdegui_mymutex));
-      if (jdegui_state==slept) 
-	{
-	  pthread_cond_wait(&(jdegui_condition),&(jdegui_mymutex));
-	  pthread_mutex_unlock(&(jdegui_mymutex));
-	}
-      else 
-	{
-	  pthread_mutex_unlock(&(jdegui_mymutex));
-	  gettimeofday(&a,NULL);
-	  jdegui_iteration();
-	  gettimeofday(&b,NULL);  
-	  diff = (b.tv_sec-a.tv_sec)*1000000+b.tv_usec-a.tv_usec;
-
-	  next = jdegui_cycle*1000-diff-10000; 
-	  /* discounts 10ms taken by calling usleep itself */
-	  if (next>0) usleep(jdegui_cycle*1000-diff);
-	  else { 
-	    /* don't bother with this message, just display as fast as you can */
-	    /* printf("jdegui: time interval violated\n"); */
-	  }
-	}
+      gettimeofday(&a,NULL);
+      jdegui_iteration();
+      gettimeofday(&b,NULL);  
+      diff = (b.tv_sec-a.tv_sec)*1000000+b.tv_usec-a.tv_usec;
+      next = jdegui_cycle*1000-diff-10000; 
+      /* discounts 10ms taken by calling usleep itself */
+      if (next>0) usleep(jdegui_cycle*1000-diff);
+      else; 
+      /* Time interval violated but don't bother with 
+	 any warning message, just display as fast as it can */
     }
 }
-
 
 void jdegui_startup()
 {
@@ -570,55 +541,22 @@ void jdegui_startup()
   char *aa;
   char a[]="myjde";
  
-  /* prepara el display */
   aa=a;
   myargv=&aa;
   display= fl_initialize(&myargc,myargv,"jdec",0,0);
   screen = DefaultScreen(display);
 
   for(i=0;i<MAX_SCHEMAS;i++) state_dpy[i]=slept;
-
-  jdegui_state=slept;
-  pthread_mutex_init(&jdegui_mymutex,PTHREAD_MUTEX_TIMED_NP);
-  pthread_cond_init(&jdegui_condition,NULL);
-
-  pthread_mutex_lock(&(jdegui_mymutex));
-  jdegui_state=slept;
+ 
   pthread_create(&(jdegui_mythread),NULL,jdegui_thread,NULL);
-  pthread_mutex_unlock(&(jdegui_mymutex));
 }
 
 void jdegui_resume()
-{
-  int i;
-
-  pthread_mutex_lock(&(jdegui_mymutex));
-  if (jdegui_debug) printf("jdegui thread on\n");
-  jdegui_state=active;
-  for(i=0;i<MAX_SCHEMAS;i++) state_dpy[i]=slept;
-  if (mastergui_on==TRUE) mastergui_resume(); 
-  pthread_cond_signal(&(jdegui_condition));
-  pthread_mutex_unlock(&(jdegui_mymutex));
-}
-
+{}
 void jdegui_suspend()
-{
-  pthread_mutex_lock(&(jdegui_mymutex));
-  if (jdegui_debug) printf("jdegui thread off\n");
-  jdegui_state=slept;
-  if (mastergui_on==TRUE) mastergui_suspend(); 
-  pthread_mutex_unlock(&(jdegui_mymutex));
-}
-
+{}
 
 void jdegui_close()
 {
-  /*
-  pthread_mutex_lock(&(jdegui_mymutex));
-  jdegui_state=slept;
-  if (mastergui_on==TRUE) mastergui_suspend(); 
-  pthread_mutex_unlock(&(jdegui_mymutex));
-  sleep(2);
-  fl_free_form(fd_mastergui->mastergui);
-  */
+  pthread_kill(jdegui_mythread,SIGKILL);
 }

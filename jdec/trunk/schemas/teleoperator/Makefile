@@ -3,7 +3,8 @@ INC-DIR = -I../../core -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/incl
 LIB-DIR = -L. -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib 
 GCC = gcc
 CFLAGS = -g -pedantic -Wall $(INC-DIR)
-LIBS = -lm -lX11 -lforms 
+LIBS = -lm -lX11 -lforms -lformsGL -lGL -lGLU
+
 
 teleoperator: teleoperatorgui.o pioneeropengl.o teleoperator.o 
 	$(GCC) -shared -Wl,-soname,teleoperator.so $(LIB-DIR) -o teleoperator.so teleoperator.o teleoperatorgui.o pioneeropengl.o $(LIBS)

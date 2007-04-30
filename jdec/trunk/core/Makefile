@@ -4,7 +4,7 @@ GCC = gcc
 CFLAGS = -g -pedantic -Wall $(INC-DIR)
 #-ansi
 #LIBS = -lpthread -lm -lforms -lX11 -ldc1394_control -lraw1394
-LIBS = -lpthread -lm -lforms -lX11 -ldl -lformsGL -lGL -lGLU
+LIBS = -lpthread -lm -lforms -lX11 -ldl
 OBJS = jdegui.o mastergui.o pioneer.o 
 INSTALLDIR=/usr/local
 CFGDIR="$(INSTALLDIR)/jde-robot"

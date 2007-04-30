@@ -660,6 +660,9 @@ void hsituner_startup()
   hsimap_threshold=20;  
 
   pthread_mutex_lock(&(all[hsituner_id].mymutex));
+  myexport("hsituner","id",&hsituner_id);
+  myexport("hsituner","resume",(void *) &hsituner_resume);
+  myexport("hsituner","suspend",(void *) &hsituner_suspend);
   printf("hsituner schema started up\n");
   put_state(hsituner_id,slept);
   pthread_create(&(all[hsituner_id].mythread),NULL,hsituner_thread,NULL);
