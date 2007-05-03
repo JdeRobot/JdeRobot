@@ -1,5 +1,5 @@
-DRIVERS = firewire  imagefile  pantilt  player video4linux networkclient networkserver
-SCHEMAS = hsituner  introrob  myschema  opengldemo  papito  myperceptive followball
+DRIVERS = firewire  imagefile  pantilt  player video4linux networkclient networkserver mplayer
+SCHEMAS = hsituner  introrob  myschema  opengldemo  papito  myperceptive followball speedy opflow
 DOCS = manual 
 
 all: 

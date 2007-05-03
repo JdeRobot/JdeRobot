@@ -899,7 +899,7 @@ class: FL_BUTTON
 type: PUSH_BUTTON
 box: 130 40 80 20
 boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_COL1
+colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_CENTER
 style: FL_BOLD_STYLE
 size: FL_DEFAULT_SIZE
@@ -917,7 +917,7 @@ class: FL_BUTTON
 type: PUSH_BUTTON
 box: 130 60 80 20
 boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_COL1
+colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_CENTER
 style: FL_BOLD_STYLE
 size: FL_DEFAULT_SIZE
@@ -935,7 +935,7 @@ class: FL_BUTTON
 type: PUSH_BUTTON
 box: 130 80 80 20
 boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_COL1
+colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_CENTER
 style: FL_BOLD_STYLE
 size: FL_DEFAULT_SIZE
@@ -953,7 +953,7 @@ class: FL_BUTTON
 type: PUSH_BUTTON
 box: 130 100 80 20
 boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_COL1
+colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_CENTER
 style: FL_BOLD_STYLE
 size: FL_DEFAULT_SIZE
@@ -989,7 +989,7 @@ class: FL_BUTTON
 type: PUSH_BUTTON
 box: 130 120 80 20
 boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_COL1
+colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_CENTER
 style: FL_BOLD_STYLE
 size: FL_DEFAULT_SIZE

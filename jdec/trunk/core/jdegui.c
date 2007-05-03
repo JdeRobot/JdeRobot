@@ -172,7 +172,8 @@ static void mastergui_buttons(FL_OBJECT *obj)
 	{
 	  if (obj == act[i]) 
 	    { 
-	      if (all[i].state==slept)
+	      /*if (all[i].state==slept) */
+	      if (fl_get_button(act[i])==PUSHED) 
 		(*all[i].resume)(GUIHUMAN,NULL,null_arbitration);
 	      else
 		{

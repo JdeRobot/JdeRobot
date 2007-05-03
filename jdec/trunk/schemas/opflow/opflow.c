@@ -54,6 +54,7 @@ FD_opflowgui *fd_opflowgui;
 /* exported variables */
 int opflow_cycle=90; /* ms */
 
+int mysonColorA;
 /* imported variables */
 char **mycolorA;
 resumeFn mycolorAresume;
@@ -81,6 +82,7 @@ float min_eig=1.0;
 float max_eig=2.0;
 float min_mov=1.5;
 float max_err=30;
+
 
 /*Movimientos encontrados*/
 IppiPoint_32f *prev=0; /* coordinates on previous frame*/
@@ -325,11 +327,14 @@ void opflow_iteration()
    static Ipp8u img3[SIFNTSC_COLUMNS*SIFNTSC_ROWS*4]; /*para cada imagen*/
    static Ipp8u img4[SIFNTSC_COLUMNS*SIFNTSC_ROWS*4]; /*nueva y vieja*/
 
-   static Ipp8u img_bw1[SIFNTSC_COLUMNS*SIFNTSC_ROWS];
-   static Ipp8u img_bw2[SIFNTSC_COLUMNS*SIFNTSC_ROWS];
    static Ipp8u *old_bw=NULL;
    static Ipp8u *new_bw=NULL;
-   
+
+   static Ipp8u img_bw1[SIFNTSC_COLUMNS*SIFNTSC_ROWS];
+   static Ipp8u img_bw2[SIFNTSC_COLUMNS*SIFNTSC_ROWS];
+   /*   static Ipp8u *old_bw=NULL;
+   static Ipp8u *new_bw=NULL;
+   */
    static Ipp8u *work_img_new; /*Imagenes de trabajo*/
    static Ipp8u *work_img_old=NULL;
 
@@ -359,6 +364,20 @@ void opflow_iteration()
 
    int nfeat_temp; /*Número de puntos de interés provisionales*/
 
+   int i,j;
+   static Ipp8u* eig_buffer=NULL;
+   static int eig_buff_step;
+   static Ipp32f *eig_val=NULL;
+   static int eig_val_s;
+   
+   static t_pInteres interes[NUM_FEAT_MAX];
+
+   int ksize=5, wsize=9;
+   float rate=2.0f, alpha=0.375f;
+   static Ipp32f *kernelX=NULL;
+   static Ipp16s *kernel_16s=NULL;
+   Ipp32f sum;
+
    /*Comienzo de la iteración*/
    speedcounter(opflow_id);
    /*Inicialización de los punteros de imagenes*/
@@ -385,27 +404,21 @@ void opflow_iteration()
 	 exit(-1);
       }
       opflow_img_work=opflow_img_1;
-      opflow_img=NULL;
-
+      opflow_img=opflow_img_2;
+      /*printf("EigenValBufferSize: %d \n",eigen_buff_tam);*/
       /*Inicializar el canal alpha para que no sea transparente*/
    }
 
    /*Obtain image*/
-   ippiCopy_8u_C3AC4R ( (Ipp8u *)*mycolorA, SIFNTSC_COLUMNS*3,
-			 (Ipp8u *)work_img_new, SIFNTSC_COLUMNS*4, imgtam);
-   ippiRGBToGray_8u_C3C1R ((Ipp8u *)*mycolorA, SIFNTSC_COLUMNS*3,
-			    (Ipp8u *)new_bw, SIFNTSC_COLUMNS, imgtam);
+   ippiCopy_8u_C3AC4R ( (Ipp8u *)(*mycolorA), SIFNTSC_COLUMNS*3,
+			(Ipp8u *)work_img_new, SIFNTSC_COLUMNS*4, imgtam);
+   ippiRGBToGray_8u_C3C1R ((Ipp8u *)(*mycolorA), SIFNTSC_COLUMNS*3,
+			   (Ipp8u *)new_bw, SIFNTSC_COLUMNS, imgtam);
+  
    /*Ahora se tiene capturada una imagen, habrá que tener dos para ejecutar
     el algoritmo*/
    if (inicializado){
-      int i,j;
-      static Ipp8u* eig_buffer=NULL;
-      static int eig_buff_step;
-      static Ipp32f *eig_val=NULL;
-      static int eig_val_s;
-
-      static t_pInteres interes[NUM_FEAT_MAX];
-
+    
       if (eig_buffer==NULL){
 	 //printf ("Reserva memoria para eig_buffer step=%d\n",eig_buff_step);
 	 eig_buffer=(Ipp8u*)malloc(sizeof (Ipp8u)*eigen_buff_tam);
@@ -428,41 +441,42 @@ void opflow_iteration()
 	    for (j=0;j<SIFNTSC_ROWS;j++){
 	       for (i=0; i<SIFNTSC_COLUMNS; i++){
 		  int val=i+j*SIFNTSC_COLUMNS;
-		  Ipp32f valor= eig_val[val];
+		  Ipp32f valorX= eig_val[val];
 		  //En este punto hay que umbralizar y ordenar
-		  if (valor>min_eig && valor<max_eig){
+		  if (valorX>min_eig && valorX<max_eig){
 		     if (nfeat_temp<NUM_FEAT_MAX){
-			interes[nfeat_temp].punto.x=j;
-			interes[nfeat_temp].punto.y=i;
-			interes[nfeat_temp].valor=valor;
+			interes[nfeat_temp].punto.x=i;
+			interes[nfeat_temp].punto.y=j;
+			interes[nfeat_temp].valor=valorX;
 			nfeat_temp++;
 		     }
 		     else{
-			if (interes[nfeat_temp].valor<valor){
+			if (interes[nfeat_temp].valor<valorX){
 			   //Insertar en el lugar adecuado
 			   int index1;
 			   int index2;
 			   for (index1=0; index1<nfeat_temp; index1++){
-			      if (interes[index1].valor<valor){
+			      if (interes[index1].valor<valorX){
 				 //Desplazar hacia la derecha
 				 for (index2=nfeat_temp-1; index2>index1; index2--){
 				    interes[index2]=interes[index2-1];
 				 }
 				 interes[index1].punto.x=i;
 				 interes[index1].punto.y=j;
-				 interes[index1].valor=valor;
+				 interes[index1].valor=valorX;
 				 break;
 			      }
 			   }
 			}
 		     }
 		  }
-		  //Aprobechamos el bucle para reiniciar la matriz del resultado
+		  //Aprovechamos el bucle para reiniciar la matriz del resultado
 		  opflow_img_work[val].calc=0;
 	       }
 	    }
             for (i=0;i<nfeat_temp; i++){
-	       prev_work[i]=interes[i].punto;
+	       prev_work[i].x=interes[i].punto.x;
+	       prev_work[i].y=interes[i].punto.y;
 	    }
 	    break;
 	 case ippStsNullPtrErr:
@@ -491,38 +505,36 @@ void opflow_iteration()
 	    printf ("Error desconocido.\n");
 	    break;
       }
+      
       /////////////////////////////////////////////////////////////
 
       /*Crea un núcleo para la creación de las pirámides*/
-      int ksize=5, wsize=9;
-      float rate=2.0f, alpha=0.375f;
-      static Ipp16s *kernel=NULL, *kernel_16s=NULL;
-      if (kernel==NULL){
-	 Ipp32f sum;
-	 int i;
-         kernel=(Ipp32f*)malloc(sizeof(Ipp32f)*ksize);
+      if (kernelX==NULL){
+         kernelX=(Ipp32f*)malloc(sizeof(Ipp32f)*ksize);
+	 if (kernelX==NULL) printf("falló malloc kernel\n");
          kernel_16s=(Ipp16s*)malloc(sizeof(Ipp16s)*ksize);
+	 if (kernel_16s==NULL) printf("falló malloc kernel_16s\n");
 	 switch (ksize) {
 	    case 3:
-	       kernel[1] = alpha;
-	       kernel[0] = kernel[2] = 0.5f*(1.0f - alpha);
+	       kernelX[1] = alpha;
+	       kernelX[0] = kernelX[2] = 0.5f*(1.0f - alpha);
 	       break;
 	    case 5:
-	       kernel[2] = alpha;
-	       kernel[1] = kernel[3] = 0.25f;
-	       kernel[0] = kernel[4] = 0.5f*(0.5f - alpha);
+	       kernelX[2] = alpha;
+	       kernelX[1] = kernelX[3] = 0.25f;
+	       kernelX[0] = kernelX[4] = 0.5f*(0.5f - alpha);
 	       break;
 	    default:
 	       sum = 0;
 	       for (i=0; i<ksize; i++) {
-		  kernel[i] = (Ipp32f)exp(alpha*(ksize/2-i)*(ksize/2-i)*0.5f);
-		  sum += kernel[i];
+		  kernelX[i] = (Ipp32f)exp(alpha*(ksize/2-i)*(ksize/2-i)*0.5f);
+		  sum += kernelX[i];
 	       }
 	       for (i=0; i<ksize; i++) {
-		  kernel[i] /= sum;
+		  kernelX[i] /= sum;
 	       }
 	 }
-	 ippsConvert_32f16s_Sfs(kernel, kernel_16s, ksize, ippRndNear, -15);
+	 ippsConvert_32f16s_Sfs(kernelX, kernel_16s, ksize, ippRndNear, -15);
       }
 
       memcpy(next_work, prev_work, nfeat_temp*sizeof(IppiPoint_32f));
@@ -539,10 +551,10 @@ void opflow_iteration()
 	    int y1 = (int) prev_work[i].y;
 	    int x2 = (int) next_work[i].x;
 	    int y2 = (int) next_work[i].y;
-
 	    opflow_img_work[valor].hyp = /*sqrt*/( square(y1 - y2) +
 		                               square(x1 - x2) );
 	    if (opflow_img_work[valor].hyp > min_mov){
+	    
 	    opflow_img_work[valor].calc=1;
 	    opflow_img_work[valor].status=status_work[i];
 	    opflow_img_work[valor].error=error_work[i];
@@ -587,6 +599,7 @@ void opflow_iteration()
    }
    /*Cambiar el buffer de las imágenes en 1 canal*/
    if (old_bw==img_bw1){
+     /*     printf("cambio %ld %ld\n",(long)old_bw,(long)new_bw);*/
       old_bw=img_bw2;
       new_bw=img_bw1;
    }
@@ -629,13 +642,11 @@ void opflow_iteration()
 
 void opflow_suspend()
 {
-  /* printf("opflow: cojo-suspend\n");*/
   pthread_mutex_lock(&(all[opflow_id].mymutex));
   put_state(opflow_id,slept);
   mycolorAsuspend();
   printf("opflow: off\n");
   pthread_mutex_unlock(&(all[opflow_id].mymutex));
-  /*  printf("opflow: suelto-suspend\n");*/
 }
 
 void opflow_resume(int father, int *brothers, arbitration fn)
@@ -666,7 +677,8 @@ void opflow_resume(int father, int *brothers, arbitration fn)
   mycolorA=(char **)myimport("colorA","colorA");
   mycolorAresume=(resumeFn)myimport("colorA","resume");
   mycolorAsuspend=(suspendFn *)myimport("colorA","suspend");
-  
+  mysonColorA=(*(int *)myimport("colorA","id"));  
+
   printf("opflow: on\n");
   pthread_cond_signal(&(all[opflow_id].condition));
   pthread_mutex_unlock(&(all[opflow_id].mymutex));
@@ -679,7 +691,6 @@ void *opflow_thread(void *not_used)
 
   for(;;)
     {
-      /* printf("opflow: iteration-cojo\n");*/
       pthread_mutex_lock(&(all[opflow_id].mymutex));
 
       if (all[opflow_id].state==slept) 
@@ -695,14 +706,10 @@ void *opflow_thread(void *not_used)
 	  /* check brothers and arbitrate. For now this is the only winner */
 	  {
 	     put_state(opflow_id,winner);
-	     //all[opflow_id].children[(*(int *)myimport("colorA","id"))]=TRUE;
+	     all[opflow_id].children[mysonColorA]=TRUE;
 	     mycolorAresume(opflow_id,NULL,NULL);
 	  }
 	  else if (all[opflow_id].state==winner);
-// 	  else all[opflow_id].state=ready;
-// 	  /* check brothers and arbitrate. For now this is the only winner */
-// 	  if (all[opflow_id].state==ready) put_state(opflow_id,winner);
-
 
 	  if (all[opflow_id].state==winner)
 	    /* I'm the winner and must execute my iteration */
@@ -782,27 +789,27 @@ void opflow_guidisplay(){
    int no_rectas=0, i, j;
    static char text [50];
    static IppiSize imgtam;
+   int val=0;
+   FL_COLOR color;
+   int x1, y1, x2, y2;
+   double angle, hypotenuse;
    
    imgtam.height=SIFNTSC_ROWS;
    imgtam.width=SIFNTSC_COLUMNS;
    
-
    if (new_img!=NULL && old_img!=NULL && prev!=NULL && next!=NULL){
       /*primero se copian las imágenes*/
       ippiCopy_8u_AC4R ((Ipp8u *)old_img, SIFNTSC_COLUMNS*4, (Ipp8u*)show_old,
 			 SIFNTSC_COLUMNS*4, imgtam);
-      ippiCopy_8u_AC4R ((Ipp8u *)new_img, SIFNTSC_COLUMNS*4, (Ipp8u *)show_new,
+      ippiCopy_8u_AC4R ((Ipp8u *)new_img, SIFNTSC_COLUMNS*4, (Ipp8u*)show_new,
 			 SIFNTSC_COLUMNS*4, imgtam);
       /*Después en la imagen inicial se pintan las flechas*/
       no_rectas=0;
       for (i=0;i<SIFNTSC_COLUMNS;i++){
 	 for (j=0; j<SIFNTSC_ROWS; j++){
-	    int val=i+j*SIFNTSC_COLUMNS;
-	    FL_COLOR color;
-	    int x1, y1, x2, y2;
-	    double angle, hypotenuse;
+	   val=i+j*SIFNTSC_COLUMNS;
 
-	    if (opflow_img[val].status!=0 || opflow_img[val].error > max_err ||
+	   if (opflow_img[val].status!=0 || opflow_img[val].error > max_err ||
 	       opflow_img[val].calc==0)
 	       continue;
 
@@ -860,9 +867,8 @@ void opflow_guidisplay(){
       default: sprintf(text,"%d movements",no_rectas);
       break;
    }
-//    printf ("%s\n",text);
+  
    fl_set_object_label(fd_opflowgui->no_arrows,text);
-   
 }
 
 void opflow_guisuspend(void)
@@ -877,7 +883,6 @@ void opflow_guiresume(void)
   static int k=0;
 
   if (k==0){ /* not initialized */
-
       k++;
       fd_opflowgui = create_form_opflowgui();
       fl_set_form_position(fd_opflowgui->opflowgui,100,200);

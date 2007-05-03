@@ -31,7 +31,7 @@ mastergui.c: mastergui.fd
 	fdesign -convert mastergui.fd
 
 clean:
-	-rm -f *.o *.a *so *~
+	-rm -f *.o *.a *so *~ mastergui.c mastergui.h
 
 install:
 	cp jde $(INSTALLDIR)/bin/

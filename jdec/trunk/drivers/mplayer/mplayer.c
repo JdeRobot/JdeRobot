@@ -33,9 +33,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-
 #define MAXVIDS 4
-
 
 int mplayer_fps;
 int mplayer_res;
@@ -55,7 +53,7 @@ int mplayer_close_command=0;
 char driver_name[256]="mplayer";
 int serve_color[MAXVIDS];
 char fichero_video[MAXVIDS][256];
-int color_active[MAXVIDS];
+int color_active[MAXVIDS]; /* # of active fathers */
 int repeat[MAXVIDS];
 int speed[MAXVIDS];
 int n_frames[MAXVIDS];
@@ -88,33 +86,39 @@ void mplayer_close(){
 }
 
 int mycolorA_resume(int father, int *brothers, arbitration fn){
-   if((serve_color[0]==1)&&(color_active[0]==0)){
-      color_active[0]=1;
-      pthread_mutex_unlock(&color_mutex[0]);
-      printf("colorA schema resume (mplayer driver)\n");
-      all[colorA_schema_id].father = father;
-      all[colorA_schema_id].fps = 0.;
-      all[colorA_schema_id].k =0;
-      put_state(colorA_schema_id,winner);
-
-      if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
-	 /* mplayer thread goes winner */
-	 pthread_mutex_lock(&mymutex);
-	 state=winner;
-	 pthread_cond_signal(&condition);
-	 pthread_mutex_unlock(&mymutex);
-      }
-   }
+  if(serve_color[0]==1)
+    {
+      color_active[0]++;
+      if ((all[colorD_schema_id].father==GUIHUMAN) ||
+	  (all[colorD_schema_id].father==SHELLHUMAN))
+	all[colorD_schema_id].father = father;
+      if(color_active[0]==1)
+	{   
+	  pthread_mutex_unlock(&color_mutex[0]);
+	  /*printf("colorA schema resume (mplayer driver)\n");*/
+	  all[colorA_schema_id].father = father;
+	  all[colorA_schema_id].fps = 0.;
+	  all[colorA_schema_id].k =0;
+	  put_state(colorA_schema_id,winner);
+	  
+	  if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
+	    /* mplayer thread goes winner */
+	    pthread_mutex_lock(&mymutex);
+	    state=winner;
+	    pthread_cond_signal(&condition);
+	    pthread_mutex_unlock(&mymutex);
+	  }
+	}
+    }
    return 0;
 }
 
 int mycolorA_suspend(){
-
-   if((serve_color[0]==1)&&(color_active[0]==1)){
-      color_active[0]=0;
+  color_active[0]--;
+  if((serve_color[0]==1)&&(color_active[0]==0)){
       pthread_mutex_lock(&color_mutex[0]);
       put_state(colorA_schema_id,slept);
-      printf("colorA schema suspend (mplayer driver)\n");
+      /*printf("colorA schema suspend (mplayer driver)\n");*/
       if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
 	 /* mplayer thread goes sleep */
 	 pthread_mutex_lock(&mymutex);
@@ -126,120 +130,139 @@ int mycolorA_suspend(){
 }
 
 int mycolorB_resume(int father, int *brothers, arbitration fn){
-   if((serve_color[1]==1)&&(color_active[1]==0)){
-      color_active[1]=1;
-      pthread_mutex_unlock(&color_mutex[1]);
-      printf("colorB schema resume (mplayer driver)\n");
-      all[colorB_schema_id].father = father;
-      all[colorB_schema_id].fps = 0.;
-      all[colorB_schema_id].k =0;
-      put_state(colorB_schema_id,winner);
-
-      if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
-	 /* mplayer thread goes winner */
-	 pthread_mutex_lock(&mymutex);
-	 state=winner;
-	 pthread_cond_signal(&condition);
-	 pthread_mutex_unlock(&mymutex);
-      }
-   }
+  if(serve_color[1]==1)
+    {
+      color_active[1]++;
+      if ((all[colorD_schema_id].father==GUIHUMAN) ||
+	  (all[colorD_schema_id].father==SHELLHUMAN))
+	all[colorD_schema_id].father = father;
+      if(color_active[1]==1)
+	{   
+	  pthread_mutex_unlock(&color_mutex[1]);
+	  /*printf("colorB schema resume (mplayer driver)\n");*/
+	  all[colorB_schema_id].father = father;
+	  all[colorB_schema_id].fps = 0.;
+	  all[colorB_schema_id].k =0;
+	  put_state(colorB_schema_id,winner);
+	  
+	  if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
+	    /* mplayer thread goes winner */
+	    pthread_mutex_lock(&mymutex);
+	    state=winner;
+	    pthread_cond_signal(&condition);
+	    pthread_mutex_unlock(&mymutex);
+	  }
+	}
+    }
    return 0;
 }
 
 int mycolorB_suspend(){
-
-   if((serve_color[1]==1)&&(color_active[1]==1)){
-      color_active[1]=0;
-      pthread_mutex_lock(&color_mutex[1]);
-      printf("colorB schema suspend (mplayer driver)\n");
-      put_state(colorB_schema_id,slept);
-
-      if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
-	 /* mplayer thread goes sleep */
-	 pthread_mutex_lock(&mymutex);
-	 state=slept;
-	 pthread_mutex_unlock(&mymutex);
-      }
-   }
-   return 0;
+  color_active[1]--;
+  if((serve_color[1]==1)&&(color_active[1]==1)){
+    pthread_mutex_lock(&color_mutex[1]);
+    /*printf("colorB schema suspend (mplayer driver)\n");*/
+    put_state(colorB_schema_id,slept);
+    
+    if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
+      /* mplayer thread goes sleep */
+      pthread_mutex_lock(&mymutex);
+      state=slept;
+      pthread_mutex_unlock(&mymutex);
+    }
+  }
+  return 0;
 }
 
 int mycolorC_resume(int father, int *brothers, arbitration fn){
-   if((serve_color[2]==1)&&(color_active[2]==0)){
-      color_active[2]=1;
-      pthread_mutex_unlock(&color_mutex[2]);
-      printf("colorC schema resume (mplayer driver)\n");
-      all[colorC_schema_id].father = father;
-      all[colorC_schema_id].fps = 0.;
-      all[colorC_schema_id].k =0;
-      put_state(colorC_schema_id,winner);
-
-      if((color_active[1]==0)&&(color_active[0]==0)&&(color_active[3]==0)){
-	 /* mplayer thread goes winner */
-	 pthread_mutex_lock(&mymutex);
-	 state=winner;
-	 pthread_cond_signal(&condition);
-	 pthread_mutex_unlock(&mymutex);
-      }
-   }
+  if(serve_color[2]==1)
+    {
+      color_active[2]++;
+      if ((all[colorD_schema_id].father==GUIHUMAN) ||
+	  (all[colorD_schema_id].father==SHELLHUMAN))
+	all[colorD_schema_id].father = father;
+      if(color_active[2]==1)
+	{
+	  pthread_mutex_unlock(&color_mutex[2]);
+	  /*printf("colorC schema resume (mplayer driver)\n");*/
+	  all[colorC_schema_id].father = father;
+	  all[colorC_schema_id].fps = 0.;
+	  all[colorC_schema_id].k =0;
+	  put_state(colorC_schema_id,winner);
+	  
+	  if((color_active[1]==0)&&(color_active[0]==0)&&(color_active[3]==0)){
+	    /* mplayer thread goes winner */
+	    pthread_mutex_lock(&mymutex);
+	    state=winner;
+	    pthread_cond_signal(&condition);
+	    pthread_mutex_unlock(&mymutex);
+	  }
+	}
+    }
    return 0;
 }
 
 int mycolorC_suspend(){
-
-   if((serve_color[2]==1)&&(color_active[2]==1)){
-      color_active[2]=0;
-      pthread_mutex_lock(&color_mutex[2]);
-      printf("colorC schema suspend (mplayer driver)\n");
-      put_state(colorC_schema_id,slept);
-
-      if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[3]==0)){
-	 /* mplayer thread goes sleep */
-	 pthread_mutex_lock(&mymutex);
-	 state=slept;
-	 pthread_mutex_unlock(&mymutex);
-      }
-   }
-   return 0;
+  color_active[2]--;
+  if((serve_color[2]==1)&&(color_active[2]==1)){
+    pthread_mutex_lock(&color_mutex[2]);
+    /*printf("colorC schema suspend (mplayer driver)\n");*/
+    put_state(colorC_schema_id,slept);
+    
+    if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[3]==0)){
+      /* mplayer thread goes sleep */
+      pthread_mutex_lock(&mymutex);
+      state=slept;
+      pthread_mutex_unlock(&mymutex);
+    }
+  }
+  return 0;
 }
 
 int mycolorD_resume(int father, int *brothers, arbitration fn){
-   if((serve_color[3]==1)&&(color_active[3]==0)){
-      color_active[3]=1;
-      pthread_mutex_unlock(&color_mutex[3]);
-      printf("colorD schema resume (mplayer driver)\n");
-      all[colorD_schema_id].father = father;
-      all[colorD_schema_id].fps = 0.;
-      all[colorD_schema_id].k =0;
-      put_state(colorD_schema_id,winner);
 
-      if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[0]==0)){
-	 /* mplayer thread goes winner */
-	 pthread_mutex_lock(&mymutex);
-	 state=winner;
-	 pthread_cond_signal(&condition);
-	 pthread_mutex_unlock(&mymutex);
-      }
-   }
+  if(serve_color[3]==1)
+    {
+      color_active[3]++;
+      if ((all[colorD_schema_id].father==GUIHUMAN) ||
+	  (all[colorD_schema_id].father==SHELLHUMAN))
+	all[colorD_schema_id].father = father;
+      if(color_active[3]==1)
+	{
+	  pthread_mutex_unlock(&color_mutex[3]);
+	  /*printf("colorD schema resume (mplayer driver)\n");*/
+	  all[colorD_schema_id].father = father;
+	  all[colorD_schema_id].fps = 0.;
+	  all[colorD_schema_id].k =0;
+	  put_state(colorD_schema_id,winner);
+	  
+	  if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[0]==0)){
+	    /* mplayer thread goes winner */
+	    pthread_mutex_lock(&mymutex);
+	    state=winner;
+	    pthread_cond_signal(&condition);
+	    pthread_mutex_unlock(&mymutex);
+	  }
+	}
+    }
    return 0;
 }
 
 int mycolorD_suspend(){
-
-   if((serve_color[3]==1)&&(color_active[3]==1)){
-      color_active[3]=0;
-      pthread_mutex_lock(&color_mutex[3]);
-      printf("colorD schema suspend (mplayer driver)\n");
-      put_state(colorD_schema_id,slept);
-
-      if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[2]==0)){
-	 /* mplayer thread goes sleep */
-	 pthread_mutex_lock(&mymutex);
-	 state=slept;
-	 pthread_mutex_unlock(&mymutex);
-      }
-   }
-   return 0;
+  color_active[3]--;
+  if((serve_color[3]==1)&&(color_active[3]==1)){
+    pthread_mutex_lock(&color_mutex[3]);
+    /*printf("colorD schema suspend (mplayer driver)\n");*/
+    put_state(colorD_schema_id,slept);
+    
+    if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[2]==0)){
+      /* mplayer thread goes sleep */
+      pthread_mutex_lock(&mymutex);
+      state=slept;
+      pthread_mutex_unlock(&mymutex);
+    }
+  }
+  return 0;
 }
 
 void lanzar_mplayer (int i){
@@ -290,7 +313,7 @@ void *mplayer_thread(void *id)
    i=*((int*)id);
    int fifo;
    
-   printf("mplayer driver started up %d\n", i);
+   printf("mplayer driver started up\n");
 
 	if ((fifo=open (fifo2[i],O_RDONLY))==-1){
 	       perror("");
@@ -462,9 +485,9 @@ int mplayer_parseconf(char *configfile){
 
 			   }else if(strcmp(word3,"provides")==0){
 			      while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
-			      printf ("%s\n",buffer_file2);
+			      /*printf ("%s",buffer_file2);*/
 			      if(sscanf(buffer_file2,"%s %s %s %s",word3,word4,word5,word6)==4){
-
+				printf("mplayer: %s from %s\n",word4,word5);
 				 if(strcmp(word4,"colorA")==0){
 				    serve_color[0]=1;
 				    strcpy (fichero_video[0],word5);
@@ -487,7 +510,7 @@ int mplayer_parseconf(char *configfile){
 				 }
 
 			      }else{
-				 printf("mplayer: provides line incorrect\n");
+				 printf("mplayer: 'provides' line incorrect\n");
 			      }
 			   }else printf("mplayer: i don't know what to do with '%s'\n",buffer_file2);
 			}
@@ -586,6 +609,7 @@ void mplayer_startup(char *configfile)
 	 all[num_schemas].close = NULL;
 	 all[num_schemas].handle = NULL;
 	 num_schemas++;
+	 myexport("colorA","id",&colorA_schema_id);
 	 myexport("colorA","colorA",&colorA);
 	 myexport("colorA","resume",(void *)mycolorA_resume);
 	 myexport("colorA","suspend",(void *)mycolorA_suspend);
@@ -611,6 +635,7 @@ void mplayer_startup(char *configfile)
 	 all[num_schemas].close = NULL;
 	 all[num_schemas].handle = NULL;
 	 num_schemas++;
+	 myexport("colorB","id",&colorB_schema_id);
 	 myexport("colorB","colorB",&colorB);
 	 myexport("colorB","resume",(void *)mycolorB_resume);
 	 myexport("colorB","suspend",(void *)mycolorB_suspend);
@@ -636,6 +661,7 @@ void mplayer_startup(char *configfile)
 	 all[num_schemas].close = NULL;
 	 all[num_schemas].handle = NULL;
 	 num_schemas++;
+	 myexport("colorC","id",&colorC_schema_id);
 	 myexport("colorC","colorC",&colorC);
 	 myexport("colorC","resume",(void *)mycolorC_resume);
 	 myexport("colorC","suspend",(void *)mycolorC_suspend);
@@ -661,6 +687,7 @@ void mplayer_startup(char *configfile)
 	 all[num_schemas].close = NULL;
 	 all[num_schemas].handle = NULL;
 	 num_schemas++;
+	 myexport("colorD","id",&colorD_schema_id);
 	 myexport("colorD","colorD",&colorD);
 	 myexport("colorD","resume",(void *)mycolorD_resume);
 	 myexport("colorD","suspend",(void *)mycolorD_suspend);
@@ -669,6 +696,4 @@ void mplayer_startup(char *configfile)
 	 printf("cannot find file for colorD\n");
       }
    }
-
-   printf("mplayer driver started up\n");
 }
