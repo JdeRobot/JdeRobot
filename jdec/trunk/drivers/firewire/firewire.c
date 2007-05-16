@@ -15,7 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : David Lobato <dlobato@gsyc.escet.urjc.es>, Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>
+ *  Authors : David Lobato <dlobato@gsyc.escet.urjc.es>, Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, JoseMaria Cañas <jmplaza@gsyc.escet.urjc.es>
  */
 
 /************************************************
@@ -156,7 +156,6 @@ int mycolorA_resume(int father, int *brothers, arbitration fn){
     all[colorA_schema_id].fps = 0.;
     all[colorA_schema_id].k =0;
     put_state(colorA_schema_id,winner);
-
     if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
       /* firewire thread goes winner */
       pthread_mutex_lock(&mymutex);
@@ -191,6 +190,7 @@ int mycolorB_resume(int father, int *brothers, arbitration fn){
     all[colorB_schema_id].father = father;
     all[colorB_schema_id].fps = 0.;
     all[colorB_schema_id].k =0;
+   
     put_state(colorB_schema_id,winner);
 
     if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
@@ -297,10 +297,12 @@ int mycolorD_suspend(){
 
 void *firewire_thread(void *not_used)
 {
+  int capturedA=FALSE, capturedB=FALSE, capturedC=FALSE,  capturedD=FALSE;
+
   printf("firewire driver started up\n");
 
   do{
-
+        
     pthread_mutex_lock(&mymutex);
 
     if (state==slept){
@@ -312,40 +314,59 @@ void *firewire_thread(void *not_used)
     }else{
       
       pthread_mutex_unlock(&mymutex);
-      
+
       /* image capture for all cameras - only capturing when needed */
       if(color_active[0]){
-	if(dc1394_dma_single_capture(&cameras[number_color[0]])==DC1394_FAILURE) perror("firewire_thread");}
+	if(dc1394_dma_single_capture(&cameras[number_color[0]])==DC1394_FAILURE) perror("firewire_thread");
+	capturedA=TRUE;
+      }
+
       if((color_active[1])&&(number_color[1]!=number_color[0])){
-	if(dc1394_dma_single_capture(&cameras[number_color[1]])==DC1394_FAILURE) perror("firewire_thread");}
+	if(dc1394_dma_single_capture(&cameras[number_color[1]])==DC1394_FAILURE) perror("firewire_thread");
+	capturedB=TRUE;
+      }
+
       if((color_active[2])&&(number_color[2]!=number_color[0])&&(number_color[2]!=number_color[1])){
-	if(dc1394_dma_single_capture(&cameras[number_color[2]])==DC1394_FAILURE) perror("firewire_thread");}
-      if((color_active[3])&&(number_color[3]!=number_color[0])&&(number_color[3]!=number_color[1])&&(number_color[3]!=number_color[0])){
-	if(dc1394_dma_single_capture(&cameras[number_color[3]])==DC1394_FAILURE) perror("firewire_thread");}
+	if(dc1394_dma_single_capture(&cameras[number_color[2]])==DC1394_FAILURE) perror("firewire_thread");
+	capturedC=TRUE;
+      }
+
+      if((color_active[3])&&(number_color[3]!=number_color[0])&&(number_color[3]!=number_color[1])&&(number_color[3]!=number_color[2])){
+	if(dc1394_dma_single_capture(&cameras[number_color[3]])==DC1394_FAILURE) perror("firewire_thread");
+	capturedD=TRUE;
+      }  
+
 
       /* image copy between buffers */
-      if(color_active[0]) uyvy2rgb((unsigned char*)cameras[number_color[0]].capture_buffer,(unsigned char*)colorA,SIFNTSC_COLUMNS*SIFNTSC_ROWS);
-      if(color_active[1]) uyvy2rgb((unsigned char*)cameras[number_color[1]].capture_buffer,(unsigned char*)colorB,SIFNTSC_COLUMNS*SIFNTSC_ROWS);
-      if(color_active[2]) uyvy2rgb((unsigned char*)cameras[number_color[2]].capture_buffer,(unsigned char*)colorC,SIFNTSC_COLUMNS*SIFNTSC_ROWS);
-      if(color_active[3]) uyvy2rgb((unsigned char*)cameras[number_color[3]].capture_buffer,(unsigned char*)colorD,SIFNTSC_COLUMNS*SIFNTSC_ROWS);
-
       /* dma_done_with_buffer for all active cameras */
-      if(color_active[0]){
+      if(color_active[0]&&(capturedA==TRUE)){
+	uyvy2rgb((unsigned char*)cameras[number_color[0]].capture_buffer,(unsigned char*)colorA,SIFNTSC_COLUMNS*SIFNTSC_ROWS);
 	if(dc1394_dma_done_with_buffer(&cameras[number_color[0]])==DC1394_FAILURE) perror("firewire_thread");
-	else speedcounter(colorA_schema_id);  
+	else speedcounter(colorA_schema_id);
+	capturedA=FALSE;
       }
-      if((color_active[1])&&(number_color[1]!=number_color[0])){
+
+      if((color_active[1])&&(capturedB==TRUE)){
+	uyvy2rgb((unsigned char*)cameras[number_color[1]].capture_buffer,(unsigned char*)colorB,SIFNTSC_COLUMNS*SIFNTSC_ROWS);
 	if(dc1394_dma_done_with_buffer(&cameras[number_color[1]])==DC1394_FAILURE) perror("firewire_thread");
-	else speedcounter(colorB_schema_id);  
+	else speedcounter(colorB_schema_id);
+	capturedB=FALSE;
       }
-      if((color_active[2])&&(number_color[2]!=number_color[0])&&(number_color[2]!=number_color[1])){
+
+      if((color_active[2])&&(capturedC==TRUE)){
+	uyvy2rgb((unsigned char*)cameras[number_color[2]].capture_buffer,(unsigned char*)colorC,SIFNTSC_COLUMNS*SIFNTSC_ROWS);
 	if(dc1394_dma_done_with_buffer(&cameras[number_color[2]])==DC1394_FAILURE) perror("firewire_thread");
-	else speedcounter(colorC_schema_id);  
+	else speedcounter(colorC_schema_id);
+	capturedC=FALSE;
       }
-      if((color_active[3])&&(number_color[3]!=number_color[0])&&(number_color[3]!=number_color[1])&&(number_color[3]!=number_color[0])){
+
+      if((color_active[3])&&(capturedD==TRUE)){
+	uyvy2rgb((unsigned char*)cameras[number_color[3]].capture_buffer,(unsigned char*)colorD,SIFNTSC_COLUMNS*SIFNTSC_ROWS);
 	if(dc1394_dma_done_with_buffer(&cameras[number_color[3]])==DC1394_FAILURE) perror("firewire_thread");
 	else speedcounter(colorD_schema_id);  
-      }
+	capturedD=FALSE;
+      }  
+
     }
   }while(firewire_close_command==0);
 
@@ -571,7 +592,7 @@ void firewire_init(){
 	    }
 	  
 	  /* deactivating autofocus and some other automatic features for each camera */
-	  if(numCameras<3){
+	  if(numCameras<4){
 	    if(number_color[0]==numCameras){
 	      dc1394_auto_on_off(handles[p],cameras[numCameras].node,FEATURE_EXPOSURE,fwCamFeatures[0].AUTO_EXPOSURE_CONFIG);
 	      dc1394_auto_on_off(handles[p],cameras[numCameras].node,FEATURE_WHITE_BALANCE,fwCamFeatures[0].AUTO_WHITE_BALANCE_CONFIG);
@@ -667,6 +688,7 @@ void firewire_startup(char *configfile)
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("colorA","id",&colorA_schema_id);
       myexport("colorA","colorA",&colorA);
       myexport("colorA","resume",(void *)mycolorA_resume);
       myexport("colorA","suspend",(void *)mycolorA_suspend);
@@ -693,6 +715,7 @@ void firewire_startup(char *configfile)
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("colorB","id",&colorB_schema_id);
       myexport("colorB","colorB",&colorB);
       myexport("colorB","resume",(void *)mycolorB_resume);
       myexport("colorB","suspend",(void *)mycolorB_suspend);
@@ -719,6 +742,7 @@ void firewire_startup(char *configfile)
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("colorC","id",&colorC_schema_id);
       myexport("colorC","colorC",&colorC);
       myexport("colorC","resume",(void *)mycolorC_resume);
       myexport("colorC","suspend",(void *)mycolorC_suspend);
@@ -745,6 +769,7 @@ void firewire_startup(char *configfile)
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("colorD","id",&colorD_schema_id);
       myexport("colorD","colorD",&colorD);
       myexport("colorD","resume",(void *)mycolorD_resume);
       myexport("colorD","suspend",(void *)mycolorD_suspend);
