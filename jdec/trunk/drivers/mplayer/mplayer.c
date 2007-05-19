@@ -14,12 +14,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors :  Javier MartÃ­n Ramos <xaverbrennt@yahoo.es>
- *             JosÃ© Antonio Santos Cadenas  <santoscadenas@gmail.com>
+ *  Authors :  Javier Martín Ramos <xaverbrennt@yahoo.es>
+ *             José Antonio Santos Cadenas  <santoscadenas@gmail.com>
  */
 
 /************************************************
- * jdec mplayer driver                         *
+ * jdec mplayer driver                          *
  ************************************************/
 
 #include <stdio.h>
@@ -32,8 +32,11 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
+
 
 #define MAXVIDS 4
+#define ROUTE_LEN 255
 
 int mplayer_fps;
 int mplayer_res;
@@ -59,8 +62,9 @@ int speed[MAXVIDS];
 int n_frames[MAXVIDS];
 int pid_mplayer[MAXVIDS];
 int pid_mencoder[MAXVIDS];
-char fifo1[MAXVIDS][100]; /* Data from mplayer to menconder */
-char fifo2[MAXVIDS][100]; /* Data from mencoder to this driver */
+char fifo1[MAXVIDS][ROUTE_LEN]; /* Data from mplayer to menconder */
+char fifo2[MAXVIDS][ROUTE_LEN]; /* Data from mencoder to this driver */
+char directorio[255];
 
 
 int colorA_schema_id, colorB_schema_id, colorC_schema_id, colorD_schema_id;
@@ -71,7 +75,7 @@ int colorA_schema_id, colorB_schema_id, colorC_schema_id, colorD_schema_id;
 void mplayer_close(){
    int i;
 
-   //Hacer unlink los fifos y matar a los hijos mplayer y  mencoder
+   /*Hacer unlink los fifos y matar a los hijos mplayer y  mencoder*/
    for (i=0; i<MAXVIDS; i++){
       if (serve_color[i]==1){
 	 kill (pid_mplayer[i], 9);
@@ -80,6 +84,10 @@ void mplayer_close(){
 	 unlink (fifo1[i]);
 	 unlink (fifo2[i]);
       }
+   }
+   /*borrar el directorio temporal (si se puede)*/
+   if (rmdir (directorio)<0){
+      perror ("I can't delete temp dir: ");
    }
    mplayer_close_command=1;
    printf("driver mplayer off\n");
@@ -321,12 +329,13 @@ void *mplayer_thread(void *id)
 	}
    do{
 
-      pthread_mutex_lock(&color_mutex[i]); //Si está bloqueado se queda ahí
-      pthread_mutex_unlock (&color_mutex[i]);
-	       /*Simplemente lee del fifo y lo coloca en colorX*/
       int leidos=0;
       int leidos_tmp=0;
       char buff[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3];
+
+      pthread_mutex_lock(&color_mutex[i]); /*Si está bloqueado se queda ahí*/
+      pthread_mutex_unlock (&color_mutex[i]);
+	       /*Simplemente lee del fifo y lo coloca en colorX*/
       while (leidos<SIFNTSC_COLUMNS*SIFNTSC_ROWS*3){
 	 leidos_tmp=read (fifo, buff+leidos,
 			  SIFNTSC_COLUMNS*SIFNTSC_ROWS*3 - leidos);
@@ -334,9 +343,9 @@ void *mplayer_thread(void *id)
 
 
 	    if (repeat[i]==1){
-		     //Lanzar otro mplayer si hay repeat
-		     //Se matan mplayer y mencoder, se ignoran errores porque
-		     //Seguramente ya hayan muerto y eso devuelve error
+	       /*Lanzar otro mplayer si hay repeat
+	       Se matan mplayer y mencoder, se ignoran errores porque
+	       Seguramente ya hayan muerto y eso devuelve error*/
 	       close(fifo);
 
 	       kill (pid_mplayer[i], 9);
@@ -358,7 +367,7 @@ void *mplayer_thread(void *id)
 	 }
 	 leidos+=leidos_tmp;
       }
-	       //Se ha leido todo un frame
+      /*Se ha leido todo un frame*/
       switch (i){
 	 case 0:
 	    memcpy(colorA, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
@@ -547,19 +556,50 @@ void mplayer_startup(char *configfile)
       printf("mplayer: cannot initiate driver. configfile parsing error.\n");
       exit(-1);
    }
-   //inicializar los nombres de los fifos
-   strcpy(fifo1[0], "/tmp/fifo-mplayer-colorA-1");
-   strcpy(fifo2[0], "/tmp/fifo-mplayer-colorA-2");
-   strcpy(fifo1[1], "/tmp/fifo-mplayer-colorB-1");
-   strcpy(fifo2[1], "/tmp/fifo-mplayer-colorB-2");
-   strcpy(fifo1[2], "/tmp/fifo-mplayer-colorC-1");
-   strcpy(fifo2[2], "/tmp/fifo-mplayer-colorC-2");
-   strcpy(fifo1[3], "/tmp/fifo-mplayer-colorD-1");
-   strcpy(fifo2[3], "/tmp/fifo-mplayer-colorD-2");
+
+   strcpy (directorio, "/tmp/jde-mplayer-XXXXXX");
+   if (mkdtemp(directorio)==NULL){
+      perror ("I can't create a temp directory: ");
+      exit (-1);
+   }
+
+   /*inicializar los nombres de los fifos*/
+   if (snprintf(fifo1[0], ROUTE_LEN, "%s/colorA-1", directorio)<0){
+      fprintf (stderr, "Can't create temp files\n");
+      exit (-1);
+   }
+   if (snprintf(fifo2[0], ROUTE_LEN, "%s/colorA-2", directorio)<0){
+      fprintf (stderr, "Can't create temp files\n");
+      exit (-1);
+   }
+   if (snprintf(fifo1[1], ROUTE_LEN, "%s/colorB-1", directorio)<0){
+      fprintf (stderr, "Can't create temp files\n");
+      exit (-1);
+   }
+   if (snprintf(fifo2[1], ROUTE_LEN, "%s/colorB-2", directorio)<0){
+      fprintf (stderr, "Can't create temp files\n");
+      exit (-1);
+   }
+   if (snprintf(fifo1[2], ROUTE_LEN, "%s/colorC-1", directorio)<0){
+      fprintf (stderr, "Can't create temp files\n");
+      exit (-1);
+   }
+   if (snprintf(fifo2[2], ROUTE_LEN, "%s/colorC-2", directorio)<0){
+      fprintf (stderr, "Can't create temp files\n");
+      exit (-1);
+   }
+   if (snprintf(fifo1[3], ROUTE_LEN, "%s/colorD-1", directorio)<0){
+      fprintf (stderr, "Can't create temp files\n");
+      exit (-1);
+   }
+   if (snprintf(fifo2[3], ROUTE_LEN, "%s/colorD-2", directorio)<0){
+      fprintf (stderr, "Can't create temp files\n");
+      exit (-1);
+   }
 
    if(mplayer_thread_created==0){
       static int args[MAXVIDS];
-      //Crear hilos para cada imagen
+      /*Crear hilos para cada imagen*/
       pthread_mutex_lock(&mymutex);
       state=slept;
       if (serve_color[0]){
@@ -583,15 +623,16 @@ void mplayer_startup(char *configfile)
    }
 
    for (i=0; i<MAXVIDS; i++){
-      //inicializar todos los mplayer y mencoder
+      /*inicializar todos los mplayer y mencoder*/
       pid_mplayer[i]=0;
       pid_mencoder[i]=0;
       if (serve_color[i]==1){
 	 lanzar_mplayer(i);
       }
    }
-   //Se crean los esquemas que a su vez bloquean al su correspondiente threat
-   //hasta que se active el esquema
+   /*Se crean los esquemas que a su vez bloquean al su correspondiente threat
+   hasta que se active el esquema*/
+   
    /*creates new schema for colorA*/
    if(serve_color[0]==1){
 

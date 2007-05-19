@@ -21,6 +21,7 @@
 #include "jde.h"
 #include "jdegui.h"
 #include "papitogui.h"
+#include "papito.h"
 
 int papito_id=0; 
 int papito_brothers[MAX_SCHEMAS];
@@ -28,33 +29,76 @@ arbitration papito_callforarbitration;
 int papito_cycle=100; /* ms */
 
 enum papito_states {init,hijos,end};
+enum hijo_states {ON, OFF};
 static int papito_state;
 FD_papitogui *fd_papitogui;
-int d;
+static int hijo_state=OFF;
+int d=0;
 
+/*Imported variables*/
 resumeFn hijoresume;
 suspendFn hijosuspend;
+int* hijo_variable=NULL;
 
 void papito_iteration()
 {  
-  all[papito_id].k++;
   d++;
+  speedcounter(papito_id);
   /* printf("papito iteration %d\n",d); */
   
   if (d==100)
     {
       papito_state=hijos;
-      if (hijoresume!=NULL)
+      if (hijoresume!=NULL){
 	hijoresume(papito_id,NULL,null_arbitration);
+	hijo_state=ON;
+      }
     }
   else if (d==200)
     {
       papito_state=init;
-      if (hijosuspend!=NULL)
+      if (hijosuspend!=NULL){
 	hijosuspend();
+	hijo_state=OFF;
+      }
+    }
+  else if (d>100 && d<200 && hijo_variable!=NULL)
+    {
+      /*En el intervalo de tiempo que el hijo está lanzado se utilizan
+       sus variables*/
+      printf ("Variable del hijo: %d\n", *hijo_variable);
     }
 }
 
+/*Exporta variables en esta función*/
+void papito_exports(){
+
+   /*Exporta*/
+   myexport("papito","cycle",&papito_cycle);
+   myexport("papito","resume",(void *)papito_resume);
+   myexport("papito","papito_cycle",&papito_cycle);
+
+}
+
+/*Importar símbolos*/
+void papito_imports(){
+   hijoresume=(resumeFn)myimport("myschema","resume");
+   if (hijoresume==NULL) printf("papito: Warning myschema_resume symbol not resolved\n");
+   hijosuspend=(suspendFn)myimport("myschema","suspend");
+   if (hijosuspend==NULL) printf("papito: Warning myschema_suspend symbol not resolved\n");
+   hijo_variable=(int *)myimport("myschema","valor");
+   if (hijo_variable==NULL) printf("papito: Warning myschema_valor symbol not resolved\n");
+}
+
+/*Las inicializaciones van en esta parte*/
+void papito_init(){
+}
+
+/*Al suspender el esquema*/
+void papito_fin(){
+   if (hijo_state==ON)
+      hijosuspend();
+}
 
 void papito_suspend()
 {
@@ -64,6 +108,7 @@ void papito_suspend()
   printf("papito: off\n");
   pthread_mutex_unlock(&(all[papito_id].mymutex));
   /*  printf("papito: suelto-suspend\n");*/
+  papito_fin();
 }
 
 
@@ -72,7 +117,7 @@ void papito_resume(int father, int *brothers, arbitration fn)
   int i;
   
   /* update the father incorporating this schema as one of its children */
-  if (father!=GUIHUMAN) 
+  if (father!=GUIHUMAN && father!=SHELLHUMAN) 
     {
       pthread_mutex_lock(&(all[father].mymutex));
       all[father].children[papito_id]=TRUE;
@@ -94,81 +139,78 @@ void papito_resume(int father, int *brothers, arbitration fn)
   printf("papito: on\n");
   pthread_cond_signal(&(all[papito_id].condition));
   pthread_mutex_unlock(&(all[papito_id].mymutex));
+  papito_imports();
 }
 
-void *papito_thread(void *not_used) 
+void *papito_thread(void *not_used)
 {
-  struct timeval a,b;
-  long diff, next;
+   struct timeval a,b;
+   long n=0; /* iteration */
+   long next,bb,aa;
 
-  for(;;)
-    {
-      /* printf("papito: iteration-cojo\n");*/
+   for(;;)
+   {
       pthread_mutex_lock(&(all[papito_id].mymutex));
 
-      if (all[papito_id].state==slept) 
-	{
-	  /*printf("papito: off\n");*/
-	  v=0; w=0;
-	  /*  printf("papito: suelto para dormirme en condicional\n");*/
-	  pthread_cond_wait(&(all[papito_id].condition),&(all[papito_id].mymutex));
-	  /*  printf("papito: cojo tras dormirme en condicional\n");*/
-	  /*printf("papito: on\n");*/
-	  papito_state=init; 
-	  /* esto es para la aplicación, no tiene que ver con infraestrucura */
-	  pthread_mutex_unlock(&(all[papito_id].mymutex));
-	  /* printf("papito: iteration-suelto1\n");*/
-	}
-      else 
-	{
-	  /* check preconditions. For now, preconditions are always satisfied*/
-	  if (all[papito_id].state==notready) put_state(papito_id,ready);
-	  else all[papito_id].state=ready;
-	  /* check brothers and arbitrate. For now this is the only winner */
-	  if (all[papito_id].state==ready) put_state(papito_id,winner);
+      if (all[papito_id].state==slept)
+      {
+	 papito_state=init;
+	 pthread_cond_wait(&(all[papito_id].condition),&(all[papito_id].mymutex));
+	 pthread_mutex_unlock(&(all[papito_id].mymutex));
+      }
+      else
+      {
+	 /* check preconditions. For now, preconditions are always satisfied*/
+	 if (all[papito_id].state==notready)
+	    put_state(papito_id,ready);
+	 /* check brothers and arbitrate. For now this is the only winner */
+	 if (all[papito_id].state==ready)
+	 {put_state(papito_id,winner);
+	 gettimeofday(&a,NULL);
+	 aa=a.tv_sec*1000000+a.tv_usec;
+	 n=0;
+	 }
 
-
-	  if (all[papito_id].state==winner)
+	 if (all[papito_id].state==winner)
 	    /* I'm the winner and must execute my iteration */
+	 {
+	    pthread_mutex_unlock(&(all[papito_id].mymutex));
+	    /*      gettimeofday(&a,NULL);*/
+	    n++;
+	    papito_iteration();
+	    gettimeofday(&b,NULL);
+	    bb=b.tv_sec*1000000+b.tv_usec;
+	    next=aa+(n+1)*(long)papito_cycle*1000-bb;
+
+	    /* diff = (b.tv_sec*1000000+b.tv_usec)-(a.tv_sec*1000000+a.tv_usec);*/
+	    /* next = (long)papito_cycle*1000-diff-3; */
+	      
+	    if (next>5000)
 	    {
-	      pthread_mutex_unlock(&(all[papito_id].mymutex));
-	      /*printf("papito: iteration-suelto2\n");*/
-
-	      gettimeofday(&a,NULL);
-	      papito_iteration();
-	      gettimeofday(&b,NULL);  
-
-	      diff = (b.tv_sec-a.tv_sec)*1000000+b.tv_usec-a.tv_usec;
-	      next = papito_cycle*1000-diff-10000; 
-	      /* discounts 10ms taken by calling usleep itself */
-	      if (next>0) usleep(papito_cycle*1000-diff);
-	      else 
-		{printf("time interval violated: papito\n"); usleep(papito_cycle*1000);
-		}
+	       usleep(next-5000);
+	       /* discounts 5ms taken by calling usleep itself, on average */
 	    }
-	  else 
+	    else  ;
+	 }
+	 else
 	    /* just let this iteration go away. overhead time negligible */
-	    {
-	      pthread_mutex_unlock(&(all[papito_id].mymutex));
-	      /*printf("papito: iteration-suelto3\n");*/
-	      usleep(papito_cycle*1000);
-	    }
-	}
-    }
+	 {
+	    pthread_mutex_unlock(&(all[papito_id].mymutex));
+	    usleep(papito_cycle*1000);
+	 }
+      }
+   }
 }
 
 void papito_startup()
 {
   pthread_mutex_lock(&(all[papito_id].mymutex));
   printf("papito schema started up\n");
-  myexport("papito","papito_cycle",&papito_cycle);
-  hijoresume=(resumeFn)myimport("myschema","myschema_resume");
-  if (hijoresume==NULL) printf("papito: Warning myschema_resume symbol not resolved\n");
-  hijosuspend=(suspendFn)myimport("myschema","myschema_suspend");
-  if (hijosuspend==NULL) printf("papito: Warning myschema_suspend symbol not resolved\n");
+  papito_exports();
   put_state(papito_id,slept);
   pthread_create(&(all[papito_id].mythread),NULL,papito_thread,NULL);
   pthread_mutex_unlock(&(all[papito_id].mymutex));
+  papito_init();
 }
 
 void papito_guibuttons(FL_OBJECT *obj)
