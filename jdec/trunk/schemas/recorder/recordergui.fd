@@ -8,14 +8,14 @@ Unit of measure: FL_COORD_PIXEL
 
 =============== FORM ===============
 Name: recordergui
-Width: 420
-Height: 560
-Number of Objects: 11
+Width: 410
+Height: 600
+Number of Objects: 15
 
 --------------------
 class: FL_BOX
 type: UP_BOX
-box: 0 0 420 560
+box: 0 0 410 600
 boxtype: FL_UP_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -33,7 +33,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
-box: 30 455 140 40
+box: 190 500 70 30
 boxtype: FL_UP_BOX
 colors: FL_COL1 FL_BLACK
 alignment: FL_ALIGN_CENTER
@@ -51,7 +51,7 @@ argument:
 --------------------
 class: FL_VALSLIDER
 type: VERT_NICE_SLIDER
-box: 370 20 20 440
+box: 360 20 30 500
 boxtype: FL_DOWN_BOX
 colors: FL_LIGHTER_COL1 FL_LIGHTER_COL1
 alignment: FL_ALIGN_BOTTOM
@@ -91,7 +91,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
-box: 210 455 140 40
+box: 270 500 70 30
 boxtype: FL_UP_BOX
 colors: FL_COL1 FL_BLACK
 alignment: FL_ALIGN_CENTER
@@ -109,7 +109,7 @@ argument:
 --------------------
 class: FL_INPUT
 type: NORMAL_INPUT
-box: 100 405 250 40
+box: 110 450 230 40
 boxtype: FL_DOWN_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_LEFT
@@ -127,7 +127,7 @@ argument:
 --------------------
 class: FL_TEXT
 type: NORMAL_TEXT
-box: 20 505 380 40
+box: 20 540 370 40
 boxtype: FL_FLAT_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_CENTER|FL_ALIGN_INSIDE
@@ -145,7 +145,7 @@ argument:
 --------------------
 class: FL_INPUT
 type: NORMAL_INPUT
-box: 130 280 210 40
+box: 110 320 230 40
 boxtype: FL_DOWN_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_LEFT
@@ -163,7 +163,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
-box: 30 355 140 40
+box: 190 370 70 30
 boxtype: FL_UP_BOX
 colors: FL_COL1 FL_BLACK
 alignment: FL_ALIGN_CENTER
@@ -177,11 +177,12 @@ gravity: FL_NoGravity FL_NoGravity
 name: bgr24
 callback: 
 argument: 
+	value: 1
 
 --------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
-box: 210 355 140 40
+box: 270 370 70 30
 boxtype: FL_UP_BOX
 colors: FL_COL1 FL_BLACK
 alignment: FL_ALIGN_CENTER
@@ -199,7 +200,7 @@ argument:
 --------------------
 class: FL_TEXT
 type: NORMAL_TEXT
-box: 10 320 160 30
+box: 20 370 150 30
 boxtype: FL_FLAT_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_LEFT|FL_ALIGN_INSIDE
@@ -211,6 +212,79 @@ shortcut:
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_INPUT
+type: NORMAL_INPUT
+box: 110 270 230 40
+boxtype: FL_DOWN_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_LEFT
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: Input Schema 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: input_schema
+callback: 
+argument: 
+
+--------------------
+class: FL_TEXT
+type: NORMAL_TEXT
+box: 30 500 70 30
+boxtype: FL_FLAT_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_LEFT|FL_ALIGN_INSIDE
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: Controls
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 110 500 70 30
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_BLACK
+alignment: FL_ALIGN_CENTER
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Preview
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: preview
+callback: 
+argument: 
+	value: 1
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 190 410 150 30
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_BLACK
+alignment: FL_ALIGN_CENTER
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Fetch input
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: fetch_input
 callback: 
 argument: 
 

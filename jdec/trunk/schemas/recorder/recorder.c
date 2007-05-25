@@ -16,12 +16,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors : José Antonio Santos Cadenas <santoscadenas@gmail.com>
+ *            Javier Martín Ramos <jmartinramos@gmail.com>
  */
-
-#define NORMAL 0
-#define SPEEDY 1
-
-#define MODE SPEEDY
 
 #include "jde.h"
 #include "jdegui.h"
@@ -34,17 +30,26 @@
 
 
 
-#define RECORDERver "recorder 1.0" /*Nombre y versión del programa*/
-
-#define MYFIFO "/tmp/recorder_fifo"
+#define RECORDERver "recorder 2.0"
 
 #define NULL_FORMAT "none"
 #define BGR24 "bgr24"
 #define BGR32 "bgr32"
 
+#define ROUTE_LEN 255
+
 int recorder_id=0;
 int recorder_brothers[MAX_SCHEMAS];
 arbitration recorder_callforarbitration;
+
+char directorio[255];
+char fifo[ROUTE_LEN];
+
+/**
+	Elige el codec que satisfaga tus intereses de entre los que liste el comando
+	"mencoder -ovc help" y cambia el valor de CODEC_NAME.
+*/
+#define CODEC_NAME "copy"
 
 /* exported variables */
 int recorder_cycle=40; /* ms */
@@ -56,8 +61,13 @@ int recorder_cycle=40; /* ms */
 float record_fps=25.0;
 int record=0;
 char video_name[256];
-
+char input_image[256];
+char input_schema[256];
+int preview = PUSHED;
 FD_recordergui *fd_recordergui=NULL;
+unsigned char show_img[SIFNTSC_COLUMNS*SIFNTSC_ROWS*4];//Para mostrar en el display
+char image_format[10]; // Formato con el que mencoder interpretará la imagen de entrada
+char ncanales;
 
 /*Xlib variables*/
 GC recorder_gc;
@@ -68,10 +78,6 @@ XImage *image;
 char **mycolorA=NULL;
 resumeFn mycolorAresume;
 suspendFn mycolorAsuspend;
-
-unsigned char show_img[SIFNTSC_COLUMNS*SIFNTSC_ROWS*4];//Para mostrar en el display
-char image_format[10]; // Formato con el que mencoder interpretará la imagen de entrada
-char ncanales;
 
 int recordergui_setupDisplay(void)
       /* Inicializa las ventanas, la paleta de colores y memoria compartida para visualizacion*/
@@ -132,14 +138,14 @@ int recordergui_setupDisplay(void)
 void recorder_iteration()
 {
   static int prev_state=0;
-  static int fifo;
+  static int fifo_fd;
   speedcounter(recorder_id);
 
   if (prev_state==0 && record==1 && strcmp(image_format, NULL_FORMAT)){
      /*Comienza una nueva grabación*/
      /*Se crea un fifo y se lanza mplayer*/
-     unlink (MYFIFO);
-     if ( (mkfifo (MYFIFO, 0600) != 0) ){
+     unlink (fifo);
+     if ( (mkfifo (fifo, 0600) != 0) ){
 	fprintf (stderr, "imposible crear el fifo\n");
 	exit (1);
      }
@@ -151,15 +157,15 @@ void recorder_iteration()
 	close(0); dup(file);
 	close(1); dup(file);
 	close(2); dup(file);
-// 	mencoder file2 -demuxer rawvideo -rawvideo fps=25.0:w=320:h=240:format=bgr24 -o file3 -ovc lavc
+
 	sprintf(str,"fps=%.1f:w=%d:h=%d:format=%s",record_fps,
 		SIFNTSC_COLUMNS,SIFNTSC_ROWS, image_format);
-	execlp("mencoder","mencoder", MYFIFO,"-demuxer","rawvideo", "-rawvideo",
-	       str, "-o", video_name, "-ovc", "lavc" ,NULL);
+	execlp("mencoder","mencoder", fifo,"-demuxer","rawvideo", "-rawvideo",
+	       str, "-o", video_name, "-ovc", CODEC_NAME ,NULL);
 	printf("Error executing mencoder\n");
 	exit(1);
      }
-     if ((fifo=open(MYFIFO, O_WRONLY))<0){
+     if ((fifo_fd=open(fifo, O_WRONLY))<0){
 	fprintf (stderr, "Error al abrir el fifo\n");
 	exit(1);
      }
@@ -167,15 +173,15 @@ void recorder_iteration()
   }
   else if (prev_state==1 && record==1){
      /*Está grabando, se escribe en el fifo la imagen actual colorA*/
-     if (write (fifo, (*mycolorA), SIFNTSC_COLUMNS*SIFNTSC_ROWS*ncanales)>SIFNTSC_COLUMNS*SIFNTSC_ROWS*ncanales){
+     if (write (fifo_fd, (*mycolorA), SIFNTSC_COLUMNS*SIFNTSC_ROWS*ncanales)>SIFNTSC_COLUMNS*SIFNTSC_ROWS*ncanales){
 	fprintf (stderr, "Error al Escribir en el fifo\n");
 	exit(1);
      }
   }
   else if (prev_state==1 && record==0){
      /*Termina la grabación se cierra el fifo y morirá con ello mencoder*/
-     close (fifo);
-     unlink(MYFIFO);
+     close (fifo_fd);
+     unlink(fifo);
      wait (NULL); /*Esperar la muerte de mencoder*/
      prev_state=0;
   }
@@ -216,76 +222,11 @@ void recorder_resume(int father, int *brothers, arbitration fn)
   recorder_callforarbitration=fn;
   put_state(recorder_id,notready);
 
- // mycolorAresume(recorder_id,NULL,NULL); /*Arrancar colorA*/
-
   /* printf("recorder: on\n");*/
   pthread_cond_signal(&(all[recorder_id].condition));
   pthread_mutex_unlock(&(all[recorder_id].mymutex));
 }
 
-#if MODE == NORMAL
-void *recorder_thread(void *not_used)
-{
-   struct timeval a,b;
-   long diff, next;
-
-   for(;;)
-   {
-      /* printf("recorder: iteration-cojo\n");*/
-      pthread_mutex_lock(&(all[recorder_id].mymutex));
-
-      if (all[recorder_id].state==slept)
-      {
-	 /*printf("recorder: off\n");*/
-	 v=0; w=0;
-	 /*  printf("recorder: suelto para dormirme en condicional\n");*/
-	 pthread_cond_wait(&(all[recorder_id].condition),&(all[recorder_id].mymutex));
-	 /*  printf("recorder: cojo tras dormirme en condicional\n");*/
-	 /*printf("recorder: on\n");*/
-// 	 recorder_state=init;
-	 /* esto es para la aplicación, no tiene que ver con infraestrucura */
-	 pthread_mutex_unlock(&(all[recorder_id].mymutex));
-	 /* printf("recorder: iteration-suelto1\n");*/
-      }
-      else
-      {
-	 /* check preconditions. For now, preconditions are always satisfied*/
-	 if (all[recorder_id].state==notready) put_state(recorder_id,ready);
-	 else all[recorder_id].state=ready;
-	 /* check brothers and arbitrate. For now this is the only winner */
-	 if (all[recorder_id].state==ready) put_state(recorder_id,winner);
-
-
-	 if (all[recorder_id].state==winner)
-	    /* I'm the winner and must execute my iteration */
-	 {
-	    pthread_mutex_unlock(&(all[recorder_id].mymutex));
-	    /*printf("recorder: iteration-suelto2\n");*/
-
-	    gettimeofday(&a,NULL);
-	    recorder_iteration();
-	    gettimeofday(&b,NULL);
-
-	    diff = (b.tv_sec-a.tv_sec)*1000000+b.tv_usec-a.tv_usec;
-	    next = recorder_cycle*1000-diff-10000;
-	    /* discounts 10ms taken by calling usleep itself */
-	    if (next>0) usleep(recorder_cycle*1000-diff);
-	    else
-	    {printf("time interval violated: recorder\n");
-// 	    usleep(recorder_cycle*1000);
-	    }
-	 }
-	 else
-	    /* just let this iteration go away. overhead time negligible */
-	 {
-	    pthread_mutex_unlock(&(all[recorder_id].mymutex));
-	    /*printf("recorder: iteration-suelto3\n");*/
-	    usleep(recorder_cycle*1000);
-	 }
-      }
-   }
-}
-#elif MODE == SPEEDY
 void *recorder_thread(void *not_used)
 {
   struct timeval a,b,c;
@@ -345,9 +286,6 @@ void *recorder_thread(void *not_used)
 	}
     }
 }
-#else
-Debe asignar un modo
-#endif
 
 void recorder_startup()
 {
@@ -363,132 +301,135 @@ void recorder_startup()
      show_img[i*4+3]=UCHAR_MAX;
   }
 
-  strcpy(image_format, NULL_FORMAT);
+  strcpy(image_format, BGR24);
+  ncanales = 3;
+  strcpy (directorio, "/tmp/jde-recorder-XXXXXX");
+  if (mkdtemp(directorio)==NULL){
+     perror ("I can't create a temp directory: ");
+     exit (-1);
+  }
 
-  /*Imports*/
-/*  mycolorA=(char **) myimport ("colorA", "colorA");
-  mycolorAresume=(resumeFn)myimport ("colorA", "resume");
-  mycolorAsuspend=(suspendFn *)myimport("colorA","suspend");*/
-  
+  if (snprintf(fifo, ROUTE_LEN, "%s/recorder", directorio)<0){
+     fprintf (stderr, "Can't create temp files\n");
+     exit (-1);
+  }
+
   pthread_create(&(all[recorder_id].mythread),NULL,recorder_thread,NULL);
   pthread_mutex_unlock(&(all[recorder_id].mymutex));
 }
 
 void recorder_guibuttons(FL_OBJECT *obj){
-   char *input_image;
+   
    int value;
-   input_image = (char *) fl_get_input(fd_recordergui->input_image);
 
    if (obj == fd_recordergui->record){
       if (fl_get_button (obj)==RELEASED){
+         fl_trigger_object(fd_recordergui->stop);
          record=0;
       }
       else {
-	 /*Comprobar si las opciones son correctas (nombre adecuado)*/
-// 	 printf("nombre=>%s<\n",(char *)fl_get_input(fd_recordergui->video_name));
-	 char *str;
-	 str=(char *)fl_get_input(fd_recordergui->video_name);
-	 if (str[0]=='\0'){
-// 	    fprintf (stderr, "Indica el nombre del fichero\n");
-	    record=0;
-	    fl_set_button(fd_recordergui->record,record);
-	    fl_set_object_label(fd_recordergui->status,"Indica el nombre del fichero");
-	 }
-    else if (!strcmp(image_format, NULL_FORMAT)) {
-       record=0;
-       fl_set_button(fd_recordergui->record, record);
-       fl_set_object_label(fd_recordergui->status,"Indica formato de entrada");
-    }
-	 else{
-	    char str_aux[256];
-       strcpy (video_name,str);
-//     printf ("%s\n",video_name);
-       snprintf (str_aux, 255,"Recording \"%s\" from \"%s\"\n",video_name, input_image);
-       str_aux[255]='\0';
-       fl_set_object_label(fd_recordergui->status,str_aux);
-       record=1;
-	 }
+         strcpy(video_name, fl_get_input(fd_recordergui->video_name));
+         if (video_name[0]=='\0'){
+            record=0;
+            fl_set_button(fd_recordergui->record,record);
+            fl_set_object_label(fd_recordergui->status,"Specify output file name");
+         }
+         else if (input_image[0]=='\0'){
+            record=0;
+            fl_set_button(fd_recordergui->record,record);
+            fl_set_object_label(fd_recordergui->status,"Specify input image");
+         }
+         else if (input_schema[0]=='\0'){
+            record=0;
+            fl_set_button(fd_recordergui->record,record);
+            fl_set_object_label(fd_recordergui->status,"Specify input schema");
+         }
+         else if (!strcmp(image_format, NULL_FORMAT)) {
+            record=0;
+            fl_set_button(fd_recordergui->record, record);
+            fl_set_object_label(fd_recordergui->status,"Specify image format");
+         }
+         else {
+            char str_aux[256];
+            snprintf (str_aux, 255,"Recording %s from %s at %s\n",video_name, input_image, input_schema);
+            str_aux[255]='\0';
+            fl_set_object_label(fd_recordergui->status,str_aux);
+            fl_deactivate_object(fd_recordergui->video_name);
+            fl_deactivate_object(fd_recordergui->input_image);
+            fl_deactivate_object(fd_recordergui->input_schema);
+            fl_deactivate_object(fd_recordergui->fetch_input);
+            fl_deactivate_object(fd_recordergui->fps);
+            fl_deactivate_object(fd_recordergui->bgr24);
+            fl_deactivate_object(fd_recordergui->bgr32);
+            record=1;
+         }
       }
+   }
+   else if (obj == fd_recordergui->fetch_input) {
+      if (record == 0) {
+         strcpy(input_schema, fl_get_input(fd_recordergui->input_schema));
+         strcpy(input_image, fl_get_input(fd_recordergui->input_image));
+         mycolorA=(char **) myimport (input_schema, input_image);
+         mycolorAresume=(resumeFn)myimport(input_schema, "resume");
+         mycolorAsuspend=(suspendFn *)myimport(input_schema,"suspend");
+         if (mycolorA == NULL) {
+            fl_set_object_label(fd_recordergui->status,"Can't fetch the input");
+         }
+         else {
+            fl_set_object_label(fd_recordergui->status,"Fetched");
+            mycolorAresume(recorder_id,NULL,NULL);
+         }
+      }
+      fl_set_button(fd_recordergui->fetch_input, RELEASED);
    }
    else if (obj == fd_recordergui->fps){
-      if (record==0){
-         record_fps = (float)fl_get_slider_value(obj);
-         recorder_cycle=(int)(1000/record_fps);
-      }
-      else{
-	 fl_set_slider_value(fd_recordergui->fps,record_fps);
-      }
+      record_fps = (float)fl_get_slider_value(obj);
+      recorder_cycle=(int)(1000/record_fps);
    }
    else if (obj == fd_recordergui->stop){
-      if (fl_get_button (obj)==PUSHED){
-	 record=0;
-	 fl_set_button(fd_recordergui->stop, RELEASED);
-	 fl_set_button(fd_recordergui->record,record);
-	 fl_set_object_label(fd_recordergui->status,"Stopped");
-      }
+      fl_activate_object(fd_recordergui->video_name);
+      fl_activate_object(fd_recordergui->input_image);
+      fl_activate_object(fd_recordergui->input_schema);
+      fl_activate_object(fd_recordergui->fetch_input);
+      fl_activate_object(fd_recordergui->fps);
+      fl_activate_object(fd_recordergui->bgr24);
+      fl_activate_object(fd_recordergui->bgr32);
+      record=0;
+      fl_set_button(fd_recordergui->stop, RELEASED);
+      fl_set_button(fd_recordergui->record,record);
+      fl_set_object_label(fd_recordergui->status,"Stopped");
    }
    else if (obj == fd_recordergui->bgr24) {
       value = fl_get_button(obj);
-      if (record == 0) {
-         if (input_image[0] == '\0') {
-            fl_set_button(fd_recordergui->bgr24, RELEASED);
-            fl_set_object_label(fd_recordergui->status,"Indica la variable de entrada");
-         }
-         else {
-            mycolorA=(char **) myimport (input_image, input_image);
-            mycolorAresume=(resumeFn)myimport (input_image, "resume");
-            mycolorAsuspend=(suspendFn *)myimport(input_image,"suspend");
-            if (mycolorA == NULL) {
-               fl_set_object_label(fd_recordergui->status,"Variable de entrada no importable");
-               fl_set_button(fd_recordergui->bgr24, RELEASED);
-            }
-            else {
-               mycolorAresume(recorder_id,NULL,NULL);
-               fl_set_button(fd_recordergui->bgr32, RELEASED);
-               strcpy(image_format, value == PUSHED ? BGR24 : NULL_FORMAT);
-               ncanales = 3;
-            }
-         }
-      }
-      else
-         fl_set_button(fd_recordergui->bgr24, !value);
+      fl_set_button(fd_recordergui->bgr32, RELEASED);
+      strcpy(image_format, value == PUSHED ? BGR24 : NULL_FORMAT);
+      ncanales = 3;
    }
    else if (obj == fd_recordergui->bgr32) {
       value = fl_get_button(obj);
-      if (record == 0) {
-         if (input_image[0] == '\0') {
-            fl_set_button(fd_recordergui->bgr32, RELEASED);
-            fl_set_object_label(fd_recordergui->status,"Indica la variable de entrada");
-         }
-         else {
-            mycolorA=(char **) myimport (input_image, input_image);
-            mycolorAresume=(resumeFn)myimport (input_image, "resume");
-            mycolorAsuspend=(suspendFn *)myimport(input_image,"suspend");
-            if (mycolorA == NULL) {
-               fl_set_object_label(fd_recordergui->status,"Variable de entrada no importable");
-               fl_set_button(fd_recordergui->bgr32, RELEASED);
-            }
-            else {
-               mycolorAresume(recorder_id,NULL,NULL);
-               fl_set_button(fd_recordergui->bgr24, RELEASED);
-               strcpy(image_format, value == PUSHED ? BGR32 : NULL_FORMAT);
-               ncanales = 4;
-            }
-         }
+      fl_set_button(fd_recordergui->bgr24, RELEASED);
+      strcpy(image_format, value == PUSHED ? BGR32 : NULL_FORMAT);
+      ncanales = 4;
+   }
+   else if (obj == fd_recordergui->preview) {
+      preview = fl_get_button(obj);
+      if (preview == 0) {
+         fl_hide_object(fd_recordergui->image);
       }
-      else
-         fl_set_button(fd_recordergui->bgr32, !value);
+      else {
+         fl_show_object(fd_recordergui->image);
+      }
    }
 }
 
 void recorder_guidisplay(){
-	if (mycolorA != NULL && strcmp(image_format, NULL_FORMAT)) {
+	if (preview != RELEASED && mycolorA != NULL && strcmp(image_format, NULL_FORMAT)) {
 		if (*mycolorA!=NULL){
 			int i;
 			for (i=0; i<SIFNTSC_COLUMNS*SIFNTSC_ROWS; i++){
-		show_img[i*4]=(*mycolorA)[i*ncanales];
-		show_img[i*4+1]=(*mycolorA)[i*ncanales+1];
-		show_img[i*4+2]=(*mycolorA)[i*ncanales+2];
+				show_img[i*4]=(*mycolorA)[i*ncanales];
+				show_img[i*4+1]=(*mycolorA)[i*ncanales+1];
+				show_img[i*4+2]=(*mycolorA)[i*ncanales+2];
 			}
 			
 			XPutImage(display,recorder_window,recorder_gc,image,0,0,
@@ -517,17 +458,12 @@ void recorder_guiresume(void)
       fl_show_form(fd_recordergui->recordergui,FL_PLACE_POSITION,FL_FULLBORDER,RECORDERver);
       recorder_window = FL_ObjWin(fd_recordergui->image);
       recordergui_setupDisplay();
-      /*mycolorA=(char **) myimport ("colorA", "colorA");
-      mycolorAresume=(resumeFn)myimport ("colorA", "resume");
-      mycolorAsuspend=(suspendFn *)myimport("colorA","suspend");*/
    }
    else{
       fl_show_form(fd_recordergui->recordergui,FL_PLACE_POSITION,FL_FULLBORDER,RECORDERver);
       recorder_window = FL_ObjWin(fd_recordergui->image);
    }
 
-   //mycolorAresume(recorder_id,NULL,NULL); /*Arrancar colorA*/
-   
    /*Asignar los valores al gui*/
    fl_set_button (fd_recordergui->record, record);
    fl_set_slider_value (fd_recordergui->fps, record_fps);
