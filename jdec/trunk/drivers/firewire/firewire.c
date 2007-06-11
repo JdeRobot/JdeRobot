@@ -18,24 +18,32 @@
  *  Authors : David Lobato <dlobato@gsyc.escet.urjc.es>, Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, JoseMaria Cañas <jmplaza@gsyc.escet.urjc.es>
  */
 
-/************************************************
- * jdec firewire driver                         *
- ************************************************/
+/**
+ *  jdec firewire driver provides video images to color variables from firewire cameras using libdc1394 library.
+ *
+ *  @file firewire.c
+ *  @author David Lobato <dlobato@gsyc.escet.urjc.es>, Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es> and Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  @version 4.1
+ *  @date 30-05-2007
+ */
 
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
 #include <libdc1394/dc1394_control.h>
 #include "jde.h"
-#define MAXCAM 4
 
+/** Max number of cameras detected by firewire driver.*/
+#define MAXCAM 4
 /* uncomment the following to drop frames to prevent delays */
+/** Dropping frames define.*/
 #define DROP_FRAMES 1
+/** Max ports per node define.*/
 #define MAX_PORTS 3
+/** Max number of buffers per node.*/
 #define NUM_BUFFERS 8
 
-/* color conversion functions from Bart Nabbe.*/
-/* corrected by Damien: bad coeficients in YUV2RGB*/
+/** Color conversion functions from Bart Nabbe. Corrected by Damien: bad coeficients in YUV2RGB.*/
 #define YUV2RGB(y, u, v, r, g, b)		\
   r = y + ((v*1436) >> 10);			\
   g = y - ((u*352 + v*731) >> 10);		\
@@ -47,8 +55,7 @@
   g = g > 255 ? 255 : g;			\
   b = b > 255 ? 255 : b
   
-/* AUTOMATIC FEATURES FOR FIREWIRE CAMERAS
-   0 means deactivated option */
+/** Automatic features for firewire cameras.*/
 typedef struct{
   int AUTO_EXPOSURE_CONFIG;
   int AUTO_WHITE_BALANCE_CONFIG;
@@ -58,40 +65,73 @@ typedef struct{
 }Firewire_features;
 
 /* declarations for libdc1394 */
+/** numPorts variable for libdc1394.*/
 int numPorts = MAX_PORTS;
+/** handle for detecting raw1394 devices.*/
 raw1394handle_t handles[MAX_PORTS];
+/** number of firewire cameras detected.*/
 int numCameras=0;
+/** camera capture structure from libdc1394 library.*/
 dc1394_cameracapture cameras[MAXCAM];
+/** camera node structure from libdc1394 library.*/
 nodeid_t *camera_nodes;
+/** camera feature structure from libdc1394 library.*/
 dc1394_feature_set features;
+/** int variable to detect when a image was captured.*/
 unsigned long int lastimage;
 
 /* declarations for video1394 */
+/** firewire camera devices.*/
 char *camfile[]={"/dev/video1394/0","/dev/video1394/1","/dev/video1394/2","/dev/video1394/3"};
+/** firewire instant fps variable.*/
 int firewire_fps;
+/** firewire instant resolution variable.*/
 int firewire_res;
 
+/** pthread variable for jdec firewire driver.*/
 pthread_t firewire_th;
+/** pthread state variable for jdec firewire driver.*/
 int state;
+/** pthread mutex for jdec firewire driver.*/
 pthread_mutex_t mymutex;
+/** pthread condition variable for jdec firewire driver.*/
 pthread_cond_t condition;
 
+/** variable to detect when the pthread is created.*/
 int firewire_thread_created=0;
+/** variable to detect when firewire driver was cleaned up.*/
 int firewire_cleaned_up=0;
+/** variable to detect when firewire driver was setup.*/
 int firewire_setup=0;
+/** variable to detect when pthread must end execution.*/
 int firewire_close_command=0;
 
 /* firewire driver API options */
+/** firewire driver name.*/
 char driver_name[256]="firewire";
+/** colors detected in config file.*/
 int serve_color[MAXCAM];
+/** structure to know what color uses which camera.*/
 int number_color[MAXCAM];
+/** structure to know what colors are active in the gui.*/
 int color_active[MAXCAM];
+/** feature structure from libdc1394 to set firewire cameras characteristics.*/
 Firewire_features fwCamFeatures[MAXCAM];
-int colorA_schema_id, colorB_schema_id, colorC_schema_id, colorD_schema_id;
+/** id set to colorA schema.*/
+int colorA_schema_id;
+/** id set to colorB schema.*/
+int colorB_schema_id;
+/** id set to colorC schema.*/
+int colorC_schema_id;
+/** id set to colorD schema.*/
+int colorD_schema_id;
 
 
 /* FIREWIRE DRIVER FUNCTIONS */
-
+/** function to transform a buffer from uyvy to rgb.
+ *  @param src source buffer.
+ *  @param dest destination buffer where the transformation will be set.
+ *  @param NumPixels how many pixels per buffer.*/
 void uyvy2rgb (unsigned char *src, unsigned char *dest, unsigned long long int NumPixels)
 {
   register int i = (NumPixels << 1)-1;
@@ -115,6 +155,7 @@ void uyvy2rgb (unsigned char *src, unsigned char *dest, unsigned long long int N
   }
 }
 
+/** cleans up firewire structures and frees the firewire bus.*/
 void firewire_clean_up() {
   int i;
   firewire_cleaned_up=1;
@@ -129,6 +170,7 @@ void firewire_clean_up() {
     raw1394_destroy_handle(handles[i]);
 }
 
+/** firewire driver closing function invoked when stopping driver.*/
 void firewire_close(){
 
   firewire_close_command=1;
@@ -136,6 +178,7 @@ void firewire_close(){
   printf("driver firewire off\n");
 }
 
+/** function that will set the default configuration to all firewire cameras detected.*/
 void set_default_firewire_camera_config(void){
 
   int i;
@@ -148,6 +191,11 @@ void set_default_firewire_camera_config(void){
   }
 }
 
+/** colorA resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorA_resume(int father, int *brothers, arbitration fn){
   if((serve_color[0]==1)&&(color_active[0]==0)){
     color_active[0]=1;
@@ -167,6 +215,8 @@ int mycolorA_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** colorA suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorA_suspend(){
 
   if((serve_color[0]==1)&&(color_active[0]==1)){
@@ -183,6 +233,11 @@ int mycolorA_suspend(){
   return 0;
 }
 
+/** colorB resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorB_resume(int father, int *brothers, arbitration fn){
   if((serve_color[1]==1)&&(color_active[1]==0)){
     color_active[1]=1;
@@ -204,6 +259,8 @@ int mycolorB_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** colorB suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorB_suspend(){
 
   if((serve_color[1]==1)&&(color_active[1]==1)){
@@ -221,6 +278,11 @@ int mycolorB_suspend(){
   return 0;
 }
 
+/** colorC resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorC_resume(int father, int *brothers, arbitration fn){
   if((serve_color[2]==1)&&(color_active[2]==0)){
     color_active[2]=1;
@@ -241,6 +303,8 @@ int mycolorC_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** colorC suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorC_suspend(){
 
   if((serve_color[2]==1)&&(color_active[2]==1)){
@@ -258,6 +322,11 @@ int mycolorC_suspend(){
   return 0;
 }
 
+/** colorD resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorD_resume(int father, int *brothers, arbitration fn){
   if((serve_color[3]==1)&&(color_active[3]==0)){
     color_active[3]=1;
@@ -278,6 +347,8 @@ int mycolorD_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** colorD suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorD_suspend(){
 
   if((serve_color[3]==1)&&(color_active[3]==1)){
@@ -295,7 +366,8 @@ int mycolorD_suspend(){
   return 0;
 }
 
-void *firewire_thread(void *not_used)
+/** firewire driver pthread function.*/
+void *firewire_thread()
 {
   int capturedA=FALSE, capturedB=FALSE, capturedC=FALSE,  capturedD=FALSE;
 
@@ -373,6 +445,9 @@ void *firewire_thread(void *not_used)
   pthread_exit(0);
 }
 
+/** firewire driver parse configuration file function.
+ *  @param configfile path and name to the config file.
+ *  @return 0 if parsing was successful or -1 if something went wrong.*/
 int firewire_parseconf(char *configfile){
 
   int end_parse=0; int end_section=0; int driver_config_parsed=0;
@@ -519,6 +594,8 @@ int firewire_parseconf(char *configfile){
   }else return -1;
 }
 
+/** firewire driver init function. It will start all firewire required devices and setting them the default configuration.
+ *  @return 0 if initialitation was successful or -1 if something went wrong.*/
 void firewire_init(){
 
   int p,i;
@@ -644,6 +721,8 @@ void firewire_init(){
   firewire_setup=1;
 }
 
+/** firewire driver startup function following jdec platform API for drivers.
+ *  @param configfile path and name to the config file of this driver.*/
 void firewire_startup(char *configfile)
 {
   int i;

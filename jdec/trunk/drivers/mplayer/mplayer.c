@@ -1,5 +1,6 @@
-
 /*
+ *  Copyright (C) 2007 Javier Martin Ramos, Jose Antonio Santos Cadenas
+ *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -14,13 +15,18 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors :  Javier Martín Ramos <xaverbrennt@yahoo.es>
- *             José Antonio Santos Cadenas  <santoscadenas@gmail.com>
+ *  Authors :  Javier Martin Ramos <xaverbrennt@yahoo.es>
+ *             Jose Antonio Santos Cadenas  <santoscadenas@gmail.com>
  */
 
-/************************************************
- * jdec mplayer driver                          *
- ************************************************/
+/**
+ *  jdec mplayer driver provides video images to color variables from static video files with 320x240 resolution and .ogg extension.
+ *
+ *  @file mplayer.c
+ *  @author Javier Martin Ramos <xaverbrennt@yahoo.es> and Jose Antonio Santos Cadenas  <santoscadenas@gmail.com>
+ *  @version 4.1
+ *  @date 30-05-2007
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -34,44 +40,73 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
-
+/** max number of videos used.*/
 #define MAXVIDS 4
+/** max number of characters in file path and name.*/
 #define ROUTE_LEN 255
 
+/** mplayer driver instant fps.*/
 int mplayer_fps;
+/** mplayer driver instant resolution.*/
 int mplayer_res;
 
+/** mplayer driver pthread structure for video playing. */
 pthread_t mplayer_th[MAXVIDS];
+/** pthread state variable.*/
 int state;
+/** mutex for video playing.*/
 pthread_mutex_t mymutex;
+/** mutex for pthreads.*/
 pthread_mutex_t color_mutex[MAXVIDS];
+/** condition flag for video playing.*/
 pthread_cond_t condition;
 
+/** mplayer driver variable to detect when threads have been created.*/
 int mplayer_thread_created=0;
+/** mplayer driver variable to detect when mplayer structures have been cleaned up.*/
 int mplayer_cleaned_up=0;
+/** mplayer driver variable to detect when the driver has been setup.*/
 int mplayer_setup=0;
+/** mplayer driver variable to detect when pthreads must end their execution.*/
 int mplayer_close_command=0;
 
 /* mplayer driver API options */
+/** mplayer driver name.*/
 char driver_name[256]="mplayer";
+/** mplayer devices detected in config file.*/
 int serve_color[MAXVIDS];
-char fichero_video[MAXVIDS][256];
-int color_active[MAXVIDS]; /* # of active fathers */
+/** mplayer video file names.*/
+char video_files[MAXVIDS][256];
+/** mplayer number of color activated in gui.*/
+int color_active[MAXVIDS];
+/** mplayer repeat structure for videos. if repeat[0] = 1 then video 1 will be repeated when finished.*/
 int repeat[MAXVIDS];
+/** mplayer speed structure for videos.*/
 int speed[MAXVIDS];
+/** mplayer number of frames per video structure.*/
 int n_frames[MAXVIDS];
+/** mplayer process id for mplayer threads.*/
 int pid_mplayer[MAXVIDS];
+/** mplayer process id for mencoder threads.*/
 int pid_mencoder[MAXVIDS];
-char fifo1[MAXVIDS][ROUTE_LEN]; /* Data from mplayer to menconder */
-char fifo2[MAXVIDS][ROUTE_LEN]; /* Data from mencoder to this driver */
-char directorio[255];
+/** mplayer driver structure to swap data between mplayer and mencoder. data from mplayer to mencoder.*/
+char fifo1[MAXVIDS][ROUTE_LEN];
+/** mplayer driver structure to swap data between mplayer and mencoder. data from mencoder to mplayer.*/
+char fifo2[MAXVIDS][ROUTE_LEN];
+/** mplayer used diretory name.*/
+char directory[255];
+/** id for colorA schema.*/
+int colorA_schema_id;
+/** id for colorB schema.*/
+int colorB_schema_id;
+/** id for colorC schema.*/
+int colorC_schema_id;
+/** id for colorD schema.*/
+int colorD_schema_id;
 
+/* MPLAYER DRIVER FUNCTIONS */
 
-int colorA_schema_id, colorB_schema_id, colorC_schema_id, colorD_schema_id;
-
-
-/* mplayer DRIVER FUNCTIONS */
-
+/** mplayer driver function to close devices.*/
 void mplayer_close(){
    int i;
 
@@ -85,14 +120,19 @@ void mplayer_close(){
 	 unlink (fifo2[i]);
       }
    }
-   /*borrar el directorio temporal (si se puede)*/
-   if (rmdir (directorio)<0){
+   /*borrar el directory temporal (si se puede)*/
+   if (rmdir (directory)<0){
       perror ("I can't delete temp dir: ");
    }
    mplayer_close_command=1;
    printf("driver mplayer off\n");
 }
 
+/** colorA resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorA_resume(int father, int *brothers, arbitration fn){
   if(serve_color[0]==1)
     {
@@ -121,6 +161,8 @@ int mycolorA_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
+/** colorA suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorA_suspend(){
   color_active[0]--;
   if((serve_color[0]==1)&&(color_active[0]==0)){
@@ -137,6 +179,11 @@ int mycolorA_suspend(){
    return 0;
 }
 
+/** colorB resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorB_resume(int father, int *brothers, arbitration fn){
   if(serve_color[1]==1)
     {
@@ -165,6 +212,8 @@ int mycolorB_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
+/** colorB suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorB_suspend(){
   color_active[1]--;
   if((serve_color[1]==1)&&(color_active[1]==1)){
@@ -182,6 +231,11 @@ int mycolorB_suspend(){
   return 0;
 }
 
+/** colorC resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorC_resume(int father, int *brothers, arbitration fn){
   if(serve_color[2]==1)
     {
@@ -210,6 +264,8 @@ int mycolorC_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
+/** colorC suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorC_suspend(){
   color_active[2]--;
   if((serve_color[2]==1)&&(color_active[2]==1)){
@@ -227,6 +283,11 @@ int mycolorC_suspend(){
   return 0;
 }
 
+/** colorD resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorD_resume(int father, int *brothers, arbitration fn){
 
   if(serve_color[3]==1)
@@ -256,6 +317,8 @@ int mycolorD_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
+/** colorD suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorD_suspend(){
   color_active[3]--;
   if((serve_color[3]==1)&&(color_active[3]==1)){
@@ -273,7 +336,9 @@ int mycolorD_suspend(){
   return 0;
 }
 
-void lanzar_mplayer (int i){
+/** mplayer driver function to start an mplayer process for a selected color.
+ *  @param i selected color to launch an mplayer thread.*/
+void mplayer_start(int i){
    int file;
    char str[100];
    char str2[100];
@@ -308,13 +373,15 @@ void lanzar_mplayer (int i){
             /* ... and exec the mplayer command.*/
 	    sprintf(str,"scale=%d:%d",SIFNTSC_COLUMNS,SIFNTSC_ROWS);
 	    sprintf (str2, "yuv4mpeg:file=%s", fifo1[i]);
-	    execlp("mplayer","mplayer",fichero_video[i],"-vo", str2,
+	    execlp("mplayer","mplayer",video_files[i],"-vo", str2,
 		   "-vf", str, "-ao","null","-slave",NULL);
 	    printf("Error executing mplayer\n");
 	    exit(1);
 	 }
 }
 
+/** mplayer driver internal thread.
+ *  @param id selected color id.*/
 void *mplayer_thread(void *id)
 {
    int i;
@@ -352,7 +419,7 @@ void *mplayer_thread(void *id)
 	       wait (NULL);
 	       kill (pid_mencoder[i], 9);
 	       wait (NULL);
-	       lanzar_mplayer(i);
+	       mplayer_start(i);
 	       if ((fifo=open (fifo2[i],O_RDONLY))==-1){
 		  perror("");
 		  exit(1);
@@ -394,6 +461,9 @@ void *mplayer_thread(void *id)
    pthread_exit(0);
 }
 
+/** mplayer driver parse configuration file function.
+ *  @param configfile path and name to the config file.
+ *  @return 0 if parsing was successful or -1 if something went wrong.*/
 int mplayer_parseconf(char *configfile){
 
    int end_parse=0; int end_section=0; int driver_config_parsed=0;
@@ -499,22 +569,22 @@ int mplayer_parseconf(char *configfile){
 				printf("mplayer: %s from %s\n",word4,word5);
 				 if(strcmp(word4,"colorA")==0){
 				    serve_color[0]=1;
-				    strcpy (fichero_video[0],word5);
+				    strcpy (video_files[0],word5);
 				    if(strcmp(word6,"repeat_on")==0) repeat[0] = 1; else repeat[0] = 0;
 
 				 }else if(strcmp(word4,"colorB")==0){
 				    serve_color[1]=1;
-				    strcpy (fichero_video[1],word5);
+				    strcpy (video_files[1],word5);
 				    if(strcmp(word6,"repeat_on")==0) repeat[1] = 1; else repeat[1] = 0;
 
 				 }else if(strcmp(word4,"colorC")==0){
 				    serve_color[2]=1;
-				    strcpy (fichero_video[2],word5);
+				    strcpy (video_files[2],word5);
 				    if(strcmp(word6,"repeat_on")==0) repeat[2] = 1; else repeat[2] = 0;
 
 				 }else if(strcmp(word4,"colorD")==0){
 				    serve_color[3]=1;
-				    strcpy (fichero_video[3],word5);
+				    strcpy (video_files[3],word5);
 				    if(strcmp(word6,"repeat_on")==0) repeat[3] = 1; else repeat[3] = 0;
 				 }
 
@@ -541,6 +611,8 @@ int mplayer_parseconf(char *configfile){
    }else return -1;
 }
 
+/** mplayer driver startup function following jdec platform API for drivers.
+ *  @param configfile path and name to the config file of this driver.*/
 void mplayer_startup(char *configfile)
 {
    int i;
@@ -557,42 +629,42 @@ void mplayer_startup(char *configfile)
       exit(-1);
    }
 
-   strcpy (directorio, "/tmp/jde-mplayer-XXXXXX");
-   if (mkdtemp(directorio)==NULL){
+   strcpy (directory, "/tmp/jde-mplayer-XXXXXX");
+   if (mkdtemp(directory)==NULL){
       perror ("I can't create a temp directory: ");
       exit (-1);
    }
 
    /*inicializar los nombres de los fifos*/
-   if (snprintf(fifo1[0], ROUTE_LEN, "%s/colorA-1", directorio)<0){
+   if (snprintf(fifo1[0], ROUTE_LEN, "%s/colorA-1", directory)<0){
       fprintf (stderr, "Can't create temp files\n");
       exit (-1);
    }
-   if (snprintf(fifo2[0], ROUTE_LEN, "%s/colorA-2", directorio)<0){
+   if (snprintf(fifo2[0], ROUTE_LEN, "%s/colorA-2", directory)<0){
       fprintf (stderr, "Can't create temp files\n");
       exit (-1);
    }
-   if (snprintf(fifo1[1], ROUTE_LEN, "%s/colorB-1", directorio)<0){
+   if (snprintf(fifo1[1], ROUTE_LEN, "%s/colorB-1", directory)<0){
       fprintf (stderr, "Can't create temp files\n");
       exit (-1);
    }
-   if (snprintf(fifo2[1], ROUTE_LEN, "%s/colorB-2", directorio)<0){
+   if (snprintf(fifo2[1], ROUTE_LEN, "%s/colorB-2", directory)<0){
       fprintf (stderr, "Can't create temp files\n");
       exit (-1);
    }
-   if (snprintf(fifo1[2], ROUTE_LEN, "%s/colorC-1", directorio)<0){
+   if (snprintf(fifo1[2], ROUTE_LEN, "%s/colorC-1", directory)<0){
       fprintf (stderr, "Can't create temp files\n");
       exit (-1);
    }
-   if (snprintf(fifo2[2], ROUTE_LEN, "%s/colorC-2", directorio)<0){
+   if (snprintf(fifo2[2], ROUTE_LEN, "%s/colorC-2", directory)<0){
       fprintf (stderr, "Can't create temp files\n");
       exit (-1);
    }
-   if (snprintf(fifo1[3], ROUTE_LEN, "%s/colorD-1", directorio)<0){
+   if (snprintf(fifo1[3], ROUTE_LEN, "%s/colorD-1", directory)<0){
       fprintf (stderr, "Can't create temp files\n");
       exit (-1);
    }
-   if (snprintf(fifo2[3], ROUTE_LEN, "%s/colorD-2", directorio)<0){
+   if (snprintf(fifo2[3], ROUTE_LEN, "%s/colorD-2", directory)<0){
       fprintf (stderr, "Can't create temp files\n");
       exit (-1);
    }
@@ -627,7 +699,7 @@ void mplayer_startup(char *configfile)
       pid_mplayer[i]=0;
       pid_mencoder[i]=0;
       if (serve_color[i]==1){
-	 lanzar_mplayer(i);
+	 mplayer_start(i);
       }
    }
    /*Se crean los esquemas que a su vez bloquean al su correspondiente threat

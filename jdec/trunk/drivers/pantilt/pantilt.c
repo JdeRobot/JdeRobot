@@ -16,14 +16,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors : Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
- *            Victor Gómez Gómez <vmanuel@gsyc.escet.urjc.es
+ *            Victor Gómez Gómez <vmanuel@gsyc.escet.urjc.es>
  *            Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>
  *            Roberto Calvo Palomino <rocapal@gsyc.escet.urjc.es>
  */
 
-/************************************************
- * jdec pantilt driver                         *
- ************************************************/
+/**
+ *  jdec pantilt driver provides sensorial information from a pantilt neck conected.
+ *
+ *  @file pantilt.c
+ *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, Victor Gómez Gómez <vmanuel@gsyc.escet.urjc.es>, Roberto Calvo Palomino <rocapal@gsyc.escet.urjc.es> and Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  @version 4.1
+ *  @date 30-05-2007
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -31,57 +36,111 @@
 #include "jde.h"
 #include <termios.h>
 
-/* directed perception pantilt limits */
+/** pantilt driver max pan angle limit.*/
 #define MAX_PAN_ANGLE 158. /* degrees */
+/** pantilt driver min pan angle limit.*/
 #define MIN_PAN_ANGLE -158. /* degrees */
+/** pantilt driver max tilt angle limit.*/
 #define MAX_TILT_ANGLE 30. /* degrees */
+/** pantilt driver min tilt angle limit.*/
 #define MIN_TILT_ANGLE -46. /* degrees */
+/** pantilt driver max speed pantilt.*/
 #define MAX_SPEED_PANTILT 205.89
+/** pantilt driver pantiltencoders period polling.*/
 #define PANTILTENCODERS_POLLING 100 /* period to ask for new pantilt encoders (ms) */
+/** pantilt driver rs232 baud rate.*/
 #define RS232_BAUD_RATE B9600
+/** pantilt driver from encoder units to deg. factor.*/
 #define ENCOD_TO_DEG (3.086/60.) /* from encoder units to deg, also 205.89/4002 */
+/** pantilt driver max char size in string message.*/
 #define MAX_MESSAGE 2048
-
+/** pantilt driver debug macro.*/
 #define D(x...) //printf(x); /* Uncomment this for see traces */
 
-
-pthread_t pantilt_readth,pantilt_pollth;
-char pantilt_device[MAX_MESSAGE]; 
+/** pantilt driver pthread for reading.*/
+pthread_t pantilt_readth;
+/** pantilt driver pthread for polling.*/
+pthread_t pantilt_pollth;
+/** pantilt driver device name. Example /dev/tty01.*/
+char pantilt_device[MAX_MESSAGE];
+/** pantilt driver serial port number.*/
 int pantilt_serialport;
 
+/** pantilt driver main pthread.*/
 pthread_t pantilt_th;
-int state_motors, state_encoders;
-pthread_mutex_t mymutex_motors, mymutex_encoders, serialpantilt_mutex;
-pthread_cond_t condition_motors, condition_encoders;
+
+/** pantilt driver state variable for motors pthread.*/
+int state_motors;
+/** pantilt driver state variable for encoders pthread.*/
+int state_encoders;
+/** pantilt driver mutex for motors pthread.*/
+pthread_mutex_t mymutex_motors;
+/** pantilt driver mutex for encoders pthread.*/
+pthread_mutex_t mymutex_encoders;
+/** pantilt driver mutex for serial pantilt device.*/
+pthread_mutex_t serialpantilt_mutex;
+/** pantilt driver condition flag for motors pthread.*/
+pthread_cond_t condition_motors;
+/** pantilt driver condition flag for encoders pthread.*/
+pthread_cond_t condition_encoders;
+/** pantilt driver reading buffer.*/
 char pantilt_in[MAX_MESSAGE];
+/** pantilt driver writting buffer.*/
 char pantilt_out[MAX_MESSAGE];
+/** pantilt driver variable to remember the current position while reading a buffer.*/
 int pantilt_marca;
 
-int ptmotors_schema_id, ptencoders_schema_id;
+/** id for pantilt motors schema.*/
+int ptmotors_schema_id;
+/** id for pantilt encoders schema.*/
+int ptencoders_schema_id;
 
-float longitude_last=0., latitude_last=0.;
-float longspeed_last=0., latspeed_last=0.;
+/** pantilt driver last longitude value read.*/
+float longitude_last=0.;
+/** pantilt driver last latitude value read.*/
+float latitude_last=0.;
+/** pantilt driver last longitude speed value read.*/
+float longspeed_last=0.;
+/** pantilt driver last latitude speed value read.*/
+float latspeed_last=0.;
 
-float max_pan, min_pan, max_tilt, min_tilt; 
+/** pantilt driver current max pan variable.*/
+float max_pan;
+/** pantilt driver current min pan variable.*/
+float min_pan;
+/** pantilt driver current max tilt variable.*/
+float max_tilt;
+/** pantilt driver current min tilt variable.*/
+float min_tilt;
+ 
 /* real limits in encoders units. MAX_PAN_ANGLE, MAX_TILT_ANGLE... are approximate limits to be used by the client of oculo */
-
+/** pantilt driver variable to detect if pthreads were created.*/
 int pantilt_thread_created=0;
+/** pantilt driver variable to detect if pantilt devices were cleaned up.*/
 int pantilt_cleaned_up=0;
+/** pantilt driver  variable to detect if pantilt devices were setup.*/
 int pantilt_setup=0;
+/** pantilt driver to show fps in jdec shell.*/
 int display_fps=0;
+/** pantilt driver variable to detect if pthreads must end its execution.*/
 int pantilt_close_command=0;
 
 /* pantilt driver API options */
+/** pantilt driver name.*/
 char driver_name[256]="pantilt";
 
 /* activate driver */
+/** pantilt driver variable to detect if pantilt encoders were activated on gui.*/
 int activate_pantiltencoders=0;
+/** pantilt driver variable to detect if pantilt motors were activated on gui.*/
 int activate_pantiltmotors=0;
 
+/** pantilt driver function to show fps in jdec shell.*/
 void pantilt_display_fps(){
   display_fps=1;
 }
 
+/** pantilt driver function to clean up pantilt devices.*/
 void pantilt_clean_up() {
   pantilt_cleaned_up=1;
   pthread_mutex_lock(&serialpantilt_mutex);
@@ -89,6 +148,7 @@ void pantilt_clean_up() {
   pthread_mutex_unlock(&serialpantilt_mutex);
 }
 
+/** pantilt driver function to stop and clean pantilt devices.*/
 void pantilt_close(){
 
   pantilt_close_command=1;
@@ -97,8 +157,10 @@ void pantilt_close(){
 }
 
 
-
-
+/** pantilt driver function to open passed device and sets it to raw mode.
+ *  @param filename path and device name.
+ *  @param io_flags flags to open device.
+ *  @return File descriptor to that device.*/
 int openRaw(char* filename, mode_t io_flags)
 /*                                                        */
 /*  Opens passed filename and sets its device to raw mode.*/
@@ -151,6 +213,10 @@ int openRaw(char* filename, mode_t io_flags)
   return fd;
 }
 
+/** pantilt driver function to set baud rate to and opened device.
+ *  @param fd file descriptor to the selected device.
+ *  @param baudRate desired baud rate. Baud rate constants are found in <termios.h>.
+ *  @return 0 if successful or -1 if something was wrong.*/
 int setBaudRate (int fd, speed_t baudRate)
 /*  Set the baud rate of an open device.                  */
 /*  Baud rate constants are found in <termios.h>.         */
@@ -190,6 +256,8 @@ int setBaudRate (int fd, speed_t baudRate)
    return(1);
 }
 
+/** pantilt driver function to send a command to a pantilt neck.
+ *  @param cmd desired command to send.*/
 void SendCmd(char *cmd){
 
   pthread_mutex_lock(&serialpantilt_mutex);
@@ -199,6 +267,8 @@ void SendCmd(char *cmd){
 
 }
 
+/** pantilt driver function to decode messages from pantilt neck.
+ *  @param mensaje received message from pantilt neck.*/
 void serve_serialpantilt_message(char *mensaje)
 {
   int pan_encoders, tilt_encoders,kk; /* encoders units */
@@ -231,8 +301,8 @@ void serve_serialpantilt_message(char *mensaje)
     }
 }
 
-
-void *serialpantilt_pollthread(void *not_used) 
+/** pantilt driver poll pthread function.*/
+void *serialpantilt_pollthread() 
 {
   struct timeval a,b;
   long diff, next;
@@ -264,6 +334,7 @@ void *serialpantilt_pollthread(void *not_used)
   pthread_exit(0);
 }
 
+/** pantilt driver read pthread function.*/
 void *serialpantilt_readthread(void *not_used) 
 { 
   int leidos=0, comienzo=0, j=0;
@@ -306,6 +377,8 @@ void *serialpantilt_readthread(void *not_used)
 }
 
 
+/** pantilt encoders suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int ptencoders_suspend()
 {
 
@@ -320,6 +393,12 @@ int ptencoders_suspend()
   return 0;
 }
 
+
+/** pantilt encoders resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int ptencoders_resume(int father, int *brothers, arbitration fn)
 {
 
@@ -338,6 +417,7 @@ int ptencoders_resume(int father, int *brothers, arbitration fn)
   return 0;
 }
 
+/** pantilt driver motors main iteration function.*/
 void pantiltmotors_iteration()
 {  
   float longspeed, latspeed, longcommand, latcommand;
@@ -390,6 +470,8 @@ void pantiltmotors_iteration()
   //if (debug[SCH_PANTILTMOTORS]) printf("pantiltmotors:  %1.1f %1.1f %1.1f %1.1f \n",latitude,longitude,latitude_speed,longitude_speed); 
 }
 
+/** pantilt motors suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int ptmotors_suspend()
 {
 
@@ -405,6 +487,12 @@ int ptmotors_suspend()
   return 0;
 }
 
+
+/** pantilt motors resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int ptmotors_resume(int father, int *brothers, arbitration fn)
 {
 
@@ -433,7 +521,7 @@ int ptmotors_resume(int father, int *brothers, arbitration fn)
   return 0;
 }
 
-
+/** pantilt driver motors pthread function.*/
 void *pantiltmotors_thread(void *not_used) 
 {
   struct timeval a,b;
@@ -470,7 +558,9 @@ void *pantiltmotors_thread(void *not_used)
 }
 
 
-
+/** pantilt driver parse configuration file function.
+ *  @param configfile path and name to the config file.
+ *  @return 0 if parsing was successful or -1 if something went wrong.*/
 int pantilt_parseconf(char *configfile){
 
   int end_parse=0; int end_section=0; int driver_config_parsed=0;
@@ -602,6 +692,8 @@ int pantilt_parseconf(char *configfile){
   return 0;   
 }
 
+/** pantilt driver init function. It will start all pantilt required devices and setting them the default configuration.
+ *  @return 0 if initialitation was successful or -1 if something went wrong.*/
 void pantilt_init(){
 
   //printf("pantilt device on %s serial port\n",pantilt_device); 
@@ -654,6 +746,8 @@ void pantilt_init(){
   pantilt_setup=1;
 }
 
+/** pantilt driver startup function following jdec platform API for drivers.
+ *  @param configfile path and name to the config file of this driver.*/
 void pantilt_startup(char *configfile)
 {
  

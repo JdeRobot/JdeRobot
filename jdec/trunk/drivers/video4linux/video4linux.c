@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006 Antonio Pineda Cabello, Jose Maria Cañas 
+ *  Copyright (C) 2007 Antonio Pineda Cabello, Jose Maria Cañas Plaza
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,20 +14,24 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
- *  Authors : Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, Jose Maria Cañas <jmplaza@gsyc.escet.urjc.es>
  */
 
-
-/************************************************
- * jdec video4linux driver                      *
- ************************************************/
+/**
+ *  jdec video4linux driver provides video images to color variables from video4linux devices, such as USB or BT878 cameras.
+ *
+ *  @file video4linux.c
+ *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es> and Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  @version 4.1
+ *  @date 30-05-2007
+ */
 
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
 #include "jde.h"
+/** Using linux time headers.*/
 #define _LINUX_TIME_H 1
+/** Using linux device headers.*/
 #define _DEVICE_H_ 1
 /* before videodev.h. It avoids /usr/include/linux/time.h:9: redefinition of `struct timespec' */
 #include <sys/stat.h>
@@ -36,7 +40,6 @@
 #include <linux/types.h>
 #include <linux/videodev.h>
 
-/* Color conversion, taken from xawtv */
 #define CLIP         320
 # define RED_NULL    128  /* 137 */
 # define BLUE_NULL   128  /* 156 */
@@ -49,58 +52,116 @@
 #define BLUE_ADD    (-BLUE_NULL * BLUE_MUL)
 #define GREEN1_ADD  (-RED_ADD/2)
 #define GREEN2_ADD  (-BLUE_ADD/6)
-/* lookup tables for color conversion*/
+
+
+/** Color conversion, taken from xawtv.*/
+#define CLIP        320
+/** Color conversion, taken from xawtv.*/
+# define RED_NULL    128  /* 137 */
+/** Color conversion, taken from xawtv.*/
+# define BLUE_NULL   128  /* 156 */
+/** Color conversion, taken from xawtv.*/
+# define LUN_MUL     256  /* 360 */
+/** Color conversion, taken from xawtv.*/
+#define RED_MUL     512
+/** Color conversion, taken from xawtv.*/
+#define BLUE_MUL    512
+/** Color conversion, taken from xawtv.*/
+#define GREEN1_MUL  (-RED_MUL/2)
+/** Color conversion, taken from xawtv.*/
+#define GREEN2_MUL  (-BLUE_MUL/6)
+/** Color conversion, taken from xawtv.*/
+#define RED_ADD     (-RED_NULL  * RED_MUL)
+/** Color conversion, taken from xawtv.*/
+#define BLUE_ADD    (-BLUE_NULL * BLUE_MUL)
+/** Color conversion, taken from xawtv.*/
+#define GREEN1_ADD  (-RED_ADD/2)
+/** Color conversion, taken from xawtv.*/
+#define GREEN2_ADD  (-BLUE_ADD/6)
+
+/** Lookup tables for color conversion.*/
 static unsigned int  ng_yuv_gray[256];
+/** Lookup tables for color conversion.*/
 static unsigned int  ng_yuv_red[256];
+/** Lookup tables for color conversion.*/
 static unsigned int  ng_yuv_blue[256];
+/** Lookup tables for color conversion.*/
 static unsigned int  ng_yuv_g1[256];
+/** Lookup tables for color conversion.*/
 static unsigned int  ng_yuv_g2[256];
+/** Lookup tables for color conversion.*/
 static unsigned int  ng_clip[256 + 2 * CLIP];
+
+/** Macro to transform color to gray.*/
 #define GRAY(val)		ng_yuv_gray[val]
+/** Macro to transform color to red.*/
 #define RED(gray,red)		ng_clip[ CLIP + gray + ng_yuv_red[red] ]
+/** Macro to transform color to green.*/
 #define GREEN(gray,red,blue)	ng_clip[ CLIP + gray + ng_yuv_g1[red] + ng_yuv_g2[blue] ]
+/** Macro to transform color to blue.*/
 #define BLUE(gray,blue)		ng_clip[ CLIP + gray + ng_yuv_blue[blue] ]
+/** Max number of cameras detected by video4linux driver.*/
 #define MAXCAM 4
 
-pthread_t v4l_thread[MAXCAM]; 
-static char *map[MAXCAM]; /* local memory for v4l capture */ 
+/** video4linux driver pthread structure for video capture. */
+pthread_t v4l_thread[MAXCAM];
+/** Map local memory for v4l capture. */
+static char *map[MAXCAM];
+/** File descriptors for /dev/video cameras.*/
 int fdv4l[MAXCAM];
+/** Video capability option.*/
 struct video_capability cap[MAXCAM];
+/** Video channel option.*/
 struct video_channel chan[MAXCAM];
+/** Video picture option.*/
 struct video_picture vpic[MAXCAM];
+/** Video buffers. */
 static struct video_mbuf gb_buffers[MAXCAM]; 
+/** Video window option. */
 struct video_window win[MAXCAM];
+/** Video mmap option.*/
 struct video_mmap gb[MAXCAM];
+/** int variable to detect when a image was captured.*/
 unsigned long int lastimage;
-
+/** State structure for pthreads.*/
 int state[MAXCAM];
+/** Mutext for pthreads. */
 pthread_mutex_t mymutex[MAXCAM];
+/** Condition flags for pthreads. */
 pthread_cond_t condition[MAXCAM];
-
+/** Display fps on jdec shell option.*/
 int display_fps=0;
-
-/* video4linux driver API options */
+/** Driver name.*/
 char driver_name[256]="video4linux";
-
-/* matrix to know which devices serve which colors.
-   first indexes 'device' and second indexes 'colors using that device' */
+/** Matrix variable to know which devices serve which colors. First indexes 'device', second indexes 'colors using that device'.*/
 int device_color[MAXCAM][MAXCAM];
-
-/* devices detected and their filenames */
+/** Devices detected. If serve_device[0] = 1 then '/dev/video0' was detected in config file.*/
 int serve_device[MAXCAM];
+/** Device names. Example: "/dev/video0".*/
 char v4l_filename[MAXCAM][256];
-
-/* colors detected and actives at every moment*/
+/** Colors detected in config file. If serve_color[0] = 1, then colorA was detected in config file.*/
 int serve_color[MAXCAM];
+/** Colors active in each moment. If color_active[0] = 1, then colorA is activated in gui.*/
 int color_active[MAXCAM];
-int color_device[MAXCAM]; /* wich device serves wich color */
+/** Which device serves which color.*/
+int color_device[MAXCAM];
+/** Option to detect when the pthreads must exit execution.*/
 int video4linux_close_command=0;
-int colorA_schema_id, colorB_schema_id, colorC_schema_id, colorD_schema_id;
+/** colorA schema id.*/
+int colorA_schema_id;
+/** colorB schema id.*/
+int colorB_schema_id;
+/** colorC schema id.*/
+int colorC_schema_id;
+/** colorD schema id.*/
+int colorD_schema_id;
 
+/** Function will activate displaying fps in jdec shell.*/
 void video4linux_display_fps(){
   display_fps=1;
 }
 
+/** Function will end execution of the driver, closing file descriptors and stopping devices.*/
 void video4linux_close(){
 
   int i;
@@ -108,6 +169,11 @@ void video4linux_close(){
   printf("driver video4linux off\n");
 }
 
+/** colorA resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorA_resume(int father, int *brothers, arbitration fn){
   if((serve_color[0]==1)&&(color_active[0]==0)){
     color_active[0]=1;
@@ -131,6 +197,8 @@ int mycolorA_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** colorA suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorA_suspend(){
       
   if((serve_color[0]==1)&&(color_active[0])){
@@ -150,6 +218,12 @@ int mycolorA_suspend(){
   return 0;
 }
 
+
+/** colorB resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorB_resume(int father, int *brothers, arbitration fn){
   if((serve_color[1]==1)&&(color_active[1]==0)){
     color_active[1]=1;
@@ -173,6 +247,8 @@ int mycolorB_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** colorB suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorB_suspend(){
       
   if((serve_color[1]==1)&&(color_active[1])){
@@ -192,6 +268,11 @@ int mycolorB_suspend(){
   return 0;
 }
 
+/** colorC resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorC_resume(int father, int *brothers, arbitration fn){
   if((serve_color[2]==1)&&(color_active[2]==0)){
     color_active[2]=1;
@@ -215,6 +296,8 @@ int mycolorC_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** colorC suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorC_suspend(){
       
   if((serve_color[2]==1)&&(color_active[2])){
@@ -234,6 +317,11 @@ int mycolorC_suspend(){
   return 0;
 }
 
+/** colorD resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorD_resume(int father, int *brothers, arbitration fn){
   if((serve_color[3]==1)&&(color_active[3]==0)){
     color_active[3]=1;
@@ -257,6 +345,8 @@ int mycolorD_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** colorD suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorD_suspend(){
       
   if((serve_color[3]==1)&&(color_active[3])){
@@ -276,7 +366,8 @@ int mycolorD_suspend(){
   return 0;
 }
 
-void *video4linux1_thread(void *not_used){
+/** video4linux driver pthread function for device /dev/video0.*/
+void *video4linux1_thread(){
   int cam=0;
   int f,c,yy,j,n;
   unsigned char y,u,v;
@@ -369,7 +460,8 @@ void *video4linux1_thread(void *not_used){
   pthread_exit(0);
 }
 
-void *video4linux2_thread(void *not_used){
+/** video4linux driver pthread function for device /dev/video1.*/
+void *video4linux2_thread(){
   int cam=0;
   int f,c,yy,j,n;
   unsigned char y,u,v;
@@ -461,8 +553,8 @@ void *video4linux2_thread(void *not_used){
   }while(video4linux_close_command==0);
   pthread_exit(0);
 }
-
-void *video4linux3_thread(void *not_used){
+/** video4linux driver pthread function for device /dev/video2.*/
+void *video4linux3_thread(){
   int cam=0;
   int f,c,yy,j,n;
   unsigned char y,u,v;
@@ -555,6 +647,7 @@ void *video4linux3_thread(void *not_used){
   pthread_exit(0);
 }
 
+/** video4linux driver pthread function for device /dev/video3.*/
 void *video4linux4_thread(void *not_used){
   int cam=0;
   int f,c,yy,j,n;
@@ -648,6 +741,9 @@ void *video4linux4_thread(void *not_used){
   pthread_exit(0);
 }
 
+/** video4linux driver parse configuration file function.
+ *  @param configfile path and name to the config file.
+ *  @return 0 if parsing was successful or -1 if something went wrong.*/
 int video4linux_parseconf(char *configfile){
 
   int end_parse=0; int end_section=0; int driver_config_parsed=0;
@@ -757,7 +853,7 @@ int video4linux_parseconf(char *configfile){
 			else if((strcmp(word4,"colorC")==0)&&(serve_color[2]==0)){device_color[0][2]=1; serve_color[2]=1;color_device[2]=0;}
 			else if((strcmp(word4,"colorD")==0)&&(serve_color[3]==0)){device_color[0][3]=1; serve_color[3]=1;color_device[3]=0;}
 			
-		  }else if(strcmp(word5,"/dev/video1")==0){
+		      }else if(strcmp(word5,"/dev/video1")==0){
 			serve_device[1]=1;
 			if((strcmp(word4,"colorA")==0)&&(serve_color[0]==0)){device_color[1][0]=1; serve_color[0]=1; color_device[0]=1;}
 			else if((strcmp(word4,"colorB")==0)&&(serve_color[1]==0)){device_color[1][1]=1; serve_color[1]=1; color_device[1]=1;}
@@ -802,6 +898,8 @@ int video4linux_parseconf(char *configfile){
   }else return -1;
 }
 
+/** video4linux driver init function. It will start all video4linux required devices and setting them the default configuration.
+ *  @return 0 if initialitation was successful or -1 if something went wrong.*/
 int video4linux_init(){
 
   int i,k,n;
@@ -809,6 +907,7 @@ int video4linux_init(){
   /* recorremos todos los posibles dispositivos */
   for(n=0;n<MAXCAM;n++){
 
+    /* inicializamos la apertura de todos los dispositivos */
     if(serve_device[n]){
 
       /* Apertura e inicializacion del dispositivo de videoforlinux */
@@ -832,23 +931,20 @@ int video4linux_init(){
 	}else printf(" CHANNEL %d: \n name=%s \n tuners=%d \n type=%d \n\n",chan[n].channel,chan[n].name,chan[n].tuners,chan[n].type);
       }
 
-  
-      if ((strcmp(cap[n].name,"BT878(Hauppauge new)")==0) && (cap[n].channels == 3)){
-	/* Selecciona el canal composite-video (=1) como canal activo. Si pongo canal Television (=0) tambien funciona. Si pongo s-video (=2) se ve, pero en niveles de gris nada mas */
-	chan[n].channel=1;
-	if (ioctl(fdv4l[n], VIDIOCSCHAN, &chan[n]) == -1) { perror("VIDIOCSCHAN"); return(-1);}
-      }
-
-	  
       /*image size*/
       win[n].width=SIFNTSC_COLUMNS;
       win[n].height=SIFNTSC_ROWS;
       win[n].x=0;
       win[n].y=0; 
       win[n].chromakey=0;
-      win[n].clipcount=0; 
-	  
-      if((strcmp(cap[n].name,"Philips 740 webcam")==0) || (strcmp(cap[n].name,"Philips 730 webcam")==0)){
+      win[n].clipcount=0;
+  
+      if ((strcmp(cap[n].name,"BT878(Hauppauge new)")==0) && (cap[n].channels == 3)){
+	/* Selecciona el canal composite-video (=1) como canal activo. Si pongo canal Television (=0) tambien funciona. Si pongo s-video (=2) se ve, pero en niveles de gris nada mas */
+	chan[n].channel=1;
+	if (ioctl(fdv4l[n], VIDIOCSCHAN, &chan[n]) == -1) { perror("VIDIOCSCHAN"); return(-1);}
+
+      }else if((strcmp(cap[n].name,"Philips 740 webcam")==0) || (strcmp(cap[n].name,"Philips 730 webcam")==0)){
 #ifdef PWCX
 	/* the driver with compression (pwcx) allows higher frame rates */
 	win[n].flags = 30 << 16; 
@@ -929,71 +1025,79 @@ int video4linux_init(){
 	ng_clip[k] = 255;
 
 	  
-      if(n==0) {
-	pthread_create(&v4l_thread[0],NULL,video4linux1_thread,NULL);
-	all[num_schemas].id = (int *) &colorA_schema_id;
-	strcpy(all[num_schemas].name,"colorA");
-	all[num_schemas].resume = (resumeFn) mycolorA_resume;
-	all[num_schemas].suspend = (suspendFn) mycolorA_suspend;
-	printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
-	(*(all[num_schemas].id)) = num_schemas;
-	all[num_schemas].fps = 0.;
-	all[num_schemas].k =0;
-	all[num_schemas].state=slept;
-	all[num_schemas].close = NULL;
-	all[num_schemas].handle = NULL;
-	num_schemas++;
-      }
-      else if(n==1) {
-	pthread_create(&v4l_thread[1],NULL,video4linux2_thread,NULL);
-	all[num_schemas].id = (int *) &colorB_schema_id;
-	strcpy(all[num_schemas].name,"colorB");
-	all[num_schemas].resume = (resumeFn) mycolorB_resume;
-	all[num_schemas].suspend = (suspendFn) mycolorB_suspend;
-	printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
-	(*(all[num_schemas].id)) = num_schemas;
-	all[num_schemas].fps = 0.;
-	all[num_schemas].k =0;
-	all[num_schemas].state=slept;
-	all[num_schemas].close = NULL;
-	all[num_schemas].handle = NULL;
-	num_schemas++;
-      }
-      else if(n==2) {
-	pthread_create(&v4l_thread[2],NULL,video4linux3_thread,NULL);
-	all[num_schemas].id = (int *) &colorC_schema_id;
-	strcpy(all[num_schemas].name,"colorC");
-	all[num_schemas].resume = (resumeFn) mycolorC_resume;
-	all[num_schemas].suspend = (suspendFn) mycolorC_suspend;
-	printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
-	(*(all[num_schemas].id)) = num_schemas;
-	all[num_schemas].fps = 0.;
-	all[num_schemas].k =0;
-	all[num_schemas].state=slept;
-	all[num_schemas].close = NULL;
-	all[num_schemas].handle = NULL;
-	num_schemas++;
-      }
-      else if(n==3) {
-	pthread_create(&v4l_thread[3],NULL,video4linux4_thread,NULL);
-	all[num_schemas].id = (int *) &colorD_schema_id;
-	strcpy(all[num_schemas].name,"colorD");
-	all[num_schemas].resume = (resumeFn) mycolorD_resume;
-	all[num_schemas].suspend = (suspendFn) mycolorD_suspend;
-	printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
-	(*(all[num_schemas].id)) = num_schemas;
-	all[num_schemas].fps = 0.;
-	all[num_schemas].k =0;
-	all[num_schemas].state=slept;
-	all[num_schemas].close = NULL;
-	all[num_schemas].handle = NULL;
-	num_schemas++;
-      }
+      if(n==0) pthread_create(&v4l_thread[0],NULL,video4linux1_thread,NULL); 
+      else if(n==1) pthread_create(&v4l_thread[1],NULL,video4linux2_thread,NULL);
+      else if(n==2) pthread_create(&v4l_thread[2],NULL,video4linux3_thread,NULL);
+      else if(n==3) pthread_create(&v4l_thread[3],NULL,video4linux4_thread,NULL);
     }
   }
+
+  /* inicializamos todos los esquemas de imagenes utilizados. */
+  if(serve_color[0]){
+    all[num_schemas].id = (int *) &colorA_schema_id;
+    strcpy(all[num_schemas].name,"colorA");
+    all[num_schemas].resume = (resumeFn) mycolorA_resume;
+    all[num_schemas].suspend = (suspendFn) mycolorA_suspend;
+    printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+    (*(all[num_schemas].id)) = num_schemas;
+    all[num_schemas].fps = 0.;
+    all[num_schemas].k =0;
+    all[num_schemas].state=slept;
+    all[num_schemas].close = NULL;
+    all[num_schemas].handle = NULL;
+    num_schemas++;
+  }
+
+  if(serve_color[1]){
+    all[num_schemas].id = (int *) &colorB_schema_id;
+    strcpy(all[num_schemas].name,"colorB");
+    all[num_schemas].resume = (resumeFn) mycolorB_resume;
+    all[num_schemas].suspend = (suspendFn) mycolorB_suspend;
+    printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+    (*(all[num_schemas].id)) = num_schemas;
+    all[num_schemas].fps = 0.;
+    all[num_schemas].k =0;
+    all[num_schemas].state=slept;
+    all[num_schemas].close = NULL;
+    all[num_schemas].handle = NULL;
+    num_schemas++;
+  }
+
+  if(serve_color[2]){
+    all[num_schemas].id = (int *) &colorC_schema_id;
+    strcpy(all[num_schemas].name,"colorC");
+    all[num_schemas].resume = (resumeFn) mycolorC_resume;
+    all[num_schemas].suspend = (suspendFn) mycolorC_suspend;
+    printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+    (*(all[num_schemas].id)) = num_schemas;
+    all[num_schemas].fps = 0.;
+    all[num_schemas].k =0;
+    all[num_schemas].state=slept;
+    all[num_schemas].close = NULL;
+    all[num_schemas].handle = NULL;
+    num_schemas++;
+  }
+
+  if(serve_color[3]){
+    all[num_schemas].id = (int *) &colorD_schema_id;
+    strcpy(all[num_schemas].name,"colorD");
+    all[num_schemas].resume = (resumeFn) mycolorD_resume;
+    all[num_schemas].suspend = (suspendFn) mycolorD_suspend;
+    printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+    (*(all[num_schemas].id)) = num_schemas;
+    all[num_schemas].fps = 0.;
+    all[num_schemas].k =0;
+    all[num_schemas].state=slept;
+    all[num_schemas].close = NULL;
+    all[num_schemas].handle = NULL;
+    num_schemas++;
+  }
+
   return 0;
 }
 
+/** video4linux driver startup function following jdec platform API for drivers.
+ *  @param configfile path and name to the config file of this driver.*/
 void video4linux_startup(char *configfile)
 {
   int i,j;

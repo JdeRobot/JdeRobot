@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006 Antonio Pineda Cabello
+ *  Copyright (C) 2006 Antonio Pineda Cabello, Raul Isado <rauli@mi.madritel.es>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,62 +18,114 @@
  *  Authors : Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, Raul Isado <rauli@mi.madritel.es>
  */
 
-/************************************************
- * jdec player driver                           *
- ************************************************/
+/**
+ *  jdec player driver provides sensorial information for robot variables from a player server.
+ *
+ *  @file player.c
+ *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es> and Raul Isado <rauli@mi.madritel.es>
+ *  @version 4.1
+ *  @date 30-05-2007
+ */
 
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
 #include <libplayerc/playerc.h>
 #include <jde.h>
+
+/** player driver command period cycle.*/
 #define PLAYER_COMMAND_CYCLE 75 /* ms */ 
 
 /* for player support through the player server */
+/** player driver client structure.*/
 playerc_client_t *player_client;
+/** player driver robot position structure.*/
 playerc_position2d_t *player_position;
+/** player driver sonar structure.*/
 playerc_sonar_t *player_sonar;
+/** player driver laser structure.*/
 playerc_laser_t *player_laser;
+/** player driver power structure.*/
 playerc_power_t *player_power;
+/** player driver debug active variable.*/
 int DEBUG=0;
-/*unsigned long v_rep=0, v_delay=0, v_total=0, w_rep=0, w_delay=0, w_total=0;*/
 
 /* driver internal variables */
+/** player driver time stamp variable.*/
 unsigned long tag=0;
 
 /* player thread attributes */
+/** player driver pthread.*/
 pthread_t player_th;
+/** player driver state variable for pthread.*/
 int state;
+/** player driver mutex variable for pthread.*/
 pthread_mutex_t mymutex;
+/** player driver condition flag for pthread.*/
 pthread_cond_t condition;
 
 /* player driver API options */
+/** player driver name.*/
 char driver_name[256]="player";
+/** player driver variable to detect when pthread must end its execution.*/
 int player_close_command=0;
-int serve_laser=0; int serve_encoders=0; int serve_sonars=0; int serve_motors=0;
-int laser_active=0; int encoders_active=0; int sonars_active=0; int motors_active=0;
 
-int laser_schema_id, encoders_schema_id, sonars_schema_id, motors_schema_id;
+/** player driver variable to check if laser device was detected in config.*/
+int serve_laser=0;
+/** player driver variable to check if encoders device was detected in config.*/
+int serve_encoders=0;
+/** player driver variable to check if sonars device was detected in config.*/
+int serve_sonars=0;
+/** player driver variable to check if motors device was detected in config.*/
+int serve_motors=0;
+/** player driver variable to check if laser was activated in gui.*/
+int laser_active=0;
+/** player driver variable to check if encoders was activated in gui.*/
+int encoders_active=0;
+/** player driver variable to check if sonars was activated in gui.*/
+int sonars_active=0;
+/** player driver variable to check if motors was activated in gui.*/
+int motors_active=0;
 
-/* player driver attributes */
+/** id for laser schema.*/
+int laser_schema_id;
+/** id for encoders schema.*/
+int encoders_schema_id;
+/** id for sonars schema.*/
+int sonars_schema_id;
+/** id for motors schema.*/
+int motors_schema_id;
+
+/** player driver connection port.*/
 int playerport;
+/** player driver hostname.*/
 char playerhost[256];
+/** player driver factor correction for x.*/
 float correcting_x=0.;
+/** player driver factor correction for y.*/
 float correcting_y=0.;
+/** player driver factor correction for theta.*/
 float correcting_theta=0.;
 
-/* last commands sent to the motors. Here to allow the reset by motors_suspend */
-static float w_sp=0., v_sp=0.;
+/** player driver last w speed command sent to the motors.*/
+static float w_sp=0.;
+/** player driver last v speed command sent to the motors.*/
+static float v_sp=0.;
 
 /* PLAYER DRIVER FUNCTIONS */
+/** player driver closing function invoked when stopping driver.*/
 void player_close(){
-
   player_close_command=1;
   playerc_client_disconnect(player_client);
   playerc_client_destroy(player_client);
   printf("disconnected from Player\n");
 }
 
+/** laser resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int player_laser_resume(int father, int *brothers, arbitration fn)
 {
 
@@ -96,7 +148,8 @@ int player_laser_resume(int father, int *brothers, arbitration fn)
   return 0;
 }
 
-
+/** laser suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int player_laser_suspend(){
 
   if((serve_laser)&&(laser_active)){
@@ -113,6 +166,11 @@ int player_laser_suspend(){
   return 0;
 }
 
+/** encoders resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int player_encoders_resume(int father, int *brothers, arbitration fn)
 {
 
@@ -136,6 +194,8 @@ int player_encoders_resume(int father, int *brothers, arbitration fn)
 
 }
 
+/** encoders suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int player_encoders_suspend(){
 
   if((serve_encoders)&&(encoders_active)){
@@ -152,6 +212,11 @@ int player_encoders_suspend(){
   return 0;
 }
 
+/** sonars resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int player_sonars_resume(int father, int *brothers, arbitration fn)
 {
 
@@ -174,6 +239,8 @@ int player_sonars_resume(int father, int *brothers, arbitration fn)
   return 0;
 }
 
+/** sonars suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int player_sonars_suspend(){
 
   if((serve_sonars)&&(sonars_active)){
@@ -190,6 +257,11 @@ int player_sonars_suspend(){
   return 0;
 }
 
+/** motors resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int player_motors_resume(int father, int *brothers, arbitration fn)
 {
 
@@ -212,6 +284,8 @@ int player_motors_resume(int father, int *brothers, arbitration fn)
 
 }
 
+/** motors suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int player_motors_suspend(){
 
   if((serve_motors)&&(motors_active)){
@@ -231,6 +305,7 @@ int player_motors_suspend(){
   return 0;
 }
 
+/** player driver motors iteration function to send commands to player server.*/
 void player_motors_iteration(){
 
   float  w_new, v_new;
@@ -259,7 +334,9 @@ void player_motors_iteration(){
     }
 }
 
-void *player_thread(void *not_used){
+
+/** player driver main thread.*/
+void *player_thread(){
   struct timeval t;
   unsigned long before,now;
   static unsigned long lastmotor=0;
@@ -318,7 +395,8 @@ void *player_thread(void *not_used){
   pthread_exit(0);
 }
 
-void player_laser_callback(void *not_used)
+/** player driver laser function callback.*/
+void player_laser_callback()
 {
   int j=0,cont=0;
   
@@ -337,7 +415,7 @@ void player_laser_callback(void *not_used)
   }
 }
 
-
+/** player driver encoders function callback.*/
 void player_encoders_callback(void *not_used)
 {
   float robotx,roboty,robottheta;
@@ -358,6 +436,7 @@ void player_encoders_callback(void *not_used)
   jde_robot[4]=sin(jde_robot[2]);
 }
 
+/** player driver sonars function callback.*/
 void player_sonar_callback(void *not_used)
 {
   int j;
@@ -372,6 +451,7 @@ void player_sonar_callback(void *not_used)
   }
 }
 
+/** player driver battery function callback.*/
 void player_battery_callback(void *not_used)
 {
   /* this is unused in JDE since we don't use the charge battery sensor.
@@ -379,6 +459,9 @@ void player_battery_callback(void *not_used)
   tag++;
 }
 
+
+/** player driver init function. It will start all player required devices and setting them the default configuration.
+ *  @return 0 if initialitation was successful or -1 if something went wrong.*/
 int player_init(){
 
   printf("connecting to Player Server at '%s:%d'\n",playerhost,playerport);
@@ -450,6 +533,9 @@ int player_init(){
   return 0;
 }
 
+/** player driver parse configuration file function.
+ *  @param configfile path and name to the config file.
+ *  @return 0 if parsing was successful or -1 if something went wrong.*/
 int player_parseconf(char *configfile){
 
   int end_parse=0; int end_section=0; int driver_config_parsed=0;
@@ -608,6 +694,8 @@ int player_parseconf(char *configfile){
   }else return -1;
 }
 
+/** player driver startup function following jdec platform API for drivers.
+ *  @param configfile path and name to the config file of this driver.*/
 int player_startup(char *configfile){
 
   /* we call the function to parse the config file */

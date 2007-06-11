@@ -1,7 +1,31 @@
+/*
+ *  Copyright (C) 2006 Antonio Pineda Cabello
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ *  Authors : Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, JoseMaria Cañas <jmplaza@gsyc.escet.urjc.es>
+ */
 
-/************************************************
- * jdec networkclient driver                    *
- ************************************************/
+/**
+ *  jdec networkclient driver provides sensorial information to platform variables such as color, laser or us, from remote jdec networkservers drivers, or oculo and otos servers.
+ *
+ *  @file networkclient.c
+ *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es> and Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  @version 4.1
+ *  @date 30-05-2007
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -12,59 +36,98 @@
 #include "jde.h"
 #include "jdemessages.h"
 
-/* read modes for images */
+/** networkclient driver oneimage socket read mode.*/
 #define ONEIMAGE 0
+/** networkclient driver messages socket read mode.*/
 #define MESSAGES 1
 
-/* client name */
+/** networkclient client name.*/
 char CLIENT_NAME[MAX_CLIENT_NAME]="jdec";
 
-/* number of devices */
+/** networkclient max number of devices.*/
 #define MAXDEVICE 10
 
-/* constants for devices */
+/** networkclient colorA device id.*/
 #define COLORA_DEVICE 0
+/** networkclient colorB device id.*/
 #define COLORB_DEVICE 1
+/** networkclient colorC device id.*/
 #define COLORC_DEVICE 2
+/** networkclient colorD device id.*/
 #define COLORD_DEVICE 3
+/** networkclient pantilt encoders device id.*/
 #define PANTILT_ENCODERS_DEVICE 4
+/** networkclient pantilt motors device id.*/
 #define PANTILT_MOTORS_DEVICE 5
+/** networkclient laser device id.*/
 #define LASER_DEVICE 6
+/** networkclient sonars device id.*/
 #define SONARS_DEVICE 7
+/** networkclient encoders device id.*/
 #define ENCODERS_DEVICE 8
+/** networkclient motors device id.*/
 #define MOTORS_DEVICE 9
 
 /* 4 images, 4 robot devices and 2 devices for pantilt */
+/** networkclient pthreads structure.*/
 pthread_t network_thread[MAXDEVICE];
+/** networkclient state variable for pthreads.*/
 int state[MAXDEVICE];
+/** networkclient mutex for pthreads.*/
 pthread_mutex_t mymutex[MAXDEVICE];
+/** networkclient condition flags for pthreads.*/
 pthread_cond_t condition[MAXDEVICE];
 
-/* networkclient driver API options */
+/** networkclient driver name.*/
 char driver_name[256]="networkclient";
 
 /* devices detected and their hostnames, ports and network id's */
+/** networkclient detected hostnames in config file.*/
 char hostname[MAXDEVICE][256];
+/** networkclient detected ports in config file.*/
 int port[MAXDEVICE];
+/** networkclient networks id.*/
 int device_network_id[MAXDEVICE];
+/** networkclient sockets for all devices.*/
 int device_socket[MAXDEVICE];
 
 /* to correct relative coordenates */
+/** networkclient correcting factor to x variable.*/
 float correcting_x=0.;
+/** networkclient correcting factor to y variable.*/
 float correcting_y=0.;
+/** networkclient correcting factor to theta variable.*/
 float correcting_theta=0.;
 
-/* 0,1,2,3 used for colorA,colorB,colorC and colorD
-   4,5 used for pantilt encoders and pantilt motors
-   6,7,8,9 used for laser, sonars, encoders and motors */
+/** networkclient devices detected in config file.*/ 
 int serve_device[MAXDEVICE];
+/** networkclient devices active at each moment.*/
 int device_active[MAXDEVICE];
+/** networkclient variable to detect when the pthreads must end its execution.*/
 int networkclient_close_command=0;
 
-int colorA_schema_id, colorB_schema_id, colorC_schema_id, colorD_schema_id;
-int laser_schema_id, encoders_schema_id, sonars_schema_id, motors_schema_id;
-int ptmotors_schema_id, ptencoders_schema_id;
+/** id for colorA schema.*/
+int colorA_schema_id;
+/** id for colorB schema.*/
+int colorB_schema_id;
+/** id for colorC schema.*/
+int colorC_schema_id;
+/** id for colorD schema.*/
+int colorD_schema_id;
+/** id for laser schema.*/
+int laser_schema_id;
+/** id for encoders schema.*/
+int encoders_schema_id;
+/** id for sonars schema.*/
+int sonars_schema_id;
+/** id for motors schema.*/
+int motors_schema_id;
+/** id for pantilt motors schema.*/
+int ptmotors_schema_id;
+/** id for pantilt encoders schema.*/
+int ptencoders_schema_id;
 
+/** networkclient function to end execution of the driver, closing file descriptors and stopping devices.*/
 void networkclient_close(){
 
   char last_message[MAX_MESSAGE];
@@ -163,6 +226,11 @@ void networkclient_close(){
   printf("driver networkclient off\n");
 }
 
+/** pantiltencoders resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int networkclient_pantiltencoders_resume(int father, int *brothers, arbitration fn){
 
   if((device_active[PANTILT_ENCODERS_DEVICE==0])&&(serve_device[PANTILT_ENCODERS_DEVICE])){
@@ -186,6 +254,8 @@ int networkclient_pantiltencoders_resume(int father, int *brothers, arbitration 
   return 0;
 }
 
+/** pantiltencoders suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int networkclient_pantiltencoders_suspend(){
 
   if((device_active[PANTILT_ENCODERS_DEVICE])&&(serve_device[PANTILT_ENCODERS_DEVICE])){
@@ -203,6 +273,11 @@ int networkclient_pantiltencoders_suspend(){
   return 0;
 }
 
+/** pantiltmotors resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int networkclient_pantiltmotors_resume(int father, int *brothers, arbitration fn){
 
   if((device_active[PANTILT_MOTORS_DEVICE==0])&&(serve_device[PANTILT_MOTORS_DEVICE])){
@@ -221,6 +296,8 @@ int networkclient_pantiltmotors_resume(int father, int *brothers, arbitration fn
   return 0;
 }
 
+/** pantiltmotors suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int networkclient_pantiltmotors_suspend(){
 
   if((device_active[PANTILT_MOTORS_DEVICE])&&(serve_device[PANTILT_MOTORS_DEVICE])){
@@ -234,6 +311,11 @@ int networkclient_pantiltmotors_suspend(){
   return 0;
 }
 
+/** laser resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int networkclient_laser_resume(int father, int *brothers, arbitration fn){
 
   if((device_active[LASER_DEVICE==0])&&(serve_device[LASER_DEVICE])){
@@ -255,6 +337,8 @@ int networkclient_laser_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** laser suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int networkclient_laser_suspend(){
 
   if((device_active[LASER_DEVICE])&&(serve_device[LASER_DEVICE])){
@@ -273,6 +357,11 @@ int networkclient_laser_suspend(){
 
 }
 
+/** encoders resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int networkclient_encoders_resume(int father, int *brothers, arbitration fn){
 
   if((device_active[ENCODERS_DEVICE]==0)&&(serve_device[ENCODERS_DEVICE])){
@@ -294,6 +383,8 @@ int networkclient_encoders_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** encoders suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int networkclient_encoders_suspend(){
 
   if((device_active[ENCODERS_DEVICE])&&(serve_device[ENCODERS_DEVICE])){
@@ -312,6 +403,11 @@ int networkclient_encoders_suspend(){
 
 }
 
+/** sonars resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int networkclient_sonars_resume(int father, int *brothers, arbitration fn){
 
   if((device_active[SONARS_DEVICE]==0)&&(serve_device[SONARS_DEVICE])){
@@ -333,6 +429,8 @@ int networkclient_sonars_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** sonars suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int networkclient_sonars_suspend(){
 
   if((device_active[SONARS_DEVICE])&&(serve_device[SONARS_DEVICE])){
@@ -351,6 +449,11 @@ int networkclient_sonars_suspend(){
 
 }
 
+/** motors resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int networkclient_motors_resume(int father, int *brothers, arbitration fn){
 
   if((device_active[MOTORS_DEVICE]==0)&&(serve_device[MOTORS_DEVICE])){
@@ -368,6 +471,8 @@ int networkclient_motors_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** motors suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int networkclient_motors_suspend(){
 
   if((device_active[MOTORS_DEVICE])&&(serve_device[MOTORS_DEVICE])){
@@ -382,6 +487,11 @@ int networkclient_motors_suspend(){
 
 }
 
+/** colorA resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int networkclient_colorA_resume(int father, int *brothers, arbitration fn){
 
   if((device_active[COLORA_DEVICE]==0)&&(serve_device[COLORA_DEVICE])){
@@ -403,6 +513,8 @@ int networkclient_colorA_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** colorA suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int networkclient_colorA_suspend(){
 
   if((device_active[COLORA_DEVICE])&&(serve_device[COLORA_DEVICE])){
@@ -414,9 +526,13 @@ int networkclient_colorA_suspend(){
     pthread_mutex_unlock(&mymutex[COLORA_DEVICE]);
   }
   return 0;
-
 }
 
+/** colorB resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int networkclient_colorB_resume(int father, int *brothers, arbitration fn){
 
   if((device_active[COLORB_DEVICE]==0)&&(serve_device[COLORB_DEVICE])){
@@ -438,6 +554,8 @@ int networkclient_colorB_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** colorB suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int networkclient_colorB_suspend(){
 
   if((device_active[COLORB_DEVICE])&&(serve_device[COLORB_DEVICE])){
@@ -452,6 +570,11 @@ int networkclient_colorB_suspend(){
 
 }
 
+/** colorC resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int networkclient_colorC_resume(int father, int *brothers, arbitration fn){
 
   if((device_active[COLORC_DEVICE]==0)&&(serve_device[COLORC_DEVICE])){
@@ -473,6 +596,8 @@ int networkclient_colorC_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** colorC suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int networkclient_colorC_suspend(){
 
   if((device_active[COLORC_DEVICE])&&(serve_device[COLORC_DEVICE])){
@@ -487,6 +612,11 @@ int networkclient_colorC_suspend(){
 
 }
 
+/** colorD resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int networkclient_colorD_resume(int father, int *brothers, arbitration fn){
 
   if((device_active[COLORD_DEVICE]==0)&&(serve_device[COLORD_DEVICE])){
@@ -508,6 +638,8 @@ int networkclient_colorD_resume(int father, int *brothers, arbitration fn){
   return 0;
 }
 
+/** colorD suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int networkclient_colorD_suspend(){
 
   if((device_active[COLORD_DEVICE])&&(serve_device[COLORD_DEVICE])){
@@ -521,6 +653,7 @@ int networkclient_colorD_suspend(){
   return 0;
 }
 
+/** networkclient driver pthread function for pantiltencoders reception.*/
 void *networkclient_pantiltencoders_thread(void *not_used){
   int j=0;
   long int readn=0,bytes_readn=0,start=0;
@@ -584,6 +717,7 @@ void *networkclient_pantiltencoders_thread(void *not_used){
   pthread_exit(0);
 }
 
+/** networkclient driver pthread function for pantiltmotors reception.*/
 void *networkclient_pantiltmotors_thread(void *not_used){
 
   char pantiltmotors_out[MAX_MESSAGE];
@@ -609,6 +743,7 @@ void *networkclient_pantiltmotors_thread(void *not_used){
   pthread_exit(0);
 }
 
+/** networkclient driver pthread function for laser reception.*/
 void *networkclient_laser_thread(void *not_used){
 
   int readn, beginning,i;
@@ -700,6 +835,7 @@ void *networkclient_laser_thread(void *not_used){
   pthread_exit(0);
 }
 
+/** networkclient driver pthread function for encoders reception.*/
 void *networkclient_encoders_thread(void *not_used){
 
   int readn, beginning,i;
@@ -820,6 +956,7 @@ void *networkclient_encoders_thread(void *not_used){
   pthread_exit(0);
 }
 
+/** networkclient driver pthread function for sonars reception.*/
 void *networkclient_sonars_thread(void *not_used){
 
   int readn, beginning,i;
@@ -911,6 +1048,7 @@ void *networkclient_sonars_thread(void *not_used){
   pthread_exit(0);
 }
 
+/** networkclient driver pthread function for motors reception.*/
 void *networkclient_motors_thread(void *not_used){
   float ac=0.;
   char message[MAX_MESSAGE];
@@ -941,6 +1079,7 @@ void *networkclient_motors_thread(void *not_used){
   pthread_exit(0);
 }
 
+/** networkclient driver pthread function for colorA reception.*/
 void *networkclient_colorA_thread(void *not_used){
   int j=0;
   long int readn=0,bytes_readn=0,start=0;
@@ -1070,6 +1209,7 @@ void *networkclient_colorA_thread(void *not_used){
   pthread_exit(0);
 }
 
+/** networkclient driver pthread function for colorB reception.*/
 void *networkclient_colorB_thread(void *not_used){
   int j=0;
   long int readn=0,bytes_readn=0,start=0;
@@ -1199,6 +1339,7 @@ void *networkclient_colorB_thread(void *not_used){
   pthread_exit(0);
 }
 
+/** networkclient driver pthread function for colorC reception.*/
 void *networkclient_colorC_thread(void *not_used){
   int j=0;
   long int readn=0,bytes_readn=0,start=0;
@@ -1328,6 +1469,7 @@ void *networkclient_colorC_thread(void *not_used){
   pthread_exit(0);
 }
 
+/** networkclient driver pthread function for colorD reception.*/
 void *networkclient_colorD_thread(void *not_used){
   int j=0;
   long int readn=0,bytes_readn=0,start=0;
@@ -1457,6 +1599,9 @@ void *networkclient_colorD_thread(void *not_used){
   pthread_exit(0);
 }
 
+/** networkclient driver parse configuration file function.
+ *  @param configfile path and name to the config file.
+ *  @return 0 if parsing was successful or -1 if something went wrong.*/
 int networkclient_parseconf(char *configfile){
 
   int end_parse=0; int end_section=0; int driver_config_parsed=0;
@@ -1670,6 +1815,8 @@ int networkclient_parseconf(char *configfile){
   }else return -1;
 }
 
+/** networkclient driver init function.
+ *  @return 0 if initialitation was successful or -1 if something went wrong.*/
 int networkclient_init(){
 
   int i;
@@ -1752,6 +1899,8 @@ int networkclient_init(){
   return 0;
 }
 
+/** networkclient driver startup function following jdec platform API for drivers.
+ *  @param configfile path and name to the config file of this driver.*/
 void networkclient_startup(char *configfile)
 {
   int i;

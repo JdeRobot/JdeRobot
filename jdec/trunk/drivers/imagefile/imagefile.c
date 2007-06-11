@@ -18,22 +18,41 @@
  *  Authors : Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-/************************************************
- * jdec imagefile driver                        *
- ************************************************/
+/**
+ *  imagefile driver provides video images to color variables from static image files with 320x240 resolution and .ppm or .pnm extension.
+ *
+ *  @file imagefile.c
+ *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es> and Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  @version 4.1
+ *  @date 30-05-2007
+ */
 
 #include <stdio.h>
 #include <string.h>
 #include "jde.h"
+/** Max number of images that can be loaded.*/
 #define MAXIMAGES 4
+/** Max char size for a string buffer.*/
 #define MAX_LINE 1024
 
+/** imagefile driver name.*/
 char driver_name[256]="imagefile";
+/** colors detected in config file.*/
 int serve_color[MAXIMAGES];
+/** imagefile filename for all colors.*/
 char name_color[MAXIMAGES][256];
 
-int colorA_schema_id, colorB_schema_id, colorC_schema_id, colorD_schema_id;
+/** id for colorA schema.*/
+int colorA_schema_id;
+/** id for colorB schema.*/
+int colorB_schema_id;
+/** id for colorC schema.*/
+int colorC_schema_id;
+/** id for colorD schema.*/
+int colorD_schema_id;
 
+/** function to read images depending on the source (colorA, colorB, colorC or colorD).
+ *  @param source selected color.*/
 void load_image(int source)
 {
   int i,leidos, marca,c,r,last=0;
@@ -99,8 +118,11 @@ void load_image(int source)
     }
 }
 
-
-
+/** colorA resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorA_resume(int father, int *brothers, arbitration fn)
 {
   printf("colorA schema resume (imagefile driver)\n");
@@ -112,6 +134,8 @@ int mycolorA_resume(int father, int *brothers, arbitration fn)
   return 0;
 }
 
+/** colorA suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorA_suspend(void)
 {
   printf("colorA schema suspend (imagefile driver)\n");
@@ -119,6 +143,11 @@ int mycolorA_suspend(void)
   return 0;
 }
 
+/** colorB resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorB_resume(int father, int *brothers, arbitration fn)
 {
   printf("colorB schema resume (imagefile driver)\n");
@@ -130,6 +159,8 @@ int mycolorB_resume(int father, int *brothers, arbitration fn)
   return 0;
 }
 
+/** colorB suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorB_suspend(void)
 {
   printf("colorB schema suspend (imagefile driver)\n");
@@ -137,6 +168,11 @@ int mycolorB_suspend(void)
   return 0;
 }
 
+/** colorC resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorC_resume(int father, int *brothers, arbitration fn)
 {
   printf("colorC schema resume (imagefile driver)\n");
@@ -148,6 +184,8 @@ int mycolorC_resume(int father, int *brothers, arbitration fn)
   return 0;
 }
 
+/** colorC suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorC_suspend(void)
 {
   printf("colorC schema suspend (imagefile driver)\n");
@@ -155,6 +193,11 @@ int mycolorC_suspend(void)
   return 0;
 }
 
+/** colorD resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param arbitration function for this schema.
+ *  @return integer resuming result.*/
 int mycolorD_resume(int father, int *brothers, arbitration fn)
 {
   printf("colorD schema resume (imagefile driver)\n");
@@ -166,6 +209,8 @@ int mycolorD_resume(int father, int *brothers, arbitration fn)
   return 0;
 }
 
+/** colorD suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
 int mycolorD_suspend(void)
 {
   printf("colorD schema suspend (imagefile driver)\n");
@@ -173,8 +218,9 @@ int mycolorD_suspend(void)
   return 0;
 }
 
-
-
+/** imagefile driver parse configuration file function.
+ *  @param configfile path and name to the config file.
+ *  @return 0 if parsing was successful or -1 if something went wrong.*/
 int imagefile_parseconf(char *configfile){
 
   int end_parse=0; int end_section=0; int driver_config_parsed=0;
@@ -304,6 +350,9 @@ int imagefile_parseconf(char *configfile){
   }else return -1;
 }
 
+
+/** imagefile driver startup function following jdec platform API for drivers.
+ *  @param configfile path and name to the config file of this driver.*/
 void imagefile_startup(char *configfile)
 {
   int i;
@@ -379,6 +428,7 @@ void imagefile_startup(char *configfile)
       }
 }
 
+/** imagefile driver closing function invoked when stopping driver.*/
 void imagefile_close()
 {
   printf("imagefile driver closed\n");

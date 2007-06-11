@@ -1,3 +1,23 @@
+/*
+ *  Copyright (C) 2006 Antonio Pineda Cabello
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ *  Authors : Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, JoseMaria Cañas <jmplaza@gsyc.escet.urjc.es>
+ */
+
 /* 
  Communications always starts with the client sending its own name, a string of MAX_CLIENT_NAME chars, to the server.
 
@@ -24,15 +44,15 @@
 #define JDEMESSAGES
 
 /* max characters in a non-image message */
-#define MAX_MESSAGE 2048         
+/** max char size for a string message.*/
+#define MAX_MESSAGE 2048
+/** max char size for a string in a client name.*/
 #define MAX_CLIENT_NAME 20
+/** defined char for a comment.*/
 #define COMMENT '#'
 
 typedef enum {
 NETWORKSERVER_goodbye,
-
-/* robot devices messages */
-
 NETWORKSERVER_sonars,
 NETWORKSERVER_subscribe_us,
 NETWORKSERVER_unsubscribe_us,
@@ -64,8 +84,6 @@ NETWORKSERVER_replay_speed,
 NETWORKSERVER_laser,
 NETWORKSERVER_subscribe_laser,
 NETWORKSERVER_unsubscribe_laser,
-
-/* images and pantilt messages */
 
 NETWORKSERVER_goodbye_images=1000,
 
