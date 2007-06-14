@@ -13,5 +13,8 @@ networkserver.o: networkserver.c
 clean:
 	rm -f *.o networkserver.so.1.0
 
+dist:
+	tar -zcvf networkserver`date +%Y-%m-%d_%H-%M`.tgz *c *h *fd Makefile
+
 release:
 	tar -zcvf newrelease.tgz *c makefile
