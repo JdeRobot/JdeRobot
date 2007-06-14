@@ -5,13 +5,13 @@ CFLAGS = -g -pedantic -Bsymbolic -Wall $(INC-DIR)
 LIBS = -lm 
 
 networkserver: networkserver.o
-	$(GCC) -shared -Bsymbolic -Wl,-soname,networkserver.so.1 $(LIB-DIR) -o networkserver.so.1.0 networkserver.o $(LIBS)
+	$(GCC) -shared -Bsymbolic -Wl,-soname,networkserver.so $(LIB-DIR) -o networkserver.so networkserver.o $(LIBS)
 
 networkserver.o: networkserver.c
 	$(GCC) $(CFLAGS) -fPIC -c networkserver.c
 
 clean:
-	rm -f *.o networkserver.so.1.0
+	rm -f *.o networkserver.so
 
 dist:
 	tar -zcvf networkserver`date +%Y-%m-%d_%H-%M`.tgz *c *h *fd Makefile
