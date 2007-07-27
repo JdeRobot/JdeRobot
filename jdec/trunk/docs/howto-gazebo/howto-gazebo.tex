@@ -1,0 +1,182 @@
+\documentclass[oneside,a4paper,12pt]{article}
+\usepackage[latin1]{inputenc}
+\usepackage[spanish,activeacute]{babel}
+\usepackage{geometry}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{a4wide}
+\usepackage[normalsize]{subfigure}
+\usepackage{titlesec}
+
+\geometry{a4paper, left=3.5cm, right=2cm, top=3cm, bottom=2.0cm, headsep=1.5cm}
+
+\begin{document}
+
+\thispagestyle{empty}
+\baselineskip 1.35\baselineskip
+\vspace{2cm}
+\begin{figure}[htb]
+   \centerline{\resizebox{.50\textwidth}{!}{\includegraphics{figs/logo_urjc}}}
+   \vspace{2cm}
+   \centerline{\resizebox{.50\textwidth}{!}{\includegraphics{figs/logo}}}
+\end{figure}
+
+\begin{center}
+  {\Large {\bf HOWTO DE GAZEBO }}
+  \vspace{2cm}
+\\Víctor Manuel Hidalgo Blázquez\\Jos\'e María Cañas Plaza 
+\end{center}
+\newpage
+
+
+\section{Introducci\'on}
+
+Gazebo es un simulador multirrobot para entornos abiertos, que es capaz de simular un conjunto de robots, sensores y objetos en un entorno tridimensional. Ademas incorpora simulacion f'isica realista, de modo que los objetos tienen masa, se pueden empujar unos a otros, etc. Entre los sensores que simula se incluyen c\'amaras como la sonyVID30, la canonVCC4 y c\'amaras genericas, asi como un par estereo.
+
+El simulador Gazebo se encuadra dentro del entorno software abierto Player/Stage/Gazebo, y la p\'agina web oficial del proyecto es la  http://playerstage.sourceforge.net desde donde se puede descargar el c\'odigo fuente y ver la documentaci\'on actualizada.
+
+Este manual describe como instalar \textit{gazebo}, para la posterior utilización de éste en \textit{jde}. B'asicamente el simuldor gazebo se lanzar\'a como un programa separado, con el mundo a simular especificado en un fichero de configuraci'on. Ese mundo simulado tendr\'a uno o mas robots, dotados cada uno de ellos con sus sensores y sus actuadores. Con jdec podemos conectar un entorno jdec a cada uno de los robots de ese mundo simulado, para gobernar el comportamiento de ese robot. Para ello hay que cargar el driver de gazebo en jdec y configurarlo adecuadamente para corresponder los sensores y actuadores en jdec con los respectivos en gazebo.
+
+% dependencias 
+Antes de comenzar a instalar gazebo, debes tener aceleracion gráfica y
+ademas deben instalarse los siguientes paquetes:
+
+\begin{itemize}
+\item{\bf{SWIG}, Simplified Wrapper and Interface Generator }
+\item{\bf{wxPython}, Python bindings for wxWidgets}
+\item{\bf{ODE 0.5} Open Dynamics Engine}
+\item{\bf{GDAL}, Geospatial Data Abstraction Library }
+\end{itemize}
+Incluso antes de instalar los paquetes que acabamos de comentar,
+convienente configurar nuestro sistema con algunos paths y librerias
+adicionales. Los path son los siguientes: 
+
+\begin{verbatim}
+export PATH=PATH:/usr/local/bin
+export CPATH=CPATH:/usr/local/include
+export LIBRARY_PATH=PATH:/usr/local/lib
+export PKG_CONFIG_PATH=PKG_CONFIG_PATH/usr/local/lib/pkgconfig
+export PYTHONPATH=PYTHONPATH/usr/local/lib/python2.3/site-packages
+\end{verbatim}
+
+\section{Instalacion en Ubuntu}
+
+Las librerias que yo instale fueron las siguientes
+\begin{verbatim} 
+libjasper-1.701-1, libjasper-1.701-dev,libdc1394, libdc1394-dev,
+gsl-bin, libgsl0, libgsl0-dev, libjpeg, libjpeg-dev, liftiff,
+libtiff-dev, libpng, libpng-dev, libgnomecanvas2-common,
+libgnomecanvas2-dev, imagemagick, python-dev, ffmpeg, libcv, libgeos-dev, libxerces-dev, libhdf4g-dev,  
+libungif4-dev, libnetcdf-dev, netcdfg-dev, libcfitsio-dev, libpq-dev,
+libgtk, automake1.9, autoconf,bison-1.35, python2.4-dev,libtdl. 
+\end{verbatim}
+
+\textbf{Importante}: seguramente haga falta alguna libreria más por
+instalar, que en estos momentos no recuerdo. En ese caso enviar un
+correo electronico diciendo la libreria en cuestion a alguna de las
+siguientes direcciones: \\ 
+\begin{center}
+jmplaza@gsyc.escet.urjc.es,
+hbmhidalgo@gmail.com.
+\end{center}
+
+Una vez habiendo instalado estas librerias y configurado nuestro
+sistema con los path ya mencionados empezamos a instalar los paquetes
+que harán falta para instalar gazebo.\\
+
+\subsection{Instalación de SWIG}
+
+Este paquete se puede instalar mediante un paquete debian, o através
+de svn. Mi recomendación es que sea a través de svn. Si decidis
+hacerlo con el paquete debian, podeis tener problemas de paquetes
+rotos, en este caso para solucionarlo hacer lo siguiente: 
+aptitude update, aptitude dist-upgrade. Si decidis hacerlo por svn,
+ejecutar pa siguiente linea en consola: 
+\begin{verbatim}
+ svn co https://swig.svn.sourceforge.net/svnroot/swig/trunk swig
+\end{verbatim} 
+
+Los siguientes pasos son: 
+\begin{verbatim}
+ % cd swig
+ % ./autogen.sh
+ % ./configure 
+ % make
+ % make install
+\end{verbatim}
+
+
+\subsection{Instalación de wxPython}
+
+Hay que modificar el fichero source.list a mi me valio con tener los
+mismos repositorios que los que hay en los ordenadores del laboratorio
+de robotica: 
+
+
+Los siguientes pasos son:
+
+\begin{verbatim}
+sudo apt-get update
+sudo apt-get install python-wxgtk2.6 python-wxtools wx2.6-i18n
+\end{verbatim}
+
+
+\subsection{Instalación de ODE}
+
+Descargar ODE-0.5 de http://opende.sourceforge.net/snapshots/. Una vez
+descargagado y descomprimido el archivo entrar al subdirectorio que se
+desempaquetado y modificar el archivo de configuración
+config/user-settings  para habilitar la línea
+OPCODE\_DIRECTORY=OPCODE. Una vez hecho esto abrir el archivo INSTALL y
+ejecutar los make que aparacen. Después copia los archivos en el
+subdirectorio  /usr/local/lib a /usr/lib y los subdirectorios en 
+/usr/local/include a  /usr/include.
+
+Para probar que esta bien instalado ejecutar los ejemplos que se
+encuentran en el subidrecotorio: ode/test
+
+\subsection{Instalación de GDAL}
+
+Tienes que descargarte la version 1.2.1 de http://www.gdal.org/.
+Despues haz los siguientes pasos: 
+\begin{verbatim}
+ tar xvzg gdal-1.2.1.tar.gz
+ cd gdal-1.2.1
+ ./configure --without-python
+ make
+ su
+ make install
+\end{verbatim}
+
+\subsection{Instalación de Gazebo desde su c\'odigo fuente}
+
+La última versión de gazebo la podemos descargar de la siguiente
+pagina: http://playerstage.sourceforge.net/. Una vez descargado y
+descomprimido llevar a cabo los siguientes pasos:
+\begin{verbatim}
+./configure
+make
+make install
+\end{verbatim}
+
+
+\section{Instalaci\'on en Fedora Core 5}
+
+
+\section{Ejecución de Gazebo}
+
+Para poder ejecutar gazebo, ejecuta por linea de comandos lo
+siguiente:
+
+\begin{verbatim}
+wxgazebo /usr/local/share/gazebo/worlds/xxxx.world
+\end{verbatim}
+
+Donde xxxx.world se corresponde con los mundos de ejemplo que hay en
+dicho direcotrio. Así pues, para ejecuntar gazebo con jde, primero
+tendremos que ejecutar el servidor de gazebo con wxgazebo, y despues
+cargar los schemas correspondientes que usen gazebo. Para ello hay que
+cargar primero el driver de gazebo.
+
+\end{document}
+
