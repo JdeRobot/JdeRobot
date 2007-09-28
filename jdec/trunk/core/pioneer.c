@@ -54,7 +54,7 @@ int encoders_users=0;
 
 float latitude,longitude;
 float latitude_speed,longitude_speed;
-int pantiltmotors_cycle=100; /* ms */
+int pantiltmotors_cycle=50; /* ms */
 
 float v,w;
 int motors_cycle=100; /* ms */

@@ -35,19 +35,11 @@
 #include <pthread.h>
 #include "jde.h"
 #include <termios.h>
+#include <math.h>
 
-/** pantilt driver max pan angle limit.*/
-#define MAX_PAN_ANGLE 158. /* degrees */
-/** pantilt driver min pan angle limit.*/
-#define MIN_PAN_ANGLE -158. /* degrees */
-/** pantilt driver max tilt angle limit.*/
-#define MAX_TILT_ANGLE 30. /* degrees */
-/** pantilt driver min tilt angle limit.*/
-#define MIN_TILT_ANGLE -46. /* degrees */
-/** pantilt driver max speed pantilt.*/
-#define MAX_SPEED_PANTILT 205.89
+
 /** pantilt driver pantiltencoders period polling.*/
-#define PANTILTENCODERS_POLLING 100 /* period to ask for new pantilt encoders (ms) */
+#define PANTILTENCODERS_POLLING 300 /* period to ask for new pantilt encoders (ms) */
 /** pantilt driver rs232 baud rate.*/
 #define RS232_BAUD_RATE B9600
 /** pantilt driver from encoder units to deg. factor.*/
@@ -443,7 +435,7 @@ void pantiltmotors_iteration()
     else longcommand=longitude;
     
     if ( (longcommand!=longitude_last) || (longspeed != longspeed_last) ) {
-      sprintf(pantilt_out,"PP%d PS%d\n",(int)(longcommand/ENCOD_TO_DEG),(int)(longspeed/ENCOD_TO_DEG));
+      sprintf(pantilt_out,"PP%d PS%d\n",(int)roundf(longcommand/ENCOD_TO_DEG),(int)roundf(longspeed/ENCOD_TO_DEG));
       SendCmd(pantilt_out);
       longitude_last=longcommand;
       longspeed_last=longspeed;
@@ -461,7 +453,7 @@ void pantiltmotors_iteration()
     else latcommand=latitude;
     
     if( (latcommand!=latitude_last) || (latspeed!=latspeed_last) )  {
-      sprintf(pantilt_out,"TP%d TS%d\n",(int)(latcommand/ENCOD_TO_DEG),(int)(latspeed/ENCOD_TO_DEG));
+      sprintf(pantilt_out,"TP%d TS%d\n",(int)roundf(latcommand/ENCOD_TO_DEG),(int)roundf(latspeed/ENCOD_TO_DEG));
       SendCmd(pantilt_out);
       latitude_last=latcommand;
       latspeed_last=latspeed;

@@ -40,8 +40,8 @@ extern void init_pioneer(void);
 #define SIFNTSC_ROWS 240
 #define SIFNTSC_COLUMNS 320
 /* directed perception pantilt limits */
-#define MAX_PAN_ANGLE 158. /* degrees */
-#define MIN_PAN_ANGLE -158. /* degrees */
+#define MAX_PAN_ANGLE 159.13 /* degrees */
+#define MIN_PAN_ANGLE -159.13 /* degrees */
 #define MAX_TILT_ANGLE 30. /* degrees */
 #define MIN_TILT_ANGLE -46. /* degrees */
 #define MAX_SPEED_PANTILT 205.89
