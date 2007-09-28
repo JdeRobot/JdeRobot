@@ -30,9 +30,11 @@
 #include <gazebo.h>
 #include <jde.h>
 
-#define GAZEBO_COMMAND_CYCLE 100	/* ms */
+#define GAZEBO_COMMAND_CYCLE 100 /* ms */
+#define GAZEBO_CYCLE 33 /*ms*/
 #define MAXCAM 4
 #define MAX_MODEL_ID	100 /*max drivers name lenth*/
+
 
 gz_client_t *client = NULL;
 gz_position_t *position = NULL;
@@ -294,6 +296,7 @@ gazebo_startup (char *configfile)
       myexport ("motors", "w", &w);
       myexport ("motors", "resume", (void *) &gazebo_motors_resume);
       myexport ("motors", "suspend", (void *) &gazebo_motors_suspend);
+      /* printf("******En startup exportando..... motors_s_i %i, resume motors_resume %i, suspend motors_suspend %i \n",motors_schema_id,gazebo_motors_resume, gazebo_motors_suspend); */
     }
 
   if (serve_laser)
@@ -839,7 +842,8 @@ gazebo_sonars_suspend ()
 int
 gazebo_motors_resume (int father, int *brothers, arbitration fn)
 {
-
+  
+  //position->data->cmd_enable_motors = 1;
   if ((serve_motors) && (motors_active == 0))
     {
       put_state (motors_schema_id, winner);
@@ -921,7 +925,6 @@ gazebo_motors_iteration ()
 {
 
   double v_double, w_double;
-
   speedcounter (motors_schema_id);
 
   if(!position){
@@ -933,13 +936,17 @@ gazebo_motors_iteration ()
   gz_position_lock (position, 1);
   v_double = position->data->vel_pos[0];
   w_double = position->data->vel_rot[2];
+
   gz_position_unlock (position);
 
   gz_position_lock (position, 1);
-  //El joystic da mm/s, gazebo acepta m/s
-  position->data->cmd_vel_pos[0] = v / 1000;	 
-  //El joystic da grados/s, gazebo acepta grados/s
-  position->data->cmd_vel_rot[2] = w;	
+
+  //jde trabaja en  mm/s, gazebo en m/s
+  position->data->cmd_vel_pos[0] = (v/1000);	 
+
+  // w esta en grados/s , gazebo trata radianes/s
+  position->data->cmd_vel_rot[2] = w * DEGTORAD;	
+
   gz_position_unlock (position);
 }
 
@@ -947,8 +954,9 @@ void *
 gazebo_thread (void *not_used)
 {
   struct timeval t;
-  unsigned long now;
+  unsigned long now, diff, next;
   static unsigned long lastmotor = 0;
+  static unsigned long lastiteration = 0;
 
   printf ("gazebo: gazebo thread started up\n");
 
@@ -971,6 +979,7 @@ gazebo_thread (void *not_used)
 	  pthread_mutex_unlock (&mymutex);
 	  gettimeofday (&t, NULL);
 	  now = t.tv_sec * 1000000 + t.tv_usec;
+	  lastiteration = now;
 
 	  /* sending motors command */
 	  if ((serve_motors) && (motors_active))
@@ -1024,6 +1033,18 @@ gazebo_thread (void *not_used)
 	  if (encoders_active)
 	    gazebo_encoders_callback ();
 
+
+	  /* to control the iteration time of this driver */
+	  gettimeofday (&t, NULL);
+	  now = t.tv_sec * 1000000 + t.tv_usec;
+	  next=lastiteration+(long)GAZEBO_CYCLE*1000;
+	  if (next>(5000+now))
+            {
+	      usleep(next-now-5000);
+	      /* discounts 5ms taken by calling usleep itself, on average */
+            }
+	  else  ;
+      
 	}
     }
   while (gazebo_close_command == 0);
