@@ -10,8 +10,6 @@ ps: dvi
 	dvips -o ${DOCUMENTO}.ps ${DOCUMENTO}.dvi
 
 pdf: 
-	#pdflatex ${DOCUMENTO}
-	pdflatex ${DOCUMENTO}
 	pdflatex ${DOCUMENTO}
 	pdflatex ${DOCUMENTO}
 	rm -f $(TEMPORALES) *dvi
@@ -22,6 +20,6 @@ clean:
 release:
 
 	rm -f $(TEMPORALES) *pdf *dvi
-	tar -zcvf newrelease.tgz *
+	tar -zcvf newrelease.tgz ${DOCUMENTO}.tex  ./figs/* Makefile 
 
 
