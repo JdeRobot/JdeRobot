@@ -43,6 +43,7 @@ struct client{
    int cs;
    char subscriptions[MAXDEVICE];
    char name[256];
+   unsigned long clk;
 };
 #define CLIENT_TH_CYCLE 33 /*para servir las imágenes en tiempo real*/
 
@@ -255,7 +256,7 @@ void init(){
                suspend[i]=(suspendFn) myimport ("colorA", "suspend");
                if (!variables[i]){
                   serve_device[i]=0;
-                  fprintf (stderr, "I can't fetch colorA, it'll not be served\n");
+                  fprintf (stderr, "I can't fetch 'colorA', it'll not be served\n");
                }
                else{
                   resume[i](-1, NULL, NULL);
@@ -267,7 +268,7 @@ void init(){
                suspend[i]=(suspendFn) myimport ("colorB", "suspend");
                if (!variables[i]){
                   serve_device[i]=0;
-                  fprintf (stderr, "I can't fetch colorB, it'll not be served\n");
+                  fprintf (stderr, "I can't fetch 'colorB', it'll not be served\n");
                }
                else{
                   resume[i](-1, NULL, NULL);
@@ -279,7 +280,7 @@ void init(){
                suspend[i]=(suspendFn) myimport ("colorC", "suspend");
                if (!variables[i]){
                   serve_device[i]=0;
-                  fprintf (stderr, "I can't fetch colorC, it'll not be served\n");
+                  fprintf (stderr, "I can't fetch 'colorC', it'll not be served\n");
                }
                else{
                   resume[i](-1, NULL, NULL);
@@ -291,12 +292,23 @@ void init(){
                suspend[i]=(suspendFn) myimport ("colorD", "suspend");
                if (!variables[i]){
                   serve_device[i]=0;
-                  fprintf (stderr, "I can't fetch colorD, it'll not be served\n");
+                  fprintf (stderr, "I can't fetch 'colorD', it'll not be served\n");
                }
                else{
                   resume[i](-1, NULL, NULL);
                }
                break;
+            case LASER_DEVICE:
+               variables[i]=myimport ("laser", "laser");
+               resume[i]=(resumeFn) myimport("laser", "resume");
+               suspend[i]=(suspendFn) myimport("laser", "suspend");
+               if (!variables[i]){
+                  serve_device[i]=0;
+                  fprintf (stderr, "I can't fetch 'laser', it'll not be served\n");
+               }
+               else{
+                  resume[i](-1, NULL, NULL);
+               }
          }
       }
    }
@@ -349,7 +361,7 @@ void dispatch_petition(struct client *info, char *petition) {
       strncpy(info->name, petition, 256);
    }
 //    printf("dispatching %s\n", petition);
-   if (sscanf(petition,"%ld",&codigo_mensaje)==EOF){
+   if (sscanf(petition,"%d",(int *)&codigo_mensaje)==EOF){
       printf("No entiendo el mensaje (%s) del cliente (%s)\n",
              petition,info->name);
       return;
@@ -397,6 +409,14 @@ void dispatch_petition(struct client *info, char *petition) {
          my_write(info->cs,myimage, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
       }
    }
+   else if (codigo_mensaje==NETWORKSERVER_subscribe_laser){
+      /*Subscripción al laser*/
+      info->subscriptions[LASER_DEVICE]=1;
+   }
+   else if (codigo_mensaje==NETWORKSERVER_unsubscribe_laser){
+      /*Subscripción al laser*/
+      info->subscriptions[LASER_DEVICE]=0;
+   }
    else if (codigo_mensaje==NETWORKSERVER_goodbye ||
             codigo_mensaje==NETWORKSERVER_goodbye_images)
    {
@@ -405,16 +425,28 @@ void dispatch_petition(struct client *info, char *petition) {
       pthread_exit(0);
    }
    else
-      printf("Mensaje NO reconocido de cliente %s: (%s)\n", info->name,petition);
+      printf("Mensaje NO reconocido del cliente %s: (%s)\n", info->name,petition);
 }
 
-void dispatch_subscriptions(struct client info) {
-   int i;
+void dispatch_subscriptions(struct client * info) {
+   int i, j;
+   char buff[MAX_MESSAGE];
 
+   info->clk++; /*Se incrementa el reloj que indica el momento del mensaje*/
+   
    for (i = 0; i < MAXDEVICE; i++) {
-      if (info.subscriptions[i]) {
+      if (info->subscriptions[i]) {
          switch(i) {
-
+            case LASER_DEVICE:
+               /*Componer el mensaje*/
+               sprintf(buff,"%d %lu",NETWORKSERVER_laser,info->clk);
+               for (j=0;j<180; j++){
+                  sprintf(buff+strlen(buff)," %d",(int)(((int *)variables[i])[j]));
+               }
+               sprintf(buff+strlen(buff),"\n");
+               /*Envío del mensaje*/
+               my_write(info->cs,buff,strlen(buff));
+               break;
          }
       }
    }
@@ -437,6 +469,7 @@ void *client_thread(void *pcs) {
 
    struct client info;
    info.cs = *(int *)pcs;
+   info.clk = 0;
    pthread_mutex_unlock(&socketmutex);
    memset(info.subscriptions, 0, MAXDEVICE);
 
@@ -493,6 +526,7 @@ void *client_thread(void *pcs) {
             nbytes -= msg_end - msg;/* the spare bytes in buffer for the
                following messages */
             dispatch_petition(&info, msg);
+            /*printf (msg);*/
             msg = msg_end;
             msg_end = strstr(msg, "\n");
          }
@@ -503,7 +537,7 @@ void *client_thread(void *pcs) {
          buffer_tmp = buffer_aux;
       }
 
-      dispatch_subscriptions(info);
+      dispatch_subscriptions(&info);
 
       gettimeofday(&b,NULL);
       bb=b.tv_sec*1000000+b.tv_usec;
