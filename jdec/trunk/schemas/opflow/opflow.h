@@ -18,25 +18,32 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-#include <ipp.h>
+#ifndef __OPFLOW__
+#define __OPFLOW__
 
 typedef struct{
+   float x;
+   float y;
+}floatPoint;
+      
+typedef struct{
    int calc;
-   Ipp8s status;
-   Ipp32f error;
-   IppiPoint_32f dest;
-   Ipp32f hyp;
-   Ipp32f angle;
+   unsigned char status;
+   float error;
+   floatPoint dest;
+   float hyp;
+   float angle;
 }t_opflow;
 
-extern void opflow_startup();
-extern void opflow_suspend();
-extern void opflow_resume(int father, int *brothers, arbitration fn);
-extern void opflow_guiresume();
-extern void opflow_guisuspend();
+extern void myschema_startup();
+extern void myschema_suspend();
+extern void myschema_resume(int father, int *brothers, arbitration fn);
+extern void myschema_guiresume();
+extern void myschema_guisuspend();
 
-extern int opflow_id; /* schema identifier */
-extern int opflow_cycle; /* ms */
+extern int myschema_id; /* schema identifier */
+extern int myschema_cycle; /* ms */
 
 /*Own variables*/
 extern t_opflow *opflow_img; /*matrix with next points*/
+#endif
