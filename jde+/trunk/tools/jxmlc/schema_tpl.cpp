@@ -1,22 +1,86 @@
-/*Initialize schema on construction*/
-void <--!SCHEMA_NAME-->::init_schema() {
+#include <jde+/schemainstancefacade.h>
+#include "$schemaname.h"
+
+REGISTER_SCHEMA($schemaname)
+
+namespace _$schemaname{
+  /*Private data class*/
+  class myPrivateData: public PrivateData {
+  public:
+    /*data class declaration*/
+  };
 }
 
-/*Un-initialize schema on destruction*/
-void <--!SCHEMA_NAME-->::delete_schema() {
+$schemaname::$schemaname()
+  :Schemaimplementation(SCHEMA_INFO($schemaname)) {}
+
+//$schemaname::~$schemaname() {}
+
+void $schemaname::init_instance(Schemainstancefacade* instance) throw(){
+  instance->private_data = new _$schemaname::myPrivateData();
+
 }
 
-/*Code execute on each iteration*/
-void <--!SCHEMA_NAME-->::iteration() {
+void $schemaname::iteration(Schemainstancefacade* instance) throw(){
+  _$schemaname::myPrivateData* priv = 
+     dynamic_cast<_$schemaname::myPrivateData*>(instance->private_data);
+
+  /*iteration code*/
 }
 
-/*Arbitrate logic*/
-void <--!SCHEMA_NAME-->::arbitrate(const std::string& request_nick) {
+void $schemaname::arbitrate(Schemainstancefacade* instance, 
+				   const std::string& request_nick) throw(){
+  _$schemaname::myPrivateData* priv = 
+     dynamic_cast<_$schemaname::myPrivateData*>(instance->private_data);
+
+  /*arbitration code*/
 }
 
-/*Check precondition logic*/
-bool <--!SCHEMA_NAME-->::check_preconditions() {
+bool $schemaname::check_preconditions(Schemainstancefacade* instance) throw(){
+  _$schemaname::myPrivateData* priv = 
+     dynamic_cast<_$schemaname::myPrivateData*>(instance->private_data);
+
+  /*check preconditions code*/
 }
 
-<--!USER_HANDLERS-->
-<--!USER_PRIVATE_MEMBERS-->
+void $schemaname::receive_child_new_state(Schemainstancefacade* instance,
+						 const std::string& child_nick,
+						 const state_enum newstate) throw(){
+  _$schemaname::myPrivateData* priv = 
+     dynamic_cast<_$schemaname::myPrivateData*>(instance->private_data);
+  
+  /*receive child new state code*/
+}
+
+void $schemaname::receive_modulation(Schemainstancefacade* instance,
+					    const std::string& name, 
+					    const Data& modulation) throw(){
+  _$schemaname::myPrivateData* priv = 
+     dynamic_cast<_$schemaname::myPrivateData*>(instance->private_data);
+
+  /*receive modulation code*/
+}
+
+void $schemaname::receive_perception(Schemainstancefacade* instance,
+					    const std::string& child_nick, 
+					    const std::string& name, 
+					    const Data& perception) throw(){
+  _$schemaname::myPrivateData* priv = 
+     dynamic_cast<_$schemaname::myPrivateData*>(instance->private_data);
+  
+  /*receive perception code*/
+}
+
+void $schemaname::sleep_handler(Schemainstancefacade* instance) throw(){
+  _$schemaname::myPrivateData* priv = 
+     dynamic_cast<_$schemaname::myPrivateData*>(instance->private_data);
+
+  /*sleep handler code*/
+}
+
+void $schemaname::wakeup_handler(Schemainstancefacade* instance) throw(){
+  _$schemaname::myPrivateData* priv = 
+     dynamic_cast<_$schemaname::myPrivateData*>(instance->private_data);
+
+  /*wakeup handler*/
+}

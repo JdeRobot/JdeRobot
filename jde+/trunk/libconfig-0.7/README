@@ -1,6 +1,0 @@
-
-To produce a PDF manual, issue the command "make pdf" after running
-configure.
-
-The `samples' subdirectory contains some examples of using libconfig
-from C and C++.

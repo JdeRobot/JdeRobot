@@ -1,7 +1,22 @@
-static std::string p[] = {<--!PERCEPTIONS-->};
-static std::string m[] = {<--!MODULATIONS-->};
+#include "$ifacename.h"
 
-const std::vector<std::string>
-<--!IFACE_NAME-->::perceptions(p,p+(sizeof(p)/sizeof(p[0])));
-const std::vector<std::string>
-<--!IFACE_NAME-->::modulations(m,m+(sizeof(m)/sizeof(m[0])));
+REGISTER_INTERFACE($ifacename)
+
+namespace _$ifacename{
+  /*Private data class*/
+  class myPrivateData: public PrivateData {
+    /*data class declaration*/
+  };
+}
+
+$ifacename::$ifacename()
+  : Schemainterface(INTERFACE_INFO($ifacename)),
+    private_data(new _$ifacename::myPrivateData()) {
+  /*Constructor code*/
+}
+
+Data& $ifacename::get_data(const std::string& data_name) {
+  _$ifacename::myPrivateData* priv = 
+     dynamic_cast<_$ifacename::myPrivateData*>(self->private_data);
+  /*data adquire code*/
+}

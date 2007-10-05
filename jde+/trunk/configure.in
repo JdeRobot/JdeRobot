@@ -21,28 +21,33 @@ AC_PROG_LIBTOOL
 AC_SUBST(INCLTDL)
 AC_SUBST(LIBLTDL)
 
-AC_MSG_CHECKING([for local libconfig use])
-AC_ARG_ENABLE([local-libconfig],
-		[  --enable-local-libconfig   Use instaled libconfig instead of v0.7],
-		[local_libconfig=$enableval],
-		[local_libconfig=no])
-AC_MSG_RESULT([$local_libconfig])
+#AC_MSG_CHECKING([for local libconfig use])
+#AC_ARG_ENABLE([local-libconfig],
+#		[  --enable-local-libconfig   Use instaled libconfig instead of v0.7],
+#		[local_libconfig=$enableval],
+#		[local_libconfig=no])
+#AC_MSG_RESULT([$local_libconfig])
 
-AM_CONDITIONAL(USE_INSTALLED_LIBCONFIG, test x$local_libconfig = xyes)
+#AM_CONDITIONAL(USE_INSTALLED_LIBCONFIG, test x$local_libconfig = xyes)
 
-if test x$local_libconfig = xyes
-then
-  AC_CHECK_LIB(config++, main,,AC_MSG_ERROR(local libconfig not found))
-  CONFIG_LINK=-lconfig++
-  AC_SUBST(CONFIG_LINK)
-else
-  AC_CONFIG_SUBDIRS(libconfig-0.7)
-  CONFIG_LIB_DIR=libconfig-0.7
-  AC_SUBST(CONFIG_LIB_DIR)
-fi
+#if test x$local_libconfig = xyes
+#then
+#  AC_CHECK_LIB(config++, main,,AC_MSG_ERROR(local libconfig not found))
+#  CONFIG_LINK=-lconfig++
+#  AC_SUBST(CONFIG_LINK)
+#else
+#  AC_CONFIG_SUBDIRS(libconfig-0.7)
+#  CONFIG_LIB_DIR=libconfig-0.7
+#  AC_SUBST(CONFIG_LIB_DIR)
+#fi
 
 PKG_CHECK_MODULES(LIBJDEDEPS,libccgnu2)
 PKG_CHECK_MODULES(JDESCOPEDEPS,glibmm-2.4 libglademm-2.4 gthread-2.0)
+
+AC_CHECK_HEADERS([readline/readline.h readline/history.h],[],AC_MSG_ERROR(readline headers not found),[])
+AC_CHECK_LIB([readline],[readline],[],AC_MSG_ERROR(readline library not found),[])
+READLINE_LIB=-lreadline
+AC_SUBST(READLINE_LIB)
 
 #JDEX_SRC_DIR="\$(top_srcdir)/src"
 #JDEX_INC_DIR="\$(top_srcdir)/include"
@@ -60,10 +65,10 @@ AC_DEFINE_UNQUOTED(PIXMAPDIR, "${prefix}/share/AC_PACKAGE_NAME/pixmap")
 
 AC_OUTPUT([
 Makefile
-jde+core/Makefile
-jde+core/src/Makefile
-jde+core/include/Makefile
-jde+core/include/jde+/Makefile
+corejde+/Makefile
+corejde+/src/Makefile
+corejde+/include/Makefile
+corejde+/include/jde+/Makefile
 docs/Makefile
 docs/doxygen.conf
 tools/Makefile
