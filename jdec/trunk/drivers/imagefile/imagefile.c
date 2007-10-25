@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006 Antonio Pineda Cabello, Jose Maria Cañas Plaza
+ *  Copyright (C) 2006 Antonio Pineda Cabello, Jose Maria Caï¿½as Plaza
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,14 +15,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  Authors : Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, Jose Maria Caï¿½as Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
 /**
  *  imagefile driver provides video images to color variables from static image files with 320x240 resolution and .ppm or .pnm extension.
  *
  *  @file imagefile.c
- *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es> and Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es> and Jose Maria Caï¿½as Plaza <jmplaza@gsyc.escet.urjc.es>
  *  @version 4.1
  *  @date 30-05-2007
  */
@@ -50,6 +50,17 @@ int colorB_schema_id;
 int colorC_schema_id;
 /** id for colorD schema.*/
 int colorD_schema_id;
+/** colorA ref counter*/
+int colorA_refs=0;
+/** colorB ref counter*/
+int colorB_refs=0;
+/** colorC ref counter*/
+int colorC_refs=0;
+/** colorD ref counter*/
+int colorD_refs=0;
+
+/** mutex for ref counters*/
+pthread_mutex_t refmutex;
 
 /** function to read images depending on the source (colorA, colorB, colorC or colorD).
  *  @param source selected color.*/
@@ -125,22 +136,41 @@ void load_image(int source)
  *  @return integer resuming result.*/
 int mycolorA_resume(int father, int *brothers, arbitration fn)
 {
-  printf("colorA schema resume (imagefile driver)\n");
-  load_image(0);
-  all[colorA_schema_id].father = father;
-  all[colorA_schema_id].fps = 0.;
-  all[colorA_schema_id].k =0;
-  put_state(colorA_schema_id,winner);
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (colorA_refs>0){
+      colorA_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorA_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      printf("colorA schema resume (imagefile driver)\n");
+      load_image(0);
+      imageA_clock++;
+      all[colorA_schema_id].father = father;
+      all[colorA_schema_id].fps = 0.;
+      all[colorA_schema_id].k =0;
+      put_state(colorA_schema_id,winner);
+   }
+   return 0;
 }
 
 /** colorA suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int mycolorA_suspend(void)
 {
-  printf("colorA schema suspend (imagefile driver)\n");
-  put_state(colorA_schema_id,slept);
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (colorA_refs>1){
+      colorA_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorA_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      printf("colorA schema suspend (imagefile driver)\n");
+      put_state(colorA_schema_id,slept);
+   }
+   return 0;
 }
 
 /** colorB resume function following jdec platform API schemas.
@@ -150,22 +180,41 @@ int mycolorA_suspend(void)
  *  @return integer resuming result.*/
 int mycolorB_resume(int father, int *brothers, arbitration fn)
 {
-  printf("colorB schema resume (imagefile driver)\n");
-  load_image(1);
-  all[colorB_schema_id].father = father;
-  all[colorB_schema_id].fps = 0.;
-  all[colorB_schema_id].k =0;
-  put_state(colorB_schema_id,winner);
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (colorB_refs>0){
+      colorB_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorB_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      printf("colorB schema resume (imagefile driver)\n");
+      load_image(1);
+      imageB_clock++;
+      all[colorB_schema_id].father = father;
+      all[colorB_schema_id].fps = 0.;
+      all[colorB_schema_id].k =0;
+      put_state(colorB_schema_id,winner);
+   }
+   return 0;
 }
 
 /** colorB suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int mycolorB_suspend(void)
 {
-  printf("colorB schema suspend (imagefile driver)\n");
-  put_state(colorB_schema_id,slept);
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (colorB_refs>1){
+      colorB_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorB_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      printf("colorB schema suspend (imagefile driver)\n");
+      put_state(colorB_schema_id,slept);
+   }
+   return 0;
 }
 
 /** colorC resume function following jdec platform API schemas.
@@ -175,22 +224,41 @@ int mycolorB_suspend(void)
  *  @return integer resuming result.*/
 int mycolorC_resume(int father, int *brothers, arbitration fn)
 {
-  printf("colorC schema resume (imagefile driver)\n");
-  load_image(2);
-  all[colorC_schema_id].father = father;
-  all[colorC_schema_id].fps = 0.;
-  all[colorC_schema_id].k =0;
-  put_state(colorC_schema_id,winner);
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (colorC_refs>0){
+      colorC_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorC_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      printf("colorC schema resume (imagefile driver)\n");
+      load_image(2);
+      imageC_clock++;
+      all[colorC_schema_id].father = father;
+      all[colorC_schema_id].fps = 0.;
+      all[colorC_schema_id].k =0;
+      put_state(colorC_schema_id,winner);
+   }
+   return 0;
 }
 
 /** colorC suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int mycolorC_suspend(void)
 {
-  printf("colorC schema suspend (imagefile driver)\n");
-  put_state(colorC_schema_id,slept);
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (colorC_refs>1){
+      colorC_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorC_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      printf("colorC schema suspend (imagefile driver)\n");
+      put_state(colorC_schema_id,slept);
+   }
+   return 0;
 }
 
 /** colorD resume function following jdec platform API schemas.
@@ -200,22 +268,41 @@ int mycolorC_suspend(void)
  *  @return integer resuming result.*/
 int mycolorD_resume(int father, int *brothers, arbitration fn)
 {
-  printf("colorD schema resume (imagefile driver)\n");
-  load_image(3);
-  all[colorD_schema_id].father = father;
-  all[colorD_schema_id].fps = 0.;
-  all[colorD_schema_id].k =0;
-  put_state(colorD_schema_id,winner);
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (colorD_refs>0){
+      colorD_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorD_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      printf("colorD schema resume (imagefile driver)\n");
+      load_image(3);
+      imageD_clock++;
+      all[colorD_schema_id].father = father;
+      all[colorD_schema_id].fps = 0.;
+      all[colorD_schema_id].k =0;
+      put_state(colorD_schema_id,winner);
+   }
+   return 0;
 }
 
 /** colorD suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int mycolorD_suspend(void)
 {
-  printf("colorD schema suspend (imagefile driver)\n");
-  put_state(colorD_schema_id,slept);
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (colorD_refs>1){
+      colorD_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorD_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      printf("colorD schema suspend (imagefile driver)\n");
+      put_state(colorD_schema_id,slept);
+   }
+   return 0;
 }
 
 /** imagefile driver parse configuration file function.
@@ -392,6 +479,11 @@ void imagefile_startup(char *configfile)
 	    all[num_schemas].resume = (resumeFn) mycolorA_resume;
 	    all[num_schemas].suspend = (suspendFn) mycolorA_suspend;
 	    printf("colorA:%s\n",name_color[i]);
+            myexport("colorA","id",&colorA_schema_id);
+            myexport("colorA","colorA",&colorA);
+            myexport("colorA","clock", &imageA_clock);
+            myexport("colorA","resume",(void *)mycolorA_resume);
+            myexport("colorA","suspend",(void *)mycolorA_suspend);
 	  }
 	else if (i==1)
 	  {
@@ -400,6 +492,11 @@ void imagefile_startup(char *configfile)
 	    all[num_schemas].resume = (resumeFn) mycolorB_resume;
 	    all[num_schemas].suspend = (suspendFn) mycolorB_suspend;
 	    printf("colorB:%s\n",name_color[i]);
+            myexport("colorB","id",&colorB_schema_id);
+            myexport("colorB","colorB",&colorB);
+            myexport("colorB","clock", &imageB_clock);
+            myexport("colorB","resume",(void *)mycolorB_resume);
+            myexport("colorB","suspend",(void *)mycolorB_suspend);
 	  }
 	else if (i==2)
 	  {
@@ -408,6 +505,11 @@ void imagefile_startup(char *configfile)
 	    all[num_schemas].resume = (resumeFn) mycolorC_resume;
 	    all[num_schemas].suspend = (suspendFn) mycolorC_suspend;
 	    printf("colorC:%s\n",name_color[i]);
+            myexport("colorC","id",&colorC_schema_id);
+            myexport("colorC","colorC",&colorC);
+            myexport("colorC","clock", &imageC_clock);
+            myexport("colorC","resume",(void *)mycolorC_resume);
+            myexport("colorC","suspend",(void *)mycolorC_suspend);
 	  }
 	else if (i==3)
 	  {
@@ -416,6 +518,11 @@ void imagefile_startup(char *configfile)
 	    all[num_schemas].resume = (resumeFn) mycolorD_resume;
 	    all[num_schemas].suspend = (suspendFn) mycolorD_suspend;
 	    printf("colorD:%s\n",name_color[i]);
+            myexport("colorD","id",&colorD_schema_id);
+            myexport("colorD","colorD",&colorD);
+            myexport("colorD","clock", &imageD_clock);
+            myexport("colorD","resume",(void *)mycolorD_resume);
+            myexport("colorD","suspend",(void *)mycolorD_suspend);
 	  }
 	printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
 	(*(all[num_schemas].id)) = num_schemas;

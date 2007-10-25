@@ -15,8 +15,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
- *            Victor Gómez Gómez <vmanuel@gsyc.escet.urjc.es>
+ *  Authors : Jose Maria Caï¿½as Plaza <jmplaza@gsyc.escet.urjc.es>
+ *            Victor Gï¿½mez Gï¿½mez <vmanuel@gsyc.escet.urjc.es>
  *            Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>
  *            Roberto Calvo Palomino <rocapal@gsyc.escet.urjc.es>
  */
@@ -25,7 +25,7 @@
  *  jdec pantilt driver provides sensorial information from a pantilt neck conected.
  *
  *  @file pantilt.c
- *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, Victor Gómez Gómez <vmanuel@gsyc.escet.urjc.es>, Roberto Calvo Palomino <rocapal@gsyc.escet.urjc.es> and Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, Victor Gï¿½mez Gï¿½mez <vmanuel@gsyc.escet.urjc.es>, Roberto Calvo Palomino <rocapal@gsyc.escet.urjc.es> and Jose Maria Caï¿½as Plaza <jmplaza@gsyc.escet.urjc.es>
  *  @version 4.1
  *  @date 30-05-2007
  */
@@ -35,11 +35,19 @@
 #include <pthread.h>
 #include "jde.h"
 #include <termios.h>
-#include <math.h>
 
-
+/** pantilt driver max pan angle limit.*/
+#define MAX_PAN_ANGLE 158. /* degrees */
+/** pantilt driver min pan angle limit.*/
+#define MIN_PAN_ANGLE -158. /* degrees */
+/** pantilt driver max tilt angle limit.*/
+#define MAX_TILT_ANGLE 30. /* degrees */
+/** pantilt driver min tilt angle limit.*/
+#define MIN_TILT_ANGLE -46. /* degrees */
+/** pantilt driver max speed pantilt.*/
+#define MAX_SPEED_PANTILT 205.89
 /** pantilt driver pantiltencoders period polling.*/
-#define PANTILTENCODERS_POLLING 300 /* period to ask for new pantilt encoders (ms) */
+#define PANTILTENCODERS_POLLING 100 /* period to ask for new pantilt encoders (ms) */
 /** pantilt driver rs232 baud rate.*/
 #define RS232_BAUD_RATE B9600
 /** pantilt driver from encoder units to deg. factor.*/
@@ -47,8 +55,7 @@
 /** pantilt driver max char size in string message.*/
 #define MAX_MESSAGE 2048
 /** pantilt driver debug macro.*/
-/* Uncomment this for see traces */
-#define D(x...) /*printf(x); */  
+#define D(x...) //printf(x); /* Uncomment this for see traces */
 
 /** pantilt driver pthread for reading.*/
 pthread_t pantilt_readth;
@@ -118,6 +125,15 @@ int display_fps=0;
 /** pantilt driver variable to detect if pthreads must end its execution.*/
 int pantilt_close_command=0;
 
+/* Ref counter*/
+/** ptmotors ref counter*/
+int ptmotors_refs=0;
+/** ptencoders ref counter*/
+int ptencoders_refs=0;
+
+/** mutex for ref counters*/
+pthread_mutex_t refmutex;
+
 /* pantilt driver API options */
 /** pantilt driver name.*/
 char driver_name[256]="pantilt";
@@ -127,37 +143,6 @@ char driver_name[256]="pantilt";
 int activate_pantiltencoders=0;
 /** pantilt driver variable to detect if pantilt motors were activated on gui.*/
 int activate_pantiltmotors=0;
-
-/* Function to truncate float number to nearest integer */
-float truncateFloat (float numberF)
-{
-	char numeroC[20];
-	int entero, decimal;
-	
-	if ( sprintf (numeroC, "%f", numberF) < 0 )
-	{
-		printf("truncateFloat: Error in convert to float number in char*\n");
-		return 0.0;
-	}
-	sscanf  (numeroC,"%d.%d",&entero,&decimal);
-	
-	while (decimal>10)
-		decimal = decimal / 10;
-	
-	if (decimal > 5)
-	{
-		if (entero>0)
-		{ /* Para numeros positivos */
-			entero=entero+1;
-		}
-		else
-		{	/* Para numeros negativos */
-			entero=entero-1;
-		}
-	}
-	
-	return (float)entero;
-}
 
 /** pantilt driver function to show fps in jdec shell.*/
 void pantilt_display_fps(){
@@ -300,7 +285,7 @@ void serve_serialpantilt_message(char *mensaje)
   if (sscanf(mensaje,"* Current Pan position is %d",&pan_encoders)==1) 
     {
       pan_angle=(float)pan_encoders*ENCOD_TO_DEG; 
-      /* if (source[SCH_PANTILTENCODERS]==serialpantilt) */
+      //if (source[SCH_PANTILTENCODERS]==serialpantilt)
       speedcounter(ptencoders_schema_id);
       /*printf("PAN=%.2f\n",pan_angle);*/
     }
@@ -405,16 +390,23 @@ void *serialpantilt_readthread(void *not_used)
  *  @return integer suspending result.*/
 int ptencoders_suspend()
 {
-
-  if (activate_pantiltencoders) {
-    pthread_mutex_unlock(&mymutex_encoders);
-    state_encoders=slept;
-    put_state(ptencoders_schema_id,slept);
-    printf("ptencoders schema suspend\n");
-    pthread_mutex_unlock(&mymutex_encoders);
-  }
-
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (ptencoders_refs>1){
+      ptencoders_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      ptencoders_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if (activate_pantiltencoders) {
+         pthread_mutex_unlock(&mymutex_encoders);
+         state_encoders=slept;
+         put_state(ptencoders_schema_id,slept);
+         printf("ptencoders schema suspend\n");
+         pthread_mutex_unlock(&mymutex_encoders);
+      }
+   }
+   return 0;
 }
 
 
@@ -425,20 +417,27 @@ int ptencoders_suspend()
  *  @return integer resuming result.*/
 int ptencoders_resume(int father, int *brothers, arbitration fn)
 {
-
-  if (activate_pantiltencoders) {
-    pthread_mutex_unlock(&mymutex_encoders);
-    state_encoders=active; 
-    all[ptencoders_schema_id].father = father;
-    all[ptencoders_schema_id].fps = 0.;
-    all[ptencoders_schema_id].k =0;
-    put_state(ptencoders_schema_id,winner);
-    printf("ptencoders schema resume\n");
-    pthread_cond_signal(&condition_encoders);
-    pthread_mutex_unlock(&mymutex_encoders);
-  }
-
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (ptencoders_refs>0){
+      ptencoders_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      ptencoders_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if (activate_pantiltencoders) {
+         pthread_mutex_unlock(&mymutex_encoders);
+         state_encoders=active;
+         all[ptencoders_schema_id].father = father;
+         all[ptencoders_schema_id].fps = 0.;
+         all[ptencoders_schema_id].k =0;
+         put_state(ptencoders_schema_id,winner);
+         printf("ptencoders schema resume\n");
+         pthread_cond_signal(&condition_encoders);
+         pthread_mutex_unlock(&mymutex_encoders);
+      }
+   }
+   return 0;
 }
 
 /** pantilt driver motors main iteration function.*/
@@ -467,8 +466,7 @@ void pantiltmotors_iteration()
     else longcommand=longitude;
     
     if ( (longcommand!=longitude_last) || (longspeed != longspeed_last) ) {
-      	
-      sprintf(pantilt_out,"PP%d PS%d\n",(int)truncateFloat(longcommand/ENCOD_TO_DEG),(int)truncateFloat(longspeed/ENCOD_TO_DEG));      
+      sprintf(pantilt_out,"PP%d PS%d\n",(int)(longcommand/ENCOD_TO_DEG),(int)(longspeed/ENCOD_TO_DEG));
       SendCmd(pantilt_out);
       longitude_last=longcommand;
       longspeed_last=longspeed;
@@ -486,30 +484,37 @@ void pantiltmotors_iteration()
     else latcommand=latitude;
     
     if( (latcommand!=latitude_last) || (latspeed!=latspeed_last) )  {
-      sprintf(pantilt_out,"TP%d TS%d\n",(int)truncateFloat(latcommand/ENCOD_TO_DEG),(int)truncateFloat(latspeed/ENCOD_TO_DEG));
+      sprintf(pantilt_out,"TP%d TS%d\n",(int)(latcommand/ENCOD_TO_DEG),(int)(latspeed/ENCOD_TO_DEG));
       SendCmd(pantilt_out);
       latitude_last=latcommand;
       latspeed_last=latspeed;
     }
   }
-  /* if (debug[SCH_PANTILTMOTORS]) printf("pantiltmotors:  %1.1f %1.1f %1.1f %1.1f \n",latitude,longitude,latitude_speed,longitude_speed); */ 
+  //if (debug[SCH_PANTILTMOTORS]) printf("pantiltmotors:  %1.1f %1.1f %1.1f %1.1f \n",latitude,longitude,latitude_speed,longitude_speed); 
 }
 
 /** pantilt motors suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int ptmotors_suspend()
 {
-
-  if (activate_pantiltmotors) {
-    pthread_mutex_lock(&mymutex_motors);
-    state_motors=slept;
-    put_state(ptmotors_schema_id,slept);
-    printf("ptmotors schema suspend\n");
-    printf("ptmotors_suspend: pan_angle=%f - tilt_angle=%f\n",pan_angle,tilt_angle); 
-    pthread_mutex_unlock(&mymutex_motors);
-  }
-
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (ptmotors_refs>1){
+      ptmotors_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      ptmotors_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if (activate_pantiltmotors) {
+         pthread_mutex_lock(&mymutex_motors);
+         state_motors=slept;
+         put_state(ptmotors_schema_id,slept);
+         printf("ptmotors schema suspend\n");
+         printf("ptmotors_suspend: pan_angle=%f - tilt_angle=%f\n",pan_angle,tilt_angle);
+         pthread_mutex_unlock(&mymutex_motors);
+      }
+   }
+   return 0;
 }
 
 
@@ -520,30 +525,37 @@ int ptmotors_suspend()
  *  @return integer resuming result.*/
 int ptmotors_resume(int father, int *brothers, arbitration fn)
 {
+   pthread_mutex_lock(&refmutex);
+   if (ptmotors_refs>0){
+      ptmotors_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      ptmotors_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if (activate_pantiltmotors) {
 
-  if (activate_pantiltmotors) {
+         printf("ptmotors_resume: pan_angle=%f - tilt_angle=%f\n",pan_angle,tilt_angle);
 
-    printf("ptmotors_resume: pan_angle=%f - tilt_angle=%f\n",pan_angle,tilt_angle); 
-
-    longitude=pan_angle;
-    latitude=tilt_angle;         
+         longitude=pan_angle;
+         latitude=tilt_angle;
 
     /* unfortunately it reads pan_angle an tilt_angle before sensationsoculo1
-       has updated them for the first time, so this schema always starts 
-       positioning the pantilt unit at (0,0) angles */ 
+         has updated them for the first time, so this schema always starts
+         positioning the pantilt unit at (0,0) angles */
 
-    pthread_mutex_lock(&mymutex_motors);
-    state_motors=winner;
-    all[ptmotors_schema_id].father = father;
-    all[ptmotors_schema_id].fps = 0.;
-    all[ptmotors_schema_id].k =0;
-    put_state(ptmotors_schema_id,winner);
-    printf("ptmotors schema resume\n");
-    pthread_cond_signal(&condition_motors);
-    pthread_mutex_unlock(&mymutex_motors);
-  }
-
-  return 0;
+         pthread_mutex_lock(&mymutex_motors);
+         state_motors=winner;
+         all[ptmotors_schema_id].father = father;
+         all[ptmotors_schema_id].fps = 0.;
+         all[ptmotors_schema_id].k =0;
+         put_state(ptmotors_schema_id,winner);
+         printf("ptmotors schema resume\n");
+         pthread_cond_signal(&condition_motors);
+         pthread_mutex_unlock(&mymutex_motors);
+      }
+   }
+   return 0;
 }
 
 /** pantilt driver motors pthread function.*/
@@ -721,7 +733,7 @@ int pantilt_parseconf(char *configfile){
  *  @return 0 if initialitation was successful or -1 if something went wrong.*/
 void pantilt_init(){
 
-  /* printf("pantilt device on %s serial port\n",pantilt_device); */ 
+  //printf("pantilt device on %s serial port\n",pantilt_device); 
   if ((pantilt_serialport = openRaw(pantilt_device, O_RDWR)) <= 0) 
     {perror("Cannot open serial port");}
   if (!setBaudRate(pantilt_serialport,(speed_t) RS232_BAUD_RATE))
@@ -807,6 +819,12 @@ void pantilt_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    myexport("ptencoders","id",&ptencoders_schema_id);
+    myexport("ptencoders","pan_angle",&pan_angle);
+    myexport("ptencoders","tilt_angle",&tilt_angle);
+    myexport("ptencoders", "clock", &pantiltencoders_clock);
+    myexport("ptencoders","resume",(void *)&ptencoders_resume);
+    myexport("ptencoders","suspend",(void *)&ptencoders_suspend);
   }
 
   if (activate_pantiltmotors) {
@@ -829,6 +847,14 @@ void pantilt_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    myexport("ptmotors","id",&ptmotors_schema_id);
+    myexport("ptmotors","longitude",&longitude);
+    myexport("ptmotors","latitude",&latitude);
+    myexport("ptmotors","longitude_speed",&longitude_speed);
+    myexport("ptmotors","latitude_speed",&latitude_speed);
+    myexport("ptmotors","cycle", &pantiltmotors_cycle);
+    myexport("ptmotors","resume",(void *)&ptmotors_resume);
+    myexport("ptmotors","suspend",(void *)&ptmotors_suspend);
   }
 
   printf("pantilt driver started up\n");

@@ -75,6 +75,8 @@ int mplayer_close_command=0;
 char driver_name[256]="mplayer";
 /** mplayer devices detected in config file.*/
 int serve_color[MAXVIDS];
+/** mutex for ref count*/
+pthread_mutex_t refmutex;
 /** mplayer video file names.*/
 char video_files[MAXVIDS][256];
 /** mplayer number of color activated in gui.*/
@@ -134,46 +136,49 @@ void mplayer_close(){
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
 int mycolorA_resume(int father, int *brothers, arbitration fn){
-  if(serve_color[0]==1)
-    {
+   if(serve_color[0]==1){
+      pthread_mutex_lock(&refmutex);
       color_active[0]++;
+      pthread_mutex_unlock(&refmutex);
       if ((all[colorD_schema_id].father==GUIHUMAN) ||
-	  (all[colorD_schema_id].father==SHELLHUMAN))
-	all[colorD_schema_id].father = father;
+           (all[colorD_schema_id].father==SHELLHUMAN))
+         all[colorD_schema_id].father = father;
       if(color_active[0]==1)
-	{   
-	  pthread_mutex_unlock(&color_mutex[0]);
-	  /*printf("colorA schema resume (mplayer driver)\n");*/
-	  all[colorA_schema_id].father = father;
-	  all[colorA_schema_id].fps = 0.;
-	  all[colorA_schema_id].k =0;
-	  put_state(colorA_schema_id,winner);
+      {
+         pthread_mutex_unlock(&color_mutex[0]);
+         /*printf("colorA schema resume (mplayer driver)\n");*/
+         all[colorA_schema_id].father = father;
+         all[colorA_schema_id].fps = 0.;
+         all[colorA_schema_id].k =0;
+         put_state(colorA_schema_id,winner);
 	  
-	  if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
-	    /* mplayer thread goes winner */
-	    pthread_mutex_lock(&mymutex);
-	    state=winner;
-	    pthread_cond_signal(&condition);
-	    pthread_mutex_unlock(&mymutex);
-	  }
-	}
-    }
+         if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
+            /* mplayer thread goes winner */
+            pthread_mutex_lock(&mymutex);
+            state=winner;
+            pthread_cond_signal(&condition);
+            pthread_mutex_unlock(&mymutex);
+         }
+      }
+   }
    return 0;
 }
 
 /** colorA suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int mycolorA_suspend(){
-  color_active[0]--;
-  if((serve_color[0]==1)&&(color_active[0]==0)){
+   pthread_mutex_lock(&refmutex);
+   color_active[0]--;
+   pthread_mutex_unlock(&refmutex);
+   if((serve_color[0]==1)&&(color_active[0]==0)){
       pthread_mutex_lock(&color_mutex[0]);
       put_state(colorA_schema_id,slept);
       /*printf("colorA schema suspend (mplayer driver)\n");*/
       if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
-	 /* mplayer thread goes sleep */
-	 pthread_mutex_lock(&mymutex);
-	 state=slept;
-	 pthread_mutex_unlock(&mymutex);
+         /* mplayer thread goes sleep */
+         pthread_mutex_lock(&mymutex);
+         state=slept;
+         pthread_mutex_unlock(&mymutex);
       }
    }
    return 0;
@@ -185,50 +190,54 @@ int mycolorA_suspend(){
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
 int mycolorB_resume(int father, int *brothers, arbitration fn){
-  if(serve_color[1]==1)
-    {
+   if(serve_color[1]==1)
+   {
+      pthread_mutex_lock(&refmutex);
       color_active[1]++;
+      pthread_mutex_unlock(&refmutex);
       if ((all[colorD_schema_id].father==GUIHUMAN) ||
-	  (all[colorD_schema_id].father==SHELLHUMAN))
-	all[colorD_schema_id].father = father;
+           (all[colorD_schema_id].father==SHELLHUMAN))
+         all[colorD_schema_id].father = father;
       if(color_active[1]==1)
-	{   
-	  pthread_mutex_unlock(&color_mutex[1]);
-	  /*printf("colorB schema resume (mplayer driver)\n");*/
-	  all[colorB_schema_id].father = father;
-	  all[colorB_schema_id].fps = 0.;
-	  all[colorB_schema_id].k =0;
-	  put_state(colorB_schema_id,winner);
+      {
+         pthread_mutex_unlock(&color_mutex[1]);
+         /*printf("colorB schema resume (mplayer driver)\n");*/
+         all[colorB_schema_id].father = father;
+         all[colorB_schema_id].fps = 0.;
+         all[colorB_schema_id].k =0;
+         put_state(colorB_schema_id,winner);
 	  
-	  if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
-	    /* mplayer thread goes winner */
-	    pthread_mutex_lock(&mymutex);
-	    state=winner;
-	    pthread_cond_signal(&condition);
-	    pthread_mutex_unlock(&mymutex);
-	  }
-	}
-    }
+         if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
+            /* mplayer thread goes winner */
+            pthread_mutex_lock(&mymutex);
+            state=winner;
+            pthread_cond_signal(&condition);
+            pthread_mutex_unlock(&mymutex);
+         }
+      }
+   }
    return 0;
 }
 
 /** colorB suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int mycolorB_suspend(){
-  color_active[1]--;
-  if((serve_color[1]==1)&&(color_active[1]==1)){
-    pthread_mutex_lock(&color_mutex[1]);
-    /*printf("colorB schema suspend (mplayer driver)\n");*/
-    put_state(colorB_schema_id,slept);
+   pthread_mutex_lock(&refmutex);
+   color_active[1]--;
+   pthread_mutex_unlock(&refmutex);
+   if((serve_color[1]==1)&&(color_active[1]==1)){
+      pthread_mutex_lock(&color_mutex[1]);
+      /*printf("colorB schema suspend (mplayer driver)\n");*/
+      put_state(colorB_schema_id,slept);
     
-    if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
-      /* mplayer thread goes sleep */
-      pthread_mutex_lock(&mymutex);
-      state=slept;
-      pthread_mutex_unlock(&mymutex);
-    }
-  }
-  return 0;
+      if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
+         /* mplayer thread goes sleep */
+         pthread_mutex_lock(&mymutex);
+         state=slept;
+         pthread_mutex_unlock(&mymutex);
+      }
+   }
+   return 0;
 }
 
 /** colorC resume function following jdec platform API schemas.
@@ -237,50 +246,54 @@ int mycolorB_suspend(){
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
 int mycolorC_resume(int father, int *brothers, arbitration fn){
-  if(serve_color[2]==1)
-    {
+   if(serve_color[2]==1)
+   {
+      pthread_mutex_lock(&refmutex);
       color_active[2]++;
+      pthread_mutex_unlock(&refmutex);
       if ((all[colorD_schema_id].father==GUIHUMAN) ||
-	  (all[colorD_schema_id].father==SHELLHUMAN))
-	all[colorD_schema_id].father = father;
+           (all[colorD_schema_id].father==SHELLHUMAN))
+         all[colorD_schema_id].father = father;
       if(color_active[2]==1)
-	{
-	  pthread_mutex_unlock(&color_mutex[2]);
-	  /*printf("colorC schema resume (mplayer driver)\n");*/
-	  all[colorC_schema_id].father = father;
-	  all[colorC_schema_id].fps = 0.;
-	  all[colorC_schema_id].k =0;
-	  put_state(colorC_schema_id,winner);
+      {
+         pthread_mutex_unlock(&color_mutex[2]);
+         /*printf("colorC schema resume (mplayer driver)\n");*/
+         all[colorC_schema_id].father = father;
+         all[colorC_schema_id].fps = 0.;
+         all[colorC_schema_id].k =0;
+         put_state(colorC_schema_id,winner);
 	  
-	  if((color_active[1]==0)&&(color_active[0]==0)&&(color_active[3]==0)){
-	    /* mplayer thread goes winner */
-	    pthread_mutex_lock(&mymutex);
-	    state=winner;
-	    pthread_cond_signal(&condition);
-	    pthread_mutex_unlock(&mymutex);
-	  }
-	}
-    }
+         if((color_active[1]==0)&&(color_active[0]==0)&&(color_active[3]==0)){
+            /* mplayer thread goes winner */
+            pthread_mutex_lock(&mymutex);
+            state=winner;
+            pthread_cond_signal(&condition);
+            pthread_mutex_unlock(&mymutex);
+         }
+      }
+   }
    return 0;
 }
 
 /** colorC suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int mycolorC_suspend(){
-  color_active[2]--;
-  if((serve_color[2]==1)&&(color_active[2]==1)){
-    pthread_mutex_lock(&color_mutex[2]);
-    /*printf("colorC schema suspend (mplayer driver)\n");*/
-    put_state(colorC_schema_id,slept);
+   pthread_mutex_lock(&refmutex);
+   color_active[2]--;
+   pthread_mutex_unlock(&refmutex);
+   if((serve_color[2]==1)&&(color_active[2]==1)){
+      pthread_mutex_lock(&color_mutex[2]);
+      /*printf("colorC schema suspend (mplayer driver)\n");*/
+      put_state(colorC_schema_id,slept);
     
-    if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[3]==0)){
-      /* mplayer thread goes sleep */
-      pthread_mutex_lock(&mymutex);
-      state=slept;
-      pthread_mutex_unlock(&mymutex);
-    }
-  }
-  return 0;
+      if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[3]==0)){
+         /* mplayer thread goes sleep */
+         pthread_mutex_lock(&mymutex);
+         state=slept;
+         pthread_mutex_unlock(&mymutex);
+      }
+   }
+   return 0;
 }
 
 /** colorD resume function following jdec platform API schemas.
@@ -290,50 +303,54 @@ int mycolorC_suspend(){
  *  @return integer resuming result.*/
 int mycolorD_resume(int father, int *brothers, arbitration fn){
 
-  if(serve_color[3]==1)
-    {
+   if(serve_color[3]==1)
+   {
+      pthread_mutex_lock(&refmutex);
       color_active[3]++;
+      pthread_mutex_unlock(&refmutex);
       if ((all[colorD_schema_id].father==GUIHUMAN) ||
-	  (all[colorD_schema_id].father==SHELLHUMAN))
-	all[colorD_schema_id].father = father;
+           (all[colorD_schema_id].father==SHELLHUMAN))
+         all[colorD_schema_id].father = father;
       if(color_active[3]==1)
-	{
-	  pthread_mutex_unlock(&color_mutex[3]);
-	  /*printf("colorD schema resume (mplayer driver)\n");*/
-	  all[colorD_schema_id].father = father;
-	  all[colorD_schema_id].fps = 0.;
-	  all[colorD_schema_id].k =0;
-	  put_state(colorD_schema_id,winner);
+      {
+         pthread_mutex_unlock(&color_mutex[3]);
+         /*printf("colorD schema resume (mplayer driver)\n");*/
+         all[colorD_schema_id].father = father;
+         all[colorD_schema_id].fps = 0.;
+         all[colorD_schema_id].k =0;
+         put_state(colorD_schema_id,winner);
 	  
-	  if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[0]==0)){
-	    /* mplayer thread goes winner */
-	    pthread_mutex_lock(&mymutex);
-	    state=winner;
-	    pthread_cond_signal(&condition);
-	    pthread_mutex_unlock(&mymutex);
-	  }
-	}
-    }
+         if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[0]==0)){
+            /* mplayer thread goes winner */
+            pthread_mutex_lock(&mymutex);
+            state=winner;
+            pthread_cond_signal(&condition);
+            pthread_mutex_unlock(&mymutex);
+         }
+      }
+   }
    return 0;
 }
 
 /** colorD suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int mycolorD_suspend(){
-  color_active[3]--;
-  if((serve_color[3]==1)&&(color_active[3]==1)){
-    pthread_mutex_lock(&color_mutex[3]);
-    /*printf("colorD schema suspend (mplayer driver)\n");*/
-    put_state(colorD_schema_id,slept);
+   pthread_mutex_lock(&refmutex);
+   color_active[3]--;
+   pthread_mutex_unlock(&refmutex);
+   if((serve_color[3]==1)&&(color_active[3]==1)){
+      pthread_mutex_lock(&color_mutex[3]);
+      /*printf("colorD schema suspend (mplayer driver)\n");*/
+      put_state(colorD_schema_id,slept);
     
-    if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[2]==0)){
-      /* mplayer thread goes sleep */
-      pthread_mutex_lock(&mymutex);
-      state=slept;
-      pthread_mutex_unlock(&mymutex);
-    }
-  }
-  return 0;
+      if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[2]==0)){
+         /* mplayer thread goes sleep */
+         pthread_mutex_lock(&mymutex);
+         state=slept;
+         pthread_mutex_unlock(&mymutex);
+      }
+   }
+   return 0;
 }
 
 /** mplayer driver function to start an mplayer process for a selected color.
@@ -382,18 +399,18 @@ void mplayer_start(int i){
 
 /** mplayer driver internal thread.
  *  @param id selected color id.*/
-void *mplayer_thread(void *id)
-{
+void *mplayer_thread(void *id){
    int i;
    i=*((int*)id);
    int fifo;
-   
+   static unsigned long int lastimage=0;
+
    printf("mplayer driver started up\n");
 
-	if ((fifo=open (fifo2[i],O_RDONLY))==-1){
-	       perror("");
-	       exit(1);
-	}
+   if ((fifo=open (fifo2[i],O_RDONLY))==-1){
+      perror("Error al abrir el fifo");
+      exit(1);
+   }
    do{
 
       int leidos=0;
@@ -402,59 +419,65 @@ void *mplayer_thread(void *id)
 
       pthread_mutex_lock(&color_mutex[i]); /*Si está bloqueado se queda ahí*/
       pthread_mutex_unlock (&color_mutex[i]);
-	       /*Simplemente lee del fifo y lo coloca en colorX*/
+      /*Simplemente lee del fifo y lo coloca en colorX*/
       while (leidos<SIFNTSC_COLUMNS*SIFNTSC_ROWS*3){
-	 leidos_tmp=read (fifo, buff+leidos,
-			  SIFNTSC_COLUMNS*SIFNTSC_ROWS*3 - leidos);
-	 if (leidos_tmp==0){
+         leidos_tmp=read (fifo, buff+leidos,
+                          SIFNTSC_COLUMNS*SIFNTSC_ROWS*3 - leidos);
+         if (leidos_tmp==0){
 
 
-	    if (repeat[i]==1){
+            if (repeat[i]==1){
 	       /*Lanzar otro mplayer si hay repeat
-	       Se matan mplayer y mencoder, se ignoran errores porque
-	       Seguramente ya hayan muerto y eso devuelve error*/
-	       close(fifo);
+               Se matan mplayer y mencoder, se ignoran errores porque
+               Seguramente ya hayan muerto y eso devuelve error*/
+               close(fifo);
 
-	       kill (pid_mplayer[i], 9);
-	       wait (NULL);
-	       kill (pid_mencoder[i], 9);
-	       wait (NULL);
-	       mplayer_start(i);
-	       if ((fifo=open (fifo2[i],O_RDONLY))==-1){
-		  perror("");
-		  exit(1);
-	       }
-	       leidos=0;
-	       leidos_tmp=0;
-	    }
-	    else{
-	       break;
-	    }
+               kill (pid_mplayer[i], 9);
+               wait (NULL);
+               kill (pid_mencoder[i], 9);
+               wait (NULL);
+               mplayer_start(i);
+               if ((fifo=open (fifo2[i],O_RDONLY))==-1){
+                  perror("");
+                  exit(1);
+               }
+               leidos=0;
+               leidos_tmp=0;
+            }
+            else{
+               break;
+            }
 
-	 }
-	 leidos+=leidos_tmp;
+         }
+         leidos+=leidos_tmp;
       }
       /*Se ha leido todo un frame*/
       switch (i){
-	 case 0:
-	    memcpy(colorA, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-	    speedcounter(colorA_schema_id);
-	    break;
-	 case 1:
-	    memcpy(colorB, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-	    speedcounter(colorB_schema_id);
-	    break;
-	 case 2:
-	    memcpy(colorC, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-	    speedcounter(colorC_schema_id);
-	    break;
-	 case 3:
-	    memcpy(colorD, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-	    speedcounter(colorD_schema_id);
-	    break;
-	 default:
-	    fprintf(stderr, "mplayer_thread: Unknown option %d.\n", i);
+         case 0:
+            memcpy(colorA, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+            speedcounter(colorA_schema_id);
+            imageA_clock=lastimage;
+            break;
+         case 1:
+            memcpy(colorB, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+            speedcounter(colorB_schema_id);
+            imageB_clock=lastimage;
+            break;
+         case 2:
+            memcpy(colorC, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+            speedcounter(colorC_schema_id);
+            imageC_clock=lastimage;
+            break;
+         case 3:
+            memcpy(colorD, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+            speedcounter(colorD_schema_id);
+            imageD_clock=lastimage;
+            break;
+         default:
+            fprintf(stderr, "mplayer_thread: Unknown option %d.\n", i);
       }
+
+      lastimage++;
 
    }while(mplayer_close_command==0);
    close(fifo);
@@ -484,128 +507,128 @@ int mplayer_parseconf(char *configfile){
     
       /* end of file */
       if (feof(myfile)){
-	 end_section=1;
-	 end_parse=1;
+         end_section=1;
+         end_parse=1;
       
-	 /* line comment */
+         /* line comment */
       }else if (buffer_file[0]=='#') {
-	 while(fgetc(myfile)!='\n');
+         while(fgetc(myfile)!='\n');
       
-	 /* white spaces */
+         /* white spaces */
       }else if (buffer_file[0]==' ') {
-	 while(buffer_file[0]==' ') buffer_file[0]=fgetc(myfile);
+         while(buffer_file[0]==' ') buffer_file[0]=fgetc(myfile);
 
-	 /* tabs */
+         /* tabs */
       }else if(buffer_file[0]=='\t') {
-	 while(buffer_file[0]=='\t') buffer_file[0]=fgetc(myfile);
-	 /* storing line in buffer */
+         while(buffer_file[0]=='\t') buffer_file[0]=fgetc(myfile);
+         /* storing line in buffer */
       }else{
       
-	 while(buffer_file[i]!='\n') buffer_file[++i]=fgetc(myfile);
-	 buffer_file[++i]='\0';
+         while(buffer_file[i]!='\n') buffer_file[++i]=fgetc(myfile);
+         buffer_file[++i]='\0';
 
-	 if (i >= limit-1) {
-	    printf("%s...\n", buffer_file);
-	    printf ("mplayer: line too long in config file!\n");
-	    exit(-1);
-	 }
+         if (i >= limit-1) {
+            printf("%s...\n", buffer_file);
+            printf ("mplayer: line too long in config file!\n");
+            exit(-1);
+         }
       
-	 /* first word of the line */
-	 if (sscanf(buffer_file,"%s",word)==1){
-	    if (strcmp(word,"driver")==0) {
-	       while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
-	       sscanf(&buffer_file[j],"%s",word2);
+         /* first word of the line */
+         if (sscanf(buffer_file,"%s",word)==1){
+            if (strcmp(word,"driver")==0) {
+               while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
+               sscanf(&buffer_file[j],"%s",word2);
 	  
-	       /* checking if this section matchs our driver name */
-	       if (strcmp(word2,driver_name)==0){
-		  /* the sections match */
-		  do{
+               /* checking if this section matchs our driver name */
+               if (strcmp(word2,driver_name)==0){
+                  /* the sections match */
+                  do{
 	      
-		     char buffer_file2[256],word3[256],word4[256],word5[256],word6[256];
-		     int k=0; int z=0;
+                     char buffer_file2[256],word3[256],word4[256],word5[256],word6[256];
+                     int k=0; int z=0;
 
-		     buffer_file2[0]=fgetc(myfile);
+                     buffer_file2[0]=fgetc(myfile);
 	      
-		     /* end of file */
-		     if (feof(myfile)){
-			end_section=1;
-			end_parse=1;
+                     /* end of file */
+                     if (feof(myfile)){
+                        end_section=1;
+                        end_parse=1;
 		
-			/* line comment */
-		     }else if (buffer_file2[0]=='#') {
-			while(fgetc(myfile)!='\n');
+                        /* line comment */
+                     }else if (buffer_file2[0]=='#') {
+                        while(fgetc(myfile)!='\n');
 	      
-			/* white spaces */
-		     }else if (buffer_file2[0]==' ') {
-			while(buffer_file2[0]==' ') buffer_file2[0]=fgetc(myfile);
+                        /* white spaces */
+                     }else if (buffer_file2[0]==' ') {
+                        while(buffer_file2[0]==' ') buffer_file2[0]=fgetc(myfile);
 
-			/* tabs */
-		     }else if(buffer_file2[0]=='\t') {
-			while(buffer_file2[0]=='\t') buffer_file2[0]=fgetc(myfile);
+                        /* tabs */
+                     }else if(buffer_file2[0]=='\t') {
+                        while(buffer_file2[0]=='\t') buffer_file2[0]=fgetc(myfile);
 
-			/* storing line in buffer */
-		     }else{
+                        /* storing line in buffer */
+                     }else{
 		
-			while(buffer_file2[k]!='\n') buffer_file2[++k]=fgetc(myfile);
-			buffer_file2[++k]='\0';
+                        while(buffer_file2[k]!='\n') buffer_file2[++k]=fgetc(myfile);
+                        buffer_file2[++k]='\0';
 		
-			/* first word of the line */
-			if (sscanf(buffer_file2,"%s",word3)==1){
-			   if (strcmp(word3,"end_driver")==0) {
-			      while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
-			      driver_config_parsed=1;
-			      end_section=1;
-			      end_parse=1;
+                        /* first word of the line */
+                        if (sscanf(buffer_file2,"%s",word3)==1){
+                           if (strcmp(word3,"end_driver")==0) {
+                              while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
+                              driver_config_parsed=1;
+                              end_section=1;
+                              end_parse=1;
 		    
-			   }else if (strcmp(word3,"driver")==0) {
-			      while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
-			      printf("mplayer: error in config file.\n'end_section' keyword required before starting new driver section.\n");
-			      end_section=1; end_parse=1;
+                           }else if (strcmp(word3,"driver")==0) {
+                              while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
+                              printf("mplayer: error in config file.\n'end_section' keyword required before starting new driver section.\n");
+                              end_section=1; end_parse=1;
 
-			   }else if(strcmp(word3,"provides")==0){
-			      while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
-			      /*printf ("%s",buffer_file2);*/
-			      if(sscanf(buffer_file2,"%s %s %s %s",word3,word4,word5,word6)==4){
-				printf("mplayer: %s from %s\n",word4,word5);
-				 if(strcmp(word4,"colorA")==0){
-				    serve_color[0]=1;
-				    strcpy (video_files[0],word5);
-				    if(strcmp(word6,"repeat_on")==0) repeat[0] = 1; else repeat[0] = 0;
+                           }else if(strcmp(word3,"provides")==0){
+                              while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
+                              /*printf ("%s",buffer_file2);*/
+                              if(sscanf(buffer_file2,"%s %s %s %s",word3,word4,word5,word6)==4){
+                                 printf("mplayer: %s from %s\n",word4,word5);
+                                 if(strcmp(word4,"colorA")==0){
+                                    serve_color[0]=1;
+                                    strcpy (video_files[0],word5);
+                                    if(strcmp(word6,"repeat_on")==0) repeat[0] = 1; else repeat[0] = 0;
 
-				 }else if(strcmp(word4,"colorB")==0){
-				    serve_color[1]=1;
-				    strcpy (video_files[1],word5);
-				    if(strcmp(word6,"repeat_on")==0) repeat[1] = 1; else repeat[1] = 0;
+                                 }else if(strcmp(word4,"colorB")==0){
+                                    serve_color[1]=1;
+                                    strcpy (video_files[1],word5);
+                                    if(strcmp(word6,"repeat_on")==0) repeat[1] = 1; else repeat[1] = 0;
 
-				 }else if(strcmp(word4,"colorC")==0){
-				    serve_color[2]=1;
-				    strcpy (video_files[2],word5);
-				    if(strcmp(word6,"repeat_on")==0) repeat[2] = 1; else repeat[2] = 0;
+                                 }else if(strcmp(word4,"colorC")==0){
+                                    serve_color[2]=1;
+                                    strcpy (video_files[2],word5);
+                                    if(strcmp(word6,"repeat_on")==0) repeat[2] = 1; else repeat[2] = 0;
 
-				 }else if(strcmp(word4,"colorD")==0){
-				    serve_color[3]=1;
-				    strcpy (video_files[3],word5);
-				    if(strcmp(word6,"repeat_on")==0) repeat[3] = 1; else repeat[3] = 0;
-				 }
+                                 }else if(strcmp(word4,"colorD")==0){
+                                    serve_color[3]=1;
+                                    strcpy (video_files[3],word5);
+                                    if(strcmp(word6,"repeat_on")==0) repeat[3] = 1; else repeat[3] = 0;
+                                 }
 
-			      }else{
-				 printf("mplayer: 'provides' line incorrect\n");
-			      }
-			   }else printf("mplayer: i don't know what to do with '%s'\n",buffer_file2);
-			}
-		     }
-		  }while(end_section==0);
-		  end_section=0;
-	       }
-	    }
-	 }
+                              }else{
+                                 printf("mplayer: 'provides' line incorrect\n");
+                              }
+                           }else printf("mplayer: i don't know what to do with '%s'\n",buffer_file2);
+                        }
+                     }
+                  }while(end_section==0);
+                  end_section=0;
+               }
+            }
+         }
       }
    }while(end_parse==0);
   
    /* checking if a driver section was read */
    if(driver_config_parsed==1){
       if((serve_color[0]==0)&&(serve_color[1]==0)&&(serve_color[2]==0)&&(serve_color[3]==0)){
-	 printf("mplayer: warning! no color provided.\n");
+         printf("mplayer: warning! no color provided.\n");
       }
       return 0;
    }else return -1;
@@ -724,6 +747,7 @@ void mplayer_startup(char *configfile)
 	 num_schemas++;
 	 myexport("colorA","id",&colorA_schema_id);
 	 myexport("colorA","colorA",&colorA);
+         myexport("colorA","clock", &imageA_clock);
 	 myexport("colorA","resume",(void *)mycolorA_resume);
 	 myexport("colorA","suspend",(void *)mycolorA_suspend);
       }else{
@@ -750,6 +774,7 @@ void mplayer_startup(char *configfile)
 	 num_schemas++;
 	 myexport("colorB","id",&colorB_schema_id);
 	 myexport("colorB","colorB",&colorB);
+         myexport("colorB","clock", &imageB_clock);
 	 myexport("colorB","resume",(void *)mycolorB_resume);
 	 myexport("colorB","suspend",(void *)mycolorB_suspend);
       }else{
@@ -776,6 +801,7 @@ void mplayer_startup(char *configfile)
 	 num_schemas++;
 	 myexport("colorC","id",&colorC_schema_id);
 	 myexport("colorC","colorC",&colorC);
+         myexport("colorC","clock", &imageC_clock);
 	 myexport("colorC","resume",(void *)mycolorC_resume);
 	 myexport("colorC","suspend",(void *)mycolorC_suspend);
       }else{
@@ -802,6 +828,7 @@ void mplayer_startup(char *configfile)
 	 num_schemas++;
 	 myexport("colorD","id",&colorD_schema_id);
 	 myexport("colorD","colorD",&colorD);
+         myexport("colorD","clock", &imageD_clock);
 	 myexport("colorD","resume",(void *)mycolorD_resume);
 	 myexport("colorD","suspend",(void *)mycolorD_suspend);
       }else{

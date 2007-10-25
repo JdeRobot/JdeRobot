@@ -87,6 +87,18 @@ int sonars_active=0;
 /** player driver variable to check if motors was activated in gui.*/
 int motors_active=0;
 
+/** laser ref counter*/
+int laser_refs=0;
+/** encoders ref counter*/
+int encoders_refs=0;
+/** sonars ref counter*/
+int sonars_refs=0;
+/** motors ref counter*/
+int motors_refs=0;
+
+/** mutex for ref counters*/
+pthread_mutex_t refmutex;
+
 /** id for laser schema.*/
 int laser_schema_id;
 /** id for encoders schema.*/
@@ -128,42 +140,58 @@ void player_close(){
  *  @return integer resuming result.*/
 int player_laser_resume(int father, int *brothers, arbitration fn)
 {
-
-  if((serve_laser)&&(laser_active==0)){
-    laser_active=1;
-    put_state(laser_schema_id,winner);
-    printf("laser schema resume (player driver)\n");
-    all[laser_schema_id].father = father;
-    all[laser_schema_id].fps = 0.;
-    all[laser_schema_id].k =0;
+   pthread_mutex_lock(&refmutex);
+   if (laser_refs>0){
+      laser_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      laser_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((serve_laser)&&(laser_active==0)){
+         laser_active=1;
+         put_state(laser_schema_id,winner);
+         printf("laser schema resume (player driver)\n");
+         all[laser_schema_id].father = father;
+         all[laser_schema_id].fps = 0.;
+         all[laser_schema_id].k =0;
     
-    if((encoders_active==0)&&(sonars_active==0)&&(motors_active==0)){
-      /* player thread goes winner */
-      pthread_mutex_lock(&mymutex);
-      state=winner;
-      pthread_cond_signal(&condition);
-      pthread_mutex_unlock(&mymutex);
-    }
-  }
-  return 0;
+         if((encoders_active==0)&&(sonars_active==0)&&(motors_active==0)){
+            /* player thread goes winner */
+            pthread_mutex_lock(&mymutex);
+            state=winner;
+            pthread_cond_signal(&condition);
+            pthread_mutex_unlock(&mymutex);
+         }
+      }
+   }
+   return 0;
 }
 
 /** laser suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int player_laser_suspend(){
-
-  if((serve_laser)&&(laser_active)){
-    laser_active=0;
-    put_state(laser_schema_id,slept);
-    printf("laser schema suspend (player driver)\n"); 
-    if((encoders_active==0)&&(sonars_active==0)&&(motors_active==0)){    
-      /* player thread goes sleep */
-      pthread_mutex_lock(&mymutex);
-      state=slept;
-      pthread_mutex_unlock(&mymutex);
-    }
-  }
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (laser_refs>1){
+      laser_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      laser_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((serve_laser)&&(laser_active)){
+         laser_active=0;
+         put_state(laser_schema_id,slept);
+         printf("laser schema suspend (player driver)\n");
+         if((encoders_active==0)&&(sonars_active==0)&&(motors_active==0)){
+            /* player thread goes sleep */
+            pthread_mutex_lock(&mymutex);
+            state=slept;
+            pthread_mutex_unlock(&mymutex);
+         }
+      }
+   }
+   return 0;
 }
 
 /** encoders resume function following jdec platform API schemas.
@@ -173,43 +201,58 @@ int player_laser_suspend(){
  *  @return integer resuming result.*/
 int player_encoders_resume(int father, int *brothers, arbitration fn)
 {
+   pthread_mutex_lock(&refmutex);
+   if (encoders_refs>0){
+      encoders_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      encoders_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((serve_encoders)&&(encoders_active==0)){
+         encoders_active=1;
+         put_state(encoders_schema_id,winner);
+         printf("encoders schema resume (player driver)\n");
+         all[encoders_schema_id].father = father;
+         all[encoders_schema_id].fps = 0.;
+         all[encoders_schema_id].k =0;
 
-  if((serve_encoders)&&(encoders_active==0)){
-    encoders_active=1;
-    put_state(encoders_schema_id,winner);
-    printf("encoders schema resume (player driver)\n");
-    all[encoders_schema_id].father = father;
-    all[encoders_schema_id].fps = 0.;
-    all[encoders_schema_id].k =0;
-
-    if((laser_active==0)&&(sonars_active==0)&&(motors_active==0)){
-      /* player thread goes winner */
-      pthread_mutex_lock(&mymutex);
-      state=winner;
-      pthread_cond_signal(&condition);
-      pthread_mutex_unlock(&mymutex);
-    }
-  }
-  return 0;
-
+         if((laser_active==0)&&(sonars_active==0)&&(motors_active==0)){
+            /* player thread goes winner */
+            pthread_mutex_lock(&mymutex);
+            state=winner;
+            pthread_cond_signal(&condition);
+            pthread_mutex_unlock(&mymutex);
+         }
+      }
+   }
+   return 0;
 }
 
 /** encoders suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int player_encoders_suspend(){
-
-  if((serve_encoders)&&(encoders_active)){
-    encoders_active=0;
-    put_state(encoders_schema_id,slept);
-    printf("encoders schema suspend (player driver)\n");
-    if((laser_active==0)&&(sonars_active==0)&&(motors_active==0)){    
-      /* player thread goes sleep */
-      pthread_mutex_lock(&mymutex);
-      state=slept;
-      pthread_mutex_unlock(&mymutex);
-    }
-  }
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (encoders_refs>1){
+      encoders_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      encoders_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((serve_encoders)&&(encoders_active)){
+         encoders_active=0;
+         put_state(encoders_schema_id,slept);
+         printf("encoders schema suspend (player driver)\n");
+         if((laser_active==0)&&(sonars_active==0)&&(motors_active==0)){
+            /* player thread goes sleep */
+            pthread_mutex_lock(&mymutex);
+            state=slept;
+            pthread_mutex_unlock(&mymutex);
+         }
+      }
+   }
+   return 0;
 }
 
 /** sonars resume function following jdec platform API schemas.
@@ -217,44 +260,59 @@ int player_encoders_suspend(){
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int player_sonars_resume(int father, int *brothers, arbitration fn)
-{
-
- if((serve_sonars)&&(sonars_active==0)){
-   sonars_active=1;
-   put_state(sonars_schema_id,winner);
-   printf("sonars schema resume (player driver)\n");
-   all[sonars_schema_id].father = father;
-   all[sonars_schema_id].fps = 0.;
-   all[sonars_schema_id].k =0;
-
-   if((laser_active==0)&&(encoders_active==0)&&(motors_active==0)){
-     /* player thread goes winner */
-     pthread_mutex_lock(&mymutex);
-     state=winner;
-     pthread_cond_signal(&condition);
-     pthread_mutex_unlock(&mymutex);
+int player_sonars_resume(int father, int *brothers, arbitration fn){
+   pthread_mutex_lock(&refmutex);
+   if (sonars_refs>0){
+      sonars_refs++;
+      pthread_mutex_unlock(&refmutex);
    }
- }
-  return 0;
+   else{
+      sonars_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((serve_sonars)&&(sonars_active==0)){
+         sonars_active=1;
+         put_state(sonars_schema_id,winner);
+         printf("sonars schema resume (player driver)\n");
+         all[sonars_schema_id].father = father;
+         all[sonars_schema_id].fps = 0.;
+         all[sonars_schema_id].k =0;
+
+         if((laser_active==0)&&(encoders_active==0)&&(motors_active==0)){
+            /* player thread goes winner */
+            pthread_mutex_lock(&mymutex);
+            state=winner;
+            pthread_cond_signal(&condition);
+            pthread_mutex_unlock(&mymutex);
+         }
+      }
+   }
+   return 0;
 }
 
 /** sonars suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int player_sonars_suspend(){
-
-  if((serve_sonars)&&(sonars_active)){
-    sonars_active=0;
-    put_state(sonars_schema_id,slept); 
-    printf("sonars schema suspend (player driver)\n");
-    if((laser_active==0)&&(encoders_active==0)&&(motors_active==0)){
-      /* player thread goes to sleep */
-      pthread_mutex_lock(&mymutex);
-      state=slept;
-      pthread_mutex_unlock(&mymutex);
-    }
-  }
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (sonars_refs>1){
+      sonars_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      sonars_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((serve_sonars)&&(sonars_active)){
+         sonars_active=0;
+         put_state(sonars_schema_id,slept);
+         printf("sonars schema suspend (player driver)\n");
+         if((laser_active==0)&&(encoders_active==0)&&(motors_active==0)){
+            /* player thread goes to sleep */
+            pthread_mutex_lock(&mymutex);
+            state=slept;
+            pthread_mutex_unlock(&mymutex);
+         }
+      }
+   }
+   return 0;
 }
 
 /** motors resume function following jdec platform API schemas.
@@ -262,47 +320,61 @@ int player_sonars_suspend(){
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int player_motors_resume(int father, int *brothers, arbitration fn)
-{
+int player_motors_resume(int father, int *brothers, arbitration fn){
+   pthread_mutex_lock(&refmutex);
+   if (motors_refs>0){
+      motors_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      motors_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((serve_motors)&&(motors_active==0)){
+         motors_active=1;
+         put_state(motors_schema_id,winner);
+         printf("motors schema resume (player driver)\n");
+         all[motors_schema_id].father = father;
+         all[motors_schema_id].fps = 0.;
+         all[motors_schema_id].k =0;
 
-  if((serve_motors)&&(motors_active==0)){
-    motors_active=1;
-    put_state(motors_schema_id,winner);
-    printf("motors schema resume (player driver)\n");
-    all[motors_schema_id].father = father;
-    all[motors_schema_id].fps = 0.;
-    all[motors_schema_id].k =0;
-
-    if((laser_active==0)&&(encoders_active==0)&&(sonars_active==0)){
-      pthread_mutex_lock(&mymutex);
-      state=winner;
-      pthread_cond_signal(&condition);
-      pthread_mutex_unlock(&mymutex);
+         if((laser_active==0)&&(encoders_active==0)&&(sonars_active==0)){
+            pthread_mutex_lock(&mymutex);
+            state=winner;
+            pthread_cond_signal(&condition);
+            pthread_mutex_unlock(&mymutex);
+         }
       }
-  }
-  return 0;
-
+   }
+   return 0;
 }
 
 /** motors suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int player_motors_suspend(){
+   pthread_mutex_lock(&refmutex);
+   if (motors_refs>1){
+      motors_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      motors_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((serve_motors)&&(motors_active)){
+         /* security stop */
+         v_sp=0; w_sp=0;
+         playerc_position2d_set_cmd_vel(player_position,v_sp,0,w_sp,0);
 
-  if((serve_motors)&&(motors_active)){
-    /* security stop */
-    v_sp=0; w_sp=0;
-    playerc_position2d_set_cmd_vel(player_position,v_sp,0,w_sp,0);
-
-    motors_active=0;
-    put_state(motors_schema_id,slept);
-    printf("motors schema resume (player driver)\n");
-    if((laser_active==0)&&(encoders_active==0)&&(sonars_active==0)){    
-      pthread_mutex_lock(&mymutex);
-      state=slept;
-      pthread_mutex_unlock(&mymutex);
+         motors_active=0;
+         put_state(motors_schema_id,slept);
+         printf("motors schema resume (player driver)\n");
+         if((laser_active==0)&&(encoders_active==0)&&(sonars_active==0)){
+            pthread_mutex_lock(&mymutex);
+            state=slept;
+            pthread_mutex_unlock(&mymutex);
+         }
       }
-  }
-  return 0;
+   }
+   return 0;
 }
 
 /** player driver motors iteration function to send commands to player server.*/
@@ -312,7 +384,7 @@ void player_motors_iteration(){
 
   int v_integer=0; int w_integer=0;
 
-  speedcounter(motors_schema_id);  
+  speedcounter(motors_schema_id);
 
   /* getting speed in integer value */
   v_integer=(int)v; w_integer=(int)w;
@@ -338,7 +410,7 @@ void player_motors_iteration(){
 /** player driver main thread.*/
 void *player_thread(){
   struct timeval t;
-  unsigned long before,now;
+  unsigned long now;
   static unsigned long lastmotor=0;
   /*
   static unsigned long last=0;
@@ -396,23 +468,31 @@ void *player_thread(){
 }
 
 /** player driver laser function callback.*/
-void player_laser_callback()
-{
-  int j=0,cont=0;
+void player_laser_callback(){
+   int j=0,cont=0;
   
-  speedcounter(laser_schema_id);
-  laser_clock=tag;
-  tag++;
+   speedcounter(laser_schema_id);
+   laser_clock=tag;
+   tag++;
 
-  while((cont<NUM_LASER)&&(j<player_laser->scan_count)){
-    if (j%2!=1){
-      /*player ofrece 360 medidas cada 0.5 angulos, por lo k solo cojemos los angulos "enteros", 181 medidas*/
-      /*NUM_LASER readings (181 in the robot, 179 in the simulator) */
-      jde_laser[cont]=(int)(player_laser->scan[j][0]*1000);
-      cont++;
-    }
-    j++;
-  }
+   if (player_laser->scan_count==NUM_LASER){
+      while((cont<NUM_LASER)&&(j<player_laser->scan_count)){
+         jde_laser[cont]=(int)(player_laser->scan[j][0]*1000);
+         cont++;
+         j++;
+      }
+   }
+   else{
+      while((cont<NUM_LASER)&&(j<player_laser->scan_count)){
+         if (j%2!=1){
+            /*player ofrece 360 medidas cada 0.5 angulos, por lo k solo cojemos los angulos "enteros", 181 medidas*/
+            /*NUM_LASER readings (181 in the robot, 179 in the simulator) */
+            jde_laser[cont]=(int)(player_laser->scan[j][0]*1000);
+            cont++;
+         }
+         j++;
+      }
+   }
 }
 
 /** player driver encoders function callback.*/
@@ -730,6 +810,7 @@ int player_startup(char *configfile){
       num_schemas++;
       myexport("laser","id",&laser_schema_id);
       myexport("laser","laser",&jde_laser);
+      myexport("laser","clock", &laser_clock);
       myexport("laser","resume",(void *) &player_laser_resume);
       myexport("laser","suspend",(void *) &player_laser_suspend);
     }
@@ -750,6 +831,7 @@ int player_startup(char *configfile){
       num_schemas++;
       myexport("encoders","id",&encoders_schema_id);
       myexport("encoders","jde_robot",&jde_robot);
+      myexport("encoders", "clock", &encoders_clock);
       myexport("encoders","resume",(void *)&player_encoders_resume);
       myexport("encoders","suspend",(void *)&player_encoders_suspend);
     }
@@ -770,6 +852,7 @@ int player_startup(char *configfile){
       num_schemas++;
       myexport("sonars","id",&sonars_schema_id);
       myexport("sonars","us",&us);
+      myexport("sonars", "clock", &us_clock);
       myexport("sonars","resume",(void *)&player_sonars_resume);
       myexport("sonars","suspend",(void *)&player_sonars_suspend);
     }
@@ -791,6 +874,7 @@ int player_startup(char *configfile){
       myexport("motors","id",&motors_schema_id);
       myexport("motors","v",&v);
       myexport("motors","w",&w);
+      myexport("motors","cycle",&motors_cycle);
       myexport("motors","resume",(void *)&player_motors_resume);
       myexport("motors","suspend",(void *)&player_motors_suspend);
     }

@@ -15,14 +15,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, JoseMaria Cañas <jmplaza@gsyc.escet.urjc.es>
+ *  Authors : Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, JoseMaria Caï¿½as <jmplaza@gsyc.escet.urjc.es>
  */
 
 /**
  *  jdec networkclient driver provides sensorial information to platform variables such as color, laser or us, from remote jdec networkservers drivers, or oculo and otos servers.
  *
  *  @file networkclient.c
- *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es> and Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es> and Jose Maria Caï¿½as Plaza <jmplaza@gsyc.escet.urjc.es>
  *  @version 4.1
  *  @date 30-05-2007
  */
@@ -126,6 +126,32 @@ int motors_schema_id;
 int ptmotors_schema_id;
 /** id for pantilt encoders schema.*/
 int ptencoders_schema_id;
+
+
+/* Contadores de referencias*/
+/** laser ref counter*/
+int laser_refs=0;
+/** encoders ref counter*/
+int encoders_refs=0;
+/** sonars ref counter*/
+int sonars_refs=0;
+/** motors ref counter*/
+int motors_refs=0;
+/** colorA ref counter*/
+int colorA_refs=0;
+/** colorB ref counter*/
+int colorB_refs=0;
+/** colorC ref counter*/
+int colorC_refs=0;
+/** colorD ref counter*/
+int colorD_refs=0;
+/** ptmotors ref counter*/
+int ptmotors_refs=0;
+/** ptencoders ref counter*/
+int ptencoders_refs=0;
+
+/** mutex for ref counters*/
+pthread_mutex_t refmutex;
 
 /** networkclient function to end execution of the driver, closing file descriptors and stopping devices.*/
 void networkclient_close(){
@@ -232,45 +258,60 @@ void networkclient_close(){
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_pantiltencoders_resume(int father, int *brothers, arbitration fn){
-
-  if((device_active[PANTILT_ENCODERS_DEVICE==0])&&(serve_device[PANTILT_ENCODERS_DEVICE])){
-    char message_out[MAX_MESSAGE];
+   pthread_mutex_lock(&refmutex);
+   if (ptencoders_refs>0){
+      ptencoders_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      ptencoders_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[PANTILT_ENCODERS_DEVICE==0])&&(serve_device[PANTILT_ENCODERS_DEVICE])){
+         char message_out[MAX_MESSAGE];
       
-    printf("ptencoders schema resume (networkclient driver)\n");
-    all[ptencoders_schema_id].father = father;
-    all[ptencoders_schema_id].fps = 0.;
-    all[ptencoders_schema_id].k =0;
-    put_state(ptencoders_schema_id,winner);
+         printf("ptencoders schema resume (networkclient driver)\n");
+         all[ptencoders_schema_id].father = father;
+         all[ptencoders_schema_id].fps = 0.;
+         all[ptencoders_schema_id].k =0;
+         put_state(ptencoders_schema_id,winner);
 
-    device_active[PANTILT_ENCODERS_DEVICE]=1;
-    pthread_mutex_lock(&mymutex[PANTILT_ENCODERS_DEVICE]);
-    sprintf(message_out,"%d\n",NETWORKSERVER_subscribe_pantilt_encoders); 
-    write(device_socket[PANTILT_ENCODERS_DEVICE],message_out,strlen(message_out));
-    state[PANTILT_ENCODERS_DEVICE]=winner;
-    pthread_cond_signal(&condition[PANTILT_ENCODERS_DEVICE]);
-    pthread_mutex_unlock(&mymutex[PANTILT_ENCODERS_DEVICE]);
-  }
-
-  return 0;
+         device_active[PANTILT_ENCODERS_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[PANTILT_ENCODERS_DEVICE]);
+         sprintf(message_out,"%d\n",NETWORKSERVER_subscribe_pantilt_encoders);
+         write(device_socket[PANTILT_ENCODERS_DEVICE],message_out,strlen(message_out));
+         state[PANTILT_ENCODERS_DEVICE]=winner;
+         pthread_cond_signal(&condition[PANTILT_ENCODERS_DEVICE]);
+         pthread_mutex_unlock(&mymutex[PANTILT_ENCODERS_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** pantiltencoders suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int networkclient_pantiltencoders_suspend(){
+   pthread_mutex_lock(&refmutex);
+   if (ptencoders_refs>1){
+      ptencoders_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      ptencoders_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[PANTILT_ENCODERS_DEVICE])&&(serve_device[PANTILT_ENCODERS_DEVICE])){
+         char message_out[MAX_MESSAGE];
 
-  if((device_active[PANTILT_ENCODERS_DEVICE])&&(serve_device[PANTILT_ENCODERS_DEVICE])){
-    char message_out[MAX_MESSAGE];
-
-    printf("ptencoders schema suspend (networkclient driver)\n");
-    device_active[PANTILT_ENCODERS_DEVICE]=0;
-    pthread_mutex_lock(&mymutex[PANTILT_ENCODERS_DEVICE]);
-    sprintf(message_out,"%d\n",NETWORKSERVER_unsubscribe_pantilt_encoders); 
-    write(device_socket[PANTILT_ENCODERS_DEVICE],message_out,strlen(message_out));
-    put_state(ptencoders_schema_id,slept);
-    state[PANTILT_ENCODERS_DEVICE]=slept;
-    pthread_mutex_unlock(&mymutex[PANTILT_ENCODERS_DEVICE]);
-  }
-  return 0;
+         printf("ptencoders schema suspend (networkclient driver)\n");
+         device_active[PANTILT_ENCODERS_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[PANTILT_ENCODERS_DEVICE]);
+         sprintf(message_out,"%d\n",NETWORKSERVER_unsubscribe_pantilt_encoders);
+         write(device_socket[PANTILT_ENCODERS_DEVICE],message_out,strlen(message_out));
+         put_state(ptencoders_schema_id,slept);
+         state[PANTILT_ENCODERS_DEVICE]=slept;
+         pthread_mutex_unlock(&mymutex[PANTILT_ENCODERS_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** pantiltmotors resume function following jdec platform API schemas.
@@ -279,36 +320,51 @@ int networkclient_pantiltencoders_suspend(){
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_pantiltmotors_resume(int father, int *brothers, arbitration fn){
-
-  if((device_active[PANTILT_MOTORS_DEVICE==0])&&(serve_device[PANTILT_MOTORS_DEVICE])){
-    printf("ptmotors schema resume (networkclient driver)\n");
-    all[ptmotors_schema_id].father = father;
-    all[ptmotors_schema_id].fps = 0.;
-    all[ptmotors_schema_id].k =0;
-    put_state(ptmotors_schema_id,winner);
-    device_active[PANTILT_MOTORS_DEVICE]=1;
-    pthread_mutex_lock(&mymutex[PANTILT_MOTORS_DEVICE]);
-    state[PANTILT_MOTORS_DEVICE]=winner;
-    pthread_cond_signal(&condition[PANTILT_MOTORS_DEVICE]);
-    pthread_mutex_unlock(&mymutex[PANTILT_MOTORS_DEVICE]);
-  }
-
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (ptmotors_refs>0){
+      ptmotors_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      ptmotors_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[PANTILT_MOTORS_DEVICE==0])&&(serve_device[PANTILT_MOTORS_DEVICE])){
+         printf("ptmotors schema resume (networkclient driver)\n");
+         all[ptmotors_schema_id].father = father;
+         all[ptmotors_schema_id].fps = 0.;
+         all[ptmotors_schema_id].k =0;
+         put_state(ptmotors_schema_id,winner);
+         device_active[PANTILT_MOTORS_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[PANTILT_MOTORS_DEVICE]);
+         state[PANTILT_MOTORS_DEVICE]=winner;
+         pthread_cond_signal(&condition[PANTILT_MOTORS_DEVICE]);
+         pthread_mutex_unlock(&mymutex[PANTILT_MOTORS_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** pantiltmotors suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int networkclient_pantiltmotors_suspend(){
-
-  if((device_active[PANTILT_MOTORS_DEVICE])&&(serve_device[PANTILT_MOTORS_DEVICE])){
-    printf("ptmotors schema suspend (networkclient driver)\n");
-    device_active[PANTILT_MOTORS_DEVICE]=0;
-    pthread_mutex_lock(&mymutex[PANTILT_MOTORS_DEVICE]);
-    put_state(ptmotors_schema_id,slept);
-    state[PANTILT_MOTORS_DEVICE]=slept;
-    pthread_mutex_unlock(&mymutex[PANTILT_MOTORS_DEVICE]);
-  }
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (ptmotors_refs>1){
+      ptmotors_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      ptmotors_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[PANTILT_MOTORS_DEVICE])&&(serve_device[PANTILT_MOTORS_DEVICE])){
+         printf("ptmotors schema suspend (networkclient driver)\n");
+         device_active[PANTILT_MOTORS_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[PANTILT_MOTORS_DEVICE]);
+         put_state(ptmotors_schema_id,slept);
+         state[PANTILT_MOTORS_DEVICE]=slept;
+         pthread_mutex_unlock(&mymutex[PANTILT_MOTORS_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** laser resume function following jdec platform API schemas.
@@ -317,44 +373,59 @@ int networkclient_pantiltmotors_suspend(){
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_laser_resume(int father, int *brothers, arbitration fn){
+   pthread_mutex_lock(&refmutex);
+   if (laser_refs>0){
+      laser_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      laser_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[LASER_DEVICE]==0)&&(serve_device[LASER_DEVICE])){
+         char message_out[MAX_MESSAGE];
 
-  if((device_active[LASER_DEVICE==0])&&(serve_device[LASER_DEVICE])){
-    char message_out[MAX_MESSAGE];
-
-    printf("laser schema resume (networkclient driver)\n");
-    all[laser_schema_id].father = father;
-    all[laser_schema_id].fps = 0.;
-    all[laser_schema_id].k =0;
-    put_state(laser_schema_id,winner);
-    device_active[LASER_DEVICE]=1;
-    pthread_mutex_lock(&mymutex[LASER_DEVICE]);
-    sprintf(message_out,"%d\n",NETWORKSERVER_subscribe_laser);
-    write(device_socket[LASER_DEVICE],message_out,strlen(message_out));
-    state[LASER_DEVICE]=winner;
-    pthread_cond_signal(&condition[LASER_DEVICE]);
-    pthread_mutex_unlock(&mymutex[LASER_DEVICE]);
-  }
-  return 0;
+         printf("laser schema resume (networkclient driver)\n");
+         all[laser_schema_id].father = father;
+         all[laser_schema_id].fps = 0.;
+         all[laser_schema_id].k = 0;
+         put_state(laser_schema_id,winner);
+         device_active[LASER_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[LASER_DEVICE]);
+         sprintf(message_out,"%d\n",NETWORKSERVER_subscribe_laser);
+         write(device_socket[LASER_DEVICE],message_out,strlen(message_out));
+         state[LASER_DEVICE]=winner;
+         pthread_cond_signal(&condition[LASER_DEVICE]);
+         pthread_mutex_unlock(&mymutex[LASER_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** laser suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int networkclient_laser_suspend(){
+   pthread_mutex_lock(&refmutex);
+   if (laser_refs>1){
+      laser_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      laser_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[LASER_DEVICE])&&(serve_device[LASER_DEVICE])){
+         char message_out[MAX_MESSAGE];
 
-  if((device_active[LASER_DEVICE])&&(serve_device[LASER_DEVICE])){
-    char message_out[MAX_MESSAGE];
-
-    printf("laser schema suspend (networking driver)\n");
-    device_active[LASER_DEVICE]=0;
-    pthread_mutex_lock(&mymutex[LASER_DEVICE]);
-    sprintf(message_out,"%d\n",NETWORKSERVER_unsubscribe_laser);
-    write(device_socket[LASER_DEVICE],message_out,strlen(message_out));
-    state[LASER_DEVICE]=slept;
-    put_state(laser_schema_id,slept);
-    pthread_mutex_unlock(&mymutex[LASER_DEVICE]);
-  }
-  return 0;
-
+         printf("laser schema suspend (networking driver)\n");
+         device_active[LASER_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[LASER_DEVICE]);
+         sprintf(message_out,"%d\n",NETWORKSERVER_unsubscribe_laser);
+         write(device_socket[LASER_DEVICE],message_out,strlen(message_out));
+         state[LASER_DEVICE]=slept;
+         put_state(laser_schema_id,slept);
+         pthread_mutex_unlock(&mymutex[LASER_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** encoders resume function following jdec platform API schemas.
@@ -363,44 +434,59 @@ int networkclient_laser_suspend(){
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_encoders_resume(int father, int *brothers, arbitration fn){
+   pthread_mutex_lock(&refmutex);
+   if (encoders_refs>0){
+      encoders_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      encoders_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[ENCODERS_DEVICE]==0)&&(serve_device[ENCODERS_DEVICE])){
+         char message_out[MAX_MESSAGE];
 
-  if((device_active[ENCODERS_DEVICE]==0)&&(serve_device[ENCODERS_DEVICE])){
-    char message_out[MAX_MESSAGE];
-
-    printf("encoders schema resume (networking driver)\n");
-    all[encoders_schema_id].father = father;
-    all[encoders_schema_id].fps = 0.;
-    all[encoders_schema_id].k =0;
-    put_state(encoders_schema_id,winner);
-    device_active[ENCODERS_DEVICE]=1;
-    pthread_mutex_lock(&mymutex[ENCODERS_DEVICE]);
-    sprintf(message_out,"%d\n", NETWORKSERVER_subscribe_encoders);
-    write(device_socket[ENCODERS_DEVICE],message_out,strlen(message_out));
-    state[ENCODERS_DEVICE]=winner;
-    pthread_cond_signal(&condition[ENCODERS_DEVICE]);
-    pthread_mutex_unlock(&mymutex[ENCODERS_DEVICE]);
-  }
-  return 0;
+         printf("encoders schema resume (networking driver)\n");
+         all[encoders_schema_id].father = father;
+         all[encoders_schema_id].fps = 0.;
+         all[encoders_schema_id].k =0;
+         put_state(encoders_schema_id,winner);
+         device_active[ENCODERS_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[ENCODERS_DEVICE]);
+         sprintf(message_out,"%d\n", NETWORKSERVER_subscribe_encoders);
+         write(device_socket[ENCODERS_DEVICE],message_out,strlen(message_out));
+         state[ENCODERS_DEVICE]=winner;
+         pthread_cond_signal(&condition[ENCODERS_DEVICE]);
+         pthread_mutex_unlock(&mymutex[ENCODERS_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** encoders suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int networkclient_encoders_suspend(){
+   pthread_mutex_lock(&refmutex);
+   if (encoders_refs>1){
+      encoders_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      encoders_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[ENCODERS_DEVICE])&&(serve_device[ENCODERS_DEVICE])){
+         char message_out[MAX_MESSAGE];
 
-  if((device_active[ENCODERS_DEVICE])&&(serve_device[ENCODERS_DEVICE])){
-    char message_out[MAX_MESSAGE];
-
-    printf("laser schema suspend (networkclient driver)\n");
-    device_active[ENCODERS_DEVICE]=0;
-    pthread_mutex_lock(&mymutex[ENCODERS_DEVICE]);
-    sprintf(message_out,"%d\n", NETWORKSERVER_unsubscribe_encoders);
-    write(device_socket[ENCODERS_DEVICE],message_out,strlen(message_out));
-    state[ENCODERS_DEVICE]=slept;
-    put_state(encoders_schema_id,slept);
-    pthread_mutex_unlock(&mymutex[ENCODERS_DEVICE]);
-  }
-  return 0;
-
+         printf("laser schema suspend (networkclient driver)\n");
+         device_active[ENCODERS_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[ENCODERS_DEVICE]);
+         sprintf(message_out,"%d\n", NETWORKSERVER_unsubscribe_encoders);
+         write(device_socket[ENCODERS_DEVICE],message_out,strlen(message_out));
+         state[ENCODERS_DEVICE]=slept;
+         put_state(encoders_schema_id,slept);
+         pthread_mutex_unlock(&mymutex[ENCODERS_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** sonars resume function following jdec platform API schemas.
@@ -409,44 +495,59 @@ int networkclient_encoders_suspend(){
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_sonars_resume(int father, int *brothers, arbitration fn){
+   pthread_mutex_lock(&refmutex);
+   if (sonars_refs>0){
+      sonars_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      sonars_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[SONARS_DEVICE]==0)&&(serve_device[SONARS_DEVICE])){
+         char message_out[MAX_MESSAGE];
 
-  if((device_active[SONARS_DEVICE]==0)&&(serve_device[SONARS_DEVICE])){
-    char message_out[MAX_MESSAGE];
-
-    printf("sonars schema resume (networkclient driver)\n");
-    all[sonars_schema_id].father = father;
-    all[sonars_schema_id].fps = 0.;
-    all[sonars_schema_id].k =0;
-    put_state(sonars_schema_id,winner);
-    device_active[SONARS_DEVICE]=1;
-    pthread_mutex_lock(&mymutex[SONARS_DEVICE]);
-    sprintf(message_out,"%d\n",NETWORKSERVER_subscribe_us);
-    write(device_socket[SONARS_DEVICE],message_out,strlen(message_out));
-    state[SONARS_DEVICE]=winner;
-    pthread_cond_signal(&condition[SONARS_DEVICE]);
-    pthread_mutex_unlock(&mymutex[SONARS_DEVICE]);
-  }
-  return 0;
+         printf("sonars schema resume (networkclient driver)\n");
+         all[sonars_schema_id].father = father;
+         all[sonars_schema_id].fps = 0.;
+         all[sonars_schema_id].k =0;
+         put_state(sonars_schema_id,winner);
+         device_active[SONARS_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[SONARS_DEVICE]);
+         sprintf(message_out,"%d\n",NETWORKSERVER_subscribe_us);
+         write(device_socket[SONARS_DEVICE],message_out,strlen(message_out));
+         state[SONARS_DEVICE]=winner;
+         pthread_cond_signal(&condition[SONARS_DEVICE]);
+         pthread_mutex_unlock(&mymutex[SONARS_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** sonars suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int networkclient_sonars_suspend(){
+   pthread_mutex_lock(&refmutex);
+   if (sonars_refs>1){
+      sonars_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      sonars_refs=0;
+      pthread_mutex_unlock(&refmutex);
+            if((device_active[SONARS_DEVICE])&&(serve_device[SONARS_DEVICE])){
+         char message_out[MAX_MESSAGE];
 
-  if((device_active[SONARS_DEVICE])&&(serve_device[SONARS_DEVICE])){
-    char message_out[MAX_MESSAGE];
-
-    printf("sonars schema suspend (networkclient driver)\n");
-    device_active[SONARS_DEVICE]=0;
-    pthread_mutex_lock(&mymutex[SONARS_DEVICE]);
-    sprintf(message_out,"%d\n",NETWORKSERVER_unsubscribe_us);
-    write(device_socket[SONARS_DEVICE],message_out,strlen(message_out));
-    state[SONARS_DEVICE]=slept;
-    put_state(sonars_schema_id,slept);
-    pthread_mutex_unlock(&mymutex[SONARS_DEVICE]);
-  }
-  return 0;
-
+         printf("sonars schema suspend (networkclient driver)\n");
+         device_active[SONARS_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[SONARS_DEVICE]);
+         sprintf(message_out,"%d\n",NETWORKSERVER_unsubscribe_us);
+         write(device_socket[SONARS_DEVICE],message_out,strlen(message_out));
+         state[SONARS_DEVICE]=slept;
+         put_state(sonars_schema_id,slept);
+         pthread_mutex_unlock(&mymutex[SONARS_DEVICE]);
+            }
+   }
+   return 0;
 }
 
 /** motors resume function following jdec platform API schemas.
@@ -455,36 +556,51 @@ int networkclient_sonars_suspend(){
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_motors_resume(int father, int *brothers, arbitration fn){
-
-  if((device_active[MOTORS_DEVICE]==0)&&(serve_device[MOTORS_DEVICE])){
-    printf("motors schema resume (networkclient driver)\n");
-    all[motors_schema_id].father = father;
-    all[motors_schema_id].fps = 0.;
-    all[motors_schema_id].k =0;
-    put_state(motors_schema_id,winner);
-    device_active[MOTORS_DEVICE]=1;
-    pthread_mutex_lock(&mymutex[MOTORS_DEVICE]);
-    state[MOTORS_DEVICE]=winner;
-    pthread_cond_signal(&condition[MOTORS_DEVICE]);
-    pthread_mutex_unlock(&mymutex[MOTORS_DEVICE]);
-  }
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (motors_refs>0){
+      motors_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      motors_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[MOTORS_DEVICE]==0)&&(serve_device[MOTORS_DEVICE])){
+         printf("motors schema resume (networkclient driver)\n");
+         all[motors_schema_id].father = father;
+         all[motors_schema_id].fps = 0.;
+         all[motors_schema_id].k =0;
+         put_state(motors_schema_id,winner);
+         device_active[MOTORS_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[MOTORS_DEVICE]);
+         state[MOTORS_DEVICE]=winner;
+         pthread_cond_signal(&condition[MOTORS_DEVICE]);
+         pthread_mutex_unlock(&mymutex[MOTORS_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** motors suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int networkclient_motors_suspend(){
-
-  if((device_active[MOTORS_DEVICE])&&(serve_device[MOTORS_DEVICE])){
-    printf("motors schema suspend (networkclient driver)\n");
-    device_active[MOTORS_DEVICE]=0;
-    pthread_mutex_lock(&mymutex[MOTORS_DEVICE]);
-    state[MOTORS_DEVICE]=slept;
-    put_state(motors_schema_id,slept);
-    pthread_mutex_unlock(&mymutex[MOTORS_DEVICE]);
-  }
-  return 0;
-
+   pthread_mutex_lock(&refmutex);
+   if (motors_refs>1){
+      motors_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      motors_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[MOTORS_DEVICE])&&(serve_device[MOTORS_DEVICE])){
+         printf("motors schema suspend (networkclient driver)\n");
+         device_active[MOTORS_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[MOTORS_DEVICE]);
+         state[MOTORS_DEVICE]=slept;
+         put_state(motors_schema_id,slept);
+         pthread_mutex_unlock(&mymutex[MOTORS_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** colorA resume function following jdec platform API schemas.
@@ -493,39 +609,55 @@ int networkclient_motors_suspend(){
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_colorA_resume(int father, int *brothers, arbitration fn){
-
-  if((device_active[COLORA_DEVICE]==0)&&(serve_device[COLORA_DEVICE])){
-    char message_out[MAX_MESSAGE];
+   pthread_mutex_lock(&refmutex);
+   if (colorA_refs>0){
+      colorA_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorA_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[COLORA_DEVICE]==0)&&(serve_device[COLORA_DEVICE])){
+         char message_out[MAX_MESSAGE];
     
-    printf("colorA schema resume (networkclient driver)\n");
-    all[colorA_schema_id].father = father;
-    all[colorA_schema_id].fps = 0.;
-    all[colorA_schema_id].k =0;
-    put_state(colorA_schema_id,winner);
-    device_active[COLORA_DEVICE]=1;
-    pthread_mutex_lock(&mymutex[COLORA_DEVICE]);
-    sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORA_DEVICE]);
-    write(device_socket[COLORA_DEVICE],message_out,strlen(message_out));
-    state[COLORA_DEVICE]=winner;
-    pthread_cond_signal(&condition[COLORA_DEVICE]);
-    pthread_mutex_unlock(&mymutex[COLORA_DEVICE]);
-  }
-  return 0;
+         printf("colorA schema resume (networkclient driver)\n");
+         all[colorA_schema_id].father = father;
+         all[colorA_schema_id].fps = 0.;
+         all[colorA_schema_id].k =0;
+         put_state(colorA_schema_id,winner);
+         device_active[COLORA_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[COLORA_DEVICE]);
+         sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORA_DEVICE]);
+         write(device_socket[COLORA_DEVICE],message_out,strlen(message_out));
+         state[COLORA_DEVICE]=winner;
+         pthread_cond_signal(&condition[COLORA_DEVICE]);
+         pthread_mutex_unlock(&mymutex[COLORA_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** colorA suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int networkclient_colorA_suspend(){
-
-  if((device_active[COLORA_DEVICE])&&(serve_device[COLORA_DEVICE])){
-    printf("colorA schema suspend (networkclient driver)\n");
-    device_active[COLORA_DEVICE]=0;
-    pthread_mutex_lock(&mymutex[COLORA_DEVICE]);
-    state[COLORA_DEVICE]=slept;
-    put_state(colorA_schema_id,slept);
-    pthread_mutex_unlock(&mymutex[COLORA_DEVICE]);
-  }
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (colorA_refs>1){
+      colorA_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorA_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[COLORA_DEVICE])&&(serve_device[COLORA_DEVICE])){
+         printf("colorA schema suspend (networkclient driver)\n");
+         device_active[COLORA_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[COLORA_DEVICE]);
+         state[COLORA_DEVICE]=slept;
+         put_state(colorA_schema_id,slept);
+         pthread_mutex_unlock(&mymutex[COLORA_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** colorB resume function following jdec platform API schemas.
@@ -534,40 +666,55 @@ int networkclient_colorA_suspend(){
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_colorB_resume(int father, int *brothers, arbitration fn){
-
-  if((device_active[COLORB_DEVICE]==0)&&(serve_device[COLORB_DEVICE])){
-    char message_out[MAX_MESSAGE];
+   pthread_mutex_lock(&refmutex);
+   if (colorB_refs>0){
+      colorB_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorB_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[COLORB_DEVICE]==0)&&(serve_device[COLORB_DEVICE])){
+         char message_out[MAX_MESSAGE];
     
-    printf("colorB schema resume (networkclient driver)\n");
-    all[colorB_schema_id].father = father;
-    all[colorB_schema_id].fps = 0.;
-    all[colorB_schema_id].k =0;
-    put_state(colorB_schema_id,winner);
-    device_active[COLORB_DEVICE]=1;
-    pthread_mutex_lock(&mymutex[COLORB_DEVICE]);
-    sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORB_DEVICE]);
-    write(device_socket[COLORB_DEVICE],message_out,strlen(message_out));
-    state[COLORB_DEVICE]=winner;
-    pthread_cond_signal(&condition[COLORB_DEVICE]);
-    pthread_mutex_unlock(&mymutex[COLORB_DEVICE]);
-  }
-  return 0;
+         printf("colorB schema resume (networkclient driver)\n");
+         all[colorB_schema_id].father = father;
+         all[colorB_schema_id].fps = 0.;
+         all[colorB_schema_id].k =0;
+         put_state(colorB_schema_id,winner);
+         device_active[COLORB_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[COLORB_DEVICE]);
+         sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORB_DEVICE]);
+         write(device_socket[COLORB_DEVICE],message_out,strlen(message_out));
+         state[COLORB_DEVICE]=winner;
+         pthread_cond_signal(&condition[COLORB_DEVICE]);
+         pthread_mutex_unlock(&mymutex[COLORB_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** colorB suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int networkclient_colorB_suspend(){
-
-  if((device_active[COLORB_DEVICE])&&(serve_device[COLORB_DEVICE])){
-    printf("colorB schema suspend (networkclient driver)\n");
-    device_active[COLORB_DEVICE]=0;
-    pthread_mutex_lock(&mymutex[COLORB_DEVICE]);
-    state[COLORB_DEVICE]=slept;
-    put_state(colorB_schema_id,slept);
-    pthread_mutex_unlock(&mymutex[COLORB_DEVICE]);
-  }
-  return 0;
-
+   pthread_mutex_lock(&refmutex);
+   if (colorB_refs>1){
+      colorB_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorB_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[COLORB_DEVICE])&&(serve_device[COLORB_DEVICE])){
+         printf("colorB schema suspend (networkclient driver)\n");
+         device_active[COLORB_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[COLORB_DEVICE]);
+         state[COLORB_DEVICE]=slept;
+         put_state(colorB_schema_id,slept);
+         pthread_mutex_unlock(&mymutex[COLORB_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** colorC resume function following jdec platform API schemas.
@@ -576,40 +723,55 @@ int networkclient_colorB_suspend(){
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_colorC_resume(int father, int *brothers, arbitration fn){
+   pthread_mutex_lock(&refmutex);
+   if (colorC_refs>0){
+      colorC_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorC_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[COLORC_DEVICE]==0)&&(serve_device[COLORC_DEVICE])){
+         char message_out[MAX_MESSAGE];
 
-  if((device_active[COLORC_DEVICE]==0)&&(serve_device[COLORC_DEVICE])){
-    char message_out[MAX_MESSAGE];
-
-    printf("colorC schema resume (networkclient driver)\n");
-    all[colorC_schema_id].father = father;
-    all[colorC_schema_id].fps = 0.;
-    all[colorC_schema_id].k =0;
-    put_state(colorC_schema_id,winner);
-    device_active[COLORC_DEVICE]=1;
-    pthread_mutex_lock(&mymutex[COLORC_DEVICE]);
-    sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORC_DEVICE]);
-    write(device_socket[COLORC_DEVICE],message_out,strlen(message_out));
-    state[COLORC_DEVICE]=winner;
-    pthread_cond_signal(&condition[COLORC_DEVICE]);
-    pthread_mutex_unlock(&mymutex[COLORC_DEVICE]);
-  }
-  return 0;
+         printf("colorC schema resume (networkclient driver)\n");
+         all[colorC_schema_id].father = father;
+         all[colorC_schema_id].fps = 0.;
+         all[colorC_schema_id].k =0;
+         put_state(colorC_schema_id,winner);
+         device_active[COLORC_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[COLORC_DEVICE]);
+         sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORC_DEVICE]);
+         write(device_socket[COLORC_DEVICE],message_out,strlen(message_out));
+         state[COLORC_DEVICE]=winner;
+         pthread_cond_signal(&condition[COLORC_DEVICE]);
+         pthread_mutex_unlock(&mymutex[COLORC_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** colorC suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int networkclient_colorC_suspend(){
-
-  if((device_active[COLORC_DEVICE])&&(serve_device[COLORC_DEVICE])){
-    printf("colorC schema suspend (networkclient driver)\n");
-    device_active[COLORC_DEVICE]=0;
-    pthread_mutex_lock(&mymutex[COLORC_DEVICE]);
-    state[COLORC_DEVICE]=slept;
-    put_state(colorC_schema_id,slept);
-    pthread_mutex_unlock(&mymutex[COLORC_DEVICE]);
-  }
-  return 0;
-
+   pthread_mutex_lock(&refmutex);
+   if (colorC_refs>1){
+      colorC_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorC_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[COLORC_DEVICE])&&(serve_device[COLORC_DEVICE])){
+         printf("colorC schema suspend (networkclient driver)\n");
+         device_active[COLORC_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[COLORC_DEVICE]);
+         state[COLORC_DEVICE]=slept;
+         put_state(colorC_schema_id,slept);
+         pthread_mutex_unlock(&mymutex[COLORC_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** colorD resume function following jdec platform API schemas.
@@ -618,39 +780,55 @@ int networkclient_colorC_suspend(){
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_colorD_resume(int father, int *brothers, arbitration fn){
+   pthread_mutex_lock(&refmutex);
+   if (colorD_refs>0){
+      colorD_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorD_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[COLORD_DEVICE]==0)&&(serve_device[COLORD_DEVICE])){
+         char message_out[MAX_MESSAGE];
 
-  if((device_active[COLORD_DEVICE]==0)&&(serve_device[COLORD_DEVICE])){
-    char message_out[MAX_MESSAGE];
-
-    printf("colorD schema resume (networkclient driver)\n");
-    all[colorD_schema_id].father = father;
-    all[colorD_schema_id].fps = 0.;
-    all[colorD_schema_id].k =0;
-    put_state(colorD_schema_id,winner);
-    device_active[COLORD_DEVICE]=1;
-    pthread_mutex_lock(&mymutex[COLORD_DEVICE]);
-    sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORD_DEVICE]);
-    write(device_socket[COLORD_DEVICE],message_out,strlen(message_out));
-    state[COLORD_DEVICE]=winner;
-    pthread_cond_signal(&condition[COLORD_DEVICE]);
-    pthread_mutex_unlock(&mymutex[COLORD_DEVICE]);
-  }
-  return 0;
+         printf("colorD schema resume (networkclient driver)\n");
+         all[colorD_schema_id].father = father;
+         all[colorD_schema_id].fps = 0.;
+         all[colorD_schema_id].k =0;
+         put_state(colorD_schema_id,winner);
+         device_active[COLORD_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[COLORD_DEVICE]);
+         sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORD_DEVICE]);
+         write(device_socket[COLORD_DEVICE],message_out,strlen(message_out));
+         state[COLORD_DEVICE]=winner;
+         pthread_cond_signal(&condition[COLORD_DEVICE]);
+         pthread_mutex_unlock(&mymutex[COLORD_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** colorD suspend function following jdec platform API schemas.
  *  @return integer suspending result.*/
 int networkclient_colorD_suspend(){
-
-  if((device_active[COLORD_DEVICE])&&(serve_device[COLORD_DEVICE])){
-    printf("colorD schema suspend (networkclient driver)\n");
-    device_active[COLORD_DEVICE]=0;
-    pthread_mutex_lock(&mymutex[COLORD_DEVICE]);
-    state[COLORD_DEVICE]=slept;
-    put_state(colorD_schema_id,slept);
-    pthread_mutex_unlock(&mymutex[COLORD_DEVICE]);
-  }
-  return 0;
+   pthread_mutex_lock(&refmutex);
+   if (colorD_refs>1){
+      colorD_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      colorD_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[COLORD_DEVICE])&&(serve_device[COLORD_DEVICE])){
+         printf("colorD schema suspend (networkclient driver)\n");
+         device_active[COLORD_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[COLORD_DEVICE]);
+         state[COLORD_DEVICE]=slept;
+         put_state(colorD_schema_id,slept);
+         pthread_mutex_unlock(&mymutex[COLORD_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** networkclient driver pthread function for pantiltencoders reception.*/
@@ -720,27 +898,41 @@ void *networkclient_pantiltencoders_thread(void *not_used){
 /** networkclient driver pthread function for pantiltmotors reception.*/
 void *networkclient_pantiltmotors_thread(void *not_used){
 
-  char pantiltmotors_out[MAX_MESSAGE];
+   char pantiltmotors_out[MAX_MESSAGE];
+   
+   struct timeval a,b;
+   long diff, next;
 
-  printf("networkclient pantiltmotors thread started\n");
+   printf("networkclient pantiltmotors thread started\n");
 
-  do{
-    speedcounter(ptmotors_schema_id);
-    pthread_mutex_lock(&mymutex[PANTILT_MOTORS_DEVICE]);
+   do{
+      speedcounter(ptmotors_schema_id);
+      pthread_mutex_lock(&mymutex[PANTILT_MOTORS_DEVICE]);
 
-    if (state[PANTILT_MOTORS_DEVICE]==slept){
-      printf("networkclient pantiltmotors thread goes sleep mode\n");
-      pthread_cond_wait(&condition[PANTILT_MOTORS_DEVICE],&mymutex[PANTILT_MOTORS_DEVICE]);
-      printf("networkclient pantiltmotors thread woke up\n");
-      pthread_mutex_unlock(&mymutex[PANTILT_MOTORS_DEVICE]);
-    }else{
-            
-      sprintf(pantiltmotors_out,"%ld %1.1f %1.1f %1.1f %1.1f\n", (long int)NETWORKSERVER_pantilt_position,longitude,latitude,longitude_speed,latitude_speed);
-      write(device_socket[PANTILT_MOTORS_DEVICE],pantiltmotors_out,strlen(pantiltmotors_out));
-      pthread_mutex_unlock(&mymutex[PANTILT_MOTORS_DEVICE]);
-    }
-  }while(networkclient_close_command==0);
-  pthread_exit(0);
+      if (state[PANTILT_MOTORS_DEVICE]==slept){
+         printf("networkclient pantiltmotors thread goes sleep mode\n");
+         pthread_cond_wait(&condition[PANTILT_MOTORS_DEVICE],&mymutex[PANTILT_MOTORS_DEVICE]);
+         printf("networkclient pantiltmotors thread woke up\n");
+         pthread_mutex_unlock(&mymutex[PANTILT_MOTORS_DEVICE]);
+      }else{
+
+         gettimeofday(&a,NULL);
+         sprintf(pantiltmotors_out,"%ld %1.1f %1.1f %1.1f %1.1f\n", (long int)NETWORKSERVER_pantilt_position,longitude,latitude,longitude_speed,latitude_speed);
+         write(device_socket[PANTILT_MOTORS_DEVICE],pantiltmotors_out,strlen(pantiltmotors_out));
+         pthread_mutex_unlock(&mymutex[PANTILT_MOTORS_DEVICE]);
+         gettimeofday(&b,NULL);
+
+         diff = (b.tv_sec-a.tv_sec)*1000000+b.tv_usec-a.tv_usec;
+         next = motors_cycle*1000-diff-10000;
+      
+         if (next>0)
+            usleep(pantiltmotors_cycle*1000-diff);
+         else {
+            usleep(pantiltmotors_cycle*1000);
+         }
+      }
+   }while(networkclient_close_command==0);
+   pthread_exit(0);
 }
 
 /** networkclient driver pthread function for laser reception.*/
@@ -786,14 +978,14 @@ void *networkclient_laser_thread(void *not_used){
 	    if (laser_in[i]=='\n'){
 	      
 	      message = &laser_in[beginning];
-	      
+
 	      if (sscanf(message,"%d %lu",&type,&network_clock)!=2){
 		printf("networkclient: i don't understand message: (%s)\n",message);
 		
 	      }else{
 		/* increments the 'j' pointer over the message till the first measure starts, jumping over the clock and type  */
 		while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
-		j++;
+                while((message[j]=='\n')&&(message[j]==' ')&&(message[j]=='\0')) j++;
 		while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
 
 		if (type==NETWORKSERVER_laser)  
@@ -802,16 +994,16 @@ void *networkclient_laser_thread(void *not_used){
 		    sensor=0;
 		    
 		    while (message[j]==' '){/* reading sonars. it stops when buffer[j]=='\n' or '\0'*/
-		      if (sscanf(&message[++j],"%d ",&l)!=1){
+		      if (sscanf(&message[++j]," %d",&l)!=1){
 			printf("networkclient: conversion failed in laser measure conversion\n");
 			
 		      }else{ /* adds the measure and increments the pointer 'j' over the message */
 			while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
 			/*j++;*/
 			jde_laser[sensor++]=l;
-			laser_clock=network_clock;
 		      }
 		    }
+                    laser_clock=network_clock;
 		  }
 	      }	      
 	      beginning=i+1;
@@ -841,7 +1033,6 @@ void *networkclient_encoders_thread(void *not_used){
   int readn, beginning,i;
   unsigned long int network_clock;
   int type;
-  int j=0;
   unsigned long nowtime; /* microsecs */
   float nowx, nowy, nowtheta;
   float a1,a2,a3;
@@ -874,28 +1065,34 @@ void *networkclient_encoders_thread(void *not_used){
       case 0: close(device_socket[ENCODERS_DEVICE]); break; /* EOF: closing socket */
       case -1: ; break; /* nothing to read; */
       default:
-	/* there is something in the socket. if received '\n' then a message has been completed. otherwise, we simply add the
-	   received chunk to the input_buffer and we will completed in further calls. if many message's were completed, we serve
-	   them all of them. we asume that the message in the buffer starts at the beginning of the buffer.*/
+	/* there is something in the socket. if received '\n' then a message has
+          been completed. otherwise, we simply add the received chunk to the
+          input_buffer and we will completed in further calls. if many message's
+          were completed, we serve them all of them. we asume that the message
+          in the buffer starts at the beginning of the buffer.*/
 	{
 	  beginning=0;
 	  for(i=encoders_trac; (i<MAX_MESSAGE)&&(i<encoders_trac+readn);i++){
 	    if (encoders_in[i]=='\n'){
 	      
 	      message = &encoders_in[beginning];
-	      
+              
 	      if (sscanf(message,"%d %lu",&type,&network_clock)!=2){
 		printf("networkclient: i don't understand message: (%s)\n",message);
 		
 	      }else{
 		/* increments the 'j' pointer over the message till the first measure starts, jumping over the clock and type  */
-		while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
-		j++;
-		while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
+// 		while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
+// 		j++;
+// 		while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
+                 //Esto no cumple el objetivo que espera
 	      
 		if (type==NETWORKSERVER_encoders) 
-		  { 
-		    if (sscanf(&message[++j],"%f %f %f %lu",&nowx,&nowy,&nowtheta,&nowtime)!=4){
+		  {
+// 		    if (sscanf(&message[++j],"%f %f %f %lu",&nowx,&nowy,&nowtheta,&nowtime)!=4){
+                     if (sscanf(message,"%d %lu %f %f %f %lu", &type,
+                         &network_clock, &nowx, &nowy, &nowtheta, &nowtime)!=6)
+                     {
 		      printf("networkclient: conversion failed in encoders measure conversion\n");
 		      /* WATCH OUT WITH LOCALE CONFIGURATION!. With bad settings it expects float numbers to be composed of an
 			 integer part and a decimal part separated by a single comma (not a single dot). In such a case the sscanf
@@ -911,16 +1108,16 @@ void *networkclient_encoders_thread(void *not_used){
 		      if (nowtime>lasttime){
 			tspeed=(1000000*sqrt((nowx-jde_robot[0])*(nowx-jde_robot[0])+(nowy-jde_robot[1])*(nowy-jde_robot[1])))/(nowtime-lasttime);
 			if (((nowx-jde_robot[0])*jde_robot[3]+(nowy-jde_robot[1])*jde_robot[4])<0) tspeed=-tspeed;
-			
+
 			/* square to avoid function calling and its delay. Division by DEGTOREAD introduces some little error */
 			a1=(jde_robot[2]/DEGTORAD-nowtheta)*(jde_robot[2]/DEGTORAD-nowtheta);
 			a2=(jde_robot[2]/DEGTORAD-nowtheta-360)*(jde_robot[2]/DEGTORAD-nowtheta-360);
 			a3=(jde_robot[2]/DEGTORAD-nowtheta+360)*(jde_robot[2]/DEGTORAD-nowtheta+360);
-			if ((a1<a2)&&(a1<a3)) 
+			if ((a1<a2)&&(a1<a3))
 			  rspeed=(1000000*(nowtheta-jde_robot[2]/DEGTORAD))/(nowtime-lasttime);
-			else if ((a2<a1)&&(a2<a3)) 
+			else if ((a2<a1)&&(a2<a3))
 			  rspeed=(1000000*(nowtheta-360-jde_robot[2]/DEGTORAD))/(nowtime-lasttime);
-			else 
+			else
 			  rspeed=(1000000*(nowtheta+360-jde_robot[2]/DEGTORAD))/(nowtime-lasttime);
 		      }
 		    }
@@ -1000,7 +1197,7 @@ void *networkclient_sonars_thread(void *not_used){
 	    if (sonars_in[i]=='\n'){
 	      
 	      message = &sonars_in[beginning];
-	      
+
 	      if (sscanf(message,"%d %lu",&type,&network_clock)!=2){
 		printf("networkclient: i don't understand message: (%s)\n",message);
 		
@@ -1011,7 +1208,7 @@ void *networkclient_sonars_thread(void *not_used){
 		while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
 		
 		if (type==NETWORKSERVER_sonars)
-		  { 
+		  {
 		    while (message[j]==' ') { /* reading sonars. it stops when buffer[j]=='\n' or '\0'*/
 		      if (sscanf(&message[++j],"%d %f",&sensor, &measure)!=2){
 			printf("networkclient: conversion failed in sonars measure conversion\n");
@@ -1020,11 +1217,11 @@ void *networkclient_sonars_thread(void *not_used){
 			while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
 			j++;
 			while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
-			speedcounter(sonars_schema_id);
 			us[sensor]=measure;
 			us_clock[sensor]=network_clock;
 		      }
 		    }
+                    speedcounter(sonars_schema_id);
 		  }
 	      }
 	      beginning=i+1;
@@ -1050,33 +1247,46 @@ void *networkclient_sonars_thread(void *not_used){
 
 /** networkclient driver pthread function for motors reception.*/
 void *networkclient_motors_thread(void *not_used){
-  float ac=0.;
-  char message[MAX_MESSAGE];
+   float ac=0.;
+   char message[MAX_MESSAGE];
 
-  printf("networkclient motors thread started\n");
+   struct timeval a,b;
+   long diff, next;
 
-  do{
-    speedcounter(motors_schema_id);
-    pthread_mutex_lock(&mymutex[MOTORS_DEVICE]);
+   printf("networkclient motors thread started\n");
 
-    if (state[MOTORS_DEVICE]==slept){
-      printf("networkclient motors thread goes sleep mode\n");
-      pthread_cond_wait(&condition[MOTORS_DEVICE],&mymutex[MOTORS_DEVICE]);
-      printf("networkclient motors thread woke up\n");
-      pthread_mutex_unlock(&mymutex[MOTORS_DEVICE]);
-    }else{
+   do{
+      speedcounter(motors_schema_id);
+      pthread_mutex_lock(&mymutex[MOTORS_DEVICE]);
+
+      if (state[MOTORS_DEVICE]==slept){
+         printf("networkclient motors thread goes sleep mode\n");
+         pthread_cond_wait(&condition[MOTORS_DEVICE],&mymutex[MOTORS_DEVICE]);
+         printf("networkclient motors thread woke up\n");
+         pthread_mutex_unlock(&mymutex[MOTORS_DEVICE]);
+      }else{
       
-      /* sends to networkserver the speed control in mm/s, mms/s2 through a the device socket */
+         /* sends to networkserver the speed control in mm/s, mms/s2 through a the device socket */
+         gettimeofday(&a,NULL);
+         sprintf(message,"%d %1.1f %1.1f\n",NETWORKSERVER_drive_speed,v,ac);
+         write(device_socket[MOTORS_DEVICE],message,strlen(message));
+         sprintf(message,"%d %1.1f %1.1f\n",NETWORKSERVER_steer_speed,w,ac);
+         write(device_socket[MOTORS_DEVICE],message,strlen(message));
+         gettimeofday(&b,NULL);
+      
+         pthread_mutex_unlock(&mymutex[MOTORS_DEVICE]);
 
-      sprintf(message,"%d %1.1f %1.1f\n",NETWORKSERVER_drive_speed,v,ac);
-      write(device_socket[PANTILT_MOTORS_DEVICE],message,strlen(message));
-      sprintf(message,"%d %1.1f %1.1f\n",NETWORKSERVER_steer_speed,w,ac);
-      write(device_socket[PANTILT_MOTORS_DEVICE],message,strlen(message));
-
-      pthread_mutex_unlock(&mymutex[MOTORS_DEVICE]);
-    }
-  }while(networkclient_close_command==0);
-  pthread_exit(0);
+         diff = (b.tv_sec-a.tv_sec)*1000000+b.tv_usec-a.tv_usec;
+         next = motors_cycle*1000-diff-10000;
+      
+         if (next>0)
+            usleep(motors_cycle*1000-diff);
+         else {
+            usleep(motors_cycle*1000);
+         }
+      }
+   }while(networkclient_close_command==0);
+   pthread_exit(0);
 }
 
 /** networkclient driver pthread function for colorA reception.*/
@@ -1090,6 +1300,7 @@ void *networkclient_colorA_thread(void *not_used){
   char message_in[MAX_MESSAGE];
   char message_out[MAX_MESSAGE];
   char lastmessage[MAX_MESSAGE];
+  unsigned long int network_clock;
   /*  fd_set dummy_set,read_set;*/
 
   printf("networkclient colorA thread started\n");
@@ -1134,8 +1345,9 @@ void *networkclient_colorA_thread(void *not_used){
 	    /* preparing to read next image */
 	    colorA_trac=0; start=0;
 	    /* completing image received */
-	    speedcounter(colorA_schema_id);
 	    memcpy(colorA,mmbuf,SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+            speedcounter(colorA_schema_id);
+            imageA_clock=network_clock;
 	    /* asking for next image */
 	    pthread_mutex_lock(&mymutex[COLORA_DEVICE]);
 	    sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORA_DEVICE]);
@@ -1149,7 +1361,6 @@ void *networkclient_colorA_thread(void *not_used){
 	  for(j=colorA_trac;(j<MAX_MESSAGE)&&(j<colorA_trac+bytes_readn)&&(read_mode==MESSAGES);j++){
 	    if (message_in[j]=='\n'){
 	      int type;
-	      unsigned long int network_clock;
 		
 	      strncpy(lastmessage,&message_in[start],j-start);
 	      lastmessage[j-start]='\0';
@@ -1221,6 +1432,7 @@ void *networkclient_colorB_thread(void *not_used){
   char message_out[MAX_MESSAGE];
   char lastmessage[MAX_MESSAGE];
   /*  fd_set dummy_set,read_set;*/
+  unsigned long int network_clock;
 
   printf("networkclient colorB thread started\n");
 
@@ -1264,8 +1476,9 @@ void *networkclient_colorB_thread(void *not_used){
 	    /* preparing to read next image */
 	    colorB_trac=0; start=0;
 	    /* completing image received */
-	    speedcounter(colorB_schema_id);
 	    memcpy(colorB,mmbuf,SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+            speedcounter(colorB_schema_id);
+            imageB_clock=network_clock;
 	    /* asking for next image */
 	    pthread_mutex_lock(&mymutex[COLORB_DEVICE]);
 	    sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORB_DEVICE]);
@@ -1279,7 +1492,6 @@ void *networkclient_colorB_thread(void *not_used){
 	  for(j=colorB_trac;(j<MAX_MESSAGE)&&(j<colorB_trac+bytes_readn)&&(read_mode==MESSAGES);j++){
 	    if (message_in[j]=='\n'){
 	      int type;
-	      unsigned long int network_clock;
 		
 	      strncpy(lastmessage,&message_in[start],j-start);
 	      lastmessage[j-start]='\0';
@@ -1352,6 +1564,8 @@ void *networkclient_colorC_thread(void *not_used){
   char lastmessage[MAX_MESSAGE];
   /*  fd_set dummy_set,read_set;*/
 
+  unsigned long int network_clock;
+
   printf("networkclient colorC thread started\n");
 
   do{
@@ -1394,8 +1608,9 @@ void *networkclient_colorC_thread(void *not_used){
 	    /* preparing to read next image */
 	    colorC_trac=0; start=0;
 	    /* completing image received */
-	    speedcounter(colorC_schema_id);
 	    memcpy(colorC,mmbuf,SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+            speedcounter(colorC_schema_id);
+            imageC_clock=network_clock;
 	    /* asking for next image */
 	    pthread_mutex_lock(&mymutex[COLORC_DEVICE]);
 	    sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORC_DEVICE]);
@@ -1409,7 +1624,6 @@ void *networkclient_colorC_thread(void *not_used){
 	  for(j=colorC_trac;(j<MAX_MESSAGE)&&(j<colorC_trac+bytes_readn)&&(read_mode==MESSAGES);j++){
 	    if (message_in[j]=='\n'){
 	      int type;
-	      unsigned long int network_clock;
 		
 	      strncpy(lastmessage,&message_in[start],j-start);
 	      lastmessage[j-start]='\0';
@@ -1482,6 +1696,8 @@ void *networkclient_colorD_thread(void *not_used){
   char lastmessage[MAX_MESSAGE];
   /*  fd_set dummy_set,read_set;*/
 
+  unsigned long network_clock;
+
   printf("networkclient colorD thread started\n");
 
   do{
@@ -1524,8 +1740,9 @@ void *networkclient_colorD_thread(void *not_used){
 	    /* preparing to read next image */
 	    colorD_trac=0; start=0;
 	    /* completing image received */
-	    speedcounter(colorD_schema_id);
 	    memcpy(colorD,mmbuf,SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+            speedcounter(colorD_schema_id);
+            imageC_clock=network_clock;
 	    /* asking for next image */
 	    pthread_mutex_lock(&mymutex[COLORD_DEVICE]);
 	    sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORD_DEVICE]);
@@ -1539,7 +1756,6 @@ void *networkclient_colorD_thread(void *not_used){
 	  for(j=colorD_trac;(j<MAX_MESSAGE)&&(j<colorD_trac+bytes_readn)&&(read_mode==MESSAGES);j++){
 	    if (message_in[j]=='\n'){
 	      int type;
-	      unsigned long int network_clock;
 		
 	      strncpy(lastmessage,&message_in[start],j-start);
 	      lastmessage[j-start]='\0';
@@ -1934,6 +2150,11 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    myexport("colorA", "id", &colorA_schema_id);
+    myexport("colorA", "colorA", &colorA);
+    myexport("colorA","clock", &imageA_clock);
+    myexport("colorA","resume",(void *) &networkclient_colorA_resume);
+    myexport("colorA","suspend",(void *) &networkclient_colorA_suspend);
   }
   if(serve_device[COLORB_DEVICE]){
     all[num_schemas].id = (int *) &colorB_schema_id;
@@ -1948,6 +2169,11 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    myexport("colorB", "id", &colorB_schema_id);
+    myexport("colorB", "colorB", &colorB);
+    myexport("colorB","clock", &imageB_clock);
+    myexport("colorB","resume",(void *) &networkclient_colorB_resume);
+    myexport("colorB","suspend",(void *) &networkclient_colorB_suspend);
   }
   if(serve_device[COLORC_DEVICE]){
     all[num_schemas].id = (int *) &colorC_schema_id;
@@ -1962,6 +2188,11 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    myexport("colorC", "id", &colorC_schema_id);
+    myexport("colorC", "colorC", &colorC);
+    myexport("colorC","clock", &imageC_clock);
+    myexport("colorC","resume",(void *) &networkclient_colorC_resume);
+    myexport("colorC","suspend",(void *) &networkclient_colorC_suspend);
   }
   if(serve_device[COLORD_DEVICE]){
     all[num_schemas].id = (int *) &colorD_schema_id;
@@ -1976,6 +2207,11 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    myexport("colorD", "id", &colorD_schema_id);
+    myexport("colorD", "colorD", &colorD);
+    myexport("colorD","clock", &imageD_clock);
+    myexport("colorD","resume",(void *) &networkclient_colorD_resume);
+    myexport("colorD","suspend",(void *) &networkclient_colorD_suspend);
   }
   if(serve_device[PANTILT_ENCODERS_DEVICE]){
     all[num_schemas].id = (int *) &ptencoders_schema_id;
@@ -1990,6 +2226,12 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    myexport("ptencoders","id",&ptencoders_schema_id);
+    myexport("ptencoders","pan_angle",&pan_angle);
+    myexport("ptencoders","tilt_angle",&tilt_angle);
+    myexport("ptencoders", "clock", &pantiltencoders_clock);
+    myexport("ptencoders","resume",(void *)&networkclient_pantiltencoders_resume);
+    myexport("ptencoders","suspend",(void *)&networkclient_pantiltencoders_suspend);
   }
   if(serve_device[PANTILT_MOTORS_DEVICE]){
     all[num_schemas].id = (int *) &ptmotors_schema_id;
@@ -2004,6 +2246,15 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    pantiltmotors_cycle=150; /*Ajusta el cilo de envÃ­o de Ã³rdenes a los motores*/
+    myexport("ptmotors","id",&ptmotors_schema_id);
+    myexport("ptmotors","longitude",&longitude);
+    myexport("ptmotors","latitude",&latitude);
+    myexport("ptmotors","longitude_speed",&longitude_speed);
+    myexport("ptmotors","latitude_speed",&latitude_speed);
+    myexport("ptmotors","cycle", &pantiltmotors_cycle);
+    myexport("ptmotors","resume",(void *)&networkclient_pantiltmotors_resume);
+    myexport("ptmotors","suspend",(void *)&networkclient_pantiltmotors_suspend);
   }
   if(serve_device[LASER_DEVICE]){
     all[num_schemas].id = (int *) &laser_schema_id;
@@ -2018,6 +2269,11 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    myexport("laser","id",&laser_schema_id);
+    myexport("laser","laser",&jde_laser);
+    myexport("laser","clock", &laser_clock);
+    myexport("laser","resume",(void *) &networkclient_laser_resume);
+    myexport("laser","suspend",(void *) &networkclient_laser_suspend);
   }
   if(serve_device[ENCODERS_DEVICE]){
     all[num_schemas].id = (int *) &encoders_schema_id;
@@ -2032,6 +2288,11 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    myexport("encoders","id",&encoders_schema_id);
+    myexport("encoders","jde_robot",&jde_robot);
+    myexport("encoders", "clock", &encoders_clock);
+    myexport("encoders","resume",(void *) &networkclient_encoders_resume);
+    myexport("encoders","suspend",(void *) &networkclient_encoders_suspend);
   }
   if(serve_device[SONARS_DEVICE]){
     all[num_schemas].id = (int *) &sonars_schema_id;
@@ -2046,6 +2307,11 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    myexport("sonars","id",&sonars_schema_id);
+    myexport("sonars","us",&us);
+    myexport("sonars", "clock", &us_clock);
+    myexport("sonars","resume",(void *)&networkclient_sonars_resume);
+    myexport("sonars","suspend",(void *)&networkclient_sonars_suspend);
   }
   if(serve_device[MOTORS_DEVICE]){
     all[num_schemas].id = (int *) &motors_schema_id;
@@ -2060,6 +2326,13 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    motors_cycle=150; /*Ajusta el ciclo de envÃ­o a los motores, cada 150 ms*/
+    myexport("motors","id",&motors_schema_id);
+    myexport("motors","v",&v);
+    myexport("motors","w",&w);
+    myexport("motors","cycle",&motors_cycle);
+    myexport("motors","resume",(void *)&networkclient_motors_resume);
+    myexport("motors","suspend",(void *)&networkclient_motors_suspend);
   }
 
   printf("networkclient driver started up\n");

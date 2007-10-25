@@ -1,4 +1,3 @@
-
 /************************************************
  * jdec networkserver driver                    *
  ************************************************/
@@ -43,9 +42,13 @@ struct client{
    int cs;
    char subscriptions[MAXDEVICE];
    char name[256];
+   unsigned long clocks[MAXDEVICE];
    unsigned long clk;
 };
 #define CLIENT_TH_CYCLE 33 /*para servir las imágenes en tiempo real*/
+
+/** Número de canales de la imágnes*/
+#define CANALES 3
 
 /* port to bind the server */
 int networkserver_port=0;
@@ -249,7 +252,6 @@ void init(){
       /*Do myimport's*/
       if (serve_device[i]){
          switch (i){
-
             case COLORA_DEVICE:
                variables[i]=myimport ("colorA", "colorA");
                resume[i]=(resumeFn) myimport ("colorA", "resume");
@@ -309,6 +311,86 @@ void init(){
                else{
                   resume[i](-1, NULL, NULL);
                }
+               break;
+            case ENCODERS_DEVICE:
+               variables[i]=myimport ("encoders", "jde_robot");
+               resume[i]=(resumeFn) myimport("encoders", "resume");
+               suspend[i]=(suspendFn) myimport("encoders", "suspend");
+               if (!variables[i]){
+                  serve_device[i]=0;
+                  fprintf (stderr, "I can't fetch 'encoders', it'll not be served\n");
+               }
+               else{
+                  resume[i](-1, NULL, NULL);
+               }
+               break;
+            case SONARS_DEVICE:
+               variables[i]=myimport ("sonars", "us");
+               resume[i]=(resumeFn) myimport("sonars", "resume");
+               suspend[i]=(suspendFn) myimport("sonars", "suspend");
+               if (!variables[i]){
+                  serve_device[i]=0;
+                  fprintf (stderr, "I can't fetch 'sonars', it'll not be served\n");
+               }
+               else{
+                  resume[i](-1, NULL, NULL);
+               }
+               break;
+            case MOTORS_DEVICE:
+            {
+               static float *motors[2];
+               variables[i]=motors;
+               motors[0]=(float *)myimport ("motors", "v");
+               motors[1]=(float *)myimport ("motors", "w");
+               resume[i]=(resumeFn) myimport("motors", "resume");
+               suspend[i]=(suspendFn) myimport("motors", "suspend");
+               if (!motors[0] || !motors[1]){
+                  serve_device[i]=0;
+                  fprintf (stderr, "I can't fetch 'motors', it'll not be served\n");
+               }
+               else{
+                  resume[i](-1, NULL, NULL);
+               }
+               break;
+            }
+            case PANTILT_ENCODERS_DEVICE:
+            {
+               static float *pantilt[2];
+               variables[i]=pantilt;
+               pantilt[0]=myimport ("ptencoders", "pan_angle");
+               pantilt[1]=myimport ("ptencoders", "tilt_angle");
+               resume[i]=(resumeFn) myimport("ptencoders", "resume");
+               suspend[i]=(suspendFn) myimport("ptencoders", "suspend");
+               if (!pantilt[0] || !pantilt[1]){
+                  serve_device[i]=0;
+                  fprintf (stderr, "I can't fetch 'pantilt_encoders', they'll not be served\n");
+               }
+               else{
+                  resume[i](-1, NULL, NULL);
+               }
+               break;
+            }
+            case PANTILT_MOTORS_DEVICE:
+            {
+               static float *pantilt_motors[4];
+               variables[i]=pantilt_motors;
+               pantilt_motors[0]=myimport ("ptmotors", "longitude");
+               pantilt_motors[1]=myimport ("ptencoders", "latitude");
+               pantilt_motors[2]=myimport ("ptmotors", "longitude_speed");
+               pantilt_motors[3]=myimport ("ptencoders", "latitude_speed");
+               resume[i]=(resumeFn) myimport("ptmotors", "resume");
+               suspend[i]=(suspendFn) myimport("ptmotors", "suspend");
+               if (!pantilt_motors[0] || !pantilt_motors[1] ||
+                    !pantilt_motors[2] || !pantilt_motors[3])
+               {
+                  serve_device[i]=0;
+                  fprintf (stderr, "I can't fetch 'pantilt_motors', they'll not be served\n");
+               }
+               else{
+                  resume[i](-1, NULL, NULL);
+               }
+               break;
+            }
          }
       }
    }
@@ -370,6 +452,8 @@ void dispatch_petition(struct client *info, char *petition) {
       /*El cliente pide una imagen*/
       int cam;
       char *image=NULL;
+      unsigned long int *clock;
+      unsigned long int time;
 
       if (sscanf(petition,"%ld %d",&codigo_mensaje,&cam)!=2){
          return;
@@ -377,46 +461,137 @@ void dispatch_petition(struct client *info, char *petition) {
       /*Comprobar si el código de cámara está servido*/
       if (serve_device[COLORA_DEVICE]==1 && device_network_id[COLORA_DEVICE]==cam){
          image=*(char **)variables[COLORA_DEVICE];
+         clock=(unsigned long int *)myimport("colorA", "clock");
+         while (info->clocks[COLORA_DEVICE]==*clock){
+            usleep(1000);/*Espero una nueva imagen durante 1ms*/
+         }
+         info->clocks[COLORA_DEVICE]=*clock;
+         time=info->clocks[COLORA_DEVICE];
       }
       else if (serve_device[COLORB_DEVICE]==1 && device_network_id[COLORB_DEVICE]==cam){
          image=*(char **)variables[COLORB_DEVICE];
+         clock=(unsigned long int *)myimport("colorB", "clock");
+         while (info->clocks[COLORB_DEVICE]==*clock){
+            usleep(1000);/*Espero una nueva imagen durante 1ms*/
+         }
+         info->clocks[COLORB_DEVICE]=*clock;
+         time=info->clocks[COLORB_DEVICE];
       }
       else if (serve_device[COLORC_DEVICE]==1 && device_network_id[COLORC_DEVICE]==cam){
          image=*(char **)variables[COLORC_DEVICE];
+         clock=(unsigned long int *)myimport("colorC", "clock");
+         while (info->clocks[COLORC_DEVICE]==*clock){
+            usleep(1000);/*Espero una nueva imagen durante 1ms*/
+         }
+         info->clocks[COLORC_DEVICE]=*clock;
+         time=info->clocks[COLORC_DEVICE];
       }
       else if (serve_device[COLORD_DEVICE]==1 && device_network_id[COLORD_DEVICE]==cam){
          image=*(char **)variables[COLORD_DEVICE];
+         clock=(unsigned long int *)myimport("colorD", "clock");
+         while (info->clocks[COLORD_DEVICE]==*clock){
+            usleep(1000);/*Espero una nueva imagen durante 1ms*/
+         }
+         info->clocks[COLORD_DEVICE]=*clock;
+         time=info->clocks[COLORD_DEVICE];
       }
 
       if (image!=NULL)
       {
-         char myimage[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3];
-         struct timeval t;
-         unsigned long int now;
-         
-         gettimeofday(&t,NULL);
-         now=t.tv_sec*1000000+t.tv_usec;
-         /*Envía la hora de captura, como no lo sabemos se envía la hora actual*/
+         char myimage[SIFNTSC_COLUMNS*SIFNTSC_ROWS*CANALES];
 
-         sprintf(output_buffer,"%d %lu %d %d %d %d\n",
-                 NETWORKSERVER_rgb24bpp_sifntsc_image, now, cam, SIFNTSC_COLUMNS,
-                 SIFNTSC_ROWS,3);
-
-         my_write(info->cs,output_buffer,strlen(output_buffer));
          /*Hago una copia local de la imagen para evitar posibles cambios en
          ella durante la escritura*/
-         memcpy(myimage, image, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-         my_write(info->cs,myimage, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+         memcpy(myimage, image, SIFNTSC_COLUMNS*SIFNTSC_ROWS*CANALES);
+         sprintf(output_buffer,"%d %lu %d %d %d %d\n",
+                 NETWORKSERVER_rgb24bpp_sifntsc_image, time, cam, SIFNTSC_COLUMNS,
+                 SIFNTSC_ROWS,CANALES);
+         my_write(info->cs,output_buffer,strlen(output_buffer));
+         my_write(info->cs,myimage, SIFNTSC_COLUMNS*SIFNTSC_ROWS*CANALES);
       }
    }
+
+
    else if (codigo_mensaje==NETWORKSERVER_subscribe_laser){
       /*Subscripción al laser*/
-      info->subscriptions[LASER_DEVICE]=1;
+      if (serve_device[LASER_DEVICE]==1)
+         info->subscriptions[LASER_DEVICE]=1;
    }
    else if (codigo_mensaje==NETWORKSERVER_unsubscribe_laser){
       /*Subscripción al laser*/
       info->subscriptions[LASER_DEVICE]=0;
    }
+
+
+   else if (codigo_mensaje==NETWORKSERVER_subscribe_encoders){
+      /*Subscripción a los encoders*/
+      if (serve_device[ENCODERS_DEVICE]==1)
+         info->subscriptions[ENCODERS_DEVICE]=1;
+   }
+   else if (codigo_mensaje==NETWORKSERVER_unsubscribe_encoders){
+      /*Subscripción a los encoders*/
+      info->subscriptions[ENCODERS_DEVICE]=0;
+   }
+
+
+   else if (codigo_mensaje==NETWORKSERVER_subscribe_us){
+      /*Subscripción a los sonars*/
+      if (serve_device[SONARS_DEVICE]==1)
+         info->subscriptions[SONARS_DEVICE]=1;
+   }
+   else if (codigo_mensaje==NETWORKSERVER_unsubscribe_us){
+      /*Subscripción a los sonars*/
+      info->subscriptions[SONARS_DEVICE]=0;
+   }
+
+
+   else if (codigo_mensaje==NETWORKSERVER_drive_speed){
+      /*Cambio de la velocidad lineal*/
+      float vel, ac;
+      if (serve_device[MOTORS_DEVICE]==1){
+         if (sscanf(petition,"%ld %f %f",&codigo_mensaje,&vel,&ac)!=3)
+            printf ("No entiendo el mensaje de cambio de velocidad.\n");
+         else
+            *(((float **)(variables[MOTORS_DEVICE]))[0])=vel;
+      }
+   }
+   else if (codigo_mensaje==NETWORKSERVER_steer_speed){
+      /*Cambio de la velocidad de giro*/
+      float velw, ac;
+      if (serve_device[MOTORS_DEVICE]==1){
+         if (sscanf(petition,"%ld %f %f",&codigo_mensaje,&velw,&ac)!=3)
+            printf ("No entiendo el mensaje de cambio de velocidad de giro.\n");
+         else
+            *(((float **)(variables[MOTORS_DEVICE]))[1])=velw;
+      }
+   }
+
+
+   else if (codigo_mensaje==NETWORKSERVER_subscribe_pantilt_encoders){
+      if (serve_device[PANTILT_ENCODERS_DEVICE])
+          info->subscriptions[PANTILT_ENCODERS_DEVICE]=1;
+   }
+   else if (codigo_mensaje==NETWORKSERVER_unsubscribe_pantilt_encoders){
+      info->subscriptions[PANTILT_ENCODERS_DEVICE]=0;
+   }
+
+
+   else if (codigo_mensaje==NETWORKSERVER_pantilt_position){
+      float lat, longt, lat_sp, longt_sp;
+      if (serve_device[PANTILT_MOTORS_DEVICE]==1){
+         if (sscanf(petition,"%ld %f %f %f %f",&codigo_mensaje,&longt, &lat,
+             &longt_sp, &lat_sp)!=5)
+            printf ("No entiendo el mensaje de motores del pantilt.\n");
+         else{
+            *(((float **)(variables[PANTILT_MOTORS_DEVICE]))[0])=longt;
+            *(((float **)(variables[PANTILT_MOTORS_DEVICE]))[1])=lat;
+            *(((float **)(variables[PANTILT_MOTORS_DEVICE]))[2])=longt_sp;
+            *(((float **)(variables[PANTILT_MOTORS_DEVICE]))[4])=lat_sp;
+         }
+      }
+   }
+
+
    else if (codigo_mensaje==NETWORKSERVER_goodbye ||
             codigo_mensaje==NETWORKSERVER_goodbye_images)
    {
@@ -438,15 +613,83 @@ void dispatch_subscriptions(struct client * info) {
       if (info->subscriptions[i]) {
          switch(i) {
             case LASER_DEVICE:
-               /*Componer el mensaje*/
-               sprintf(buff,"%d %lu",NETWORKSERVER_laser,info->clk);
-               for (j=0;j<180; j++){
-                  sprintf(buff+strlen(buff)," %d",(int)(((int *)variables[i])[j]));
+            {
+               unsigned long int *clock;
+               clock=(unsigned long int *)myimport("laser", "clock");
+               if (info->clocks[LASER_DEVICE]!=*clock){
+                  info->clocks[LASER_DEVICE]=*clock;
+                  /*Componer el mensaje*/
+                  sprintf(buff,"%d %lu",NETWORKSERVER_laser,
+                          info->clocks[LASER_DEVICE]);
+                  variables[i]=myimport("laser", "laser");
+                  for (j=0;j<NUM_LASER; j++){
+                     sprintf(buff+strlen(buff)," %d",
+                             (int)(((int *)variables[i])[j]));
+                  }
+                  sprintf(buff+strlen(buff),"\n");
+                  /*Envío del mensaje*/
+                  my_write(info->cs,buff,strlen(buff));
                }
-               sprintf(buff+strlen(buff),"\n");
-               /*Envío del mensaje*/
-               my_write(info->cs,buff,strlen(buff));
                break;
+            }
+            case ENCODERS_DEVICE:
+            {
+               unsigned long int *clock;
+               clock=(unsigned long int *)myimport("encoders", "clock");
+               if (info->clocks[ENCODERS_DEVICE]!=*clock){
+                  info->clocks[ENCODERS_DEVICE]=*clock;
+                  /*Composición del mensaje*/
+                  sprintf(buff, "%d %lu", NETWORKSERVER_encoders,
+                          info->clocks[ENCODERS_DEVICE]);
+                  sprintf(buff+strlen(buff)," %1.1f %1.1f %1.5f %lu\n",
+                          (float)((float *)variables[i])[0],
+                          (float)((float *)variables[i])[1],
+                          (float)((float *)variables[i])[2] * RADTODEG,
+                          info->clocks[ENCODERS_DEVICE]);
+                  /*Envío del mensaje*/
+                  my_write(info->cs, buff, strlen(buff));
+               }
+               break;
+            }
+            case SONARS_DEVICE:
+            {
+               unsigned long int *clock;
+               clock=(unsigned long int *)myimport("sonars", "clock");
+               //printf ("%ld, %lu, %lu", info->clocks[SONARS_DEVICE], clock, clock[0]);
+               if (info->clocks[SONARS_DEVICE]!=clock[0]){
+                  info->clocks[SONARS_DEVICE]=clock[0];
+                  /*Componer el mensaje*/
+                  sprintf(buff,"%d %lu",NETWORKSERVER_sonars,
+                          info->clocks[SONARS_DEVICE]);
+                  variables[i]=myimport("sonars", "us");
+                  for (j=0;j<NUM_SONARS; j++){
+                     sprintf(buff+strlen(buff)," %d %1.1f", j,
+                             (float)(((float *)variables[i])[j]));
+                  }
+                  sprintf(buff+strlen(buff),"\n");
+                  /*Envío del mensaje*/
+                  my_write(info->cs,buff,strlen(buff));
+               }
+               break;
+            }
+            case PANTILT_ENCODERS_DEVICE:
+            {
+               unsigned long int *clock;
+               clock=(unsigned long int *)myimport("ptencoders", "clock");
+               if (info->clocks[PANTILT_ENCODERS_DEVICE]!=*clock){
+                  info->clocks[PANTILT_ENCODERS_DEVICE]=*clock;
+                  /*Composición del mensaje*/
+                  sprintf(buff, "%d %lu", NETWORKSERVER_pantilt_encoders,
+                          info->clocks[ENCODERS_DEVICE]);
+                  sprintf(buff+strlen(buff)," %1.1f %1.1f\n",
+                          (float)((float *)variables[i])[0],
+                           (float)((float *)variables[i])[1]);
+                  /*Envía tipo, hora, pan, tilt*/
+                  /*Envío del mensaje*/
+                  my_write(info->cs, buff, strlen(buff));
+               }
+               break;
+            }
          }
       }
    }
