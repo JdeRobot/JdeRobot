@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006 José María Cañas Plaza 
+ *  Copyright (C) 2006 Josï¿½ Marï¿½a Caï¿½as Plaza 
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  Authors : Josï¿½ Marï¿½a Caï¿½as Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
 #define thisrelease "jdec 4.2-svn"
@@ -28,6 +28,7 @@
 /* hierarchy */
 JDESchema all[MAX_SCHEMAS];
 int num_schemas=0;
+int loaded_schemas=0;
 
 JDEDriver mydrivers[MAX_SCHEMAS];
 int num_drivers=0;
@@ -481,6 +482,7 @@ int jde_readline(FILE *myfile)
 	sscanf(&buffer_file[j],"%s",word);
 	jde_loadschema(word);
 	(*all[num_schemas-1].startup)();
+        loaded_schemas++;
       }
     else if (strcmp(word,"resume")==0)
       {
@@ -545,8 +547,8 @@ int main(int argc, char** argv)
   signal(SIGABRT, &jdeshutdown); /* failed assert handler */
   signal(SIGPIPE, SIG_IGN);
   
-  /* Pablo Barrera: Por alguna razón libforms hace que fprintf("%f") ponga 
-    una coma en vez de un punto como separador si las locales son españolas. 
+  /* Pablo Barrera: Por alguna razï¿½n libforms hace que fprintf("%f") ponga 
+    una coma en vez de un punto como separador si las locales son espaï¿½olas. 
     Con esto las ponemos a POSIX. Al salir el entorno es el normal */
   /*unsetenv("LANG");*/
   setenv("LC_ALL","POSIX",1);
@@ -610,13 +612,18 @@ int main(int argc, char** argv)
   do {
     i=jde_readline(config);
   }while(i!=EOF);
-  
-  /* start the jdegui thread */
-  printf("Starting gui stuff...\n");
-  jdegui_startup(); 
-  jdegui_resume();
 
-  if (startwithgui==TRUE) mastergui_resume();
+  if (loaded_schemas>0){
+     /* start the jdegui thread */
+     printf("Starting gui stuff...\n");
+     jdegui_startup();
+     jdegui_resume();
+
+     if (startwithgui==TRUE) mastergui_resume();
+  }
+  else{
+     printf ("No schemas loaded. I'll act as server. No gui started\n");
+  }
 
   /* start the cronos thread */
   printf("Starting cronos...\n");

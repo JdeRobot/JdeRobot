@@ -469,29 +469,22 @@ void *player_thread(){
 
 /** player driver laser function callback.*/
 void player_laser_callback(){
-   int j=0,cont=0;
+   int j=0,cont=0,rel;
   
    speedcounter(laser_schema_id);
-   laser_clock=tag;
-   tag++;
+   laser_clock=tag++;
 
-   if (player_laser->scan_count==NUM_LASER){
-      while((cont<NUM_LASER)&&(j<player_laser->scan_count)){
+   /*player ofrece 360 medidas cada 0.5 angulos, por lo k solo cojemos los angulos "enteros", 181 medidas*/
+   /*NUM_LASER readings (181 in the robot, 179 in the simulator) */
+   /*rel indica cada cuanto se debe tomar una medida de player para ajustar
+     el número de medidas a las de jdec*/
+   rel=player_laser->scan_count/NUM_LASER;
+   while((cont<NUM_LASER)&&(j<player_laser->scan_count)){
+      if (j%rel!=1){
          jde_laser[cont]=(int)(player_laser->scan[j][0]*1000);
          cont++;
-         j++;
       }
-   }
-   else{
-      while((cont<NUM_LASER)&&(j<player_laser->scan_count)){
-         if (j%2!=1){
-            /*player ofrece 360 medidas cada 0.5 angulos, por lo k solo cojemos los angulos "enteros", 181 medidas*/
-            /*NUM_LASER readings (181 in the robot, 179 in the simulator) */
-            jde_laser[cont]=(int)(player_laser->scan[j][0]*1000);
-            cont++;
-         }
-         j++;
-      }
+      j++;
    }
 }
 
