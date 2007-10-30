@@ -127,6 +127,67 @@ int ptmotors_schema_id;
 /** id for pantilt encoders schema.*/
 int ptencoders_schema_id;
 
+/*API Variables servidas*/
+/** 'ptmotors' schema longitude control*/
+float longitude; /* degs, pan angle */
+/** 'ptmotors' schema latitude control*/
+float latitude; /* degs, tilt angle */
+/** 'ptmotors' schema longitude speed control*/
+float longitude_speed;
+/** 'ptmotors' schema latitude speed control*/
+float latitude_speed;
+/** 'ptmotors' schema cycle control variable*/
+int pantiltmotors_cycle;
+
+/** 'ptencoders' schema pan angle information*/
+float pan_angle;   /* degs */
+/** 'ptencoders' schema tilt angle information*/
+float tilt_angle;  /* degs */
+/** 'ptencoders' schema clock*/
+unsigned long int pantiltencoders_clock;
+
+/** 'colorA' schema image data*/
+char *colorA; /* sifntsc image itself */
+/** 'colorA' schema clock*/
+unsigned long int imageA_clock;
+
+/** 'colorB' schema image data*/
+char *colorB; /* sifntsc image itself */
+/** 'colorB' schema clock*/
+unsigned long int imageB_clock;
+
+/** 'colorC' schema image data*/
+char *colorC; /* sifntsc image itself */
+/** 'colorC' schema clock*/
+unsigned long int imageC_clock;
+
+/** 'colorD' schema image data*/
+char *colorD; /* sifntsc image itself */
+/** 'colorD' schema clock*/
+unsigned long int imageD_clock;
+
+/** 'encoders' schema, odometry information.*/
+float jde_robot[5];
+/** 'encoders' schema, clock variable.*/
+unsigned long int encoders_clock;
+
+/** 'laser' schema, laser information.*/
+int jde_laser[NUM_LASER];
+/** 'laser' schema, clock variable.*/
+unsigned long int laser_clock;
+
+/** 'sonars' schema, sonars information.*/
+float us[NUM_SONARS];
+/** 'sonars' schema, clock variable.*/
+unsigned long int us_clock[NUM_SONARS];
+
+/** 'motors' schema, speed control.*/
+float v; /* mm/s */
+/** 'motors' schema, turn speed control.*/
+float w; /* deg/s*/
+/** 'motors' schema, cycle control.*/
+int motors_cycle;
+
 
 /* Contadores de referencias*/
 /** laser ref counter*/
@@ -961,59 +1022,67 @@ void *networkclient_laser_thread(void *not_used){
       pthread_mutex_unlock(&mymutex[LASER_DEVICE]);
     }else{
       
-      pthread_mutex_unlock(&mymutex[LASER_DEVICE]);
+       pthread_mutex_unlock(&mymutex[LASER_DEVICE]);
 
-      /* reading from socket. no overflow when using MAX_MESSAGE. messages are read in chunks. */
-      readn=read(device_socket[LASER_DEVICE],&laser_in[laser_trac],MAX_MESSAGE);
-      switch(readn){
-      case 0: close(device_socket[LASER_DEVICE]); break; /* EOF: closing socket */
-      case -1: ; break; /* nothing to read; */
-      default:
-	/* there is something in the socket. if received '\n' then a message has been completed. otherwise, we simply add the
-	   received chunk to the input_buffer and we will completed in further calls. if many message's were completed, we serve
-	   them all of them. we asume that the message in the buffer starts at the beginning of the buffer.*/
-	{
-	  beginning=0;
-	  for(i=laser_trac; (i<MAX_MESSAGE)&&(i<laser_trac+readn);i++){
-	    if (laser_in[i]=='\n'){
-	      
-	      message = &laser_in[beginning];
+       /* reading from socket. no overflow when using MAX_MESSAGE. messages are read in chunks. */
+       readn=read(device_socket[LASER_DEVICE],&laser_in[laser_trac],MAX_MESSAGE);
+       switch(readn){
+          case 0:
+             close(device_socket[LASER_DEVICE]);
+             break; /* EOF: closing socket */
+          case -1:
+             break; /* nothing to read; */
+          default:
+             /* there is something in the socket. if received '\n' then a
+             message has been completed. otherwise, we simply add the received
+             chunk to the input_buffer and we will completed in further calls.
+             if many message's were completed, we serve them all of them. we
+             asume that the message in the buffer starts at the beginning of
+             the buffer.*/
+          {
+             beginning=0;
+             for(i=laser_trac; (i<MAX_MESSAGE)&&(i<laser_trac+readn);i++){
+                if (laser_in[i]=='\n'){
+                   message = &laser_in[beginning];
 
-	      if (sscanf(message,"%d %lu",&type,&network_clock)!=2){
-		printf("networkclient: i don't understand message: (%s)\n",message);
+                   if (sscanf(message,"%d %lu",&type,&network_clock)!=2){
+                      printf("networkclient: i don't understand message: (%s)\n",message);
 		
-	      }else{
-		/* increments the 'j' pointer over the message till the first measure starts, jumping over the clock and type  */
-		while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
-                while((message[j]=='\n')&&(message[j]==' ')&&(message[j]=='\0')) j++;
-		while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
+                   }else{
+                      j=0;
+                      /* increments the 'j' pointer over the message till the first measure starts, jumping over the clock and type  */
+                      while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0'))
+                         j++;
+                      j++;
+                      while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0'))
+                         j++;
 
-		if (type==NETWORKSERVER_laser)  
-		  { 
-		    speedcounter(laser_schema_id);
-		    sensor=0;
-		    
-		    while (message[j]==' '){/* reading sonars. it stops when buffer[j]=='\n' or '\0'*/
-		      if (sscanf(&message[++j]," %d",&l)!=1){
-			printf("networkclient: conversion failed in laser measure conversion\n");
-			
-		      }else{ /* adds the measure and increments the pointer 'j' over the message */
-			while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
-			/*j++;*/
-			jde_laser[sensor++]=l;
-		      }
-		    }
-                    laser_clock=network_clock;
-		  }
-	      }	      
-	      beginning=i+1;
-	    }
-	  }
+                      if (type==NETWORKSERVER_laser){
+                         speedcounter(laser_schema_id);
+                         sensor=0;
+
+                         while (message[j]==' '){/* reading lasers. it stops when buffer[j]=='\n' or '\0'*/
+                            if (sscanf(&message[++j],"%d ",&l)!=1){
+                               printf("networkclient: conversion failed in laser measure conversion\n");
+                            }else{ /* adds the measure and increments the pointer 'j' over the message */
+                               while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
+                               /*j++;*/
+                               jde_laser[sensor++]=l;
+                            }
+                         }
+                         laser_clock=network_clock;
+                      }
+                   }
+                   beginning=i+1;
+                }
+             }
 	  
 	  if (beginning==0){ /* message didn't end in this reception */
-	    if (laser_trac+readn >= MAX_MESSAGE-1) laser_trac=0;
+	    if (laser_trac+readn >= MAX_MESSAGE-1)
+               laser_trac=0;
 	    /* the reception buffer has been filled with the chunks of the received messages, but no message has been entirely completed. the current message will be ignored. LOOK OUT! the next message will start incorrectly as it will have the rest of the incompleted message at the beginning, and will be ignored too because it can't be understood. that way, when overflow occurs, both messages will be lost.*/
-	    else laser_trac+=readn;
+	    else
+               laser_trac+=readn;
 	    
 	  }else{
 	    strncpy(laser_in,&(laser_in[beginning]),laser_trac+readn-beginning);
@@ -1081,12 +1150,6 @@ void *networkclient_encoders_thread(void *not_used){
 		printf("networkclient: i don't understand message: (%s)\n",message);
 		
 	      }else{
-		/* increments the 'j' pointer over the message till the first measure starts, jumping over the clock and type  */
-// 		while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
-// 		j++;
-// 		while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
-                 //Esto no cumple el objetivo que espera
-	      
 		if (type==NETWORKSERVER_encoders) 
 		  {
 // 		    if (sscanf(&message[++j],"%f %f %f %lu",&nowx,&nowy,&nowtheta,&nowtime)!=4){
@@ -1171,76 +1234,80 @@ void *networkclient_sonars_thread(void *not_used){
 
   do{
 
-    pthread_mutex_lock(&mymutex[SONARS_DEVICE]);
+     pthread_mutex_lock(&mymutex[SONARS_DEVICE]);
 
-    if (state[SONARS_DEVICE]==slept){
-      printf("networkclient sonars thread goes sleep mode\n");
-      pthread_cond_wait(&condition[SONARS_DEVICE],&mymutex[SONARS_DEVICE]);
-      printf("networkclient sonars thread woke up\n");
-      pthread_mutex_unlock(&mymutex[SONARS_DEVICE]);
-    }else{
+     if (state[SONARS_DEVICE]==slept){
+        printf("networkclient sonars thread goes sleep mode\n");
+        pthread_cond_wait(&condition[SONARS_DEVICE],&mymutex[SONARS_DEVICE]);
+        printf("networkclient sonars thread woke up\n");
+        pthread_mutex_unlock(&mymutex[SONARS_DEVICE]);
+     }else{
       
-      pthread_mutex_unlock(&mymutex[SONARS_DEVICE]);
+        pthread_mutex_unlock(&mymutex[SONARS_DEVICE]);
 
-      /* reading from socket. no overflow when using MAX_MESSAGE. messages are read in chunks. */
-      readn=read(device_socket[SONARS_DEVICE],&sonars_in[sonars_trac],MAX_MESSAGE);
-      switch(readn){
-      case 0: close(device_socket[SONARS_DEVICE]); break; /* EOF: closing socket */
-      case -1: ; break; /* nothing to read; */
-      default:
-	/* there is something in the socket. if received '\n' then a message has been completed. otherwise, we simply add the
-	   received chunk to the input_buffer and we will completed in further calls. if many message's were completed, we serve
-	   them all of them. we asume that the message in the buffer starts at the beginning of the buffer.*/
-	{
-	  beginning=0;
-	  for(i=sonars_trac; (i<MAX_MESSAGE)&&(i<sonars_trac+readn);i++){
-	    if (sonars_in[i]=='\n'){
+        /* reading from socket. no overflow when using MAX_MESSAGE. messages are read in chunks. */
+        readn=read(device_socket[SONARS_DEVICE],&sonars_in[sonars_trac],MAX_MESSAGE);
+        switch(readn){
+           case 0: close(device_socket[SONARS_DEVICE]); break; /* EOF: closing socket */
+           case -1: ; break; /* nothing to read; */
+           default:
+              /* there is something in the socket. if received '\n' then a
+              message has been completed. otherwise, we simply add the received
+              chunk to the input_buffer and we will completed in further calls.
+              if many message's were completed, we serve them all of them. we
+              asume that the message in the buffer starts at the beginning of
+              the buffer.*/
+           {
+              beginning=0;
+              for(i=sonars_trac; (i<MAX_MESSAGE)&&(i<sonars_trac+readn);i++){
+                 if (sonars_in[i]=='\n'){
 	      
-	      message = &sonars_in[beginning];
+                    message = &sonars_in[beginning];
 
-	      if (sscanf(message,"%d %lu",&type,&network_clock)!=2){
-		printf("networkclient: i don't understand message: (%s)\n",message);
+                    if (sscanf(message,"%d %lu",&type,&network_clock)!=2){
+                       printf("networkclient: i don't understand message: (%s)\n",message);
 		
-	      }else{
-		/* increments the 'j' pointer over the message till the first measure starts, jumping over the clock and type  */
-		while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
-		j++;
-		while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
+                    }else{
+                       j=0;
+                       /* increments the 'j' pointer over the message till the first measure starts, jumping over the clock and type  */
+                       while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
+                       j++;
+                       while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
 		
-		if (type==NETWORKSERVER_sonars)
-		  {
-		    while (message[j]==' ') { /* reading sonars. it stops when buffer[j]=='\n' or '\0'*/
-		      if (sscanf(&message[++j],"%d %f",&sensor, &measure)!=2){
-			printf("networkclient: conversion failed in sonars measure conversion\n");
+                       if (type==NETWORKSERVER_sonars)
+                       {
+                          while (message[j]==' ') { /* reading sonars. it stops when buffer[j]=='\n' or '\0'*/
+                             if (sscanf(&message[++j],"%d %f",&sensor, &measure)!=2){
+                                printf("networkclient: conversion failed in sonars measure conversion\n");
 			
-		      }else { /* adds the measure and increments the pointer 'j' over the message */
-			while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
-			j++;
-			while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
-			us[sensor]=measure;
-			us_clock[sensor]=network_clock;
-		      }
-		    }
-                    speedcounter(sonars_schema_id);
-		  }
-	      }
-	      beginning=i+1;
-	    }
-	  }
+                             }else { /* adds the measure and increments the pointer 'j' over the message */
+                                while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
+                                j++;
+                                while((message[j]!='\n')&&(message[j]!=' ')&&(message[j]!='\0')) j++;
+                                us[sensor]=measure;
+                                us_clock[sensor]=network_clock;
+                             }
+                          }
+                          speedcounter(sonars_schema_id);
+                       }
+                    }
+                    beginning=i+1;
+                 }
+              }
 	  
-	  if (beginning==0){ /* message didn't end in this reception */
-	    if (sonars_trac+readn >= MAX_MESSAGE-1) sonars_trac=0;
-	    /* the reception buffer has been filled with the chunks of the received messages, but no message has been entirely completed. the current message will be ignored. LOOK OUT! the next message will start incorrectly as it will have the rest of the incompleted message at the beginning, and will be ignored too because it can't be understood. that way, when overflow occurs, both messages will be lost.*/
-	    else sonars_trac+=readn;
+              if (beginning==0){ /* message didn't end in this reception */
+                 if (sonars_trac+readn >= MAX_MESSAGE-1) sonars_trac=0;
+                 /* the reception buffer has been filled with the chunks of the received messages, but no message has been entirely completed. the current message will be ignored. LOOK OUT! the next message will start incorrectly as it will have the rest of the incompleted message at the beginning, and will be ignored too because it can't be understood. that way, when overflow occurs, both messages will be lost.*/
+                 else sonars_trac+=readn;
 	    
-	  }else{
-	    strncpy(sonars_in,&(sonars_in[beginning]),sonars_trac+readn-beginning);
-	    sonars_trac = sonars_trac+readn-beginning;
-	    beginning=0; /* for the next chunk received */
-	  }
-	}
-      }
-    }
+              }else{
+                 strncpy(sonars_in,&(sonars_in[beginning]),sonars_trac+readn-beginning);
+                 sonars_trac = sonars_trac+readn-beginning;
+                 beginning=0; /* for the next chunk received */
+              }
+           }
+        }
+     }
   }while(networkclient_close_command==0);
   pthread_exit(0);
 }

@@ -43,7 +43,6 @@ struct client{
    char subscriptions[MAXDEVICE];
    char name[256];
    unsigned long clocks[MAXDEVICE];
-   unsigned long clk;
 };
 #define CLIENT_TH_CYCLE 33 /*para servir las imágenes en tiempo real*/
 
@@ -606,8 +605,6 @@ void dispatch_petition(struct client *info, char *petition) {
 void dispatch_subscriptions(struct client * info) {
    int i, j;
    char buff[MAX_MESSAGE];
-
-   info->clk++; /*Se incrementa el reloj que indica el momento del mensaje*/
    
    for (i = 0; i < MAXDEVICE; i++) {
       if (info->subscriptions[i]) {
@@ -712,7 +709,6 @@ void *client_thread(void *pcs) {
 
    struct client info;
    info.cs = *(int *)pcs;
-   info.clk = 0;
    pthread_mutex_unlock(&socketmutex);
    memset(info.subscriptions, 0, MAXDEVICE);
 
