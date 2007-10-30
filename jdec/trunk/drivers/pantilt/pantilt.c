@@ -35,19 +35,10 @@
 #include <pthread.h>
 #include "jde.h"
 #include <termios.h>
+#include <math.h> 
 
-/** pantilt driver max pan angle limit.*/
-#define MAX_PAN_ANGLE 158. /* degrees */
-/** pantilt driver min pan angle limit.*/
-#define MIN_PAN_ANGLE -158. /* degrees */
-/** pantilt driver max tilt angle limit.*/
-#define MAX_TILT_ANGLE 30. /* degrees */
-/** pantilt driver min tilt angle limit.*/
-#define MIN_TILT_ANGLE -46. /* degrees */
-/** pantilt driver max speed pantilt.*/
-#define MAX_SPEED_PANTILT 205.89
 /** pantilt driver pantiltencoders period polling.*/
-#define PANTILTENCODERS_POLLING 100 /* period to ask for new pantilt encoders (ms) */
+#define PANTILTENCODERS_POLLING 300 /* period to ask for new pantilt encoders (ms) */
 /** pantilt driver rs232 baud rate.*/
 #define RS232_BAUD_RATE B9600
 /** pantilt driver from encoder units to deg. factor.*/
@@ -55,7 +46,9 @@
 /** pantilt driver max char size in string message.*/
 #define MAX_MESSAGE 2048
 /** pantilt driver debug macro.*/
-#define D(x...) //printf(x); /* Uncomment this for see traces */
+/* Uncomment this for see traces */ 
+#define D(x...) /*printf(x); */  
+
 
 /** pantilt driver pthread for reading.*/
 pthread_t pantilt_readth;
@@ -143,6 +136,39 @@ char driver_name[256]="pantilt";
 int activate_pantiltencoders=0;
 /** pantilt driver variable to detect if pantilt motors were activated on gui.*/
 int activate_pantiltmotors=0;
+
+
+/* Function to truncate float number to nearest integer */ 
+float truncateFloat (float numberF) 
+{ 
+ char numeroC[20]; 
+ int entero, decimal; 
+
+ if ( sprintf (numeroC, "%f", numberF) < 0 ) 
+   { 
+    printf("truncateFloat: Error in convert to float number in char*\n"); 
+    return 0.0; 
+   } 
+ sscanf  (numeroC,"%d.%d",&entero,&decimal); 
+
+ while (decimal>10) 
+    decimal = decimal / 10; 
+
+    if (decimal > 5) 
+       { 
+         if (entero>0) 
+            { /* Para numeros positivos */ 
+              entero=entero+1; 
+            } 
+         else 
+            {       /* Para numeros negativos */ 
+              entero=entero-1; 
+            } 
+       } 
+
+ return (float)entero; 
+}
+
 
 /** pantilt driver function to show fps in jdec shell.*/
 void pantilt_display_fps(){
@@ -285,7 +311,7 @@ void serve_serialpantilt_message(char *mensaje)
   if (sscanf(mensaje,"* Current Pan position is %d",&pan_encoders)==1) 
     {
       pan_angle=(float)pan_encoders*ENCOD_TO_DEG; 
-      //if (source[SCH_PANTILTENCODERS]==serialpantilt)
+      /* if (source[SCH_PANTILTENCODERS]==serialpantilt) */ 
       speedcounter(ptencoders_schema_id);
       /*printf("PAN=%.2f\n",pan_angle);*/
     }
@@ -466,7 +492,7 @@ void pantiltmotors_iteration()
     else longcommand=longitude;
     
     if ( (longcommand!=longitude_last) || (longspeed != longspeed_last) ) {
-      sprintf(pantilt_out,"PP%d PS%d\n",(int)(longcommand/ENCOD_TO_DEG),(int)(longspeed/ENCOD_TO_DEG));
+      sprintf(pantilt_out,"PP%d PS%d\n",(int)truncateFloat(longcommand/ENCOD_TO_DEG),(int)truncateFloat(longspeed/ENCOD_TO_DEG));       
       SendCmd(pantilt_out);
       longitude_last=longcommand;
       longspeed_last=longspeed;
@@ -484,13 +510,14 @@ void pantiltmotors_iteration()
     else latcommand=latitude;
     
     if( (latcommand!=latitude_last) || (latspeed!=latspeed_last) )  {
-      sprintf(pantilt_out,"TP%d TS%d\n",(int)(latcommand/ENCOD_TO_DEG),(int)(latspeed/ENCOD_TO_DEG));
+      sprintf(pantilt_out,"TP%d TS%d\n",(int)truncateFloat(latcommand/ENCOD_TO_DEG),(int)truncateFloat(latspeed/ENCOD_TO_DEG)); 
       SendCmd(pantilt_out);
       latitude_last=latcommand;
       latspeed_last=latspeed;
     }
   }
-  //if (debug[SCH_PANTILTMOTORS]) printf("pantiltmotors:  %1.1f %1.1f %1.1f %1.1f \n",latitude,longitude,latitude_speed,longitude_speed); 
+  /* if (debug[SCH_PANTILTMOTORS]) printf("pantiltmotors:  %1.1f %1.1f %1.1f %1.1f \n",latitude,longitude,latitude_speed,longitude_speed); */
+
 }
 
 /** pantilt motors suspend function following jdec platform API schemas.
@@ -733,7 +760,7 @@ int pantilt_parseconf(char *configfile){
  *  @return 0 if initialitation was successful or -1 if something went wrong.*/
 void pantilt_init(){
 
-  //printf("pantilt device on %s serial port\n",pantilt_device); 
+  /* printf("pantilt device on %s serial port\n",pantilt_device); */  
   if ((pantilt_serialport = openRaw(pantilt_device, O_RDWR)) <= 0) 
     {perror("Cannot open serial port");}
   if (!setBaudRate(pantilt_serialport,(speed_t) RS232_BAUD_RATE))
