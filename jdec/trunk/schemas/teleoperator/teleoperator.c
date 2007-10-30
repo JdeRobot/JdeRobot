@@ -18,6 +18,8 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
+#define DEBUG 1
+
 #include "jde.h"
 #include "jdegui.h"
 #include "teleoperatorgui.h"
@@ -65,7 +67,7 @@ static int toggle=FALSE;
 #define RELEASED 0
 
 
-static char *samplesource;
+static char *samplesource=NULL;
 static int vmode;
 static XImage *imagenA,*imagenB,*imagenC,*imagenD,*sampleimage; 
 static char *imagenA_buf, *imagenB_buf, *imagenC_buf, *imagenD_buf, *sampleimage_buf; /* puntero a memoria para la imagen a visualizar en el servidor X. No compartida con el servidor */
@@ -85,22 +87,37 @@ float joystick_x, joystick_y;
 float pt_joystick_x, pt_joystick_y;
 int back=0;
 
-float *mysonars;
-int *mylaser;
-float *myencoders;
+float *mysonars=NULL;
+int *mylaser=NULL;
+float *myencoders=NULL;
 resumeFn laserresume, sonarsresume, encodersresume;
 suspendFn lasersuspend, sonarssuspend, encoderssuspend;
 
-float *myv;
-float *myw;
+float *myv=NULL;
+float *myw=NULL;
 resumeFn motorsresume;
 suspendFn motorssuspend;
 
-float *mypan_angle, *mytilt_angle;  /* degs */
-float *mylongitude; /* degs, pan angle */
-float *mylatitude; /* degs, tilt angle */
-float *mylongitude_speed;
-float *mylatitude_speed;
+float *mypan_angle=NULL, *mytilt_angle=NULL;  /* degs */
+float *mylongitude=NULL; /* degs, pan angle */
+float *mylatitude=NULL; /* degs, tilt angle */
+float *mylongitude_speed=NULL;
+float *mylatitude_speed=NULL;
+resumeFn ptmotorsresume, ptencodersresume;
+suspendFn ptmotorssuspend, ptencoderssuspend;
+
+char **mycolorA;
+resumeFn colorAresume;
+suspendFn colorAsuspend;
+char **mycolorB;
+resumeFn colorBresume;
+suspendFn colorBsuspend;
+char **mycolorC;
+resumeFn colorCresume;
+suspendFn colorCsuspend;
+char **mycolorD;
+resumeFn colorDresume;
+suspendFn colorDsuspend;
 
 
 FD_teleoperatorgui *fd_teleoperatorgui;
@@ -137,12 +154,12 @@ void teleoperator_iteration()
   if ((display_state & PANTILT_TELEOPERATOR)!=0)      
     {
       /* pt_joystick_x and pt_joystick_y fall in [0,1], the default limits from Xforms */  
-      latitude=MIN_TILT_ANGLE+pt_joystick_y*(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
-      longitude=MAX_PAN_ANGLE-pt_joystick_x*(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
+      *mylatitude=MIN_TILT_ANGLE+pt_joystick_y*(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
+      *mylongitude=MAX_PAN_ANGLE-pt_joystick_x*(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
       
       speed_coef = fl_get_slider_value(fd_teleoperatorgui->ptspeed);
-      longitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
-      latitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
+      *mylongitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
+      *mylatitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
       /*printf("teleoperator: longitude speed %.2f, latitude speed %.2f\n",longitude_speed,latitude_speed);*/
     }
   
@@ -159,6 +176,18 @@ void teleoperator_suspend()
     encoderssuspend();
   if ((display_state & BASE_TELEOPERATOR)!=0)
     motorssuspend();
+  if ((display_state & DISPLAY_COLORIMAGEA)!=0)
+     colorAsuspend();
+  if ((display_state & DISPLAY_COLORIMAGEB)!=0)
+     colorBsuspend();
+  if ((display_state & DISPLAY_COLORIMAGEC)!=0)
+     colorCsuspend();
+  if ((display_state & DISPLAY_COLORIMAGED)!=0)
+     colorDsuspend();
+  if ((display_state & DISPLAY_PANTILTENCODERS)!=0)
+     ptencoderssuspend();
+  if ((display_state & PANTILT_TELEOPERATOR)!=0)
+     ptmotorssuspend();
 
   pthread_mutex_lock(&(all[teleoperator_id].mymutex));
   put_state(teleoperator_id,slept);
@@ -213,21 +242,25 @@ void *teleoperator_thread(void *not_used)
 	    { 
 	      put_state(teleoperator_id,winner);
 	 
-	      /* start the winner state from controlled motor values */ 
+	      /* start the winner state from controlled motor values */
+              /*
 	      if ((display_state & DISPLAY_SONARS)!=0) 
 		{
 		  mysonars=(float *)myimport("sonars","us");
 		  sonarsresume=(resumeFn)myimport("sonars","resume");
 		  sonarssuspend=(suspendFn)myimport("sonars","suspend");
 		  sonarsresume(teleoperator_id,NULL,NULL);
-		  *myv=0; *myw=0;
+                  if (myv!=NULL)
+                     *myv=0;
+                  if (myw!=NULL)
+                     *myw=0;
 		}
 	      
 	      if ((display_state & DISPLAY_LASER)!=0) 
 		{
-		  mylaser=(int *)myimport("laser","jde_laser");
+		  mylaser=(int *)myimport("laser","laser");
 		  laserresume=(resumeFn)myimport("laser","resume");
-		  lasersuspend=(suspendFn *)myimport("laser","suspend");
+		  lasersuspend=(suspendFn)myimport("laser","suspend");
 		  laserresume(teleoperator_id,NULL,NULL);
 		}
 	      
@@ -246,7 +279,7 @@ void *teleoperator_thread(void *not_used)
 		  motorsresume=(resumeFn)myimport("motors","resume");
 		  motorssuspend=(suspendFn)myimport("motors","suspend");
 		  motorsresume(teleoperator_id,NULL,NULL);
-		}
+		}*/
 	    }
 	  else if (all[teleoperator_id].state==winner);
 
@@ -294,7 +327,7 @@ void teleoperator_close()
 
 void teleoperator_startup()
 {
-  samplesource=colorA;
+  samplesource=NULL;
   virtualcam.posx=-150;
   virtualcam.posy=-150.;
   virtualcam.posz=150.;
@@ -456,149 +489,143 @@ static int image_displaysetup()
 int freeobj_ventanaAA_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
   if ((event==FL_PUSH)&&(key==MOUSELEFT)&&
       ((display_state&DISPLAY_COLORIMAGEA)!=0))
-    samplesource=colorA;
+    samplesource=*mycolorA;
   return 0;
 }
 
 int freeobj_ventanaBB_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
   if ((event==FL_PUSH)&&(key==MOUSELEFT)&&
       ((display_state&DISPLAY_COLORIMAGEB)!=0))
-    samplesource=colorB;
+    samplesource=*mycolorB;
   return 0;
 }
 
 int freeobj_ventanaCC_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
   if ((event==FL_PUSH)&&(key==MOUSELEFT)&&
       ((display_state&DISPLAY_COLORIMAGEC)!=0)) 
-    samplesource=colorC;
+    samplesource=*mycolorC;
   return 0;
 }
 
 int freeobj_ventanaDD_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
   if ((event==FL_PUSH)&&(key==MOUSELEFT)&&
       ((display_state&DISPLAY_COLORIMAGED)!=0))
-    samplesource=colorD;
+    samplesource=*mycolorD;
   return 0;
 }
 
 
 extern void teleoperator_guisuspend(void);
 
-void teleoperator_guibuttons(FL_OBJECT *obj)
-{
-  float dpan=0.5,dtilt=0.5, speed_coef;
-  float r,lati,longi,guix,guiy,guiz;
-  float dx,dy,dz;
+void teleoperator_guibuttons(FL_OBJECT *obj){
+   float dpan=0.5,dtilt=0.5, speed_coef;
+   float r,lati,longi,guix,guiy,guiz;
+   float dx,dy,dz;
 
-  if (track_robot==TRUE)
-    {  
-      virtualcam.foax=jde_robot[0]/100.;
-      virtualcam.foay=jde_robot[1]/100.;
+   if (track_robot==TRUE){
+      if (myencoders!=NULL){
+         virtualcam.foax=myencoders[0]/100.;
+         virtualcam.foay=myencoders[1]/100.;
+      }
+      else{
+         virtualcam.foax=0.;
+         virtualcam.foay=0.;
+      }
       virtualcam.foaz=0.;
-      if ((fl_get_button(fd_teleoperatorgui->selectfoa)==PUSHED) ||
-	  (fl_get_button(fd_teleoperatorgui->selectfoaRel)==PUSHED))
-	{
-	  if (fl_get_button(fd_teleoperatorgui->selectfoa)==PUSHED)
-	    {
-	      guix=virtualcam.foax; 
-	      guiy=virtualcam.foay; 
-	      guiz=virtualcam.foaz;
-	    }
-	  else if (fl_get_button(fd_teleoperatorgui->selectfoaRel)==PUSHED)
-	    {
-	      guix=virtualcam.foax-virtualcam.posx;
-	      guiy=virtualcam.foay-virtualcam.posy;
-	      guiz=virtualcam.foaz-virtualcam.posz;
-	    }
-	  fl_set_slider_value(fd_teleoperatorgui->posX,(double)guix);
-	  fl_set_slider_value(fd_teleoperatorgui->posY,(double)guiy);
-	  fl_set_slider_value(fd_teleoperatorgui->posZ,(double)guiz);
-	  r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
-	  lati=(float)asin(guiz/r)*360./(2.*PI);
-	  longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);      
-	  fl_set_positioner_xvalue(fd_teleoperatorgui->latlong,(double) longi);
-	  fl_set_positioner_yvalue(fd_teleoperatorgui->latlong,(double) lati);
-	  fl_set_slider_value(fd_teleoperatorgui->posR,(double)r);  
-	}
-    }
 
-  if (obj==fd_teleoperatorgui->posOrigin) 
-    { 
+      if ((fl_get_button(fd_teleoperatorgui->selectfoa)==PUSHED) ||
+           (fl_get_button(fd_teleoperatorgui->selectfoaRel)==PUSHED))
+      {
+         if (fl_get_button(fd_teleoperatorgui->selectfoa)==PUSHED){
+            guix=virtualcam.foax;
+            guiy=virtualcam.foay;
+            guiz=virtualcam.foaz;
+         }
+         else if (fl_get_button(fd_teleoperatorgui->selectfoaRel)==PUSHED){
+            guix=virtualcam.foax-virtualcam.posx;
+            guiy=virtualcam.foay-virtualcam.posy;
+            guiz=virtualcam.foaz-virtualcam.posz;
+         }
+         fl_set_slider_value(fd_teleoperatorgui->posX,(double)guix);
+         fl_set_slider_value(fd_teleoperatorgui->posY,(double)guiy);
+         fl_set_slider_value(fd_teleoperatorgui->posZ,(double)guiz);
+         r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
+         lati=(float)asin(guiz/r)*360./(2.*PI);
+         longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);
+         fl_set_positioner_xvalue(fd_teleoperatorgui->latlong,(double) longi);
+         fl_set_positioner_yvalue(fd_teleoperatorgui->latlong,(double) lati);
+         fl_set_slider_value(fd_teleoperatorgui->posR,(double)r);
+      }
+   }
+
+   if (obj==fd_teleoperatorgui->posOrigin) {
       guix=0.; guiy=0.; guiz=0.;
       fl_set_slider_value(fd_teleoperatorgui->posX,(double)guix);
       fl_set_slider_value(fd_teleoperatorgui->posY,(double)guiy);
       fl_set_slider_value(fd_teleoperatorgui->posZ,(double)guiz);
       fl_set_positioner_xvalue(fd_teleoperatorgui->latlong,(double)0.);
       fl_set_positioner_yvalue(fd_teleoperatorgui->latlong,(double)90.);
-      fl_set_slider_value(fd_teleoperatorgui->posR,(double)0.); 
-      if (fl_get_button(fd_teleoperatorgui->selectposition)==PUSHED)
-	{
-	  if (toggle==TRUE)
-	    {
-	      dx=virtualcam.foax - virtualcam.posx;
-	      dy=virtualcam.foay - virtualcam.posy;
-	      dz=virtualcam.foaz - virtualcam.posz;
-	      virtualcam.foax=guix+dx;
-	      virtualcam.foay=guiy+dy;
-	      virtualcam.foaz=guiz+dz;
-	    }
-	  virtualcam.posx=guix; virtualcam.posy=guiy; virtualcam.posz=guiz;
-	} 
-      else if (fl_get_button(fd_teleoperatorgui->selectfoa)==PUSHED)
-	{
-	  virtualcam.foax=guix; 
-	  virtualcam.foay=guiy; 
-	  virtualcam.foaz=guiz;
-	}
-      else if (fl_get_button(fd_teleoperatorgui->selectfoaRel)==PUSHED)
-	{
-	  virtualcam.foax=virtualcam.posx+guix; 
-	  virtualcam.foay=virtualcam.posy+guiy; 
-	  virtualcam.foaz=virtualcam.posz+guiz;
-	}
-    }
-  else if ((obj==fd_teleoperatorgui->posX) ||
-	   (obj==fd_teleoperatorgui->posY) || 
-	   (obj==fd_teleoperatorgui->posZ))
-    {
+      fl_set_slider_value(fd_teleoperatorgui->posR,(double)0.);
+      if (fl_get_button(fd_teleoperatorgui->selectposition)==PUSHED){
+         if (toggle==TRUE){
+            dx=virtualcam.foax - virtualcam.posx;
+            dy=virtualcam.foay - virtualcam.posy;
+            dz=virtualcam.foaz - virtualcam.posz;
+            virtualcam.foax=guix+dx;
+            virtualcam.foay=guiy+dy;
+            virtualcam.foaz=guiz+dz;
+         }
+         virtualcam.posx=guix; virtualcam.posy=guiy; virtualcam.posz=guiz;
+      }
+      else if (fl_get_button(fd_teleoperatorgui->selectfoa)==PUSHED){
+         virtualcam.foax=guix;
+         virtualcam.foay=guiy;
+         virtualcam.foaz=guiz;
+      }
+      else if (fl_get_button(fd_teleoperatorgui->selectfoaRel)==PUSHED){
+         virtualcam.foax=virtualcam.posx+guix;
+         virtualcam.foay=virtualcam.posy+guiy;
+         virtualcam.foaz=virtualcam.posz+guiz;
+      }
+   }
+   else if ((obj==fd_teleoperatorgui->posX) ||
+             (obj==fd_teleoperatorgui->posY) ||
+             (obj==fd_teleoperatorgui->posZ))
+   {
       guix=(float) fl_get_slider_value(fd_teleoperatorgui->posX);
       guiy=(float) fl_get_slider_value(fd_teleoperatorgui->posY);
       guiz=(float) fl_get_slider_value(fd_teleoperatorgui->posZ);
-      if (fl_get_button(fd_teleoperatorgui->selectposition)==PUSHED)
-	{
-	  if (toggle==TRUE)
-	    {
-	      dx=virtualcam.foax - virtualcam.posx;
-	      dy=virtualcam.foay - virtualcam.posy;
-	      dz=virtualcam.foaz - virtualcam.posz;
-	      virtualcam.foax=guix+dx;
-	      virtualcam.foay=guiy+dy;
-	      virtualcam.foaz=guiz+dz;
-	    }
-	  virtualcam.posx=guix; virtualcam.posy=guiy; virtualcam.posz=guiz;
-	} 
-      else if (fl_get_button(fd_teleoperatorgui->selectfoa)==PUSHED)
-	{
-	  virtualcam.foax=guix; 
-	  virtualcam.foay=guiy; 
-	  virtualcam.foaz=guiz;
-	}
-      else if (fl_get_button(fd_teleoperatorgui->selectfoaRel)==PUSHED)
-	{
-	  virtualcam.foax=guix+virtualcam.posx;
-	  virtualcam.foay=guiy+virtualcam.posy;
-	  virtualcam.foaz=guiz+virtualcam.posz;
-	}
+      if (fl_get_button(fd_teleoperatorgui->selectposition)==PUSHED){
+         if (toggle==TRUE){
+            dx=virtualcam.foax - virtualcam.posx;
+            dy=virtualcam.foay - virtualcam.posy;
+            dz=virtualcam.foaz - virtualcam.posz;
+            virtualcam.foax=guix+dx;
+            virtualcam.foay=guiy+dy;
+            virtualcam.foaz=guiz+dz;
+         }
+         virtualcam.posx=guix; virtualcam.posy=guiy; virtualcam.posz=guiz;
+      }
+      else if (fl_get_button(fd_teleoperatorgui->selectfoa)==PUSHED){
+         virtualcam.foax=guix;
+         virtualcam.foay=guiy;
+         virtualcam.foaz=guiz;
+      }
+      else if (fl_get_button(fd_teleoperatorgui->selectfoaRel)==PUSHED){
+         virtualcam.foax=guix+virtualcam.posx;
+         virtualcam.foay=guiy+virtualcam.posy;
+         virtualcam.foaz=guiz+virtualcam.posz;
+      }
       r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
       lati=(float)asin(guiz/r)*360./(2.*PI);
-      longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);      
+      longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);
       fl_set_positioner_xvalue(fd_teleoperatorgui->latlong,(double) longi);
       fl_set_positioner_yvalue(fd_teleoperatorgui->latlong,(double) lati);
-      fl_set_slider_value(fd_teleoperatorgui->posR,(double)r);  
-    }
-  else if ((obj==fd_teleoperatorgui->posR) ||
-	   (obj==fd_teleoperatorgui->latlong))
-    {
+      fl_set_slider_value(fd_teleoperatorgui->posR,(double)r);
+   }
+   else if ((obj==fd_teleoperatorgui->posR) ||
+             (obj==fd_teleoperatorgui->latlong))
+   {
       longi=2*PI*fl_get_positioner_xvalue(fd_teleoperatorgui->latlong)/360.;
       lati=2*PI*fl_get_positioner_yvalue(fd_teleoperatorgui->latlong)/360.;
       r=fl_get_slider_value(fd_teleoperatorgui->posR);
@@ -608,301 +635,416 @@ void teleoperator_guibuttons(FL_OBJECT *obj)
       fl_set_slider_value(fd_teleoperatorgui->posX,(double)guix);
       fl_set_slider_value(fd_teleoperatorgui->posY,(double)guiy);
       fl_set_slider_value(fd_teleoperatorgui->posZ,(double)guiz);
-      if (fl_get_button(fd_teleoperatorgui->selectposition)==PUSHED)
-	{
-	  if (toggle==TRUE)
-	    {
-	      dx=virtualcam.foax - virtualcam.posx;
-	      dy=virtualcam.foay - virtualcam.posy;
-	      dz=virtualcam.foaz - virtualcam.posz;
-	      virtualcam.foax=guix+dx;
-	      virtualcam.foay=guiy+dy;
-	      virtualcam.foaz=guiz+dz;
-	    }
-	  virtualcam.posx=guix; virtualcam.posy=guiy; virtualcam.posz=guiz;
-	} 
-      else if (fl_get_button(fd_teleoperatorgui->selectfoa)==PUSHED)
-	{
-	  virtualcam.foax=guix; 
-	  virtualcam.foay=guiy; 
-	  virtualcam.foaz=guiz;
-	}
-      else if (fl_get_button(fd_teleoperatorgui->selectfoaRel)==PUSHED)
-	{
-	  virtualcam.foax=guix+virtualcam.posx;
-	  virtualcam.foay=guiy+virtualcam.posy;
-	  virtualcam.foaz=guiz+virtualcam.posz;
-	}
-    }
-  else if (obj == fd_teleoperatorgui->track_robot) 
-    {if (fl_get_button(obj)==PUSHED) 
-      {
-	track_robot=TRUE;
-	fl_set_button(fd_teleoperatorgui->toggle,RELEASED);
-	toggle=FALSE;
+      if (fl_get_button(fd_teleoperatorgui->selectposition)==PUSHED){
+         if (toggle==TRUE){
+            dx=virtualcam.foax - virtualcam.posx;
+            dy=virtualcam.foay - virtualcam.posy;
+            dz=virtualcam.foaz - virtualcam.posz;
+            virtualcam.foax=guix+dx;
+            virtualcam.foay=guiy+dy;
+            virtualcam.foaz=guiz+dz;
+         }
+         virtualcam.posx=guix; virtualcam.posy=guiy; virtualcam.posz=guiz;
       }
-    else track_robot=FALSE;
-    } 
-  else if (obj == fd_teleoperatorgui->toggle) 
-    {if (fl_get_button(obj)==PUSHED) 
-      {
-	toggle=TRUE;
-	fl_set_button(fd_teleoperatorgui->track_robot,RELEASED);
-	track_robot=FALSE;
+      else if (fl_get_button(fd_teleoperatorgui->selectfoa)==PUSHED){
+         virtualcam.foax=guix;
+         virtualcam.foay=guiy;
+         virtualcam.foaz=guiz;
       }
-    else toggle=FALSE;
-    } 
-  else if (obj == fd_teleoperatorgui->selectposition)
-    {
-      if (fl_get_button(fd_teleoperatorgui->selectposition)==PUSHED)
-	{
-	  fl_set_button(fd_teleoperatorgui->selectfoa,RELEASED);
-	  fl_set_button(fd_teleoperatorgui->selectfoaRel,RELEASED);
-	  guix=virtualcam.posx; guiy=virtualcam.posy; guiz=virtualcam.posz;	  
-	  r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
-	  lati=(float)asin(guiz/r)*360./(2.*PI);
-	  longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);
-	  fl_set_positioner_xvalue(fd_teleoperatorgui->latlong,(double) longi);
-	  fl_set_positioner_yvalue(fd_teleoperatorgui->latlong,(double) lati);
-	  fl_set_slider_value(fd_teleoperatorgui->posR,(double)r); 
-	  fl_set_slider_value(fd_teleoperatorgui->posX,(double)guix);
-	  fl_set_slider_value(fd_teleoperatorgui->posY,(double)guiy);
-	  fl_set_slider_value(fd_teleoperatorgui->posZ,(double)guiz);
-	}
-    }
-  else if (obj == fd_teleoperatorgui->selectfoa)
-    {
-      if (fl_get_button(fd_teleoperatorgui->selectfoa)==PUSHED)
-	{
-	  fl_set_button(fd_teleoperatorgui->selectposition,RELEASED);
-	  fl_set_button(fd_teleoperatorgui->selectfoaRel,RELEASED);
-	  guix=virtualcam.foax; 
-	  guiy=virtualcam.foay; 
-	  guiz=virtualcam.foaz;
-	  r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
-	  lati=(float)asin(guiz/r)*360./(2.*PI);
-	  longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);
-	  fl_set_positioner_xvalue(fd_teleoperatorgui->latlong,(double) longi);
-	  fl_set_positioner_yvalue(fd_teleoperatorgui->latlong,(double) lati);
-	  fl_set_slider_value(fd_teleoperatorgui->posR,(double)r); 
-	  fl_set_slider_value(fd_teleoperatorgui->posX,(double)guix);
-	  fl_set_slider_value(fd_teleoperatorgui->posY,(double)guiy);
-	  fl_set_slider_value(fd_teleoperatorgui->posZ,(double)guiz);
-	}
-    }
-  else if (obj == fd_teleoperatorgui->selectfoaRel)
-    {
-      if (fl_get_button(fd_teleoperatorgui->selectfoaRel)==PUSHED)
-	{
-	  fl_set_button(fd_teleoperatorgui->selectposition,RELEASED);
-	  fl_set_button(fd_teleoperatorgui->selectfoa,RELEASED);
-	  guix=virtualcam.foax-virtualcam.posx; 
-	  guiy=virtualcam.foay-virtualcam.posy; 
-	  guiz=virtualcam.foaz-virtualcam.posz;
-	  r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
-	  lati=(float)asin(guiz/r)*360./(2.*PI);
-	  longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);
-	  fl_set_positioner_xvalue(fd_teleoperatorgui->latlong,(double) longi);
-	  fl_set_positioner_yvalue(fd_teleoperatorgui->latlong,(double) lati);
-	  fl_set_slider_value(fd_teleoperatorgui->posR,(double)r); 
-	  fl_set_slider_value(fd_teleoperatorgui->posX,(double)guix);
-	  fl_set_slider_value(fd_teleoperatorgui->posY,(double)guiy);
-	  fl_set_slider_value(fd_teleoperatorgui->posZ,(double)guiz);
-	}
-    }
+      else if (fl_get_button(fd_teleoperatorgui->selectfoaRel)==PUSHED){
+         virtualcam.foax=guix+virtualcam.posx;
+         virtualcam.foay=guiy+virtualcam.posy;
+         virtualcam.foaz=guiz+virtualcam.posz;
+      }
+   }
+   else if (obj == fd_teleoperatorgui->track_robot) {
+      if (fl_get_button(obj)==PUSHED){
+         track_robot=TRUE;
+         fl_set_button(fd_teleoperatorgui->toggle,RELEASED);
+         toggle=FALSE;
+      }
+      else track_robot=FALSE;
+   }
+   else if (obj == fd_teleoperatorgui->toggle){
+      if (fl_get_button(obj)==PUSHED){
+         toggle=TRUE;
+         fl_set_button(fd_teleoperatorgui->track_robot,RELEASED);
+         track_robot=FALSE;
+      }
+      else toggle=FALSE;
+   }
+   else if (obj == fd_teleoperatorgui->selectposition){
+      if (fl_get_button(fd_teleoperatorgui->selectposition)==PUSHED){
+         fl_set_button(fd_teleoperatorgui->selectfoa,RELEASED);
+         fl_set_button(fd_teleoperatorgui->selectfoaRel,RELEASED);
+         guix=virtualcam.posx; guiy=virtualcam.posy; guiz=virtualcam.posz;
+         r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
+         lati=(float)asin(guiz/r)*360./(2.*PI);
+         longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);
+         fl_set_positioner_xvalue(fd_teleoperatorgui->latlong,(double) longi);
+         fl_set_positioner_yvalue(fd_teleoperatorgui->latlong,(double) lati);
+         fl_set_slider_value(fd_teleoperatorgui->posR,(double)r);
+         fl_set_slider_value(fd_teleoperatorgui->posX,(double)guix);
+         fl_set_slider_value(fd_teleoperatorgui->posY,(double)guiy);
+         fl_set_slider_value(fd_teleoperatorgui->posZ,(double)guiz);
+      }
+   }
+   else if (obj == fd_teleoperatorgui->selectfoa){
+      if (fl_get_button(fd_teleoperatorgui->selectfoa)==PUSHED){
+         fl_set_button(fd_teleoperatorgui->selectposition,RELEASED);
+         fl_set_button(fd_teleoperatorgui->selectfoaRel,RELEASED);
+         guix=virtualcam.foax;
+         guiy=virtualcam.foay;
+         guiz=virtualcam.foaz;
+         r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
+         lati=(float)asin(guiz/r)*360./(2.*PI);
+         longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);
+         fl_set_positioner_xvalue(fd_teleoperatorgui->latlong,(double) longi);
+         fl_set_positioner_yvalue(fd_teleoperatorgui->latlong,(double) lati);
+         fl_set_slider_value(fd_teleoperatorgui->posR,(double)r);
+         fl_set_slider_value(fd_teleoperatorgui->posX,(double)guix);
+         fl_set_slider_value(fd_teleoperatorgui->posY,(double)guiy);
+         fl_set_slider_value(fd_teleoperatorgui->posZ,(double)guiz);
+      }
+   }
+   else if (obj == fd_teleoperatorgui->selectfoaRel){
+      if (fl_get_button(fd_teleoperatorgui->selectfoaRel)==PUSHED){
+         fl_set_button(fd_teleoperatorgui->selectposition,RELEASED);
+         fl_set_button(fd_teleoperatorgui->selectfoa,RELEASED);
+         guix=virtualcam.foax-virtualcam.posx;
+         guiy=virtualcam.foay-virtualcam.posy;
+         guiz=virtualcam.foaz-virtualcam.posz;
+         r=(float)sqrt((double)(guix*guix+guiy*guiy+guiz*guiz));
+         lati=(float)asin(guiz/r)*360./(2.*PI);
+         longi=(float)atan2((float)guiy,(float)guix)*360./(2.*PI);
+         fl_set_positioner_xvalue(fd_teleoperatorgui->latlong,(double) longi);
+         fl_set_positioner_yvalue(fd_teleoperatorgui->latlong,(double) lati);
+         fl_set_slider_value(fd_teleoperatorgui->posR,(double)r);
+         fl_set_slider_value(fd_teleoperatorgui->posX,(double)guix);
+         fl_set_slider_value(fd_teleoperatorgui->posY,(double)guiy);
+         fl_set_slider_value(fd_teleoperatorgui->posZ,(double)guiz);
+      }
+   }
 
-  else if (obj == fd_teleoperatorgui->hide) 
-    {
+   else if (obj == fd_teleoperatorgui->hide) {
       teleoperator_guisuspend();
       /* it stops the robot when the teleoperatorGUI is disabled */
-      if ((display_state & BASE_TELEOPERATOR)!=0)
-	{
-	  joystick_x=0.5;
-	  joystick_y=0.5;
-	}
-    }
-  else if (obj == fd_teleoperatorgui->joystick) 
-    {
-      if ((display_state & BASE_TELEOPERATOR)!=0) 
-	{
-	  if (fl_get_button(fd_teleoperatorgui->back)==RELEASED)
-	    joystick_y=0.5+0.5*fl_get_positioner_yvalue(fd_teleoperatorgui->joystick);
-	  else 
-	    joystick_y=0.5-0.5*fl_get_positioner_yvalue(fd_teleoperatorgui->joystick);
-	  joystick_x=fl_get_positioner_xvalue(fd_teleoperatorgui->joystick);
-	  fl_redraw_object(fd_teleoperatorgui->joystick);
-	}
-    }    
-   else if (obj == fd_teleoperatorgui->back) 
-    {
+      if ((display_state & BASE_TELEOPERATOR)!=0){
+         joystick_x=0.5;
+         joystick_y=0.5;
+      }
+   }
+   else if (obj == fd_teleoperatorgui->joystick) {
+      if ((display_state & BASE_TELEOPERATOR)!=0) {
+         if (fl_get_button(fd_teleoperatorgui->back)==RELEASED)
+            joystick_y=0.5+0.5*fl_get_positioner_yvalue(fd_teleoperatorgui->joystick);
+         else
+            joystick_y=0.5-0.5*fl_get_positioner_yvalue(fd_teleoperatorgui->joystick);
+         joystick_x=fl_get_positioner_xvalue(fd_teleoperatorgui->joystick);
+         fl_redraw_object(fd_teleoperatorgui->joystick);
+      }
+   }
+   else if (obj == fd_teleoperatorgui->back) {
       if (fl_get_button(fd_teleoperatorgui->back)==RELEASED)
-	joystick_y=0.5+0.5*fl_get_positioner_yvalue(fd_teleoperatorgui->joystick);
-      else 
-	joystick_y=0.5-0.5*fl_get_positioner_yvalue(fd_teleoperatorgui->joystick);
+         joystick_y=0.5+0.5*fl_get_positioner_yvalue(fd_teleoperatorgui->joystick);
+      else
+         joystick_y=0.5-0.5*fl_get_positioner_yvalue(fd_teleoperatorgui->joystick);
       joystick_x=fl_get_positioner_xvalue(fd_teleoperatorgui->joystick);
       fl_redraw_object(fd_teleoperatorgui->joystick);
-    }    
-  else if (obj == fd_teleoperatorgui->stop) 
-    {
+   }
+   else if (obj == fd_teleoperatorgui->stop){
       fl_set_positioner_xvalue(fd_teleoperatorgui->joystick,0.5);
       fl_set_positioner_yvalue(fd_teleoperatorgui->joystick,0.);
       joystick_x=0.5;
       joystick_y=0.5;
-    }     
-  else if (obj == fd_teleoperatorgui->pantilt_joystick) 
-    {
-      if ((display_state & PANTILT_TELEOPERATOR)!=0) 
-	{pt_joystick_y=fl_get_positioner_yvalue(fd_teleoperatorgui->pantilt_joystick);
-	pt_joystick_x=fl_get_positioner_xvalue(fd_teleoperatorgui->pantilt_joystick);
-	/*  fl_redraw_object(fd_teleoperatorgui->pantilt_joystick);*/
-	}
-    }    
-  else if (obj == fd_teleoperatorgui->pantilt_origin) 
-    {
-      if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05) 
-	pt_joystick_x= 1.-(0.-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
-      if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05) 
-	pt_joystick_y= (0.-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);   
-    }     
-  else if (obj == fd_teleoperatorgui->pantilt_stop) 
-    {
+   }
+   else if (obj == fd_teleoperatorgui->pantilt_joystick){
+      if ((display_state & PANTILT_TELEOPERATOR)!=0){
+         pt_joystick_y=fl_get_positioner_yvalue(fd_teleoperatorgui->pantilt_joystick);
+         pt_joystick_x=fl_get_positioner_xvalue(fd_teleoperatorgui->pantilt_joystick);
+         /*  fl_redraw_object(fd_teleoperatorgui->pantilt_joystick);*/
+      }
+   }
+   else if (obj == fd_teleoperatorgui->pantilt_origin){
+      if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05)
+         pt_joystick_x= 1.-(0.-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
+      if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05)
+         pt_joystick_y= (0.-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
+   }
+   else if (obj == fd_teleoperatorgui->pantilt_stop) {
       /* current pantilt position as initial command, to avoid any movement */
-      if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05) 
-	pt_joystick_x= 1.-(pan_angle-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
-      if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05) 
-	pt_joystick_y= (tilt_angle-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);   
-    }
-  else if (obj == fd_teleoperatorgui->ptspeed)
-    {
+      if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05){
+         if (mypan_angle!=NULL)
+            pt_joystick_x= 1.-(*mypan_angle-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
+         else
+            pt_joystick_x= 1.-(0-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
+      }
+      if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05){
+         if (mytilt_angle!=NULL)
+            pt_joystick_y= (*mytilt_angle-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
+         else
+            pt_joystick_y= (0-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
+      }
+   }
+   else if (obj == fd_teleoperatorgui->ptspeed){
       speed_coef = fl_get_slider_value(fd_teleoperatorgui->ptspeed);
-      longitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
-      latitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
-    }
-
-  else if (obj == fd_teleoperatorgui->sonars)
-    {
-      if (fl_get_button(fd_teleoperatorgui->sonars)==PUSHED)
-	{
-	  display_state = display_state | DISPLAY_SONARS;
-	  mysonars=(float *)myimport("sonars","us");
-	  sonarsresume=(resumeFn)myimport("sonars","resume");
-	  sonarssuspend=(suspendFn)myimport("sonars","suspend");
-	  sonarsresume(teleoperator_id,NULL,NULL);
-	}
-      else 
-	{
-	  display_state = display_state & ~DISPLAY_SONARS;
-	  sonarssuspend();
-	}
-    }
-  else if (obj == fd_teleoperatorgui->laser)
-    {
-      if (fl_get_button(fd_teleoperatorgui->laser)==PUSHED)
-	{
-	  display_state = display_state | DISPLAY_LASER;
-	  mylaser=(int *)myimport("laser","jde_laser");
-	  laserresume=(resumeFn)myimport("laser","resume");
-	  lasersuspend=(suspendFn *)myimport("laser","suspend");
-	  laserresume(teleoperator_id,NULL,NULL);
-	}
-      else 
-	{ 
-	  display_state = display_state & ~DISPLAY_LASER;
-	  lasersuspend();
-	}
-    }
-  else if (obj == fd_teleoperatorgui->encoders)
-    {
+      if (mylongitude_speed!=NULL)
+         *mylongitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
+      if (mylatitude_speed!=NULL)
+         *mylatitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
+   }
+   else if (obj == fd_teleoperatorgui->sonars){
+      if (fl_get_button(fd_teleoperatorgui->sonars)==PUSHED){
+         display_state = display_state | DISPLAY_SONARS;
+         mysonars=(float *)myimport("sonars","us");
+         sonarsresume=(resumeFn)myimport("sonars","resume");
+         sonarssuspend=(suspendFn)myimport("sonars","suspend");
+         if (sonarsresume!=NULL){
+            sonarsresume(teleoperator_id,NULL,NULL);
+         }
+         else{
+            display_state = display_state & ~DISPLAY_SONARS;
+            fl_set_button(fd_teleoperatorgui->sonars, RELEASED);
+         }
+      }
+      else {
+         display_state = display_state & ~DISPLAY_SONARS;
+         if (sonarssuspend!=NULL)
+            sonarssuspend();
+      }
+   }
+   else if (obj == fd_teleoperatorgui->laser){
+      if (fl_get_button(fd_teleoperatorgui->laser)==PUSHED){
+         display_state = display_state | DISPLAY_LASER;
+         mylaser=(int *)myimport("laser","laser");
+         laserresume=(resumeFn )myimport("laser","resume");
+         lasersuspend=(suspendFn)myimport("laser","suspend");
+         if (laserresume!=NULL){
+            laserresume(teleoperator_id,NULL,NULL);
+         }
+         else{
+            fl_set_button(obj, RELEASED);
+            display_state = display_state & ~DISPLAY_LASER;
+         }
+      }
+      else {
+         display_state = display_state & ~DISPLAY_LASER;
+         if (lasersuspend!=NULL)
+            lasersuspend();
+      }
+   }
+   else if (obj == fd_teleoperatorgui->encoders)
+   {
       if (fl_get_button(fd_teleoperatorgui->encoders)==PUSHED)
-	{
-	  display_state = display_state | DISPLAY_ROBOT;
-	  myencoders=(float *)myimport("encoders","jde_robot");
-	  encodersresume=(resumeFn)myimport("encoders","resume");
-	  encoderssuspend=(suspendFn)myimport("encoders","suspend");
-	  encodersresume(teleoperator_id,NULL,NULL);
-	}
-      else 
-	{
-	  display_state = display_state & ~DISPLAY_ROBOT;
-	  encoderssuspend();
-	}
-    }
-  else if (obj == fd_teleoperatorgui->motors)
-    {
-      if (fl_get_button(fd_teleoperatorgui->motors)==PUSHED)
-	{
-	  display_state = display_state | BASE_TELEOPERATOR;
-	  myv=(float *)myimport("motors","v");
-	  myw=(float *)myimport("motors","w");
-	  motorsresume=(resumeFn)myimport("motors","resume");
-	  motorssuspend=(suspendFn)myimport("motors","suspend");
-	  motorsresume(teleoperator_id,NULL,NULL);
-	}
+      {
+         display_state = display_state | DISPLAY_ROBOT;
+         myencoders=(float *)myimport("encoders","jde_robot");
+         encodersresume=(resumeFn)myimport("encoders","resume");
+         encoderssuspend=(suspendFn)myimport("encoders","suspend");
+         if (encodersresume!=NULL)
+            encodersresume(teleoperator_id,NULL,NULL);
+         else{
+            fl_set_button(obj, RELEASED);
+            display_state = display_state & ~DISPLAY_ROBOT;
+         }
+      }
       else
-	{
-	  v=0.; w=0.; /*safety stop when disabling the motors teleoperator */
-	  display_state = display_state & ~BASE_TELEOPERATOR;
-	  motorssuspend();
-	}
-    }
-  else if (obj == fd_teleoperatorgui->PTmotors)
-    {
-      if (fl_get_button(fd_teleoperatorgui->PTmotors)==PUSHED)
-	display_state = display_state | PANTILT_TELEOPERATOR;
-      else 
-	{
-	  /*safety stop when disabling the teleoperator */
-	  /* current pantilt position as initial command, to avoid any movement */
-	  if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05) 
-	    pt_joystick_x= 1.-(pan_angle-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
-	  if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05) 
-	    pt_joystick_y= (tilt_angle-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);   
-	  display_state = display_state & ~PANTILT_TELEOPERATOR;
-	}
-    }
-  else if (obj == fd_teleoperatorgui->PTencoders)
-    {
-      if (fl_get_button(fd_teleoperatorgui->PTencoders)==PUSHED)
-	display_state = display_state | DISPLAY_PANTILTENCODERS;
-      else 
-	display_state = display_state & ~DISPLAY_PANTILTENCODERS;
-    }
-  else if (obj == fd_teleoperatorgui->colorA)
-    {
-      if (fl_get_button(fd_teleoperatorgui->colorA)==PUSHED)
-	display_state = display_state | DISPLAY_COLORIMAGEA;
-      else 
-	display_state = display_state & ~DISPLAY_COLORIMAGEA;
-    }
-  else if (obj == fd_teleoperatorgui->colorB)
-    {
-      if (fl_get_button(fd_teleoperatorgui->colorB)==PUSHED)
-	display_state = display_state | DISPLAY_COLORIMAGEB;
-      else 
-	display_state = display_state & ~DISPLAY_COLORIMAGEB;
-    }
-  else if (obj == fd_teleoperatorgui->colorC)
-    {
-      if (fl_get_button(fd_teleoperatorgui->colorC)==PUSHED)
-	display_state = display_state | DISPLAY_COLORIMAGEC;
-      else 
-	display_state = display_state & ~DISPLAY_COLORIMAGEC;
-    }
+      {
+         display_state = display_state & ~DISPLAY_ROBOT;
+         if (encoderssuspend!=NULL)
+            encoderssuspend();
+      }
+   }
+   else if (obj == fd_teleoperatorgui->motors)
+   {
+      if (fl_get_button(fd_teleoperatorgui->motors)==PUSHED)
+      {
+         display_state = display_state | BASE_TELEOPERATOR;
+         myv=(float *)myimport("motors","v");
+         myw=(float *)myimport("motors","w");
+         motorsresume=(resumeFn)myimport("motors","resume");
+         motorssuspend=(suspendFn)myimport("motors","suspend");
+         if (motorsresume!=NULL)
+            motorsresume(teleoperator_id,NULL,NULL);
+         else{
+            fl_set_button(fd_teleoperatorgui->motors, RELEASED);
+            display_state = display_state & ~BASE_TELEOPERATOR;
+         }
+      }
+      else
+      {
+         /*safety stop when disabling the motors teleoperator */
+         if (myv!=NULL)
+            *myv=0.;
+         if (myw!=NULL)
+            *myw=0.;
+         display_state = display_state & ~BASE_TELEOPERATOR;
+         if (motorssuspend!=NULL)
+            motorssuspend();
+      }
+   }
+   else if (obj == fd_teleoperatorgui->PTmotors){
+      if (fl_get_button(fd_teleoperatorgui->PTmotors)==PUSHED){
+         mylongitude=myimport("ptmotors", "longitude");
+         mylatitude=myimport ("ptmotors", "latitude");
+         mylongitude_speed=myimport("ptmotors", "longitude_speed");
+         mylatitude_speed=myimport("ptmotors","latitude_speed");
+         ptmotorsresume=myimport("ptmotors","resume");
+         ptmotorssuspend=myimport("ptmotors","suspend");
+         if (ptmotorsresume!=NULL){
+            display_state = display_state | PANTILT_TELEOPERATOR;
+            ptmotorsresume(teleoperator_id, NULL, NULL);
+         }
+         else{
+            display_state = display_state & ~PANTILT_TELEOPERATOR;
+            fl_set_button(obj, RELEASED);
+         }
+      }
+      else {
+         /*safety stop when disabling the teleoperator */
+         /* current pantilt position as initial command, to avoid any movement */
+         if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05){
+            if (mypan_angle!=NULL)
+               pt_joystick_x= 1.-(*mypan_angle-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
+            else
+               pt_joystick_x= 1.-(0-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
+         }
+         if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05){
+            if (mytilt_angle!=NULL)
+               pt_joystick_y= (*mytilt_angle-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
+            else
+               pt_joystick_y= (0-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
+         }
+         if (ptmotorssuspend!=NULL){
+            ptmotorssuspend();
+         }
+         display_state = display_state & ~PANTILT_TELEOPERATOR;
+      }
+   }
+   else if (obj == fd_teleoperatorgui->PTencoders){
+      if (fl_get_button(fd_teleoperatorgui->PTencoders)==PUSHED){
+         mypan_angle=myimport("ptencoders", "pan_angle");
+         mytilt_angle=myimport("ptencoders", "tilt_angle");
+         ptencodersresume=myimport("ptencoders", "resume");
+         ptencoderssuspend=myimport("ptencoders", "suspend");
+         if (ptencodersresume!=NULL){
+            ptencodersresume(teleoperator_id, NULL, NULL);
+            display_state = display_state | DISPLAY_PANTILTENCODERS;
+         }
+         else{
+            fl_set_button(obj, RELEASED);
+            display_state = display_state & ~DISPLAY_PANTILTENCODERS;
+         }
+      }
+      else{
+         display_state = display_state & ~DISPLAY_PANTILTENCODERS;
+         if (ptencoderssuspend!=NULL)
+            ptencoderssuspend();
+      }
+   }
+   else if (obj == fd_teleoperatorgui->colorA){
+      if (fl_get_button(fd_teleoperatorgui->colorA)==PUSHED){
+         mycolorA=myimport ("colorA", "colorA");
+         colorAresume=myimport("colorA", "resume");
+         colorAsuspend=myimport("colorA", "suspend");
+         if (colorAresume!=NULL){
+            display_state = display_state | DISPLAY_COLORIMAGEA;
+            colorAresume(teleoperator_id, NULL, NULL);
+         }
+         else{
+            display_state = display_state & ~DISPLAY_COLORIMAGEA;
+            fl_set_button(obj, RELEASED);
+         }
+      }
+      else {
+         display_state = display_state & ~DISPLAY_COLORIMAGEA;
+         if (colorAsuspend!=NULL)
+            colorAsuspend();
+      }
+   }
+   else if (obj == fd_teleoperatorgui->colorB){
+      if (fl_get_button(fd_teleoperatorgui->colorB)==PUSHED){
+         mycolorB=myimport ("colorB", "colorB");
+         colorBresume=myimport("colorB", "resume");
+         colorBsuspend=myimport("colorB", "suspend");
+         if (colorBresume!=NULL){
+            display_state = display_state | DISPLAY_COLORIMAGEB;
+            colorBresume(teleoperator_id, NULL, NULL);
+         }
+         else{
+            display_state = display_state & ~DISPLAY_COLORIMAGEB;
+            fl_set_button(obj, RELEASED);
+         }
+      }
+      else {
+         display_state = display_state & ~DISPLAY_COLORIMAGEB;
+         if (colorBsuspend!=NULL)
+            colorBsuspend();
+      }
+   }
+
+   else if (obj == fd_teleoperatorgui->colorC){
+      if (fl_get_button(fd_teleoperatorgui->colorC)==PUSHED){
+         mycolorC=myimport ("colorC", "colorC");
+         colorCresume=myimport("colorC", "resume");
+         colorCsuspend=myimport("colorC", "suspend");
+         if (colorCresume!=NULL){
+            display_state = display_state | DISPLAY_COLORIMAGEC;
+            colorCresume(teleoperator_id, NULL, NULL);
+         }
+         else{
+            display_state = display_state & ~DISPLAY_COLORIMAGEC;
+            fl_set_button(obj, RELEASED);
+         }
+      }
+      else {
+         display_state = display_state & ~DISPLAY_COLORIMAGEC;
+         if (colorCsuspend!=NULL)
+            colorCsuspend();
+      }
+   }
+
   else if (obj == fd_teleoperatorgui->colorD)
     {
-      if (fl_get_button(fd_teleoperatorgui->colorD)==PUSHED)
-	display_state = display_state | DISPLAY_COLORIMAGED;
-      else 
-	display_state = display_state & ~DISPLAY_COLORIMAGED;
+      if (fl_get_button(fd_teleoperatorgui->colorD)==PUSHED){
+         mycolorD=myimport ("colorD", "colorD");
+         colorDresume=myimport("colorD", "resume");
+         colorDsuspend=myimport("colorD", "suspend");
+         if (colorDresume!=NULL){
+            display_state = display_state | DISPLAY_COLORIMAGED;
+            colorDresume(teleoperator_id, NULL, NULL);
+         }
+         else{
+            display_state = display_state & ~DISPLAY_COLORIMAGED;
+            fl_set_button(obj, RELEASED);
+         }
+      }
+      else {
+         display_state = display_state & ~DISPLAY_COLORIMAGED;
+         if (colorDsuspend!=NULL)
+            colorDsuspend();
+      }
     }
   
   /* modifies pantilt positioner to follow pantilt angles. 
      It tracks the pantilt movement. It should be at
      display_poll, but there it causes a weird display behavior. */
-  if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05) 
-    dpan= 1.-(pan_angle-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
-  if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05) 
-    dtilt= (tilt_angle-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);   
+    if (mypan_angle!=NULL){
+       if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05)
+          dpan= 1.-(*mypan_angle-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
+    }
+    else{
+       if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05)
+          dpan= 1.-(0-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
+    }
+    if (mytilt_angle!=NULL){
+       if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05)
+          dtilt= (*mytilt_angle-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
+    }
+    else{
+       if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05)
+          dtilt= (0-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
+    }
   fl_set_positioner_xvalue(fd_teleoperatorgui->pantilt_joystick,dpan);
   fl_set_positioner_yvalue(fd_teleoperatorgui->pantilt_joystick,dtilt);
   /*fl_redraw_object(fd_teleoperatorgui->pantilt_joystick);*/
@@ -915,6 +1057,7 @@ void teleoperator_guidisplay()
   float r,lati,longi,dx,dy,dz;
   float matColors[4];
   float  Xp_sensor, Yp_sensor;
+
 
   fl_activate_glcanvas(fd_teleoperatorgui->canvas);
   /* Set the OpenGL state machine to the right context for this display */
@@ -973,13 +1116,24 @@ void teleoperator_guidisplay()
   /** Robot Frame of Reference **/
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  mypioneer.posx=jde_robot[0]/100.;
-  mypioneer.posy=jde_robot[1]/100.;
-  mypioneer.posz=0.;
-  mypioneer.foax=jde_robot[0]/100.;
-  mypioneer.foay=jde_robot[1]/100.;
-  mypioneer.foaz=10.;
-  mypioneer.roll=jde_robot[2]*RADTODEG;
+  if (myencoders!=NULL){
+     mypioneer.posx=myencoders[0]/100.;
+     mypioneer.posy=myencoders[1]/100.;
+     mypioneer.posz=0.;
+     mypioneer.foax=myencoders[0]/100.;
+     mypioneer.foay=myencoders[1]/100.;
+     mypioneer.foaz=10.;
+     mypioneer.roll=myencoders[2]*RADTODEG;
+  }
+  else{
+     mypioneer.posx=0.;
+     mypioneer.posy=0.;
+     mypioneer.posz=0.;
+     mypioneer.foax=0.;
+     mypioneer.foay=0.;
+     mypioneer.foaz=10.;
+     mypioneer.roll=0.;
+  }
   glTranslatef(mypioneer.posx,mypioneer.posy,mypioneer.posz);
   dx=(mypioneer.foax-mypioneer.posx);
   dy=(mypioneer.foay-mypioneer.posy);
@@ -991,7 +1145,7 @@ void teleoperator_guidisplay()
   else lati=acos(dz/r)*360./(2.*PI);
   glRotatef(lati,0.,1.,0.);
   glRotatef(mypioneer.roll,0.,0.,1.);
-  
+
   /* X axis */
   glColor3f( 1., 0., 0. );
   glBegin(GL_LINES);
@@ -1030,7 +1184,10 @@ void teleoperator_guidisplay()
       for (k = 0; k < NUM_SONARS; k++) {
 	start.x=us_coord[k][0];
 	start.y=us_coord[k][1];
-	Xp_sensor = us[k]; /* mm */
+        if (mysonars!=NULL)
+           Xp_sensor = mysonars[k]; /* mm */
+        else
+           Xp_sensor = 0;
 	Yp_sensor = 0.;
 	/* Coordenadas del punto detectado por el US con respecto al sistema del sensor, eje x+ normal al sensor */
 	end.x = us_coord[k][0] + Xp_sensor*us_coord[k][3] - Yp_sensor*us_coord[k][4];
@@ -1060,8 +1217,14 @@ void teleoperator_guidisplay()
       start.y=laser_coord[1];
       for(k=0;k<NUM_LASER;k++) 
 	{
-	  Xp_sensor = jde_laser[k]*cos(((float)k-90.)*DEGTORAD); 
-	  Yp_sensor = jde_laser[k]*sin(((float)k-90.)*DEGTORAD);
+           if (mylaser!=NULL){
+              Xp_sensor = mylaser[k]*cos(((float)k-90.)*DEGTORAD);
+              Yp_sensor = mylaser[k]*sin(((float)k-90.)*DEGTORAD);
+           }
+           else{
+              Xp_sensor = 0.*cos(((float)k-90.)*DEGTORAD);
+              Yp_sensor = 0.*sin(((float)k-90.)*DEGTORAD);
+           }
 	  /* Coordenadas del punto detectado por el US con respecto al sistema del sensor, eje x+ normal al sensor */
 	  end.x = laser_coord[0]*10. + Xp_sensor*laser_coord[3] - Yp_sensor*laser_coord[4];
 	  end.y = laser_coord[1] + Yp_sensor*laser_coord[3] + Xp_sensor*laser_coord[4];
@@ -1084,174 +1247,235 @@ void teleoperator_guidisplay()
   /* sample image display */
   {
     /* Pasa de la imagen capturada a la imagen para visualizar (sampleimage_buf), "cambiando" de formato adecuadamente */
-    if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8))
-      {for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-	{ sampleimage_buf[i]= (unsigned char)tabla[(unsigned char)(samplesource[i*3])];}}
-    else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
-      {
-	for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++)
-	  { sampleimage_buf[i*2+1]=(0xf8&(samplesource[i*3+2]))+((0xe0&(samplesource[i*3+1]))>>5);
-	  sampleimage_buf[i*2]=((0xf8&(samplesource[i*3]))>>3)+((0x1c&(samplesource[i*3+1]))<<3);
-	  }
-      }
-    else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
-	     ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
-      {for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-	{ sampleimage_buf[i*4]=samplesource[i*3]; /* Blue Byte */
-	sampleimage_buf[i*4+1]=samplesource[i*3+1]; /* Green Byte */
-	sampleimage_buf[i*4+2]=samplesource[i*3+2]; /* Red Byte */
-	sampleimage_buf[i*4+3]=0; /* dummy byte */  }
-      }
+     if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8)){
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++){
+           if (samplesource!=NULL)
+              sampleimage_buf[i]= (unsigned char)tabla[(unsigned char)(samplesource[i*3])];
+           else
+              sampleimage_buf[i]= (unsigned char)tabla[(unsigned char)(0)];
+        }
+     }
+     else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)){
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++){
+           if (samplesource!=NULL){
+              sampleimage_buf[i*2+1]=(0xf8&(samplesource[i*3+2]))+((0xe0&(samplesource[i*3+1]))>>5);
+              sampleimage_buf[i*2]=((0xf8&(samplesource[i*3]))>>3)+((0x1c&(samplesource[i*3+1]))<<3);
+           }
+           else{
+              sampleimage_buf[i*2+1]=(0xf8&(0))+((0xe0&(0))>>5);
+              sampleimage_buf[i*2]=((0xf8&(0))>>3)+((0x1c&(0))<<3);
+           }
+        }
+     }
+     else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
+                ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
+     {
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++){
+           if(samplesource!=NULL){
+              sampleimage_buf[i*4]=samplesource[i*3]; /* Blue Byte */
+              sampleimage_buf[i*4+1]=samplesource[i*3+1]; /* Green Byte */
+              sampleimage_buf[i*4+2]=samplesource[i*3+2]; /* Red Byte */
+           }
+           else{
+              sampleimage_buf[i*4]=0; /* Blue Byte */
+              sampleimage_buf[i*4+1]=0; /* Green Byte */
+              sampleimage_buf[i*4+2]=0; /* Red Byte */
+           }
+           sampleimage_buf[i*4+3]=UCHAR_MAX; /* dummy byte */  }
+     }
   }
-  
+
   /* color imageA display */
-  if ((display_state&DISPLAY_COLORIMAGEA)!=0)
-    {
-      /* Pasa de la imagen capturada a la imagen para visualizar (imagenA_buf), "cambiando" de formato adecuadamente */
-      if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
-	  { 
-	    c=i%(SIFNTSC_COLUMNS/2);
-	    row=i/(SIFNTSC_COLUMNS/2);
-	    j=2*row*SIFNTSC_COLUMNS+2*c;
-	    imagenA_buf[i]= (unsigned char)tabla[(unsigned char)(colorA[j*3])];
-	  }
-	}
-      else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
-	{
-	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++)
-	    { 
-	      c=i%(SIFNTSC_COLUMNS/2);
-	      row=i/(SIFNTSC_COLUMNS/2);
-	      j=2*row*SIFNTSC_COLUMNS+2*c;
-	      imagenA_buf[i*2+1]=(0xf8&(colorA[j*3+2]))+((0xe0&(colorA[j*3+1]))>>5);
-	      imagenA_buf[i*2]=((0xf8&(colorA[j*3]))>>3)+((0x1c&(colorA[j*3+1]))<<3);
-	    }
-	}
-      else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
-	       ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
-	  { 
-	    c=i%(SIFNTSC_COLUMNS/2);
-	    row=i/(SIFNTSC_COLUMNS/2);
-	    j=2*row*SIFNTSC_COLUMNS+2*c;
-	    imagenA_buf[i*4]=colorA[j*3]; /* Blue Byte */
-	    imagenA_buf[i*4+1]=colorA[j*3+1]; /* Green Byte */
-	    imagenA_buf[i*4+2]=colorA[j*3+2]; /* Red Byte */
-	    imagenA_buf[i*4+3]=0; /* dummy byte */  }
-	}
-    }
-  
+  if ((display_state&DISPLAY_COLORIMAGEA)!=0){
+      /* Pasa de la imagen capturada a la imagen para visualizar (imagenA_buf),
+     "cambiando" de formato adecuadamente */
+     if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8)){
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++){
+           c=i%(SIFNTSC_COLUMNS/2);
+           row=i/(SIFNTSC_COLUMNS/2);
+           j=2*row*SIFNTSC_COLUMNS+2*c;
+           if (mycolorA!=NULL)
+              imagenA_buf[i]= (unsigned char)tabla[(unsigned char)((*mycolorA)[j*3])];
+           else
+              imagenA_buf[i]= (unsigned char)tabla[(unsigned char)(0)];
+        }
+     }
+     else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)){
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++){ 
+           c=i%(SIFNTSC_COLUMNS/2);
+           row=i/(SIFNTSC_COLUMNS/2);
+           j=2*row*SIFNTSC_COLUMNS+2*c;
+           if (mycolorA!=NULL){
+              imagenA_buf[i*2+1]=(0xf8&((*mycolorA)[j*3+2]))+((0xe0&((*mycolorA)[j*3+1]))>>5);
+              imagenA_buf[i*2]=((0xf8&((*mycolorA)[j*3]))>>3)+((0x1c&((*mycolorA)[j*3+1]))<<3);
+           }
+           else{
+              imagenA_buf[i*2+1]=(0xf8&(0))+((0xe0&(0))>>5);
+              imagenA_buf[i*2]=((0xf8&(0))>>3)+((0x1c&(0))<<3);
+           }
+        }
+     }
+     else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
+                ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
+     {
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++){
+           c=i%(SIFNTSC_COLUMNS/2);
+           row=i/(SIFNTSC_COLUMNS/2);
+           j=2*row*SIFNTSC_COLUMNS+2*c;
+           if (mycolorA!=NULL){
+              imagenA_buf[i*4]=(*mycolorA)[j*3]; /* Blue Byte */
+              imagenA_buf[i*4+1]=(*mycolorA)[j*3+1]; /* Green Byte */
+              imagenA_buf[i*4+2]=(*mycolorA)[j*3+2]; /* Red Byte */
+           }
+           else{
+              imagenA_buf[i*4]=0; /* Blue Byte */
+              imagenA_buf[i*4+1]=0; /* Green Byte */
+              imagenA_buf[i*4+2]=0; /* Red Byte */
+           }
+           imagenA_buf[i*4+3]=UCHAR_MAX; /* alpha Byte */
+        }
+     }
+  }
+
   /* color imageB display */
-  if ((display_state&DISPLAY_COLORIMAGEB)!=0)
-    {
-      /* Pasa de la imagen capturada a la imagen para visualizar (imagenB_buf), "cambiando" de formato adecuadamente */
-      if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
-	  { 
-	    c=i%(SIFNTSC_COLUMNS/2);
-	    row=i/(SIFNTSC_COLUMNS/2);
-	    j=2*row*SIFNTSC_COLUMNS+2*c;
-	    imagenB_buf[i]= (unsigned char)tabla[(unsigned char)(colorB[j*3])];
-	  }}
-      else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
-	{
-	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++)
-	    { 
-	      c=i%(SIFNTSC_COLUMNS/2);
-	      row=i/(SIFNTSC_COLUMNS/2);
-	      j=2*row*SIFNTSC_COLUMNS+2*c;
-	      imagenB_buf[i*2+1]=(0xf8&(colorB[j*3+2]))+((0xe0&(colorB[j*3+1]))>>5);
-	      imagenB_buf[i*2]=((0xf8&(colorB[j*3]))>>3)+((0x1c&(colorB[j*3+1]))<<3);
-	    }
-	}
-      else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
-	       ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
-	  { 
-	    c=i%(SIFNTSC_COLUMNS/2);
-	    row=i/(SIFNTSC_COLUMNS/2);
-	    j=2*row*SIFNTSC_COLUMNS+2*c;
-	    imagenB_buf[i*4]=colorB[j*3]; /* Blue Byte */
-	    imagenB_buf[i*4+1]=colorB[j*3+1]; /* Green Byte */
-	    imagenB_buf[i*4+2]=colorB[j*3+2]; /* Red Byte */
-	    imagenB_buf[i*4+3]=0; /* dummy byte */  }
-	}
-    }
-  
+  if ((display_state&DISPLAY_COLORIMAGEB)!=0){
+     /* Pasa de la imagen capturada a la imagen para visualizar (imagenB_buf),
+      "cambiando" de formato adecuadamente */
+     if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8)){
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++){
+           c=i%(SIFNTSC_COLUMNS/2);
+           row=i/(SIFNTSC_COLUMNS/2);
+           j=2*row*SIFNTSC_COLUMNS+2*c;
+           if (mycolorB!=NULL)
+              imagenB_buf[i]= (unsigned char)tabla[(unsigned char)((*mycolorB)[j*3])];
+           else
+              imagenB_buf[i]= (unsigned char)tabla[(unsigned char)(0)];
+        }
+     }
+     else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)){
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++){
+           c=i%(SIFNTSC_COLUMNS/2);
+           row=i/(SIFNTSC_COLUMNS/2);
+           j=2*row*SIFNTSC_COLUMNS+2*c;
+           if (mycolorB!=NULL){
+              imagenB_buf[i*2+1]=(0xf8&((*mycolorB)[j*3+2]))+((0xe0&((*mycolorB)[j*3+1]))>>5);
+              imagenB_buf[i*2]=((0xf8&((*mycolorB)[j*3]))>>3)+((0x1c&((*mycolorB)[j*3+1]))<<3);
+           }
+           else{
+              imagenB_buf[i*2+1]=(0xf8&(0))+((0xe0&(0))>>5);
+              imagenB_buf[i*2]=((0xf8&(0))>>3)+((0x1c&(0))<<3);
+           }
+        }
+     }
+     else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
+                ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
+     {
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++){
+           c=i%(SIFNTSC_COLUMNS/2);
+           row=i/(SIFNTSC_COLUMNS/2);
+           j=2*row*SIFNTSC_COLUMNS+2*c;
+           if (mycolorB!=NULL){
+              imagenB_buf[i*4]=(*mycolorB)[j*3]; /* Blue Byte */
+              imagenB_buf[i*4+1]=(*mycolorB)[j*3+1]; /* Green Byte */
+              imagenB_buf[i*4+2]=(*mycolorB)[j*3+2]; /* Red Byte */
+           }
+           else{
+              imagenB_buf[i*4]=0; /* Blue Byte */
+              imagenB_buf[i*4+1]=0; /* Green Byte */
+              imagenB_buf[i*4+2]=0; /* Red Byte */
+           }
+           imagenB_buf[i*4+3]=UCHAR_MAX; /* alpha byte */
+        }
+     }
+  }
+
   /* color imageC display */
-  if ((display_state&DISPLAY_COLORIMAGEC)!=0)
-    {
-      /* Pasa de la imagen capturada a la imagen para visualizar (imagenC_buf), "cambiando" de formato adecuadamente */
-      if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
-	  { 
-	    c=i%(SIFNTSC_COLUMNS/2);
-	    row=i/(SIFNTSC_COLUMNS/2);
-	    j=2*row*SIFNTSC_COLUMNS+2*c;
-	    imagenC_buf[i]= (unsigned char)tabla[(unsigned char)(colorC[j*3])];
-	  }}
-      else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
-	{
-	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++)
-	    { 
-	      c=i%(SIFNTSC_COLUMNS/2);
-	      row=i/(SIFNTSC_COLUMNS/2);
-	      j=2*row*SIFNTSC_COLUMNS+2*c;
-	      imagenC_buf[i*2+1]=(0xf8&(colorC[j*3+2]))+((0xe0&(colorC[j*3+1]))>>5);
-	      imagenC_buf[i*2]=((0xf8&(colorC[j*3]))>>3)+((0x1c&(colorC[j*3+1]))<<3);
-	    }
-	}
-      else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
-	       ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
-	  { 
-	    c=i%(SIFNTSC_COLUMNS/2);
-	    row=i/(SIFNTSC_COLUMNS/2);
-	    j=2*row*SIFNTSC_COLUMNS+2*c;
-	    imagenC_buf[i*4]=colorC[j*3]; /* Blue Byte */
-	    imagenC_buf[i*4+1]=colorC[j*3+1]; /* Green Byte */
-	    imagenC_buf[i*4+2]=colorC[j*3+2]; /* Red Byte */
-	    imagenC_buf[i*4+3]=0; /* dummy byte */  }
-	}
-    }
-  
+  if ((display_state&DISPLAY_COLORIMAGEC)!=0){
+      /* Pasa de la imagen capturada a la imagen para visualizar (imagenC_buf),
+     "cambiando" de formato adecuadamente */
+     if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8)){
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++){
+           c=i%(SIFNTSC_COLUMNS/2);
+           row=i/(SIFNTSC_COLUMNS/2);
+           j=2*row*SIFNTSC_COLUMNS+2*c;
+           if (mycolorC!=NULL)
+              imagenC_buf[i]= (unsigned char)tabla[(unsigned char)((*mycolorC)[j*3])];
+           else{
+              imagenC_buf[i]= (unsigned char)tabla[(unsigned char)(0)];
+           }
+        }
+     }
+     else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) {
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++){
+           c=i%(SIFNTSC_COLUMNS/2);
+           row=i/(SIFNTSC_COLUMNS/2);
+           j=2*row*SIFNTSC_COLUMNS+2*c;
+           if (mycolorC!=NULL){
+              imagenC_buf[i*2+1]=(0xf8&((*mycolorC)[j*3+2]))+((0xe0&((*mycolorC)[j*3+1]))>>5);
+              imagenC_buf[i*2]=((0xf8&((*mycolorC)[j*3]))>>3)+((0x1c&((*mycolorC)[j*3+1]))<<3);
+           }
+           else{
+              imagenC_buf[i*2+1]=(0xf8&(0))+((0xe0&(0))>>5);
+              imagenC_buf[i*2]=((0xf8&(0))>>3)+((0x1c&(0))<<3);
+           }
+        }
+     }
+     else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
+                ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
+     {
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++){
+           c=i%(SIFNTSC_COLUMNS/2);
+           row=i/(SIFNTSC_COLUMNS/2);
+           j=2*row*SIFNTSC_COLUMNS+2*c;
+           if (mycolorC!=NULL){
+              imagenC_buf[i*4]=(*mycolorC)[j*3]; /* Blue Byte */
+              imagenC_buf[i*4+1]=(*mycolorC)[j*3+1]; /* Green Byte */
+              imagenC_buf[i*4+2]=(*mycolorC)[j*3+2]; /* Red Byte */
+           }
+           else{
+              imagenC_buf[i*4]=0; /* Blue Byte */
+              imagenC_buf[i*4+1]=0; /* Green Byte */
+              imagenC_buf[i*4+2]=0; /* Red Byte */
+           }
+           imagenC_buf[i*4+3]=0; /* dummy byte */
+        }
+     }
+  }
+
   /* color imageD display */
-  if ((display_state&DISPLAY_COLORIMAGED)!=0)
-    {
-      /* Pasa de la imagen capturada a la imagen para visualizar (imagenD_buf), "cambiando" de formato adecuadamente */
-      if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
-	  { 
-	    c=i%(SIFNTSC_COLUMNS/2);
-	    row=i/(SIFNTSC_COLUMNS/2);
-	    j=2*row*SIFNTSC_COLUMNS+2*c;
-	    imagenD_buf[i]= (unsigned char)tabla[(unsigned char)(colorD[j*3])];
-	  }}
-      else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
-	{
-	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++)
-	    { 
-	      c=i%(SIFNTSC_COLUMNS/2);
-	      row=i/(SIFNTSC_COLUMNS/2);
-	      j=2*row*SIFNTSC_COLUMNS+2*c;
-	      imagenD_buf[i*2+1]=(0xf8&(colorD[j*3+2]))+((0xe0&(colorD[j*3+1]))>>5);
-	      imagenD_buf[i*2]=((0xf8&(colorD[j*3]))>>3)+((0x1c&(colorD[j*3+1]))<<3);
-	    }
-	}
-      else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
-	       ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
-	{for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++) 
-	  { 
-	    c=i%(SIFNTSC_COLUMNS/2);
-	    row=i/(SIFNTSC_COLUMNS/2);
-	    j=2*row*SIFNTSC_COLUMNS+2*c;
-	    imagenD_buf[i*4]=colorD[j*3]; /* Blue Byte */
-	    imagenD_buf[i*4+1]=colorD[j*3+1]; /* Green Byte */
-	    imagenD_buf[i*4+2]=colorD[j*3+2]; /* Red Byte */
-	    imagenD_buf[i*4+3]=0; /* dummy byte */  }
-	}
-    }
+  if ((display_state&DISPLAY_COLORIMAGED)!=0){
+      /* Pasa de la imagen capturada a la imagen para visualizar (imagenD_buf),
+     "cambiando" de formato adecuadamente */
+     if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8)){
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++){
+           c=i%(SIFNTSC_COLUMNS/2);
+           row=i/(SIFNTSC_COLUMNS/2);
+           j=2*row*SIFNTSC_COLUMNS+2*c;
+           imagenD_buf[i]= (unsigned char)tabla[(unsigned char)((*mycolorD)[j*3])];
+        }
+     }
+     else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)){
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++){
+           c=i%(SIFNTSC_COLUMNS/2);
+           row=i/(SIFNTSC_COLUMNS/2);
+           j=2*row*SIFNTSC_COLUMNS+2*c;
+           imagenD_buf[i*2+1]=(0xf8&((*mycolorD)[j*3+2]))+((0xe0&((*mycolorD)[j*3+1]))>>5);
+           imagenD_buf[i*2]=((0xf8&((*mycolorD)[j*3]))>>3)+((0x1c&((*mycolorD)[j*3+1]))<<3);
+        }
+     }
+     else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
+                ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
+     {
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS/4; i++){
+           c=i%(SIFNTSC_COLUMNS/2);
+           row=i/(SIFNTSC_COLUMNS/2);
+           j=2*row*SIFNTSC_COLUMNS+2*c;
+           imagenD_buf[i*4]=(*mycolorD)[j*3]; /* Blue Byte */
+           imagenD_buf[i*4+1]=(*mycolorD)[j*3+1]; /* Green Byte */
+           imagenD_buf[i*4+2]=(*mycolorD)[j*3+2]; /* Red Byte */
+           imagenD_buf[i*4+3]=0; /* dummy byte */  }
+     }
+  }
 
   if ((display_state&DISPLAY_COLORIMAGEA)!=0)
     {    /* Draw screen onto display */
@@ -1268,13 +1492,16 @@ void teleoperator_guidisplay()
       XPutImage(display,teleoperatorgui_win,teleoperatorgui_gc,imagenC,0,0,fd_teleoperatorgui->ventanaC->x+1, fd_teleoperatorgui->ventanaC->y+1, SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2);
     }
   
-  if ((display_state&DISPLAY_COLORIMAGED)!=0)
-    {    /* Draw screen onto display */
-      XPutImage(display,teleoperatorgui_win,teleoperatorgui_gc,imagenD,0,0,fd_teleoperatorgui->ventanaD->x+1, fd_teleoperatorgui->ventanaD->y+1, SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2);
-    }
-  
+  if ((display_state&DISPLAY_COLORIMAGED)!=0){    /* Draw screen onto display */
+     XPutImage(display,teleoperatorgui_win,teleoperatorgui_gc,imagenD,0,0,
+               fd_teleoperatorgui->ventanaD->x+1,
+               fd_teleoperatorgui->ventanaD->y+1, SIFNTSC_COLUMNS/2,
+               SIFNTSC_ROWS/2);
+  }
+
   /* Draw sample image onto display */
-      XPutImage(display,teleoperatorgui_win,teleoperatorgui_gc,sampleimage,0,0,fd_teleoperatorgui->sampleimage->x+1, fd_teleoperatorgui->sampleimage->y+1, SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+    XPutImage(display,teleoperatorgui_win,teleoperatorgui_gc,sampleimage,0,0,fd_teleoperatorgui->sampleimage->x+1, fd_teleoperatorgui->sampleimage->y+1, SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+
 }
 
 
@@ -1336,15 +1563,15 @@ void teleoperator_guiresume(void)
   else fl_set_button(fd_teleoperatorgui->track_robot,RELEASED);
   if (toggle==TRUE) fl_set_button(fd_teleoperatorgui->toggle,PUSHED);
   else fl_set_button(fd_teleoperatorgui->toggle,RELEASED);
-  
   teleoperatorgui_win = FL_ObjWin(fd_teleoperatorgui->ventanaA);
   /* the window (teleoperatorgui_win) changes every time the form is hided and showed again. They need to be updated before displaying anything again */
   
   fl_set_positioner_xvalue(fd_teleoperatorgui->joystick,0.5);
   fl_set_positioner_yvalue(fd_teleoperatorgui->joystick,0.);
   joystick_x=0.5;
-  joystick_y=0.5;	  
-  fl_set_slider_value(fd_teleoperatorgui->ptspeed,(double)(1.-latitude_speed/MAX_SPEED_PANTILT));
+  joystick_y=0.5;
+  if (mylatitude_speed!=NULL)
+     fl_set_slider_value(fd_teleoperatorgui->ptspeed,(double)(1.-(*mylatitude_speed)/MAX_SPEED_PANTILT));
 
   register_buttonscallback(teleoperator_guibuttons);
   register_displaycallback(teleoperator_guidisplay);
