@@ -19,33 +19,14 @@
  *            Roberto Calvo Palomino <rocapal@gsyc.escet.urjc.es>
  */
 
-/* ChangeLog:
-followball (0.4) stable: urgency=low
-	* Add flag -O2 for full optimize code
-	* [FIX-BUG] The search is carried out with speed_latitude=0.0
-	* Increase the pan and tilt speeds.
--- Roberto Calvo <rocapal@gsyc.escet.urjc.es>  Fri, 23 Mar 2007 21:15:29 +0100
-
-
-followball (0.3) stable: urgency=low
-	* Change the cycle of scheme=70ms
-	* Change value of PAN Speed (see followball.c)
-	* Add buttons for activate/desactivate the visualization of histogram
-	and filter HSI image.
-  -- Roberto Calvo <rocapal@gsyc.escet.urjc.es>  Sat, 10 Mar 2007 20:58:50 +0100
-
-followball (0.2) stable: urgency=low
-	* The control of pantilt is realized "in speed"
-  -- Roberto Calvo <rocapal@gsyc.escet.urjc.es>  Tue, 23 Jan 2007 23:07:58 +0100
-*/
-
 #include <jde.h>
 #include <jdegui.h>
 #include "followballgui.h"
 #include "followball.h"
 #include <math.h>
+#include "libRGB2HSI.h"
 
-#define FollowballVER "Followball 0.3"
+#define FollowballVER "Followball 0.6"
 
 #define D(x...) //printf(x)
 
@@ -63,7 +44,7 @@ struct dfilter data_filter;
 int followball_id=0;
 int followball_brothers[MAX_SCHEMAS];
 arbitration followball_callforarbitration;
-int followball_cycle=50; /* ms */
+int followball_cycle=30; /* ms */
 
 FD_followballgui *fd_followballgui;
 
@@ -131,7 +112,7 @@ int hsimap_threshold;
 
 
 /*Conversor a HSI*/
-void rgb2hsi (double r, double g, double b, double *H, double *S, double *I){
+void rgb2hsi2 (double r, double g, double b, double *H, double *S, double *I){
    double a, n, d;
 
    *I = (r + b + g) / 3.0;
@@ -526,13 +507,13 @@ int followballgui_setupDisplay(void)
 void pantilt_iteration()
 {
 
-#define VEL_MAX_PAN 2000.0*ENCOD_TO_DEG
+#define VEL_MAX_PAN 2500.0*ENCOD_TO_DEG
 #define VEL_MIN_PAN 350.0*ENCOD_TO_DEG
 #define POS_MIN_PAN 40.0
 #define POS_MAX_PAN 160.0 
 
-#define VEL_MAX_TILT 1100.0*ENCOD_TO_DEG 
-#define VEL_MIN_TILT 30.0*ENCOD_TO_DEG
+#define VEL_MAX_TILT 1000.0*ENCOD_TO_DEG 
+#define VEL_MIN_TILT 300.0*ENCOD_TO_DEG
 #define POS_MIN_TILT 40.0
 #define POS_MAX_TILT 120.0
 
@@ -621,26 +602,34 @@ void busqueda_iteration()
 {
     
   longitude_speed=1200*ENCOD_TO_DEG;
+  latitude_speed = 0.0;
 
-  D("Busqueda Iteration: pan_angle=%f , tilt_angle=%f\n",pan_angle, tilt_angle);
+  
   /* Buscamos hacia la derecha */
   if (last_movement==right) {
-    if ( pan_angle > -MAX_PAN_ANGLE ){
-      longitude = -40.0 + pan_angle;
-    }
-    else {
+	D("[DERECHA]Busqueda Iteration: pan_angle=%f (MAX=%f) , tilt_angle=%f\n",pan_angle, MAX_PAN_ANGLE ,tilt_angle);
+    if ( pan_angle > -MAX_PAN_ANGLE )
+    {  
+		longitude = -MAX_PAN_ANGLE;
+	}
+    else
+	{ 
       last_movement=left;
-    }
+	}
+    
   }
   /* Buscamos hacia la izquierda */
   else {
-    if ( pan_angle < MAX_TILT_ANGLE )
-      longitude = 40.0 + pan_angle;
+	D("[IZQUIERDA]Busqueda Iteration: pan_angle=%f (MAX=%f) , tilt_angle=%f\n",pan_angle, MAX_PAN_ANGLE ,tilt_angle);
+    if ( pan_angle < MAX_PAN_ANGLE )
+	{
+		longitude = MAX_PAN_ANGLE;
+	}
     else
-      last_movement=right;
+	{
+		last_movement=right;
+	}
   }
-
-  latitude_speed = 0.0;
 
 }
 
@@ -654,6 +643,7 @@ void followball_iteration()
   double r,g,b,I,H,S;
   unsigned int X, Y;
   double x,y; 
+  struct HSI* myHSI;
 
   int pixeles=0, pasa_filtro=0, num_lineas=0;
   int pixel_x=1, pixel_y=1;
@@ -681,11 +671,17 @@ void followball_iteration()
   
   for(i=0;i< SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++)
     {
-      /* Modo XLib, 4 bytes por pixel */
-      r = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4+2]/255.0;
-      g = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4+1]/255.0;
-      b = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4]/255.0;
-      rgb2hsi (r, g, b, &H, &S, &I);
+
+      r = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4+2];
+      g = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4+1];
+      b = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4];
+
+      myHSI = libRGB2HSI_getHSI((int)r,(int)g,(int)b);
+      H=myHSI->H;
+      S=myHSI->S;
+      I=myHSI->I;     
+
+      //rgb2hsi2 (r, g, b, &H, &S, &I);
 
       if((I<=i_max/255.0)&&(I>=i_min/255.0)&&
 	 (S >= s_min) && (S <= s_max) && 
@@ -774,7 +770,6 @@ void followball_iteration()
   
   data_filter.pixeles = pixeles;
   data_filter.lineas = num_lineas;
-
   if (data_filter.pixeles>MIN_PIXELES) {
 
     /* hallamos la media de los puntos */
@@ -822,6 +817,8 @@ void followball_suspend()
   longitude_speed = 0.0;
   latitude_speed = 0.0;
 
+  libRGB2HSI_destroyTable();
+
   printf("followball: off\n");
   pthread_mutex_unlock(&(all[followball_id].mymutex));
 }
@@ -830,6 +827,7 @@ void followball_suspend()
 void followball_resume(int father, int *brothers, arbitration fn)
 {
   int i;
+  //struct HSI* myHSI;
 
   /* update the father incorporating this schema as one of its children */
   if (father!=GUIHUMAN) 
@@ -849,9 +847,14 @@ void followball_resume(int father, int *brothers, arbitration fn)
      i=0;
      while(brothers[i]!=-1) {followball_brothers[i]=brothers[i];i++;}
    }
+
   followball_callforarbitration=fn;
   put_state(followball_id,notready);
   printf("followball: on\n");
+
+  libRGB2HSI_init();
+  libRGB2HSI_createTable();
+
   pthread_cond_signal(&(all[followball_id].condition));
   pthread_mutex_unlock(&(all[followball_id].mymutex));
 }
@@ -935,7 +938,7 @@ void followball_guibuttons(FL_OBJECT *obj)
   if (obj == fd_followballgui-> btActiveHist )
   {
   	if ( fl_get_button(fd_followballgui->btActiveHist)==PUSHED )
-  		isActivatedShowHistogram=1;
+  		isActivatedShowHistogram=0;
   	else
   		isActivatedShowHistogram=0;
   }
@@ -1099,6 +1102,7 @@ int handle2 (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void 
    int x_matriz,y_matriz;
    unsigned char r,g,b;
    double H,S,I;
+   struct HSI* myHSI;
 
    if (!isActivatedShowHistogram)
    	return 0;
@@ -1110,9 +1114,14 @@ int handle2 (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void 
 	 r=imagenOrig_buf[(SIFNTSC_COLUMNS*y_matriz+x_matriz)*4+2];
 	 g=imagenOrig_buf[(SIFNTSC_COLUMNS*y_matriz+x_matriz)*4+1];
 	 b=imagenOrig_buf[(SIFNTSC_COLUMNS*y_matriz+x_matriz)*4];
-	 /*printf("r:%d,g:%d,b:%d\n",r,g,b);*/
-	 rgb2hsi(r/255.0,g/255.0,b/255.0,&H,&S,&I);
-	 /*printf("H:%1f,S:%1f,I:%1f\n",H,S,I);*/
+
+	 //rgb2hsi2(r/255.0,g/255.0,b/255.0,&H,&S,&I);
+
+	 myHSI = libRGB2HSI_getHSI((int)r,(int)g,(int)b);
+	 H=myHSI->H;
+	 S=myHSI->S;
+	 I=myHSI->I;
+
 	 h_max=H+.2;
 	 h_min=H-.2;
 	 if (h_max>2*3.1416){
