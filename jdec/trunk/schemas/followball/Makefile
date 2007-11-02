@@ -5,11 +5,14 @@ GCC = gcc
 CFLAGS = -g -O2 -Wall $(INC-DIR)
 LIBS = -lm -lX11 -lforms 
 
-followball: followball.o followballgui.o libRGB2HSI.o
+followball: followballgui.o followball.o libRGB2HSI.o
 	$(GCC) -shared -Wl,-soname,followball.so $(LIB-DIR) -o followball.so followball.o  followballgui.o libRGB2HSI.o $(LIBS)
 
 followballgui.o: followballgui.c followballgui.h
 	$(GCC) $(CFLAGS) -fPIC -c followballgui.c
+
+followballgui.c: followballgui.fd
+	fdesign -convert followballgui.fd
 
 followball.o: followball.c followball.h
 	$(GCC) $(CFLAGS) -fPIC -c followball.c
