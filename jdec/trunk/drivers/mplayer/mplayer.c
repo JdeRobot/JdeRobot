@@ -106,6 +106,28 @@ int colorC_schema_id;
 /** id for colorD schema.*/
 int colorD_schema_id;
 
+/*Variables compartidas*/
+/** 'colorA' schema image data*/
+char *colorA; /* sifntsc image itself */
+/** 'colorA' schema clock*/
+unsigned long int imageA_clock;
+
+/** 'colorB' schema image data*/
+char *colorB; /* sifntsc image itself */
+/** 'colorB' schema clock*/
+unsigned long int imageB_clock;
+
+/** 'colorC' schema image data*/
+char *colorC; /* sifntsc image itself */
+/** 'colorC' schema clock*/
+unsigned long int imageC_clock;
+
+/** 'colorD' schema image data*/
+char *colorD; /* sifntsc image itself */
+/** 'colorD' schema clock*/
+unsigned long int imageD_clock;
+
+
 /* MPLAYER DRIVER FUNCTIONS */
 
 /** mplayer driver function to close devices.*/
@@ -369,32 +391,32 @@ void mplayer_start(int i){
       exit (1);
 
    if ((pid_mencoder[i]=fork()) == 0) {/* We create a new process...
-                           // ... close its stdin, stdout & stderr ...*/
-	    file = open("/dev/null",O_RDWR);
-	    close(0); dup(file);
-	    close(1); dup(file);
-	    close(2); dup(file);
+      // ... close its stdin, stdout & stderr ...*/
+      file = open("/dev/null",O_RDWR);
+      close(0); dup(file);
+      close(1); dup(file);
+      close(2); dup(file);
 	    
-	    execlp("mencoder","mencoder",fifo1[i],"-nosound","-o",fifo2[i],
-		   "-ovc","raw","-of","rawvideo","-vf","format=bgr24",NULL);
-	    printf("Error executing mencoder\n");
-	    exit(1);
-	 }
+      execlp("mencoder","mencoder",fifo1[i],"-nosound","-o",fifo2[i],
+             "-ovc","raw","-of","rawvideo","-vf","format=bgr24",NULL);
+      printf("Error executing mencoder\n");
+      exit(1);
+   }
 
-	 if ((pid_mplayer[i]=fork()) == 0) { /* We create a new process...
-                           // ... close its stdin, stdout & stderr ...*/
-	    file = open("/dev/null",O_RDWR);
-	    close(0); dup(file);
-	    close(1); dup(file);
-	    close(2); dup(file);
-            /* ... and exec the mplayer command.*/
-	    sprintf(str,"scale=%d:%d",SIFNTSC_COLUMNS,SIFNTSC_ROWS);
-	    sprintf (str2, "yuv4mpeg:file=%s", fifo1[i]);
-	    execlp("mplayer","mplayer",video_files[i],"-vo", str2,
-		   "-vf", str, "-ao","null","-slave",NULL);
-	    printf("Error executing mplayer\n");
-	    exit(1);
-	 }
+   if ((pid_mplayer[i]=fork()) == 0) { /* We create a new process...
+      // ... close its stdin, stdout & stderr ...*/
+      file = open("/dev/null",O_RDWR);
+      close(0); dup(file);
+      close(1); dup(file);
+      close(2); dup(file);
+      /* ... and exec the mplayer command.*/
+      sprintf(str,"scale=%d:%d",SIFNTSC_COLUMNS,SIFNTSC_ROWS);
+      sprintf (str2, "yuv4mpeg:file=%s", fifo1[i]);
+      execlp("mplayer","mplayer",video_files[i],"-vo", str2,
+             "-vf", str, "-ao","null","-slave",NULL);
+      printf("Error executing mplayer\n");
+      exit(1);
+   }
 }
 
 /** mplayer driver internal thread.
@@ -692,6 +714,15 @@ void mplayer_startup(char *configfile)
       exit (-1);
    }
 
+   for (i=0; i<MAXVIDS; i++){
+      /*inicializar todos los mplayer y mencoder*/
+      pid_mplayer[i]=0;
+      pid_mencoder[i]=0;
+      if (serve_color[i]==1){
+         mplayer_start(i);
+      }
+   }
+
    if(mplayer_thread_created==0){
       static int args[MAXVIDS];
       /*Crear hilos para cada imagen*/
@@ -715,15 +746,6 @@ void mplayer_startup(char *configfile)
       }
       mplayer_thread_created=1;
       pthread_mutex_unlock(&mymutex);
-   }
-
-   for (i=0; i<MAXVIDS; i++){
-      /*inicializar todos los mplayer y mencoder*/
-      pid_mplayer[i]=0;
-      pid_mencoder[i]=0;
-      if (serve_color[i]==1){
-	 mplayer_start(i);
-      }
    }
    /*Se crean los esquemas que a su vez bloquean al su correspondiente threat
    hasta que se active el esquema*/

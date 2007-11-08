@@ -679,8 +679,6 @@ int networkclient_colorA_resume(int father, int *brothers, arbitration fn){
       colorA_refs=1;
       pthread_mutex_unlock(&refmutex);
       if((device_active[COLORA_DEVICE]==0)&&(serve_device[COLORA_DEVICE])){
-         char message_out[MAX_MESSAGE];
-    
          printf("colorA schema resume (networkclient driver)\n");
          all[colorA_schema_id].father = father;
          all[colorA_schema_id].fps = 0.;
@@ -688,8 +686,6 @@ int networkclient_colorA_resume(int father, int *brothers, arbitration fn){
          put_state(colorA_schema_id,winner);
          device_active[COLORA_DEVICE]=1;
          pthread_mutex_lock(&mymutex[COLORA_DEVICE]);
-         sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORA_DEVICE]);
-         write(device_socket[COLORA_DEVICE],message_out,strlen(message_out));
          state[COLORA_DEVICE]=winner;
          pthread_cond_signal(&condition[COLORA_DEVICE]);
          pthread_mutex_unlock(&mymutex[COLORA_DEVICE]);
@@ -736,8 +732,6 @@ int networkclient_colorB_resume(int father, int *brothers, arbitration fn){
       colorB_refs=1;
       pthread_mutex_unlock(&refmutex);
       if((device_active[COLORB_DEVICE]==0)&&(serve_device[COLORB_DEVICE])){
-         char message_out[MAX_MESSAGE];
-    
          printf("colorB schema resume (networkclient driver)\n");
          all[colorB_schema_id].father = father;
          all[colorB_schema_id].fps = 0.;
@@ -745,8 +739,6 @@ int networkclient_colorB_resume(int father, int *brothers, arbitration fn){
          put_state(colorB_schema_id,winner);
          device_active[COLORB_DEVICE]=1;
          pthread_mutex_lock(&mymutex[COLORB_DEVICE]);
-         sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORB_DEVICE]);
-         write(device_socket[COLORB_DEVICE],message_out,strlen(message_out));
          state[COLORB_DEVICE]=winner;
          pthread_cond_signal(&condition[COLORB_DEVICE]);
          pthread_mutex_unlock(&mymutex[COLORB_DEVICE]);
@@ -793,8 +785,6 @@ int networkclient_colorC_resume(int father, int *brothers, arbitration fn){
       colorC_refs=1;
       pthread_mutex_unlock(&refmutex);
       if((device_active[COLORC_DEVICE]==0)&&(serve_device[COLORC_DEVICE])){
-         char message_out[MAX_MESSAGE];
-
          printf("colorC schema resume (networkclient driver)\n");
          all[colorC_schema_id].father = father;
          all[colorC_schema_id].fps = 0.;
@@ -802,8 +792,6 @@ int networkclient_colorC_resume(int father, int *brothers, arbitration fn){
          put_state(colorC_schema_id,winner);
          device_active[COLORC_DEVICE]=1;
          pthread_mutex_lock(&mymutex[COLORC_DEVICE]);
-         sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORC_DEVICE]);
-         write(device_socket[COLORC_DEVICE],message_out,strlen(message_out));
          state[COLORC_DEVICE]=winner;
          pthread_cond_signal(&condition[COLORC_DEVICE]);
          pthread_mutex_unlock(&mymutex[COLORC_DEVICE]);
@@ -850,8 +838,6 @@ int networkclient_colorD_resume(int father, int *brothers, arbitration fn){
       colorD_refs=1;
       pthread_mutex_unlock(&refmutex);
       if((device_active[COLORD_DEVICE]==0)&&(serve_device[COLORD_DEVICE])){
-         char message_out[MAX_MESSAGE];
-
          printf("colorD schema resume (networkclient driver)\n");
          all[colorD_schema_id].father = father;
          all[colorD_schema_id].fps = 0.;
@@ -859,8 +845,6 @@ int networkclient_colorD_resume(int father, int *brothers, arbitration fn){
          put_state(colorD_schema_id,winner);
          device_active[COLORD_DEVICE]=1;
          pthread_mutex_lock(&mymutex[COLORD_DEVICE]);
-         sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORD_DEVICE]);
-         write(device_socket[COLORD_DEVICE],message_out,strlen(message_out));
          state[COLORD_DEVICE]=winner;
          pthread_cond_signal(&condition[COLORD_DEVICE]);
          pthread_mutex_unlock(&mymutex[COLORD_DEVICE]);
@@ -1152,7 +1136,6 @@ void *networkclient_encoders_thread(void *not_used){
 	      }else{
 		if (type==NETWORKSERVER_encoders) 
 		  {
-// 		    if (sscanf(&message[++j],"%f %f %f %lu",&nowx,&nowy,&nowtheta,&nowtime)!=4){
                      if (sscanf(message,"%d %lu %f %f %f %lu", &type,
                          &network_clock, &nowx, &nowy, &nowtheta, &nowtime)!=6)
                      {
@@ -1356,530 +1339,330 @@ void *networkclient_motors_thread(void *not_used){
    pthread_exit(0);
 }
 
+int leer_cadena (int s, char * buff, int maximo){
+   int leidos=0;
+   int retorno=0;
+   do{
+      if (read (s, buff, 1)<0){
+         fprintf(stderr, "error en read %s\n", strerror(errno));
+         return -1;
+      }
+      leidos++;
+      if (retorno){
+         if (*buff=='\n'){
+            buff[1]='\0';
+            return leidos;
+         }
+         else{
+            retorno=0;
+         }
+      }
+      if (*buff=='\r'){
+         retorno=1;
+      }
+      buff++;
+   }while (leidos<maximo-1);
+   return leidos;
+}
+
 /** networkclient driver pthread function for colorA reception.*/
 void *networkclient_colorA_thread(void *not_used){
-  int j=0;
-  long int readn=0,bytes_readn=0,start=0;
-  int read_mode=MESSAGES; int colorA_trac=0;
-  /* the next buffer is used to receive the image that enters through the socket. the buffer is a bit greater because of the
-     asynchronous read in chunks that is made in the socket in order to receive the incoming data. */
-  char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
-  char message_in[MAX_MESSAGE];
-  char message_out[MAX_MESSAGE];
-  char lastmessage[MAX_MESSAGE];
-  unsigned long int network_clock;
-  /*  fd_set dummy_set,read_set;*/
+   char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
+   unsigned long int network_clock;
+   /*  fd_set dummy_set,read_set;*/
+   FILE *buffer_colorA;
+   buffer_colorA=fdopen(device_socket[COLORA_DEVICE], "r+");
 
-  printf("networkclient colorA thread started\n");
+   printf("networkclient colorA thread started\n");
 
-  do{
+   do{
 
-    pthread_mutex_lock(&mymutex[COLORA_DEVICE]);
+      pthread_mutex_lock(&mymutex[COLORA_DEVICE]);
 
-    if (state[COLORA_DEVICE]==slept){
-      printf("networkclient colorA thread goes sleep mode\n");
-      pthread_cond_wait(&condition[COLORA_DEVICE],&mymutex[COLORA_DEVICE]);
-      printf("networkclient colorA thread woke up\n");
-      pthread_mutex_unlock(&mymutex[COLORA_DEVICE]);
-    }else{
+      if (state[COLORA_DEVICE]==slept){
+         printf("networkclient colorA thread goes sleep mode\n");
+         pthread_cond_wait(&condition[COLORA_DEVICE],&mymutex[COLORA_DEVICE]);
+         printf("networkclient colorA thread woke up\n");
+         pthread_mutex_unlock(&mymutex[COLORA_DEVICE]);
+      }else{
       
-      pthread_mutex_unlock(&mymutex[COLORA_DEVICE]);
-
-      /* FD_ZERO(&dummy_set);
-	 FD_ZERO(&read_set);
-	 FD_SET(device_socket[COLORA_DEVICE],&read_set);
-	 select(FD_SETSIZE,&read_set,&dummy_set,&dummy_set,NULL);*/
-
-      if (read_mode==MESSAGES){
-	readn=read(device_socket[COLORA_DEVICE],&(message_in[colorA_trac]),MAX_MESSAGE-colorA_trac);
-      }else if (read_mode==ONEIMAGE){
-	readn=read(device_socket[COLORA_DEVICE],&(mmbuf[colorA_trac]),SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE-colorA_trac);
+         pthread_mutex_unlock(&mymutex[COLORA_DEVICE]);
+         /*Write petition*/
+         fprintf(buffer_colorA,"%d %d\n",
+                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 device_network_id[COLORA_DEVICE]);
+         fflush(buffer_colorA);
+         /*Read message*/
+         {
+            int i2,i3,i4,i5,type;
+            char buffer_lectura[MAX_MESSAGE];
+            if (fgets(buffer_lectura, MAX_MESSAGE, buffer_colorA)!=NULL){
+               if (sscanf(buffer_lectura,"%d %lu %d %d %d %d\n",&type,
+                   &network_clock,&i2,&i3,&i4,&i5)!=6)
+               {
+                  printf("networkclient: i don't understand message from networkserver to colorA. (%s)\n",
+                         buffer_lectura);
+               }
+               else{
+                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                     int total=0;
+                     int actual=0;
+                     /*Read image*/
+                     do{
+                        actual=fread( &(mmbuf[total]), sizeof(char),
+                                        (i3*i4*i5)-total, buffer_colorA);
+                        if (actual>0)
+                           total+=actual;
+                        else{
+                           if (ferror(buffer_colorA)){
+                              perror("Error at fread");
+                              clearerr(buffer_colorA);
+                           }
+                           if (feof(buffer_colorA)){
+                              perror("EOF at fread");
+                              clearerr(buffer_colorA);
+                           }
+                        }
+                     }while(total<i3*i4*i5);
+                     memcpy (colorA, mmbuf, i3*i4*i5);
+                     speedcounter(colorA_schema_id);
+                     imageA_clock=network_clock;
+                  }
+               }
+            }
+            else{
+               fprintf(stderr, "Error en la lectura del socket de colorA, deja de ser servido\n");
+               pthread_exit(0);
+            }
+         }
       }
-
-      bytes_readn=readn;
-      switch(readn){
-      case 0: exit(1); break;
-      case -1: break; /* nothing to read */
-      default: 
-	if (read_mode==ONEIMAGE) { /* incomplete image */
-	  if ((colorA_trac+bytes_readn)<(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3)){ 
-	    colorA_trac+=bytes_readn;
-	  }else{
-	    read_mode=MESSAGES;
-	    /*complete image. now we put in message mode */
-	    strncpy(message_in,&(mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]),colorA_trac+bytes_readn-SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-	    bytes_readn=colorA_trac+bytes_readn-SIFNTSC_COLUMNS*SIFNTSC_ROWS*3;
-	    /* preparing to read next image */
-	    colorA_trac=0; start=0;
-	    /* completing image received */
-	    memcpy(colorA,mmbuf,SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-            speedcounter(colorA_schema_id);
-            imageA_clock=network_clock;
-	    /* asking for next image */
-	    pthread_mutex_lock(&mymutex[COLORA_DEVICE]);
-	    sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORA_DEVICE]);
-	    write(device_socket[COLORA_DEVICE],message_out,strlen(message_out));
-	    pthread_mutex_unlock(&mymutex[COLORA_DEVICE]);
-	  }
-	}
-	  
-	if (read_mode==MESSAGES){
-	  start=0;
-	  for(j=colorA_trac;(j<MAX_MESSAGE)&&(j<colorA_trac+bytes_readn)&&(read_mode==MESSAGES);j++){
-	    if (message_in[j]=='\n'){
-	      int type;
-		
-	      strncpy(lastmessage,&message_in[start],j-start);
-	      lastmessage[j-start]='\0';
-	      start=j+1;
-
-	      if (sscanf(lastmessage,"%d %lu",&type,&network_clock)!=2) {
-		printf("networkclient: i don't understand message from networkserver to colorA: (%s)\n",lastmessage);
-	      }else{
-
-		int i2,i3,i4,i5;
-		int k=0;
-
-		while((lastmessage[k]!='\n')&&(lastmessage[k]!=' ')&&(lastmessage[k]!='\0')) k++;
-		k++;
-		while((lastmessage[k]!='\n')&&(lastmessage[k]!=' ')&&(lastmessage[k]!='\0')) k++;
-		if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
-		  sscanf(&lastmessage[++k],"%d %d %d %d\n",&i2,&i3,&i4,&i5);
-
-		  if ((colorA_trac+bytes_readn-start)<SIFNTSC_COLUMNS*SIFNTSC_ROWS*3){
-		    strncpy(mmbuf,&(message_in[start]),colorA_trac+bytes_readn-start);
-		    read_mode=ONEIMAGE; 
-		    colorA_trac=colorA_trac+bytes_readn-start;
-		    /* we break to get out of the for and switch */
-		    break; 
-		  }else{ /* (colorA_trac+bytes_readn-start)>=SIFNTSC_COLUMNS*SIFNTSC_ROWS*1 */
-		    strncpy(mmbuf,&(message_in[start]),SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-		    start=start+SIFNTSC_COLUMNS*SIFNTSC_ROWS*3;
-		    j=j+SIFNTSC_COLUMNS*SIFNTSC_ROWS*3;
-		    
-		    /* image completed */
-		    speedcounter(colorA_schema_id);
-		    memcpy(colorA,mmbuf,SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-		    /* asking for next image */
-		    pthread_mutex_lock(&mymutex[COLORA_DEVICE]);
-		  sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORA_DEVICE]);
-		  write(device_socket[COLORA_DEVICE],message_out,strlen(message_out));
-		  pthread_mutex_unlock(&mymutex[COLORA_DEVICE]);
-		  }
-		}
-	      }
-	    }
-	  }
-	}
-	  
-	if (read_mode==MESSAGES){
-	  if ((colorA_trac+bytes_readn-start)>= MAX_MESSAGE){
-	    colorA_trac=0; printf("networkclient: reception buffer overflow for colorA\n");
-	  }else if ((colorA_trac+bytes_readn-start)>0){
-	    strncpy(message_in,&(message_in[start]),colorA_trac+bytes_readn-start);
-	    /* shift the remaining bytes of the chunk (the bytes don't complete a message) to the start position of the buffer. */
-	    colorA_trac=colorA_trac+bytes_readn-start;
-	  }
-	}
-      }
-    }
-  }while(networkclient_close_command==0);
-  pthread_exit(0);
+   }while(networkclient_close_command==0);
+   pthread_exit(0);
 }
 
 /** networkclient driver pthread function for colorB reception.*/
 void *networkclient_colorB_thread(void *not_used){
-  int j=0;
-  long int readn=0,bytes_readn=0,start=0;
-  int read_mode=MESSAGES; int colorB_trac=0;
-  /* the next buffer is used to receive the image that enters through the socket. the buffer is a bit greater because of the
-     asynchronous read in chunks that is made in the socket in order to receive the incoming data. */
-  char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
-  char message_in[MAX_MESSAGE];
-  char message_out[MAX_MESSAGE];
-  char lastmessage[MAX_MESSAGE];
-  /*  fd_set dummy_set,read_set;*/
-  unsigned long int network_clock;
+   char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
+   unsigned long int network_clock;
+   /*  fd_set dummy_set,read_set;*/
+   FILE *buffer_colorB;
+   buffer_colorB=fdopen(device_socket[COLORB_DEVICE], "r+");
 
-  printf("networkclient colorB thread started\n");
+   printf("networkclient colorB thread started\n");
 
-  do{
+   do{
 
-    pthread_mutex_lock(&mymutex[COLORB_DEVICE]);
+      pthread_mutex_lock(&mymutex[COLORB_DEVICE]);
 
-    if (state[COLORB_DEVICE]==slept){
-      printf("networkclient colorB thread goes sleep mode\n");
-      pthread_cond_wait(&condition[COLORB_DEVICE],&mymutex[COLORB_DEVICE]);
-      printf("networkclient colorB thread woke up\n");
-      pthread_mutex_unlock(&mymutex[COLORB_DEVICE]);
-    }else{
+      if (state[COLORB_DEVICE]==slept){
+         printf("networkclient colorB thread goes sleep mode\n");
+         pthread_cond_wait(&condition[COLORB_DEVICE],&mymutex[COLORB_DEVICE]);
+         printf("networkclient colorB thread woke up\n");
+         pthread_mutex_unlock(&mymutex[COLORB_DEVICE]);
+      }else{
       
-      pthread_mutex_unlock(&mymutex[COLORB_DEVICE]);
-
-      /* FD_ZERO(&dummy_set);
-	 FD_ZERO(&read_set);
-	 FD_SET(device_socket[COLORB_DEVICE],&read_set);
-	 select(FD_SETSIZE,&read_set,&dummy_set,&dummy_set,NULL);*/
-
-      if (read_mode==MESSAGES){
-	readn=read(device_socket[COLORB_DEVICE],&(message_in[colorB_trac]),MAX_MESSAGE-colorB_trac);
-      }else if (read_mode==ONEIMAGE){
-	readn=read(device_socket[COLORB_DEVICE],&(mmbuf[colorB_trac]),SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE-colorB_trac);
+         pthread_mutex_unlock(&mymutex[COLORB_DEVICE]);
+         /*Write petition*/
+         fprintf(buffer_colorB,"%d %d\n",
+                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 device_network_id[COLORB_DEVICE]);
+         fflush(buffer_colorB);
+         /*Read message*/
+         {
+            int i2,i3,i4,i5,type;
+            char buffer_lectura[MAX_MESSAGE];
+            if (fgets(buffer_lectura, MAX_MESSAGE, buffer_colorB)!=NULL){
+               if (sscanf(buffer_lectura,"%d %lu %d %d %d %d\n",&type,
+                   &network_clock,&i2,&i3,&i4,&i5)!=6)
+               {
+                  printf("networkclient: i don't understand message from networkserver to colorB. (%s)\n",
+                         buffer_lectura);
+               }
+               else{
+                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                     int total=0;
+                     int actual=0;
+                     /*Read image*/
+                     do{
+                        actual=fread( &(mmbuf[total]), sizeof(char),
+                                        (i3*i4*i5)-total, buffer_colorB);
+                        if (actual>0)
+                           total+=actual;
+                        else{
+                           if (ferror(buffer_colorB)){
+                              perror("Error at fread");
+                              clearerr(buffer_colorB);
+                           }
+                           if (feof(buffer_colorB)){
+                              perror("EOF at fread");
+                              clearerr(buffer_colorB);
+                           }
+                        }
+                     }while(total<i3*i4*i5);
+                     memcpy (colorB, mmbuf, i3*i4*i5);
+                     speedcounter(colorB_schema_id);
+                     imageB_clock=network_clock;
+                  }
+               }
+            }
+            else{
+               fprintf(stderr, "Error en la lectura del socket de colorB, deja de ser servido\n");
+               pthread_exit(0);
+            }
+         }
       }
-
-      bytes_readn=readn;      
-      switch(readn){
-      case 0: exit(1); break;
-      case -1: break; /* nothing to read */
-      default: 
-	if (read_mode==ONEIMAGE) { /* incomplete image */
-	  if ((colorB_trac+bytes_readn)<(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3)){ 
-	    colorB_trac+=bytes_readn;
-	  }else{
-	    read_mode=MESSAGES;
-	    /*complete image. now we put in message mode */
-	    strncpy(message_in,&(mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]),colorB_trac+bytes_readn-SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-	    bytes_readn=colorB_trac+bytes_readn-SIFNTSC_COLUMNS*SIFNTSC_ROWS*3;
-	    /* preparing to read next image */
-	    colorB_trac=0; start=0;
-	    /* completing image received */
-	    memcpy(colorB,mmbuf,SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-            speedcounter(colorB_schema_id);
-            imageB_clock=network_clock;
-	    /* asking for next image */
-	    pthread_mutex_lock(&mymutex[COLORB_DEVICE]);
-	    sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORB_DEVICE]);
-	    write(device_socket[COLORB_DEVICE],message_out,strlen(message_out));
-	    pthread_mutex_unlock(&mymutex[COLORB_DEVICE]);
-	  }
-	}
-	  
-	if (read_mode==MESSAGES){
-	  start=0;
-	  for(j=colorB_trac;(j<MAX_MESSAGE)&&(j<colorB_trac+bytes_readn)&&(read_mode==MESSAGES);j++){
-	    if (message_in[j]=='\n'){
-	      int type;
-		
-	      strncpy(lastmessage,&message_in[start],j-start);
-	      lastmessage[j-start]='\0';
-	      start=j+1;
-
-	      if (sscanf(lastmessage,"%d %lu",&type,&network_clock)!=2) {
-		printf("networkclient: i don't understand message from networkserver to colorB: (%s)\n",lastmessage);
-	      }else{
-
-		int i2,i3,i4,i5;
-		int k=0;
-
-		while((lastmessage[k]!='\n')&&(lastmessage[k]!=' ')&&(lastmessage[k]!='\0')) k++;
-		k++;
-		while((lastmessage[k]!='\n')&&(lastmessage[k]!=' ')&&(lastmessage[k]!='\0')) k++;
-		if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
-		  sscanf(&lastmessage[++k],"%d %d %d %d\n",&i2,&i3,&i4,&i5);
-
-		  if ((colorB_trac+bytes_readn-start)<SIFNTSC_COLUMNS*SIFNTSC_ROWS*3){
-		    strncpy(mmbuf,&(message_in[start]),colorB_trac+bytes_readn-start);
-		    read_mode=ONEIMAGE; 
-		    colorB_trac=colorB_trac+bytes_readn-start;
-		    /* we break to get out of the for and switch */
-		    break; 
-		  }else{ /* (colorB_trac+bytes_readn-start)>=SIFNTSC_COLUMNS*SIFNTSC_ROWS*1 */
-		    strncpy(mmbuf,&(message_in[start]),SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-		    start=start+SIFNTSC_COLUMNS*SIFNTSC_ROWS*3;
-		    j=j+SIFNTSC_COLUMNS*SIFNTSC_ROWS*3;
-		    
-		    /* image completed */
-		    speedcounter(colorB_schema_id);
-		    memcpy(colorB,mmbuf,SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-		    /* asking for next image */
-		    pthread_mutex_lock(&mymutex[COLORB_DEVICE]);
-		  sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORB_DEVICE]);
-		  write(device_socket[COLORB_DEVICE],message_out,strlen(message_out));
-		  pthread_mutex_unlock(&mymutex[COLORB_DEVICE]);
-		  }
-		}
-	      }
-	    }
-	  }
-	}
-	  
-	if (read_mode==MESSAGES){
-	  if ((colorB_trac+bytes_readn-start)>= MAX_MESSAGE){
-	    colorB_trac=0; printf("networkclient: reception buffer overflow for colorB\n");
-	  }else if ((colorB_trac+bytes_readn-start)>0){
-	    strncpy(message_in,&(message_in[start]),colorB_trac+bytes_readn-start);
-	    /* shift the remaining bytes of the chunk (the bytes don't complete a message) to the start position of the buffer. */
-	    colorB_trac=colorB_trac+bytes_readn-start;
-	  }
-	}
-      }
-    }
-  }while(networkclient_close_command==0);
-  pthread_exit(0);
+   }while(networkclient_close_command==0);
+   pthread_exit(0);
 }
 
 /** networkclient driver pthread function for colorC reception.*/
 void *networkclient_colorC_thread(void *not_used){
-  int j=0;
-  long int readn=0,bytes_readn=0,start=0;
-  int read_mode=MESSAGES; int colorC_trac=0;
-  /* the next buffer is used to receive the image that enters through the socket. the buffer is a bit greater because of the
-     asynchronous read in chunks that is made in the socket in order to receive the incoming data. */
-  char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
-  char message_in[MAX_MESSAGE];
-  char message_out[MAX_MESSAGE];
-  char lastmessage[MAX_MESSAGE];
-  /*  fd_set dummy_set,read_set;*/
+   char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
+   unsigned long int network_clock;
+   /*  fd_set dummy_set,read_set;*/
+   FILE *buffer_colorC;
+   buffer_colorC=fdopen(device_socket[COLORC_DEVICE], "r+");
 
-  unsigned long int network_clock;
+   printf("networkclient colorC thread started\n");
 
-  printf("networkclient colorC thread started\n");
+   do{
 
-  do{
+      pthread_mutex_lock(&mymutex[COLORC_DEVICE]);
 
-    pthread_mutex_lock(&mymutex[COLORC_DEVICE]);
-
-    if (state[COLORC_DEVICE]==slept){
-      printf("networkclient colorC thread goes sleep mode\n");
-      pthread_cond_wait(&condition[COLORC_DEVICE],&mymutex[COLORC_DEVICE]);
-      printf("networkclient colorC thread woke up\n");
-      pthread_mutex_unlock(&mymutex[COLORC_DEVICE]);
-    }else{
+      if (state[COLORC_DEVICE]==slept){
+         printf("networkclient colorC thread goes sleep mode\n");
+         pthread_cond_wait(&condition[COLORC_DEVICE],&mymutex[COLORC_DEVICE]);
+         printf("networkclient colorC thread woke up\n");
+         pthread_mutex_unlock(&mymutex[COLORC_DEVICE]);
+      }else{
       
-      pthread_mutex_unlock(&mymutex[COLORC_DEVICE]);
-
-      /* FD_ZERO(&dummy_set);
-	 FD_ZERO(&read_set);
-	 FD_SET(device_socket[COLORC_DEVICE],&read_set);
-	 select(FD_SETSIZE,&read_set,&dummy_set,&dummy_set,NULL);*/
-
-      if (read_mode==MESSAGES){
-	readn=read(device_socket[COLORC_DEVICE],&(message_in[colorC_trac]),MAX_MESSAGE-colorC_trac);
-      }else if (read_mode==ONEIMAGE){
-	readn=read(device_socket[COLORC_DEVICE],&(mmbuf[colorC_trac]),SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE-colorC_trac);
+         pthread_mutex_unlock(&mymutex[COLORC_DEVICE]);
+         /*Write petition*/
+         fprintf(buffer_colorC,"%d %d\n",
+                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 device_network_id[COLORC_DEVICE]);
+         fflush(buffer_colorC);
+         /*Read message*/
+         {
+            int i2,i3,i4,i5,type;
+            char buffer_lectura[MAX_MESSAGE];
+            if (fgets(buffer_lectura, MAX_MESSAGE, buffer_colorC)!=NULL){
+               if (sscanf(buffer_lectura,"%d %lu %d %d %d %d\n",&type,
+                   &network_clock,&i2,&i3,&i4,&i5)!=6)
+               {
+                  printf("networkclient: i don't understand message from networkserver to colorC. (%s)\n",
+                         buffer_lectura);
+               }
+               else{
+                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                     int total=0;
+                     int actual=0;
+                     /*Read image*/
+                     do{
+                        actual=fread( &(mmbuf[total]), sizeof(char),
+                                        (i3*i4*i5)-total, buffer_colorC);
+                        if (actual>0)
+                           total+=actual;
+                        else{
+                           if (ferror(buffer_colorC)){
+                              perror("Error at fread");
+                              clearerr(buffer_colorC);
+                           }
+                           if (feof(buffer_colorC)){
+                              perror("EOF at fread");
+                              clearerr(buffer_colorC);
+                           }
+                        }
+                     }while(total<i3*i4*i5);
+                     memcpy (colorC, mmbuf, i3*i4*i5);
+                     speedcounter(colorC_schema_id);
+                     imageC_clock=network_clock;
+                  }
+               }
+            }
+            else{
+               fprintf(stderr, "Error en la lectura del socket de colorC, deja de ser servido\n");
+               pthread_exit(0);
+            }
+         }
       }
-
-      bytes_readn=readn;      
-      switch(readn){
-      case 0: exit(1); break;
-      case -1: break; /* nothing to read */
-      default: 
-	if (read_mode==ONEIMAGE) { /* incomplete image */
-	  if ((colorC_trac+bytes_readn)<(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3)){ 
-	    colorC_trac+=bytes_readn;
-	  }else{
-	    read_mode=MESSAGES;
-	    /*complete image. now we put in message mode */
-	    strncpy(message_in,&(mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]),colorC_trac+bytes_readn-SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-	    bytes_readn=colorC_trac+bytes_readn-SIFNTSC_COLUMNS*SIFNTSC_ROWS*3;
-	    /* preparing to read next image */
-	    colorC_trac=0; start=0;
-	    /* completing image received */
-	    memcpy(colorC,mmbuf,SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-            speedcounter(colorC_schema_id);
-            imageC_clock=network_clock;
-	    /* asking for next image */
-	    pthread_mutex_lock(&mymutex[COLORC_DEVICE]);
-	    sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORC_DEVICE]);
-	    write(device_socket[COLORC_DEVICE],message_out,strlen(message_out));
-	    pthread_mutex_unlock(&mymutex[COLORC_DEVICE]);
-	  }
-	}
-	  
-	if (read_mode==MESSAGES){
-	  start=0;
-	  for(j=colorC_trac;(j<MAX_MESSAGE)&&(j<colorC_trac+bytes_readn)&&(read_mode==MESSAGES);j++){
-	    if (message_in[j]=='\n'){
-	      int type;
-		
-	      strncpy(lastmessage,&message_in[start],j-start);
-	      lastmessage[j-start]='\0';
-	      start=j+1;
-
-	      if (sscanf(lastmessage,"%d %lu",&type,&network_clock)!=2) {
-		printf("networkclient: i don't understand message from networkserver to colorC: (%s)\n",lastmessage);
-	      }else{
-
-		int i2,i3,i4,i5;
-		int k=0;
-
-		while((lastmessage[k]!='\n')&&(lastmessage[k]!=' ')&&(lastmessage[k]!='\0')) k++;
-		k++;
-		while((lastmessage[k]!='\n')&&(lastmessage[k]!=' ')&&(lastmessage[k]!='\0')) k++;
-		if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
-		  sscanf(&lastmessage[++k],"%d %d %d %d\n",&i2,&i3,&i4,&i5);
-
-		  if ((colorC_trac+bytes_readn-start)<SIFNTSC_COLUMNS*SIFNTSC_ROWS*3){
-		    strncpy(mmbuf,&(message_in[start]),colorC_trac+bytes_readn-start);
-		    read_mode=ONEIMAGE; 
-		    colorC_trac=colorC_trac+bytes_readn-start;
-		    /* we break to get out of the for and switch */
-		    break; 
-		  }else{ /* (colorC_trac+bytes_readn-start)>=SIFNTSC_COLUMNS*SIFNTSC_ROWS*1 */
-		    strncpy(mmbuf,&(message_in[start]),SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-		    start=start+SIFNTSC_COLUMNS*SIFNTSC_ROWS*3;
-		    j=j+SIFNTSC_COLUMNS*SIFNTSC_ROWS*3;
-		    
-		    /* image completed */
-		    speedcounter(colorC_schema_id);
-		    memcpy(colorC,mmbuf,SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-		    /* asking for next image */
-		    pthread_mutex_lock(&mymutex[COLORC_DEVICE]);
-		  sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORC_DEVICE]);
-		  write(device_socket[COLORC_DEVICE],message_out,strlen(message_out));
-		  pthread_mutex_unlock(&mymutex[COLORC_DEVICE]);
-		  }
-		}
-	      }
-	    }
-	  }
-	}
-	  
-	if (read_mode==MESSAGES){
-	  if ((colorC_trac+bytes_readn-start)>= MAX_MESSAGE){
-	    colorC_trac=0; printf("networkclient: reception buffer overflow for colorC\n");
-	  }else if ((colorC_trac+bytes_readn-start)>0){
-	    strncpy(message_in,&(message_in[start]),colorC_trac+bytes_readn-start);
-	    /* shift the remaining bytes of the chunk (the bytes don't complete a message) to the start position of the buffer. */
-	    colorC_trac=colorC_trac+bytes_readn-start;
-	  }
-	}
-      }
-    }
-  }while(networkclient_close_command==0);
-  pthread_exit(0);
+   }while(networkclient_close_command==0);
+   pthread_exit(0);
 }
 
 /** networkclient driver pthread function for colorD reception.*/
 void *networkclient_colorD_thread(void *not_used){
-  int j=0;
-  long int readn=0,bytes_readn=0,start=0;
-  int read_mode=MESSAGES; int colorD_trac=0;
-  /* the next buffer is used to receive the image that enters through the socket. the buffer is a bit greater because of the
-     asynchronous read in chunks that is made in the socket in order to receive the incoming data. */
-  char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
-  char message_in[MAX_MESSAGE];
-  char message_out[MAX_MESSAGE];
-  char lastmessage[MAX_MESSAGE];
-  /*  fd_set dummy_set,read_set;*/
+   char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
+   unsigned long int network_clock;
+   /*  fd_set dummy_set,read_set;*/
+   FILE *buffer_colorD;
+   buffer_colorD=fdopen(device_socket[COLORD_DEVICE], "r+");
 
-  unsigned long network_clock;
+   printf("networkclient colorD thread started\n");
 
-  printf("networkclient colorD thread started\n");
+   do{
 
-  do{
+      pthread_mutex_lock(&mymutex[COLORD_DEVICE]);
 
-    pthread_mutex_lock(&mymutex[COLORD_DEVICE]);
-
-    if (state[COLORD_DEVICE]==slept){
-      printf("networkclient colorD thread goes sleep mode\n");
-      pthread_cond_wait(&condition[COLORD_DEVICE],&mymutex[COLORD_DEVICE]);
-      printf("networkclient colorD thread woke up\n");
-      pthread_mutex_unlock(&mymutex[COLORD_DEVICE]);
-    }else{
+      if (state[COLORD_DEVICE]==slept){
+         printf("networkclient colorD thread goes sleep mode\n");
+         pthread_cond_wait(&condition[COLORD_DEVICE],&mymutex[COLORD_DEVICE]);
+         printf("networkclient colorD thread woke up\n");
+         pthread_mutex_unlock(&mymutex[COLORD_DEVICE]);
+      }else{
       
-      pthread_mutex_unlock(&mymutex[COLORD_DEVICE]);
-
-      /* FD_ZERO(&dummy_set);
-	 FD_ZERO(&read_set);
-	 FD_SET(device_socket[COLORD_DEVICE],&read_set);
-	 select(FD_SETSIZE,&read_set,&dummy_set,&dummy_set,NULL);*/
-
-      if (read_mode==MESSAGES){
-	readn=read(device_socket[COLORD_DEVICE],&(message_in[colorD_trac]),MAX_MESSAGE-colorD_trac);
-      }else if (read_mode==ONEIMAGE){
-	readn=read(device_socket[COLORD_DEVICE],&(mmbuf[colorD_trac]),SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE-colorD_trac);
+         pthread_mutex_unlock(&mymutex[COLORD_DEVICE]);
+         /*Write petition*/
+         fprintf(buffer_colorD,"%d %d\n",
+                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 device_network_id[COLORD_DEVICE]);
+         fflush(buffer_colorD);
+         /*Read message*/
+         {
+            int i2,i3,i4,i5,type;
+            char buffer_lectura[MAX_MESSAGE];
+            if (fgets(buffer_lectura, MAX_MESSAGE, buffer_colorD)!=NULL){
+               if (sscanf(buffer_lectura,"%d %lu %d %d %d %d\n",&type,
+                   &network_clock,&i2,&i3,&i4,&i5)!=6)
+               {
+                  printf("networkclient: i don't understand message from networkserver to colorD. (%s)\n",
+                         buffer_lectura);
+               }
+               else{
+                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                     int total=0;
+                     int actual=0;
+                     /*Read image*/
+                     do{
+                        actual=fread( &(mmbuf[total]), sizeof(char),
+                                        (i3*i4*i5)-total, buffer_colorD);
+                        if (actual>0)
+                           total+=actual;
+                        else{
+                           if (ferror(buffer_colorD)){
+                              perror("Error at fread");
+                              clearerr(buffer_colorD);
+                           }
+                           if (feof(buffer_colorD)){
+                              perror("EOF at fread");
+                              clearerr(buffer_colorD);
+                           }
+                        }
+                     }while(total<i3*i4*i5);
+                     memcpy (colorD, mmbuf, i3*i4*i5);
+                     speedcounter(colorD_schema_id);
+                     imageD_clock=network_clock;
+                  }
+               }
+            }
+            else{
+               fprintf(stderr, "Error en la lectura del socket de colorD, deja de ser servido\n");
+               pthread_exit(0);
+            }
+         }
       }
-
-      bytes_readn=readn;      
-      switch(readn){
-      case 0: exit(1); break;
-      case -1: break; /* nothing to read */
-      default: 
-	if (read_mode==ONEIMAGE) { /* incomplete image */
-	  if ((colorD_trac+bytes_readn)<(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3)){ 
-	    colorD_trac+=bytes_readn;
-	  }else{
-	    read_mode=MESSAGES;
-	    /*complete image. now we put in message mode */
-	    strncpy(message_in,&(mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3]),colorD_trac+bytes_readn-SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-	    bytes_readn=colorD_trac+bytes_readn-SIFNTSC_COLUMNS*SIFNTSC_ROWS*3;
-	    /* preparing to read next image */
-	    colorD_trac=0; start=0;
-	    /* completing image received */
-	    memcpy(colorD,mmbuf,SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-            speedcounter(colorD_schema_id);
-            imageC_clock=network_clock;
-	    /* asking for next image */
-	    pthread_mutex_lock(&mymutex[COLORD_DEVICE]);
-	    sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORD_DEVICE]);
-	    write(device_socket[COLORD_DEVICE],message_out,strlen(message_out));
-	    pthread_mutex_unlock(&mymutex[COLORD_DEVICE]);
-	  }
-	}
-	  
-	if (read_mode==MESSAGES){
-	  start=0;
-	  for(j=colorD_trac;(j<MAX_MESSAGE)&&(j<colorD_trac+bytes_readn)&&(read_mode==MESSAGES);j++){
-	    if (message_in[j]=='\n'){
-	      int type;
-		
-	      strncpy(lastmessage,&message_in[start],j-start);
-	      lastmessage[j-start]='\0';
-	      start=j+1;
-
-	      if (sscanf(lastmessage,"%d %lu",&type,&network_clock)!=2) {
-		printf("networkclient: i don't understand message from networkserver to colorD: (%s)\n",lastmessage);
-	      }else{
-
-		int i2,i3,i4,i5;
-		int k=0;
-
-		while((lastmessage[k]!='\n')&&(lastmessage[k]!=' ')&&(lastmessage[k]!='\0')) k++;
-		k++;
-		while((lastmessage[k]!='\n')&&(lastmessage[k]!=' ')&&(lastmessage[k]!='\0')) k++;
-		if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
-		  sscanf(&lastmessage[++k],"%d %d %d %d\n",&i2,&i3,&i4,&i5);
-
-		  if ((colorD_trac+bytes_readn-start)<SIFNTSC_COLUMNS*SIFNTSC_ROWS*3){
-		    strncpy(mmbuf,&(message_in[start]),colorD_trac+bytes_readn-start);
-		    read_mode=ONEIMAGE; 
-		    colorD_trac=colorD_trac+bytes_readn-start;
-		    /* we break to get out of the for and switch */
-		    break; 
-		  }else{ /* (colorD_trac+bytes_readn-start)>=SIFNTSC_COLUMNS*SIFNTSC_ROWS*1 */
-		    strncpy(mmbuf,&(message_in[start]),SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-		    start=start+SIFNTSC_COLUMNS*SIFNTSC_ROWS*3;
-		    j=j+SIFNTSC_COLUMNS*SIFNTSC_ROWS*3;
-		    
-		    /* image completed */
-		    speedcounter(colorD_schema_id);
-		    memcpy(colorD,mmbuf,SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-		    /* asking for next image */
-		    pthread_mutex_lock(&mymutex[COLORD_DEVICE]);
-		  sprintf(message_out,"%d %d\n",NETWORKSERVER_rgb24bpp_sifntsc_image_query,device_network_id[COLORD_DEVICE]);
-		  write(device_socket[COLORD_DEVICE],message_out,strlen(message_out));
-		  pthread_mutex_unlock(&mymutex[COLORD_DEVICE]);
-		  }
-		}
-	      }
-	    }
-	  }
-	}
-	  
-	if (read_mode==MESSAGES){
-	  if ((colorD_trac+bytes_readn-start)>= MAX_MESSAGE){
-	    colorD_trac=0; printf("networkclient: reception buffer overflow for colorD\n");
-	  }else if ((colorD_trac+bytes_readn-start)>0){
-	    strncpy(message_in,&(message_in[start]),colorD_trac+bytes_readn-start);
-	    /* shift the remaining bytes of the chunk (the bytes don't complete a message) to the start position of the buffer. */
-	    colorD_trac=colorD_trac+bytes_readn-start;
-	  }
-	}
-      }
-    }
-  }while(networkclient_close_command==0);
-  pthread_exit(0);
+   }while(networkclient_close_command==0);
+   pthread_exit(0);
 }
 
 /** networkclient driver parse configuration file function.
