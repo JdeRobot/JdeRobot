@@ -30,7 +30,7 @@
 #include <gazebo.h>
 #include <jde.h>
 
-#define GAZEBO_COMMAND_CYCLE 100 /* ms */
+#define GAZEBO_COMMAND_CYCLE 100	/* ms */
 #define GAZEBO_CYCLE 33 /*ms*/
 #define MAXCAM 4
 #define MAX_MODEL_ID	100 /*max drivers name lenth*/
@@ -117,6 +117,15 @@ int state;
 pthread_mutex_t mymutex;
 pthread_cond_t condition;
 
+/** pthread state variable.*/
+int state;
+/** mutex for video playing.*/
+pthread_mutex_t mymutex;
+/** mutex for pthreads.*/
+pthread_mutex_t color_mutex[MAXCAM];
+/** condition flag for video playing.*/
+pthread_cond_t condition;
+
 
 char driver_name[256] = "gazebo";
 int gazebo_close_command = 0;
@@ -140,7 +149,7 @@ int serve_laser = 0,
   color_active[MAXCAM];
 
 int 
-  laser_schema_id,
+laser_schema_id,
   encoders_schema_id,
   sonars_schema_id,
   motors_schema_id,
@@ -151,29 +160,46 @@ int
   ptz_enc_schema_id;
 
 
+/*Variables a exportar*/
+char *colorA; /** 'colorA' schema image data*/
+char *colorB; /** 'colorB' schema image data*/
+char *colorC; /** 'colorC' schema image data*/
+char *colorD;/** 'color' schema image data*/
+float v; /* mm/s */
+float w; /* deg/s*/
+float jde_robot[5];
+float us[NUM_SONARS];
+int jde_laser[NUM_LASER];
+float pan_angle, tilt_angle;  /* degs */
+float longitude; /* degs, pan angle */
+float latitude; /* degs, tilt angle */
+float longitude_speed;
+float l_speed;
+/*Fin variables a exportar*/
+
 int
 gazebo_init ()
 {
-
+  
   printf ("connecting to Gazebo Server");
-
+  
   gz_error_init (1, 9);		/*Trazas de gazebo al máximo*/
 
   client = gz_client_alloc ();
-
+  
   position = gz_position_alloc ();
-
-
+  
+  
   if (gz_client_connect_wait (client, server_id, client_id) != 0)
     {
       fprintf (stderr, "gazebo: Error connecting to gazebo server\n");
       exit (-1);
     }
-
+  
   if (serve_stereo)
     {
       stereo = gz_stereo_alloc ();
-
+      
       if (gz_stereo_open (stereo, client, stereo_name) != 0)
 	{
 	  fprintf (stderr, "Error opening  \"%s\" stereohead\n",
@@ -202,13 +228,13 @@ gazebo_startup (char *configfile)
 {
   puts ("Starting gazebo");
   fflush (stdout);
-
+  
   if (gazebo_parseconf (configfile) == -1)
     {
       printf ("gazebo:driver not initialized. Configuration file parsing error.\n");
       exit (-1);
     }
-
+  
   if (laser_name[0])
     serve_laser = 1;
   if (position_name[0])
@@ -222,60 +248,66 @@ gazebo_startup (char *configfile)
       serve_motors = 1;
     }
   if (ptz_name[0]){
-	serve_ptz_enc=1; //Si hay nombre de ptz con gazebo sirve las dos cosas
-	serve_ptz_cmd=1;
-	}
-
-
+    serve_ptz_enc=1; //Si hay nombre de ptz con gazebo sirve las dos cosas
+    serve_ptz_cmd=1;
+  }
+  
+  
   if (colorA_name.gazebo_id[0])
     {
       puts (colorA_name.gazebo_id);
       serve_color[0] = 1;
     }
-  if (colorB_name.gazebo_id[0])
+  if (colorB_name.gazebo_id[0]){
+    puts (colorB_name.gazebo_id);
     serve_color[1] = 1;
-  if (colorC_name.gazebo_id[0])
+  }
+  if (colorC_name.gazebo_id[0]){
+    puts (colorC_name.gazebo_id);
     serve_color[2] = 1;
-  if (colorD_name.gazebo_id[0])
+  }
+  if (colorD_name.gazebo_id[0]){
+    puts (colorD_name.gazebo_id);
     serve_color[3] = 1;
+  }
 
   if (colorA_name.tipo > 1) {
-      serve_stereo = 1;
-      strcpy (stereo_name, colorA_name.gazebo_id);
-    }
-
+    serve_stereo = 1;
+    strcpy (stereo_name, colorA_name.gazebo_id);
+  }
+  
   else if (colorB_name.tipo > 1) {
-      serve_stereo = 1;
-      strcpy (stereo_name, colorB_name.gazebo_id);
-    }
-
+    serve_stereo = 1;
+    strcpy (stereo_name, colorB_name.gazebo_id);
+  }
+  
   else if (colorC_name.tipo > 1) {
       serve_stereo = 1;
       strcpy (stereo_name, colorC_name.gazebo_id);
-    }
-
-
+  }
+  
+  
   else if (colorD_name.tipo > 1) {
-      serve_stereo = 1;
-      strcpy (stereo_name, colorD_name.gazebo_id);
-    }
-
+    serve_stereo = 1;
+    strcpy (stereo_name, colorD_name.gazebo_id);
+  }
+  
   gazebo_init ();
-
+  
   /* gazebo thread creation */
   pthread_mutex_lock (&mymutex);
   //state = slept;
   state = winner;
   pthread_create (&gazebo_th, NULL, gazebo_thread, NULL);
   pthread_mutex_unlock (&mymutex);
-
+  
   if(serve_motors || serve_encoders){
-  	if (gz_position_open (position, client, motors_name) != 0) {
-		position=NULL;
-      		puts ("error apriendo la position");
-    		}
+    if (gz_position_open (position, client, motors_name) != 0) {
+      position=NULL;
+      puts ("error apriendo la position");
+    }
   	}
-
+  
   if (serve_motors)
     {
       all[num_schemas].id = (int *) &motors_schema_id;
@@ -296,9 +328,10 @@ gazebo_startup (char *configfile)
       myexport ("motors", "w", &w);
       myexport ("motors", "resume", (void *) &gazebo_motors_resume);
       myexport ("motors", "suspend", (void *) &gazebo_motors_suspend);
-      /* printf("******En startup exportando..... motors_s_i %i, resume motors_resume %i, suspend motors_suspend %i \n",motors_schema_id,gazebo_motors_resume, gazebo_motors_suspend); */
+      printf("******En startup exportando..... motors_s_i %i, resume motors_resume %i, suspend motors_suspend %i \n",motors_schema_id,gazebo_motors_resume, gazebo_motors_suspend);
+      v=0; w=0;
     }
-
+  
   if (serve_laser)
     {
       all[num_schemas].id = (int *) &laser_schema_id;
@@ -335,11 +368,15 @@ gazebo_startup (char *configfile)
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
-      myexport ("ptz", "id", &ptz_cmd_schema_id);
-      myexport ("ptz", "resume", (void *) &gazebo_ptz_cmd_resume);
-      myexport ("ptz", "suspend", (void *) &gazebo_ptz_cmd_suspend);
+      myexport("ptz", "id", &ptz_cmd_schema_id);
+      myexport("ptmotors", "longitude",&longitude);
+      myexport("ptmotors", "latitude",&latitude);
+      myexport("ptmotors", "longitude_speed",&longitude_speed);
+      myexport("ptmotors","latitude_speed",&l_speed);
+      myexport("ptmotors","resume",(void *)&gazebo_ptz_cmd_resume);
+      myexport("ptmotors", "suspend",(void *)&gazebo_ptz_cmd_suspend);
     }
-
+  
   if (serve_ptz_enc)
     {
       all[num_schemas].id = (int *) &ptz_enc_schema_id;
@@ -348,7 +385,7 @@ gazebo_startup (char *configfile)
       all[num_schemas].suspend = (suspendFn) gazebo_ptz_enc_suspend;
       printf ("%s schema loaded (id %d)\n", all[num_schemas].name,
 	      num_schemas);
-
+      
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k = 0;
@@ -359,8 +396,10 @@ gazebo_startup (char *configfile)
       myexport ("ptz", "id", &ptz_enc_schema_id);
       myexport ("ptz", "pan_angle", &pan_angle);
       myexport ("ptz", "tilt_angle", &tilt_angle);
+      myexport("ptencoders","resume",(void *)&gazebo_ptz_enc_resume);
+      myexport("ptencoders","suspend",(void *)&gazebo_ptz_enc_suspend);
       }
-
+  
   if (serve_sonars)
     {
       all[num_schemas].id = (int *) &sonars_schema_id;
@@ -405,6 +444,8 @@ gazebo_startup (char *configfile)
 
   if (serve_color[0])
     {
+      colorA = (char*)malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3*sizeof(char));
+      pthread_mutex_lock(&color_mutex[0]);
       all[num_schemas].id = (int *) &camera_schema_id[0];
       strcpy (all[num_schemas].name, "colorA");
       all[num_schemas].resume = (resumeFn) gazebo_camera0_resume;
@@ -418,10 +459,16 @@ gazebo_startup (char *configfile)
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("colorA","id",&camera_schema_id[0]);
+      myexport("colorA","colorA",&colorA);
+      myexport("colorA","resume",(void *)gazebo_camera0_resume);
+      myexport("colorA","suspend",(void *)gazebo_camera0_suspend);
     }
 
   if (serve_color[1])
     {
+      colorB = (char*)malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3*sizeof(char));
+      pthread_mutex_lock(&color_mutex[1]);
       all[num_schemas].id = (int *) &camera_schema_id[1];
       strcpy (all[num_schemas].name, "colorB");
       all[num_schemas].resume = (resumeFn) gazebo_camera1_resume;
@@ -435,9 +482,15 @@ gazebo_startup (char *configfile)
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("colorB","id",&camera_schema_id[1]);
+      myexport("colorB","colorB",&colorB);
+      myexport("colorB","resume",(void *)gazebo_camera1_resume);
+      myexport("colorB","suspend",(void *)gazebo_camera1_suspend);
     }
   if (serve_color[2])
     {
+      colorC = (char*)malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3*sizeof(char));
+      pthread_mutex_lock(&color_mutex[2]);
       all[num_schemas].id = (int *) &camera_schema_id[2];
       strcpy (all[num_schemas].name, "colorC");
       all[num_schemas].resume = (resumeFn) gazebo_camera2_resume;
@@ -452,10 +505,17 @@ gazebo_startup (char *configfile)
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("colorC","id",&camera_schema_id[2]);
+      myexport("colorC","colorC",&colorC);
+      myexport("colorC","resume",(void *)gazebo_camera2_resume);
+      myexport("colorC","suspend",(void *)gazebo_camera2_suspend);
+
     }
 
   if (serve_color[3])
     {
+      colorD = (char*)malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3*sizeof(char));
+      pthread_mutex_lock(&color_mutex[3]);
       all[num_schemas].id = (int *) &camera_schema_id[3];
       strcpy (all[num_schemas].name, "colorD");
       all[num_schemas].resume = (resumeFn) gazebo_camera3_resume;
@@ -469,6 +529,10 @@ gazebo_startup (char *configfile)
       all[num_schemas].close = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
+      myexport("colorD","id",&camera_schema_id[3]);
+      myexport("colorD","colorD",&colorD);
+      myexport("colorD","resume",(void *)gazebo_camera3_resume);
+      myexport("colorD","suspend",(void *)gazebo_camera3_suspend);
     }
 
   return 0;
@@ -484,19 +548,19 @@ gazebo_close ()
       gz_position_free (position);
       position=NULL;
     }
-
+  
   if (ptz){
 	gz_ptz_close(ptz);
 	gz_ptz_free(ptz);
 	ptz=NULL;
-	}
-
+  }
+  
   if (stereo){
-	gz_stereo_close(stereo);
-	gz_stereo_free(stereo);
-	stereo=NULL;
-	}
-
+    gz_stereo_close(stereo);
+    gz_stereo_free(stereo);
+    stereo=NULL;
+  }
+  
   gz_client_disconnect (client);
   gz_client_free (client);
   printf ("Switching gazebo off\n");
@@ -506,24 +570,23 @@ gazebo_close ()
 int
 gazebo_ptz_cmd_resume (int father, int *brothers, arbitration fn)
 {
-
+  
   if ((serve_ptz_cmd) && (ptz_cmd_active == 0))
     {
       ptz_cmd_active = 1;
-
-	gz_ptz_lock(ptz,1);
-	ptz->data->cmd_pan=0.0;
-	ptz->data->cmd_tilt=0.0;
-	gz_ptz_unlock(ptz);
-	pan_angle=0.0;
-	tilt_angle=0.0;
-
-	longitude=0.0;
-	latitude=0.0;
-
+      gz_ptz_lock(ptz,1);
+      ptz->data->cmd_pan=0.0;
+      ptz->data->cmd_tilt=0.0;
+      gz_ptz_unlock(ptz);
+      pan_angle=0.0;
+      tilt_angle=0.0;
+      
+      longitude=0.0;
+      latitude=0.0;
+      
       put_state (ptz_cmd_schema_id, winner);
       printf ("gazebo: ptz command  resume\n");
-
+      
       all[ptz_cmd_schema_id].father = father;
       all[ptz_cmd_schema_id].fps = 0.;
       all[ptz_cmd_schema_id].k = 0;
@@ -546,13 +609,12 @@ gazebo_ptz_cmd_suspend ()
 int
 gazebo_ptz_enc_resume (int father, int *brothers, arbitration fn)
 {
-
+  
   if ((serve_ptz_enc) && (ptz_enc_active == 0))
     {
       ptz_enc_active = 1;
       put_state (ptz_enc_schema_id, winner);
-      printf ("gazebo: ptz encoders resume\n");
-
+      
       all[ptz_enc_schema_id].father = father;
       all[ptz_enc_schema_id].fps = 0.;
       all[ptz_enc_schema_id].k = 0;
@@ -584,20 +646,35 @@ gazebo_camera0_resume (int father, int *brothers, arbitration fn)
 		   colorA_name.gazebo_id);
 	  exit (-1);
 	}
-
+      
     }
+  
+   if (serve_color[0]==1) 
+     {
+       color_active[0]++;
+       if ((all[camera_schema_id[3]].father==GUIHUMAN) ||
+	   (all[camera_schema_id[3]].father==SHELLHUMAN))
+	 all[camera_schema_id[3]].father = father;
+       if(color_active[0]==1)
+	 
+	 {
+	   pthread_mutex_unlock(&color_mutex[0]);
+	   all[camera_schema_id[0]].father = father;
+	   all[camera_schema_id[0]].fps = 0.;
+	   all[camera_schema_id[0]].k = 0;
+	   put_state (camera_schema_id[0], winner);
 
-  if ((serve_color[0]) && (color_active[0] == 0))
-    {
-      color_active[0] = 1;
-      put_state (camera_schema_id[0], winner);
-      printf ("gazebo: camera  0 resume\n");
-      all[camera_schema_id[0]].father = father;
-      all[camera_schema_id[0]].fps = 0.;
-      all[camera_schema_id[0]].k = 0;
-      put_state (camera_schema_id[0], winner);
-	}
-  return 0;
+	   if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
+	     /* gazebo thread goes winner */
+	     pthread_mutex_lock(&mymutex);
+	     state=winner;
+	     pthread_cond_signal(&condition);
+	     pthread_mutex_unlock(&mymutex);
+	   }
+	 }
+     }
+
+   return 0;
 }
 
 int
@@ -612,17 +689,33 @@ gazebo_camera1_resume (int father, int *brothers, arbitration fn)
 	  exit (-1);
 	}
     }
-
-  if ((serve_color[1]) && (color_active[1] == 0))
+  
+  if (serve_color[1]==1) 
     {
-      color_active[1] = 1;
-      put_state (camera_schema_id[1], winner);
-      printf ("gazebo: camera 1 resume\n");
-      all[camera_schema_id[1]].father = father;
-      all[camera_schema_id[1]].fps = 0.;
-      all[camera_schema_id[1]].k = 0;
-      put_state (camera_schema_id[1], winner);
+      color_active[1]++;
+      if ((all[camera_schema_id[3]].father==GUIHUMAN) ||
+	  (all[camera_schema_id[3]].father==SHELLHUMAN))
+	all[camera_schema_id[3]].father = father;
+      if(color_active[1]==1)
+	
+	{
+	  pthread_mutex_unlock(&color_mutex[1]);
+	  
+	  all[camera_schema_id[1]].father = father;
+	  all[camera_schema_id[1]].fps = 0.;
+	  all[camera_schema_id[1]].k = 0;
+	  put_state (camera_schema_id[1], winner);
+	  
+	  if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
+	    /* gazebo thread goes winner */
+	    pthread_mutex_lock(&mymutex);
+	    state=winner;
+	    pthread_cond_signal(&condition);
+	    pthread_mutex_unlock(&mymutex);
+	  }
+	}
     }
+  
   return 0;
 }
 
@@ -635,19 +728,35 @@ gazebo_camera2_resume (int father, int *brothers, arbitration fn)
       if (gz_camera_open (camera[2], client, colorC_name.gazebo_id) != 0)
 	{
 	  fprintf (stderr, "Error openning the %s camera\n",
-			colorC_name.gazebo_id);
+		   colorC_name.gazebo_id);
 	  exit (-1);
 	}
     }
-
-  if ((serve_color[2]) && (color_active[2] == 0))
+  
+  if (serve_color[2]==1) 
     {
-      color_active[2] = 1;
-      printf ("gazebo: camera 3 resume\n");
-      all[camera_schema_id[2]].father = father;
-      all[camera_schema_id[2]].fps = 0.;
-      all[camera_schema_id[2]].k = 0;
-      put_state (camera_schema_id[2], winner);
+      color_active[2]++;
+      if ((all[camera_schema_id[3]].father==GUIHUMAN) ||
+	  (all[camera_schema_id[3]].father==SHELLHUMAN))
+	all[camera_schema_id[3]].father = father;
+      if(color_active[2]==1)
+	
+	{
+	  pthread_mutex_unlock(&color_mutex[2]);
+	  
+	  all[camera_schema_id[2]].father = father;
+	  all[camera_schema_id[2]].fps = 0.;
+	  all[camera_schema_id[2]].k = 0;
+	  put_state (camera_schema_id[2], winner);
+	  
+	  if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[3]==0)){
+	    /* gazebo thread goes winner */
+	    pthread_mutex_lock(&mymutex);
+	    state=winner;
+	    pthread_cond_signal(&condition);
+	    pthread_mutex_unlock(&mymutex);
+	  }
+	}
     }
   return 0;
 }
@@ -666,15 +775,30 @@ gazebo_camera3_resume (int father, int *brothers, arbitration fn)
 	}
     }
 
-  if ((serve_color[3]) && (color_active[3] == 0))
+  if (serve_color[3]==1) 
     {
-      color_active[3] = 1;
-      put_state (camera_schema_id[3], winner);
-      printf ("gazebo: camera resume\n");
-      all[camera_schema_id[3]].father = father;
-      all[camera_schema_id[3]].fps = 0.;
-      all[camera_schema_id[3]].k = 0;
-      put_state (camera_schema_id[3], winner);
+      color_active[3]++;
+      if ((all[camera_schema_id[3]].father==GUIHUMAN) ||
+	  (all[camera_schema_id[3]].father==SHELLHUMAN))
+	all[camera_schema_id[3]].father = father;
+      if(color_active[3]==1)
+	
+	{
+	  pthread_mutex_unlock(&color_mutex[3]);
+	  
+	  all[camera_schema_id[3]].father = father;
+	  all[camera_schema_id[3]].fps = 0.;
+	  all[camera_schema_id[3]].k = 0;
+	  put_state (camera_schema_id[3], winner);
+	  
+	  if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[2]==0)){
+	    /* gazebo tshread goes winner */
+	    pthread_mutex_lock(&mymutex);
+	    state=winner;
+	    pthread_cond_signal(&condition);
+	    pthread_mutex_unlock(&mymutex);
+	  }
+	}
     }
   return 0;
 }
@@ -685,10 +809,10 @@ gazebo_camera3_resume (int father, int *brothers, arbitration fn)
 int
 gazebo_camera0_suspend ()
 {
-  if ((serve_color[0]) && (color_active[0]))
+  color_active[0]--;
+  if ((serve_color[0]) && (color_active[0]==0))
     {
-      color_active[0] = 0;
-      printf ("Gazebo: camera 0 suspend\n");
+      pthread_mutex_lock(&color_mutex[0]);
       put_state (camera_schema_id[0], slept);
       if (camera[0])
 	{
@@ -696,7 +820,13 @@ gazebo_camera0_suspend ()
 	  gz_camera_free (camera[0]);
 	  camera[0] = NULL;
 	}
-
+      if((color_active[1]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
+	// gazebo thread goes sleep 
+	pthread_mutex_lock(&mymutex);
+	state=slept;
+	pthread_mutex_unlock(&mymutex);
+      }
+      
     }
   return 0;
 }
@@ -704,10 +834,10 @@ gazebo_camera0_suspend ()
 int
 gazebo_camera1_suspend ()
 {
+  color_active[1]--;
   if ((serve_color[1]) && (color_active[1]))
     {
-      color_active[1] = 0;
-      printf ("Gazebo: camera 1 suspend\n");
+      pthread_mutex_lock(&color_mutex[1]);
       put_state (camera_schema_id[1], slept);
       if (camera[1])
 	{
@@ -715,6 +845,12 @@ gazebo_camera1_suspend ()
 	  gz_camera_free (camera[1]);
 	  camera[1] = NULL;
 	}
+      if((color_active[0]==0)&&(color_active[2]==0)&&(color_active[3]==0)){
+	// gazebo thread goes sleep 
+	pthread_mutex_lock(&mymutex);
+	state=slept;
+	pthread_mutex_unlock(&mymutex);
+      }
     }
   return 0;
 }
@@ -722,10 +858,10 @@ gazebo_camera1_suspend ()
 int
 gazebo_camera2_suspend ()
 {
+  color_active[2]--;
   if ((serve_color[2]) && (color_active[2]))
     {
-      color_active[2] = 0;
-      printf ("Gazebo: camera 2 suspend\n");
+      pthread_mutex_lock(&color_mutex[2]);
       put_state (camera_schema_id[2], slept);
       if (camera[2])
 	{
@@ -733,6 +869,12 @@ gazebo_camera2_suspend ()
 	  gz_camera_free (camera[2]);
 	  camera[2] = NULL;
 	}
+      if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[3]==0)){
+	// gazebo thread goes sleep 
+	pthread_mutex_lock(&mymutex);
+	state=slept;
+	pthread_mutex_unlock(&mymutex);
+      }
     }
   return 0;
 }
@@ -740,10 +882,11 @@ gazebo_camera2_suspend ()
 int
 gazebo_camera3_suspend ()
 {
+   color_active[3]--;
   if ((serve_color[3]) && (color_active[3]))
     {
-      color_active[3] = 0;
-      printf ("Gazebo: camera 3 suspend\n");
+      pthread_mutex_lock(&color_mutex[3]);
+      printf ("gazebo: camera 3 suspend\n");
       put_state (camera_schema_id[2], slept);
       if (camera[3])
 	{
@@ -751,6 +894,12 @@ gazebo_camera3_suspend ()
 	  gz_camera_free (camera[3]);
 	  camera[3] = NULL;
 	}
+      if((color_active[0]==0)&&(color_active[1]==0)&&(color_active[2]==0)){
+	// gazebo thread goes sleep 
+	pthread_mutex_lock(&mymutex);
+	state=slept;
+	pthread_mutex_unlock(&mymutex);
+      }
 
     }
   return 0;
@@ -953,9 +1102,10 @@ gazebo_motors_iteration ()
 void *
 gazebo_thread (void *not_used)
 {
-  struct timeval t;
-  unsigned long now, diff, next;
+  struct timeval t,t2;
+  unsigned long now, diff,next;
   static unsigned long lastmotor = 0;
+  static unsigned long actualmotor = 0;
   static unsigned long lastiteration = 0;
 
   printf ("gazebo: gazebo thread started up\n");
@@ -1033,18 +1183,15 @@ gazebo_thread (void *not_used)
 	  if (encoders_active)
 	    gazebo_encoders_callback ();
 
-
-	  /* to control the iteration time of this driver */
+	 /* to control the iteration time of this driver */
 	  gettimeofday (&t, NULL);
 	  now = t.tv_sec * 1000000 + t.tv_usec;
 	  next=lastiteration+(long)GAZEBO_CYCLE*1000;
 	  if (next>(5000+now))
-            {
+	    {
 	      usleep(next-now-5000);
-	      /* discounts 5ms taken by calling usleep itself, on average */
-            }
-	  else  ;
-      
+	    }
+
 	}
     }
   while (gazebo_close_command == 0);
@@ -1080,10 +1227,12 @@ gazebo_camera_callback (int camnum)
     }
   for (i = 0; i < SIFNTSC_COLUMNS * SIFNTSC_ROWS * 3; i += 3)
     {
+
       destination[i] = camera[camnum]->data->image[i + 2];
       destination[i + 1] = camera[camnum]->data->image[i + 1];
       destination[i + 2] = camera[camnum]->data->image[i];
     }
+
   gz_camera_unlock (camera[camnum]);
 }
 
@@ -1152,9 +1301,6 @@ gazebo_ptz_cmd_callback(){
 		gz_ptz_lock(ptz,1);
 		ptz->data->cmd_pan=longitude * DEGTORAD;
 		ptz->data->cmd_tilt=latitude * DEGTORAD;
-		//printf("Pan Tilt command from teleoperator"
-		//		" longitude: %f:latitude:%f\n",
-		//		longitude,latitude);
 		gz_ptz_unlock(ptz);
 		}
 	}
@@ -1201,8 +1347,6 @@ gazebo_laser_callback ()
       cont2 = rint(relation * cont);
       jde_laser[cont] = (int) (laser->data->ranges[cont2] * 1000);
 	
-      //printf("relation %f jde ray %d gazebo ray %d\n",
-	//	relation,cont,cont2);
     }
   gz_laser_unlock (laser);
 }
@@ -1261,7 +1405,6 @@ gazebo_sonars_callback ()
   for (j = 0; j < NUM_SONARS; j++)
     {
       us[j] = (float) sonar->data->sonar_ranges[j]*1000.0;
-      //printf("sonar %d:%f  %f\n",j,us[j],(float)sonar->data->sonar_ranges[j]);
     }
   gz_sonar_unlock (sonar);
 
@@ -1276,9 +1419,9 @@ gazebo_parseconf (char *configfile)
   int ItIsAGaceboLine = 0, i, colors;
   char *cameras[] = { "colorA", "colorB", "colorC", "colorD" };
   gc_name *colorX_name[] = { &colorA_name,
-    &colorB_name,
-    &colorC_name,
-    &colorD_name
+			     &colorB_name,
+			     &colorC_name,
+			     &colorD_name
   };
   if (!conf)
     return (-1);
@@ -1302,13 +1445,13 @@ gazebo_parseconf (char *configfile)
 	break;
       for (colors = 0; colors < 4; colors++)
 	{
-
+	  
 	  pLine1 = strstr (cpLinea, cameras[colors]);
 	  if (pLine1 )
 	    {
 	      pLine2 = strstr (pLine1, " ");
 	      for (i = 0; isspace (pLine2[0]); pLine2++);	//salto blancos
-
+	      
 	      if (strstr (pLine2, "leftd"))
 		{		/*Stereo left dispsrity */
 		  pLine1 = strstr (pLine2, " ");
@@ -1317,7 +1460,7 @@ gazebo_parseconf (char *configfile)
 		  strcpy (colorX_name[colors]->gazebo_id, pLine2);
 		  colorX_name[colors]->tipo = 4;	/*left disparity */
 		}
-
+	      
 	      else if (strstr (pLine2, "rightd"))
 		{		/*Stereo right dispsrity */
 		  pLine1 = strstr (pLine2, " ");
@@ -1326,7 +1469,7 @@ gazebo_parseconf (char *configfile)
 		  printf ("Nombre del estero rightd:%s:\n", pLine2);
 		  colorX_name[colors]->tipo = 5;	/*right disparity */
 		}
-
+	      
 	      else if (strstr (pLine2, "left"))
 		{		/*Stereo left */
 		  pLine1 = strstr (pLine2, " ");
@@ -1337,7 +1480,7 @@ gazebo_parseconf (char *configfile)
 		  strcpy (colorX_name[colors]->gazebo_id, pLine2);	/*stereo id */
 		  colorX_name[colors]->tipo = 2;	/* left */
 		}
-
+	      
 	      else if (strstr (pLine2, "right"))
 		{		/*Stereo right */
 		  pLine1 = strstr (pLine2, " ");
@@ -1348,7 +1491,7 @@ gazebo_parseconf (char *configfile)
 		  strcpy (colorX_name[colors]->gazebo_id, pLine2);	/*stereo id */
 		  colorX_name[colors]->tipo = 3;	/*right */
 		}
-
+	      
 	      else
 		{		/*Se trata de una camara mono */
 		  pLine1 = strstr (pLine2, "\n");
@@ -1369,7 +1512,7 @@ gazebo_parseconf (char *configfile)
           printf("El nombre del laser es :%s:\n",pLine2);
 	  strncpy (laser_name, pLine2, MAX_MODEL_ID);
 	}
-       
+      
       pLine2 = strstr (cpLinea, " motors ");
       if (pLine2)
 	{			//Tomo el surtidor de motores
@@ -1380,7 +1523,7 @@ gazebo_parseconf (char *configfile)
           printf("El nombre para motores es  :%s:\n",pLine2);
 	  strncpy (motors_name, pLine2, MAX_MODEL_ID);
 	}
-
+      
       pLine2 = strstr(cpLinea," encoders ");
       if (pLine2)
 	{			//Tomo el surtidor de encoders
@@ -1402,7 +1545,7 @@ gazebo_parseconf (char *configfile)
           printf("El nombre para sonar es  :%s:\n",pLine2);
 	  strncpy (sonar_name, pLine2, MAX_MODEL_ID);
 	}
-
+      
       pLine2=strstr(cpLinea," pantilt ");
       if (pLine2)
 	{			//Tomo el surtidor de ptz
@@ -1413,9 +1556,9 @@ gazebo_parseconf (char *configfile)
           printf("El nombre para pantilt es  :%s:\n",pLine2);
 	  strncpy (ptz_name, pLine2, MAX_MODEL_ID);
 	}
-
+      
     }
-
+  
   fclose (conf);
   return 0;
 }

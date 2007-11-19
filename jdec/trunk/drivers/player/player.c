@@ -87,6 +87,30 @@ int sonars_active=0;
 /** player driver variable to check if motors was activated in gui.*/
 int motors_active=0;
 
+/*API de variables servidas*/
+/** 'encoders' schema, odometry information.*/
+float jde_robot[5];
+/** 'encoders' schema, clock variable.*/
+unsigned long int encoders_clock;
+
+/** 'laser' schema, laser information.*/
+int jde_laser[NUM_LASER];
+/** 'laser' schema, clock variable.*/
+unsigned long int laser_clock;
+
+/** 'sonars' schema, sonars information.*/
+float us[NUM_SONARS];
+/** 'sonars' schema, clock variable.*/
+unsigned long int us_clock[NUM_SONARS];
+
+/** 'motors' schema, speed control.*/
+float v; /* mm/s */
+/** 'motors' schema, turn speed control.*/
+float w; /* deg/s*/
+/** 'motors' schema, cycle control.*/
+int motors_cycle;
+
+/*Contadores de referencias*/
 /** laser ref counter*/
 int laser_refs=0;
 /** encoders ref counter*/

@@ -125,6 +125,29 @@ int colorB_schema_id;
 int colorC_schema_id;
 /** id set to colorD schema.*/
 int colorD_schema_id;
+
+/*API variables servidas*/
+/** 'colorA' schema image data*/
+char *colorA; /* sifntsc image itself */
+/** 'colorA' schema clock*/
+unsigned long int imageA_clock;
+
+/** 'colorB' schema image data*/
+char *colorB; /* sifntsc image itself */
+/** 'colorB' schema clock*/
+unsigned long int imageB_clock;
+
+/** 'colorC' schema image data*/
+char *colorC; /* sifntsc image itself */
+/** 'colorC' schema clock*/
+unsigned long int imageC_clock;
+
+/** 'colorD' schema image data*/
+char *colorD; /* sifntsc image itself */
+/** 'colorD' schema clock*/
+unsigned long int imageD_clock;
+
+/*Contadores de referencias*/
 /** colorA ref counter*/
 int colorA_refs=0;
 /** colorB ref counter*/

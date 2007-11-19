@@ -106,6 +106,26 @@ float max_tilt;
 /** pantilt driver current min tilt variable.*/
 float min_tilt;
  
+/*API Variables compartidas*/
+/** 'ptmotors' schema longitude control*/
+float longitude; /* degs, pan angle */
+/** 'ptmotors' schema latitude control*/
+float latitude; /* degs, tilt angle */
+/** 'ptmotors' schema longitude speed control*/
+float longitude_speed;
+/** 'ptmotors' schema latitude speed control*/
+float latitude_speed;
+/** 'ptmotors' schema cycle control variable*/
+int pantiltmotors_cycle;
+
+/** 'ptencoders' schema pan angle information*/
+float pan_angle;   /* degs */
+/** 'ptencoders' schema tilt angle information*/
+float tilt_angle;  /* degs */
+/** 'ptencoders' schema clock*/
+unsigned long int pantiltencoders_clock;
+
+
 /* real limits in encoders units. MAX_PAN_ANGLE, MAX_TILT_ANGLE... are approximate limits to be used by the client of oculo */
 /** pantilt driver variable to detect if pthreads were created.*/
 int pantilt_thread_created=0;

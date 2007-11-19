@@ -22,6 +22,7 @@
 #include "jdegui.h"
 #include "introrobgui.h"
 #include "navegacion.h"
+#include "variables.h"
 
 #define DISPLAY_ROBOT 0x01UL
 #define DISPLAY_SONARS 0x04UL
@@ -152,10 +153,7 @@ int pintaSegmento(Tvoxel a, Tvoxel b, int color)
    }
 
 void introrob_iteration()
-{  
-  static int d=0;
- 
-
+{
   speedcounter(introrob_id);
   /* printf("introrob iteration %d\n",d++);*/
 
@@ -167,6 +165,22 @@ void introrob_iteration()
   else if (introrob_state==deliberative) deliberative_iteration();
   else if (introrob_state==hybrid) hybrid_iteration();
   else {v=0;w=0;}
+  /*Mover los valores de la variables de trabajo a las variables actuadoras
+    del robot que han sido importadas*/
+  if (myv!=NULL)
+     *myv=v;
+  if (myw!=NULL)
+     *myw=w;
+  if (myencoders!=NULL){
+     int i;
+     for (i=0;i<5; i++)
+        myencoders[i]=jde_robot[i];
+  }
+  if (mylaser!=NULL){
+     int i;
+     for (i=0; i<NUM_LASER; i++)
+        mylaser[i]=jde_laser[i];
+  }
 }
 
 
@@ -205,7 +219,7 @@ void introrob_resume(int father, int *brothers, arbitration fn)
 
   mylaser=(int *)myimport("laser","jde_laser");
   laserresume=(resumeFn)myimport("laser","resume");
-  lasersuspend=(suspendFn *)myimport("laser","suspend");
+  lasersuspend=(suspendFn)myimport("laser","suspend");
 
   myencoders=(float *)myimport("encoders","jde_robot");
   encodersresume=(resumeFn)myimport("encoders","resume");
@@ -365,7 +379,7 @@ void introrob_guidisplay()
   static float k=0;
   int i;
   Tvoxel aa,bb;
-  static XPoint targetgraf,old;
+  static XPoint targetgraf;
   XPoint a,b;
 
   fl_redraw_object(fd_introrobgui->joystick);
