@@ -57,19 +57,19 @@ void rgb2hsi_wiki (double r, double g, double b, double *H, double *S, double *V
 	else
 		max = b;
 
-	//printf("min=%.1f - max=%.1f\n",min, max);
+	//printf("min=%.1f - max=%.1f - r=%.1f - g=%.1f - b=%.1f\n",min,max,r,g,b);
 	// Calculamos valor de H
 	if (max==min)
 	{
 		*H=.0;					 // En estos casos, H no tiene sentido
 	}
 	else if (max==r && g>=b)
-	{
+	{		
 		*H=60*((g-b)/(max-min));
 	}
 	else if (max==r && g<b)
-	{
-		*H=60*((g-b)/max-min)+360;
+	{		
+		*H=60*((g-b)/(max-min))+360;
 	}
 	else if (max==g)
 	{

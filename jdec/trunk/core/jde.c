@@ -369,6 +369,12 @@ int jde_loadschema(char *name)
 	printf("WARNING: Unresolved symbol %s in %s schema\n",n,name);
 
       dlerror();
+      strcpy(n,name); strcat(n,"_stop");
+      all[num_schemas].close = (void (*)(void)) dlsym(all[num_schemas].handle,n);
+      if ((error=dlerror()) != NULL)
+         printf("WARNING: Unresolved symbol %s in %s schema\n",n,name);
+
+      dlerror();
       strcpy(n,name); strcat(n,"_guiresume");
       all[num_schemas].guiresume = (void (*)(void)) dlsym(all[num_schemas].handle,n);  
       if ((error=dlerror()) != NULL)

@@ -3,8 +3,10 @@ GCC = gcc
 CFLAGS = -g -O2 -Wall
 LIBS = -lm 
 
-all: lib
+NAME="libRGB2HSI"
+VERSION=`cat Changelog | grep ^. | head -1 | cut -d\( -f2 | cut -d\) -f1`
 
+all: lib
 
 rgb2hsi.o : rgb2hsi.c rgb2hsi.h
 	$(GCC) $(CFLAGS) -fPIC -c rgb2hsi.c
@@ -23,7 +25,6 @@ uninstall:
 	rm -f /usr/include/rgb2hsi.h
 
 newrelease:
-	tar -zcvf newrelease.tgz *c *.h Makefile Changelog
-
+	tar -zcvf $(NAME)_$(VERSION).tgz *c *.h Makefile Changelog
 clean:
 	rm -f *.o *.a 

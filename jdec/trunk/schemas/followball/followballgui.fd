@@ -199,27 +199,6 @@ argument:
 --------------------
 class: FL_VALSLIDER
 type: VERT_BROWSER_SLIDER
-box: 220 360 40 170
-boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_COL1
-alignment: FL_ALIGN_BOTTOM
-style: FL_NORMAL_STYLE
-size: FL_TINY_SIZE
-lcol: FL_BLACK
-label: H_min
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: Hmin
-callback: 
-argument: 
-	bounds: 6 0
-	precision: 4
-	value: 0
-
---------------------
-class: FL_VALSLIDER
-type: VERT_BROWSER_SLIDER
 box: 270 360 40 170
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_COL1
@@ -234,10 +213,10 @@ gravity: FL_NoGravity FL_NoGravity
 name: Hmax
 callback: 
 argument: 
-	bounds: 6 0
+	bounds: 360 0
 	precision: 4
 	value: 0
-	step: 1e-04
+	step: 0,0001
 
 --------------------
 class: FL_VALSLIDER
@@ -393,6 +372,27 @@ gravity: FL_NoGravity FL_NoGravity
 name: btActiveHSI
 callback: 
 argument: 
+
+--------------------
+class: FL_VALSLIDER
+type: VERT_BROWSER_SLIDER
+box: 220 360 40 170
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_BOTTOM
+style: FL_NORMAL_STYLE
+size: FL_TINY_SIZE
+lcol: FL_BLACK
+label: H_min
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: Hmin
+callback: 
+argument: 
+	bounds: 360 0
+	precision: 4
+	value: 0
 
 ==============================
 create_the_forms

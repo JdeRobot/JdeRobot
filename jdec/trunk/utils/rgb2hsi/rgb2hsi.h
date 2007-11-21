@@ -20,7 +20,7 @@
  */
 
 #define NAME     "rgb2hsi"
-#define VERSION  "0.4"
+#define VERSION  "0.4.1"
 
 /// *** RGB to HSI  *** ///
 
@@ -33,7 +33,7 @@ struct HSI
 
 struct HSI * LUT_RGB2HSI [64][64][64];
 
-/// \brief Init the JDE_RGB2HSI
+/// \brief Init the RGB2HSI
 void RGB2HSI_init();
 
 /// \brief Create a translate RGB2HSI table with resolution of 6bits (64x64x64)

@@ -1022,7 +1022,7 @@ int mplayer_parseconf(char *configfile){
                                        repeat[3] = 0;
                                  }
                               }
-                              if((words==5) && (strcmp(word5,"v4l")==0)){
+                              else if((words==5) && (strcmp(word5,"v4l")==0)){
                                  printf("mplayer: %s from device %s\n",word4,word6);
                                  if(strcmp(word4,"colorA")==0){
                                     serve_color[0]=1;

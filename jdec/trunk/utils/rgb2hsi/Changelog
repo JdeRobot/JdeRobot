@@ -1,4 +1,11 @@
-libRGB2HSI (0.4) stable; urgnecy=low
+libRGB2HSI (0.4.1) stable; urgency=low
+
+	* Bug fixed: Some times H had an error value.
+	* Add test for librery
+
+  -- Roberto Calvo <rocapal@gsyc.es>  Tue, 20 Nov 2007 21:20:35 +0100
+
+libRGB2HSI (0.4) stable; urgency=low
 	
 	* Add concurrency control about TableRGB2HSI
 	* Change name functions
