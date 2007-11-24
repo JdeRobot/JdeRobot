@@ -272,20 +272,6 @@ void set_default_firewire_camera_config(void){
   }
 }
 
-/** This function indicates if any of the other color schemas are active
- *  @param my_index Schema identifier (for this driver)
- *  @return 0 if the other schemas are not active */
-int brothers_sleeping(int my_index) {
-   int i;
-   int value = 1;
-   for (i = 0; i < MAXCAM; i++) {
-      if (i == my_index)
-         continue;
-      value = value && (color_active[i]==0);
-   }
-   return value;
-}
-
 /** colorA resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
@@ -306,14 +292,13 @@ int mycolorA_resume(int father, int *brothers, arbitration fn){
          all[colorA_schema_id].father = father;
          all[colorA_schema_id].fps = 0.;
          all[colorA_schema_id].k =0;
+         all[colorA_schema_id].k =0;
          put_state(colorA_schema_id,winner);
-         if(brothers_sleeping(0)){
-            /* firewire thread goes winner */
-            pthread_mutex_lock(&mymutex[0]);
-            state[0]=winner;
-            pthread_cond_signal(&condition[0]);
-            pthread_mutex_unlock(&mymutex[0]);
-         }
+         /* firewire thread goes winner */
+         pthread_mutex_lock(&mymutex[0]);
+         state[0]=winner;
+         pthread_cond_signal(&condition[0]);
+         pthread_mutex_unlock(&mymutex[0]);
       }
    }
    return 0;
@@ -335,12 +320,10 @@ int mycolorA_suspend(){
          color_active[0]=0;
          put_state(colorA_schema_id,slept);
          printf("colorA schema suspend (firewire driver)\n");
-         if(brothers_sleeping(0)){
-            /* firewire thread goes sleep */
-            pthread_mutex_lock(&mymutex[0]);
-            state[0]=slept;
-            pthread_mutex_unlock(&mymutex[0]);
-         }
+         /* firewire thread goes sleep */
+         pthread_mutex_lock(&mymutex[0]);
+         state[0]=slept;
+         pthread_mutex_unlock(&mymutex[0]);
       }
    }
    return 0;
@@ -370,13 +353,11 @@ int mycolorB_resume(int father, int *brothers, arbitration fn){
    
          put_state(colorB_schema_id,winner);
 
-         if(brothers_sleeping(1)){
-            /* firewire thread goes winner */
-            pthread_mutex_lock(&mymutex[1]);
-            state[1]=winner;
-            pthread_cond_signal(&condition[1]);
-            pthread_mutex_unlock(&mymutex[1]);
-         }
+         /* firewire thread goes winner */
+         pthread_mutex_lock(&mymutex[1]);
+         state[1]=winner;
+         pthread_cond_signal(&condition[1]);
+         pthread_mutex_unlock(&mymutex[1]);
       }
    }
    return 0;
@@ -398,13 +379,10 @@ int mycolorB_suspend(){
          color_active[1]=0;
          printf("colorB schema suspend (firewire driver)\n");
          put_state(colorB_schema_id,slept);
-
-         if(brothers_sleeping(1)){
-            /* firewire thread goes sleep */
-            pthread_mutex_lock(&mymutex[1]);
-            state[1]=slept;
-            pthread_mutex_unlock(&mymutex[1]);
-         }
+         /* firewire thread goes sleep */
+         pthread_mutex_lock(&mymutex[1]);
+         state[1]=slept;
+         pthread_mutex_unlock(&mymutex[1]);
       }
    }
    return 0;
@@ -432,14 +410,11 @@ int mycolorC_resume(int father, int *brothers, arbitration fn){
          all[colorC_schema_id].fps = 0.;
          all[colorC_schema_id].k =0;
          put_state(colorC_schema_id,winner);
-
-         if(brothers_sleeping(2)){
-            /* firewire thread goes winner */
-            pthread_mutex_lock(&mymutex[2]);
-            state[2]=winner;
-            pthread_cond_signal(&condition[2]);
-            pthread_mutex_unlock(&mymutex[2]);
-         }
+         /* firewire thread goes winner */
+         pthread_mutex_lock(&mymutex[2]);
+         state[2]=winner;
+         pthread_cond_signal(&condition[2]);
+         pthread_mutex_unlock(&mymutex[2]);
       }
    }
    return 0;
@@ -461,13 +436,10 @@ int mycolorC_suspend(){
          color_active[2]=0;
          printf("colorC schema suspend (firewire driver)\n");
          put_state(colorC_schema_id,slept);
-
-         if(brothers_sleeping(2)){
-            /* firewire thread goes sleep */
-            pthread_mutex_lock(&mymutex[2]);
-            state[2]=slept;
-            pthread_mutex_unlock(&mymutex[2]);
-         }
+         /* firewire thread goes sleep */
+         pthread_mutex_lock(&mymutex[2]);
+         state[2]=slept;
+         pthread_mutex_unlock(&mymutex[2]);
       }
    }
    return 0;
@@ -495,14 +467,11 @@ int mycolorD_resume(int father, int *brothers, arbitration fn){
          all[colorD_schema_id].fps = 0.;
          all[colorD_schema_id].k =0;
          put_state(colorD_schema_id,winner);
-
-         if(brothers_sleeping(3)){
-            /* firewire thread goes winner */
-            pthread_mutex_lock(&mymutex[3]);
-            state[3]=winner;
-            pthread_cond_signal(&condition[3]);
-            pthread_mutex_unlock(&mymutex[3]);
-         }
+         /* firewire thread goes winner */
+         pthread_mutex_lock(&mymutex[3]);
+         state[3]=winner;
+         pthread_cond_signal(&condition[3]);
+         pthread_mutex_unlock(&mymutex[3]);
       }
    }
    return 0;
@@ -524,13 +493,10 @@ int mycolorD_suspend(){
          color_active[3]=0;
          printf("colorD schema suspend (firewire driver)\n");
          put_state(colorD_schema_id,slept);
-
-         if(brothers_sleeping(3)){
-            /* firewire thread goes sleep */
-            pthread_mutex_lock(&mymutex[3]);
-            state[3]=slept;
-            pthread_mutex_unlock(&mymutex[3]);
-         }
+         /* firewire thread goes sleep */
+         pthread_mutex_lock(&mymutex[3]);
+         state[3]=slept;
+         pthread_mutex_unlock(&mymutex[3]);
       }
    }
    return 0;
@@ -557,14 +523,11 @@ int myvarcolorA_resume(int father, int *brothers, arbitration fn){
          all[varcolorA_schema_id].fps = 0.;
          all[varcolorA_schema_id].k =0;
          put_state(varcolorA_schema_id,winner);
-
-         if(brothers_sleeping(4)){
-            /* firewire thread goes winner */
-            pthread_mutex_lock(&mymutex[4]);
-            state[4]=winner;
-            pthread_cond_signal(&condition[4]);
-            pthread_mutex_unlock(&mymutex[4]);
-         }
+         /* firewire thread goes winner */
+         pthread_mutex_lock(&mymutex[4]);
+         state[4]=winner;
+         pthread_cond_signal(&condition[4]);
+         pthread_mutex_unlock(&mymutex[4]);
       }
    }
    return 0;
@@ -585,13 +548,10 @@ int myvarcolorA_suspend(){
          color_active[4]=0;
          printf("varcolorA schema suspend (firewire driver)\n");
          put_state(varcolorA_schema_id,slept);
-
-         if(brothers_sleeping(4)){
-            /* firewire thread goes sleep */
-            pthread_mutex_lock(&mymutex[4]);
-            state[4]=slept;
-            pthread_mutex_unlock(&mymutex[4]);
-         }
+         /* firewire thread goes sleep */
+         pthread_mutex_lock(&mymutex[4]);
+         state[4]=slept;
+         pthread_mutex_unlock(&mymutex[4]);
       }
    }
    return 0;
@@ -618,14 +578,11 @@ int myvarcolorB_resume(int father, int *brothers, arbitration fn){
          all[varcolorB_schema_id].fps = 0.;
          all[varcolorB_schema_id].k =0;
          put_state(varcolorB_schema_id,winner);
-
-         if(brothers_sleeping(5)){
-            /* firewire thread goes winner */
-            pthread_mutex_lock(&mymutex[5]);
-            state[5]=winner;
-            pthread_cond_signal(&condition[5]);
-            pthread_mutex_unlock(&mymutex[5]);
-         }
+         /* firewire thread goes winner */
+         pthread_mutex_lock(&mymutex[5]);
+         state[5]=winner;
+         pthread_cond_signal(&condition[5]);
+         pthread_mutex_unlock(&mymutex[5]);
       }
    }
    return 0;
@@ -646,13 +603,10 @@ int myvarcolorB_suspend(){
          color_active[5]=0;
          printf("varcolorB schema suspend (firewire driver)\n");
          put_state(varcolorB_schema_id,slept);
-
-         if(brothers_sleeping(5)){
-            /* firewire thread goes sleep */
-            pthread_mutex_lock(&mymutex[5]);
-            state[5]=slept;
-            pthread_mutex_unlock(&mymutex[5]);
-         }
+         /* firewire thread goes sleep */
+         pthread_mutex_lock(&mymutex[5]);
+         state[5]=slept;
+         pthread_mutex_unlock(&mymutex[5]);
       }
    }
    return 0;
@@ -679,14 +633,11 @@ int myvarcolorC_resume(int father, int *brothers, arbitration fn){
          all[varcolorC_schema_id].fps = 0.;
          all[varcolorC_schema_id].k =0;
          put_state(varcolorC_schema_id,winner);
-
-         if(brothers_sleeping(6)){
-            /* firewire thread goes winner */
-            pthread_mutex_lock(&mymutex[6]);
-            state[6]=winner;
-            pthread_cond_signal(&condition[6]);
-            pthread_mutex_unlock(&mymutex[6]);
-         }
+         /* firewire thread goes winner */
+         pthread_mutex_lock(&mymutex[6]);
+         state[6]=winner;
+         pthread_cond_signal(&condition[6]);
+         pthread_mutex_unlock(&mymutex[6]);
       }
    }
    return 0;
@@ -707,13 +658,10 @@ int myvarcolorC_suspend(){
          color_active[6]=0;
          printf("varcolorC schema suspend (firewire driver)\n");
          put_state(varcolorC_schema_id,slept);
-
-         if(brothers_sleeping(6)){
-            /* firewire thread goes sleep */
-            pthread_mutex_lock(&mymutex[6]);
-            state[6]=slept;
-            pthread_mutex_unlock(&mymutex[6]);
-         }
+         /* firewire thread goes sleep */
+         pthread_mutex_lock(&mymutex[6]);
+         state[6]=slept;
+         pthread_mutex_unlock(&mymutex[6]);
       }
    }
    return 0;
@@ -740,14 +688,11 @@ int myvarcolorD_resume(int father, int *brothers, arbitration fn){
          all[varcolorD_schema_id].fps = 0.;
          all[varcolorD_schema_id].k =0;
          put_state(varcolorD_schema_id,winner);
-
-         if(brothers_sleeping(7)){
-            /* firewire thread goes winner */
-            pthread_mutex_lock(&mymutex[7]);
-            state[7]=winner;
-            pthread_cond_signal(&condition[7]);
-            pthread_mutex_unlock(&mymutex[7]);
-         }
+         /* firewire thread goes winner */
+         pthread_mutex_lock(&mymutex[7]);
+         state[7]=winner;
+         pthread_cond_signal(&condition[7]);
+         pthread_mutex_unlock(&mymutex[7]);
       }
    }
    return 0;
@@ -768,13 +713,10 @@ int myvarcolorD_suspend(){
          color_active[7]=0;
          printf("varcolorD schema suspend (firewire driver)\n");
          put_state(varcolorD_schema_id,slept);
-
-         if(brothers_sleeping(7)){
-            /* firewire thread goes sleep */
-            pthread_mutex_lock(&mymutex[7]);
-            state[7]=slept;
-            pthread_mutex_unlock(&mymutex[7]);
-         }
+         /* firewire thread goes sleep */
+         pthread_mutex_lock(&mymutex[7]);
+         state[7]=slept;
+         pthread_mutex_unlock(&mymutex[7]);
       }
    }
    return 0;
@@ -794,7 +736,7 @@ void *firewire_thread(void *id)
         
     pthread_mutex_lock(&mymutex[i]);
 
-    if (state==slept){
+    if (state[i]==slept){
       printf("firewire thread in sleep mode\n");
       pthread_cond_wait(&condition[i],&mymutex[i]);
       printf("firewire thread woke up\n");
