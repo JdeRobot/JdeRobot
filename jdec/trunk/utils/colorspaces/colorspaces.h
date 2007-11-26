@@ -19,34 +19,34 @@
  *  	      Jose Maria Caas Plaza <jmplaza@gsyc.es>
  */
 
-#define NAME     "rgb2hsi"
-#define VERSION  "0.4.1"
+#define NAME     "colorspaces"
+#define VERSION  "1.0.0"
 
 /// *** RGB to HSI  *** ///
 
-struct HSI
+struct HSV
 {
 	double H;
 	double S;
-	double I;
+	double V;
 };
 
-struct HSI * LUT_RGB2HSI [64][64][64];
+struct HSV * LUT_RGB2HSV [64][64][64];
 
-/// \brief Init the RGB2HSI
-void RGB2HSI_init();
+/// \brief Init the RGB2HSV
+void RGB2HSV_init();
 
-/// \brief Create a translate RGB2HSI table with resolution of 6bits (64x64x64)
-void RGB2HSI_createTable();
+/// \brief Create a translate RGB2HSV table with resolution of 6bits (64x64x64)
+void RGB2HSV_createTable();
 
-/// \brief Free de memory of RGB2HSI
-void RGB2HSI_destroyTable();
+/// \brief Free de memory of RGB2HSV
+void RGB2HSV_destroyTable();
 
-/// \brief Print the struct HSI
-void RGB2HSI_printHSI (struct HSI*);
+/// \brief Print the struct HSV
+void RGB2HSV_printHSI (struct HSV*);
 
 /// \brief Test
-void RGB2HSI_test();
+void RGB2HSV_test();
 
 /// \brief Return the translate RGB to HSI
-static inline const struct HSI* RGB2HSI_getHSI (int R, int G, int B)  { return LUT_RGB2HSI[R>>2][G>>2][B>>2]; };
+static inline const struct HSV* RGB2HSV_getHSV (int R, int G, int B)  { return LUT_RGB2HSV[R>>2][G>>2][B>>2]; };

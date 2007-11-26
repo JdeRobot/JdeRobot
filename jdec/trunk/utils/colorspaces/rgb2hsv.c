@@ -23,21 +23,21 @@
 #include <math.h>
 #include <pthread.h>
 
-#include "rgb2hsi.h"
+#include "colorspaces.h"
 
 const int MAX_BITS = 8;
 const int SIGNIFICATIVE_BITS = 6;
 const int MAX_RGB = 255;
 
 /* Condicional variable:
- *   0: The table RGB2HSI don't exists.
- *   1: The table RGB2HSI exists.
+ *   0: The table RGB2HSV don't exists.
+ *   1: The table RGB2HSV exists.
  */
-static int isInitTableHSI;
+static int isInitTableHSV;
 
 static pthread_mutex_t mutex;
 
-void rgb2hsi_wiki (double r, double g, double b, double *H, double *S, double *V)
+void rgb2hsv_wiki (double r, double g, double b, double *H, double *S, double *V)
 {
 	double min, max;
 
@@ -91,57 +91,6 @@ void rgb2hsi_wiki (double r, double g, double b, double *H, double *S, double *V
 }
 
 
-// Conversor to HSI
-void rgb2hsi (double r, double g, double b, double *H, double *S, double *I)
-{
-	const float PI = 3.141592654;
-	double a, n, d;
-
-	// the component I has benn hacked, the result is divided by 255.0
-	*I = (r + b + g) / 3.0;
-
-	// El minimo
-	if ((r <= g) && (r <= b))
-	{
-		a = r;
-	}
-	else if ((g <= r) && (g <= b))
-	{
-		a = g;
-	}
-	else
-	{
-		a = b;
-	}
-
-	if ((r + b + g) == 0)
-	{
-		*S = 1.0;
-	}
-	else
-	{
-		*S = 1.0 - (3.0 / (r + b + g)) * a;
-	}
-
-	n = .5 * ((r - g) + (r - b));
-	d = sqrt ((r - g) * (r - g) + (r - b) * (g - b));
-	if ((d == 0) || (*S == 1) || (*S == 0))
-	{
-		// En estos casos *H no tiene sentido
-		*H = 0.0;
-	}
-	else
-	{
-		*H = acos (n / d);		 // Falta medio crculo
-	}
-	if (b < g)
-	{
-		// Crculo completo
-		*H = (2*PI) - *H;
-	}
-
-}
-
 
 /// \brief Function to print unsiged int in binary
 void print_status(unsigned long status)
@@ -167,14 +116,14 @@ void print_status(unsigned long status)
 }
 
 
-void RGB2HSI_destroyTable ()
+void RGB2HSV_destroyTable ()
 {
 
 	int r,g,b;
 	int pos_r, pos_g, pos_b;
 	int count = 4;
 
-	printf("Destroy Table LUT_RGB2HSI .... OK\n");
+	printf("Destroy Table LUT_RGB2HSV .... OK\n");
 
 	for (b=0;b<=MAX_RGB;b=b+count)
 		for (g=0;g<=MAX_RGB;g=g+count)
@@ -184,39 +133,39 @@ void RGB2HSI_destroyTable ()
 				if (g==0) pos_g=0; else pos_g = g/4;
 				if (b==0) pos_b=0; else pos_b = b/4;
 
-				if (LUT_RGB2HSI[pos_r][pos_g][pos_b])
+				if (LUT_RGB2HSV[pos_r][pos_g][pos_b])
 				{
-					free(LUT_RGB2HSI[pos_r][pos_g][pos_b]);
-			//RGB2HSI[pos_r][pos_g][pos_b]=NULL;
+					free(LUT_RGB2HSV[pos_r][pos_g][pos_b]);
+					//RGB2HSI[pos_r][pos_g][pos_b]=NULL;
 				}
 			}
 	pthread_mutex_lock(&mutex);
-	isInitTableHSI = 0;
+	isInitTableHSV = 0;
 	pthread_mutex_unlock(&mutex);
 }
 
 
-void RGB2HSI_init()
+void RGB2HSV_init()
 {
 	printf("Init %s v%s ... \n",NAME,VERSION);
 	pthread_mutex_lock(&mutex);
-	isInitTableHSI = 0;
+	isInitTableHSV = 0;
 	pthread_mutex_unlock(&mutex);
 }
 
 
 /// @TODO: Calculate values for create a generic table
-void RGB2HSI_createTable()
+void RGB2HSV_createTable()
 {
 
 	int r,g,b;
 	int count, index;
 	int pos_r, pos_g, pos_b;
 
-	struct HSI* newHSI;
+	struct HSV* newHSV;
 	
 	pthread_mutex_lock(&mutex);
-	if (isInitTableHSI==1)
+	if (isInitTableHSV==1)
 	{
 		pthread_mutex_unlock(&mutex);
 		return;
@@ -231,46 +180,46 @@ void RGB2HSI_createTable()
 		for (g=0;g<=MAX_RGB;g=g+count)
 			for (r=0;r<=MAX_RGB;r=r+count)
 			{
-				newHSI = (struct HSI*) malloc(sizeof(struct HSI));
-				if (!newHSI)
+				newHSV = (struct HSV*) malloc(sizeof(struct HSV));
+				if (!newHSV)
 				{
 					printf("Allocated memory error\n");
 					exit(-1);
 				}
 
-				rgb2hsi_wiki(r,g,b,&(newHSI->H),&(newHSI->S),&(newHSI->I));
+				rgb2hsv_wiki(r,g,b,&(newHSV->H),&(newHSV->S),&(newHSV->V));
 
 				if (r==0) pos_r=0; else pos_r = r/4;
 				if (g==0) pos_g=0; else pos_g = g/4;
 				if (b==0) pos_b=0; else pos_b = b/4;
 
 				//printf("[%d,%d,%d] RGB=%d,%d,%d - %.1f,%.1f,%.1f \n",pos_r,pos_g,pos_b,r,g,b,newHSI->H,newHSI->S,newHSI->I);
-				LUT_RGB2HSI[pos_r][pos_g][pos_b] = newHSI;
+				LUT_RGB2HSV[pos_r][pos_g][pos_b] = newHSV;
 
 				index++;
 			}
 
-	printf("Table 'LUT_RGB2HSI' create with 6 bits (%d values)\n",index);
+	printf("Table 'LUT_RGB2HSV' create with 6 bits (%d values)\n",index);
 	
 	pthread_mutex_lock(&mutex);
-	isInitTableHSI=1;
+	isInitTableHSV=1;
 	pthread_mutex_unlock(&mutex);
 }
 
 
-void RGB2HSI_printHSI (struct HSI* hsi)
+void RGB2HSV_printHSV (struct HSV* hsv)
 {
-	printf("HSI: %.1f,%.1f,%.1f\n",hsi->H,hsi->S,hsi->I);
+	printf("HSV: %.1f,%.1f,%.1f\n",hsv->H,hsv->S,hsv->V);
 }
 
 
-void RGB2HSI_test (void)
+void RGB2HSV_test (void)
 {
 	int r,g,b;
-	const struct HSI* myHSI;
-	struct HSI myHSI2;
+	const struct HSV* myHSV=NULL;
+	struct HSV myHSV2;
 	char line[16];
-
+ 
 	while (1)
 	{
 
@@ -279,13 +228,19 @@ void RGB2HSI_test (void)
 		if ( sscanf(line,"%d,%d,%d",&r,&g,&b)!= 3)
 			break;
 
-		myHSI = RGB2HSI_getHSI(r,g,b);
+		myHSV = RGB2HSV_getHSV(r,g,b);
+		
+		if (myHSV==NULL)
+		{
+			printf ("Error in myHSV=NULL\n");
+			continue;
+		}
+		
+		printf("[Table] RGB: %d,%d,%d -- HSV: %.1f,%.1f,%.1f\n",r,g,b,myHSV->H,myHSV->S,myHSV->V);
 
-		printf("[Table] RGB: %d,%d,%d -- HSI: %.1f,%.1f,%.1f\n",r,g,b,myHSI->H,myHSI->S,myHSI->I);
+		rgb2hsv_wiki(r,g,b,&myHSV2.H,&myHSV2.S,&myHSV2.V);
 
-		rgb2hsi_wiki(r,g,b,&myHSI2.H,&myHSI2.S,&myHSI2.I);
-
-		printf("[Algor] RGB: %d,%d,%d -- HSI: %.1f,%.1f,%.1f\n",r,g,b,myHSI2.H,myHSI2.S,myHSI2.I);
+		printf("[Algor] RGB: %d,%d,%d -- HSI: %.1f,%.1f,%.1f\n",r,g,b,myHSV2.H,myHSV2.S,myHSV2.V);
 
 	}
 }
