@@ -1,11 +1,17 @@
-followball (0.7) stable: urgency=low
+followball (1.0.0) stable; urgency=low
+	* Integrated with libcolor-spaces
+	* Use myimport for jde variables
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 25 Nov 2007 17:50:58 +0100
+
+followball (0.7) stable; urgency=low
 
 	* Integrated with rgb2hsi (jde)
 	* Use myexport for jde variables
 
  -- Roberto Calvo <rocapal@gsyc.es>  Tue, 20 Nov 2007 13:42:12 +0100
 
-followball (0.6) stable: urgency=low
+followball (0.6) stable; urgency=low
 
 	* The search iteration is realized "in speed".
 	* Increase the pan speed in search iteration.
@@ -13,7 +19,7 @@ followball (0.6) stable: urgency=low
 
  -- Roberto Calvo <rocapal@gsyc.es>  Sun, 30 Sep 2007 19:10:24 +0200
 
-followball (0.5) stable: urgency=low
+followball (0.5) stable; urgency=low
 
 	* Add libRGB2HSI
 	* Increase the pant and tilt speeds

@@ -24,9 +24,9 @@
 #include "followballgui.h"
 #include "followball.h"
 #include <math.h>
-#include <rgb2hsi.h>
+#include <colorspaces.h>
 
-#define FollowballVER "Followball 0.7"
+#define FollowballVER  	"Followball - 1.0.0" 
 
 #define D(x...)                  //printf(x)
 
@@ -61,6 +61,7 @@ int isActivatedShowHistogram=0;
 /* Defines if the visualization of ImageHSI is activated */
 int isActivatedShowImageHSI=0;
 
+
 #define PI 3.141592654
 /* this memory must exist even with the followballgui turned on */
 char imagenOrig_buf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*4];
@@ -70,14 +71,18 @@ char disco_buf[SMAX*SMAX*4];
 char histograma_buf[SMAX*SMAX*4];
 int masc[SMAX*SMAX];
 
-float longitude;                 /* degs, pan angle */
-float latitude;                  /* degs, tilt angle */
-float longitude_speed;
-float latitude_speed;
-float pan_angle;                 /* degs */
-float tilt_angle;                /* degs */
+float *mypan_angle=NULL, *mytilt_angle=NULL;  /* degs */
+float *mylongitude=NULL; /* degs, pan angle */
+float *mylatitude=NULL; /* degs, tilt angle */
+float *mylongitude_speed=NULL;
+float *mylatitude_speed=NULL;
 
-char* colorA;
+resumeFn ptmotorsresume, ptencodersresume;
+suspendFn ptmotorssuspend, ptencoderssuspend;
+
+char** mycolorA;
+resumeFn colorAresume;
+suspendFn colorAsuspend;
 
 /* Para los botones */
 #define PUSHED 1
@@ -563,11 +568,11 @@ void pantilt_iteration()
                                  //  CTE_PTU);
       angulo_y = ENCOD_TO_DEG * ((int) abs(data_filter.y) );
 
-      longitude_speed = VEL_MAX_PAN-((POS_MAX_PAN-(abs(data_filter.x)))/((POS_MAX_PAN-POS_MIN_PAN)/(VEL_MAX_PAN-VEL_MIN_PAN)));
-      latitude_speed = VEL_MAX_TILT-((POS_MAX_TILT-(abs(data_filter.y)))/((POS_MAX_TILT-POS_MIN_TILT)/(VEL_MAX_TILT-VEL_MIN_TILT)));
+      *mylongitude_speed = VEL_MAX_PAN-((POS_MAX_PAN-(abs(data_filter.x)))/((POS_MAX_PAN-POS_MIN_PAN)/(VEL_MAX_PAN-VEL_MIN_PAN)));
+      *mylatitude_speed = VEL_MAX_TILT-((POS_MAX_TILT-(abs(data_filter.y)))/((POS_MAX_TILT-POS_MIN_TILT)/(VEL_MAX_TILT-VEL_MIN_TILT)));
 
-      //longitude_speed = 1000*ENCOD_TO_DEG;
-      //latitude_speed = 300*ENCOD_TO_DEG;
+      //*mylongitude_speed = 1000*ENCOD_TO_DEG;
+      //*mylatitude_speed = 300*ENCOD_TO_DEG;
 
       switch (data_filter.cuadrante)
       {
@@ -589,28 +594,28 @@ void pantilt_iteration()
         */
         case 1:                  /* Si esta en el 1 -> Mover hacia abajo y derecha */
           D("OBJETIVO: Primer Cuadrante\n");
-          longitude = -MAX_PAN_ANGLE;
-          latitude =  -MAX_TILT_ANGLE;
+          *mylongitude = -MAX_PAN_ANGLE;
+          *mylatitude =  -MAX_TILT_ANGLE;
           last_movement=right;
           break;
 
         case 2:                  /* Si esta en el 2 -> Mover hacia abajo e izquierda */
           D("OBJETIVO: Segundo Cuadrante\n");
-          longitude = MAX_PAN_ANGLE;
-          latitude = -MAX_TILT_ANGLE;
+          *mylongitude = MAX_PAN_ANGLE;
+          *mylatitude = -MAX_TILT_ANGLE;
           last_movement=left;
           break;
         case 3:                  /* Si esta en el 3 -> Mover hacia arriba e derecha */
           D("OBJETIVO: Tercer Cuadrante\n");
-          longitude = -MAX_PAN_ANGLE;
-          latitude = MAX_TILT_ANGLE;
+          *mylongitude = -MAX_PAN_ANGLE;
+          *mylatitude = MAX_TILT_ANGLE;
           last_movement=right;
           break;
 
         case 4:                  /*  Si esta en el 4 -> Mover hacia arriba e izquierda */
           D("OBJETIVO: Cuarto Cuadrante\n");
-          longitude = MAX_PAN_ANGLE;
-          latitude = MAX_TILT_ANGLE;
+          *mylongitude = MAX_PAN_ANGLE;
+          *mylatitude = MAX_TILT_ANGLE;
           last_movement=left;
           break;
 
@@ -618,14 +623,14 @@ void pantilt_iteration()
           D("Pantilt Iteration: Cuadrante erroneo\n");
       }
 
-      D("Pantilt Iteration: longitude=%f - latitude=%f\n",longitude,latitude);
+      D("Pantilt Iteration: longitude=%f - latitude=%f\n",*mylongitude,*mylatitude);
     }
     else
     {
       /* Paramos los ejes ya que estamos en zona de la banda muerta */
       D("Pantilt Iteration: Estamos en zona muerta ... parar ejes\n");
-      longitude_speed = 0.0;
-      latitude_speed = 0.0;
+      *mylongitude_speed = 0.0;
+      *mylatitude_speed = 0.0;
     }
   }
 }
@@ -633,17 +638,17 @@ void pantilt_iteration()
 
 void busqueda_iteration()
 {
-
-  longitude_speed=1200*ENCOD_TO_DEG;
-  latitude_speed = 0.0;
+  
+  *mylongitude_speed=1200*ENCOD_TO_DEG;
+  *mylatitude_speed = 0.0;
 
   /* Buscamos hacia la derecha */
   if (last_movement==right)
   {
-    D("[DERECHA]Busqueda Iteration: pan_angle=%f (MAX=%f) , tilt_angle=%f\n",pan_angle, MAX_PAN_ANGLE ,tilt_angle);
-    if ( pan_angle > -MAX_PAN_ANGLE )
+    D("[DERECHA]Busqueda Iteration: pan_angle=%f (MAX=%f) , tilt_angle=%f\n",*mypan_angle, MAX_PAN_ANGLE ,*mytilt_angle);
+    if ( *mypan_angle > -MAX_PAN_ANGLE )
     {
-      longitude = -MAX_PAN_ANGLE;
+      *mylongitude = -MAX_PAN_ANGLE;
     }
     else
     {
@@ -654,10 +659,10 @@ void busqueda_iteration()
   /* Buscamos hacia la izquierda */
   else
   {
-    D("[IZQUIERDA]Busqueda Iteration: pan_angle=%f (MAX=%f) , tilt_angle=%f\n",pan_angle, MAX_PAN_ANGLE ,tilt_angle);
-    if ( pan_angle < MAX_PAN_ANGLE )
+    D("[IZQUIERDA]Busqueda Iteration: pan_angle=%f (MAX=%f) , tilt_angle=%f\n",*mypan_angle, MAX_PAN_ANGLE ,*mytilt_angle);
+    if ( *mypan_angle < MAX_PAN_ANGLE )
     {
-      longitude = MAX_PAN_ANGLE;
+      *mylongitude = MAX_PAN_ANGLE;
     }
     else
     {
@@ -680,7 +685,7 @@ void followball_iteration()
   double r,g,b,I,H,S;
   unsigned int X, Y;
   double x,y;
-  struct HSI* myHSI;
+  struct HSV* myHSV;
 
   int pixeles=0, pasa_filtro=0, num_lineas=0;
   int pixel_x=1, pixel_y=1;
@@ -693,30 +698,32 @@ void followball_iteration()
 
   /*  printf("followball iteration %d\n",d++);*/
 
+  /*
   for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++)
-  {                              /* Blue Byte */
-    imagenOrig_buf[i*4]=colorA[i*3];
-                                 /* Green Byte */
-    imagenOrig_buf[i*4+1]=colorA[i*3+1];
-                                 /* Red Byte */
-    imagenOrig_buf[i*4+2]=colorA[i*3+2];
-    imagenOrig_buf[i*4+3]=0;     /* dummy byte */
+  {                              // Blue Byte 
+    imagenOrig_buf[i*4]=mycolorA[i*3];
+                                 // Green Byte 
+    imagenOrig_buf[i*4+1]=mycolorA[i*3+1];
+                                 // Red Byte 
+    imagenOrig_buf[i*4+2]=mycolorA[i*3+2];
+    imagenOrig_buf[i*4+3]=0;     // dummy byte 
   }
-
+  */
+  
   for(i=0; i<SMAX*SMAX; i++)
     masc[i]=0;
 
   for(i=0;i< SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++)
   {
 
-    r = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4+2];
-    g = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4+1];
-    b = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4];
+    r = (float)(unsigned int)(unsigned char)(*mycolorA)[i*3+2]; //imagenOrig_buf[i*4+2];
+    g = (float)(unsigned int)(unsigned char)(*mycolorA)[i*3+1]; //imagenOrig_buf[i*4+1];
+    b = (float)(unsigned int)(unsigned char)(*mycolorA)[i*3];   //imagenOrig_buf[i*4];
 
-    myHSI = (struct HSI*) RGB2HSI_getHSI( (int)r,(int)g,(int)b);
-    H=myHSI->H;
-    S=myHSI->S;
-    I=myHSI->I;
+    myHSV = (struct HSV*) RGB2HSV_getHSV( (int)r,(int)g,(int)b);
+    H=myHSV->H;
+    S=myHSV->S;
+    I=myHSV->V;
 
     if((I<=i_max)&&(I>=i_min)&&
       (S >= s_min) && (S <= s_max) &&
@@ -725,9 +732,9 @@ void followball_iteration()
       /* pasa el filtro */
       if (isActivatedShowImageHSI)
       {
-        hsifiltrada_buf[i*4+0]=imagenOrig_buf[i*4+0];
-        hsifiltrada_buf[i*4+1]=imagenOrig_buf[i*4+1];
-        hsifiltrada_buf[i*4+2]=imagenOrig_buf[i*4+2];
+        hsifiltrada_buf[i*4+0]=(*mycolorA)[i*3]; //imagenOrig_buf[i*4+0];
+        hsifiltrada_buf[i*4+1]=(*mycolorA)[i*3+1]; //imagenOrig_buf[i*4+1];
+        hsifiltrada_buf[i*4+2]=(*mycolorA)[i*3+2]; //imagenOrig_buf[i*4+2];
         hsifiltrada_buf[i*4+3]=0;
       }
 
@@ -849,10 +856,15 @@ void followball_suspend()
   pthread_mutex_lock(&(all[followball_id].mymutex));
   put_state(followball_id,slept);
 
-  longitude_speed = 0.0;
-  latitude_speed = 0.0;
+  *mylongitude_speed = 0.0;
+  *mylatitude_speed = 0.0;
+  
+  //ptmotorssuspend();
+  //ptencoderssuspend();
+  //colorAsuspend();
+	 
 
-  RGB2HSI_destroyTable();
+  RGB2HSV_destroyTable();
 
   printf("followball: off\n");
   pthread_mutex_unlock(&(all[followball_id].mymutex));
@@ -862,7 +874,7 @@ void followball_suspend()
 void followball_resume(int father, int *brothers, arbitration fn)
 {
   int i;
-  //struct HSI* myHSI;
+
 
   /* update the father incorporating this schema as one of its children */
   if (father!=GUIHUMAN)
@@ -883,12 +895,49 @@ void followball_resume(int father, int *brothers, arbitration fn)
     while(brothers[i]!=-1) {followball_brothers[i]=brothers[i];i++;}
   }
 
+  /* importamos motors de pantilt */
+  
+  mylongitude=myimport("ptmotors", "longitude");
+  mylatitude=myimport ("ptmotors", "latitude");
+  mylongitude_speed=myimport("ptmotors", "longitude_speed");
+  mylatitude_speed=myimport("ptmotors","latitude_speed");
+//  ptmotorsresume=myimport("ptmotors","resume");
+//  ptmotorssuspend=myimport("ptmotors","suspend");
+  
+  //if (ptmotorsresume!=NULL)
+  //   ptmotorsresume(followball_id, NULL, NULL);
+  
+
+
+  /* importamos encoders de pantilt */
+
+  mypan_angle=myimport("ptencoders", "pan_angle");
+  mytilt_angle=myimport("ptencoders", "tilt_angle");
+  
+  //ptencodersresume=myimport("ptencoders", "resume");
+  //ptencoderssuspend=myimport("ptencoders", "suspend");
+  //if (ptencodersresume!=NULL)
+  //    ptencodersresume(followball_id, NULL, NULL);
+ 
+
+
+  
+  /* Importamos colorA */
+  mycolorA=myimport ("colorA", "colorA");
+  colorAresume=myimport("colorA", "resume");
+  colorAsuspend=myimport("colorA", "suspend");
+  
+  if (colorAresume!=NULL)
+	colorAresume(followball_id, NULL, NULL);
+           
+  
   followball_callforarbitration=fn;
   put_state(followball_id,notready);
   printf("followball: on\n");
+    
 
-  RGB2HSI_init();
-  RGB2HSI_createTable();
+  RGB2HSV_init();
+  RGB2HSV_createTable();
 
   pthread_cond_signal(&(all[followball_id].condition));
   pthread_mutex_unlock(&(all[followball_id].mymutex));
@@ -907,8 +956,7 @@ void *followball_thread(void *not_used)
 
     if (all[followball_id].state==slept)
     {
-      longitude_speed=0.0;
-      latitude_speed=0.0;
+
       pthread_cond_wait(&(all[followball_id].condition),&(all[followball_id].mymutex));
       pthread_mutex_unlock(&(all[followball_id].mymutex));
     }
@@ -951,25 +999,16 @@ void *followball_thread(void *not_used)
 
 void followball_startup()
 {
+  printf("followball_startup\n"); 
   draw_hsimap(disco_buf, SMAX);
-  i_min=49.0; i_max=150.3;
-  h_min=180; h_max=250;
-  s_min=0.43; s_max=0.80;
+  i_min=120.0; i_max=255.0;
+  h_min=277.5; h_max=252.5;
+  s_min=0.25; s_max=0.56;
 
   hsimap_threshold=20;
 
   pthread_mutex_lock(&(all[followball_id].mymutex));
   printf("followball schema started up\n");
-
-  myexport("motors","longitude",&longitude);
-  myexport("motors","latitude",&latitude);
-  myexport("motors","longitude_speed",&longitude_speed);
-  myexport("motors","latitude_speed",&latitude_speed);
-
-  myexport("ptencoders","pan_angle",&pan_angle);
-  myexport("ptencoders","tilt_angle",&tilt_angle);
-
-  myexport("colorA", "colorA", &colorA);
 
   put_state(followball_id,slept);
   pthread_create(&(all[followball_id].mythread),NULL,followball_thread,NULL);
@@ -1101,6 +1140,21 @@ void followball_guibuttons(FL_OBJECT *obj)
 
 void followball_guidisplay()
 {
+  int vmode,i;
+  
+  vmode= fl_get_vclass();
+  
+  if ( (vmode==TrueColor)&&(fl_state[vmode].depth==24 || fl_state[vmode].depth==32) )
+  {
+	  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++)
+	  {					 
+		  imagenOrig_buf[i*4]= (*mycolorA)[3*i];
+		  imagenOrig_buf[i*4+1]= (*mycolorA)[3*i+1];
+		  imagenOrig_buf[i*4+2]= (*mycolorA)[3*i+2];
+		  imagenOrig_buf[i*4+3]=0; 
+	  }
+		
+  }
   drawcheese(histograma_buf,centro_x,centro_y,h_max,h_min,s_max,s_min,FL_PALEGREEN);
 
   XPutImage(display,followball_win,followball_gc,imagenOrig,0,0,fd_followballgui->oculo_orig->x, fd_followballgui->oculo_orig->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
@@ -1137,15 +1191,22 @@ void followball_guiresume(void)
     fl_show_form(fd_followballgui->followballgui,FL_PLACE_POSITION,FL_FULLBORDER,FollowballVER);
     followball_win= FL_ObjWin(fd_followballgui->oculo_orig);
   }
+  
 
   register_buttonscallback(followball_guibuttons);
   register_displaycallback(followball_guidisplay);
 
+  /* HSV Values for pink ball */
+  i_min=120.0; i_max=255.0;
+  h_min=277.5; h_max=252.5;
+  s_min=0.25; s_max=0.56;
+
   /* HSI Values for red ball */
+  /*
   i_min=49.0; i_max=150.3;
   h_min=240.0; h_max=280.0;
   s_min=0.43; s_max=0.80;
-
+  */
   fl_set_slider_bounds(fd_followballgui->w_slider,100,1);
   fl_set_slider_value(fd_followballgui->w_slider,hsimap_threshold);
   fl_set_slider_bounds(fd_followballgui->Imin,0,255);
@@ -1168,7 +1229,7 @@ int handle2 (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void 
   int x_matriz,y_matriz;
   unsigned char r,g,b;
   double H,S,I;
-  struct HSI* myHSI;
+  struct HSV* myHSV;
 
   //if (!isActivatedShowHistogram)
   // 	return 0;
@@ -1185,12 +1246,12 @@ int handle2 (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void 
 
       //rgb2hsi2(r/255.0,g/255.0,b/255.0,&H,&S,&I);
 
-      myHSI = (struct HSI*) RGB2HSI_getHSI((int)r,(int)g,(int)b);
-      H=myHSI->H;
-      S=myHSI->S;
-      I=myHSI->I;
+      myHSV = (struct HSV*) RGB2HSV_getHSV((int)r,(int)g,(int)b);
+      H=myHSV->H;
+      S=myHSV->S;
+      I=myHSV->V;
 
-	  printf("(%d,%d,%d) = (%.1f,%.1f,%.1f) \n",r,g,b,H,S,I);
+	  //printf("(%d,%d,%d) = (%.1f,%.1f,%.1f) \n",r,g,b,H,S,I);
 
       h_max=H+20.0;
       h_min=H-20.0;
@@ -1245,7 +1306,7 @@ int handle (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void *
 
   if(event==FL_DBLCLICK)
   {
-    /*printf("He hecho doble click\n");*/
+    
     x_pulsada=mx-10;y_pulsada=my-10;
     x_pulsada=x_pulsada-centro_x;
     y_pulsada=centro_y-y_pulsada;
