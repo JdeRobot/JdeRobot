@@ -18,11 +18,11 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void hsituner_startup();
-extern void hsituner_suspend();
-extern void hsituner_resume(int father, int *brothers, arbitration fn);
-extern void hsituner_guiresume();
-extern void hsituner_guisuspend();
+extern void hsvtuner_startup();
+extern void hsvtuner_suspend();
+extern void hsvtuner_resume(int father, int *brothers, arbitration fn);
+extern void hsvtuner_guiresume();
+extern void hsvtuner_guisuspend();
 
-extern int hsituner_id; /* schema identifier */
-extern int hsituner_cycle; /* ms */
+extern int hsvtuner_id; /* schema identifier */
+extern int hsvtuner_cycle; /* ms */

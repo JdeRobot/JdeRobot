@@ -15,32 +15,33 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  
  */
 
 #include <jde.h>
 #include <jdegui.h>
-#include "hsitunergui.h"
+#include "hsvtunergui.h"
 #include <math.h>
+#include <colorspaces.h>
 
-#define HSItunerVER "HSItuner 2.7"
+#define HSVtunerVer "hsvtuner 2.7"
 
-int hsituner_id=0;
-int hsituner_brothers[MAX_SCHEMAS];
-arbitration hsituner_callforarbitration;
-int hsituner_cycle=150; /* ms */
+int hsvtuner_id=0;
+int hsvtuner_brothers[MAX_SCHEMAS];
+arbitration hsvtuner_callforarbitration;
+int hsvtuner_cycle=100; /* ms */
 
-FD_hsitunergui *fd_hsitunergui;
+FD_hsvtunergui *fd_hsvtunergui;
 
 /* Necesarias para las Xlib */
-GC hsituner_gc;
-Window hsituner_win; /* image window */
+GC hsvtuner_gc;
+Window hsvtuner_win; /* image window */
 XImage *imagenOrig;
 XImage *hsifiltrada;
 XImage *histograma;
 
 #define PI 3.141592654
-/* this memory must exist even with the hsitunergui turned on */
+/* this memory must exist even with the hsvtunergui turned on */
 char imagenOrig_buf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*4];
 char hsifiltrada_buf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*4];
 #define SMAX SIFNTSC_COLUMNS /*320*/
@@ -83,48 +84,14 @@ int pulsada=0;
 /*Fin quesito*/
 
 int toblack=0;
+int primera =0;
 
 double s_min, s_max, h_min, h_max, i_min, i_max;
 int hsimap_threshold;
 
-/*Conversor a HSI*/
-void rgb2hsi (double r, double g, double b, double *H, double *S, double *I){
-   double a, n, d;
-
-   *I = (r + b + g) / 3.0;
-
-   /* El minimo*/
-   if ((r <= g) && (r <= b)){
-      a = r;
-   }
-   else if ((g <= r) && (g <= b)){
-      a = g;
-   }
-   else{
-      a = b;
-   }
-
-   if ((r + b + g) == 0){
-      *S = 1.0;
-   }
-   else{
-      *S = 1.0 - (3.0 / (r + b + g)) * a;
-   }
-
-   n = .5 * ((r - g) + (r - b));
-   d = sqrt ((r - g) * (r - g) + (r - b) * (g - b));
-   if ((d == 0) || (*S == 1) || (*S == 0)){
-      /* En estos casos *H no tiene sentido*/
-      *H = 0.0;
-   }
-   else{
-			*H = acos (n / d);/* Falta medio círculo*/
-   }
-   if (b < g){
-      /* Círculo completo*/
-      *H = (2*PI) - *H;
-   }
-}
+char **mycolorA;
+resumeFn colorAresume;
+suspendFn colorAsuspend;
 
 void hsi2rgb (double H, double S, double I, double *r, double *g, double *b)
 {
@@ -195,8 +162,8 @@ void draw_hsimap(char *buffer, int size){
 	
 	 S = sqrt(y*y + x*x);
 	 ind = (size*j + i)*4; 
-	
-	 hsi2rgb (H,S,0,&r,&g,&b);
+	 H = 2*3.1416 - H;
+	 hsi2rgb(H,S,0,&r,&g,&b);
 	 scale = 255.0;
 	 R = (unsigned char) (scale * r);
 	 G = (unsigned char) (scale * g);
@@ -418,14 +385,14 @@ void drawcheese (char *img,int x_centro,int y_centro, double h_max, double h_min
 
 /*Fin funciones quesito*/
 
-int hsitunergui_setupDisplay(void) 
+int hsvtunergui_setupDisplay(void) 
      /* Inicializa las ventanas, la paleta de colores y memoria compartida para visualizacion*/ 
 {
   int vmode;
   XGCValues gc_values;
 
   gc_values.graphics_exposures = False;
-  hsituner_gc = XCreateGC(display,hsituner_win, GCGraphicsExposures, &gc_values); 
+  hsvtuner_gc = XCreateGC(display,hsvtuner_win, GCGraphicsExposures, &gc_values); 
    
   vmode= fl_get_vclass();
 
@@ -482,34 +449,43 @@ int hsitunergui_setupDisplay(void)
 
 
 
-void hsituner_iteration()
+void hsvtuner_iteration()
 {  
   int i;
   double r,g,b,I,H,S;
   unsigned int X, Y;
   double x,y;
+  struct HSV* myHSV;
 
-  all[hsituner_id].k++;
-  /*  printf("hsituner iteration %d\n",d++);*/
+  all[hsvtuner_id].k++;
+  /*  printf("hsvtuner iteration %d\n",d++);*/
   for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-    { imagenOrig_buf[i*4]=colorA[i*3]; /* Blue Byte */
-    imagenOrig_buf[i*4+1]=colorA[i*3+1]; /* Green Byte */
-    imagenOrig_buf[i*4+2]=colorA[i*3+2]; /* Red Byte */
-    imagenOrig_buf[i*4+3]=0; /* dummy byte */  
+    { imagenOrig_buf[i*4]=(*mycolorA)[i*3]; /* Blue Byte */
+      imagenOrig_buf[i*4+1]=(*mycolorA)[i*3+1]; /* Green Byte */
+      imagenOrig_buf[i*4+2]=(*mycolorA)[i*3+2]; /* Red Byte */
+      imagenOrig_buf[i*4+3]=0; /* dummy byte */  
     }
- 
+
   for(i=0; i<SMAX*SMAX; i++)
     masc[i]=0;
 
   for(i=0;i< SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++)
     {
       /* Modo XLib, 4 bytes por pixel */
-      r = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4+2]/255.0;
-      g = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4+1]/255.0;
-      b = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4]/255.0;
-      rgb2hsi (r, g, b, &H, &S, &I);
-    
-      if((I<=i_max/255.0)&&(I>=i_min/255.0)&&
+      r = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4+2];
+      g = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4+1];
+      b = (float)(unsigned int)(unsigned char)imagenOrig_buf[i*4];
+
+      myHSV = (struct HSV*) RGB2HSV_getHSV( (int)r,(int)g,(int)b);
+      H=myHSV->H;
+      S=myHSV->S;
+      I=myHSV->V;
+
+      /*El resultado de la libreria es  en 
+	grados, y la gui se expresa en radianes para la H*/
+      H=H*DEGTORAD;
+            
+      if((I<=i_max)&&(I>=i_min)&&
 	  (S >= s_min) && (S <= s_max) && 
 	 (((H >= h_min) && (H <= h_max) && (h_min < h_max)) ||
 	  ((H >= h_min) && (H <= 2*PI) && (h_min > h_max)) ||
@@ -532,9 +508,9 @@ void hsituner_iteration()
 	 }
 	 else{
 	    /* En vez de a negro lo pasamos a BW, oscurecido para que se vea mejor (180/255 sobre 1) */
-	    hsifiltrada_buf[i*4+0] = (unsigned char) (180.0*I);
-	    hsifiltrada_buf[i*4+1] = (unsigned char) (180.0*I);
-	    hsifiltrada_buf[i*4+2] = (unsigned char) (180.0*I);
+	    hsifiltrada_buf[i*4+0] = (unsigned char) (I*180/255);
+	    hsifiltrada_buf[i*4+1] = (unsigned char) (I*180/255);
+	    hsifiltrada_buf[i*4+2] = (unsigned char) (I*180/255);
 	    hsifiltrada_buf[i*4+3] = 0;
 	 }
 	}
@@ -563,16 +539,16 @@ void hsituner_iteration()
 }
 
 
-void hsituner_suspend()
+void hsvtuner_suspend()
 {
-  pthread_mutex_lock(&(all[hsituner_id].mymutex));
-  put_state(hsituner_id,slept);
-  printf("hsituner: off\n");
-  pthread_mutex_unlock(&(all[hsituner_id].mymutex));
+  pthread_mutex_lock(&(all[hsvtuner_id].mymutex));
+  put_state(hsvtuner_id,slept);
+  printf("hsvtuner: off\n");
+  pthread_mutex_unlock(&(all[hsvtuner_id].mymutex));
 }
 
 
-void hsituner_resume(int father, int *brothers, arbitration fn)
+void hsvtuner_resume(int father, int *brothers, arbitration fn)
 {
   int i;
 
@@ -580,78 +556,90 @@ void hsituner_resume(int father, int *brothers, arbitration fn)
   if (father!=GUIHUMAN) 
     {
       pthread_mutex_lock(&(all[father].mymutex));
-      all[father].children[hsituner_id]=TRUE;
+      all[father].children[hsvtuner_id]=TRUE;
       pthread_mutex_unlock(&(all[father].mymutex));
     }
 
-  pthread_mutex_lock(&(all[hsituner_id].mymutex));
+  pthread_mutex_lock(&(all[hsvtuner_id].mymutex));
   /* this schema resumes its execution with no children at all */
-  for(i=0;i<MAX_SCHEMAS;i++) all[hsituner_id].children[i]=FALSE;
-  all[hsituner_id].father=father;
+  for(i=0;i<MAX_SCHEMAS;i++) all[hsvtuner_id].children[i]=FALSE;
+  all[hsvtuner_id].father=father;
   if (brothers!=NULL)
    {
-     for(i=0;i<MAX_SCHEMAS;i++) hsituner_brothers[i]=-1;
+     for(i=0;i<MAX_SCHEMAS;i++) hsvtuner_brothers[i]=-1;
      i=0;
-     while(brothers[i]!=-1) {hsituner_brothers[i]=brothers[i];i++;}
+     while(brothers[i]!=-1) {hsvtuner_brothers[i]=brothers[i];i++;}
    }
-  hsituner_callforarbitration=fn;
-  put_state(hsituner_id,notready);
-  printf("hsituner: on\n");
-  pthread_cond_signal(&(all[hsituner_id].condition));
-  pthread_mutex_unlock(&(all[hsituner_id].mymutex));
+
+  /* Importamos colorA and launch the colorA child schema */
+  mycolorA=myimport ("colorA", "colorA");
+  colorAresume=myimport("colorA", "resume");
+  colorAsuspend=myimport("colorA", "suspend");  
+  if (colorAresume!=NULL)
+	colorAresume(hsvtuner_id, NULL, NULL);
+
+  hsvtuner_callforarbitration=fn;
+  put_state(hsvtuner_id,notready);
+  printf("hsvtuner: on\n");  
+    
+  RGB2HSV_init();
+  RGB2HSV_createTable();
+
+  pthread_cond_signal(&(all[hsvtuner_id].condition));
+  pthread_mutex_unlock(&(all[hsvtuner_id].mymutex));
 }
 
-void *hsituner_thread(void *not_used) 
+void *hsvtuner_thread(void *not_used) 
 {
   struct timeval a,b;
   long diff, next;
 
   for(;;)
     {
-      pthread_mutex_lock(&(all[hsituner_id].mymutex));
+      pthread_mutex_lock(&(all[hsvtuner_id].mymutex));
 
-      if (all[hsituner_id].state==slept) 
+      if (all[hsvtuner_id].state==slept) 
 	{
-	  v=0; w=0;
-	  pthread_cond_wait(&(all[hsituner_id].condition),&(all[hsituner_id].mymutex));
-	  pthread_mutex_unlock(&(all[hsituner_id].mymutex));
+	  //v=0; w=0;
+	  pthread_cond_wait(&(all[hsvtuner_id].condition),&(all[hsvtuner_id].mymutex));
+	  pthread_mutex_unlock(&(all[hsvtuner_id].mymutex));
 	}
       else 
 	{
 	  /* check preconditions. For now, preconditions are always satisfied*/
-	  if (all[hsituner_id].state==notready) put_state(hsituner_id,ready);
-	  else all[hsituner_id].state=ready;
+	  if (all[hsvtuner_id].state==notready) put_state(hsvtuner_id,ready);
+	  else all[hsvtuner_id].state=ready;
 	  /* check brothers and arbitrate. For now this is the only winner */
-	  if (all[hsituner_id].state==ready) put_state(hsituner_id,winner);
+	  if (all[hsvtuner_id].state==ready) put_state(hsvtuner_id,winner);
 
 
-	  if (all[hsituner_id].state==winner)
+	  if (all[hsvtuner_id].state==winner)
 	    /* I'm the winner and must execute my iteration */
 	    {
-	      pthread_mutex_unlock(&(all[hsituner_id].mymutex));
+	      pthread_mutex_unlock(&(all[hsvtuner_id].mymutex));
 	      gettimeofday(&a,NULL);
-	      hsituner_iteration();
+	      hsvtuner_iteration();
 	      gettimeofday(&b,NULL);  
 
 	      diff = (b.tv_sec-a.tv_sec)*1000000+b.tv_usec-a.tv_usec;
-	      next = hsituner_cycle*1000-diff-10000; 
+	      next = hsvtuner_cycle*1000-diff-10000; 
 	      /* discounts 10ms taken by calling usleep itself */
-	      if (next>0) usleep(hsituner_cycle*1000-diff);
+	      if (next>0) usleep(hsvtuner_cycle*1000-diff);
 	      else 
-		{printf("time interval violated: hsituner\n"); usleep(hsituner_cycle*1000);
+		{printf("time interval violated: hsvtuner\n"); usleep(hsvtuner_cycle*1000);
 		}
 	    }
 	  else 
 	    /* just let this iteration go away. overhead time negligible */
 	    {
-	      pthread_mutex_unlock(&(all[hsituner_id].mymutex));
-	      usleep(hsituner_cycle*1000);
+	      pthread_mutex_unlock(&(all[hsvtuner_id].mymutex));
+	      usleep(hsvtuner_cycle*1000);
 	    }
 	}
     }
 }
 
-void hsituner_startup()
+void hsvtuner_startup()
 {
   draw_hsimap(disco_buf, SMAX);
   i_min=0.; i_max=255.;
@@ -659,23 +647,24 @@ void hsituner_startup()
   s_min=0.2; s_max=0.4;
   hsimap_threshold=20;  
 
-  pthread_mutex_lock(&(all[hsituner_id].mymutex));
-  myexport("hsituner","id",&hsituner_id);
-  myexport("hsituner","resume",(void *) &hsituner_resume);
-  myexport("hsituner","suspend",(void *) &hsituner_suspend);
-  printf("hsituner schema started up\n");
-  put_state(hsituner_id,slept);
-  pthread_create(&(all[hsituner_id].mythread),NULL,hsituner_thread,NULL);
-  pthread_mutex_unlock(&(all[hsituner_id].mymutex));
+  pthread_mutex_lock(&(all[hsvtuner_id].mymutex));
+  myexport("hsvtuner","id",&hsvtuner_id);
+  myexport("hsvtuner","resume",(void *) &hsvtuner_resume);
+  myexport("hsvtuner","suspend",(void *) &hsvtuner_suspend);
+  
+  printf("hsvtuner schema started up\n");
+  put_state(hsvtuner_id,slept);
+  pthread_create(&(all[hsvtuner_id].mythread),NULL,hsvtuner_thread,NULL);
+  pthread_mutex_unlock(&(all[hsvtuner_id].mymutex));
 }
 
 
-void hsituner_guibuttons(FL_OBJECT *obj)
+void hsvtuner_guibuttons(FL_OBJECT *obj)
 { 
    double aux;
    
-  if (obj == fd_hsitunergui->Hmax){
-       h_max=fl_get_slider_value(fd_hsitunergui->Hmax);
+  if (obj == fd_hsvtunergui->Hmax){
+       h_max=fl_get_slider_value(fd_hsvtunergui->Hmax);
        if(h_max>2*PI){
 	  h_max=h_max-2*PI;
        }
@@ -683,12 +672,12 @@ void hsituner_guibuttons(FL_OBJECT *obj)
 	  h_max=h_max+2*PI;
        }
        if (h_max==h_min){
-	  fl_set_slider_value(fd_hsitunergui->Smin,0.0);
+	  fl_set_slider_value(fd_hsvtunergui->Smin,0.0);
 	  s_min=0.0;
        }
     }	
-  else if (obj == fd_hsitunergui->Hmin){  
-     h_min=fl_get_slider_value(fd_hsitunergui->Hmin);
+  else if (obj == fd_hsvtunergui->Hmin){  
+     h_min=fl_get_slider_value(fd_hsvtunergui->Hmin);
      if(h_min>2*PI){
 	h_min=h_min-2*PI;
      }
@@ -696,63 +685,63 @@ void hsituner_guibuttons(FL_OBJECT *obj)
 	h_min=h_min+2*PI;
      }
      if (h_max==h_min){
-	fl_set_slider_value(fd_hsitunergui->Smin,0.0);
+	fl_set_slider_value(fd_hsvtunergui->Smin,0.0);
 	s_min=0.0;
      }
     }	
   
-  else if (obj == fd_hsitunergui->Smax){
-    s_max=fl_get_slider_value(fd_hsitunergui->Smax);
+  else if (obj == fd_hsvtunergui->Smax){
+    s_max=fl_get_slider_value(fd_hsvtunergui->Smax);
     if (s_max<=s_min){
        aux=s_min;
        s_min=s_max;
        s_max=aux;
-       fl_set_slider_value(fd_hsitunergui->Smax,s_max);
-       fl_set_slider_value(fd_hsitunergui->Smin,s_min);
+       fl_set_slider_value(fd_hsvtunergui->Smax,s_max);
+       fl_set_slider_value(fd_hsvtunergui->Smin,s_min);
     }
   }	
   
-  else if (obj == fd_hsitunergui->Smin)
+  else if (obj == fd_hsvtunergui->Smin)
     {
-      s_min=fl_get_slider_value(fd_hsitunergui->Smin);
+      s_min=fl_get_slider_value(fd_hsvtunergui->Smin);
       if (s_max<=s_min){
 	 aux=s_min;
 	 s_min=s_max;
 	 s_max=aux;
-	 fl_set_slider_value(fd_hsitunergui->Smax,s_max);
-	 fl_set_slider_value(fd_hsitunergui->Smin,s_min);
+	 fl_set_slider_value(fd_hsvtunergui->Smax,s_max);
+	 fl_set_slider_value(fd_hsvtunergui->Smin,s_min);
       }
     }	
   
-  else if (obj == fd_hsitunergui->Imax)
-    {i_max=fl_get_slider_value(fd_hsitunergui->Imax);
+  else if (obj == fd_hsvtunergui->Imax)
+    {i_max=fl_get_slider_value(fd_hsvtunergui->Imax);
       if (i_max<=i_min){
       aux=i_min;
       i_min=i_max;
       i_max=aux;
-      fl_set_slider_value(fd_hsitunergui->Imax,i_max);
-      fl_set_slider_value(fd_hsitunergui->Imin,i_min);
+      fl_set_slider_value(fd_hsvtunergui->Imax,i_max);
+      fl_set_slider_value(fd_hsvtunergui->Imin,i_min);
       }
     }	
   
-  else if (obj == fd_hsitunergui->Imin)
-    {i_min=fl_get_slider_value(fd_hsitunergui->Imin);
+  else if (obj == fd_hsvtunergui->Imin)
+    {i_min=fl_get_slider_value(fd_hsvtunergui->Imin);
     if (i_max<=i_min){
       aux=i_min;
       i_min=i_max;
       i_max=aux;
-      fl_set_slider_value(fd_hsitunergui->Imax,i_max);
-      fl_set_slider_value(fd_hsitunergui->Imin,i_min);
+      fl_set_slider_value(fd_hsvtunergui->Imax,i_max);
+      fl_set_slider_value(fd_hsvtunergui->Imin,i_min);
       }
     }
   
-  else if (obj ==fd_hsitunergui->w_slider)
+  else if (obj ==fd_hsvtunergui->w_slider)
     {
-      hsimap_threshold=(int)fl_get_slider_value(fd_hsitunergui->w_slider);
+      hsimap_threshold=(int)fl_get_slider_value(fd_hsvtunergui->w_slider);
       /*printf("hsimap_threshold %d\n",hsimap_threshold);*/
   }
-  if (obj ==fd_hsitunergui->toblack){
-     if (fl_get_button(fd_hsitunergui->toblack)==RELEASED){
+  if (obj ==fd_hsvtunergui->toblack){
+     if (fl_get_button(fd_hsvtunergui->toblack)==RELEASED){
 	toblack=0;
      }
      else 
@@ -760,77 +749,87 @@ void hsituner_guibuttons(FL_OBJECT *obj)
   }
 }
 
-void hsituner_guidisplay()
+void hsvtuner_guidisplay()
 {
    drawcheese(histograma_buf,centro_x,centro_y,h_max,h_min,s_max,s_min,FL_PALEGREEN);
   
-  XPutImage(display,hsituner_win,hsituner_gc,imagenOrig,0,0,fd_hsitunergui->oculo_orig->x, fd_hsitunergui->oculo_orig->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+  XPutImage(display,hsvtuner_win,hsvtuner_gc,imagenOrig,0,0,fd_hsvtunergui->oculo_orig->x, fd_hsvtunergui->oculo_orig->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
   
-  XPutImage(display,hsituner_win,hsituner_gc,hsifiltrada,0,0,fd_hsitunergui->oculo_modif->x, fd_hsitunergui->oculo_modif->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+  XPutImage(display,hsvtuner_win,hsvtuner_gc,hsifiltrada,0,0,fd_hsvtunergui->oculo_modif->x, fd_hsvtunergui->oculo_modif->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
  
-  XPutImage(display,hsituner_win,hsituner_gc,histograma,0,0,fd_hsitunergui->histograma->x, fd_hsitunergui->histograma->y, SMAX, SMAX);
+  XPutImage(display,hsvtuner_win,hsvtuner_gc,histograma,0,0,fd_hsvtunergui->histograma->x, fd_hsvtunergui->histograma->y, SMAX, SMAX);
 }
 
 
-void hsituner_guisuspend(void)
+void hsvtuner_guisuspend(void)
 {
-   delete_buttonscallback(hsituner_guibuttons);
-   delete_displaycallback(hsituner_guidisplay);
-   fl_hide_form(fd_hsitunergui->hsitunergui);
+   delete_buttonscallback(hsvtuner_guibuttons);
+   delete_displaycallback(hsvtuner_guidisplay);
+   fl_hide_form(fd_hsvtunergui->hsvtunergui);
 }
 
-void hsituner_guiresume(void)
+void hsvtuner_guiresume(void)
 {
   static int k=0;
 
   if (k==0) /* not initialized */
     {
       k++;
-      fd_hsitunergui = create_form_hsitunergui();
-      fl_set_form_position(fd_hsitunergui->hsitunergui,400,50);
-      fl_show_form(fd_hsitunergui->hsitunergui,FL_PLACE_POSITION,FL_FULLBORDER,HSItunerVER);
-      hsituner_win= FL_ObjWin(fd_hsitunergui->oculo_orig);
-      hsitunergui_setupDisplay();
+      fd_hsvtunergui = create_form_hsvtunergui();
+      fl_set_form_position(fd_hsvtunergui->hsvtunergui,400,50);
+      fl_show_form(fd_hsvtunergui->hsvtunergui,FL_PLACE_POSITION,FL_FULLBORDER,HSVtunerVer);
+      hsvtuner_win= FL_ObjWin(fd_hsvtunergui->oculo_orig);
+      hsvtunergui_setupDisplay();
     }
   else 
     {
-      fl_show_form(fd_hsitunergui->hsitunergui,FL_PLACE_POSITION,FL_FULLBORDER,HSItunerVER);
-      hsituner_win= FL_ObjWin(fd_hsitunergui->oculo_orig);
+      fl_show_form(fd_hsvtunergui->hsvtunergui,FL_PLACE_POSITION,FL_FULLBORDER,HSVtunerVer);
+      hsvtuner_win= FL_ObjWin(fd_hsvtunergui->oculo_orig);
     }
 
-  register_buttonscallback(hsituner_guibuttons);
-  register_displaycallback(hsituner_guidisplay);
+  register_buttonscallback(hsvtuner_guibuttons);
+  register_displaycallback(hsvtuner_guidisplay);
 
-  fl_set_slider_bounds(fd_hsitunergui->w_slider,100,1);
-  fl_set_slider_value(fd_hsitunergui->w_slider,hsimap_threshold);
-  fl_set_slider_bounds(fd_hsitunergui->Imin,0,255);
-  fl_set_slider_value(fd_hsitunergui->Imin,i_min);
-  fl_set_slider_bounds(fd_hsitunergui->Imax,0,255);
-  fl_set_slider_value(fd_hsitunergui->Imax,i_max);
-  fl_set_slider_bounds(fd_hsitunergui->Hmin,2.*PI,0);
-  fl_set_slider_value(fd_hsitunergui->Hmin,h_min);
-  fl_set_slider_bounds(fd_hsitunergui->Hmax,2.*PI,0);
-  fl_set_slider_value(fd_hsitunergui->Hmax,h_max);
-  fl_set_slider_bounds(fd_hsitunergui->Smin,1,0);
-  fl_set_slider_value(fd_hsitunergui->Smin,s_min);
-  fl_set_slider_bounds(fd_hsitunergui->Smax,1,0);
-  fl_set_slider_value(fd_hsitunergui->Smax,s_max);
+  fl_set_slider_bounds(fd_hsvtunergui->w_slider,100,1);
+  fl_set_slider_value(fd_hsvtunergui->w_slider,hsimap_threshold);
+  fl_set_slider_bounds(fd_hsvtunergui->Imin,0,255);
+  fl_set_slider_value(fd_hsvtunergui->Imin,i_min);
+  fl_set_slider_bounds(fd_hsvtunergui->Imax,0,255);
+  fl_set_slider_value(fd_hsvtunergui->Imax,i_max);
+  fl_set_slider_bounds(fd_hsvtunergui->Hmin,2.*PI,0);
+  fl_set_slider_value(fd_hsvtunergui->Hmin,h_min);
+  fl_set_slider_bounds(fd_hsvtunergui->Hmax,2.*PI,0);
+  fl_set_slider_value(fd_hsvtunergui->Hmax,h_max);
+  fl_set_slider_bounds(fd_hsvtunergui->Smin,1,0);
+  fl_set_slider_value(fd_hsvtunergui->Smin,s_min);
+  fl_set_slider_bounds(fd_hsvtunergui->Smax,1,0);
+  fl_set_slider_value(fd_hsvtunergui->Smax,s_max);
 }
 
 int handle2 (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void *xev){
    int x_matriz,y_matriz;
-   unsigned char r,g,b;
+   float r,g,b;
    double H,S,I;
+   struct HSV* myHSV;
+
    if (event==FL_PUSH){
       if ((my>=10) && (my<=250) && (mx>=430) && (mx<=750)){			
 	 x_matriz=mx-430;
 	 y_matriz=my-10;
-	 r=imagenOrig_buf[(SIFNTSC_COLUMNS*y_matriz+x_matriz)*4+2];
-	 g=imagenOrig_buf[(SIFNTSC_COLUMNS*y_matriz+x_matriz)*4+1];
-	 b=imagenOrig_buf[(SIFNTSC_COLUMNS*y_matriz+x_matriz)*4];
-	 /*printf("r:%d,g:%d,b:%d\n",r,g,b);*/
-	 rgb2hsi(r/255.0,g/255.0,b/255.0,&H,&S,&I);
-	 /*printf("H:%1f,S:%1f,I:%1f\n",H,S,I);*/
+	 primera=1;
+	 r=(float)(unsigned int)(unsigned char)imagenOrig_buf[(SIFNTSC_COLUMNS*y_matriz+x_matriz)*4+2];
+	 g=(float)(unsigned int)(unsigned char)imagenOrig_buf[(SIFNTSC_COLUMNS*y_matriz+x_matriz)*4+1];
+	 b=(float)(unsigned int)(unsigned char)imagenOrig_buf[(SIFNTSC_COLUMNS*y_matriz+x_matriz)*4];
+	 //printf("R,G,B %1f %1f %1f \n",r,g,b);
+	 myHSV = (struct HSV*) RGB2HSV_getHSV( (int)r,(int)g,(int)b);
+	 H=myHSV->H;
+	 S=myHSV->S;
+	 I=myHSV->V;
+
+	 /*El resultado de la libreria es  en 
+	  grados, y la gui se expresa en radianes para la H*/
+	 H=H*DEGTORAD;
+
 	 h_max=H+.2;
 	 h_min=H-.2;
 	 if (h_max>2*3.1416){
@@ -847,7 +846,6 @@ int handle2 (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void 
 	 if (s_min<0){
 	    s_min=0;
 	 }
-	 I=I*255;
 	 i_max=I+50.;
 	 i_min=I-50.;
 	 if (i_max>255.){
@@ -856,13 +854,14 @@ int handle2 (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void 
 	 if (i_min<0.){
 	    i_min=0.;
 	 }
-	 fl_set_slider_value(fd_hsitunergui->Hmax,h_max);
-	 fl_set_slider_value(fd_hsitunergui->Hmin,h_min);
-	 fl_set_slider_value(fd_hsitunergui->Smax,s_max);
-	 fl_set_slider_value(fd_hsitunergui->Smin,s_min);
-	 fl_set_slider_value(fd_hsitunergui->Imax,i_max);
-	 fl_set_slider_value(fd_hsitunergui->Imin,i_min);
+	 fl_set_slider_value(fd_hsvtunergui->Hmax,h_max);
+	 fl_set_slider_value(fd_hsvtunergui->Hmin,h_min);
+	 fl_set_slider_value(fd_hsvtunergui->Smax,s_max);
+	 fl_set_slider_value(fd_hsvtunergui->Smin,s_min);
+	 fl_set_slider_value(fd_hsvtunergui->Imax,i_max);
+	 fl_set_slider_value(fd_hsvtunergui->Imin,i_min);
       }
+
 		
    }
    return 0;
@@ -916,10 +915,10 @@ int handle (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void *
 	 s_min=0.;
       }
       /*CAMBIO LOS VALORES DE LOS SLIDERS*/
-      fl_set_slider_value(fd_hsitunergui->Hmax,h_max);
-      fl_set_slider_value(fd_hsitunergui->Hmin,h_min);
-      fl_set_slider_value(fd_hsitunergui->Smax,s_max);
-      fl_set_slider_value(fd_hsitunergui->Smin,s_min);
+      fl_set_slider_value(fd_hsvtunergui->Hmax,h_max);
+      fl_set_slider_value(fd_hsvtunergui->Hmin,h_min);
+      fl_set_slider_value(fd_hsvtunergui->Smax,s_max);
+      fl_set_slider_value(fd_hsvtunergui->Smin,s_min);
    }
    xquesito1=cos(h_max)*s_max*radio_hsi_map+centro_x;
    yquesito1=centro_y-sin(h_max)*s_max*radio_hsi_map;
@@ -968,8 +967,8 @@ int handle (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void *
 	    s_max=(float)sqrt((x_pulsada*x_pulsada)+(y_pulsada*y_pulsada))/radio_hsi_map;
 	    pulsada=0;
 	    s_min=0.;
-	    fl_set_slider_value(fd_hsitunergui->Smax,s_max);
-	    fl_set_slider_value(fd_hsitunergui->Smin,s_min);
+	    fl_set_slider_value(fd_hsvtunergui->Smax,s_max);
+	    fl_set_slider_value(fd_hsvtunergui->Smin,s_min);
 	 }
       }
 		
@@ -1093,10 +1092,10 @@ int handle (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void *
 	       default:
 		  break;
 	    }
-	    fl_set_slider_value(fd_hsitunergui->Hmax,h_max);
-	    fl_set_slider_value(fd_hsitunergui->Hmin,h_min);
-	    fl_set_slider_value(fd_hsitunergui->Smax,s_max);
-	    fl_set_slider_value(fd_hsitunergui->Smin,s_min);
+	    fl_set_slider_value(fd_hsvtunergui->Hmax,h_max);
+	    fl_set_slider_value(fd_hsvtunergui->Hmin,h_min);
+	    fl_set_slider_value(fd_hsvtunergui->Smax,s_max);
+	    fl_set_slider_value(fd_hsvtunergui->Smin,s_min);
 	 }
       }
    }
