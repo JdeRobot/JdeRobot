@@ -421,13 +421,17 @@ void player_motors_iteration(){
   else if(w_integer<-MAX_RVEL) w_new=-MAX_RVEL*DEGTORAD;
   else w_new=w*DEGTORAD;
 
-  if ((v_sp!=v_new)||(w_sp!=w_new))
-    {
-      v_sp=v_new;
-      w_sp=w_new;
-      /* sending speed to player server */
-      playerc_position2d_set_cmd_vel(player_position,v_sp,0,w_sp,0);
-    }
+  /* sending speed to player server */
+  /*  We send speed commands in all iterations, to prevent the watchdog at the 
+      pioneer robot stopping the robot when the w_new or the v_new are constant 
+      for a long period. Now we get a continuous movement */
+  /*  if ((v_sp!=v_new)||(w_sp!=w_new))
+      {
+  */
+  v_sp=v_new;
+  w_sp=w_new;
+  playerc_position2d_set_cmd_vel(player_position,v_sp,0,w_sp,0);
+  /* }*/
 }
 
 
