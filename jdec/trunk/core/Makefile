@@ -1,11 +1,10 @@
-INC-DIR = -I. -I../include -I/usr/X11R6/include -I/usr/local/include -I/usr/include/X11
-LIB-DIR = -L. -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib 
+INC-DIR = -I. -I../include -I/usr/local/include
+LIB-DIR = -L. -L/usr/lib -L -L/usr/local/lib 
 GCC = gcc
 CFLAGS = -g -pedantic -Wall $(INC-DIR)
-#-ansi
-#LIBS = -lpthread -lm -lforms -lX11 -ldc1394_control -lraw1394
-LIBS = -lpthread -lm -lforms -lX11 -ldl
-OBJS = jdegui.o mastergui.o pioneer.o 
+LIBS = -lpthread -lm -ldl
+
+OBJS = pioneer.o
 INSTALLDIR=/usr/local
 CFGDIR="$(INSTALLDIR)/jde-robot"
 
@@ -18,20 +17,11 @@ jde: jde.o $(OBJS)
 jde.o: jde.c
 	$(GCC) $(CFLAGS) -D CONFIGDIR='$(CFGDIR)' -c jde.c	
 
-jdegui.o: jdegui.c jdegui.h mastergui.o 
-	$(GCC) $(CFLAGS) -c jdegui.c
-
 pioneer.o: pioneer.c pioneer.h
 	$(GCC) $(CFLAGS) -c pioneer.c
 
-mastergui.o: mastergui.c mastergui.h
-	$(GCC) $(CFLAGS) -c mastergui.c
-
-mastergui.c: mastergui.fd
-	fdesign -convert mastergui.fd
-
 clean:
-	-rm -f *.o *.a *so *~ mastergui.c mastergui.h
+	-rm -f *.o *.a *so *~
 
 install:
 	cp jde $(INSTALLDIR)/bin/

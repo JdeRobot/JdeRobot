@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006 Jos� Mar�a Ca�as Plaza 
+ *  Copyright (C) 2006 José María Cañas Plaza
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,37 +15,96 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : Jos� Mar�a Ca�as Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
 #define thisrelease "jdec 4.2-svn"
 
 #include "jde.h"
 #include "dlfcn.h"
-#include "jdegui.h"
+
+/** Maximum buffer size (for strings)*/
 #define MAX_BUFFER 1024
 
 /* hierarchy */
+/** Array with all the loaded schemas*/
 JDESchema all[MAX_SCHEMAS];
+/** Number of loaded schemas*/
 int num_schemas=0;
+/** Number of explicity loaded schemas*/
 int loaded_schemas=0;
 
+/** Array with all the loaded drivers*/
 JDEDriver mydrivers[MAX_SCHEMAS];
+/** Number of loaded drivers*/
 int num_drivers=0;
 
+/** Shared variables' type definition*/
 typedef struct sharedname{
-  char schema[MAX_BUFFER];
-  char name[MAX_BUFFER];
-  void *pointer;
+   /** The exporter schema's name*/
+   char schema[MAX_BUFFER];
+   /** The name of the shared variable or funcion*/
+   char name[MAX_BUFFER];
+   /** Pointer to de shared variable of function casted to (void *)*/
+   void *pointer;
   /*  Tsharedname next;*/
 }Tsharedname;
 
+/** Maximum number of shared varibles and functions*/
 #define MAX_SHARED 600
-static Tsharedname sharedlist[MAX_SHARED]; 
+/** List with the shared variables and functions*/
+static Tsharedname sharedlist[MAX_SHARED];
+/** Number of shared variables*/ 
 static int num_shared=0;
 
+/** The jdec prompt*/
 #define PROMPT "jdec$ "
 
+/**
+ * Resumes(shows) the jdec master gui. As it is implemented by a schema it must
+ * import it's identifier.
+ */
+void mastergui_resume(){
+   int *master;
+   if ((master=(int *)myimport ("master_gtk", "id"))!=NULL){
+      if (all[*master].guiresume!=NULL)
+         all[*master].guiresume();
+      all[*master].guistate=on;
+   }
+   else if ((master=(int *)myimport ("master_xforms", "id"))!=NULL){
+      if (all[*master].guiresume!=NULL)
+         all[*master].guiresume();
+      all[*master].guistate=on;
+   }
+   else
+      fprintf(stderr,"Jde: No mastergui loaded\n");
+}
+
+/** Suspends(hides) the jdec master gui. As it is implemented by a schema it must
+ * import it's identifier.
+ */
+void mastergui_suspend(){
+   int * master;
+   if ((master=(int *)myimport ("master_gtk", "id"))!=NULL){
+      if (all[*master].guisuspend!=NULL)
+         all[*master].guisuspend();
+      all[*master].guistate=off;
+   }
+   else if ((master=(int *)myimport ("master_xforms", "id"))!=NULL){
+      if (all[*master].guisuspend!=NULL)
+         all[*master].guisuspend();
+      all[*master].guistate=off;
+   }
+   else
+      fprintf(stderr,"Jde: No mastergui loaded\n");
+}
+
+/**
+ * Puts the state in newstate to the schema idexed by numschema
+ * @param newstate Schema's new states
+ * @param numschema Schema's index in the schema's array
+ * @return void
+ */
 void put_state(int numschema, int newstate)
 {
   all[numschema].state=newstate;
@@ -58,12 +117,26 @@ void put_state(int numschema, int newstate)
       (newstate==active));
 }
 
+/**
+ * This functions must be called at every schema's iteration, it increments the
+ * schema's iteration counter to calculate schema's ips.
+ * @param numschema Schema's identifier
+ * @return void
+ */
 void speedcounter(int numschema)
 {
   if ((numschema>=0)&&(numschema<num_schemas))
     all[numschema].k++;
 }
 
+/**
+ * It is used to share variables and functions between diferent schemas and
+ * drivers (remember that they are in diferent names' spaces)
+ * @param schema String containing the exporter schema's name
+ * @param name String containing the exported variable's names
+ * @param p Pointer to the variable or function casted to (void *)
+ * @return 1 if the variables was correctly exported, othewise 0
+ */
 int myexport(char *schema, char *name, void *p)
      /* publishes the variable, to make it available to other schemas */
 {
@@ -90,9 +163,15 @@ int myexport(char *schema, char *name, void *p)
       else if ((found==0)&&(num_shared>=MAX_SHARED))
 	printf("Warning no space for sharing %s variable\n",name);
     }
-  return 1;
+  return found;
 }
 
+/**
+ * Get the pointer to a variable shared with myexport
+ * @param schema String containing the exporter schema's name
+ * @param name String containing the exported variable's names
+ * @return The pointer to the variable casted to (void *)
+ */
 void *myimport(char *schema, char *name)
      /* returns NULL in case of not finding the requested variable */
 {
@@ -108,14 +187,21 @@ void *myimport(char *schema, char *name)
   return value;
 }
 
+/**
+ * Null arbitrarion function
+ * @return void
+ */
 void null_arbitration()
 {
   printf("NULL arbitration\n");
 }
 
-int dummy(void)
-{return 0;}
-
+/**
+ * This function must be used instead of exit() to terminate de program
+ * correctly
+ * @param sig The same as the status argument at exit function
+ * @return void
+ */
 void jdeshutdown(int sig)
 {
   int i;
@@ -131,19 +217,23 @@ void jdeshutdown(int sig)
   for(i=0;i<num_drivers;i++)
     {
       if (mydrivers[i].close!=NULL) mydrivers[i].close();
+      if (mydrivers[i].handle!=NULL) dlclose(mydrivers[i].handle);
     }
 
-  jdegui_close();
-
   printf("Bye\n");
-  exit(0);
+  exit(sig);
 }
 
 
-/* Cronos thread, to measure the real rythm of different schemas and drivers, in iterations per second */
+/** Cronos thread identifier*/
 static pthread_t cronos_th;
+/** Cronos thread it is going to iterate each 2 seconds*/
 #define cronos_cycle 2000 /* ms, to compute fps*/
 
+/**
+ * Cronos thread, to measure the real rythm of different schemas and drivers,
+ * in iterations per second
+ */
 void *cronos_thread(void *not_used) 
 {
   struct timeval tlast,tnow;
@@ -157,8 +247,6 @@ void *cronos_thread(void *not_used)
       gettimeofday(&tnow,NULL); 
       diff = (tnow.tv_sec-tlast.tv_sec)*1000000+tnow.tv_usec-tlast.tv_usec;
       
-      fpsgui=kgui*1000000/diff;
-      kgui=0;
       for(i=0;i<num_schemas;i++)
 	{
 	  (all[i].fps)=(float)(all[i].k)*(float)1000000./(float)diff;
@@ -171,7 +259,11 @@ void *cronos_thread(void *not_used)
 
 }
 
-/* jde shell */
+/**
+ * Implements jde shell
+ * @param mensaje The string typed by the user
+ * @returns 0 if no erros ocurred, othewise -1
+ */
 int serve_keyboardmessage(char *mensaje)
 {
  char word[256],word2[256];
@@ -180,138 +272,147 @@ int serve_keyboardmessage(char *mensaje)
  int i,j,k;
 
  /*printf("Command from keyboard: %s\n",mensaje); */
- if (sscanf(mensaje,"%s ",word)==1) 
-   {
-     if ((strcmp(word,"resume")==0) ||
-	 (strcmp(word,"run")==0)||
-	 (strcmp(word,"on")==0))
-	{
-	  if (sscanf(mensaje,"%s %s",word,word2)==2) 
-	    {	  
-	      r=(resumeFn)myimport(word2,"resume");
-	      if (r!=NULL) r(SHELLHUMAN,NULL,NULL);
-	    }
-	  else printf("What schema do you want to resume?\n");
-	}
-     else if ((strcmp(word,"suspend")==0)||
-	      (strcmp(word,"kill")==0) ||
-	      (strcmp(word,"off")==0))
-	{
-	  if (sscanf(mensaje,"%s %s",word,word2)==2) 
-	    {	
-	      s=(suspendFn)myimport(word2,"suspend");
-	      if (s!=NULL) s();
-	    }
-	   else printf("What schema do you want to suspend?\n");
-	}
-     else if ((strcmp(word,"guiresume")==0)||
-	      (strcmp(word,"guion")==0))
+ if (sscanf(mensaje,"%s ",word)==1) {
+    if ((strcmp(word,"resume")==0) ||
+         (strcmp(word,"run")==0)||
+         (strcmp(word,"on")==0))
+    {
+       if (sscanf(mensaje,"%s %s",word,word2)==2) {
+          r=(resumeFn)myimport(word2,"resume");
+          if (r!=NULL) r(SHELLHUMAN,NULL,NULL);
+       }
+       else printf("What schema do you want to resume?\n");
+    }
+    else if ((strcmp(word,"suspend")==0)||
+              (strcmp(word,"kill")==0) ||
+              (strcmp(word,"off")==0))
+    {
+       if (sscanf(mensaje,"%s %s",word,word2)==2) {
+          s=(suspendFn)myimport(word2,"suspend");
+          if (s!=NULL) s();
+       }
+       else printf("What schema do you want to suspend?\n");
+    }
+    else if ((strcmp(word,"guiresume")==0)||
+              (strcmp(word,"guion")==0))
+    {
+       if (sscanf(mensaje,"%s %s",word,word2)==2) {
+          for(i=0;i<num_schemas;i++){
+             if (strcmp(all[i].name,word2)==0) {
+                if (all[i].guiresume!=NULL)
+                   all[i].guiresume();
+                all[i].guistate=on;
+                break;
+             }
+          }
+       }
+       else printf("What schema do you want to resume its GUI?\n");
+    }
+    else if ((strcmp(word,"guisuspend")==0)||
+              (strcmp(word,"guioff")==0))
+    {
+       if (sscanf(mensaje,"%s %s",word,word2)==2)
        {
-	  if (sscanf(mensaje,"%s %s",word,word2)==2) 
-	    {	  
-	      for(i=0;i<num_schemas;i++)
-		{if (strcmp(all[i].name,word2)==0) 
-		  {all[i].guistate=pending_on;
-		  break;
-		  }
-		}
-	    }
-	  else printf("What schema do you want to resume its GUI?\n");
-	}
-     else if ((strcmp(word,"guisuspend")==0)||
-	      (strcmp(word,"guioff")==0))
-	{
-	  if (sscanf(mensaje,"%s %s",word,word2)==2) 
-	    {	
-	     for(i=0;i<num_schemas;i++)
-		{if (strcmp(all[i].name,word2)==0) 
-		  {all[i].guistate=pending_off;
-		  break;
-		  }
-		}
-	    }
-	  else printf("What schema do you want to suspend its GUI?\n");
-	}
-      else if ((strcmp(word,"mastergui")==0) ||
-	       (strcmp(word,"gui")==0))
-	{
-	  if (sscanf(mensaje,"%s %s",word,word2)==2) 
-	    {
-	      if (strcmp(word2,"on")==0)
-		mastergui_resume();
-	      else if (strcmp(word2,"off")==0)
-		mastergui_suspend();
-	    }
-	}
-     else if ((strcmp(word,"quit")==0) ||
-	      (strcmp(word,"QUIT")==0) || 
-	      (strcmp(word,"exit")==0) ||
-	      (strcmp(word,"EXIT")==0))
+          for(i=0;i<num_schemas;i++){
+             if (strcmp(all[i].name,word2)==0){
+                if (all[i].guisuspend!=NULL)
+                   all[i].guisuspend();
+                all[i].guistate=on;
+                break;
+             }
+          }
+       }
+       else printf("What schema do you want to suspend its GUI?\n");
+    }
+    else if ((strcmp(word,"mastergui")==0) ||
+              (strcmp(word,"gui")==0))
+    {
+       if (sscanf(mensaje,"%s %s",word,word2)==2){
+          if (strcmp(word2,"on")==0)
+             mastergui_resume();
+          else if (strcmp(word2,"off")==0)
+             mastergui_suspend();
+       }
+    }
+    else if ((strcmp(word,"quit")==0) ||
+              (strcmp(word,"QUIT")==0) ||
+              (strcmp(word,"exit")==0) ||
+              (strcmp(word,"EXIT")==0))
        jdeshutdown(0);
-     else if ((strcmp(word,"help")==0) || 
-	      (strcmp(word,"?")==0))
+    else if ((strcmp(word,"help")==0) ||
+              (strcmp(word,"?")==0))
        printf("This is the shell of %s. Available commands:\n  * quit\n  * help\n  * ls\n      list the loaded schemas\n  * ps\n      print the non-slept schemas, their state and speed\n  * mastergui [on|off]\n      show the master GUI of jdec, to visually manage the schema set\n\n  * [schemaname]\n      run the schema\n  * kill [schemaname]\n      move the schema to slept state\n  * guion [schemaname]\n      show the GUI of the schema\n  * guioff [schemaname]\n      hide the GUI of the schema\n",thisrelease);
-     else if ((strcmp(word,"ls")==0)||
-	      (strcmp(word,"list")==0) ||
-	      (strcmp(word,"LS")==0) ||
-	      (strcmp(word,"LIST")==0))
-       {
-	 for(i=0;i<num_schemas;i++)
-	       printf("%s\n",all[i].name);
+    else if ((strcmp(word,"ls")==0)||
+              (strcmp(word,"list")==0) ||
+              (strcmp(word,"LS")==0) ||
+              (strcmp(word,"LIST")==0))
+    {
+       for(i=0;i<num_schemas;i++)
+          printf("%s\n",all[i].name);
+    }
+    else if ((strcmp(word,"ps")==0)||
+              (strcmp(word,"PS")==0))
+    {
+       for(i=0;i<num_schemas;i++){
+          if ((all[i].state==winner) ||
+               (all[i].state==notready) ||
+               (all[i].state==ready))
+          {
+             printf("%s: %.0f ips, ",all[i].name,all[i].fps);
+             if (all[i].state==winner) {
+                printf("winner ( ");
+                k=0;
+                for (j=0;j<num_schemas;j++)
+                   if (all[i].children[j]==TRUE) {
+                   if (k==0) {
+                      printf("\b");k++;
+                   }
+                   printf("%s ",all[j].name);
+                   }
+                   printf("\b)");
+             }
+             else if (all[i].state==slept)
+                printf("slept");
+             else if (all[i].state==notready)
+                printf("notready");
+             else if (all[i].state==ready)
+                printf("ready");
+             else if (all[i].state==forced)
+                printf("forced");
+             printf("\n");
+          }
        }
-     else if ((strcmp(word,"ps")==0)||
-	      (strcmp(word,"PS")==0))
-       {
-	 for(i=0;i<num_schemas;i++)
-	   {
-	     if ((all[i].state==winner) ||
-		 (all[i].state==notready) ||
-		 (all[i].state==ready))
-	       {
-		 printf("%s: %.0f ips, ",all[i].name,all[i].fps);
-		 if (all[i].state==winner) 
-		   {
-		     printf("winner ( ");
-		     k=0;
-		     for (j=0;j<num_schemas;j++)
-		       if (all[i].children[j]==TRUE) 
-			 {
-			   if (k==0) {printf("\b");k++;}
-			   printf("%s ",all[j].name);
-			 }
-		     printf("\b)");
-		   }
-		 else if (all[i].state==slept) printf("slept");
-		 else if (all[i].state==notready) printf("notready");
-		 else if (all[i].state==ready) printf("ready");
-		 else if (all[i].state==forced) printf("forced");
-		 printf("\n");
-	       }
-	   }
+    }
+    else
+    {
+       /* to activate an schema, just type its name on the jdec shell */
+       for(i=0;i<num_schemas;i++){
+          if (strcmp(all[i].name,word)==0){
+             r=(resumeFn)myimport(word,"resume");
+             if (r!=NULL) r(SHELLHUMAN,NULL,NULL);
+             return 0;
+          }
        }
-     else 
-       {
-	 /* to activate an schema, just type its name on the jdec shell */
-	 for(i=0;i<num_schemas;i++)
-	   {
-	     if (strcmp(all[i].name,word)==0)
-	       {
-		 r=(resumeFn)myimport(word,"resume");
-		 if (r!=NULL) r(SHELLHUMAN,NULL,NULL);
-		 return 0;
-	       }
-	   }
-	 return -1;
-       }
-   }
+       return -1;
+    }
+ }
  return 0;
    
 }
 
 /* Reading the configuration file */
-static char configfile[MAX_BUFFER]; /* name of the configuration file used */
-static int driver_section=0; /* when reading any driver section from the configuration file */
+/** Name of the configuration file used by jde*/
+static char configfile[MAX_BUFFER];
+/** When reading any driver section from the configuration file */
+static int driver_section=0;
+/** Indicates if the master gui must be initialized automaticaly*/
 static int startwithgui=FALSE;
+
+/**
+ * Loads a shema
+ * @param name The schema's name
+ * @return Always 1
+ */
 int jde_loadschema(char *name)
 {
   char n[200];
@@ -402,6 +503,11 @@ int jde_loadschema(char *name)
     }
 }
 
+/**
+ * Loads a driver
+ * @param name The drivers's name
+ * @return Always 1
+ */
 int jde_loaddriver(char *name)
 {
   char n[200];
@@ -446,8 +552,12 @@ int jde_loaddriver(char *name)
     }
 }
 
+/**
+ * It reads a single line from config file, parses it and do the right thing.
+ * @param myfile The config file descriptor.
+ * @returns EOF in detects end of such file. Otherwise returns 0.
+ */
 int jde_readline(FILE *myfile)
-     /* It reads a single line from config file, parses it and do the right thing. Returns EOF in detects end of such file. Otherwise returns 0.*/
      /* To startup non-basic schemas, just raise the flag, putting the in active state. It will effectively start up in main, after the "startup" of all basic schemas */
 
 {
@@ -538,7 +648,12 @@ int jde_readline(FILE *myfile)
   }
 }
 
-
+/**
+ * Jde main function
+ * @param argc Number of arguments
+ * @param argv Array with the params
+ * @return The end status
+ */
 int main(int argc, char** argv)
 {
   int i,marca,leidos,last=0;
@@ -621,14 +736,7 @@ int main(int argc, char** argv)
 
   if (loaded_schemas>0){
      /* start the jdegui thread */
-     printf("Starting gui stuff...\n");
-     jdegui_startup();
-     jdegui_resume();
-
      if (startwithgui==TRUE) mastergui_resume();
-  }
-  else{
-     printf ("No schemas loaded. I'll act as server. No gui started\n");
   }
 
   /* start the cronos thread */
