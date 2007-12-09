@@ -160,7 +160,7 @@ void player_close(){
 /** laser resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int player_laser_resume(int father, int *brothers, arbitration fn)
 {
@@ -221,7 +221,7 @@ int player_laser_suspend(){
 /** encoders resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int player_encoders_resume(int father, int *brothers, arbitration fn)
 {
@@ -282,7 +282,7 @@ int player_encoders_suspend(){
 /** sonars resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int player_sonars_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -342,7 +342,7 @@ int player_sonars_suspend(){
 /** motors resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int player_motors_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);

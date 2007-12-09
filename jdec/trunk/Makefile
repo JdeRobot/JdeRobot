@@ -1,12 +1,16 @@
-DRIVERS = firewire  imagefile  pantilt  player video4linux networkclient networkserver mplayer
-SCHEMAS = hsituner  introrob opengldemo followball opflow recorder
-DOCS = manual 
-EXAMPLES = fuzzylib  myschema  papito 
-UTILS = fuzzylib progeo
+DRIVERS = firewire imagefile player networkclient networkserver mplayer graphics_gtk graphics_xforms pantilt
+SCHEMAS = eyeoperator  followball  hsvtuner  introrob  opengldemo  opflow  recorder  teleoperator
+DOCS = manual progeo-manual howto-ipp howto-gazebo 
+EXAMPLES = fuzzylib myschema papito 
+UTILS = fuzzylib progeo colorspaces
 
 all: 
 	CURDIR=`pwd`;
 	cd core && make
+	cd $(CURDIR)
+
+	CURDIR=`pwd`;
+	cd docs && doxygen jdec.doxygen;
 	cd $(CURDIR)
 
 	CURDIR=`pwd`;	
@@ -42,6 +46,7 @@ all:
 clean:
 	CURDIR=`pwd`;
 	cd core && make clean
+	cd $(CURDIR)/docs && rm -rf html
 	for i in $(UTILS); do (echo "Cleaning " $$i); \
 	cd $(CURDIR) ;\
 	cd utils/$$i && make clean || exit ; pwd;\

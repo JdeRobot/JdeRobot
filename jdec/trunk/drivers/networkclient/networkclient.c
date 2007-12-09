@@ -15,14 +15,16 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, JoseMaria Ca�as <jmplaza@gsyc.escet.urjc.es>
+ *  Authors : Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>
+              Jose Maria Cañas <jmplaza@gsyc.escet.urjc.es>
+              Jose Antonio Santos Cadenas <santoscadenas@gmail.com>
  */
 
 /**
  *  jdec networkclient driver provides sensorial information to platform variables such as color, laser or us, from remote jdec networkservers drivers, or oculo and otos servers.
  *
  *  @file networkclient.c
- *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es> and Jose Maria Ca�as Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es> and Jose Antonio Santos Cadenas <santoscadenas@gmail.com>
  *  @version 4.1
  *  @date 30-05-2007
  */
@@ -316,7 +318,7 @@ void networkclient_close(){
 /** pantiltencoders resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_pantiltencoders_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -378,7 +380,7 @@ int networkclient_pantiltencoders_suspend(){
 /** pantiltmotors resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_pantiltmotors_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -431,7 +433,7 @@ int networkclient_pantiltmotors_suspend(){
 /** laser resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_laser_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -492,7 +494,7 @@ int networkclient_laser_suspend(){
 /** encoders resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_encoders_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -553,7 +555,7 @@ int networkclient_encoders_suspend(){
 /** sonars resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_sonars_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -614,7 +616,7 @@ int networkclient_sonars_suspend(){
 /** motors resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_motors_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -667,7 +669,7 @@ int networkclient_motors_suspend(){
 /** colorA resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_colorA_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -720,7 +722,7 @@ int networkclient_colorA_suspend(){
 /** colorB resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_colorB_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -773,7 +775,7 @@ int networkclient_colorB_suspend(){
 /** colorC resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_colorC_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -826,7 +828,7 @@ int networkclient_colorC_suspend(){
 /** colorD resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int networkclient_colorD_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);

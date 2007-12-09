@@ -1,6 +1,34 @@
-/************************************************
- * jdec networkserver driver                    *
- ************************************************/
+/*
+ *  Copyright (C) 2006 Jose Antonio Santos Cadenas, Javier Martín Ramos
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ *  Authors : Jose Antonio Santos Cadenas <santoscadenas@gmail.com>
+ *            Javier Martin Ramos <xaverbrennt@yahoo.es>
+ *            Jose Maria Cañas <jmplaza@gsyc.escet.urjc.es>
+ */
+
+/**
+ * jdec networkserver driver provides sensorial information (such as color,
+ * laser or us) to remote clients.
+ *
+ *  @file networkserver.c
+ *  @author Jose Antonio Santos Cadenas <santoscadenas@gmail.com> and Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  @version 1.0
+ *  @date 2007-12-7
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -26,60 +54,68 @@
       /* number of devices */
 #define MAXDEVICE 10
 
-pthread_t network_thread;
-int state;
-pthread_mutex_t mymutex;
-pthread_cond_t condition;
 
 /* networkserver driver API options */
+/** The driver name*/
 char driver_name[256]="networkserver";
 
-#define MAX_MESSAGE 2048
+/** Maximum number of clients waiting for server's accept*/
 #define MAX_QUEUE 5
-   // Maximum number of clients waiting for server's accept
 
+
+/** Client structure type definition*/
 struct client{
+   /** Socket referencing the conection with the client*/
    int cs;
+   /** Shows to what services it's subscribed*/
    char subscriptions[MAXDEVICE];
+   /** Client name*/
    char name[256];
+   /** Stores the clock of the last data served*/
    unsigned long clocks[MAXDEVICE];
 };
+/** Client iteration cycle*/
 #define CLIENT_TH_CYCLE 33 /*para servir las imágenes en tiempo real*/
 
-/** Número de canales de la imágnes*/
+/** Image nuber of channels*/
 #define CANALES 3
 
-/* port to bind the server */
+/** port to bind the server */
 int networkserver_port=0;
 
-/* devices detected and their network id */
+/** devices detected (the ones that are going to be served)*/
 int serve_device[MAXDEVICE];
+/** devfices network id */
 int device_network_id[MAXDEVICE];
 
-/*Imported variables*/
+/*Import section*/
+/**Imported variables from sensors schemas*/
 void *variables[MAXDEVICE];
+/** Sensor schemas resume functon*/
 resumeFn resume[MAXDEVICE];
+/** Sensor schemas suspend functon*/
 suspendFn suspend[MAXDEVICE];
 
+/** Mutex to wait until the client socket id is stored at client structure*/
 pthread_mutex_t socketmutex;
 
 /*PID's*/
+/** Listen thread identifier*/
 pthread_t listen_pid;
 
-/* other vars */
-int display_fps=0;
-int networkserver_close_command=0;
 
-/* if we need to show fps */
-void networkserver_display_fps(){
-   display_fps=1;
-}
-
+/** Close function following the jdec driver api*/
 void networkserver_close(){
 
    printf("driver networkserver off\n");
 }
 
+/**
+ * Networkclient driver parse configuration file function. Determines wich
+ * devices are server and the connection port.
+ * 
+ * @param configfile path and name to the config file.
+ * @return 0 if parsing was successful or -1 if something went wrong.*/
 int networkserver_parseconf(char *configfile){
 
    int end_parse=0; int end_section=0; int driver_config_parsed=0;
@@ -245,6 +281,7 @@ int networkserver_parseconf(char *configfile){
    }else return -1;
 }
 
+/** Initialization function*/
 void init(){
    int i;
    for (i=0;i<MAXDEVICE; i++){
@@ -395,18 +432,24 @@ void init(){
    }
 }
 
-void bootstrap(int *s, struct sockaddr_in *addr_servicio, unsigned short port) {
+/**
+ * Initializes network connection
+ * @param s Pointer to the socket storage
+ * @param addr_service Pointer to the sockaddr_in structure
+ * @param port The port were the server will wait for connections
+ */
+void bootstrap(int *s, struct sockaddr_in *addr_service, unsigned short port) {
    *s = socket(AF_INET, SOCK_STREAM, 0);
    if (*s < 0) {
       perror("");
       jdeshutdown(0);
    }
 
-   addr_servicio->sin_family = AF_INET;
-   addr_servicio->sin_port = htons(port);
-   addr_servicio->sin_addr.s_addr = INADDR_ANY;
+   addr_service->sin_family = AF_INET;
+   addr_service->sin_port = htons(port);
+   addr_service->sin_addr.s_addr = INADDR_ANY;
 
-   if (bind(*s, (struct sockaddr *) addr_servicio, sizeof(*addr_servicio)) < 0){
+   if (bind(*s, (struct sockaddr *) addr_service, sizeof(*addr_service)) < 0){
       perror("");
       jdeshutdown(0);
    }
@@ -417,6 +460,14 @@ void bootstrap(int *s, struct sockaddr_in *addr_servicio, unsigned short port) {
    }
 }
 
+/**
+ * @brief Special write function to ignore the non block socket.
+ * When a EAGAIN error apear it is ignored and the write operation is redone.
+ *
+ * @param fd File descriptor where the write operacion will done
+ * @param buf Data to write
+ * @param count Number of bytes to write from buf
+ */
 void my_write(int fd, const void *buf, size_t count) { 
    int escritos = 0;
    int total_escritos = 0;
@@ -434,6 +485,15 @@ void my_write(int fd, const void *buf, size_t count) {
    } while (total_escritos < count);
 }
 
+/**
+ * @brief Receives a petition from a particular client, and dispatch it
+ * The petition can be an image petition, a subscription petition or a motors
+ * order. In the first case the image response will be send by de client socket,
+ * in the second case the subscription will be registered and in the last one
+ * the motors variable will be actualized.
+ * @param info The client information structure.
+ * @param petition The message recieved from client
+ */
 void dispatch_petition(struct client *info, char *petition) {
    long int codigo_mensaje;
    char output_buffer[MAX_MESSAGE];
@@ -441,7 +501,6 @@ void dispatch_petition(struct client *info, char *petition) {
    if (info->name[0]=='\0'){
       strncpy(info->name, petition, 256);
    }
-//    printf("dispatching %s\n", petition);
    if (sscanf(petition,"%d",(int *)&codigo_mensaje)==EOF){
       printf("No entiendo el mensaje (%s) del cliente (%s)\n",
              petition,info->name);
@@ -602,6 +661,12 @@ void dispatch_petition(struct client *info, char *petition) {
       printf("Mensaje NO reconocido del cliente %s: (%s)\n", info->name,petition);
 }
 
+/**
+ * @brief Dispatch all client subscriptions.
+ * It checks all the subscriptions and if the subscription is active, the
+ * appropriate information will be sent through the client socket.
+ * @param info The client information structure.
+ */
 void dispatch_subscriptions(struct client * info) {
    int i, j;
    char buff[MAX_MESSAGE];
@@ -692,6 +757,12 @@ void dispatch_subscriptions(struct client * info) {
    }
 }
 
+/**
+ * @brief The client thread
+ * It will recieve all the petitions from the client and will dispatch it. It will
+ * attend to the subscription too.
+ * @param pcs The client socket that will be stored in the client structure.
+ */
 void *client_thread(void *pcs) {
    char buf1[MAX_MESSAGE];
    char buf2[MAX_MESSAGE];
@@ -789,6 +860,11 @@ void *client_thread(void *pcs) {
    pthread_exit(0);
 }
 
+/**
+ * @brief The main thread
+ * It's the main driver thread. It will initialize the socket and will accept
+ * client connections, then will create a @ref client_thread for each client.
+ */
 void *listen_thread() {
    int s; /* FD socket escucha */
    int cs; /* FD socket despacho cliente */
@@ -810,6 +886,10 @@ void *listen_thread() {
    }
 }
 
+/**
+ * The startup function following the drivers jde api.
+ * @param configfile path and name to the config file of this driver.
+ */
 void networkserver_startup(char *configfile)
 {
    int i;

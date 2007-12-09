@@ -24,10 +24,14 @@
 #define JDEMESSAGES
 
 /* max characters in a non-image message */
-#define MAX_MESSAGE 2048         
+/** Maximum number of characters in a non-image message*/
+#define MAX_MESSAGE 2048
+/** Maximum number of characters in the client name*/
 #define MAX_CLIENT_NAME 20
+/** Coment line symbol*/
 #define COMMENT '#'
 
+/** Possible messages between client and server*/
 typedef enum {
    NETWORKSERVER_goodbye,
 

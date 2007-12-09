@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2007 Javier Martin Ramos, Jose Antonio Santos Cadenas
+ *  Copyright (C) 2007 Jose Antonio Santos Cadenas
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,13 +16,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors :   Jose Antonio Santos Cadenas  <santoscadenas@gmail.com>
+ *              Jose Maria Cañas Plaza <jmplaza@gsyc.es>
  */
 
 /**
  *  jdec graphics_gtk driver provides support for GTK window manager.
  *
  *  @file graphics_gtk.c
- *  @author Jose Antonio Santos Cadenas <santoscadenas@gmail.com>
+ *  @author Jose Antonio Santos Cadenas <santoscadenas@gmail.com> and Jose Maria Cañas Plaza <jmplaza@gsyc.es>
  *  @version 1.0
  *  @date 2007-11-21
  */
@@ -43,9 +44,9 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
-/** pthread identifiers for jdec gtk driver threads.*/
+/** pthread identifier for jdec graphics_gtk driver thread.*/
 pthread_t graphics_gtk_id;
-/** pthread identifiers for jdec gtk driver threads.*/
+/** pthread identifier for jdec graphics_gtk driver thread.*/
 pthread_t graphics_gtk_id2;
 
 /** graphics_gtk driver name.*/

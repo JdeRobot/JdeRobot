@@ -25,7 +25,7 @@
  *  jdec pantilt driver provides sensorial information from a pantilt neck conected.
  *
  *  @file pantilt.c
- *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, Victor G�mez G�mez <vmanuel@gsyc.escet.urjc.es>, Roberto Calvo Palomino <rocapal@gsyc.escet.urjc.es> and Jose Maria Ca�as Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, Victor Gómez Gómez <vmanuel@gsyc.escet.urjc.es>, Roberto Calvo Palomino <rocapal@gsyc.escet.urjc.es> and Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  *  @version 4.1
  *  @date 30-05-2007
  */
@@ -105,7 +105,7 @@ float min_pan;
 float max_tilt;
 /** pantilt driver current min tilt variable.*/
 float min_tilt;
- 
+
 /*API Variables compartidas*/
 /** 'ptmotors' schema longitude control*/
 float longitude; /* degs, pan angle */
@@ -158,7 +158,11 @@ int activate_pantiltencoders=0;
 int activate_pantiltmotors=0;
 
 
-/* Function to truncate float number to nearest integer */ 
+/**
+ * Function to truncate float number to nearest integer
+ * @param numberF The number that will be truncated
+ * @return The number truncated
+ */
 float truncateFloat (float numberF) 
 { 
  char numeroC[20]; 
@@ -459,7 +463,7 @@ int ptencoders_suspend()
 /** pantilt encoders resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int ptencoders_resume(int father, int *brothers, arbitration fn)
 {
@@ -568,7 +572,7 @@ int ptmotors_suspend()
 /** pantilt motors resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int ptmotors_resume(int father, int *brothers, arbitration fn)
 {

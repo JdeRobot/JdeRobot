@@ -44,10 +44,15 @@
 /** Diferent kinds of input*/
 enum
 {
+   /**Input from a video*/
    VIDEO = 0,
+   /**Input from a usb camera*/
    V4LCAM,
+   /**Input from a tv capturer*/
    V4LTV,
+   /**Input from a composite video signal*/
    V4LCOMP,
+   /**Input from super-video signal*/
    V4LSVID
 };
 
@@ -176,7 +181,7 @@ unsigned long int varimageD_clock;
 
 /* MPLAYER DRIVER FUNCTIONS */
 
-/** mplayer driver function to close devices.*/
+/** mplayer driver function to kill every mplayer and mencoder called.*/
 void mplayer_close(){
    int i;
 
@@ -201,7 +206,7 @@ void mplayer_close(){
 /** colorA resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int mycolorA_resume(int father, int *brothers, arbitration fn){
    if(serve_color[0]==1){
@@ -244,7 +249,7 @@ int mycolorA_suspend(){
 /** colorB resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int mycolorB_resume(int father, int *brothers, arbitration fn){
    if(serve_color[1]==1)
@@ -289,7 +294,7 @@ int mycolorB_suspend(){
 /** colorC resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int mycolorC_resume(int father, int *brothers, arbitration fn){
    if(serve_color[2]==1)
@@ -334,7 +339,7 @@ int mycolorC_suspend(){
 /** colorD resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int mycolorD_resume(int father, int *brothers, arbitration fn){
 
@@ -380,7 +385,7 @@ int mycolorD_suspend(){
 /** varcolorA resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int myvarcolorA_resume(int father, int *brothers, arbitration fn){
    if(serve_color[4]==1){
@@ -424,7 +429,7 @@ int myvarcolorA_suspend(){
 /** varcolorB resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int myvarcolorB_resume(int father, int *brothers, arbitration fn){
    if(serve_color[5]==1){
@@ -468,7 +473,7 @@ int myvarcolorB_suspend(){
 /** varcolorC resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int myvarcolorC_resume(int father, int *brothers, arbitration fn){
    if(serve_color[6]==1){
@@ -512,7 +517,7 @@ int myvarcolorC_suspend(){
 /** varcolorD resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int myvarcolorD_resume(int father, int *brothers, arbitration fn){
    if(serve_color[7]==1){
@@ -553,8 +558,8 @@ int myvarcolorD_suspend(){
    return 0;
 }
 
-/** mplayer driver function to start an mplayer process for a selected color.
- *  @param i selected color to launch an mplayer thread.*/
+/** mplayer driver function to start a mplayer process for a selected color.
+ *  @param i selected color to launch a mplayer thread.*/
 void mplayer_start(int i){
    int file;
    char str[100];
@@ -1220,18 +1225,22 @@ void mplayer_startup(char *configfile)
       state=slept;
       if (serve_color[0]){
          args[0]=0;
+         colorA = (char *) malloc(width[0]*height[0]*3);
          pthread_create(&mplayer_th[0],NULL,mplayer_thread,(void*)&args[0]);
       }
       if (serve_color[1]){
          args[1]=1;
+         colorB = (char *) malloc(width[1]*height[1]*3);
          pthread_create(&mplayer_th[1],NULL,mplayer_thread,(void*)&args[1]);
       }
       if (serve_color[2]){
          args[2]=2;
+         colorC = (char *) malloc(width[2]*height[2]*3);
          pthread_create(&mplayer_th[2],NULL,mplayer_thread,(void*)&args[2]);
       }
       if (serve_color[3]){
          args[3]=3;
+         colorD = (char *) malloc(width[3]*height[3]*3);
          pthread_create(&mplayer_th[3],NULL,mplayer_thread,(void*)&args[3]);
       }
      if (serve_color[4]){

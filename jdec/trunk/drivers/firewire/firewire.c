@@ -19,12 +19,16 @@
  */
 
 /**
- *  jdec firewire driver provides video images to color variables from firewire cameras using libdc1394 library.
+ * jdec firewire driver provides video images to color variables from firewire
+ * cameras using libdc1394 library.
  *
- *  @file firewire.c
- *  @author David Lobato <dlobato@gsyc.escet.urjc.es>, Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es> and Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>, José Antonio Santos <santoscadenas@gmail.com>
- *  @version 4.2
- -*  @date 2007-11-17
+ * This 4.3 version includes support for variable images. Only 320x240 and
+ * 640x420 sizes are admitted because firewire cameras only support this sizes.
+ *
+ * @file firewire.c
+ * @author David Lobato <dlobato@gsyc.escet.urjc.es>, Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, Jose Maria Cañas Plaza <jmplaza@gsyc.escet.urjc.es>and José Antonio Santos <santoscadenas@gmail.com>
+ * @version 4.3
+ * @date 2007-11-17
  */
 
 #include <stdio.h>
@@ -43,7 +47,10 @@
 /** Max number of buffers per node.*/
 #define NUM_BUFFERS 8
 
-/** Color conversion functions from Bart Nabbe. Corrected by Damien: bad coeficients in YUV2RGB.*/
+/**
+ * Color conversion functions from Bart Nabbe.
+ * Corrected by Damien: bad coeficients in YUV2RGB.
+ */
 #define YUV2RGB(y, u, v, r, g, b)		\
   r = y + ((v*1436) >> 10);			\
   g = y - ((u*352 + v*731) >> 10);		\
@@ -92,7 +99,7 @@ int firewire_fps640;
 /** firewire instant resolution variable for 640X480 size.*/
 int firewire_res640;
 
-/** pthread variable for jdec firewire driver.*/
+/** pthread identifiers for jdec firewire driver threads.*/
 pthread_t firewire_th[MAXCAM];
 /** Arguments for firewire threads*/
 int args[MAXCAM];
@@ -275,7 +282,7 @@ void set_default_firewire_camera_config(void){
 /** colorA resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int mycolorA_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -332,7 +339,7 @@ int mycolorA_suspend(){
 /** colorB resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int mycolorB_resume(int father, int *brothers, arbitration fn){
 
@@ -391,7 +398,7 @@ int mycolorB_suspend(){
 /** colorC resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int mycolorC_resume(int father, int *brothers, arbitration fn){
 
@@ -448,7 +455,7 @@ int mycolorC_suspend(){
 /** colorD resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int mycolorD_resume(int father, int *brothers, arbitration fn){
 
@@ -505,7 +512,7 @@ int mycolorD_suspend(){
 /** varcolorA resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int myvarcolorA_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -560,7 +567,7 @@ int myvarcolorA_suspend(){
 /** varcolorB resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int myvarcolorB_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -615,7 +622,7 @@ int myvarcolorB_suspend(){
 /** varcolorC resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int myvarcolorC_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -670,7 +677,7 @@ int myvarcolorC_suspend(){
 /** varcolorD resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
- *  @param arbitration function for this schema.
+ *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int myvarcolorD_resume(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
@@ -900,10 +907,11 @@ void *firewire_thread(void *id)
   pthread_exit(0);
 }
 
-/** Determines if a image configuration could be captured or not
+/** Determines if an image configuration could be captured or not
  *  @param width width of the possible image
- *  @param heigth height of the possible image
- *  @return 1 if the size is 320x240 or 640x480*/
+ *  @param height height of the possible image
+ *  @return 1 if the size could be captured, otherwise 0
+ */
 int size_ok(int width, int height){
    if (width==320 && height==240)
       return 1;
@@ -1231,7 +1239,8 @@ int firewire_parseconf(char *configfile){
    }else return -1;
 }
 
-/** firewire driver init function. It will start all firewire required devices and setting them the default configuration.
+/** firewire driver init function. It will start all firewire required devices
+ *  and setting them the default configuration.
  *  @return 0 if initialitation was successful or -1 if something went wrong.*/
 void firewire_init(){
 
@@ -1423,6 +1432,8 @@ void firewire_startup(char *configfile)
       myexport("colorA","height",&height[0]);
       myexport("colorA","resume",(void *)mycolorA_resume);
       myexport("colorA","suspend",(void *)mycolorA_suspend);
+
+      colorA=(char *)malloc (width[0]*height[0]*3);
     }else{
       serve_color[0]=0;
       printf("cannot find firewire camera for colorA\n");
@@ -1455,6 +1466,8 @@ void firewire_startup(char *configfile)
       myexport("colorB","height",&height[1]);
       myexport("colorB","resume",(void *)mycolorB_resume);
       myexport("colorB","suspend",(void *)mycolorB_suspend);
+
+      colorB=(char *)malloc (width[1]*height[1]*3);
     }else{
       serve_color[1]=0;
       printf("cannot find firewire camera for colorB\n");
@@ -1487,6 +1500,8 @@ void firewire_startup(char *configfile)
       myexport("colorC","height",&height[2]);
       myexport("colorC","resume",(void *)mycolorC_resume);
       myexport("colorC","suspend",(void *)mycolorC_suspend);
+
+      colorC=(char *)malloc (width[2]*height[2]*3);
     }else{
       serve_color[2]=0;
       printf("cannot find firewire camera for colorC\n");
@@ -1519,6 +1534,8 @@ void firewire_startup(char *configfile)
       myexport("colorD","height",&height[3]);
       myexport("colorD","resume",(void *)mycolorD_resume);
       myexport("colorD","suspend",(void *)mycolorD_suspend);
+
+      colorD=(char *)malloc (width[3]*height[3]*3);
     }else{
       serve_color[3]=0;
       printf("cannot find firewire camera for colorD\n");
