@@ -19,7 +19,9 @@
  */
 
 #include "jde.h"
-#include "jdegui.h"
+#include <forms.h>
+#include "graphics_xforms.h"
+#include "introrob.h"
 #include "introrobgui.h"
 #include "navegacion.h"
 #include "variables.h"
@@ -27,6 +29,18 @@
 #define DISPLAY_ROBOT 0x01UL
 #define DISPLAY_SONARS 0x04UL
 #define DISPLAY_LASER 0x08UL
+
+/*Gui declarations*/
+Display *mydisplay;
+int  *myscreen;
+
+/*Gui callbacks*/
+registerbuttons myregister_buttonscallback;
+registerdisplay myregister_displaycallback;
+deletebuttons mydelete_buttonscallback;
+deletedisplay mydelete_displaycallback;
+
+
 
 int introrob_id=0; 
 int introrob_brothers[MAX_SCHEMAS];
@@ -148,7 +162,7 @@ int pintaSegmento(Tvoxel a, Tvoxel b, int color)
      fl_set_foreground(introrobgui_gc,color);
      xy2introrobcanvas(a,&aa);
      xy2introrobcanvas(b,&bb);
-     XDrawLine(display,introrob_canvas_win,introrobgui_gc,aa.x,aa.y,bb.x,bb.y);
+     XDrawLine(mydisplay,introrob_canvas_win,introrobgui_gc,aa.x,aa.y,bb.x,bb.y);
      return 0;
    }
 
@@ -297,6 +311,36 @@ void *introrob_thread(void *not_used)
     }
 }
 
+void introrob_init(){
+   if (myregister_buttonscallback==NULL){
+      if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
+         printf ("I can't fetch register_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_buttonscallback=(deletebuttons)myimport ("graphics_xforms", "delete_buttonscallback"))==NULL){
+         printf ("I can't fetch delete_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((myregister_displaycallback=(registerdisplay)myimport ("graphics_xforms", "register_displaycallback"))==NULL){
+         printf ("I can't fetch register_displaycallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_displaycallback=(deletedisplay)myimport ("graphics_xforms", "delete_displaycallback"))==NULL){
+         jdeshutdown(1);
+         printf ("I can't fetch delete_displaycallback from graphics_xforms\n");
+      }
+   }
+
+   if ((myscreen=(int *)myimport("graphics_xforms", "screen"))==NULL){
+      fprintf (stderr, "teleoperator: I can't fetch screen from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+   if ((mydisplay=(Display *)myimport("graphics_xforms", "display"))==NULL){
+      fprintf (stderr, "teleoperator: I can't fetch display from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+}
+
 void introrob_startup()
 {
   pthread_mutex_lock(&(all[introrob_id].mymutex));
@@ -306,14 +350,16 @@ void introrob_startup()
   printf("introrob schema started up\n");
   put_state(introrob_id,slept);
   pthread_create(&(all[introrob_id].mythread),NULL,introrob_thread,NULL);
+  introrob_init();
   pthread_mutex_unlock(&(all[introrob_id].mymutex));
 
   introrob_state=teleoperated;
 }
 
-void introrob_guibuttons(FL_OBJECT *obj)
+void introrob_guibuttons(void *obj1)
 {
   double delta, deltapos;
+  FL_OBJECT *obj=(FL_OBJECT *)obj1;
  
   if (obj == fd_introrobgui->exit) jdeshutdown(0);
   else if (obj == fd_introrobgui->escala)  
@@ -411,7 +457,7 @@ void introrob_guidisplay()
   if (introrob_visual_refresh==TRUE)
     {
       fl_rectbound(0,0,introrob_width,introrob_height,FL_WHITE);   
-      XFlush(display);
+      XFlush(mydisplay);
     }
 
   /* the grid at the floor */
@@ -424,14 +470,14 @@ void introrob_guidisplay()
       bb.y=15000.;
       xy2introrobcanvas(aa,&a);
       xy2introrobcanvas(bb,&b);
-      XDrawLine(display,introrob_canvas_win,introrobgui_gc,a.x,a.y,b.x,b.y);
+      XDrawLine(mydisplay,introrob_canvas_win,introrobgui_gc,a.x,a.y,b.x,b.y);
       aa.y=-15000.+(float)i*1000;
       aa.x=-15000.;
       bb.y=-15000.+(float)i*1000;
       bb.x=15000.;
       xy2introrobcanvas(aa,&a);
       xy2introrobcanvas(bb,&b);
-      XDrawLine(display,introrob_canvas_win,introrobgui_gc,a.x,a.y,b.x,b.y);
+      XDrawLine(mydisplay,introrob_canvas_win,introrobgui_gc,a.x,a.y,b.x,b.y);
     }
   /* fl_set_foreground(introrobgui_gc,FL_RIGHT_BCOL); */
   
@@ -464,7 +510,7 @@ void introrob_guidisplay()
       fl_set_foreground(introrobgui_gc,FL_WHITE); 
       /* clean last laser, but only if there wasn't a total refresh. In case of total refresh the white rectangle already cleaned all */
       /*for(i=0;i<NUM_LASER;i++) XDrawPoint(display,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy[i].x,introrob_laser_dpy[i].y);*/
-      XDrawPoints(display,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy,NUM_LASER,CoordModeOrigin);
+      XDrawPoints(mydisplay,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy,NUM_LASER,CoordModeOrigin);
     }
   
   if ((introrob_display_state&DISPLAY_LASER)!=0){
@@ -475,7 +521,7 @@ void introrob_guidisplay()
       }
     fl_set_foreground(introrobgui_gc,FL_BLUE);
     /*for(i=0;i<NUM_LASER;i++) XDrawPoint(display,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy[i].x,introrob_laser_dpy[i].y);*/
-    XDrawPoints(display,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy,NUM_LASER,CoordModeOrigin);
+    XDrawPoints(mydisplay,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy,NUM_LASER,CoordModeOrigin);
   }
   
   
@@ -487,7 +533,7 @@ void introrob_guidisplay()
     {  
       fl_set_foreground(introrobgui_gc,FL_WHITE); 
       /* clean last robot, but only if there wasn't a total refresh. In case of total refresh the white rectangle already cleaned all */
-      for(i=0;i<numintrorob_ego;i++) XDrawLine(display,introrob_canvas_win,introrobgui_gc,introrob_ego[i].x,introrob_ego[i].y,introrob_ego[i+1].x,introrob_ego[i+1].y);
+      for(i=0;i<numintrorob_ego;i++) XDrawLine(mydisplay,introrob_canvas_win,introrobgui_gc,introrob_ego[i].x,introrob_ego[i].y,introrob_ego[i+1].x,introrob_ego[i+1].y);
       
     }
   
@@ -512,7 +558,7 @@ void introrob_guidisplay()
     
     /* pinto los nuevos */
     numintrorob_ego=EGOMAX-1;
-    for(i=0;i<numintrorob_ego;i++) XDrawLine(display,introrob_canvas_win,introrobgui_gc,introrob_ego[i].x,introrob_ego[i].y,introrob_ego[i+1].x,introrob_ego[i+1].y);
+    for(i=0;i<numintrorob_ego;i++) XDrawLine(mydisplay,introrob_canvas_win,introrobgui_gc,introrob_ego[i].x,introrob_ego[i].y,introrob_ego[i+1].x,introrob_ego[i+1].y);
   }
 
 
@@ -524,13 +570,13 @@ void introrob_guidisplay()
 	/* the target has changed, do its last position must be cleaned from the canvas */
 	{
 	  fl_set_foreground(introrobgui_gc,FL_WHITE);
-	  XDrawLine(display,introrob_canvas_win,introrobgui_gc,targetgraf.x-5,targetgraf.y,targetgraf.x+5,targetgraf.y);
-	  XDrawLine(display,introrob_canvas_win,introrobgui_gc,targetgraf.x,targetgraf.y-5,targetgraf.x,targetgraf.y+5);
+	  XDrawLine(mydisplay,introrob_canvas_win,introrobgui_gc,targetgraf.x-5,targetgraf.y,targetgraf.x+5,targetgraf.y);
+	  XDrawLine(mydisplay,introrob_canvas_win,introrobgui_gc,targetgraf.x,targetgraf.y-5,targetgraf.x,targetgraf.y+5);
 	}
       fl_set_foreground(introrobgui_gc,FL_RED);
       xy2introrobcanvas(vfftarget,&targetgraf);
-      XDrawLine(display,introrob_canvas_win,introrobgui_gc,targetgraf.x-5,targetgraf.y,targetgraf.x+5,targetgraf.y);
-      XDrawLine(display,introrob_canvas_win,introrobgui_gc,targetgraf.x,targetgraf.y-5,targetgraf.x,targetgraf.y+5);
+      XDrawLine(mydisplay,introrob_canvas_win,introrobgui_gc,targetgraf.x-5,targetgraf.y,targetgraf.x+5,targetgraf.y);
+      XDrawLine(mydisplay,introrob_canvas_win,introrobgui_gc,targetgraf.x,targetgraf.y-5,targetgraf.x,targetgraf.y+5);
     }
   
 
@@ -726,16 +772,28 @@ int introrob_button_released_on_micanvas(FL_OBJECT *ob, Window win, int win_widt
 }
 
 
-void introrob_guisuspend(void)
+void introrob_guisuspend_aux(void)
 {
   v_teleop=0; w_teleop=0; 
   /* to make a safety stop when the robot is being teleoperated from GUI */
-  delete_buttonscallback(introrob_guibuttons);
-  delete_displaycallback(introrob_guidisplay);
+  mydelete_buttonscallback(introrob_guibuttons);
+  mydelete_displaycallback(introrob_guidisplay);
   fl_hide_form(fd_introrobgui->introrobgui);
 }
 
-void introrob_guiresume(void)
+void introrob_guisuspend(){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
+         fn ((gui_function)introrob_guisuspend_aux);
+      }
+   }
+   else{
+      fn ((gui_function)introrob_guisuspend_aux);
+   }
+}
+
+void introrob_guiresume_aux(void)
 {
   static int k=0;
   XGCValues gc_values;
@@ -760,7 +818,7 @@ void introrob_guiresume(void)
       fl_show_form(fd_introrobgui->introrobgui,FL_PLACE_POSITION,FL_FULLBORDER,"introrob");
       introrob_canvas_win= FL_ObjWin(fd_introrobgui->micanvas);
       gc_values.graphics_exposures = False;
-      introrobgui_gc = XCreateGC(display, introrob_canvas_win, GCGraphicsExposures, &gc_values);  
+      introrobgui_gc = XCreateGC(mydisplay, introrob_canvas_win, GCGraphicsExposures, &gc_values);  
 
       /* canvas handlers */
       fl_add_canvas_handler(fd_introrobgui->micanvas,ButtonPress,introrob_button_pressed_on_micanvas,NULL);
@@ -799,6 +857,18 @@ void introrob_guiresume(void)
   fl_set_positioner_xvalue(fd_introrobgui->center,0.5);
   fl_set_positioner_yvalue(fd_introrobgui->center,0.5);
 	
-  register_buttonscallback(introrob_guibuttons);
-  register_displaycallback(introrob_guidisplay);
+  myregister_buttonscallback(introrob_guibuttons);
+  myregister_displaycallback(introrob_guidisplay);
+}
+
+void introrob_guiresume(){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
+         fn ((gui_function)introrob_guiresume_aux);
+      }
+   }
+   else{
+      fn ((gui_function)introrob_guiresume_aux);
+   }
 }

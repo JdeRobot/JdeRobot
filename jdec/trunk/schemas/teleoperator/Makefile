@@ -1,5 +1,5 @@
 JDEDIR = /usr/local
-INC-DIR = -I../../core -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/include/X11 -I$(JDEDIR)/include/jde-robot
+INC-DIR = -I../../core -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/include/X11 -I../../drivers/graphics_xforms -I$(JDEDIR)/include/jde-robot
 LIB-DIR = -L. -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib 
 GCC = gcc
 CFLAGS = -g -pedantic -Wall $(INC-DIR)
@@ -22,7 +22,7 @@ pioneeropengl.o: pioneeropengl.c pioneeropengl.h
 	$(GCC) $(CFLAGS) -fPIC -c pioneeropengl.c
 
 clean:
-	rm -f *.o teleoperator.so 
+	rm -f *.o teleoperator.so teleoperatorgui.h teleoperatorgui.c 
 
 install:
 	cp teleoperator.so $(JDEDIR)/share/jde-robot/

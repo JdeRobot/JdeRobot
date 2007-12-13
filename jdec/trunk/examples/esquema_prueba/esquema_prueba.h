@@ -18,17 +18,11 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void introrob_startup();
-extern void introrob_suspend();
-extern void introrob_resume(int father, int *brothers, arbitration fn);
-extern void introrob_guiresume();
-extern void introrob_guisuspend();
+extern void esquema_prueba_startup();
+extern void esquema_prueba_suspend();
+extern void esquema_prueba_resume(int father, int *brothers, arbitration fn);
+extern void esquema_prueba_guiresume();
+extern void esquema_prueba_guisuspend();
 
-#define MOUSELEFT 1
-#define MOUSEMIDDLE 2
-#define MOUSERIGHT 3
-#define MOUSEWHEELUP 4
-#define MOUSEWHEELDOWN 5
-
-#define PI 3.14159265
-
+extern int esquema_prueba_id; /* schema identifier */
+extern int esquema_prueba_cycle; /* ms */

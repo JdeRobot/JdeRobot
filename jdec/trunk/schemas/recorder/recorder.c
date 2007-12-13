@@ -20,7 +20,8 @@
  */
 
 #include "jde.h"
-#include "jdegui.h"
+#include "forms.h"
+#include "graphics_xforms.h"
 #include "recordergui.h"
 #include "recorder.h"
 #include <string.h>
@@ -28,6 +29,16 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
+
+/*Gui declarations*/
+Display *mydisplay;
+int  *myscreen;
+
+/*Gui callbacks*/
+registerbuttons myregister_buttonscallback;
+registerdisplay myregister_displaycallback;
+deletebuttons mydelete_buttonscallback;
+deletedisplay mydelete_displaycallback;
 
 
 #define RECORDERver "recorder 2.0"
@@ -46,9 +57,9 @@ char directorio[255];
 char fifo[ROUTE_LEN];
 
 /**
-	Elige el codec que satisfaga tus intereses de entre los que liste el comando
-	"mencoder -ovc help" y cambia el valor de CODEC_NAME.
-*/
+ * Elige el codec que satisfaga tus intereses de entre los que liste el comando
+ * "mencoder -ovc help" y cambia el valor de CODEC_NAME.
+ */
 #define CODEC_NAME "copy"
 
 /* exported variables */
@@ -86,7 +97,7 @@ int recordergui_setupDisplay(void)
    static XGCValues gc_values;
 
    gc_values.graphics_exposures = False;
-   recorder_gc = XCreateGC(display,recorder_window, GCGraphicsExposures, &gc_values);
+   recorder_gc = XCreateGC(mydisplay,recorder_window, GCGraphicsExposures, &gc_values);
    
    vmode= fl_get_vclass();
 
@@ -94,7 +105,7 @@ int recordergui_setupDisplay(void)
    {
       printf("16 bits mode\n");
       /* Imagen principal */
-      image = XCreateImage(display,DefaultVisual(display,screen),16,
+      image = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),16,
 			       ZPixmap, 0, (char*)show_img, SIFNTSC_COLUMNS,
 			       SIFNTSC_ROWS,8,0);
 
@@ -103,7 +114,7 @@ int recordergui_setupDisplay(void)
    {
       printf("24 bits mode\n");
       /* Imagen principal */
-      image = XCreateImage(display,DefaultVisual(display,screen),24,
+      image = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),24,
 			       ZPixmap, 0, (char*)show_img, SIFNTSC_COLUMNS,
 			       SIFNTSC_ROWS,8,0);
 
@@ -113,7 +124,7 @@ int recordergui_setupDisplay(void)
 
       printf("32 bits mode\n");
       /* Imagen principal */
-      image = XCreateImage(display,DefaultVisual(display,screen),32,
+      image = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),32,
 			       ZPixmap, 0, (char*)show_img, SIFNTSC_COLUMNS,
 			       SIFNTSC_ROWS,8,0);
 
@@ -123,7 +134,7 @@ int recordergui_setupDisplay(void)
    {
       printf("8 bits mode\n");
       /* Imagen principal */
-      image = XCreateImage(display,DefaultVisual(display,screen),8,
+      image = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),8,
 			       ZPixmap, 0, (char*)show_img, SIFNTSC_COLUMNS,
 			       SIFNTSC_ROWS,8,0);
    }
@@ -135,61 +146,59 @@ int recordergui_setupDisplay(void)
 }
 
 
-void recorder_iteration()
-{
-  static int prev_state=0;
-  static int fifo_fd;
-  speedcounter(recorder_id);
+void recorder_iteration(){
+   static int prev_state=0;
+   static int fifo_fd;
+   speedcounter(recorder_id);
 
-  if (prev_state==0 && record==1 && strcmp(image_format, NULL_FORMAT)){
-     /*Comienza una nueva grabación*/
-     /*Se crea un fifo y se lanza mplayer*/
-     unlink (fifo);
-     if ( (mkfifo (fifo, 0600) != 0) ){
-	fprintf (stderr, "imposible crear el fifo\n");
-	exit (1);
-     }
-     if (fork() == 0) {/* We create a new process...
-	// ... close its stdin, stdout & stderr ...*/
-	char str[50];
-	int file;
-	file = open("/dev/null",O_RDWR);
-	close(0); dup(file);
-	close(1); dup(file);
-	close(2); dup(file);
+   if (prev_state==0 && record==1 && strcmp(image_format, NULL_FORMAT)){
+      /*Comienza una nueva grabación*/
+      /*Se crea un fifo y se lanza mplayer*/
+      unlink (fifo);
+      if ( (mkfifo (fifo, 0600) != 0) ){
+         fprintf (stderr, "imposible crear el fifo\n");
+         exit (1);
+      }
+      if (fork() == 0) {/* We create a new process...
+         // ... close its stdin, stdout & stderr ...*/
+         char str[50];
+         int file;
+         file = open("/dev/null",O_RDWR);
+         close(0); dup(file);
+         close(1); dup(file);
+         close(2); dup(file);
 
-	sprintf(str,"fps=%.1f:w=%d:h=%d:format=%s",record_fps,
-		SIFNTSC_COLUMNS,SIFNTSC_ROWS, image_format);
-	execlp("mencoder","mencoder", fifo,"-demuxer","rawvideo", "-rawvideo",
-	       str, "-o", video_name, "-ovc", CODEC_NAME ,NULL);
-	printf("Error executing mencoder\n");
-	exit(1);
-     }
-     if ((fifo_fd=open(fifo, O_WRONLY))<0){
-	fprintf (stderr, "Error al abrir el fifo\n");
-	exit(1);
-     }
-     prev_state=1;
-  }
-  else if (prev_state==1 && record==1){
-     /*Está grabando, se escribe en el fifo la imagen actual colorA*/
-     if (write (fifo_fd, (*mycolorA), SIFNTSC_COLUMNS*SIFNTSC_ROWS*ncanales)>SIFNTSC_COLUMNS*SIFNTSC_ROWS*ncanales){
-	fprintf (stderr, "Error al Escribir en el fifo\n");
-	exit(1);
-     }
-  }
-  else if (prev_state==1 && record==0){
-     /*Termina la grabación se cierra el fifo y morirá con ello mencoder*/
-     close (fifo_fd);
-     unlink(fifo);
-     wait (NULL); /*Esperar la muerte de mencoder*/
-     prev_state=0;
-  }
+         sprintf(str,"fps=%.1f:w=%d:h=%d:format=%s",record_fps,
+                 SIFNTSC_COLUMNS,SIFNTSC_ROWS, image_format);
+         execlp("mencoder","mencoder", fifo,"-demuxer","rawvideo", "-rawvideo",
+                str, "-o", video_name, "-ovc", CODEC_NAME ,NULL);
+         printf("Error executing mencoder\n");
+         exit(1);
+      }
+      if ((fifo_fd=open(fifo, O_WRONLY))<0){
+         fprintf (stderr, "Error al abrir el fifo\n");
+         exit(1);
+      }
+      prev_state=1;
+   }
+   else if (prev_state==1 && record==1){
+      /*Está grabando, se escribe en el fifo la imagen actual colorA*/
+      if (write (fifo_fd, (*mycolorA), SIFNTSC_COLUMNS*SIFNTSC_ROWS*ncanales)>SIFNTSC_COLUMNS*SIFNTSC_ROWS*ncanales){
+         fprintf (stderr, "Error al Escribir en el fifo\n");
+         exit(1);
+      }
+   }
+   else if (prev_state==1 && record==0){
+      /*Termina la grabación se cierra el fifo y morirá con ello mencoder*/
+      close (fifo_fd);
+      unlink(fifo);
+      wait (NULL); /*Esperar la muerte de mencoder*/
+      prev_state=0;
+   }
 }
 
 
-void recorder_suspend()
-{
+void recorder_suspend(){
   pthread_mutex_lock(&(all[recorder_id].mymutex));
   put_state(recorder_id,slept);
   /*  printf("recorder: off\n");*/
@@ -229,10 +238,9 @@ void recorder_resume(int father, int *brothers, arbitration fn)
 
 void *recorder_thread(void *not_used)
 {
-  struct timeval a,b,c;
+  struct timeval a,b;
   long n=0; /* iteration */
-  struct timespec d;
-  long diff,next,bb,aa;
+  long next,bb,aa;
 
   for(;;)
     {
@@ -287,6 +295,36 @@ void *recorder_thread(void *not_used)
     }
 }
 
+void recorder_init(){
+   if (myregister_buttonscallback==NULL){
+      if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
+         printf ("I can't fetch register_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_buttonscallback=(deletebuttons)myimport ("graphics_xforms", "delete_buttonscallback"))==NULL){
+         printf ("I can't fetch delete_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((myregister_displaycallback=(registerdisplay)myimport ("graphics_xforms", "register_displaycallback"))==NULL){
+         printf ("I can't fetch register_displaycallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_displaycallback=(deletedisplay)myimport ("graphics_xforms", "delete_displaycallback"))==NULL){
+         jdeshutdown(1);
+         printf ("I can't fetch delete_displaycallback from graphics_xforms\n");
+      }
+   }
+
+   if ((myscreen=(int *)myimport("graphics_xforms", "screen"))==NULL){
+      fprintf (stderr, "teleoperator: I can't fetch screen from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+   if ((mydisplay=(Display *)myimport("graphics_xforms", "display"))==NULL){
+      fprintf (stderr, "teleoperator: I can't fetch display from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+}
+
 void recorder_startup()
 {
   int i;
@@ -315,12 +353,13 @@ void recorder_startup()
   }
 
   pthread_create(&(all[recorder_id].mythread),NULL,recorder_thread,NULL);
+  recorder_init();
   pthread_mutex_unlock(&(all[recorder_id].mymutex));
 }
 
-void recorder_guibuttons(FL_OBJECT *obj){
-   
+void recorder_guibuttons(void *obj1){
    int value;
+   FL_OBJECT *obj=(FL_OBJECT *)obj1;
 
    if (obj == fd_recordergui->record){
       if (fl_get_button (obj)==RELEASED){
@@ -371,7 +410,7 @@ void recorder_guibuttons(FL_OBJECT *obj){
          strcpy(input_image, fl_get_input(fd_recordergui->input_image));
          mycolorA=(char **) myimport (input_schema, input_image);
          mycolorAresume=(resumeFn)myimport(input_schema, "resume");
-         mycolorAsuspend=(suspendFn *)myimport(input_schema,"suspend");
+         mycolorAsuspend=(suspendFn)myimport(input_schema,"suspend");
          if (mycolorA == NULL) {
             fl_set_object_label(fd_recordergui->status,"Can't fetch the input");
          }
@@ -432,21 +471,33 @@ void recorder_guidisplay(){
 				show_img[i*4+2]=(*mycolorA)[i*ncanales+2];
 			}
 			
-			XPutImage(display,recorder_window,recorder_gc,image,0,0,
+			XPutImage(mydisplay,recorder_window,recorder_gc,image,0,0,
 			fd_recordergui->image->x,fd_recordergui->image->y,
 			SIFNTSC_COLUMNS, SIFNTSC_ROWS);
 		}
 	}
 }
 
-void recorder_guisuspend(void)
+void recorder_guisuspend_aux(void)
 {
-   delete_buttonscallback(recorder_guibuttons);
-   delete_displaycallback(recorder_guidisplay);
+   mydelete_buttonscallback(recorder_guibuttons);
+   mydelete_displaycallback(recorder_guidisplay);
    fl_hide_form(fd_recordergui->recordergui);
 }
 
-void recorder_guiresume(void)
+void recorder_guisuspend(void){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
+         fn ((gui_function)recorder_guisuspend_aux);
+      }
+   }
+   else{
+      fn ((gui_function)recorder_guisuspend_aux);
+   }
+}
+
+void recorder_guiresume_aux(void)
 {
    static int k=0;
 
@@ -470,6 +521,18 @@ void recorder_guiresume(void)
    recorder_cycle=(int)(1000/record_fps);
    fl_set_object_label(fd_recordergui->status,"Stopped");
 
-   register_buttonscallback(recorder_guibuttons);
-   register_displaycallback(recorder_guidisplay);
+   myregister_buttonscallback(recorder_guibuttons);
+   myregister_displaycallback(recorder_guidisplay);
+}
+
+void recorder_guiresume(void){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
+         fn ((gui_function)recorder_guiresume_aux);
+      }
+   }
+   else{
+      fn ((gui_function)recorder_guiresume_aux);
+   }
 }

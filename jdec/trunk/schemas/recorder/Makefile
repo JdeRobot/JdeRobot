@@ -1,5 +1,5 @@
 JDEDIR = /usr/local
-INC-DIR = -I../../core -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/include/X11 -I$(JDEDIR)/include/jde-robot
+INC-DIR = -I../../core -I../../drivers/graphics_xforms -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/include/X11 -I$(JDEDIR)/include/jde-robot
 LIB-DIR = -L. -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib 
 GCC = gcc
 CFLAGS = -g -O -pedantic -Wall $(INC-DIR)
@@ -18,7 +18,7 @@ recordergui.c: recordergui.fd
 	fdesign -convert recordergui.fd
 
 clean:
-	rm -f *.o recorder.so
+	rm -f *.o recorder.so recordergui.c recordergui.h
 
 install:
 	cp recorder.so $(JDEDIR)/share/jde-robot/

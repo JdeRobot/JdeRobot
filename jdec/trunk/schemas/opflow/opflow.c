@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006 José María Cañas Plaza 
+ *  Copyright (C) 2006 José María Cañas Plaza
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
  */
 
 #include "jde.h"
-#include "jdegui.h"
+#include <forms.h>
+#include "graphics_xforms.h"
 #include "opflowgui.h"
 #include "opflow.h"
 #include <string.h>
@@ -34,6 +35,15 @@
 #define RELEASED 0
 
 #define square(a)  ((a)*(a))
+
+Display *mydisplay;
+int  *myscreen;
+
+/*Gui callbacks*/
+registerbuttons myregister_buttonscallback;
+registerdisplay myregister_displaycallback;
+deletebuttons mydelete_buttonscallback;
+deletedisplay mydelete_displaycallback;
 
 typedef struct{
    IppiPoint_32f punto;
@@ -134,7 +144,7 @@ void opflow_IPP(
 {
    IppiPyramid *pPyr1, *pPyr2;
    IppiOptFlowPyrLK *pOF;
-   /*Crea las pirámides*/
+   /*Crea las pirÃ¡mides*/
    ippiPyramidInitAlloc (&pPyr1, numLevel, roiSize, rate);
    ippiPyramidInitAlloc (&pPyr2, numLevel, roiSize, rate);
    {
@@ -185,13 +195,13 @@ void opflow_IPP(
 	    printf ("Puntero a nulo\n");
 	    break;
 	 case ippStsSizeErr:
-	    printf ("Valor de tamaño erroneo\n");
+	    printf ("Valor de tamaÃ±o erroneo\n");
 	    break;
 	 case ippStsBadArgErr:
 	    printf ("Error maxLev, threshold o maxIter\n");
 	    break;
 	 default:
-	    printf ("opción desconocida\n");
+	    printf ("opciÃ³n desconocida\n");
       }
       ippiOpticalFlowPyrLKFree_8u_C1R(pOF);
       for (i=level; i>0; i--) {
@@ -277,8 +287,37 @@ int opflowgui_setupDisplay(void)
    int vmode;
    static XGCValues gc_values;
 
+   if ((mydisplay= (Display *)myimport("graphics_xforms", "display"))==NULL){
+      fprintf (stderr, "oplfow: I can't fetch display from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+   if ((myscreen= (int *)myimport("graphics_xforms", "screen"))==NULL){
+      fprintf (stderr, "oplfow: I can't fetch screen from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+
+   if (myregister_buttonscallback==NULL){
+      if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
+         printf ("opflow: I can't fetch register_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_buttonscallback=(deletebuttons)myimport ("graphics_xforms", "delete_buttonscallback"))==NULL){
+         printf ("opflow: I can't fetch delete_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((myregister_displaycallback=(registerdisplay)myimport ("graphics_xforms", "register_displaycallback"))==NULL){
+         printf ("opflow: I can't fetch register_displaycallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_displaycallback=(deletedisplay)myimport ("graphics_xforms", "delete_displaycallback"))==NULL){
+         jdeshutdown(1);
+         printf ("ofplow: I can't fetch delete_displaycallback from graphics_xforms\n");
+      }
+   }
+   
+
    gc_values.graphics_exposures = False;
-   opflow_gc = XCreateGC(display,opflow_window, GCGraphicsExposures, &gc_values);
+   opflow_gc = XCreateGC(mydisplay,opflow_window, GCGraphicsExposures, &gc_values);
    
    vmode= fl_get_vclass();
 
@@ -286,7 +325,7 @@ int opflowgui_setupDisplay(void)
    {
       printf("16 bits mode\n");
       /* Imagen principal */
-      old_image = XCreateImage(display,DefaultVisual(display,screen),16,
+      old_image = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),16,
 			       ZPixmap, 0, (char*)show_old, SIFNTSC_COLUMNS,
 			       SIFNTSC_ROWS,8,0);
    }
@@ -294,7 +333,7 @@ int opflowgui_setupDisplay(void)
    {
       printf("24 bits mode\n");
       /* Imagen principal */
-      old_image = XCreateImage(display,DefaultVisual(display,screen),24,
+      old_image = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),24,
 			       ZPixmap, 0, (char*)show_old, SIFNTSC_COLUMNS,
 			       SIFNTSC_ROWS,8,0);
    }
@@ -303,7 +342,7 @@ int opflowgui_setupDisplay(void)
 
       printf("32 bits mode\n");
       /* Imagen principal */
-      old_image = XCreateImage(display,DefaultVisual(display,screen),32,
+      old_image = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),32,
 			       ZPixmap, 0, (char*)show_old, SIFNTSC_COLUMNS,
 			       SIFNTSC_ROWS,8,0);
       
@@ -312,7 +351,7 @@ int opflowgui_setupDisplay(void)
    {
       printf("8 bits mode\n");
       /* Imagen principal */
-      old_image = XCreateImage(display,DefaultVisual(display,screen),8,
+      old_image = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),8,
 			       ZPixmap, 0, (char*)show_old, SIFNTSC_COLUMNS,
 			       SIFNTSC_ROWS,8,0);
 
@@ -396,7 +435,6 @@ void opflow_iteration()
    if (inicializado){
       int i,j;
       static Ipp8u* eig_buffer=NULL;
-      static int eig_buff_step;
       static Ipp32f *eig_val=NULL;
       static int eig_val_s;
 
@@ -430,7 +468,7 @@ void opflow_iteration()
                for (i=0; i<SIFNTSC_COLUMNS; i++){
                   int val=i+j*SIFNTSC_COLUMNS;
                   Ipp32f valor= eig_val[val];
-		  //Se utiliza también para reiniciar la matriz resultado
+		  //Se utiliza tambiÃ©n para reiniciar la matriz resultado
                   opflow_img_work[val].calc=0;
 		  //En este punto hay que umbralizar y ordenar
                   if (valor>min_eig && valor<max_eig){
@@ -498,10 +536,10 @@ void opflow_iteration()
             }
             break;
          case ippStsSizeErr:
-            printf ("Parámetros erróneos.\n");
+            printf ("ParÃ¡metros errÃ³neos.\n");
             break;
          case ippStsStepErr:
-            printf ("Step inválido.\n");
+            printf ("Step invÃ¡lido.\n");
             printf ("width=%d, COLUMS=%d\n", imgtam.width, SIFNTSC_COLUMNS);
             break;
          case ippStsNotEvenStepErr:
@@ -710,7 +748,7 @@ void opflow_resume(int father, int *brothers, arbitration fn)
       pthread_mutex_unlock(&(all[opflow_id].mymutex));
       mycolorA=(char **)myimport("colorA","colorA");
       mycolorAresume=(resumeFn)myimport("colorA","resume");
-      mycolorAsuspend=(suspendFn *)myimport("colorA","suspend");
+      mycolorAsuspend=(suspendFn)myimport("colorA","suspend");
       mycolorAid = (int *)myimport ("colorA", "id");
    }
    veces_arrancado++;
@@ -810,7 +848,8 @@ void opflow_startup()
    pthread_mutex_unlock(&(all[opflow_id].mymutex));
 }
 
-void opflow_guibuttons(FL_OBJECT *obj){
+void opflow_guibuttons(void *obj1){
+   FL_OBJECT *obj=(FL_OBJECT*)obj1;
    if (obj == fd_opflowgui->show_arrows){
       if (fl_get_button (obj)==RELEASED){
 	 show_arrows=0;
@@ -960,21 +999,35 @@ void opflow_guidisplay(){
 	 record_work=aux;
       }
 #endif
-      XPutImage(display,opflow_window,opflow_gc,old_image,
+      XPutImage(mydisplay,opflow_window,opflow_gc,old_image,
 		0,0,fd_opflowgui->old_img->x,
 		fd_opflowgui->old_img->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
    }
    
 }
 
-void opflow_guisuspend(void)
+void opflow_guisuspend_aux(void)
 {
-  delete_buttonscallback(opflow_guibuttons);
-  delete_displaycallback(opflow_guidisplay);
+   if (mydelete_buttonscallback!=NULL)
+      mydelete_buttonscallback(opflow_guibuttons);
+   if (mydelete_displaycallback!=NULL)
+      mydelete_displaycallback(opflow_guidisplay);
   fl_hide_form(fd_opflowgui->opflowgui);
 }
 
-void opflow_guiresume(void)
+void opflow_guisuspend(void){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
+         fn ((gui_function)opflow_guisuspend_aux);
+      }
+   }
+   else{
+      fn ((gui_function)opflow_guisuspend_aux);
+   }
+}
+
+void opflow_guiresume_aux(void)
 {
   static int k=0;
 
@@ -1001,6 +1054,20 @@ void opflow_guiresume(void)
   fl_set_slider_value (fd_opflowgui->layers, layers);
   fl_set_slider_value (fd_opflowgui->num_iters, num_iter);
 
-  register_buttonscallback(opflow_guibuttons);
-  register_displaycallback(opflow_guidisplay);
+  if (myregister_buttonscallback!=NULL)
+     myregister_buttonscallback(opflow_guibuttons);
+  if (myregister_displaycallback!=NULL)
+     myregister_displaycallback(opflow_guidisplay);
+}
+
+void opflow_guiresume(void){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
+         fn ((gui_function)opflow_guiresume_aux);
+      }
+   }
+   else{
+      fn ((gui_function)opflow_guiresume_aux);
+   }
 }

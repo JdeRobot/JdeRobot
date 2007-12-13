@@ -19,17 +19,20 @@
  */
 
 #include "jde.h"
-#include "jdegui.h"
+#include <forms.h>
+#include "graphics_xforms.h"
 #include "opflow.h"
 #include "eyeoperator1gui.h"
 #include "eyeoperator1.h"
 #include "pioneer.h"
 #include <ipp.h>
 
-#define EYEOPERATORver "eyeoperator14"
+#define EYEOPERATORver "eyeoperator1"
 
 #define CUBO(a) ((a)*(a)*(a))
 #define CUADRADO(a) ((a)*(a))
+
+#define PI 3.14159265
 
 int eyeoperator1_id=0;
 int eyeoperator1_brothers[MAX_SCHEMAS];
@@ -44,6 +47,13 @@ int eyeoperator1_cycle=50; /* ms */
 GC eyeoperator1_gc;
 Window eyeoperator1_window;
 XImage *image;
+
+Display *mydisplay;
+int  *myscreen;
+
+/*Gui callbacks*/
+registerdisplay myregister_displaycallback;
+deletedisplay mydelete_displaycallback;
 
 #ifdef GRABAR
 /*Exportar para grabar*/
@@ -167,7 +177,7 @@ int eyeoperator1gui_setupDisplay(void)
    static XGCValues gc_values;
 
    gc_values.graphics_exposures = False;
-   eyeoperator1_gc = XCreateGC(display,eyeoperator1_window, GCGraphicsExposures, &gc_values);
+   eyeoperator1_gc = XCreateGC(mydisplay,eyeoperator1_window, GCGraphicsExposures, &gc_values);
    
    vmode= fl_get_vclass();
 
@@ -175,7 +185,7 @@ int eyeoperator1gui_setupDisplay(void)
    {
       printf("16 bits mode\n");
       /* Imagen principal */
-      image = XCreateImage(display,DefaultVisual(display,screen),16,
+      image = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),16,
                            ZPixmap, 0, (char*)show_img, SIFNTSC_COLUMNS,
                            SIFNTSC_ROWS,8,0);
    }
@@ -183,7 +193,7 @@ int eyeoperator1gui_setupDisplay(void)
    {
       printf("24 bits mode\n");
       /* Imagen principal */
-      image = XCreateImage(display,DefaultVisual(display,screen),24,
+      image = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),24,
                            ZPixmap, 0, (char*)show_img, SIFNTSC_COLUMNS,
                            SIFNTSC_ROWS,8,0);
 
@@ -193,7 +203,7 @@ int eyeoperator1gui_setupDisplay(void)
 
       printf("32 bits mode\n");
       /* Imagen principal */
-      image = XCreateImage(display,DefaultVisual(display,screen),32,
+      image = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),32,
                            ZPixmap, 0, (char*)show_img, SIFNTSC_COLUMNS,
                            SIFNTSC_ROWS,8,0);
    }
@@ -201,7 +211,7 @@ int eyeoperator1gui_setupDisplay(void)
    {
       printf("8 bits mode\n");
       /* Imagen principal */
-      image = XCreateImage(display,DefaultVisual(display,screen),8,
+      image = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),8,
                            ZPixmap, 0, (char*)show_img, SIFNTSC_COLUMNS,
                            SIFNTSC_ROWS,8,0);
    }
@@ -324,7 +334,7 @@ void eyeoperator1_resume(int father, int *brothers, arbitration fn){
 
    myopflow_img=(t_opflow **)myimport ("opflow", "opflow_img");
    myopflowresume=(resumeFn)myimport("opflow","resume");
-   myopflowsuspend=(suspendFn *)myimport("opflow","suspend");
+   myopflowsuspend=(suspendFn)myimport("opflow","suspend");
    myopflowid=(int *)myimport ("opflow", "id");
    mask=(Ipp8u **)myimport("opflow", "mask");
   
@@ -431,6 +441,28 @@ void *eyeoperator1_thread(void *not_used)
    }
 }
 
+void eyeoperator1_init(){
+   if (myregister_displaycallback==NULL){
+      if ((myregister_displaycallback=(registerdisplay)myimport ("graphics_xforms", "register_displaycallback"))==NULL){
+         printf ("I can't fetch register_displaycallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_displaycallback=(deletedisplay)myimport ("graphics_xforms", "delete_displaycallback"))==NULL){
+         jdeshutdown(1);
+         printf ("I can't fetch delete_displaycallback from graphics_xforms\n");
+      }
+   }
+
+   if ((myscreen=(int *)myimport("graphics_xforms", "screen"))==NULL){
+      fprintf (stderr, "teleoperator: I can't fetch screen from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+   if ((mydisplay=(Display *)myimport("graphics_xforms", "display"))==NULL){
+      fprintf (stderr, "teleoperator: I can't fetch display from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+}
+
 void eyeoperator1_startup()
 {
    int i;
@@ -459,13 +491,8 @@ void eyeoperator1_startup()
    
    pthread_create(&(all[eyeoperator1_id].mythread),NULL,eyeoperator1_thread,
 		    NULL);
+   eyeoperator1_init();
    pthread_mutex_unlock(&(all[eyeoperator1_id].mymutex));
-}
-
-void eyeoperator1_guibuttons(FL_OBJECT *obj)
-{
-
-
 }
 
 void eyeoperator1_guidisplay()
@@ -495,9 +522,9 @@ void eyeoperator1_guidisplay()
 
       /*Ahora pintar el flujo medio*/
       {
+         int x2,y2;
          int x1=(region.x1+region.x2)/2;
          int y1=(region.y1+region.y2)/2;;
-         int x2,y2;
          /*Darle longitud al segmento que se pinta*/
          x2 = (int) (x1 - 2 * modulo * cos(angulo));
          y2 = (int) (y1 - 2 * modulo * sin(angulo));
@@ -527,22 +554,33 @@ void eyeoperator1_guidisplay()
          record_work=aux;
       }
 #endif
-      XPutImage(display,eyeoperator1_window,eyeoperator1_gc,image,0,0,
+      XPutImage(mydisplay,eyeoperator1_window,eyeoperator1_gc,image,0,0,
                 fd_eyeoperator1gui->img->x,fd_eyeoperator1gui->img->y,
                 SIFNTSC_COLUMNS, SIFNTSC_ROWS);
    }
 }
 
 
-void eyeoperator1_guisuspend(void)
+void eyeoperator1_guisuspend_aux(void)
 {
-  delete_buttonscallback(eyeoperator1_guibuttons);
-  delete_displaycallback(eyeoperator1_guidisplay);
+  mydelete_displaycallback(eyeoperator1_guidisplay);
   mycolorAsuspend();
   fl_hide_form(fd_eyeoperator1gui->eyeoperator1gui);
 }
 
-void eyeoperator1_guiresume(void)
+void teleoperator_guisuspend(){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
+         fn ((gui_function)eyeoperator1_guisuspend_aux);
+      }
+   }
+   else{
+      fn ((gui_function)eyeoperator1_guisuspend_aux);
+   }
+}
+
+void eyeoperator1_guiresume_aux(void)
 {
   static int k=0;
 
@@ -556,7 +594,7 @@ void eyeoperator1_guiresume(void)
      eyeoperator1gui_setupDisplay();
      mycolorA=(char **) myimport ("colorA", "colorA");
      mycolorAresume=(resumeFn)myimport ("colorA", "resume");
-     mycolorAsuspend=(suspendFn *)myimport("colorA","suspend");
+     mycolorAsuspend=(suspendFn)myimport("colorA","suspend");
   }
   else{
      fl_show_form(fd_eyeoperator1gui->eyeoperator1gui,FL_PLACE_POSITION,
@@ -566,6 +604,18 @@ void eyeoperator1_guiresume(void)
 
   mycolorAresume(eyeoperator1_id,NULL,NULL); /*Arrancar colorA*/
 
-  register_buttonscallback(eyeoperator1_guibuttons);
-  register_displaycallback(eyeoperator1_guidisplay);
+  myregister_displaycallback(eyeoperator1_guidisplay);
 }
+
+void teleoperator_guiresume(){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
+         fn ((gui_function)eyeoperator1_guiresume_aux);
+      }
+   }
+   else{
+      fn ((gui_function)eyeoperator1_guiresume_aux);
+   }
+}
+

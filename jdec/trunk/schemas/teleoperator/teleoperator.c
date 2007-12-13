@@ -21,7 +21,8 @@
 #define DEBUG 1
 
 #include "jde.h"
-#include "jdegui.h"
+#include "forms.h"
+#include "graphics_xforms.h"
 #include "teleoperatorgui.h"
 
 #define v3f glVertex3f
@@ -32,6 +33,12 @@
 #include <forms.h>
 #include <glcanvas.h>
 #include "pioneeropengl.h"
+
+#define MOUSELEFT 1
+#define MOUSEMIDDLE 2
+#define MOUSERIGHT 3
+#define MOUSEWHEELUP 4
+#define MOUSEWHEELDOWN 5
 
 #define DISPLAY_ROBOT 0x01UL
 #define DISPLAY_PANTILTENCODERS 0x20UL
@@ -62,6 +69,14 @@ static SofReference mypioneer,virtualcam;
 static int track_robot=TRUE;
 static int toggle=FALSE;
 
+Display *mydisplay;
+int  *myscreen;
+
+/*Gui callbacks*/
+registerbuttons myregister_buttonscallback;
+registerdisplay myregister_displaycallback;
+deletebuttons mydelete_buttonscallback;
+deletedisplay mydelete_displaycallback;
 
 #define PUSHED 1
 #define RELEASED 0
@@ -342,6 +357,34 @@ void teleoperator_startup()
   printf("teleoperator schema started up\n");
   put_state(teleoperator_id,slept);
   pthread_create(&(all[teleoperator_id].mythread),NULL,teleoperator_thread,NULL);
+
+  if (myregister_buttonscallback==NULL){
+     if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
+        printf ("I can't fetch register_buttonscallback from graphics_xforms\n");
+        jdeshutdown(1);
+     }
+     if ((mydelete_buttonscallback=(deletebuttons)myimport ("graphics_xforms", "delete_buttonscallback"))==NULL){
+        printf ("I can't fetch delete_buttonscallback from graphics_xforms\n");
+        jdeshutdown(1);
+     }
+     if ((myregister_displaycallback=(registerdisplay)myimport ("graphics_xforms", "register_displaycallback"))==NULL){
+        printf ("I can't fetch register_displaycallback from graphics_xforms\n");
+        jdeshutdown(1);
+     }
+     if ((mydelete_displaycallback=(deletedisplay)myimport ("graphics_xforms", "delete_displaycallback"))==NULL){
+        jdeshutdown(1);
+        printf ("I can't fetch delete_displaycallback from graphics_xforms\n");
+     }
+  }
+
+  if ((myscreen=(int *)myimport("graphics_xforms", "screen"))==NULL){
+     fprintf (stderr, "teleoperator: I can't fetch screen from graphics_xforms\n");
+     jdeshutdown(1);
+  }
+  if ((mydisplay=(Display *)myimport("graphics_xforms", "display"))==NULL){
+     fprintf (stderr, "teleoperator: I can't fetch display from graphics_xforms\n");
+     jdeshutdown(1);
+  }
   pthread_mutex_unlock(&(all[teleoperator_id].mymutex));
 }
 
@@ -392,56 +435,56 @@ static int image_displaysetup()
     XColor nuevocolor;
     int pixelNum, numCols;
     int allocated_colors=0, non_allocated_colors=0;
-   
+
     teleoperatorgui_win= FL_ObjWin(fd_teleoperatorgui->ventanaA);
-    XGetWindowAttributes(display, teleoperatorgui_win, &win_attributes);  
-    XMapWindow(display, teleoperatorgui_win);
+    XGetWindowAttributes(mydisplay, teleoperatorgui_win, &win_attributes);
+    XMapWindow(mydisplay, teleoperatorgui_win);
     /*XSelectInput(display, teleoperatorgui_win, ButtonPress|StructureNotifyMask);*/   
     gc_values.graphics_exposures = False;
-    teleoperatorgui_gc = XCreateGC(display, teleoperatorgui_win, GCGraphicsExposures, &gc_values);  
-    
+    teleoperatorgui_gc = XCreateGC(mydisplay, teleoperatorgui_win, GCGraphicsExposures, &gc_values);  
+
     /* Utilizan el Visual (=estructura de color) y el colormap con que este operando el programa principal con su Xforms. No crea un nuevo colormap, sino que modifica el que se estaba usando a traves de funciones de Xforms*/
     vmode= fl_get_vclass();
     if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
       {printf("teleoperator: truecolor 16 bpp\n");
       imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2/4);    
-      imagenA = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),win_attributes.depth, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
       imagenB_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2/4);    
-      imagenB = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenB = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),win_attributes.depth, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
       imagenC_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2/4);    
-      imagenC = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenC = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),win_attributes.depth, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
       imagenD_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2/4);    
-      imagenD = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenD = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),win_attributes.depth, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
       return win_attributes.depth;
       sampleimage_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2);    
-      sampleimage = XCreateImage(display,DefaultVisual(display,screen),win_attributes.depth, ZPixmap,0,sampleimage_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+      sampleimage = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),win_attributes.depth, ZPixmap,0,sampleimage_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
       }
     else if ((vmode==TrueColor)&&(fl_state[vmode].depth==24)) 
       { printf("teleoperator: truecolor 24 bpp\n");
       imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
-      imagenA = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
       imagenB_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
-      imagenB = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenB = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
       imagenC_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
-      imagenC = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenC = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
       imagenD_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
-      imagenD = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenD = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
       sampleimage_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
-      sampleimage = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,sampleimage_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+      sampleimage = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,sampleimage_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
       return win_attributes.depth;
       }
     else if ((vmode==TrueColor)&&(fl_state[vmode].depth==32)) 
       { printf("teleoperator: truecolor 24 bpp\n");
       imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
-      imagenA = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
       imagenB_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
-      imagenB = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenB = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
       imagenC_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
-      imagenC = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenC = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
       imagenD_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4/4); 
-      imagenD = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+      imagenD = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
       sampleimage_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
-      sampleimage = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,sampleimage_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+      sampleimage = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,sampleimage_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
       return win_attributes.depth;
       }
     else if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8)) 
@@ -455,23 +498,23 @@ static int image_displaysetup()
 	    nuevocolor.blue=pixelNum<<8;
 	    nuevocolor.flags=DoRed|DoGreen|DoBlue;
 	    
-	    /*if (XAllocColor(display,DefaultColormap(display,screen),&nuevocolor)==False) tabla[pixelNum]=tabla[pixelNum-1];*/
-	    if (XAllocColor(display,fl_state[vmode].colormap,&nuevocolor)==False) {tabla[pixelNum]=tabla[pixelNum-1]; non_allocated_colors++;}
+	    /*if (XAllocColor(display,DefaultColormap(display,*myscreen),&nuevocolor)==False) tabla[pixelNum]=tabla[pixelNum-1];*/
+	    if (XAllocColor(mydisplay,fl_state[vmode].colormap,&nuevocolor)==False) {tabla[pixelNum]=tabla[pixelNum-1]; non_allocated_colors++;}
 	    else {tabla[pixelNum]=nuevocolor.pixel;allocated_colors++;}
 	  }
 	printf("teleoperator: depth= %d\n", fl_state[vmode].depth); 
 	printf("teleoperator: colormap got %d colors, %d non_allocated colors\n",allocated_colors,non_allocated_colors);
 
 	imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS/4);    
-	imagenA = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+	imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
 	imagenB_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS/4);    
-	imagenB = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+	imagenB = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,imagenB_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
 	imagenC_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS/4);    
-	imagenC = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+	imagenC = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,imagenC_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
 	imagenD_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS/4);    
-	imagenD = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
+	imagenD = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,imagenD_buf,SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2,8,0);
 	sampleimage_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS);    
-	sampleimage = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,sampleimage_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+	sampleimage = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,sampleimage_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
 
 	pixel8bpp_rojo = fl_get_pixel(FL_RED);
 	pixel8bpp_blanco = fl_get_pixel(FL_WHITE);
@@ -517,10 +560,12 @@ int freeobj_ventanaDD_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my
 
 extern void teleoperator_guisuspend(void);
 
-void teleoperator_guibuttons(FL_OBJECT *obj){
+void teleoperator_guibuttons(void *obj1){
+   FL_OBJECT *obj;
    float dpan=0.5,dtilt=0.5, speed_coef;
    float r,lati,longi,guix,guiy,guiz;
    float dx,dy,dz;
+   obj=(FL_OBJECT *)obj1;
 
    if (track_robot==TRUE){
       if (myencoders!=NULL){
@@ -728,6 +773,7 @@ void teleoperator_guibuttons(FL_OBJECT *obj){
 
    else if (obj == fd_teleoperatorgui->hide) {
       teleoperator_guisuspend();
+      all[teleoperator_id].guistate=off;
       /* it stops the robot when the teleoperatorGUI is disabled */
       if ((display_state & BASE_TELEOPERATOR)!=0){
          joystick_x=0.5;
@@ -889,8 +935,8 @@ void teleoperator_guibuttons(FL_OBJECT *obj){
          mylatitude=myimport ("ptmotors", "latitude");
          mylongitude_speed=myimport("ptmotors", "longitude_speed");
          mylatitude_speed=myimport("ptmotors","latitude_speed");
-         ptmotorsresume=myimport("ptmotors","resume");
-         ptmotorssuspend=myimport("ptmotors","suspend");
+         ptmotorsresume=(resumeFn)myimport("ptmotors","resume");
+         ptmotorssuspend=(suspendFn)myimport("ptmotors","suspend");
          if (ptmotorsresume!=NULL){
             display_state = display_state | PANTILT_TELEOPERATOR;
             ptmotorsresume(teleoperator_id, NULL, NULL);
@@ -925,8 +971,8 @@ void teleoperator_guibuttons(FL_OBJECT *obj){
       if (fl_get_button(fd_teleoperatorgui->PTencoders)==PUSHED){
          mypan_angle=myimport("ptencoders", "pan_angle");
          mytilt_angle=myimport("ptencoders", "tilt_angle");
-         ptencodersresume=myimport("ptencoders", "resume");
-         ptencoderssuspend=myimport("ptencoders", "suspend");
+         ptencodersresume=(resumeFn)myimport("ptencoders", "resume");
+         ptencoderssuspend=(suspendFn)(suspendFn)myimport("ptencoders", "suspend");
          if (ptencodersresume!=NULL){
             ptencodersresume(teleoperator_id, NULL, NULL);
             display_state = display_state | DISPLAY_PANTILTENCODERS;
@@ -945,8 +991,8 @@ void teleoperator_guibuttons(FL_OBJECT *obj){
    else if (obj == fd_teleoperatorgui->colorA){
       if (fl_get_button(fd_teleoperatorgui->colorA)==PUSHED){
          mycolorA=myimport ("colorA", "colorA");
-         colorAresume=myimport("colorA", "resume");
-         colorAsuspend=myimport("colorA", "suspend");
+         colorAresume=(resumeFn)myimport("colorA", "resume");
+         colorAsuspend=(suspendFn)myimport("colorA", "suspend");
          if (colorAresume!=NULL){
             display_state = display_state | DISPLAY_COLORIMAGEA;
             colorAresume(teleoperator_id, NULL, NULL);
@@ -965,8 +1011,8 @@ void teleoperator_guibuttons(FL_OBJECT *obj){
    else if (obj == fd_teleoperatorgui->colorB){
       if (fl_get_button(fd_teleoperatorgui->colorB)==PUSHED){
          mycolorB=myimport ("colorB", "colorB");
-         colorBresume=myimport("colorB", "resume");
-         colorBsuspend=myimport("colorB", "suspend");
+         colorBresume=(resumeFn)myimport("colorB", "resume");
+         colorBsuspend=(suspendFn)myimport("colorB", "suspend");
          if (colorBresume!=NULL){
             display_state = display_state | DISPLAY_COLORIMAGEB;
             colorBresume(teleoperator_id, NULL, NULL);
@@ -986,8 +1032,8 @@ void teleoperator_guibuttons(FL_OBJECT *obj){
    else if (obj == fd_teleoperatorgui->colorC){
       if (fl_get_button(fd_teleoperatorgui->colorC)==PUSHED){
          mycolorC=myimport ("colorC", "colorC");
-         colorCresume=myimport("colorC", "resume");
-         colorCsuspend=myimport("colorC", "suspend");
+         colorCresume=(resumeFn)myimport("colorC", "resume");
+         colorCsuspend=(suspendFn)myimport("colorC", "suspend");
          if (colorCresume!=NULL){
             display_state = display_state | DISPLAY_COLORIMAGEC;
             colorCresume(teleoperator_id, NULL, NULL);
@@ -1008,8 +1054,8 @@ void teleoperator_guibuttons(FL_OBJECT *obj){
     {
       if (fl_get_button(fd_teleoperatorgui->colorD)==PUSHED){
          mycolorD=myimport ("colorD", "colorD");
-         colorDresume=myimport("colorD", "resume");
-         colorDsuspend=myimport("colorD", "suspend");
+         colorDresume=(resumeFn)myimport("colorD", "resume");
+         colorDsuspend=(suspendFn)myimport("colorD", "suspend");
          if (colorDresume!=NULL){
             display_state = display_state | DISPLAY_COLORIMAGED;
             colorDresume(teleoperator_id, NULL, NULL);
@@ -1478,34 +1524,34 @@ void teleoperator_guidisplay()
   }
 
   if ((display_state&DISPLAY_COLORIMAGEA)!=0)
-    {    /* Draw screen onto display */
-      XPutImage(display,teleoperatorgui_win,teleoperatorgui_gc,imagenA,0,0,fd_teleoperatorgui->ventanaA->x+1, fd_teleoperatorgui->ventanaA->y+1, SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2);
+    {    /* Draw *myscreen onto display */
+      XPutImage(mydisplay,teleoperatorgui_win,teleoperatorgui_gc,imagenA,0,0,fd_teleoperatorgui->ventanaA->x+1, fd_teleoperatorgui->ventanaA->y+1, SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2);
     }
   
   if ((display_state&DISPLAY_COLORIMAGEB)!=0)
-    {    /* Draw screen onto display */
-      XPutImage(display,teleoperatorgui_win,teleoperatorgui_gc,imagenB,0,0,fd_teleoperatorgui->ventanaB->x+1, fd_teleoperatorgui->ventanaB->y+1, SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2);
+    {    /* Draw *myscreen onto display */
+      XPutImage(mydisplay,teleoperatorgui_win,teleoperatorgui_gc,imagenB,0,0,fd_teleoperatorgui->ventanaB->x+1, fd_teleoperatorgui->ventanaB->y+1, SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2);
     }
   
   if ((display_state&DISPLAY_COLORIMAGEC)!=0)
-    {    /* Draw screen onto display */
-      XPutImage(display,teleoperatorgui_win,teleoperatorgui_gc,imagenC,0,0,fd_teleoperatorgui->ventanaC->x+1, fd_teleoperatorgui->ventanaC->y+1, SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2);
+    {    /* Draw *myscreen onto display */
+      XPutImage(mydisplay,teleoperatorgui_win,teleoperatorgui_gc,imagenC,0,0,fd_teleoperatorgui->ventanaC->x+1, fd_teleoperatorgui->ventanaC->y+1, SIFNTSC_COLUMNS/2, SIFNTSC_ROWS/2);
     }
   
-  if ((display_state&DISPLAY_COLORIMAGED)!=0){    /* Draw screen onto display */
-     XPutImage(display,teleoperatorgui_win,teleoperatorgui_gc,imagenD,0,0,
+  if ((display_state&DISPLAY_COLORIMAGED)!=0){    /* Draw *myscreen onto display */
+     XPutImage(mydisplay,teleoperatorgui_win,teleoperatorgui_gc,imagenD,0,0,
                fd_teleoperatorgui->ventanaD->x+1,
                fd_teleoperatorgui->ventanaD->y+1, SIFNTSC_COLUMNS/2,
                SIFNTSC_ROWS/2);
   }
 
   /* Draw sample image onto display */
-    XPutImage(display,teleoperatorgui_win,teleoperatorgui_gc,sampleimage,0,0,fd_teleoperatorgui->sampleimage->x+1, fd_teleoperatorgui->sampleimage->y+1, SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+    XPutImage(mydisplay,teleoperatorgui_win,teleoperatorgui_gc,sampleimage,0,0,fd_teleoperatorgui->sampleimage->x+1, fd_teleoperatorgui->sampleimage->y+1, SIFNTSC_COLUMNS, SIFNTSC_ROWS);
 
 }
 
 
-void teleoperator_guisuspend(void)
+void teleoperator_guisuspend_aux(void)
 {
   if ((display_state & BASE_TELEOPERATOR)!=0)
     {
@@ -1513,12 +1559,24 @@ void teleoperator_guisuspend(void)
       (*myw)=0;
     }
   /* to make a safety stop when the robot is being teleoperated from GUI */
-  delete_buttonscallback(teleoperator_guibuttons);
-  delete_displaycallback(teleoperator_guidisplay);
+  mydelete_buttonscallback(teleoperator_guibuttons);
+  mydelete_displaycallback(teleoperator_guidisplay);
   fl_hide_form(fd_teleoperatorgui->teleoperatorgui);
 }
 
-void teleoperator_guiresume(void)
+void teleoperator_guisuspend(){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
+         fn ((gui_function)teleoperator_guisuspend_aux);
+      }
+   }
+   else{
+      fn ((gui_function)teleoperator_guisuspend_aux);
+   }
+}
+
+void teleoperator_guiresume_aux(void)
 {
   static int k=0;
   float r,lati,longi,guix,guiy,guiz;
@@ -1529,9 +1587,9 @@ void teleoperator_guiresume(void)
       fd_teleoperatorgui = create_form_teleoperatorgui();
       fl_set_form_position(fd_teleoperatorgui->teleoperatorgui,400,50);
       fl_show_form(fd_teleoperatorgui->teleoperatorgui,FL_PLACE_POSITION,FL_FULLBORDER,"teleoperator");
-    
       image_displaysetup(); /* Tiene que ir despues de la inicializacion de Forms, pues hace uso de informacion que la libreria rellena en tiempo de ejecucion al iniciarse */
       fl_add_canvas_handler(fd_teleoperatorgui->canvas,Expose,InitOGL,0);
+      
     }
   else 
     {
@@ -1558,7 +1616,7 @@ void teleoperator_guiresume(void)
   fl_set_slider_value(fd_teleoperatorgui->posZ,virtualcam.posz);
   fl_set_positioner_xvalue(fd_teleoperatorgui->latlong,(double) longi);
   fl_set_positioner_yvalue(fd_teleoperatorgui->latlong,(double) lati);
-  fl_set_slider_value(fd_teleoperatorgui->posR,(double)r); 
+  fl_set_slider_value(fd_teleoperatorgui->posR,(double)r);
   if (track_robot==TRUE) fl_set_button(fd_teleoperatorgui->track_robot,PUSHED);
   else fl_set_button(fd_teleoperatorgui->track_robot,RELEASED);
   if (toggle==TRUE) fl_set_button(fd_teleoperatorgui->toggle,PUSHED);
@@ -1573,6 +1631,24 @@ void teleoperator_guiresume(void)
   if (mylatitude_speed!=NULL)
      fl_set_slider_value(fd_teleoperatorgui->ptspeed,(double)(1.-(*mylatitude_speed)/MAX_SPEED_PANTILT));
 
-  register_buttonscallback(teleoperator_guibuttons);
-  register_displaycallback(teleoperator_guidisplay);
+  if (myregister_buttonscallback!=NULL){
+     myregister_buttonscallback(teleoperator_guibuttons);
+     myregister_displaycallback(teleoperator_guidisplay);
+  }
+  else{
+     fprintf (stderr, "teleoperator: myregister_buttonscallback not fetched\n");
+     jdeshutdown(1);
+  }
+}
+
+void teleoperator_guiresume(){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
+         fn ((gui_function)teleoperator_guiresume_aux);
+      }
+   }
+   else{
+      fn ((gui_function)teleoperator_guiresume_aux);
+   }
 }

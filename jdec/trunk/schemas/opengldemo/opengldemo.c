@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006 José María Cañas Plaza 
+ *  Copyright (C) 2006 Josï¿½ Marï¿½a Caï¿½as Plaza 
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,11 +15,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  Authors : Josï¿½ Marï¿½a Caï¿½as Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
 #include <jde.h>
-#include <jdegui.h>
+#include <forms.h>
+#include "graphics_xforms.h"
 #define v3f glVertex3f
 
 #include <GL/gl.h>              
@@ -29,6 +30,16 @@
 #include <forms.h>
 #include <glcanvas.h>
 #include "opengldemogui.h"
+
+/*Gui declarations*/
+Display *mydisplay;
+int  *myscreen;
+
+/*Gui callbacks*/
+registerbuttons myregister_buttonscallback;
+registerdisplay myregister_displaycallback;
+deletebuttons mydelete_buttonscallback;
+deletedisplay mydelete_displaycallback;
 
 int opengldemo_id=0; 
 int opengldemo_brothers[MAX_SCHEMAS];
@@ -45,7 +56,6 @@ float xcam,ycam,zcam,foax,foay,foaz;
 
 void opengldemo_iteration()
 {  
-  static int d;
   all[opengldemo_id].k++;
   /* printf("opengldemo iteration %d\n",d++);*/
 }
@@ -144,12 +154,43 @@ void *opengldemo_thread(void *not_used)
     }
 }
 
+void opengldemo_init(){
+   if (myregister_buttonscallback==NULL){
+      if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
+         printf ("I can't fetch register_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_buttonscallback=(deletebuttons)myimport ("graphics_xforms", "delete_buttonscallback"))==NULL){
+         printf ("I can't fetch delete_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((myregister_displaycallback=(registerdisplay)myimport ("graphics_xforms", "register_displaycallback"))==NULL){
+         printf ("I can't fetch register_displaycallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_displaycallback=(deletedisplay)myimport ("graphics_xforms", "delete_displaycallback"))==NULL){
+         jdeshutdown(1);
+         printf ("I can't fetch delete_displaycallback from graphics_xforms\n");
+      }
+   }
+
+   if ((myscreen=(int *)myimport("graphics_xforms", "screen"))==NULL){
+      fprintf (stderr, "teleoperator: I can't fetch screen from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+   if ((mydisplay=(Display *)myimport("graphics_xforms", "display"))==NULL){
+      fprintf (stderr, "teleoperator: I can't fetch display from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+}
+
 void opengldemo_startup()
 {
   pthread_mutex_lock(&(all[opengldemo_id].mymutex));
   printf("opengldemo schema started up\n");
   put_state(opengldemo_id,slept);
   pthread_create(&(all[opengldemo_id].mythread),NULL,opengldemo_thread,NULL);
+  opengldemo_init();
   pthread_mutex_unlock(&(all[opengldemo_id].mymutex));
 }
 
@@ -260,7 +301,7 @@ void PintaEscenaCubos()
 
   if(rotar)
     {     
-      /* cada vez que se llama a esta función rota un poquito */
+      /* cada vez que se llama a esta funciï¿½n rota un poquito */
       /* se va acumulando sobre la anterior que hubiera */
 
       /* cubo 1 */
@@ -321,9 +362,10 @@ void PintaEscenaCubos()
     }
 }
 
-void opengldemo_guibuttons(FL_OBJECT *obj)
+void opengldemo_guibuttons(void *obj1)
 {
-  float r,lati,longi,roll,rollDEG;
+  float r,lati,longi;
+  FL_OBJECT *obj=(FL_OBJECT *)obj1;
 
   if (obj==fd_opengldemogui->camOrigin) 
     { xcam=0.; ycam=0.; zcam=0.;
@@ -378,15 +420,11 @@ void opengldemo_guibuttons(FL_OBJECT *obj)
 
 void opengldemo_guidisplay()
 {
-  static int d=0;
-  /*  printf("it %d\n",d++);    */
-
-
   fl_activate_glcanvas(fd_opengldemogui->canvas);
   /* Set the OpenGL state machine to the right context for this display */
   /* reset of the depth and color buffers */
   InitOGL(fd_opengldemogui->canvas, FL_ObjWin(fd_opengldemogui->canvas),fd_opengldemogui->canvas->w,fd_opengldemogui->canvas->h,NULL,NULL);
-  /* proyección perspectiva */
+  /* proyecciï¿½n perspectiva */
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(45.,(GLfloat)640/(GLfloat)480,1.0,100.0);
@@ -394,9 +432,9 @@ void opengldemo_guidisplay()
   /* gluPerspective(45.,(GLfloat)w/(GLfloat)h,1.0,100.0);
      glTranslatef(0,0,-15); */
   /* glTranslatef(-xcam,-ycam,-zcam); 
-     OJO que esta transformación hay que "ponerle el menos"
+     OJO que esta transformaciï¿½n hay que "ponerle el menos"
   */
-  /* proyección ortográfica 
+  /* proyecciï¿½n ortogrï¿½fica 
      glOrtho(-5.0,5.0,-5.0,5.0,1.0,100.0);
      glTranslatef(0,0,-5);
   */
@@ -425,15 +463,27 @@ void opengldemo_guidisplay()
 }
 
 
-void opengldemo_guisuspend(void)
+void opengldemo_guisuspend_aux(void)
 {
   /*  all[opengldemo_id].gui=FALSE;*/
-  delete_buttonscallback(opengldemo_guibuttons);
-  delete_displaycallback(opengldemo_guidisplay);
+  mydelete_buttonscallback(opengldemo_guibuttons);
+  mydelete_displaycallback(opengldemo_guidisplay);
   fl_hide_form(fd_opengldemogui->opengldemogui);
 }
 
-void opengldemo_guiresume(void)
+void opengldemo_guisuspend(void){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
+         fn ((gui_function)opengldemo_guisuspend_aux);
+      }
+   }
+   else{
+      fn ((gui_function)opengldemo_guisuspend_aux);
+   }
+}
+
+void opengldemo_guiresume_aux(void)
 {
   static int k=0;
 
@@ -465,9 +515,22 @@ void opengldemo_guiresume(void)
       fl_set_slider_value(fd_opengldemogui->camR,(double)0.); 
 
     }
-  register_buttonscallback(opengldemo_guibuttons);
-  register_displaycallback(opengldemo_guidisplay);
+  myregister_buttonscallback(opengldemo_guibuttons);
+  myregister_displaycallback(opengldemo_guidisplay);
 
   fl_show_form(fd_opengldemogui->opengldemogui,FL_PLACE_POSITION,FL_FULLBORDER,"opengldemo");
 
 }
+
+void opengldemo_guiresume(void){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
+         fn ((gui_function)opengldemo_guiresume_aux);
+      }
+   }
+   else{
+      fn ((gui_function)opengldemo_guiresume_aux);
+   }
+}
+

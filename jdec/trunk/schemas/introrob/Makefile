@@ -1,5 +1,5 @@
 JDEDIR = /usr/local
-INC-DIR = -I../../core -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/include/X11 -I$(JDEDIR)/include/jde-robot
+INC-DIR = -I../../core -I../../drivers/graphics_xforms -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/include/X11 -I$(JDEDIR)/include/jde-robot
 LIB-DIR = -L. -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib 
 GCC = gcc
 CFLAGS = -g -pedantic -Wall $(INC-DIR)
@@ -21,7 +21,7 @@ navegacion.o: navegacion.c utilidades.h
 	$(GCC) $(CFLAGS) -fPIC -c navegacion.c
 
 clean:
-	rm -f *.o introrob.so 
+	rm -f *.o introrob.so introrobgui.h introrobgui.c 
 
 install:
 	cp introrob.so $(JDEDIR)/share/jde-robot/

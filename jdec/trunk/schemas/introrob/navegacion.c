@@ -1,6 +1,8 @@
 #include "jde.h"
-#include "jdegui.h"
+#include "forms.h"
 #include "utilidades.h"
+#include "variables.h"
+#include "introrob.h"
 
 void vff_iteration(void)
 {

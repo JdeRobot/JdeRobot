@@ -16,19 +16,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *            José Antonio Santos Cadenas <santoscadenas@gmail.com>
  */
 
-extern void introrob_startup();
-extern void introrob_suspend();
-extern void introrob_resume(int father, int *brothers, arbitration fn);
-extern void introrob_guiresume();
-extern void introrob_guisuspend();
+extern void mastergui_startup();
+extern void mastergui_suspend();
+extern void mastergui_resume(int father, int *brothers, arbitration fn);
+extern void mastergui_guiresume();
+extern void mastergui_guisuspend();
 
-#define MOUSELEFT 1
-#define MOUSEMIDDLE 2
-#define MOUSERIGHT 3
-#define MOUSEWHEELUP 4
-#define MOUSEWHEELDOWN 5
-
-#define PI 3.14159265
-
+extern int mastergui_id; /* schema identifier */
+extern int mastergui_cycle; /* ms */
