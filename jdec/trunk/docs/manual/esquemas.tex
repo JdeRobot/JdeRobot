@@ -1,0 +1,102 @@
+\newpage
+\section{Biblioteca de esquemas}
+
+%el planteamiento de esta sección, de momento, es describir brevemente y dar punteros a los pfcs donde se describen en detalle las técnicas, los algoritmos y los esquemas programados.
+
+%filtro de color, vff, segmentación histográmica recursiva, segmentación lineal, memoria laser, etc.
+
+A continuación se describen los esquemas disponibles actualmente en la plataforma. Se recomienda utilizarlos para crear nueva funcionalidad sobre la suya.
+
+Muchos son los comportamientos desarrollados en robots con \textit{jdec}, tanto en docencia, en proyectos fin de carrera y en las investigaciones científicas. Ese uso ha ido generando una colección de esquemas que encapsulan funcionalidad interesante. Reutilizar no es inmediato. De hecho, reutilizar en plan caja negra sin retocar nada, es casi imposible, sólo viable en casos muy claros. Sin embargo, el conjunto de esquemas sí ofrecen muchos algoritmos y líneas de código que con algo de estudio, adaptación, afinación se pueden reutilizar en nuevas aplicaciones, acortando el tiempo de desarrollo.
+
+%Introrob
+\subsection{IntroROB}
+IntroROB \ref{fig:captura.introrob} es un esquema orientado a la docencia de la robótica en la URJC. Con él se pretende facilitar al máximo la adaptación de los alumnos a la plataforma, proporcionando la mayor abstracción posible para que estos sólo tengan que preocuparse de programar los algoritmos oportunos.\\
+
+Antes de empezar a trabajar con IntroROB es importante tener, al menos, algunas
+nociones sobre la plataforma: las variables perceptivas \ref{sec:variables}, la 
+naturaleza iterativa de las aplicaciones sobre \texttt{jdec} \ref{sec:esquemas},
+la instalación \ref{sec:instalacion}, la configuración \ref{sec:configuracion}...
+para poder avanzar a mejor ritmo.\\
+
+En líneas generales, te bastará saber que \texttt{player} simula un entorno para
+\texttt{jdec}, por lo que el primero siempre ha de lanzarse antes que el
+segundo.\\
+
+El entorno que simule \texttt{player} vendrá dado por un fichero de configuración
+\texttt{.cfg} que se le pase como argumento a \texttt{player}.
+En dicho fichero se especifican los sensores que proveerá \texttt{player} y el
+\texttt{.world} que simulará como entorno, así como varios parámetros más.
+ Tendrás que mantener una consonacia entre los sensores que sirve \texttt{player}
+y los que requiere \texttt{jdec} a través de su \texttt{.conf}, para que todo lo
+que precises en tu esquema introrob lo sirva uno y lo recoja el otro. En los ficheros \texttt{.world} se detalla la imagen subyacente y la posición de inicio, entre otros
+parámetros. Deberás asegurarte de que la línea \textit{pose} del \texttt{.world}
+esté acorde con la línea \textit{initial\_position} del \texttt{.conf}.\\
+
+\texttt{Player} adjunta varios ficheros de configuración y \textit{mundos} que
+pueden servirte como ejemplos.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=15cm]{figs/introrob}
+\end{center}
+\caption{Ejecución normal de \texttt{player} e introrob sobre \texttt{jdec}}
+\label{fig:captura.introrob}
+\end{figure}
+
+%teleoperator
+\subsection{Teleoperator}
+Teleoperator \ref{fig:teleoperator} ha sido creado con la idea de sacar de la plataforma gran parte de la conexión con el robot pioneer. Con él podemos teleoperar el robot (pioneer o cualquier otro), visualizarlo en un canvas 3D (tanto al robot como a sus medidas sensoriales, láser y sónar) y visualizar las imágenes capturadas por la plataforma.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=15cm]{figs/sensorsmotorsgui}
+\end{center}
+\caption{Interfaz gráfica del esquema \texttt{teleperator}}
+\label{fig:teleoperator}
+\end{figure}
+
+%Hsituner
+\subsection{HSITuner}
+Este esquema está orientado a la calibración de filtros de color con HSI. Así como a servir como ejemplo para las aplicaciones con imágenes.
+
+%followball
+\subsection{Followball}
+Es un esquema dedicado a practicar con el cuello mecánico (pantilt). Sirve como ejemplo para empezar a trabajar con este dispositivo.
+
+%opflow
+\subsection{Opflow}
+Opflow es el primer esquema desarrollado sobre la biblioteca IPP de intel. Esta aplicación calcula el flujo óptico en la imagen colorA. Este esquema está acualmente en continua evolución.
+
+%recorder
+\subsection{Recorder}
+Este esquema grabar un vídeo a partir de flujos de imágenes. Simplemente se indica el nombre del esquema que exporta la imagen (en formato brg24 o bgr32 con el mismo nombre que el esquema), el nombre y los fps del vídeo.
+
+
+
+%sólo las cosas muy probadas.
+
+%\subsection{Navegación con obstáculos locales}
+%\subsubsection{Esquema lasersegments}
+%\subsubsection{Esquema occupancygrid}
+%\subsubsection{Esquema followwall}
+
+%\subsection{Procesamiento visual}
+%\subsubsection{Esquema edges}
+%\subsubsection{Esquema visualdiff}
+%\subsubsection{Esquema visualjamb}
+%\subsubsection{Esquema jambgrid}
+
+%\subsection{Navegación hacia un punto cercano}
+%\subsubsection{Esquema advance}
+%\subsubsection{Esquema gotopoint}
+%\subsubsection{Esquema stop}
+
+%\section{Utilidades}
+
+%\subsection{Clientes de prueba}
+%otosclient, oculoclient, stereoclient.
+%\subsection{hsituner}
+%\subsection{fuzzylib}
+%\subsection{gridslib}
+%\subsection{progeo}

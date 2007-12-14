@@ -61,11 +61,15 @@ Este manual describe como instalar \textit{gazebo}, para la posterior utilizació
 
 \section{Instalación}
 
-Antes de comenzar a instalar gazebo, debes tener aceleracion gráfica y ademas deben instalarse los siguientes paquetes:
+Antes de comenzar a instalar gazebo, debes tener aceleración gráfica
+ via hardware. Para comprobar esto ejecuta por consola el
+siguiente comando: glxinfo | grep rendering. La salida de este debe
+ser: direct rendering: Yes. Si no es asi, no tienes aceleración
+gráfica vía hardware.  Además deben instalarse los siguientes paquetes:
 
 \begin{itemize}
-\item{\bf{SWIG}, Simplified Wrapper and Interface Generator }
-\item{\bf{wxPython}, Python bindings for wxWidgets}
+\item{\bf{SWIG 1.3}, Simplified Wrapper and Interface Generator }
+\item{\bf{wxPython 2.6}, Python bindings for wxWidgets}
 \item{\bf{ODE 0.5} Open Dynamics Engine}
 \item{\bf{GDAL}, Geospatial Data Abstraction Library }
 \end{itemize}
@@ -73,14 +77,14 @@ Antes de comenzar a instalar gazebo, debes tener aceleracion gráfica y ademas de
 Incluso antes de instalar los paquetes que acabamos de comentar, convienente configurar nuestro sistema con algunos paths y librerias adicionales. Los path son los siguientes: 
 
 \begin{verbatim}
-export PATH=PATH:/usr/local/bin
-export CPATH=CPATH:/usr/local/include
-export LIBRARY_PATH=PATH:/usr/local/lib
-export PKG_CONFIG_PATH=PKG_CONFIG_PATH/usr/local/lib/pkgconfig
-export PYTHONPATH=PYTHONPATH/usr/local/lib/python2.3/site-packages
+export PATH=/usr/local/bin:PATH
+export CPATH=/usr/local/include:CPATH
+export LIBRARY_PATH=/usr/local/lib:LIBRARY_PATH
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:PKG_CONFIG_PATH
+export PYTHONPATH=/usr/local/lib/python2.3/site-packages:PYTHONPATH
 \end{verbatim}
 
-\subsection{Instalacion en Ubuntu}
+\subsection{Instalacion en Ubuntu dapper}
 
 Las librerias que yo instale fueron las siguientes: libjasper-1.701-1, libjasper-1.701-dev,libdc1394, libdc1394-dev, gsl-bin, libgsl0, libgsl0-dev, libjpeg, libjpeg-dev, liftiff, libtiff-dev, libpng, libpng-dev, libgnomecanvas2-common, libgnomecanvas2-dev, imagemagick, python-dev, ffmpeg, libcv, libgeos-dev, libxerces-dev, libhdf4g-dev, libungif4-dev, libnetcdf-dev, netcdfg-dev, libcfitsio-dev, libpq-dev, libgtk, automake1.9, autoconf,bison-1.35, python2.4-dev,libtdl. 
 
@@ -88,27 +92,26 @@ Las librerias que yo instale fueron las siguientes: libjasper-1.701-1, libjasper
 
 Una vez habiendo instalado estas librerias y configurado nuestro sistema con los path ya mencionados empezamos a instalar los paquetes que harán falta para instalar gazebo.
 
-\subsubsection{Instalación de SWIG}
+\subsubsection{Instalación de SWIG 1.3}
 
 Este paquete se puede instalar mediante un paquete debian, o a través de svn. Mi recomendación es que sea a través de svn. Si decidis hacerlo con el paquete debian, podeis tener problemas de paquetes rotos, en este caso para solucionarlo hacer lo siguiente: aptitude update, aptitude dist-upgrade. Si decidis hacerlo por svn, ejecutar pa siguiente linea en consola: 
 \begin{verbatim}
  svn co https://swig.svn.sourceforge.net/svnroot/swig/trunk swig
 \end{verbatim} 
 
-Los siguientes pasos son: 
+Despues realizar los siguientes pasos : 
 \begin{verbatim}
- % cd swig
- % ./autogen.sh
- % ./configure 
- % make
- % make install
+  cd swig
+  ./autogen.sh
+  ./configure 
+  make
+  make install
 \end{verbatim}
 
 
-\subsubsection{Instalación de wxPython}
+\subsubsection{Instalación de wxPython 2.6}
 
 Hay que modificar el fichero source.list a mi me valio con tener los mismos repositorios que los que hay en los ordenadores del laboratorio de robotica.
-
 
 Los siguientes pasos son:
 
@@ -118,15 +121,28 @@ sudo apt-get install python-wxgtk2.6 python-wxtools wx2.6-i18n
 \end{verbatim}
 
 
-\subsubsection{Instalación de ODE}
+\subsubsection{Instalación de ODE 0.5}
 
-Descargar ODE-0.5 de http://opende.sourceforge.net/snapshots/. Una vez descargagado y descomprimido el archivo entrar al subdirectorio que se desempaquetado y modificar el archivo de configuración config/user-settings  para habilitar la línea OPCODE\_DIRECTORY=OPCODE. Una vez hecho esto abrir el archivo INSTALL y ejecutar los make que aparacen. Después copia los archivos en el subdirectorio  /usr/local/lib a /usr/lib y los subdirectorios en /usr/local/include a /usr/include.
+Descargar ODE-0.5 de http://opende.sourceforge.net/snapshots/. Una vez
+descargagado y descomprimido el archivo hay que  modificar el archivo
+de configuración config/user-settings  para habilitar la línea
+OPCODE\_DIRECTORY=OPCODE.
+
+ Una vez hecho esto debemos ejecutar. 
+\begin{verbatim}
+  sh autogen.sh
+  ./configure --with-trimesh=opcode --enable-double-precision
+   make 
+  make install
+\end{verbatim}
 
 Para probar que esta bien instalado ejecutar los ejemplos que se encuentran en el subidrecotorio: ode/test
 
 \subsubsection{Instalación de GDAL}
 
-Tienes que descargarte la version 1.2.1 de http://www.gdal.org/. Despues haz los siguientes pasos: 
+Para instalar gdal lo puedes hacer atraves de apt-get install o
+descargarte la version 1.2.1 (o superior)  de http://www.gdal.org/. Si
+te descargas la version tienes que realizar los siguientes pasos: 
 
 \begin{verbatim}
  tar xvzg gdal-1.2.1.tar.gz
@@ -137,9 +153,9 @@ Tienes que descargarte la version 1.2.1 de http://www.gdal.org/. Despues haz los
  make install
 \end{verbatim}
 
-\subsubsection{Instalación de Gazebo desde su c\'odigo fuente}
+\subsubsection{Instalación de Gazebo 0.7}
 
-La última versión de gazebo la podemos descargar de la siguiente pagina: http://playerstage.sourceforge.net/. Una vez descargado y descomprimido llevar a cabo los siguientes pasos:
+Una vez descargado y descomprimido llevar a cabo los siguientes pasos:
 
 \begin{verbatim}
 ./configure
@@ -147,6 +163,19 @@ make
 make install
 \end{verbatim}
 
+
+\subsection{Instalación de Gazebo 0.7 en Ubuntu Gutsy}
+La instalación de gazebo 0.7 en Ubuntu Gutsy, es exactamente igual que
+en Ubuntu dapper, excepto en la instalación de ODE. Para empezar
+debemos instalar la version 0.9 de ODE en vez de la 0.5. Para instalar
+esta versión los pasos son los siguientes.
+
+\begin{verbatim}
+ sh autogen.sh
+ ./configure --enable-release --enable-double-precision --with-trimesh=opcode 
+  make 
+  make install
+\end{verbatim}
 
 \subsection{Instalaci\'on en Fedora Core 5}
 
@@ -333,6 +362,55 @@ Una vez habiendo comentado cada parte del mundo por separado, ponemos todo el có
   </model:Pioneer2DX>
 </gz:world>
 \end{verbatim}
+
+\section{Texturas en Gazebo}
+En este apartado explicaremos como introducir texturas en los modelos
+de gazebo. Para poder introducir la textura que queramos debemos
+copiarla al directorio:\\ /usr/local/share/gazebo/worlds/, es en este
+directorio donde gazebo buscará las texturas que le indiquemos en el
+mundo.
+\\
+Los dos unicos módelos a los cuales se les puede introducir texturas
+son: Road y  simpleSolid. Por lo tanto para poder introducir texturas a
+los demás modelos deberemos modificar en el fichero de este modelo, el
+método nombreModelo::OdeLoad() . Los modelos se encuentran en el siguiente directorio:
+gazebo/server/models/.
+\\
+A continuación vamos a ver como modficar dicho método con un
+ejemplo. En nuestro ejemplo vamos a introducir texturas en el modelo
+Carchasis. Para empezar abrimos el fichero Carchasis.cc y nos situamos
+en el método Carchasis::OdeLoad(). Buscamos la instrucción donde se
+carga el color del modelo:\\
+\begin{verbatim}
+ geom->SetColor( node->GetColor("color", GzColor(1.0, 1.0, 1.0)));
+\end{verbatim}
+
+despues de esta instrucción añadimos lo siguiente: 
+
+\begin{verbatim}
+  textureFile = node->SearchFilename("textureFile","/usr/local/share/gazebo/worlds" , NULL);
+  if (textureFile)
+  {
+    printf("loading texture file [%s] for CarChasis", textureFile);  
+    if (geom->SetTexture2DFile(textureFile) != 0)
+    {
+      printf("unable to load texture file");
+      return -1;
+    }
+  }
+\end{verbatim}
+
+
+En la siguiente figura podemos observar como se ha introducido
+texturas en el modelo Carchasis.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=8cm]{figs/texturas}
+  \end{center}
+  \caption{Texturas en gazebo}
+  \label{fig:gazebo}
+\end{figure}
 
 \section{Importando cámaras de Gazebo}
 
