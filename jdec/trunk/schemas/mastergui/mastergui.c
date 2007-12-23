@@ -29,7 +29,6 @@ int mastergui_brothers[MAX_SCHEMAS];
 arbitration mastergui_callforarbitration;
 
 enum mastergui_states {init,t1,r1,t2,r2,t3,r3,t4,end};
-static int mastergui_state;
 FD_masterguigui *fd_masterguigui;
 
 #define PUSHED 1
@@ -60,9 +59,8 @@ registerdisplay myregister_displaycallback;
 deletebuttons mydelete_buttonscallback;
 deletedisplay mydelete_displaycallback;
 
-void mastergui_iteration(){
-}
 
+int gui_activated=0;
 
 /*Importar símbolos*/
 void mastergui_imports(){
@@ -195,70 +193,15 @@ void mastergui_end(){
 
 void mastergui_suspend()
 {
-
+   mastergui_guisuspend();
+   put_state(mastergui_id, slept);
 }
 
 
 void mastergui_resume(int father, int *brothers, arbitration fn)
 {
-
-}
-
-void *mastergui_thread(void *not_used)
-{
-   struct timeval a,b;
-   long n=0; /* iteration */
-   long next,bb,aa=0;
-
-   for(;;)
-   {
-      pthread_mutex_lock(&(all[mastergui_id].mymutex));
-
-      if (all[mastergui_id].state==slept)
-      {
-         mastergui_state=init;
-         pthread_cond_wait(&(all[mastergui_id].condition),&(all[mastergui_id].mymutex));
-         pthread_mutex_unlock(&(all[mastergui_id].mymutex));
-      }
-      else
-      {
-         /* check preconditions. For now, preconditions are always satisfied*/
-         if (all[mastergui_id].state==notready)
-            put_state(mastergui_id,ready);
-         /* check brothers and arbitrate. For now this is the only winner */
-         if (all[mastergui_id].state==ready)
-         {put_state(mastergui_id,winner);
-         gettimeofday(&a,NULL);
-         aa=a.tv_sec*1000000+a.tv_usec;
-         n=0;
-         }
-
-         if (all[mastergui_id].state==winner)
-            /* I'm the winner and must execute my iteration */
-         {
-            pthread_mutex_unlock(&(all[mastergui_id].mymutex));
-            /*      gettimeofday(&a,NULL);*/
-            n++;
-            mastergui_iteration();
-            gettimeofday(&b,NULL);
-            bb=b.tv_sec*1000000+b.tv_usec;
-            next=aa+(n+1)*(long)mastergui_cycle*1000-bb;
-
-            if (next>5000)
-            {
-               usleep(next-5000);
-               /* discounts 5ms taken by calling usleep itself, on average */
-            }
-            else  ;
-         }
-         else
-            /* just let this iteration go away. overhead time negligible */
-         {
-            pthread_mutex_unlock(&(all[mastergui_id].mymutex));
-            usleep(mastergui_cycle*1000);
-         }
-      }
-   }
+   mastergui_guiresume();
+   put_state(mastergui_id, winner);
 }
 
 void mastergui_startup()
@@ -496,11 +439,13 @@ void mastergui_guidisplay(){
 
 
 void mastergui_guisuspend_aux(void){
-   fl_hide_form(fd_masterguigui->masterguigui);
-   all[mastergui_id].guistate=on;
+   gui_activated--;
+   if (gui_activated==0){
+      fl_hide_form(fd_masterguigui->masterguigui);
    
-   mydelete_buttonscallback(mastergui_guibuttons);
-   mydelete_displaycallback(mastergui_guidisplay);
+      mydelete_buttonscallback(mastergui_guibuttons);
+      mydelete_displaycallback(mastergui_guidisplay);
+   }
 }
 
 void mastergui_guisuspend(){
@@ -521,17 +466,22 @@ void mastergui_guiresume_aux(void){
       gui_init();
       init=1;
    }
-   fl_show_form(fd_masterguigui->masterguigui,FL_PLACE_POSITION,FL_FULLBORDER,"jdec master gui");
-   hierarchy_win = FL_ObjWin(fd_masterguigui->hierarchy);
-   all[mastergui_id].guistate=off;
+   gui_activated++;
+   if (gui_activated==1){
+      all[mastergui_id].guistate=pending_on;
+      fl_show_form(fd_masterguigui->masterguigui,FL_PLACE_POSITION,
+                   FL_FULLBORDER,"jdec master gui");
+      hierarchy_win = FL_ObjWin(fd_masterguigui->hierarchy);
+      all[mastergui_id].guistate=off;
 
-   if (myregister_buttonscallback!=NULL){
-      myregister_buttonscallback(mastergui_guibuttons);
-      myregister_displaycallback(mastergui_guidisplay);
-   }
-   else{
-      fprintf (stderr, "mastergui: myregister_buttonscallback not fetched\n");
-      jdeshutdown(1);
+      if (myregister_buttonscallback!=NULL){
+         myregister_buttonscallback(mastergui_guibuttons);
+         myregister_displaycallback(mastergui_guidisplay);
+      }
+      else{
+         fprintf (stderr, "mastergui: myregister_buttonscallback not fetched\n");
+         jdeshutdown(1);
+      }
    }
 }
 

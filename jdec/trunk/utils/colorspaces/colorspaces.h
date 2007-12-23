@@ -19,8 +19,11 @@
  *  	      Jose Maria Caas Plaza <jmplaza@gsyc.es>
  */
 
+#ifndef _COLOR_SPACES_H
+#define _COLOR_SPACES_H
+
 #define NAME     "colorspaces"
-#define VERSION  "1.0.0"
+#define VERSION  "1.1.0"
 
 /// *** RGB to HSI  *** ///
 
@@ -31,7 +34,7 @@ struct HSV
 	double V;
 };
 
-struct HSV * LUT_RGB2HSV [64][64][64];
+extern struct HSV * LUT_RGB2HSV [64][64][64];
 
 /// \brief Init the RGB2HSV
 void RGB2HSV_init();
@@ -50,3 +53,5 @@ void RGB2HSV_test();
 
 /// \brief Return the translate RGB to HSI
 static inline const struct HSV* RGB2HSV_getHSV (int R, int G, int B)  { return LUT_RGB2HSV[R>>2][G>>2][B>>2]; };
+
+#endif

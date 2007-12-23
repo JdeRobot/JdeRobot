@@ -47,7 +47,10 @@
 char CLIENT_NAME[MAX_CLIENT_NAME]="jdec";
 
 /** networkclient max number of devices.*/
-#define MAXDEVICE 10
+#define MAXDEVICE 14
+
+/** Maximum number of images served*/
+#define MAXCAM 8
 
 /** networkclient colorA device id.*/
 #define COLORA_DEVICE 0
@@ -69,6 +72,14 @@ char CLIENT_NAME[MAX_CLIENT_NAME]="jdec";
 #define ENCODERS_DEVICE 8
 /** networkclient motors device id.*/
 #define MOTORS_DEVICE 9
+/** networkclient varcolorA device id.*/
+#define VARCOLORA_DEVICE 10
+/** networkclient varcolorB device id.*/
+#define VARCOLORB_DEVICE 11
+/** networkclient varcolorC device id.*/
+#define VARCOLORC_DEVICE 12
+/** networkclient varcolorD device id.*/
+#define VARCOLORD_DEVICE 13
 
 /* 4 images, 4 robot devices and 2 devices for pantilt */
 /** networkclient pthreads structure.*/
@@ -116,6 +127,14 @@ int colorB_schema_id;
 int colorC_schema_id;
 /** id for colorD schema.*/
 int colorD_schema_id;
+/** id for varcolorA schema.*/
+int varcolorA_schema_id;
+/** id for varcolorB schema.*/
+int varcolorB_schema_id;
+/** id for varcolorC schema.*/
+int varcolorC_schema_id;
+/** id for varcolorD schema.*/
+int varcolorD_schema_id;
 /** id for laser schema.*/
 int laser_schema_id;
 /** id for encoders schema.*/
@@ -149,24 +168,49 @@ float tilt_angle;  /* degs */
 unsigned long int pantiltencoders_clock;
 
 /** 'colorA' schema image data*/
-char *colorA; /* sifntsc image itself */
+char *colorA=NULL; /* sifntsc image itself */
 /** 'colorA' schema clock*/
 unsigned long int imageA_clock;
 
 /** 'colorB' schema image data*/
-char *colorB; /* sifntsc image itself */
+char *colorB=NULL; /* sifntsc image itself */
 /** 'colorB' schema clock*/
 unsigned long int imageB_clock;
 
 /** 'colorC' schema image data*/
-char *colorC; /* sifntsc image itself */
+char *colorC=NULL; /* sifntsc image itself */
 /** 'colorC' schema clock*/
 unsigned long int imageC_clock;
 
 /** 'colorD' schema image data*/
-char *colorD; /* sifntsc image itself */
+char *colorD=NULL; /* sifntsc image itself */
 /** 'colorD' schema clock*/
 unsigned long int imageD_clock;
+
+/** 'varcolorA' schema image data*/
+char *varcolorA=NULL; /* sifntsc image itself */
+/** 'varcolorA' schema clock*/
+unsigned long int varimageA_clock;
+
+/** 'varcolorB' schema image data*/
+char *varcolorB=NULL; /* sifntsc image itself */
+/** 'varcolorB' schema clock*/
+unsigned long int varimageB_clock;
+
+/** 'varcolorC' schema image data*/
+char *varcolorC=NULL; /* sifntsc image itself */
+/** 'varcolorC' schema clock*/
+unsigned long int varimageC_clock;
+
+/** 'varcolorD' schema image data*/
+char *varcolorD=NULL; /* sifntsc image itself */
+/** 'varcolorD' schema clock*/
+unsigned long int varimageD_clock;
+
+/** width of each served video**/
+int width[MAXCAM];
+/** height of each served video**/
+int height[MAXCAM];
 
 /** 'encoders' schema, odometry information.*/
 float jde_robot[5];
@@ -208,6 +252,14 @@ int colorB_refs=0;
 int colorC_refs=0;
 /** colorD ref counter*/
 int colorD_refs=0;
+/** varcolorA ref counter*/
+int varcolorA_refs=0;
+/** varcolorB ref counter*/
+int varcolorB_refs=0;
+/** varcolorC ref counter*/
+int varcolorC_refs=0;
+/** varcolorD ref counter*/
+int varcolorD_refs=0;
 /** ptmotors ref counter*/
 int ptmotors_refs=0;
 /** ptencoders ref counter*/
@@ -878,6 +930,218 @@ int networkclient_colorD_suspend(){
    return 0;
 }
 
+/** varcolorA resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param fn arbitration function for this schema.
+ *  @return integer resuming result.*/
+int networkclient_varcolorA_resume(int father, int *brothers, arbitration fn){
+   pthread_mutex_lock(&refmutex);
+   if (varcolorA_refs>0){
+      varcolorA_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      varcolorA_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[VARCOLORA_DEVICE]==0)&&(serve_device[VARCOLORA_DEVICE])){
+         printf("varcolorA schema resume (networkclient driver)\n");
+         all[varcolorA_schema_id].father = father;
+         all[varcolorA_schema_id].fps = 0.;
+         all[varcolorA_schema_id].k =0;
+         put_state(varcolorA_schema_id,winner);
+         device_active[VARCOLORA_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[VARCOLORA_DEVICE]);
+         state[VARCOLORA_DEVICE]=winner;
+         pthread_cond_signal(&condition[VARCOLORA_DEVICE]);
+         pthread_mutex_unlock(&mymutex[VARCOLORA_DEVICE]);
+      }
+   }
+   return 0;
+}
+
+/** varcolorA suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
+int networkclient_varcolorA_suspend(){
+   pthread_mutex_lock(&refmutex);
+   if (varcolorA_refs>1){
+      varcolorA_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      varcolorA_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[VARCOLORA_DEVICE])&&(serve_device[VARCOLORA_DEVICE])){
+         printf("varcolorA schema suspend (networkclient driver)\n");
+         device_active[VARCOLORA_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[VARCOLORA_DEVICE]);
+         state[VARCOLORA_DEVICE]=slept;
+         put_state(varcolorA_schema_id,slept);
+         pthread_mutex_unlock(&mymutex[VARCOLORA_DEVICE]);
+      }
+   }
+   return 0;
+}
+
+/** varcolorB resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param fn arbitration function for this schema.
+ *  @return integer resuming result.*/
+int networkclient_varcolorB_resume(int father, int *brothers, arbitration fn){
+   pthread_mutex_lock(&refmutex);
+   if (varcolorB_refs>0){
+      varcolorB_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      varcolorB_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[VARCOLORB_DEVICE]==0)&&(serve_device[VARCOLORB_DEVICE])){
+         printf("varcolorB schema resume (networkclient driver)\n");
+         all[varcolorB_schema_id].father = father;
+         all[varcolorB_schema_id].fps = 0.;
+         all[varcolorB_schema_id].k =0;
+         put_state(varcolorB_schema_id,winner);
+         device_active[VARCOLORB_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[VARCOLORB_DEVICE]);
+         state[VARCOLORB_DEVICE]=winner;
+         pthread_cond_signal(&condition[VARCOLORB_DEVICE]);
+         pthread_mutex_unlock(&mymutex[VARCOLORB_DEVICE]);
+      }
+   }
+   return 0;
+}
+
+/** varcolorB suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
+int networkclient_varcolorB_suspend(){
+   pthread_mutex_lock(&refmutex);
+   if (varcolorB_refs>1){
+      varcolorB_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      varcolorB_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[VARCOLORB_DEVICE])&&(serve_device[VARCOLORB_DEVICE])){
+         printf("varcolorB schema suspend (networkclient driver)\n");
+         device_active[VARCOLORB_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[VARCOLORB_DEVICE]);
+         state[VARCOLORB_DEVICE]=slept;
+         put_state(varcolorB_schema_id,slept);
+         pthread_mutex_unlock(&mymutex[VARCOLORB_DEVICE]);
+      }
+   }
+   return 0;
+}
+
+/** varcolorC resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param fn arbitration function for this schema.
+ *  @return integer resuming result.*/
+int networkclient_varcolorC_resume(int father, int *brothers, arbitration fn){
+   pthread_mutex_lock(&refmutex);
+   if (varcolorC_refs>0){
+      varcolorC_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      varcolorC_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[VARCOLORC_DEVICE]==0)&&(serve_device[VARCOLORC_DEVICE])){
+         printf("varcolorC schema resume (networkclient driver)\n");
+         all[varcolorC_schema_id].father = father;
+         all[varcolorC_schema_id].fps = 0.;
+         all[varcolorC_schema_id].k =0;
+         put_state(varcolorC_schema_id,winner);
+         device_active[VARCOLORC_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[VARCOLORC_DEVICE]);
+         state[VARCOLORC_DEVICE]=winner;
+         pthread_cond_signal(&condition[VARCOLORC_DEVICE]);
+         pthread_mutex_unlock(&mymutex[VARCOLORC_DEVICE]);
+      }
+   }
+   return 0;
+}
+
+/** varcolorC suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
+int networkclient_varcolorC_suspend(){
+   pthread_mutex_lock(&refmutex);
+   if (varcolorC_refs>1){
+      varcolorC_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      varcolorC_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[VARCOLORC_DEVICE])&&(serve_device[VARCOLORC_DEVICE])){
+         printf("varcolorC schema suspend (networkclient driver)\n");
+         device_active[VARCOLORC_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[VARCOLORC_DEVICE]);
+         state[VARCOLORC_DEVICE]=slept;
+         put_state(varcolorC_schema_id,slept);
+         pthread_mutex_unlock(&mymutex[VARCOLORC_DEVICE]);
+      }
+   }
+   return 0;
+}
+
+/** varcolorD resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param fn arbitration function for this schema.
+ *  @return integer resuming result.*/
+int networkclient_varcolorD_resume(int father, int *brothers, arbitration fn){
+   pthread_mutex_lock(&refmutex);
+   if (varcolorD_refs>0){
+      varcolorD_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      varcolorD_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[VARCOLORD_DEVICE]==0)&&(serve_device[VARCOLORD_DEVICE])){
+         printf("varcolorD schema resume (networkclient driver)\n");
+         all[varcolorD_schema_id].father = father;
+         all[varcolorD_schema_id].fps = 0.;
+         all[varcolorD_schema_id].k =0;
+         put_state(varcolorD_schema_id,winner);
+         device_active[VARCOLORD_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[VARCOLORD_DEVICE]);
+         state[VARCOLORD_DEVICE]=winner;
+         pthread_cond_signal(&condition[VARCOLORD_DEVICE]);
+         pthread_mutex_unlock(&mymutex[VARCOLORD_DEVICE]);
+      }
+   }
+   return 0;
+}
+
+/** varcolorD suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
+int networkclient_varcolorD_suspend(){
+   pthread_mutex_lock(&refmutex);
+   if (varcolorD_refs>1){
+      varcolorD_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      varcolorD_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[VARCOLORD_DEVICE])&&(serve_device[VARCOLORD_DEVICE])){
+         printf("varcolorD schema suspend (networkclient driver)\n");
+         device_active[VARCOLORD_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[VARCOLORD_DEVICE]);
+         state[VARCOLORD_DEVICE]=slept;
+         put_state(varcolorD_schema_id,slept);
+         pthread_mutex_unlock(&mymutex[VARCOLORD_DEVICE]);
+      }
+   }
+   return 0;
+}
+
 /** networkclient driver pthread function for pantiltencoders reception.*/
 void *networkclient_pantiltencoders_thread(void *not_used){
   int j=0;
@@ -1369,7 +1633,7 @@ int leer_cadena (int s, char * buff, int maximo){
 
 /** networkclient driver pthread function for colorA reception.*/
 void *networkclient_colorA_thread(void *not_used){
-   char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
+   char *mmbuf;
    unsigned long int network_clock;
    /*  fd_set dummy_set,read_set;*/
    FILE *buffer_colorA;
@@ -1410,6 +1674,7 @@ void *networkclient_colorA_thread(void *not_used){
                      int total=0;
                      int actual=0;
                      /*Read image*/
+                     mmbuf=(char *)malloc(sizeof(char)*i3*i4*i5);
                      do{
                         actual=fread( &(mmbuf[total]), sizeof(char),
                                         (i3*i4*i5)-total, buffer_colorA);
@@ -1426,9 +1691,17 @@ void *networkclient_colorA_thread(void *not_used){
                            }
                         }
                      }while(total<i3*i4*i5);
-                     memcpy (colorA, mmbuf, i3*i4*i5);
-                     speedcounter(colorA_schema_id);
-                     imageA_clock=network_clock;
+
+                     if (width[0]!=i3 || height[0]!=i4){
+                        fprintf (stderr, "Error: network colorA image size and local are different\n");
+                        jdeshutdown(1);
+                     }
+                     else{
+                        memcpy (colorA, mmbuf, width[0]*height[0]*i5);
+                        free(mmbuf);
+                        speedcounter(colorA_schema_id);
+                        imageA_clock=network_clock;
+                     }
                   }
                }
             }
@@ -1444,7 +1717,7 @@ void *networkclient_colorA_thread(void *not_used){
 
 /** networkclient driver pthread function for colorB reception.*/
 void *networkclient_colorB_thread(void *not_used){
-   char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
+   char * mmbuf;
    unsigned long int network_clock;
    /*  fd_set dummy_set,read_set;*/
    FILE *buffer_colorB;
@@ -1485,6 +1758,7 @@ void *networkclient_colorB_thread(void *not_used){
                      int total=0;
                      int actual=0;
                      /*Read image*/
+                     mmbuf=(char *)malloc(sizeof(char)*i3*i4*i5);
                      do{
                         actual=fread( &(mmbuf[total]), sizeof(char),
                                         (i3*i4*i5)-total, buffer_colorB);
@@ -1501,9 +1775,17 @@ void *networkclient_colorB_thread(void *not_used){
                            }
                         }
                      }while(total<i3*i4*i5);
-                     memcpy (colorB, mmbuf, i3*i4*i5);
-                     speedcounter(colorB_schema_id);
-                     imageB_clock=network_clock;
+
+                     if (width[1]!=i3 || height[1]!=i4){
+                        fprintf (stderr, "Error: network colorB image size and local are different\n");
+                        jdeshutdown(1);
+                     }
+                     else{
+                        memcpy (colorB, mmbuf, width[1]*height[1]*i5);
+                        free(mmbuf);
+                        speedcounter(colorB_schema_id);
+                        imageB_clock=network_clock;
+                     }
                   }
                }
             }
@@ -1519,7 +1801,7 @@ void *networkclient_colorB_thread(void *not_used){
 
 /** networkclient driver pthread function for colorC reception.*/
 void *networkclient_colorC_thread(void *not_used){
-   char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
+   char * mmbuf;
    unsigned long int network_clock;
    /*  fd_set dummy_set,read_set;*/
    FILE *buffer_colorC;
@@ -1560,6 +1842,7 @@ void *networkclient_colorC_thread(void *not_used){
                      int total=0;
                      int actual=0;
                      /*Read image*/
+                     mmbuf=(char *)malloc(sizeof(char)*i3*i4*i5);
                      do{
                         actual=fread( &(mmbuf[total]), sizeof(char),
                                         (i3*i4*i5)-total, buffer_colorC);
@@ -1576,9 +1859,17 @@ void *networkclient_colorC_thread(void *not_used){
                            }
                         }
                      }while(total<i3*i4*i5);
-                     memcpy (colorC, mmbuf, i3*i4*i5);
-                     speedcounter(colorC_schema_id);
-                     imageC_clock=network_clock;
+
+                     if (width[2]!=i3 || height[2]!=i4){
+                        fprintf (stderr, "Error: network colorC image size and local are different\n");
+                        jdeshutdown(1);
+                     }
+                     else{
+                        memcpy (colorC, mmbuf, width[2]*height[2]*i5);
+                        free(mmbuf);
+                        speedcounter(colorC_schema_id);
+                        imageB_clock=network_clock;
+                     }
                   }
                }
             }
@@ -1594,7 +1885,7 @@ void *networkclient_colorC_thread(void *not_used){
 
 /** networkclient driver pthread function for colorD reception.*/
 void *networkclient_colorD_thread(void *not_used){
-   char mmbuf[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3+MAX_MESSAGE];
+   char *mmbuf;
    unsigned long int network_clock;
    /*  fd_set dummy_set,read_set;*/
    FILE *buffer_colorD;
@@ -1635,6 +1926,7 @@ void *networkclient_colorD_thread(void *not_used){
                      int total=0;
                      int actual=0;
                      /*Read image*/
+                     mmbuf=(char *)malloc(sizeof(char)*i3*i4*i5);
                      do{
                         actual=fread( &(mmbuf[total]), sizeof(char),
                                         (i3*i4*i5)-total, buffer_colorD);
@@ -1651,14 +1943,358 @@ void *networkclient_colorD_thread(void *not_used){
                            }
                         }
                      }while(total<i3*i4*i5);
-                     memcpy (colorD, mmbuf, i3*i4*i5);
-                     speedcounter(colorD_schema_id);
-                     imageD_clock=network_clock;
+
+                     if (width[3]!=i3 || height[3]!=i4){
+                        fprintf (stderr, "Error: network colorD image size and local are different\n");
+                        jdeshutdown(1);
+                     }
+                     else{
+                        memcpy (colorD, mmbuf, width[3]*height[3]*i5);
+                        free(mmbuf);
+                        speedcounter(colorD_schema_id);
+                        imageB_clock=network_clock;
+                     }
                   }
                }
             }
             else{
                fprintf(stderr, "Error en la lectura del socket de colorD, deja de ser servido\n");
+               pthread_exit(0);
+            }
+         }
+      }
+   }while(networkclient_close_command==0);
+   pthread_exit(0);
+}
+
+/** networkclient driver pthread function for varcolorA reception.*/
+void *networkclient_varcolorA_thread(void *not_used){
+   char *mmbuf;
+   unsigned long int network_clock;
+   /*  fd_set dummy_set,read_set;*/
+   FILE *buffer_varcolorA;
+   buffer_varcolorA=fdopen(device_socket[VARCOLORA_DEVICE], "r+");
+
+   printf("networkclient varcolorA thread started\n");
+
+   do{
+
+      pthread_mutex_lock(&mymutex[VARCOLORA_DEVICE]);
+
+      if (state[VARCOLORA_DEVICE]==slept){
+         printf("networkclient varcolorA thread goes sleep mode\n");
+         pthread_cond_wait(&condition[VARCOLORA_DEVICE],&mymutex[VARCOLORA_DEVICE]);
+         printf("networkclient varcolorA thread woke up\n");
+         pthread_mutex_unlock(&mymutex[VARCOLORA_DEVICE]);
+      }else{
+      
+         pthread_mutex_unlock(&mymutex[VARCOLORA_DEVICE]);
+         /*Write petition*/
+         fprintf(buffer_varcolorA,"%d %d\n",
+                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 device_network_id[VARCOLORA_DEVICE]);
+         fflush(buffer_varcolorA);
+         /*Read message*/
+         {
+            int i2,i3,i4,i5,type;
+            char buffer_lectura[MAX_MESSAGE];
+            if (fgets(buffer_lectura, MAX_MESSAGE, buffer_varcolorA)!=NULL){
+               if (sscanf(buffer_lectura,"%d %lu %d %d %d %d\n",&type,
+                   &network_clock,&i2,&i3,&i4,&i5)!=6)
+               {
+                  printf("networkclient: i don't understand message from networkserver to varcolorA. (%s)\n",
+                         buffer_lectura);
+               }
+               else{
+                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                     int total=0;
+                     int actual=0;
+                     /*Read image*/
+                     mmbuf=(char *)malloc(sizeof(char)*i3*i4*i5);
+                     do{
+                        actual=fread( &(mmbuf[total]), sizeof(char),
+                                        (i3*i4*i5)-total, buffer_varcolorA);
+                        if (actual>0)
+                           total+=actual;
+                        else{
+                           if (ferror(buffer_varcolorA)){
+                              perror("Error at fread");
+                              clearerr(buffer_varcolorA);
+                           }
+                           if (feof(buffer_varcolorA)){
+                              perror("EOF at fread");
+                              clearerr(buffer_varcolorA);
+                           }
+                        }
+                     }while(total<i3*i4*i5);
+
+                     if (width[4]!=i3 || height[4]!=i4){
+                        fprintf (stderr, "Error: network varcolorA image size and local are different\n");
+                        jdeshutdown(1);
+                     }
+                     else{
+                        memcpy (varcolorA, mmbuf, width[4]*height[4]*i5);
+                        free(mmbuf);
+                        speedcounter(varcolorA_schema_id);
+                        imageB_clock=network_clock;
+                     }
+                  }
+               }
+            }
+            else{
+               fprintf(stderr, "Error en la lectura del socket de varcolorA, deja de ser servido\n");
+               pthread_exit(0);
+            }
+         }
+      }
+   }while(networkclient_close_command==0);
+   pthread_exit(0);
+}
+
+/** networkclient driver pthread function for varcolorB reception.*/
+void *networkclient_varcolorB_thread(void *not_used){
+   char *mmbuf;
+   unsigned long int network_clock;
+   /*  fd_set dummy_set,read_set;*/
+   FILE *buffer_varcolorB;
+   buffer_varcolorB=fdopen(device_socket[VARCOLORB_DEVICE], "r+");
+
+   printf("networkclient varcolorB thread started\n");
+
+   do{
+
+      pthread_mutex_lock(&mymutex[VARCOLORB_DEVICE]);
+
+      if (state[VARCOLORB_DEVICE]==slept){
+         printf("networkclient varcolorB thread goes sleep mode\n");
+         pthread_cond_wait(&condition[VARCOLORB_DEVICE],&mymutex[VARCOLORB_DEVICE]);
+         printf("networkclient varcolorB thread woke up\n");
+         pthread_mutex_unlock(&mymutex[VARCOLORB_DEVICE]);
+      }else{
+      
+         pthread_mutex_unlock(&mymutex[VARCOLORB_DEVICE]);
+         /*Write petition*/
+         fprintf(buffer_varcolorB,"%d %d\n",
+                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 device_network_id[VARCOLORB_DEVICE]);
+         fflush(buffer_varcolorB);
+         /*Read message*/
+         {
+            int i2,i3,i4,i5,type;
+            char buffer_lectura[MAX_MESSAGE];
+            if (fgets(buffer_lectura, MAX_MESSAGE, buffer_varcolorB)!=NULL){
+               if (sscanf(buffer_lectura,"%d %lu %d %d %d %d\n",&type,
+                   &network_clock,&i2,&i3,&i4,&i5)!=6)
+               {
+                  printf("networkclient: i don't understand message from networkserver to varcolorB. (%s)\n",
+                         buffer_lectura);
+               }
+               else{
+                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                     int total=0;
+                     int actual=0;
+                     /*Read image*/
+                     mmbuf=(char *)malloc(sizeof(char)*i3*i4*i5);
+                     do{
+                        actual=fread( &(mmbuf[total]), sizeof(char),
+                                        (i3*i4*i5)-total, buffer_varcolorB);
+                        if (actual>0)
+                           total+=actual;
+                        else{
+                           if (ferror(buffer_varcolorB)){
+                              perror("Error at fread");
+                              clearerr(buffer_varcolorB);
+                           }
+                           if (feof(buffer_varcolorB)){
+                              perror("EOF at fread");
+                              clearerr(buffer_varcolorB);
+                           }
+                        }
+                     }while(total<i3*i4*i5);
+
+                     if (width[5]!=i3 || height[5]!=i4){
+                        fprintf (stderr, "Error: network varcolorB image size and local are different\n");
+                        jdeshutdown(1);
+                     }
+                     else{
+                        memcpy (varcolorB, mmbuf, width[5]*height[5]*i5);
+                        free(mmbuf);
+                        speedcounter(varcolorB_schema_id);
+                        imageB_clock=network_clock;
+                     }
+                  }
+               }
+            }
+            else{
+               fprintf(stderr, "Error en la lectura del socket de varcolorB, deja de ser servido\n");
+               pthread_exit(0);
+            }
+         }
+      }
+   }while(networkclient_close_command==0);
+   pthread_exit(0);
+}
+
+/** networkclient driver pthread function for varcolorC reception.*/
+void *networkclient_varcolorC_thread(void *not_used){
+   char *mmbuf;
+   unsigned long int network_clock;
+   /*  fd_set dummy_set,read_set;*/
+   FILE *buffer_varcolorC;
+   buffer_varcolorC=fdopen(device_socket[VARCOLORC_DEVICE], "r+");
+
+   printf("networkclient varcolorC thread started\n");
+
+   do{
+
+      pthread_mutex_lock(&mymutex[VARCOLORC_DEVICE]);
+
+      if (state[VARCOLORC_DEVICE]==slept){
+         printf("networkclient varcolorC thread goes sleep mode\n");
+         pthread_cond_wait(&condition[VARCOLORC_DEVICE],&mymutex[VARCOLORC_DEVICE]);
+         printf("networkclient varcolorC thread woke up\n");
+         pthread_mutex_unlock(&mymutex[VARCOLORC_DEVICE]);
+      }else{
+      
+         pthread_mutex_unlock(&mymutex[VARCOLORC_DEVICE]);
+         /*Write petition*/
+         fprintf(buffer_varcolorC,"%d %d\n",
+                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 device_network_id[VARCOLORC_DEVICE]);
+         fflush(buffer_varcolorC);
+         /*Read message*/
+         {
+            int i2,i3,i4,i5,type;
+            char buffer_lectura[MAX_MESSAGE];
+            if (fgets(buffer_lectura, MAX_MESSAGE, buffer_varcolorC)!=NULL){
+               if (sscanf(buffer_lectura,"%d %lu %d %d %d %d\n",&type,
+                   &network_clock,&i2,&i3,&i4,&i5)!=6)
+               {
+                  printf("networkclient: i don't understand message from networkserver to varcolorC. (%s)\n",
+                         buffer_lectura);
+               }
+               else{
+                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                     int total=0;
+                     int actual=0;
+                     /*Read image*/
+                     mmbuf=(char *)malloc(sizeof(char)*i3*i4*i5);
+                     do{
+                        actual=fread( &(mmbuf[total]), sizeof(char),
+                                        (i3*i4*i5)-total, buffer_varcolorC);
+                        if (actual>0)
+                           total+=actual;
+                        else{
+                           if (ferror(buffer_varcolorC)){
+                              perror("Error at fread");
+                              clearerr(buffer_varcolorC);
+                           }
+                           if (feof(buffer_varcolorC)){
+                              perror("EOF at fread");
+                              clearerr(buffer_varcolorC);
+                           }
+                        }
+                     }while(total<i3*i4*i5);
+
+                     if (width[6]!=i3 || height[6]!=i4){
+                        fprintf (stderr, "Error: network varcolorC image size and local are different\n");
+                        jdeshutdown(1);
+                     }
+                     else{
+                        memcpy (varcolorC, mmbuf, width[6]*height[6]*i5);
+                        free(mmbuf);
+                        speedcounter(varcolorC_schema_id);
+                        imageB_clock=network_clock;
+                     }
+                  }
+               }
+            }
+            else{
+               fprintf(stderr, "Error en la lectura del socket de varcolorC, deja de ser servido\n");
+               pthread_exit(0);
+            }
+         }
+      }
+   }while(networkclient_close_command==0);
+   pthread_exit(0);
+}
+
+/** networkclient driver pthread function for varcolorD reception.*/
+void *networkclient_varcolorD_thread(void *not_used){
+   char *mmbuf;
+   unsigned long int network_clock;
+   /*  fd_set dummy_set,read_set;*/
+   FILE *buffer_varcolorD;
+   buffer_varcolorD=fdopen(device_socket[VARCOLORD_DEVICE], "r+");
+
+   printf("networkclient varcolorD thread started\n");
+
+   do{
+
+      pthread_mutex_lock(&mymutex[VARCOLORD_DEVICE]);
+
+      if (state[VARCOLORD_DEVICE]==slept){
+         printf("networkclient varcolorD thread goes sleep mode\n");
+         pthread_cond_wait(&condition[VARCOLORD_DEVICE],&mymutex[VARCOLORD_DEVICE]);
+         printf("networkclient varcolorD thread woke up\n");
+         pthread_mutex_unlock(&mymutex[VARCOLORD_DEVICE]);
+      }else{
+      
+         pthread_mutex_unlock(&mymutex[VARCOLORD_DEVICE]);
+         /*Write petition*/
+         fprintf(buffer_varcolorD,"%d %d\n",
+                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 device_network_id[VARCOLORD_DEVICE]);
+         fflush(buffer_varcolorD);
+         /*Read message*/
+         {
+            int i2,i3,i4,i5,type;
+            char buffer_lectura[MAX_MESSAGE];
+            if (fgets(buffer_lectura, MAX_MESSAGE, buffer_varcolorD)!=NULL){
+               if (sscanf(buffer_lectura,"%d %lu %d %d %d %d\n",&type,
+                   &network_clock,&i2,&i3,&i4,&i5)!=6)
+               {
+                  printf("networkclient: i don't understand message from networkserver to varcolorD. (%s)\n",
+                         buffer_lectura);
+               }
+               else{
+                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                     int total=0;
+                     int actual=0;
+                     /*Read image*/
+                     mmbuf=(char *)malloc(sizeof(char)*i3*i4*i5);
+                     do{
+                        actual=fread( &(mmbuf[total]), sizeof(char),
+                                        (i3*i4*i5)-total, buffer_varcolorD);
+                        if (actual>0)
+                           total+=actual;
+                        else{
+                           if (ferror(buffer_varcolorD)){
+                              perror("Error at fread");
+                              clearerr(buffer_varcolorD);
+                           }
+                           if (feof(buffer_varcolorD)){
+                              perror("EOF at fread");
+                              clearerr(buffer_varcolorD);
+                           }
+                        }
+                     }while(total<i3*i4*i5);
+
+                     if (width[7]!=i3 || height[7]!=i4){
+                        fprintf (stderr, "Error: network varcolorD image size and local are different\n");
+                        jdeshutdown(1);
+                     }
+                     else{
+                        memcpy (varcolorD, mmbuf, width[7]*height[7]*i5);
+                        free(mmbuf);
+                        speedcounter(varcolorD_schema_id);
+                        imageB_clock=network_clock;
+                     }
+                  }
+               }
+            }
+            else{
+               fprintf(stderr, "Error en la lectura del socket de varcolorD, deja de ser servido\n");
                pthread_exit(0);
             }
          }
@@ -1728,6 +2364,7 @@ int networkclient_parseconf(char *configfile){
 	    do{
 	      
 	      char buffer_file2[256],word3[256],word4[256],word5[256],word6[256],word7[256];
+              char word8[256],word9[256];
 	      int k=0; int z=0;
 
 	      buffer_file2[0]=fgetc(myfile);
@@ -1769,37 +2406,87 @@ int networkclient_parseconf(char *configfile){
 		    end_section=1; end_parse=1;
 
 		  }else if(strcmp(word3,"provides")==0){
+                     int words=0;
 		    while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
-		    if(sscanf(buffer_file2,"%s %s %s %s %s",word3,word4,word5,word6,word7)>4){
-		      
-		      if((strcmp(word4,"colorA")==0)&&(serve_device[COLORA_DEVICE]==0)){
-			serve_device[COLORA_DEVICE]=1;
-			device_active[COLORA_DEVICE]=0;
-			strcpy(hostname[COLORA_DEVICE],word5);
-			port[COLORA_DEVICE]=atoi(word6);
-			device_network_id[COLORA_DEVICE]=atoi(word7);
-		      }
-		      else if((strcmp(word4,"colorB")==0)&&(serve_device[COLORB_DEVICE]==0)){
-			serve_device[COLORB_DEVICE]=1;
-			device_active[COLORB_DEVICE]=0;
-			strcpy(hostname[COLORB_DEVICE],word5);
-			port[COLORB_DEVICE]=atoi(word6);
-			device_network_id[COLORB_DEVICE]=atoi(word7);
-		      }
-		      else if((strcmp(word4,"colorC")==0)&&(serve_device[COLORC_DEVICE]==0)){
-			serve_device[COLORC_DEVICE]=1;
-			device_active[COLORC_DEVICE]=0;
-			strcpy(hostname[COLORC_DEVICE],word5);
-			port[COLORC_DEVICE]=atoi(word6);
-			device_network_id[COLORC_DEVICE]=atoi(word7);
-		      }
-		      else if((strcmp(word4,"colorD")==0)&&(serve_device[COLORD_DEVICE]==0)){
-			serve_device[COLORD_DEVICE]=1;
-			device_active[COLORD_DEVICE]=0;
-			strcpy(hostname[COLORD_DEVICE],word5);
-			port[COLORD_DEVICE]=atoi(word6);
-			device_network_id[COLORD_DEVICE]=atoi(word7);
-		      }
+		    if((words=sscanf(buffer_file2,"%s %s %s %s %s %s %s",word3,word4,
+                        word5,word6,word7,word8,word9))>=5)
+                    {
+                       if (words==5){
+                          if((strcmp(word4,"colorA")==0)&&(serve_device[COLORA_DEVICE]==0)){
+                             serve_device[COLORA_DEVICE]=1;
+                             device_active[COLORA_DEVICE]=0;
+                             strcpy(hostname[COLORA_DEVICE],word5);
+                             port[COLORA_DEVICE]=atoi(word6);
+                             device_network_id[COLORA_DEVICE]=atoi(word7);
+                             width[0]=SIFNTSC_COLUMNS;
+                             height[0]=SIFNTSC_ROWS;
+                          }
+                          else if((strcmp(word4,"colorB")==0)&&(serve_device[COLORB_DEVICE]==0)){
+                             serve_device[COLORB_DEVICE]=1;
+                             device_active[COLORB_DEVICE]=0;
+                             strcpy(hostname[COLORB_DEVICE],word5);
+                             port[COLORB_DEVICE]=atoi(word6);
+                             device_network_id[COLORB_DEVICE]=atoi(word7);
+                             width[1]=SIFNTSC_COLUMNS;
+                             height[1]=SIFNTSC_ROWS;
+                          }
+                          else if((strcmp(word4,"colorC")==0)&&(serve_device[COLORC_DEVICE]==0)){
+                             serve_device[COLORC_DEVICE]=1;
+                             device_active[COLORC_DEVICE]=0;
+                             strcpy(hostname[COLORC_DEVICE],word5);
+                             port[COLORC_DEVICE]=atoi(word6);
+                             device_network_id[COLORC_DEVICE]=atoi(word7);
+                             width[2]=SIFNTSC_COLUMNS;
+                             height[2]=SIFNTSC_ROWS;
+                          }
+                          else if((strcmp(word4,"colorD")==0)&&(serve_device[COLORD_DEVICE]==0)){
+                             serve_device[COLORD_DEVICE]=1;
+                             device_active[COLORD_DEVICE]=0;
+                             strcpy(hostname[COLORD_DEVICE],word5);
+                             port[COLORD_DEVICE]=atoi(word6);
+                             device_network_id[COLORD_DEVICE]=atoi(word7);
+                             width[3]=SIFNTSC_COLUMNS;
+                             height[3]=SIFNTSC_ROWS;
+                          }
+                       }
+                       else if (words==7){
+                          if((strcmp(word4,"varcolorA")==0)&&(serve_device[VARCOLORA_DEVICE]==0)){
+                             serve_device[VARCOLORA_DEVICE]=1;
+                             device_active[VARCOLORA_DEVICE]=0;
+                             strcpy(hostname[VARCOLORA_DEVICE],word5);
+                             port[VARCOLORA_DEVICE]=atoi(word6);
+                             device_network_id[VARCOLORA_DEVICE]=atoi(word7);
+                             width[4]=atoi(word8);
+                             height[4]=atoi(word9);
+                          }
+                          else if((strcmp(word4,"varcolorB")==0)&&(serve_device[VARCOLORB_DEVICE]==0)){
+                             serve_device[VARCOLORB_DEVICE]=1;
+                             device_active[VARCOLORB_DEVICE]=0;
+                             strcpy(hostname[VARCOLORB_DEVICE],word5);
+                             port[VARCOLORB_DEVICE]=atoi(word6);
+                             device_network_id[VARCOLORB_DEVICE]=atoi(word7);
+                             width[5]=atoi(word8);
+                             height[5]=atoi(word9);
+                          }
+                          else if((strcmp(word4,"varcolorC")==0)&&(serve_device[VARCOLORC_DEVICE]==0)){
+                             serve_device[VARCOLORC_DEVICE]=1;
+                             device_active[VARCOLORC_DEVICE]=0;
+                             strcpy(hostname[VARCOLORC_DEVICE],word5);
+                             port[VARCOLORC_DEVICE]=atoi(word6);
+                             device_network_id[VARCOLORC_DEVICE]=atoi(word7);
+                             width[6]=atoi(word8);
+                             height[6]=atoi(word9);
+                          }
+                          else if((strcmp(word4,"varcolorD")==0)&&(serve_device[VARCOLORD_DEVICE]==0)){
+                             serve_device[VARCOLORD_DEVICE]=1;
+                             device_active[VARCOLORD_DEVICE]=0;
+                             strcpy(hostname[VARCOLORD_DEVICE],word5);
+                             port[VARCOLORD_DEVICE]=atoi(word6);
+                             device_network_id[VARCOLORD_DEVICE]=atoi(word7);
+                             width[7]=atoi(word8);
+                             height[7]=atoi(word9);
+                          }
+                       }
 		      else{
 			printf("networkclient: provides line incorrect\n");
 		      }
@@ -1949,21 +2636,52 @@ int networkclient_init(){
       pthread_mutex_lock(&mymutex[i]);
       state[i]=slept;
       switch(i){
-      case COLORA_DEVICE: pthread_create(&network_thread[COLORA_DEVICE],NULL,networkclient_colorA_thread,NULL); break;
-      case COLORB_DEVICE: pthread_create(&network_thread[COLORB_DEVICE],NULL,networkclient_colorB_thread,NULL); break;
-      case COLORC_DEVICE: pthread_create(&network_thread[COLORC_DEVICE],NULL,networkclient_colorC_thread,NULL); break;
-      case COLORD_DEVICE: pthread_create(&network_thread[COLORD_DEVICE],NULL,networkclient_colorD_thread,NULL); break;
-      case PANTILT_ENCODERS_DEVICE: pthread_create(&network_thread[PANTILT_ENCODERS_DEVICE],NULL,networkclient_pantiltencoders_thread,NULL); break;
-      case PANTILT_MOTORS_DEVICE: pthread_create(&network_thread[PANTILT_MOTORS_DEVICE],NULL,networkclient_pantiltmotors_thread,NULL); break;
-      case LASER_DEVICE: pthread_create(&network_thread[LASER_DEVICE],NULL,networkclient_laser_thread,NULL); break;
-      case SONARS_DEVICE: pthread_create(&network_thread[SONARS_DEVICE],NULL,networkclient_sonars_thread,NULL); break;
-      case ENCODERS_DEVICE: pthread_create(&network_thread[ENCODERS_DEVICE],NULL,networkclient_encoders_thread,NULL); break;
-      case MOTORS_DEVICE: pthread_create(&network_thread[MOTORS_DEVICE],NULL,networkclient_motors_thread,NULL); break;
+      case COLORA_DEVICE:
+         pthread_create(&network_thread[COLORA_DEVICE],NULL,networkclient_colorA_thread,NULL);
+         break;
+      case COLORB_DEVICE:
+         pthread_create(&network_thread[COLORB_DEVICE],NULL,networkclient_colorB_thread,NULL);
+         break;
+      case COLORC_DEVICE:
+         pthread_create(&network_thread[COLORC_DEVICE],NULL,networkclient_colorC_thread,NULL);
+         break;
+      case COLORD_DEVICE:
+         pthread_create(&network_thread[COLORD_DEVICE],NULL,networkclient_colorD_thread,NULL);
+         break;
+      case VARCOLORA_DEVICE:
+         pthread_create(&network_thread[VARCOLORA_DEVICE],NULL,networkclient_varcolorA_thread,NULL);
+         break;
+      case VARCOLORB_DEVICE:
+         pthread_create(&network_thread[VARCOLORB_DEVICE],NULL,networkclient_varcolorB_thread,NULL);
+         break;
+      case VARCOLORC_DEVICE:
+         pthread_create(&network_thread[VARCOLORC_DEVICE],NULL,networkclient_varcolorC_thread,NULL);
+         break;
+      case VARCOLORD_DEVICE:
+         pthread_create(&network_thread[VARCOLORD_DEVICE],NULL,networkclient_varcolorD_thread,NULL);
+         break;
+      case PANTILT_ENCODERS_DEVICE:
+         pthread_create(&network_thread[PANTILT_ENCODERS_DEVICE],NULL,networkclient_pantiltencoders_thread,NULL);
+         break;
+      case PANTILT_MOTORS_DEVICE:
+         pthread_create(&network_thread[PANTILT_MOTORS_DEVICE],NULL,networkclient_pantiltmotors_thread,NULL);
+         break;
+      case LASER_DEVICE:
+         pthread_create(&network_thread[LASER_DEVICE],NULL,networkclient_laser_thread,NULL);
+         break;
+      case SONARS_DEVICE:
+         pthread_create(&network_thread[SONARS_DEVICE],NULL,networkclient_sonars_thread,NULL);
+         break;
+      case ENCODERS_DEVICE:
+         pthread_create(&network_thread[ENCODERS_DEVICE],NULL,networkclient_encoders_thread,NULL);
+         break;
+      case MOTORS_DEVICE:
+         pthread_create(&network_thread[MOTORS_DEVICE],NULL,networkclient_motors_thread,NULL);
+         break;
       }
       pthread_mutex_unlock(&mymutex[i]);
     }
   }
-
   return 0;
 }
 
@@ -1973,6 +2691,11 @@ void networkclient_startup(char *configfile)
 {
   int i;
 
+  for (i=0; i<MAXCAM; i++){
+     width[i]=0;
+     height[i]=0;
+  }
+  
   /* reseting serve color array and setting default options */
   for(i=0;i<MAXDEVICE;i++){serve_device[i]=0; device_active[i]=0; device_network_id[i]=0; state[i]=slept; device_socket[i]=0;}
 
@@ -2002,8 +2725,11 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    colorA=malloc(sizeof(char)*width[0]*height[0]*3);
     myexport("colorA", "id", &colorA_schema_id);
     myexport("colorA", "colorA", &colorA);
+    myexport("colorA", "width", &(width[0]));
+    myexport("colorA", "height", &(height[0]));
     myexport("colorA","clock", &imageA_clock);
     myexport("colorA","resume",(void *) &networkclient_colorA_resume);
     myexport("colorA","suspend",(void *) &networkclient_colorA_suspend);
@@ -2021,8 +2747,11 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    colorB=malloc(sizeof(char)*width[1]*height[1]*3);
     myexport("colorB", "id", &colorB_schema_id);
     myexport("colorB", "colorB", &colorB);
+    myexport("colorB", "width", &(width[1]));
+    myexport("colorB", "height", &(height[1]));
     myexport("colorB","clock", &imageB_clock);
     myexport("colorB","resume",(void *) &networkclient_colorB_resume);
     myexport("colorB","suspend",(void *) &networkclient_colorB_suspend);
@@ -2040,8 +2769,11 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    colorC=malloc(sizeof(char)*width[2]*height[2]*3);
     myexport("colorC", "id", &colorC_schema_id);
     myexport("colorC", "colorC", &colorC);
+    myexport("colorC", "width", &(width[2]));
+    myexport("colorC", "height", &(height[2]));
     myexport("colorC","clock", &imageC_clock);
     myexport("colorC","resume",(void *) &networkclient_colorC_resume);
     myexport("colorC","suspend",(void *) &networkclient_colorC_suspend);
@@ -2059,11 +2791,102 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
+    colorD=malloc(sizeof(char)*width[3]*height[3]*3);
     myexport("colorD", "id", &colorD_schema_id);
     myexport("colorD", "colorD", &colorD);
+    myexport("colorD", "width", &(width[3]));
+    myexport("colorD", "height",&(height[3]));
     myexport("colorD","clock", &imageD_clock);
     myexport("colorD","resume",(void *) &networkclient_colorD_resume);
     myexport("colorD","suspend",(void *) &networkclient_colorD_suspend);
+  }
+  if(serve_device[VARCOLORA_DEVICE]){
+     all[num_schemas].id = (int *) &varcolorA_schema_id;
+     strcpy(all[num_schemas].name,"varcolorA");
+     all[num_schemas].resume = (resumeFn) networkclient_varcolorA_resume;
+     all[num_schemas].suspend = (suspendFn) networkclient_varcolorA_suspend;
+     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+     (*(all[num_schemas].id)) = num_schemas;
+     all[num_schemas].fps = 0.;
+     all[num_schemas].k =0;
+     all[num_schemas].state=slept;
+     all[num_schemas].close = NULL;
+     all[num_schemas].handle = NULL;
+     num_schemas++;
+     varcolorA=malloc(sizeof(char)*width[4]*height[4]*3);
+     myexport("varcolorA", "id", &varcolorA_schema_id);
+     myexport("varcolorA", "varcolorA", &varcolorA);
+     myexport("varcolorA", "width", &(width[4]));
+     myexport("varcolorA", "height", &(height[4]));
+     myexport("varcolorA","clock", &varimageA_clock);
+     myexport("varcolorA","resume",(void *) &networkclient_varcolorA_resume);
+     myexport("varcolorA","suspend",(void *) &networkclient_varcolorA_suspend);
+  }
+  if(serve_device[VARCOLORB_DEVICE]){
+     all[num_schemas].id = (int *) &varcolorB_schema_id;
+     strcpy(all[num_schemas].name,"varcolorB");
+     all[num_schemas].resume = (resumeFn) networkclient_varcolorB_resume;
+     all[num_schemas].suspend = (suspendFn) networkclient_varcolorB_suspend;
+     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+     (*(all[num_schemas].id)) = num_schemas;
+     all[num_schemas].fps = 0.;
+     all[num_schemas].k =0;
+     all[num_schemas].state=slept;
+     all[num_schemas].close = NULL;
+     all[num_schemas].handle = NULL;
+     num_schemas++;
+     varcolorB=malloc(sizeof(char)*width[5]*height[5]*3);
+     myexport("varcolorB", "id", &varcolorB_schema_id);
+     myexport("varcolorB", "varcolorB", &varcolorB);
+     myexport("varcolorB", "width", &(width[5]));
+     myexport("varcolorB", "height", &(height[5]));
+     myexport("varcolorB","clock", &varimageB_clock);
+     myexport("varcolorB","resume",(void *) &networkclient_varcolorB_resume);
+     myexport("varcolorB","suspend",(void *) &networkclient_varcolorB_suspend);
+  }
+  if(serve_device[VARCOLORC_DEVICE]){
+     all[num_schemas].id = (int *) &varcolorC_schema_id;
+     strcpy(all[num_schemas].name,"varcolorC");
+     all[num_schemas].resume = (resumeFn) networkclient_varcolorC_resume;
+     all[num_schemas].suspend = (suspendFn) networkclient_varcolorC_suspend;
+     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+     (*(all[num_schemas].id)) = num_schemas;
+     all[num_schemas].fps = 0.;
+     all[num_schemas].k =0;
+     all[num_schemas].state=slept;
+     all[num_schemas].close = NULL;
+     all[num_schemas].handle = NULL;
+     num_schemas++;
+     varcolorC=malloc(sizeof(char)*width[6]*height[6]*3);
+     myexport("varcolorC", "id", &varcolorC_schema_id);
+     myexport("varcolorC", "varcolorC", &varcolorC);
+     myexport("varcolorC", "width", &(width[6]));
+     myexport("varcolorC", "height", &(height[6]));
+     myexport("varcolorC","clock", &varimageC_clock);
+     myexport("varcolorC","resume",(void *) &networkclient_varcolorC_resume);
+     myexport("varcolorC","suspend",(void *) &networkclient_varcolorC_suspend);
+  }
+  if(serve_device[VARCOLORD_DEVICE]){
+     all[num_schemas].id = (int *) &varcolorD_schema_id;
+     strcpy(all[num_schemas].name,"varcolorD");
+     all[num_schemas].resume = (resumeFn) networkclient_varcolorD_resume;
+     all[num_schemas].suspend = (suspendFn) networkclient_varcolorD_suspend;
+     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+     (*(all[num_schemas].id)) = num_schemas;
+     all[num_schemas].fps = 0.;
+     all[num_schemas].k =0;
+     all[num_schemas].state=slept;
+     all[num_schemas].close = NULL;
+     all[num_schemas].handle = NULL;
+     num_schemas++;
+     varcolorD=malloc(sizeof(char)*width[7]*height[7]*3);
+     myexport("varcolorD", "id", &varcolorD_schema_id);
+     myexport("varcolorD", "varcolorD", &varcolorD);
+     myexport("varcolorD", "width", &(width[7]));
+     myexport("varcolorD", "height", &(height[7]));
+     myexport("varcolorD","clock", &varimageD_clock);
+     myexport("varcolorD","resume",(void *) &networkclient_varcolorD_resume);
+     myexport("varcolorD","suspend",(void *) &networkclient_varcolorD_suspend);
   }
   if(serve_device[PANTILT_ENCODERS_DEVICE]){
     all[num_schemas].id = (int *) &ptencoders_schema_id;

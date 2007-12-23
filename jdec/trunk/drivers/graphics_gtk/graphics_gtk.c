@@ -177,6 +177,32 @@ void *graphics_gtk_thread2(void){
 }
 
 /**
+ * Search in the path the .glade file and loads it
+ * @param file_name The name of the .glade file
+ * @returns the newly created GladeXML object, or NULL on failure.
+ */
+GladeXML* load_glade (char * file_name){
+   char *path, *directorio, *path2;
+   char cp_path[1024];
+
+   path=getenv("LD_LIBRARY_PATH"); /*Capture enviroment variable*/
+   strncpy(cp_path,path, 1024);
+   path2=cp_path;
+
+   while ((directorio=strsep(&path2,":"))!=NULL){
+      char fichero[1024];
+      strncpy(fichero, directorio, 1024);
+      strncat(fichero,"/", 1024-strlen(fichero));
+      strncat(fichero, file_name, 1024-strlen(fichero));
+      if (access(fichero, R_OK)==0){
+         /*Se puede cargar el fichero*/
+         return glade_xml_new (fichero, NULL,NULL);
+      }
+   }
+   return NULL;
+}
+
+/**
  * @brief graphics_gtk driver startup function following jdec platform API for drivers.
  *
  * It initializates the driver and exports the requiered functions.
@@ -195,6 +221,7 @@ void graphics_gtk_startup(char *configfile)
 
    myexport ("graphics_gtk", "register_displaycallback", (void *)register_displaycallback);
    myexport ("graphics_gtk", "delete_displaycallback", (void *)delete_displaycallback);
+   myexport ("graphics_gtk", "load_glade", (void *)load_glade);
 
    pthread_create(&graphics_gtk_id,NULL,graphics_gtk_thread,NULL);
    pthread_create(&graphics_gtk_id2,NULL,graphics_gtk_thread2,NULL);

@@ -51,8 +51,12 @@
 #define SONARS_DEVICE 7
 #define ENCODERS_DEVICE 8
 #define MOTORS_DEVICE 9
+#define VARCOLORA_DEVICE 10
+#define VARCOLORB_DEVICE 11
+#define VARCOLORC_DEVICE 12
+#define VARCOLORD_DEVICE 13
       /* number of devices */
-#define MAXDEVICE 10
+#define MAXDEVICE 14
 
 
 /* networkserver driver API options */
@@ -234,6 +238,22 @@ int networkserver_parseconf(char *configfile){
                                     serve_device[COLORD_DEVICE]=1;
                                     device_network_id[COLORD_DEVICE]=atoi(word5);
                                  }
+                                 else if((strcmp(word4,"varcolorA")==0)&&(serve_device[VARCOLORA_DEVICE]==0)){
+                                    serve_device[VARCOLORA_DEVICE]=1;
+                                    device_network_id[VARCOLORA_DEVICE]=atoi(word5);
+                                 }
+                                 else if((strcmp(word4,"varcolorB")==0)&&(serve_device[VARCOLORB_DEVICE]==0)){
+                                    serve_device[VARCOLORB_DEVICE]=1;
+                                    device_network_id[VARCOLORB_DEVICE]=atoi(word5);
+                                 }
+                                 else if((strcmp(word4,"varcolorC")==0)&&(serve_device[VARCOLORC_DEVICE]==0)){
+                                    serve_device[VARCOLORC_DEVICE]=1;
+                                    device_network_id[VARCOLORC_DEVICE]=atoi(word5);
+                                 }
+                                 else if((strcmp(word4,"varcolorD")==0)&&(serve_device[VARCOLORD_DEVICE]==0)){
+                                    serve_device[VARCOLORD_DEVICE]=1;
+                                    device_network_id[VARCOLORD_DEVICE]=atoi(word5);
+                                 }
                                  else{
                                     printf("networkserver: serves line incorrect\n");
                                  }
@@ -331,6 +351,54 @@ void init(){
                if (!variables[i]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'colorD', it'll not be served\n");
+               }
+               else{
+                  resume[i](-1, NULL, NULL);
+               }
+               break;
+            case VARCOLORA_DEVICE:
+               variables[i]=myimport ("varcolorA", "varcolorA");
+               resume[i]=(resumeFn) myimport ("varcolorA", "resume");
+               suspend[i]=(suspendFn) myimport ("varcolorA", "suspend");
+               if (!variables[i]){
+                  serve_device[i]=0;
+                  fprintf (stderr, "I can't fetch 'varcolorA', it'll not be served\n");
+               }
+               else{
+                  resume[i](-1, NULL, NULL);
+               }
+               break;
+            case VARCOLORB_DEVICE:
+               variables[i]=myimport ("varcolorB", "varcolorB");
+               resume[i]=(resumeFn) myimport ("varcolorB", "resume");
+               suspend[i]=(suspendFn) myimport ("varcolorB", "suspend");
+               if (!variables[i]){
+                  serve_device[i]=0;
+                  fprintf (stderr, "I can't fetch 'varcolorB', it'll not be served\n");
+               }
+               else{
+                  resume[i](-1, NULL, NULL);
+               }
+               break;
+            case VARCOLORC_DEVICE:
+               variables[i]=myimport ("varcolorC", "varcolorC");
+               resume[i]=(resumeFn) myimport ("varcolorC", "resume");
+               suspend[i]=(suspendFn) myimport ("varcolorC", "suspend");
+               if (!variables[i]){
+                  serve_device[i]=0;
+                  fprintf (stderr, "I can't fetch 'varcolorC', it'll not be served\n");
+               }
+               else{
+                  resume[i](-1, NULL, NULL);
+               }
+               break;
+            case VARCOLORD_DEVICE:
+               variables[i]=myimport ("varcolorD", "varcolorD");
+               resume[i]=(resumeFn) myimport ("varcolorD", "resume");
+               suspend[i]=(suspendFn) myimport ("varcolorD", "suspend");
+               if (!variables[i]){
+                  serve_device[i]=0;
+                  fprintf (stderr, "I can't fetch 'varcolorD', it'll not be served\n");
                }
                else{
                   resume[i](-1, NULL, NULL);
@@ -486,7 +554,7 @@ void my_write(int fd, const void *buf, size_t count) {
 }
 
 /**
- * @brief Receives a petition from a particular client, and dispatch it
+ * @brief Receives a petition from a particular client and dispatchs it.
  * The petition can be an image petition, a subscription petition or a motors
  * order. In the first case the image response will be send by de client socket,
  * in the second case the subscription will be registered and in the last one
@@ -510,6 +578,7 @@ void dispatch_petition(struct client *info, char *petition) {
       /*El cliente pide una imagen*/
       int cam;
       char *image=NULL;
+      int *width, *height;
       unsigned long int *clock;
       unsigned long int time;
 
@@ -520,6 +589,8 @@ void dispatch_petition(struct client *info, char *petition) {
       if (serve_device[COLORA_DEVICE]==1 && device_network_id[COLORA_DEVICE]==cam){
          image=*(char **)variables[COLORA_DEVICE];
          clock=(unsigned long int *)myimport("colorA", "clock");
+         width=(int *)myimport("colorA","width");
+         height=(int *)myimport("colorA","height");
          while (info->clocks[COLORA_DEVICE]==*clock){
             usleep(1000);/*Espero una nueva imagen durante 1ms*/
          }
@@ -529,6 +600,8 @@ void dispatch_petition(struct client *info, char *petition) {
       else if (serve_device[COLORB_DEVICE]==1 && device_network_id[COLORB_DEVICE]==cam){
          image=*(char **)variables[COLORB_DEVICE];
          clock=(unsigned long int *)myimport("colorB", "clock");
+         width=(int *)myimport("colorB","width");
+         height=(int *)myimport("colorB","height");
          while (info->clocks[COLORB_DEVICE]==*clock){
             usleep(1000);/*Espero una nueva imagen durante 1ms*/
          }
@@ -538,6 +611,8 @@ void dispatch_petition(struct client *info, char *petition) {
       else if (serve_device[COLORC_DEVICE]==1 && device_network_id[COLORC_DEVICE]==cam){
          image=*(char **)variables[COLORC_DEVICE];
          clock=(unsigned long int *)myimport("colorC", "clock");
+         width=(int *)myimport("colorC","width");
+         height=(int *)myimport("colorC","height");
          while (info->clocks[COLORC_DEVICE]==*clock){
             usleep(1000);/*Espero una nueva imagen durante 1ms*/
          }
@@ -547,25 +622,73 @@ void dispatch_petition(struct client *info, char *petition) {
       else if (serve_device[COLORD_DEVICE]==1 && device_network_id[COLORD_DEVICE]==cam){
          image=*(char **)variables[COLORD_DEVICE];
          clock=(unsigned long int *)myimport("colorD", "clock");
+         width=(int *)myimport("colorD","width");
+         height=(int *)myimport("colorD","height");
          while (info->clocks[COLORD_DEVICE]==*clock){
             usleep(1000);/*Espero una nueva imagen durante 1ms*/
          }
          info->clocks[COLORD_DEVICE]=*clock;
          time=info->clocks[COLORD_DEVICE];
       }
+      else if (serve_device[VARCOLORA_DEVICE]==1 && device_network_id[VARCOLORA_DEVICE]==cam){
+         image=*(char **)variables[VARCOLORA_DEVICE];
+         clock=(unsigned long int *)myimport("varcolorA", "clock");
+         width=(int *)myimport("varcolorA","width");
+         height=(int *)myimport("varcolorA","height");
+         while (info->clocks[VARCOLORA_DEVICE]==*clock){
+            usleep(1000);/*Espero una nueva imagen durante 1ms*/
+         }
+         info->clocks[VARCOLORA_DEVICE]=*clock;
+         time=info->clocks[VARCOLORA_DEVICE];
+      }
+      else if (serve_device[VARCOLORB_DEVICE]==1 && device_network_id[VARCOLORB_DEVICE]==cam){
+         image=*(char **)variables[VARCOLORB_DEVICE];
+         clock=(unsigned long int *)myimport("varcolorB", "clock");
+         width=(int *)myimport("varcolorB","width");
+         height=(int *)myimport("varcolorB","height");
+         while (info->clocks[VARCOLORB_DEVICE]==*clock){
+            usleep(1000);/*Espero una nueva imagen durante 1ms*/
+         }
+         info->clocks[VARCOLORB_DEVICE]=*clock;
+         time=info->clocks[VARCOLORB_DEVICE];
+      }
+      else if (serve_device[VARCOLORC_DEVICE]==1 && device_network_id[VARCOLORC_DEVICE]==cam){
+         image=*(char **)variables[VARCOLORC_DEVICE];
+         clock=(unsigned long int *)myimport("varcolorC", "clock");
+         width=(int *)myimport("varcolorC","width");
+         height=(int *)myimport("varcolorC","height");
+         while (info->clocks[VARCOLORC_DEVICE]==*clock){
+            usleep(1000);/*Espero una nueva imagen durante 1ms*/
+         }
+         info->clocks[VARCOLORC_DEVICE]=*clock;
+         time=info->clocks[VARCOLORC_DEVICE];
+      }
+      else if (serve_device[VARCOLORD_DEVICE]==1 && device_network_id[VARCOLORD_DEVICE]==cam){
+         image=*(char **)variables[VARCOLORD_DEVICE];
+         clock=(unsigned long int *)myimport("varcolorD", "clock");
+         width=(int *)myimport("varcolorD","width");
+         height=(int *)myimport("varcolorD","height");
+         while (info->clocks[VARCOLORD_DEVICE]==*clock){
+            usleep(1000);/*Espero una nueva imagen durante 1ms*/
+         }
+         info->clocks[VARCOLORD_DEVICE]=*clock;
+         time=info->clocks[VARCOLORD_DEVICE];
+      }
 
       if (image!=NULL)
       {
-         char myimage[SIFNTSC_COLUMNS*SIFNTSC_ROWS*CANALES];
+         char * myimage;
 
          /*Hago una copia local de la imagen para evitar posibles cambios en
          ella durante la escritura*/
-         memcpy(myimage, image, SIFNTSC_COLUMNS*SIFNTSC_ROWS*CANALES);
+         myimage=(char *)malloc(sizeof(char)*(*width)*(*height)*CANALES);
+         memcpy(myimage, image, (*width)*(*height)*CANALES);
          sprintf(output_buffer,"%d %lu %d %d %d %d\n",
-                 NETWORKSERVER_rgb24bpp_sifntsc_image, time, cam, SIFNTSC_COLUMNS,
-                 SIFNTSC_ROWS,CANALES);
+                 NETWORKSERVER_rgb24bpp_sifntsc_image, time, cam, (*width),
+                 (*height),CANALES);
          my_write(info->cs,output_buffer,strlen(output_buffer));
-         my_write(info->cs,myimage, SIFNTSC_COLUMNS*SIFNTSC_ROWS*CANALES);
+         my_write(info->cs,myimage, (*width)*(*height)*CANALES);
+         free(myimage);
       }
    }
 
@@ -717,7 +840,6 @@ void dispatch_subscriptions(struct client * info) {
             {
                unsigned long int *clock;
                clock=(unsigned long int *)myimport("sonars", "clock");
-               //printf ("%ld, %lu, %lu", info->clocks[SONARS_DEVICE], clock, clock[0]);
                if (info->clocks[SONARS_DEVICE]!=clock[0]){
                   info->clocks[SONARS_DEVICE]=clock[0];
                   /*Componer el mensaje*/
@@ -771,7 +893,7 @@ void *client_thread(void *pcs) {
    char *buffer_aux;
    char *msg, *msg_end;
    int bytes_read;
-   int nbytes = 0; // number of valid bytes in buffer
+   int nbytes = 0; /*number of valid bytes in buffer*/
    int continuar;
 
    struct timeval a, b;
@@ -826,13 +948,13 @@ void *client_thread(void *pcs) {
       }
 
       if (nbytes > 0) {
-         // Possible message/s to dispatch
+         /* Possible message/s to dispatch*/
          buffer[nbytes] = '\0';
          msg = buffer;
          msg_end = strstr(buffer, "\n");
-         while (msg_end != NULL) { // For each message in buffer
+         while (msg_end != NULL) { /* For each message in buffer*/
             *msg_end = '\0';
-            msg_end++; // msg_end now points to the folling messages
+            msg_end++; /* msg_end now points to the folling messages*/
             nbytes -= msg_end - msg;/* the spare bytes in buffer for the
                following messages */
             dispatch_petition(&info, msg);

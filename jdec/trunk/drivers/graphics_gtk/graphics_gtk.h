@@ -10,6 +10,8 @@
 #ifndef __GRAPHICS_GTK_H__
 #define __GRAPHICS_GTK_H__
 
+#include <glade/glade-xml.h>
+
 /**
  * Generic display refresh callback function's type definition
  * @return void
@@ -29,4 +31,12 @@ typedef int (*registerdisplay)(guidisplay f);
  * @return 1 if the callback was unregistered correctly, othewise 0
  */
 typedef int (*deletedisplay)(guidisplay f);
+
+/**
+ * Search in the path the .glade file and loads it
+ * @param file_name The name of the .glade file
+ * @returns the newly created GladeXML object, or NULL on failure.
+ */
+typedef GladeXML* (*loadglade) (char * file_name);
+
 #endif

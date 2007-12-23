@@ -25,6 +25,8 @@
 
 #include "colorspaces.h"
 
+struct HSV * LUT_RGB2HSV [64][64][64];
+
 const int MAX_BITS = 8;
 const int SIGNIFICATIVE_BITS = 6;
 const int MAX_RGB = 255;

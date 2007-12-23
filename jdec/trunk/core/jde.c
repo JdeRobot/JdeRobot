@@ -31,8 +31,6 @@
 JDESchema all[MAX_SCHEMAS];
 /** Number of loaded schemas*/
 int num_schemas=0;
-/** Number of explicity loaded schemas*/
-int loaded_schemas=0;
 
 /** Array with all the loaded drivers*/
 JDEDriver mydrivers[MAX_SCHEMAS];
@@ -47,57 +45,15 @@ typedef struct sharedname{
    char name[MAX_BUFFER];
    /** Pointer to de shared variable of function casted to (void *)*/
    void *pointer;
-  /*  Tsharedname next;*/
+  /**  Pointer to the next node*/
+   struct sharedname *next;
 }Tsharedname;
 
-/** Maximum number of shared varibles and functions*/
-#define MAX_SHARED 600
 /** List with the shared variables and functions*/
-static Tsharedname sharedlist[MAX_SHARED];
-/** Number of shared variables*/ 
-static int num_shared=0;
+static Tsharedname *sharedlist=NULL;
 
 /** The jdec prompt*/
 #define PROMPT "jdec$ "
-
-/**
- * Resumes(shows) the jdec master gui. As it is implemented by a schema it must
- * import it's identifier.
- */
-void mastergui_resume(){
-   int *master;
-   if ((master=(int *)myimport ("master_gtk", "id"))!=NULL){
-      if (all[*master].guiresume!=NULL)
-         all[*master].guiresume();
-      all[*master].guistate=on;
-   }
-   else if ((master=(int *)myimport ("master_xforms", "id"))!=NULL){
-      if (all[*master].guiresume!=NULL)
-         all[*master].guiresume();
-      all[*master].guistate=on;
-   }
-   else
-      fprintf(stderr,"Jde: No mastergui loaded\n");
-}
-
-/** Suspends(hides) the jdec master gui. As it is implemented by a schema it must
- * import it's identifier.
- */
-void mastergui_suspend(){
-   int * master;
-   if ((master=(int *)myimport ("master_gtk", "id"))!=NULL){
-      if (all[*master].guisuspend!=NULL)
-         all[*master].guisuspend();
-      all[*master].guistate=off;
-   }
-   else if ((master=(int *)myimport ("master_xforms", "id"))!=NULL){
-      if (all[*master].guisuspend!=NULL)
-         all[*master].guisuspend();
-      all[*master].guistate=off;
-   }
-   else
-      fprintf(stderr,"Jde: No mastergui loaded\n");
-}
 
 /**
  * Puts the state in newstate to the schema idexed by numschema
@@ -140,30 +96,43 @@ void speedcounter(int numschema)
 int myexport(char *schema, char *name, void *p)
      /* publishes the variable, to make it available to other schemas */
 {
-  int i;
-  int found=0;
-  if (p!=NULL) 
-    {
-      for(i=0;i<num_shared;i++)
-	if (sharedlist[i].pointer==NULL) 
-	  {
-	    sharedlist[i].pointer=p;
-	    strcpy(sharedlist[i].name,name);
-	    strcpy(sharedlist[i].schema,schema);
-	    found=1;
-	    break;
-	  }
-      if ((found==0)&&(num_shared<MAX_SHARED)) 
-	{
-	  sharedlist[num_shared].pointer=p;
-	  strcpy(sharedlist[num_shared].name,name);
-	  strcpy(sharedlist[num_shared].schema,schema);
-	  num_shared++;
-	}
-      else if ((found==0)&&(num_shared>=MAX_SHARED))
-	printf("Warning no space for sharing %s variable\n",name);
-    }
-  return found;
+  Tsharedname * next;
+  Tsharedname * this;
+  if (p!=NULL) {
+     if (sharedlist!=NULL){
+        next=sharedlist->next;
+        this=sharedlist;
+        while (this->next!=NULL && (strcmp(schema, this->schema)!=0 ||
+               strcmp(name, this->name)!=0) )
+        {
+           this=this->next;
+        }
+        if (this->next==NULL){
+           /*Store this new symbol*/
+           this->next=(Tsharedname *)malloc (sizeof(Tsharedname));
+           this=this->next;
+           strcpy(this->name,name);
+           strcpy(this->schema,schema);
+           this->pointer=p;
+           this->next=NULL;
+        }
+        else{
+           /*Symbol already stored*/
+           printf ("Warning: Symbol \"%s\" at schema \"%s\" it's alredy stored, my export will be ignored now\n",
+                   name, schema);
+           return 0;
+        }
+     }
+     else{
+        /*Empty list*/
+        sharedlist=(Tsharedname *)malloc (sizeof(Tsharedname));
+        strcpy(sharedlist->name,name);
+        strcpy(sharedlist->schema,schema);
+        sharedlist->pointer=p;
+        sharedlist->next=NULL;
+     }
+  }
+  return 1;
 }
 
 /**
@@ -175,16 +144,19 @@ int myexport(char *schema, char *name, void *p)
 void *myimport(char *schema, char *name)
      /* returns NULL in case of not finding the requested variable */
 {
-  void *value=NULL;
-  int i=0;
+   Tsharedname *this;
 
-  for(i=0;i<num_shared;i++)
-    if ((strcmp(schema,sharedlist[i].schema)==0) &&
-	(strcmp(name,sharedlist[i].name)==0))
-	{ value=sharedlist[i].pointer;
-	break;
-	}
-  return value;
+   this=sharedlist;
+   while (this!=NULL){
+      if ((strcmp(schema,this->schema)==0) &&
+           (strcmp(name,this->name)==0))
+      {
+         return this->pointer;
+      }
+      this=this->next;
+   }
+   /*This statment will execute only if the symbos it's not at the list*/
+   return NULL;
 }
 
 /**
@@ -324,16 +296,6 @@ int serve_keyboardmessage(char *mensaje)
        }
        else printf("What schema do you want to suspend its GUI?\n");
     }
-    else if ((strcmp(word,"mastergui")==0) ||
-              (strcmp(word,"gui")==0))
-    {
-       if (sscanf(mensaje,"%s %s",word,word2)==2){
-          if (strcmp(word2,"on")==0)
-             mastergui_resume();
-          else if (strcmp(word2,"off")==0)
-             mastergui_suspend();
-       }
-    }
     else if ((strcmp(word,"quit")==0) ||
               (strcmp(word,"QUIT")==0) ||
               (strcmp(word,"exit")==0) ||
@@ -341,7 +303,7 @@ int serve_keyboardmessage(char *mensaje)
        jdeshutdown(0);
     else if ((strcmp(word,"help")==0) ||
               (strcmp(word,"?")==0))
-       printf("This is the shell of %s. Available commands:\n  * quit\n  * help\n  * ls\n      list the loaded schemas\n  * ps\n      print the non-slept schemas, their state and speed\n  * mastergui [on|off]\n      show the master GUI of jdec, to visually manage the schema set\n\n  * [schemaname]\n      run the schema\n  * kill [schemaname]\n      move the schema to slept state\n  * guion [schemaname]\n      show the GUI of the schema\n  * guioff [schemaname]\n      hide the GUI of the schema\n",thisrelease);
+       printf("This is the shell of %s. Available commands:\n  * quit\n  * help\n  * ls\n      list the loaded schemas\n  * ps\n      print the non-slept schemas, their state and speed\n      show the master GUI of jdec, to visually manage the schema set\n\n  * [schemaname]\n      run the schema\n  * kill [schemaname]\n      move the schema to slept state\n  * guion [schemaname]\n      show the GUI of the schema\n  * guioff [schemaname]\n      hide the GUI of the schema\n",thisrelease);
     else if ((strcmp(word,"ls")==0)||
               (strcmp(word,"list")==0) ||
               (strcmp(word,"LS")==0) ||
@@ -405,8 +367,6 @@ int serve_keyboardmessage(char *mensaje)
 static char configfile[MAX_BUFFER];
 /** When reading any driver section from the configuration file */
 static int driver_section=0;
-/** Indicates if the master gui must be initialized automaticaly*/
-static int startwithgui=FALSE;
 
 /**
  * Loads a shema
@@ -561,7 +521,7 @@ int jde_readline(FILE *myfile)
      /* To startup non-basic schemas, just raise the flag, putting the in active state. It will effectively start up in main, after the "startup" of all basic schemas */
 
 {
-  const int limit = 256;
+#define limit 256
   char word[limit];
   int i=0,j=0;
   char buffer_file[limit]; 
@@ -598,7 +558,6 @@ int jde_readline(FILE *myfile)
 	sscanf(&buffer_file[j],"%s",word);
 	jde_loadschema(word);
 	(*all[num_schemas-1].startup)();
-        loaded_schemas++;
       }
     else if (strcmp(word,"resume")==0)
       {
@@ -632,15 +591,6 @@ int jde_readline(FILE *myfile)
       while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
       driver_section=0;
     }
-
-    else if ((strcmp(word,"mastergui")==0) ||
-	     (strcmp(word,"gui")==0))
-      {
-	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
-	sscanf(&buffer_file[j],"%s",word);
-	if (strcmp(word,"on")==0) startwithgui=TRUE;   
-      }
-
     else{
       if(driver_section==0) printf("i don't know what to do with: %s\n",buffer_file);
     }
@@ -681,15 +631,16 @@ int main(int argc, char** argv)
     {
       if ((strcmp(argv[n],"--help")==0) ||
 	  (strcmp(argv[n],"-h")==0))
-	{printf("Use: jde [config.file] [--gui]\n\n     [config.file] Sets an specific config file. Don't use this option to read default configuration.\n           [--gui] Starts JDE with the main gui activated.\n\n");
+	{printf("Use: jde [config.file]\n\n     [config.file] Sets an specific config file. Don't use this option to read default configuration.\n\n");
 	exit(0);}
       else if ((strcmp(argv[n],"--version")==0) ||
 	       (strcmp(argv[n],"-v")==0))
 	{printf("%s\n",thisrelease);
 	exit(0);}
       else if ((strcmp(argv[n],"--gui")==0) ||
-	       (strcmp(argv[n],"-g")==0))
-	startwithgui=TRUE;   
+              (strcmp(argv[n],"-g")==0)){
+          printf("Not valid command line argument \"--gui\". If you want to \nauto activate the gui use the configuration file.");
+      }
       else 
 	{filenameatconsole=TRUE;
 	sprintf(configfile,"%s",argv[n]);
@@ -733,11 +684,6 @@ int main(int argc, char** argv)
   do {
     i=jde_readline(config);
   }while(i!=EOF);
-
-  if (loaded_schemas>0){
-     /* start the jdegui thread */
-     if (startwithgui==TRUE) mastergui_resume();
-  }
 
   /* start the cronos thread */
   printf("Starting cronos...\n");

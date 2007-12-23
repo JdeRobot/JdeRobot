@@ -1111,7 +1111,7 @@ int mplayer_parseconf(char *configfile){
   
    /* checking if a driver section was read */
    if(driver_config_parsed==1){
-      if((serve_color[0]==0)&&(serve_color[1]==0)&&(serve_color[2]==0)&&(serve_color[3]==0)){
+      if((serve_color[0]==0)&&(serve_color[1]==0)&&(serve_color[2]==0)&&(serve_color[3]==0)&&(serve_color[4]==0)&&(serve_color[5]==0)&&(serve_color[6]==0)&&(serve_color[7]==0)){
          printf("mplayer: warning! no color provided.\n");
       }
       return 0;
@@ -1404,7 +1404,7 @@ void mplayer_startup(char *configfile)
          num_schemas++;
          myexport("varcolorA","id",&varcolorA_schema_id);
          myexport("varcolorA","varcolorA",&varcolorA);
-         myexport("varcolorA","clock", &imageA_clock);
+         myexport("varcolorA","clock", &varimageA_clock);
          myexport("varcolorA","resume",(void *)myvarcolorA_resume);
          myexport("varcolorA","suspend",(void *)myvarcolorA_suspend);
          myexport("varcolorA","width",&width[4]);
@@ -1433,7 +1433,7 @@ void mplayer_startup(char *configfile)
          num_schemas++;
          myexport("varcolorB","id",&varcolorB_schema_id);
          myexport("varcolorB","varcolorB",&varcolorB);
-         myexport("varcolorB","clock", &imageB_clock);
+         myexport("varcolorB","clock", &varimageB_clock);
          myexport("varcolorB","resume",(void *)myvarcolorB_resume);
          myexport("varcolorB","suspend",(void *)myvarcolorB_suspend);
          myexport("varcolorB","width",&width[5]);
@@ -1462,7 +1462,7 @@ void mplayer_startup(char *configfile)
          num_schemas++;
          myexport("varcolorC","id",&varcolorC_schema_id);
          myexport("varcolorC","varcolorC",&varcolorC);
-         myexport("varcolorC","clock", &imageC_clock);
+         myexport("varcolorC","clock", &varimageC_clock);
          myexport("varcolorC","resume",(void *)myvarcolorC_resume);
          myexport("varcolorC","suspend",(void *)myvarcolorC_suspend);
          myexport("varcolorC","width",&width[6]);
@@ -1491,7 +1491,7 @@ void mplayer_startup(char *configfile)
          num_schemas++;
          myexport("varcolorD","id",&varcolorD_schema_id);
          myexport("varcolorD","varcolorD",&varcolorD);
-         myexport("varcolorD","clock", &imageD_clock);
+         myexport("varcolorD","clock", &varimageD_clock);
          myexport("varcolorD","resume",(void *)myvarcolorD_resume);
          myexport("varcolorD","suspend",(void *)myvarcolorD_suspend);
          myexport("varcolorD","width",&width[7]);
