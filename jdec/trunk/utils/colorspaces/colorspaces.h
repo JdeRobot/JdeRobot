@@ -23,7 +23,7 @@
 #define _COLOR_SPACES_H
 
 #define NAME     "colorspaces"
-#define VERSION  "1.1.0"
+#define VERSION  "1.2.0"
 
 /// *** RGB to HSI  *** ///
 
@@ -36,6 +36,10 @@ struct HSV
 
 extern struct HSV * LUT_RGB2HSV [64][64][64];
 
+extern int isInitTableHSV;
+
+extern pthread_mutex_t mutex;
+ 
 /// \brief Init the RGB2HSV
 void RGB2HSV_init();
 

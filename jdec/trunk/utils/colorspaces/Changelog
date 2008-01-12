@@ -1,3 +1,10 @@
+libcolorspaces (1.2.0) stable; urgency=low
+
+ * isInitTableHSVI and mutex are declared as 'extern' in headers
+ * FIX BUG: there are multiples inicializate when 2 objects at the same library (.so) access to this library
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sat, 29 Dec 2007 12:43:04 +0100
+
 libcolorspaces (1.1.0) stable; urgency=low
  
  * Add #ifdef in headers

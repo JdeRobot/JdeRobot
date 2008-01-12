@@ -35,9 +35,10 @@ const int MAX_RGB = 255;
  *   0: The table RGB2HSV don't exists.
  *   1: The table RGB2HSV exists.
  */
-static int isInitTableHSV;
+int isInitTableHSV;
 
-static pthread_mutex_t mutex;
+/* mutex */
+pthread_mutex_t mutex;
 
 void rgb2hsv_wiki (double r, double g, double b, double *H, double *S, double *V)
 {
@@ -149,6 +150,15 @@ void RGB2HSV_destroyTable ()
 
 void RGB2HSV_init()
 {
+	/* Checking exist one instance */
+	pthread_mutex_lock(&mutex);
+        if (isInitTableHSV==1)
+        {
+                pthread_mutex_unlock(&mutex);
+                return;
+        }
+        pthread_mutex_unlock(&mutex);
+
 	printf("Init %s v%s ... \n",NAME,VERSION);
 	pthread_mutex_lock(&mutex);
 	isInitTableHSV = 0;
@@ -166,6 +176,7 @@ void RGB2HSV_createTable()
 
 	struct HSV* newHSV;
 	
+	/* Checking exist one instance */
 	pthread_mutex_lock(&mutex);
 	if (isInitTableHSV==1)
 	{
