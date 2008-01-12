@@ -1,3 +1,10 @@
+libcolorspaces (1.3.0) stable; urgency=low
+
+ * Add hsv2rgb function. It does not use the inline function nor the lookuptable. The conversion equations follow the wikipedia "official" transformations.
+
+ -- JoseMaria Cañas and Victor Hidalgo <hbmhidalgo@gmail.com> Sat, Jan 12 11:53:37 CET 2008
+
+
 libcolorspaces (1.2.0) stable; urgency=low
 
  * isInitTableHSVI and mutex are declared as 'extern' in headers

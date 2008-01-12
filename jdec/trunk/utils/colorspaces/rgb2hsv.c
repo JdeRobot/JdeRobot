@@ -94,6 +94,39 @@ void rgb2hsv_wiki (double r, double g, double b, double *H, double *S, double *V
 }
 
 
+void hsv2rgb(double H, double S, double V, double *r, double *g, double *b)
+ /* From the wikipedia: hsv color space */
+  /*H entre 0 y 360, S entre 0 y 1 , V entre 0 ,255*/
+{
+  double h_aux,f,p,q,t, v_aux;
+ 
+  h_aux = ((int)fabs(H/60.0)) % 6;
+  f = (H/60.0) - h_aux;
+  
+  v_aux = V;
+  p = v_aux * (1-S);
+  q = v_aux * (1 - f*S);
+  t = v_aux * (1 - (1-f)*S);
+
+  if (((int)h_aux) == 0){
+    *r = v_aux; *g=t; *b=p;
+  }
+  else if (((int)h_aux == 1)){
+    *r = q; *g=v_aux; *b=p;
+  }
+  else if (((int)h_aux == 2)){
+    *r = p; *g=v_aux; *b=t;
+  }    
+  else if (((int)h_aux == 3)){
+    *r = p; *g=q; *b=v_aux;
+  }
+  else if (((int)h_aux == 4)){
+    *r = t; *g=p; *b=v_aux;
+  }
+  else if (((int)h_aux == 5)){
+    *r = v_aux; *g=p; *b=q;
+  }
+}
 
 /// \brief Function to print unsiged int in binary
 void print_status(unsigned long status)
