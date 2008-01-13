@@ -1,0 +1,14 @@
+.SILENT:
+
+CC = g++
+AR = ar
+MV = mv
+RM = rm -f
+CP = cp
+
+WHERE = $(PWD)/
+
+OPTIONS = -Wall -ffast-math -O6 -D_SMP_ -DMODULE -D_KERNEL_ -fexpensive-optimizations
+MFLAGS = all
+
+LIBS = -lXext -lpthread
