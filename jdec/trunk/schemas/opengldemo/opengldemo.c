@@ -54,6 +54,9 @@ char rotar=1;
 /* ventana de visualizacion 3d */
 float xcam,ycam,zcam,foax,foay,foaz;
 
+void opengldemo_stop(){
+}
+
 void opengldemo_iteration()
 {  
   all[opengldemo_id].k++;

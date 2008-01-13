@@ -815,6 +815,9 @@ void *opflow_thread(void *not_used)
    }
 }
 
+void opflow_stop(){
+}
+
 void opflow_startup()
 {
    int i;

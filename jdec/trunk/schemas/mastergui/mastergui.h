@@ -24,6 +24,7 @@ extern void mastergui_suspend();
 extern void mastergui_resume(int father, int *brothers, arbitration fn);
 extern void mastergui_guiresume();
 extern void mastergui_guisuspend();
+extern void mastergui_stop();
 
 extern int mastergui_id; /* schema identifier */
 extern int mastergui_cycle; /* ms */

@@ -1,5 +1,5 @@
 JDEDIR = /usr/local
-INC-DIR = -I../../core -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/include/X11 -I$(JDEDIR)/include/jde-robot
+INC-DIR = -I../../core -I../../drivers/graphics_xforms -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/include/X11 -I$(JDEDIR)/include/jde-robot
 LIB-DIR = -L. -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib 
 GCC = gcc
 CFLAGS = -g -pedantic -Wall $(INC-DIR)
@@ -18,7 +18,7 @@ myschema.o: myschema.c myschema.h myschemagui.o
 	$(GCC) $(CFLAGS) -fPIC -c myschema.c
 
 clean:
-	rm -f *.o myschema.so
+	rm -f *.o myschema.so myschemagui.c myschemagui.h
 
 install:
 	cp myschema.so $(JDEDIR)/share/jde-robot/

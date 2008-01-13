@@ -1,5 +1,5 @@
 JDEDIR = /usr/local
-INC-DIR = -I../../core -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/include/X11 -I../include -I$(JDEDIR)/include/jde-robot
+INC-DIR = -I../../core -I../../drivers/graphics_xforms -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/include/X11 -I../include -I$(JDEDIR)/include/jde-robot
 LIB-DIR = -L. -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib 
 GCC = gcc
 CFLAGS = -g -pedantic -Wall $(INC-DIR)
@@ -18,7 +18,7 @@ papitogui.c: papitogui.fd
 	fdesign -convert papitogui.fd
 
 clean:
-	rm -f *.o papito.so 
+	rm -f *.o papito.so papitogui.h papitogui.c 
 
 install:
 	cp papito.so $(JDEDIR)/share/jde-robot/

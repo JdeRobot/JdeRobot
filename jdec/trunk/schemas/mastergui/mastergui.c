@@ -187,9 +187,11 @@ void gui_init(){
 }
 
 /*Al suspender el esquema*/
-void mastergui_end(){
+void mastergui_stop(){
 }
 
+void mastergui_close(){
+}
 
 void mastergui_suspend()
 {

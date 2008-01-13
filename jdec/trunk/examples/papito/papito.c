@@ -19,9 +19,16 @@
  */
 
 #include "jde.h"
-#include "jdegui.h"
+#include "forms.h"
+#include "graphics_xforms.h"
 #include "papitogui.h"
 #include "papito.h"
+
+/*Gui callbacks*/
+registerbuttons myregister_buttonscallback;
+registerdisplay myregister_displaycallback;
+deletebuttons mydelete_buttonscallback;
+deletedisplay mydelete_displaycallback;
 
 int papito_id=0; 
 int papito_brothers[MAX_SCHEMAS];
@@ -83,15 +90,36 @@ void papito_exports(){
 /*Importar símbolos*/
 void papito_imports(){
    hijoresume=(resumeFn)myimport("myschema","resume");
-   if (hijoresume==NULL) printf("papito: Warning myschema_resume symbol not resolved\n");
+   if (hijoresume==NULL)
+      printf("papito: Warning myschema_resume symbol not resolved\n");
    hijosuspend=(suspendFn)myimport("myschema","suspend");
-   if (hijosuspend==NULL) printf("papito: Warning myschema_suspend symbol not resolved\n");
+   if (hijosuspend==NULL)
+      printf("papito: Warning myschema_suspend symbol not resolved\n");
    hijo_variable=(int *)myimport("myschema","valor");
-   if (hijo_variable==NULL) printf("papito: Warning myschema_valor symbol not resolved\n");
+   if (hijo_variable==NULL)
+      printf("papito: Warning myschema_valor symbol not resolved\n");
 }
 
 /*Las inicializaciones van en esta parte*/
 void papito_init(){
+   if (myregister_buttonscallback==NULL){
+      if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
+         printf ("I can't fetch register_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_buttonscallback=(deletebuttons)myimport ("graphics_xforms", "delete_buttonscallback"))==NULL){
+         printf ("I can't fetch delete_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((myregister_displaycallback=(registerdisplay)myimport ("graphics_xforms", "register_displaycallback"))==NULL){
+         printf ("I can't fetch register_displaycallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_displaycallback=(deletedisplay)myimport ("graphics_xforms", "delete_displaycallback"))==NULL){
+         jdeshutdown(1);
+         printf ("I can't fetch delete_displaycallback from graphics_xforms\n");
+      }
+   }
 }
 
 /*Al suspender el esquema*/
@@ -213,7 +241,7 @@ void papito_startup()
   papito_init();
 }
 
-void papito_guibuttons(FL_OBJECT *obj)
+void papito_guibuttons(void *obj)
 {
 }
 
@@ -227,14 +255,21 @@ void papito_guidisplay()
 }
 
 
-void papito_guisuspend(void)
+void papito_guisuspend_aux(void)
 {
-  delete_buttonscallback(papito_guibuttons);
-  delete_displaycallback(papito_guidisplay);
+  mydelete_buttonscallback(papito_guibuttons);
+  mydelete_displaycallback(papito_guidisplay);
   fl_hide_form(fd_papitogui->papitogui);
 }
 
-void papito_guiresume(void)
+void papito_guisuspend(void){
+   callback fn;
+   if ((fn=(callback)myimport ("graphics_xforms", "gui_callback"))!=NULL){
+      fn ((gui_function)papito_guisuspend_aux);
+   }
+}
+
+void papito_guiresume_aux(void)
 {
   static int k=0;
 
@@ -244,7 +279,14 @@ void papito_guiresume(void)
       fd_papitogui = create_form_papitogui();
       fl_set_form_position(fd_papitogui->papitogui,400,50);
     }
-  register_buttonscallback(papito_guibuttons);
-  register_displaycallback(papito_guidisplay);
+  myregister_buttonscallback(papito_guibuttons);
+  myregister_displaycallback(papito_guidisplay);
   fl_show_form(fd_papitogui->papitogui,FL_PLACE_POSITION,FL_FULLBORDER,"papito");
+}
+
+void papito_guiresume(void){
+   callback fn;
+   if ((fn=(callback)myimport ("graphics_xforms", "gui_callback"))!=NULL){
+      fn ((gui_function)papito_guiresume_aux);
+   }
 }

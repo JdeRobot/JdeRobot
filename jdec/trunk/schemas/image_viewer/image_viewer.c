@@ -231,6 +231,8 @@ void image_viewer_init(){
 void image_viewer_end(){
 }
 
+void image_viewer_stop(){
+}
 
 void image_viewer_suspend()
 {

@@ -145,6 +145,8 @@ int recordergui_setupDisplay(void)
    return 1;
 }
 
+void recorder_stop(){
+}
 
 void recorder_iteration(){
    static int prev_state=0;

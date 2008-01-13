@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2007 Teodoro González Sánchez
+ *  Copyright (C) 2007 Teodoro Gonzï¿½lez Sï¿½nchez
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,10 +30,14 @@
 #include <gazebo.h>
 #include <jde.h>
 
+/** The driver's command thread cycle*/
 #define GAZEBO_COMMAND_CYCLE 100	/* ms */
+/** The driver's main cycle*/
 #define GAZEBO_CYCLE 33 /*ms*/
+/** Maximum number of cameras*/
 #define MAXCAM 4
-#define MAX_MODEL_ID	100 /*max drivers name lenth*/
+/** Max drivers name lenth*/
+#define MAX_MODEL_ID	100 
 
 
 gz_client_t *client = NULL;
@@ -183,7 +187,7 @@ gazebo_init ()
   
   printf ("connecting to Gazebo Server");
   
-  gz_error_init (1, 9);		/*Trazas de gazebo al máximo*/
+  gz_error_init (1, 9);		/*Trazas de gazebo al mï¿½ximo*/
 
   client = gz_client_alloc ();
   
@@ -1329,7 +1333,7 @@ gazebo_laser_callback ()
  * Gazebo ofrece un numero de medidas configurable
  * Mapeamos las medidas de gazebo en las de jde
  * una a una cuando el numero de medidas coincide
- * una a varias o viceversa cuando el número de medidas difiere 
+ * una a varias o viceversa cuando el nï¿½mero de medidas difiere 
  */
 
   int cont = 0;
@@ -1391,12 +1395,12 @@ void
 gazebo_sonars_callback ()
 {
 /* Gazebo da para cada sensor la posicion x,y,z
- * y su orientación roll,pitch,yaw: 6 parámetros
- * jde contempla x,y mas la orientación : 5 parametros
+ * y su orientaciï¿½n roll,pitch,yaw: 6 parï¿½metros
+ * jde contempla x,y mas la orientaciï¿½n : 5 parametros
  * Por ahora suponemos que las posiciones por defecto para
  * el robot pioneer son las adecuadas en ambos sistemas 
  * dado que los modelos de robots coinciden. Pasamos NUM_SONARS rangos
- * Gazebo permite un máximo de 48 sensores
+ * Gazebo permite un mï¿½ximo de 48 sensores
  * Gazebo nos da las distancias sonar en metros. Paso a mm para jde
  */
   int j;

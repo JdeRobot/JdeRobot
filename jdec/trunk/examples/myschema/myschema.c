@@ -19,9 +19,16 @@
  */
 
 #include "jde.h"
-#include "jdegui.h"
+#include "forms.h"
+#include "graphics_xforms.h"
 #include "myschemagui.h"
 #include "myschema.h"
+
+/*Gui callbacks*/
+registerbuttons myregister_buttonscallback;
+registerdisplay myregister_displaycallback;
+deletebuttons mydelete_buttonscallback;
+deletedisplay mydelete_displaycallback;
 
 int myschema_id=0; 
 int myschema_brothers[MAX_SCHEMAS];
@@ -70,6 +77,24 @@ void myschema_exports(){
 
 /*Las inicializaciones van en esta parte*/
 void myschema_init(){
+   if (myregister_buttonscallback==NULL){
+      if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
+         printf ("I can't fetch register_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_buttonscallback=(deletebuttons)myimport ("graphics_xforms", "delete_buttonscallback"))==NULL){
+         printf ("I can't fetch delete_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((myregister_displaycallback=(registerdisplay)myimport ("graphics_xforms", "register_displaycallback"))==NULL){
+         printf ("I can't fetch register_displaycallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_displaycallback=(deletedisplay)myimport ("graphics_xforms", "delete_displaycallback"))==NULL){
+         jdeshutdown(1);
+         printf ("I can't fetch delete_displaycallback from graphics_xforms\n");
+      }
+   }
 }
 
 /*Al suspender el esquema*/
@@ -187,7 +212,7 @@ void myschema_startup()
   myschema_init();
 }
 
-void myschema_guibuttons(FL_OBJECT *obj){
+void myschema_guibuttons(void *obj){
 }
 
 void myschema_guidisplay(){
@@ -199,13 +224,20 @@ void myschema_guidisplay(){
 }
 
 
-void myschema_guisuspend(void){
-  delete_buttonscallback(myschema_guibuttons);
-  delete_displaycallback(myschema_guidisplay);
+void myschema_guisuspend_aux(void){
+  mydelete_buttonscallback(myschema_guibuttons);
+  mydelete_displaycallback(myschema_guidisplay);
   fl_hide_form(fd_myschemagui->myschemagui);
 }
 
-void myschema_guiresume(void){
+void myschema_guisuspend(){
+   callback fn;
+   if ((fn=(callback)myimport ("graphics_xforms", "gui_callback"))!=NULL){
+      fn ((gui_function)myschema_guisuspend_aux);
+   }
+}
+
+void myschema_guiresume_aux(void){
   static int k=0;
 
   if (k==0) /* not initialized */
@@ -214,7 +246,14 @@ void myschema_guiresume(void){
       fd_myschemagui = create_form_myschemagui();
       fl_set_form_position(fd_myschemagui->myschemagui,400,50);
     }
-  register_buttonscallback(myschema_guibuttons);
-  register_displaycallback(myschema_guidisplay);
+  myregister_buttonscallback(myschema_guibuttons);
+  myregister_displaycallback(myschema_guidisplay);
   fl_show_form(fd_myschemagui->myschemagui,FL_PLACE_POSITION,FL_FULLBORDER,"myschema");
+}
+
+void myschema_guiresume(){
+   callback fn;
+   if ((fn=(callback)myimport ("graphics_xforms", "gui_callback"))!=NULL){
+      fn ((gui_function)myschema_guiresume_aux);
+   }
 }

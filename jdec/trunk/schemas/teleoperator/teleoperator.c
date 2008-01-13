@@ -24,6 +24,7 @@
 #include "forms.h"
 #include "graphics_xforms.h"
 #include "teleoperatorgui.h"
+#include "pioneer.h"
 
 #define v3f glVertex3f
 #include <GL/gl.h>              
@@ -140,6 +141,8 @@ GC teleoperatorgui_gc;
 Window teleoperatorgui_win; 
 unsigned long display_state;
 
+void teleoperator_stop(){
+}
 
 void teleoperator_iteration()
 {  
@@ -350,6 +353,7 @@ void teleoperator_startup()
   virtualcam.foay=0.;
   virtualcam.foaz=0.;
   virtualcam.roll=0.;
+  init_pioneer();
   pthread_mutex_lock(&(all[teleoperator_id].mymutex));
   myexport("teleoperator","id",&teleoperator_id);
   myexport("teleoperator","resume",(void *) &teleoperator_resume);

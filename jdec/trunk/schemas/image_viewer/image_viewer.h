@@ -23,6 +23,7 @@ extern void image_viewer_suspend();
 extern void image_viewer_resume(int father, int *brothers, arbitration fn);
 extern void image_viewer_guiresume();
 extern void image_viewer_guisuspend();
+extern void image_viewer_stop();
 
 extern int image_viewer_id; /* schema identifier */
 extern int image_viewer_cycle; /* ms */
