@@ -26,8 +26,8 @@ typedef struct voxel{
   float y;}Tvoxel;
 #endif
 
-extern void us2xy(int numsensor, float d,float phi, Tvoxel *point);
-extern void laser2xy(int reading, float d, Tvoxel *point);
+extern void us2xy(int numsensor, float d,float phi, Tvoxel *point, float *jderobot);
+extern void laser2xy(int reading, float d, Tvoxel *point, float *jderobot);
 extern void init_pioneer(void);
 
 /***************** Robot Configuration ***************/
@@ -45,6 +45,9 @@ extern void init_pioneer(void);
 #define MAX_TILT_ANGLE 30. /* degrees */
 #define MIN_TILT_ANGLE -46. /* degrees */
 #define MAX_SPEED_PANTILT 205.89
+
+/** Conversion from deg to rad*/
+#define DEGTORAD     (3.14159264 / 180.0)
 
 extern float laser_coord[5]; /* laser sensor position */
 extern float us_coord[NUM_SONARS][5];/* us sensor positions */

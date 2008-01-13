@@ -675,9 +675,6 @@ int main(int argc, char** argv)
 	printf("Configuration from %s\n",configfile);
       }
     }
-  
-  /* init the pioneer robot */
-  init_pioneer(); 
  
   /* read the configuration file: load drivers and schemas */
   printf("Reading configuration...\n");

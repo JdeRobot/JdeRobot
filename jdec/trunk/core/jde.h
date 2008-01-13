@@ -32,7 +32,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <math.h>
-#include <pioneer.h>
+#include <pioneer_const.h>
 
 /** Conversion from deg to rad*/
 #define DEGTORAD     (3.14159264 / 180.0)
@@ -45,6 +45,10 @@
 #ifndef FALSE
 /** False value*/
 #define FALSE        0
+#endif
+
+#ifdef __cplusplus
+ extern "C" {
 #endif
 
 /** Possible schema's states*/
@@ -208,5 +212,9 @@ typedef struct {
     */
    void (*close)(void);
 }JDEDriver;
+
+#ifdef __cplusplus
+ }
+#endif
 
 #endif

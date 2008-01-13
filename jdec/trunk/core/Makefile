@@ -4,21 +4,17 @@ GCC = gcc
 CFLAGS = -g -pedantic -Wall $(INC-DIR)
 LIBS = -lpthread -lm -ldl
 
-OBJS = pioneer.o
 INSTALLDIR=/usr/local
 CFGDIR="$(INSTALLDIR)/jde-robot"
 
 ALL: jde
 
 # Infraestructura jde
-jde: jde.o $(OBJS)
+jde: jde.o
 	$(GCC) $(CFLAGS) -Wl,-export-dynamic $(LIB-DIR) -o jde jde.o $(OBJS) $(LIBS)
 
 jde.o: jde.c
-	$(GCC) $(CFLAGS) -D CONFIGDIR='$(CFGDIR)' -c jde.c	
-
-pioneer.o: pioneer.c pioneer.h
-	$(GCC) $(CFLAGS) -c pioneer.c
+	$(GCC) $(CFLAGS) -D CONFIGDIR='$(CFGDIR)' -c jde.c
 
 clean:
 	-rm -f *.o *.a *so *~
