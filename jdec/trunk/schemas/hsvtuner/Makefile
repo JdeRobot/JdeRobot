@@ -1,8 +1,8 @@
 JDEDIR = /usr/local
-INC-DIR = -I../../core -I../../utils/colorspaces -I. -I/usr/include -I/usr/X11R6/include -I/usr/include/X11 -I/usr/local/include -I/usr/include/X11 -I$(JDEDIR)/include/jde-robot 
+INC-DIR = -I../../core -I../../utils/colorspaces -I. -I/usr/include -I/usr/X11R6/include -I/usr/include/X11 -I/usr/local/include -I/usr/include/X11 -I$(JDEDIR)/include/jde-robot -I../../drivers/graphics_xforms 
 LIB-DIR = -L. -L../../utils/colorspaces -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib  
 GCC = gcc
-CFLAGS = -g -pedantic -Wall $(INC-DIR)
+CFLAGS = -g -O2 -Wall $(INC-DIR)
 LIBS = -lm -lX11 -lforms -lcolorspaces
 
 hsvtuner: hsvtuner.o hsvtunergui.o

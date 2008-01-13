@@ -19,12 +19,22 @@
  */
 
 #include <jde.h>
-#include <jdegui.h>
+#include <forms.h>
 #include "hsvtunergui.h"
 #include <math.h>
 #include <colorspaces.h>
+#include "graphics_xforms.h"
 
-#define HSVtunerVer "hsvtuner 2.7"
+#define HSVtunerVer "hsvtuner 2.8"
+
+Display *mydisplay;
+int  *myscreen;
+
+/*Gui callbacks*/
+registerbuttons myregister_buttonscallback;
+registerdisplay myregister_displaycallback;
+deletebuttons mydelete_buttonscallback;
+deletedisplay mydelete_displaycallback;
 
 int hsvtuner_id=0;
 int hsvtuner_brothers[MAX_SCHEMAS];
@@ -86,50 +96,14 @@ int pulsada=0;
 int toblack=0;
 int primera =0;
 
-double s_min, s_max, h_min, h_max, i_min, i_max;
+double s_min, s_max, h_min, h_max, v_min, v_max;
 int hsimap_threshold;
 
 char **mycolorA;
 resumeFn colorAresume;
 suspendFn colorAsuspend;
 
-void hsi2rgb (double H, double S, double I, double *r, double *g, double *b)
-{
-   /*Pasa de hsi a rgb. Todos entre 0 y 1, execpto H, que esta entre 0 y 2*pi */
-
-   if (S <= 1)
-   {
-      /* Hay que pasar el punto HS a el espacio RGB */
-      if (H <= 2.0 * PI / 3.0)
-      {
-	 *b = (1.0 - S) / 3.0;
-	 *r = (1.0 + ((S * cos (H)) / (cos (PI / 3.0 - H)))) / 3.0;
-	 *g = 1.0 - (*b + *r);
-      }
-      else if (H <= 4.0 * PI / 3.0)
-      {
-	 H = H - 2 * PI / 3.0;
-	 *r = (1.0 - S) / 3.0;
-	 *g = (1.0 + ((S * cos (H)) / (cos (PI / 3.0 - H)))) / 3.0;
-	 *b = 1.0 - (*r + *g);
-      }
-      else if (H <= 2.0 * PI)
-      {
-	 H = H - 4.0 * PI / 3.0;
-	 *g = (1.0 - S) / 3.0;
-	 *b = (1.0 + ((S * cos (H)) / (cos (PI / 3.0 - H)))) / 3.0;
-	 *r = 1.0 - (*g + *b);
-      }
-   }
-   else
-   {			/* Puntos fuera del circulo negros */
-      *r = 0;
-      *b = 0;
-      *g = 0;
-   }
-}
-
-void draw_hsimap(char *buffer, int size){
+void draw_hsvmap(char *buffer, int size){
    int i,j,ind; 
    float x, y, H, S, scale;
    double r,g,b;
@@ -139,35 +113,27 @@ void draw_hsimap(char *buffer, int size){
       for(i=0; i < size; i++){
 	 x = (2.0*i)/size - 1.0;
 	 y = 1.0 - (2.0*j)/size;
-	 if ((x >= -1e-7) && (x <= 1e-7)) {
-	    if (y > 0){
-	       H = PI/2.0;
-	    } else{
-	       H = 3.0*PI/2.0;
-	    }
-	 } else { /*x != 0 */
-	    if (x < 0){
-	       H = atan(y/x) + PI;
-	    } else {
-	       H = atan (y/x);
-	    }
-	 }
-	 H=-H;
-	 if (H>2*PI){
+	 H = atan2(y,x);
+	 if (H>=2*PI){
 	    H-=2*PI;
 	 }
 	 if (H<0){
 	    H+=2*PI;
 	 }
-	
+	 H = RADTODEG*H;
 	 S = sqrt(y*y + x*x);
-	 ind = (size*j + i)*4; 
-	 H = 2*3.1416 - H;
-	 hsi2rgb(H,S,0,&r,&g,&b);
-	 scale = 255.0;
-	 R = (unsigned char) (scale * r);
-	 G = (unsigned char) (scale * g);
-	 B = (unsigned char) (scale * b);
+	 ind = (size*j + i)*4;
+	 if (S<1.)
+	   {
+	     hsv2rgb(H,S,0.7,&r,&g,&b);
+	     scale = 255.0;
+	     R = (unsigned char) (scale * r);
+	     G = (unsigned char) (scale * g);
+	     B = (unsigned char) (scale * b);
+	   }
+	 else
+	   { R=175; G=175; B=175;}
+
 	 buffer[ind]   = B; /* Blue */
 	 buffer[ind+1] = G; /* Green */
 	 buffer[ind+2] = R; /* Red */
@@ -392,53 +358,53 @@ int hsvtunergui_setupDisplay(void)
   XGCValues gc_values;
 
   gc_values.graphics_exposures = False;
-  hsvtuner_gc = XCreateGC(display,hsvtuner_win, GCGraphicsExposures, &gc_values); 
+  hsvtuner_gc = XCreateGC(mydisplay,hsvtuner_win, GCGraphicsExposures, &gc_values);
    
   vmode= fl_get_vclass();
 
   if ((vmode==TrueColor)&&(fl_state[vmode].depth==16))
 	{
 		/* Imagen principal */
-		imagenOrig = XCreateImage(display,DefaultVisual(display,screen),16, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+		imagenOrig = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),16, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 	
 		/*Imagen filtrada */
-		hsifiltrada = XCreateImage(display, DefaultVisual(display,screen),16, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+		hsifiltrada = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),16, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 	
 		/* Mapa HSI */
-		histograma = XCreateImage(display, DefaultVisual(display,screen),16, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
+		histograma = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),16, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
 	}
 	else if ((vmode==TrueColor)&&(fl_state[vmode].depth==24))
 	{
 		/* Imagen principal */
-		imagenOrig = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+		imagenOrig = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 	
 		/*Imagen filtrada */
-		hsifiltrada = XCreateImage(display, DefaultVisual(display,screen),24, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+		hsifiltrada = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 	
 		/* Mapa HSI */
-		histograma = XCreateImage(display, DefaultVisual(display,screen),24, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
+		histograma = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
  	}
 	else if ((vmode==TrueColor)&&(fl_state[vmode].depth==32))
 	{
 		/* Imagen principal */
-		imagenOrig = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+		imagenOrig = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 	
 		/*Imagen filtrada */
-		hsifiltrada = XCreateImage(display, DefaultVisual(display,screen),32, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+		hsifiltrada = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 	
 		/* Mapa HSI */
-		histograma = XCreateImage(display, DefaultVisual(display,screen),32, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
+		histograma = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
 	}
 	else if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8)) 
 	{
 		/* Imagen principal */
-		imagenOrig = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+		imagenOrig = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 		
 		/*Imagen filtrada */
-		hsifiltrada = XCreateImage(display, DefaultVisual(display,screen),8, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+		hsifiltrada = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 		
 		/* Mapa HSI */
-		histograma = XCreateImage(display, DefaultVisual(display,screen),8, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
+		histograma = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
 	}
   else 
   {
@@ -452,7 +418,7 @@ int hsvtunergui_setupDisplay(void)
 void hsvtuner_iteration()
 {  
   int i;
-  double r,g,b,I,H,S;
+  double r,g,b,V,H,S;
   unsigned int X, Y;
   double x,y;
   struct HSV* myHSV;
@@ -463,7 +429,7 @@ void hsvtuner_iteration()
     { imagenOrig_buf[i*4]=(*mycolorA)[i*3]; /* Blue Byte */
       imagenOrig_buf[i*4+1]=(*mycolorA)[i*3+1]; /* Green Byte */
       imagenOrig_buf[i*4+2]=(*mycolorA)[i*3+2]; /* Red Byte */
-      imagenOrig_buf[i*4+3]=0; /* dummy byte */  
+      imagenOrig_buf[i*4+3]=UCHAR_MAX; /* dummy byte */
     }
 
   for(i=0; i<SMAX*SMAX; i++)
@@ -479,15 +445,15 @@ void hsvtuner_iteration()
       myHSV = (struct HSV*) RGB2HSV_getHSV( (int)r,(int)g,(int)b);
       H=myHSV->H;
       S=myHSV->S;
-      I=myHSV->V;
+      V=myHSV->V;
 
       /*El resultado de la libreria es  en 
 	grados, y la gui se expresa en radianes para la H*/
       H=H*DEGTORAD;
             
-      if((I<=i_max)&&(I>=i_min)&&
+      if((V<=v_max)&&(V>=v_min)&&
 	  (S >= s_min) && (S <= s_max) && 
-	 (((H >= h_min) && (H <= h_max) && (h_min < h_max)) ||
+	 (((H >= h_min) && (H <= h_max) && (h_min <= h_max)) ||
 	  ((H >= h_min) && (H <= 2*PI) && (h_min > h_max)) ||
 	  ((H <= h_max) && (H >= 0.) && (h_min > h_max))))
 	{
@@ -495,7 +461,7 @@ void hsvtuner_iteration()
 	  hsifiltrada_buf[i*4+0]=imagenOrig_buf[i*4+0];
 	  hsifiltrada_buf[i*4+1]=imagenOrig_buf[i*4+1];
 	  hsifiltrada_buf[i*4+2]=imagenOrig_buf[i*4+2];
-	  hsifiltrada_buf[i*4+3]=0;
+	  hsifiltrada_buf[i*4+3]=UCHAR_MAX;
 	}
       else {
 	 /*No pasa el filtro*/
@@ -504,18 +470,18 @@ void hsvtuner_iteration()
 	    hsifiltrada_buf[i*4+0] = (unsigned char) 0;
 	    hsifiltrada_buf[i*4+1] = (unsigned char) 0;
 	    hsifiltrada_buf[i*4+2] = (unsigned char) 0;
-	    hsifiltrada_buf[i*4+3] = 0;
+	    hsifiltrada_buf[i*4+3] = UCHAR_MAX;
 	 }
 	 else{
 	    /* En vez de a negro lo pasamos a BW, oscurecido para que se vea mejor (180/255 sobre 1) */
-	    hsifiltrada_buf[i*4+0] = (unsigned char) (I*180/255);
-	    hsifiltrada_buf[i*4+1] = (unsigned char) (I*180/255);
-	    hsifiltrada_buf[i*4+2] = (unsigned char) (I*180/255);
-	    hsifiltrada_buf[i*4+3] = 0;
+	    hsifiltrada_buf[i*4+0] = (unsigned char) (V*180/255);
+	    hsifiltrada_buf[i*4+1] = (unsigned char) (V*180/255);
+	    hsifiltrada_buf[i*4+2] = (unsigned char) (V*180/255);
+	    hsifiltrada_buf[i*4+3] = UCHAR_MAX;
 	 }
 	}
 
-      /*Apunto los valores en la máscara HSI (histograma negativo) */
+      /*Apunto los valores en la máscara HSV (histograma negativo) */
 	x = S*cos(-H-(3.1416/2.)); /* El rojo (H=0)está a la derecha */
 	y = S*sin(-H-(3.1416/2.));
 
@@ -527,13 +493,14 @@ void hsvtuner_iteration()
  
   /* Dibujamos el histograma negativo */
   memcpy(histograma_buf, disco_buf, SMAX*SMAX*4);
-  for (i=0;i<=SMAX*SMAX; i++){
+  for (i=0;i<SMAX*SMAX; i++){
     if (masc[i] >= hsimap_threshold)
       {
       histograma_buf[i*4+0] = (char)255; 
       histograma_buf[i*4+1] = (char)255; 
-      histograma_buf[i*4+2] = (char)255; 
+      histograma_buf[i*4+2] = (char)255;
       }
+    histograma_buf[i*4+3] = UCHAR_MAX;
     }
     /*dibujamos los quesitos*/
 }
@@ -639,10 +606,51 @@ void *hsvtuner_thread(void *not_used)
     }
 }
 
+void hsvtuner_init(){
+   if ((mydisplay= (Display *)myimport("graphics_xforms", "display"))==NULL){
+      fprintf (stderr, "hsvtuner: I can't fetch display from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+   if ((myscreen= (int *)myimport("graphics_xforms", "screen"))==NULL){
+      fprintf (stderr, "hsvtuner: I can't fetch screen from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+
+   if (myregister_buttonscallback==NULL){
+      if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
+         printf ("hsvtuner: I can't fetch register_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_buttonscallback=(deletebuttons)myimport ("graphics_xforms", "delete_buttonscallback"))==NULL){
+         printf ("hsvtuner: I can't fetch delete_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((myregister_displaycallback=(registerdisplay)myimport ("graphics_xforms", "register_displaycallback"))==NULL){
+         printf ("hsvtuner: I can't fetch register_displaycallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_displaycallback=(deletedisplay)myimport ("graphics_xforms", "delete_displaycallback"))==NULL){
+         jdeshutdown(1);
+         printf ("hsvtuner: I can't fetch delete_displaycallback from graphics_xforms\n");
+      }
+   }
+}
+
+void hsvtuner_close()
+{
+  pthread_mutex_lock(&(all[hsvtuner_id].mymutex));
+  hsvtuner_suspend();  
+  pthread_mutex_unlock(&(all[hsvtuner_id].mymutex));
+  sleep(2);
+  fl_free_form(fd_hsvtunergui->hsvtunergui);
+  printf ("hsvtuner close\n");
+}
+
+
 void hsvtuner_startup()
 {
-  draw_hsimap(disco_buf, SMAX);
-  i_min=0.; i_max=255.;
+  draw_hsvmap(disco_buf, SMAX);
+  v_min=0.; v_max=255.;
   h_min=0.; h_max=1.;
   s_min=0.2; s_max=0.4;
   hsimap_threshold=20;  
@@ -654,14 +662,16 @@ void hsvtuner_startup()
   
   printf("hsvtuner schema started up\n");
   put_state(hsvtuner_id,slept);
+  hsvtuner_init();
   pthread_create(&(all[hsvtuner_id].mythread),NULL,hsvtuner_thread,NULL);
   pthread_mutex_unlock(&(all[hsvtuner_id].mymutex));
 }
 
 
-void hsvtuner_guibuttons(FL_OBJECT *obj)
+void hsvtuner_guibuttons(void *obj2)
 { 
    double aux;
+   FL_OBJECT *obj=(FL_OBJECT *)obj2;
    
   if (obj == fd_hsvtunergui->Hmax){
        h_max=fl_get_slider_value(fd_hsvtunergui->Hmax);
@@ -713,25 +723,25 @@ void hsvtuner_guibuttons(FL_OBJECT *obj)
       }
     }	
   
-  else if (obj == fd_hsvtunergui->Imax)
-    {i_max=fl_get_slider_value(fd_hsvtunergui->Imax);
-      if (i_max<=i_min){
-      aux=i_min;
-      i_min=i_max;
-      i_max=aux;
-      fl_set_slider_value(fd_hsvtunergui->Imax,i_max);
-      fl_set_slider_value(fd_hsvtunergui->Imin,i_min);
+  else if (obj == fd_hsvtunergui->Vmax)
+    {v_max=fl_get_slider_value(fd_hsvtunergui->Vmax);
+      if (v_max<=v_min){
+      aux=v_min;
+      v_min=v_max;
+      v_max=aux;
+      fl_set_slider_value(fd_hsvtunergui->Vmax,v_max);
+      fl_set_slider_value(fd_hsvtunergui->Vmin,v_min);
       }
     }	
   
-  else if (obj == fd_hsvtunergui->Imin)
-    {i_min=fl_get_slider_value(fd_hsvtunergui->Imin);
-    if (i_max<=i_min){
-      aux=i_min;
-      i_min=i_max;
-      i_max=aux;
-      fl_set_slider_value(fd_hsvtunergui->Imax,i_max);
-      fl_set_slider_value(fd_hsvtunergui->Imin,i_min);
+  else if (obj == fd_hsvtunergui->Vmin)
+    {v_min=fl_get_slider_value(fd_hsvtunergui->Vmin);
+    if (v_max<=v_min){
+      aux=v_min;
+      v_min=v_max;
+      v_max=aux;
+      fl_set_slider_value(fd_hsvtunergui->Vmax,v_max);
+      fl_set_slider_value(fd_hsvtunergui->Vmin,v_min);
       }
     }
   
@@ -753,22 +763,35 @@ void hsvtuner_guidisplay()
 {
    drawcheese(histograma_buf,centro_x,centro_y,h_max,h_min,s_max,s_min,FL_PALEGREEN);
   
-  XPutImage(display,hsvtuner_win,hsvtuner_gc,imagenOrig,0,0,fd_hsvtunergui->oculo_orig->x, fd_hsvtunergui->oculo_orig->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+  XPutImage(mydisplay,hsvtuner_win,hsvtuner_gc,imagenOrig,0,0,fd_hsvtunergui->oculo_orig->x, fd_hsvtunergui->oculo_orig->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
   
-  XPutImage(display,hsvtuner_win,hsvtuner_gc,hsifiltrada,0,0,fd_hsvtunergui->oculo_modif->x, fd_hsvtunergui->oculo_modif->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+  XPutImage(mydisplay,hsvtuner_win,hsvtuner_gc,hsifiltrada,0,0,fd_hsvtunergui->oculo_modif->x, fd_hsvtunergui->oculo_modif->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
  
-  XPutImage(display,hsvtuner_win,hsvtuner_gc,histograma,0,0,fd_hsvtunergui->histograma->x, fd_hsvtunergui->histograma->y, SMAX, SMAX);
+  XPutImage(mydisplay,hsvtuner_win,hsvtuner_gc,histograma,0,0,fd_hsvtunergui->histograma->x, fd_hsvtunergui->histograma->y, SMAX, SMAX);
 }
 
 
-void hsvtuner_guisuspend(void)
+void hsvtuner_guisuspend_aux(void)
 {
-   delete_buttonscallback(hsvtuner_guibuttons);
-   delete_displaycallback(hsvtuner_guidisplay);
+   mydelete_buttonscallback(hsvtuner_guibuttons);
+   mydelete_displaycallback(hsvtuner_guidisplay);
    fl_hide_form(fd_hsvtunergui->hsvtunergui);
 }
 
-void hsvtuner_guiresume(void)
+void hsvtuner_guisuspend(void)
+{
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
+         fn ((gui_function)hsvtuner_guisuspend_aux);
+      }
+   }
+   else{
+      fn ((gui_function)hsvtuner_guisuspend_aux);
+   }
+}
+
+void hsvtuner_guiresume_aux(void)
 {
   static int k=0;
 
@@ -787,15 +810,15 @@ void hsvtuner_guiresume(void)
       hsvtuner_win= FL_ObjWin(fd_hsvtunergui->oculo_orig);
     }
 
-  register_buttonscallback(hsvtuner_guibuttons);
-  register_displaycallback(hsvtuner_guidisplay);
+  myregister_buttonscallback(hsvtuner_guibuttons);
+  myregister_displaycallback(hsvtuner_guidisplay);
 
   fl_set_slider_bounds(fd_hsvtunergui->w_slider,100,1);
   fl_set_slider_value(fd_hsvtunergui->w_slider,hsimap_threshold);
-  fl_set_slider_bounds(fd_hsvtunergui->Imin,0,255);
-  fl_set_slider_value(fd_hsvtunergui->Imin,i_min);
-  fl_set_slider_bounds(fd_hsvtunergui->Imax,0,255);
-  fl_set_slider_value(fd_hsvtunergui->Imax,i_max);
+  fl_set_slider_bounds(fd_hsvtunergui->Vmin,255,0);
+  fl_set_slider_value(fd_hsvtunergui->Vmin,v_min);
+  fl_set_slider_bounds(fd_hsvtunergui->Vmax,255,0);
+  fl_set_slider_value(fd_hsvtunergui->Vmax,v_max);
   fl_set_slider_bounds(fd_hsvtunergui->Hmin,2.*PI,0);
   fl_set_slider_value(fd_hsvtunergui->Hmin,h_min);
   fl_set_slider_bounds(fd_hsvtunergui->Hmax,2.*PI,0);
@@ -804,6 +827,19 @@ void hsvtuner_guiresume(void)
   fl_set_slider_value(fd_hsvtunergui->Smin,s_min);
   fl_set_slider_bounds(fd_hsvtunergui->Smax,1,0);
   fl_set_slider_value(fd_hsvtunergui->Smax,s_max);
+}
+
+void hsvtuner_guiresume(void)
+{
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
+         fn ((gui_function)hsvtuner_guiresume_aux);
+      }
+   }
+   else{
+      fn ((gui_function)hsvtuner_guiresume_aux);
+   }
 }
 
 int handle2 (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void *xev){
@@ -846,20 +882,20 @@ int handle2 (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void 
 	 if (s_min<0){
 	    s_min=0;
 	 }
-	 i_max=I+50.;
-	 i_min=I-50.;
-	 if (i_max>255.){
-	    i_max=255.;
+	 v_max=I+50.;
+	 v_min=I-50.;
+	 if (v_max>255.){
+	    v_max=255.;
 	 }
-	 if (i_min<0.){
-	    i_min=0.;
+	 if (v_min<0.){
+	    v_min=0.;
 	 }
 	 fl_set_slider_value(fd_hsvtunergui->Hmax,h_max);
 	 fl_set_slider_value(fd_hsvtunergui->Hmin,h_min);
 	 fl_set_slider_value(fd_hsvtunergui->Smax,s_max);
 	 fl_set_slider_value(fd_hsvtunergui->Smin,s_min);
-	 fl_set_slider_value(fd_hsvtunergui->Imax,i_max);
-	 fl_set_slider_value(fd_hsvtunergui->Imin,i_min);
+	 fl_set_slider_value(fd_hsvtunergui->Vmax,v_max);
+	 fl_set_slider_value(fd_hsvtunergui->Vmin,v_min);
       }
 
 		

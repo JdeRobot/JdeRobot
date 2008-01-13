@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2006 Jos Mara Caas Plaza
+ *  Copyright (C) 2006 José María Cañas Plaza 
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,18 +15,21 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : Jos Mara Caas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  *            Roberto Calvo Palomino <rocapal@gsyc.escet.urjc.es>
+ *            Jose Antonio Santos Cadena <santoscadenas@gmail.com>
+ *
  */
 
 #include <jde.h>
-#include <jdegui.h>
+#include <forms.h>
 #include "followballgui.h"
 #include "followball.h"
 #include <math.h>
 #include <colorspaces.h>
+#include "graphics_xforms.h"
 
-#define FollowballVER  	"Followball - 1.0.0" 
+#define FollowballVER  	"Followball - 2.0.0" 
 
 #define D(x...)                  //printf(x)
 
@@ -37,6 +40,16 @@
 #define CTE_PTU 1.9              /* CTE que nos convierte de distancia a unidades PANTILT */
 #define ENCOD_TO_DEG (3.086/60.) /* CTE que nos pasa de unidades PANTILT a grados */
 #define DEG_TO_ENCOD (60./3.086) /* CTE que nos pasa de grados a unidades PANTILT */
+
+/*Gui variables*/
+Display *mydisplay;
+int  *myscreen;
+
+/*Gui callbacks*/
+registerbuttons myregister_buttonscallback;
+registerdisplay myregister_displaycallback;
+deletebuttons mydelete_buttonscallback;
+deletedisplay mydelete_displaycallback;
 
 int last_movement;               /* Indica el ultimo movimiento que ha realizado la pantilt */
 struct dfilter data_filter;
@@ -482,53 +495,53 @@ int followballgui_setupDisplay(void)
   XGCValues gc_values;
 
   gc_values.graphics_exposures = False;
-  followball_gc = XCreateGC(display,followball_win, GCGraphicsExposures, &gc_values);
+  followball_gc = XCreateGC(mydisplay,followball_win, GCGraphicsExposures, &gc_values);
 
   vmode= fl_get_vclass();
 
   if ((vmode==TrueColor)&&(fl_state[vmode].depth==16))
   {
     /* Imagen principal */
-    imagenOrig = XCreateImage(display,DefaultVisual(display,screen),16, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+    imagenOrig = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),16, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 
     /*Imagen filtrada */
-    hsifiltrada = XCreateImage(display, DefaultVisual(display,screen),16, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+    hsifiltrada = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),16, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 
     /* Mapa HSI */
-    histograma = XCreateImage(display, DefaultVisual(display,screen),16, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
+    histograma = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),16, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
   }
   else if ((vmode==TrueColor)&&(fl_state[vmode].depth==24))
   {
     /* Imagen principal */
-    imagenOrig = XCreateImage(display,DefaultVisual(display,screen),24, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+    imagenOrig = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 
     /*Imagen filtrada */
-    hsifiltrada = XCreateImage(display, DefaultVisual(display,screen),24, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+    hsifiltrada = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 
     /* Mapa HSI */
-    histograma = XCreateImage(display, DefaultVisual(display,screen),24, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
+    histograma = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
   }
   else if ((vmode==TrueColor)&&(fl_state[vmode].depth==32))
   {
     /* Imagen principal */
-    imagenOrig = XCreateImage(display,DefaultVisual(display,screen),32, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+    imagenOrig = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 
     /*Imagen filtrada */
-    hsifiltrada = XCreateImage(display, DefaultVisual(display,screen),32, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+    hsifiltrada = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 
     /* Mapa HSI */
-    histograma = XCreateImage(display, DefaultVisual(display,screen),32, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
+    histograma = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
   }
   else if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8))
   {
     /* Imagen principal */
-    imagenOrig = XCreateImage(display,DefaultVisual(display,screen),8, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+    imagenOrig = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,imagenOrig_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 
     /*Imagen filtrada */
-    hsifiltrada = XCreateImage(display, DefaultVisual(display,screen),8, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
+    hsifiltrada = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,hsifiltrada_buf,SIFNTSC_COLUMNS,SIFNTSC_ROWS,8,0);
 
     /* Mapa HSI */
-    histograma = XCreateImage(display, DefaultVisual(display,screen),8, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
+    histograma = XCreateImage(mydisplay, DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,histograma_buf,SMAX,SMAX,8,0);
   }
   else
   {
@@ -996,6 +1009,35 @@ void *followball_thread(void *not_used)
   }
 }
 
+void followball_init(){
+   if ((mydisplay= (Display *)myimport("graphics_xforms", "display"))==NULL){
+      fprintf (stderr, "oplfow: I can't fetch display from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+   if ((myscreen= (int *)myimport("graphics_xforms", "screen"))==NULL){
+      fprintf (stderr, "oplfow: I can't fetch screen from graphics_xforms\n");
+      jdeshutdown(1);
+   }
+
+   if (myregister_buttonscallback==NULL){
+      if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
+         printf ("opflow: I can't fetch register_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_buttonscallback=(deletebuttons)myimport ("graphics_xforms", "delete_buttonscallback"))==NULL){
+         printf ("opflow: I can't fetch delete_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((myregister_displaycallback=(registerdisplay)myimport ("graphics_xforms", "register_displaycallback"))==NULL){
+         printf ("opflow: I can't fetch register_displaycallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_displaycallback=(deletedisplay)myimport ("graphics_xforms", "delete_displaycallback"))==NULL){
+         jdeshutdown(1);
+         printf ("ofplow: I can't fetch delete_displaycallback from graphics_xforms\n");
+      }
+   }
+}
 
 void followball_startup()
 {
@@ -1011,15 +1053,19 @@ void followball_startup()
   printf("followball schema started up\n");
 
   put_state(followball_id,slept);
+
+  followball_init();
+  
   pthread_create(&(all[followball_id].mythread),NULL,followball_thread,NULL);
   pthread_mutex_unlock(&(all[followball_id].mymutex));
 }
 
 
-void followball_guibuttons(FL_OBJECT *obj)
+void followball_guibuttons(void *obj2)
 {
   double aux;
-
+  FL_OBJECT *obj=(FL_OBJECT *)obj2;
+  
   if (obj == fd_followballgui-> btActiveHist )
   {
     if ( fl_get_button(fd_followballgui->btActiveHist)==PUSHED )
@@ -1157,23 +1203,35 @@ void followball_guidisplay()
   }
   drawcheese(histograma_buf,centro_x,centro_y,h_max,h_min,s_max,s_min,FL_PALEGREEN);
 
-  XPutImage(display,followball_win,followball_gc,imagenOrig,0,0,fd_followballgui->oculo_orig->x, fd_followballgui->oculo_orig->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+  XPutImage(mydisplay,followball_win,followball_gc,imagenOrig,0,0,fd_followballgui->oculo_orig->x, fd_followballgui->oculo_orig->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
 
-  XPutImage(display,followball_win,followball_gc,hsifiltrada,0,0,fd_followballgui->oculo_modif->x, fd_followballgui->oculo_modif->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+  XPutImage(mydisplay,followball_win,followball_gc,hsifiltrada,0,0,fd_followballgui->oculo_modif->x, fd_followballgui->oculo_modif->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
 
-  XPutImage(display,followball_win,followball_gc,histograma,0,0,fd_followballgui->histograma->x, fd_followballgui->histograma->y, SMAX, SMAX);
+  XPutImage(mydisplay,followball_win,followball_gc,histograma,0,0,fd_followballgui->histograma->x, fd_followballgui->histograma->y, SMAX, SMAX);
 }
 
 
-void followball_guisuspend(void)
+void followball_guisuspend_aux(void)
 {
-  delete_buttonscallback(followball_guibuttons);
-  delete_displaycallback(followball_guidisplay);
+  mydelete_buttonscallback(followball_guibuttons);
+  mydelete_displaycallback(followball_guidisplay);
   fl_hide_form(fd_followballgui->followballgui);
 }
 
+void followball_guisuspend(void){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
+         fn ((gui_function)followball_guisuspend_aux);
+      }
+   }
+   else{
+      fn ((gui_function)followball_guisuspend_aux);
+   }
+}
 
-void followball_guiresume(void)
+
+void followball_guiresume_aux(void)
 {
   static int k=0;
 
@@ -1193,8 +1251,8 @@ void followball_guiresume(void)
   }
   
 
-  register_buttonscallback(followball_guibuttons);
-  register_displaycallback(followball_guidisplay);
+  myregister_buttonscallback(followball_guibuttons);
+  myregister_displaycallback(followball_guidisplay);
 
   /* HSV Values for pink ball */
   i_min=120.0; i_max=255.0;
@@ -1223,6 +1281,17 @@ void followball_guiresume(void)
   fl_set_slider_value(fd_followballgui->Smax,s_max);
 }
 
+void followball_guiresume(void){
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
+         fn ((gui_function)followball_guiresume_aux);
+      }
+   }
+   else{
+      fn ((gui_function)followball_guiresume_aux);
+   }
+}
 
 int handle2 (FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my, int key, void *xev)
 {

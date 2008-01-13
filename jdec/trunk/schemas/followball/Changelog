@@ -1,6 +1,12 @@
+followball (2.0.0) stable; urgency=low
+  * Integrated with graphics_xfomrs driver
+
+ -- José Antonio Santos Cadenas <santoscadenas@gmail.com>  jue ene 10 12:47:59 CET 2008
+
+
 followball (1.0.0) stable; urgency=low
-	* Integrated with libcolor-spaces
-	* Use myimport for jde variables
+  * Integrated with libcolor-spaces
+  * Use myimport for jde variables
 
  -- Roberto Calvo <rocapal@gsyc.es>  Sun, 25 Nov 2007 17:50:58 +0100
 

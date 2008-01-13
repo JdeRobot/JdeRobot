@@ -33,7 +33,7 @@ argument:
 --------------------
 class: FL_FRAME
 type: ENGRAVED_FRAME
-box: 430 10 322 242
+box: 430 10 320 240
 boxtype: FL_NO_BOX
 colors: FL_BLACK FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -51,7 +51,7 @@ argument:
 --------------------
 class: FL_FRAME
 type: ENGRAVED_FRAME
-box: 10 10 332 332
+box: 10 10 320 320
 boxtype: FL_NO_BOX
 colors: FL_BLACK FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -69,7 +69,7 @@ argument:
 --------------------
 class: FL_FRAME
 type: ENGRAVED_FRAME
-box: 430 290 322 242
+box: 430 270 322 242
 boxtype: FL_NO_BOX
 colors: FL_BLACK FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -87,7 +87,7 @@ argument:
 --------------------
 class: FL_VALSLIDER
 type: VERT_BROWSER_SLIDER
-box: 370 10 40 190
+box: 340 10 30 190
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_BOTTOM
@@ -180,7 +180,7 @@ argument:
 --------------------
 class: FL_FREE
 type: NORMAL_FREE
-box: 10 10 330 330
+box: 10 10 320 320
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_MCOL
 alignment: FL_ALIGN_CENTER
@@ -199,7 +199,7 @@ argument:
 --------------------
 class: FL_VALSLIDER
 type: VERT_BROWSER_SLIDER
-box: 220 360 40 170
+box: 10 360 40 170
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_BOTTOM
@@ -220,7 +220,7 @@ argument:
 --------------------
 class: FL_VALSLIDER
 type: VERT_BROWSER_SLIDER
-box: 270 360 40 170
+box: 60 360 40 170
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_BOTTOM
@@ -242,7 +242,7 @@ argument:
 --------------------
 class: FL_VALSLIDER
 type: VERT_BROWSER_SLIDER
-box: 320 360 40 170
+box: 110 360 40 170
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_BOTTOM
@@ -262,7 +262,7 @@ argument:
 --------------------
 class: FL_VALSLIDER
 type: VERT_BROWSER_SLIDER
-box: 370 360 40 170
+box: 160 360 40 170
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_BOTTOM
@@ -281,19 +281,19 @@ argument:
 
 --------------------
 class: FL_VALSLIDER
-type: HOR_BROWSER_SLIDER
-box: 10 360 190 30
+type: VERT_BROWSER_SLIDER
+box: 260 360 40 170
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_BOTTOM
 style: FL_NORMAL_STYLE
 size: FL_TINY_SIZE
 lcol: FL_BLACK
-label: I_max
+label: V_max
 shortcut: 
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
-name: Imax
+name: Vmax
 callback: 
 argument: 
 	bounds: 0 255
@@ -302,19 +302,19 @@ argument:
 
 --------------------
 class: FL_VALSLIDER
-type: HOR_BROWSER_SLIDER
-box: 10 410 190 30
+type: VERT_BROWSER_SLIDER
+box: 210 360 40 170
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_BOTTOM
 style: FL_NORMAL_STYLE
 size: FL_TINY_SIZE
 lcol: FL_BLACK
-label: I_min
+label: V_min
 shortcut: 
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
-name: Imin
+name: Vmin
 callback: 
 argument: 
 	bounds: 0 255
@@ -343,14 +343,14 @@ argument:
 --------------------
 class: FL_BUTTON
 type: PUSH_BUTTON
-box: 40 480 140 30
-boxtype: FL_UP_BOX
-colors: FL_LIGHTER_COL1 FL_BOTTOM_BCOL
+box: 430 520 320 20
+boxtype: FL_FRAME_BOX
+colors: FL_MCOL FL_BOTTOM_BCOL
 alignment: FL_ALIGN_CENTER
 style: FL_BOLD_STYLE
 size: FL_DEFAULT_SIZE
 lcol: FL_RIGHT_BCOL
-label: Background B/BW
+label: Background in greyscale
 shortcut: 
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity

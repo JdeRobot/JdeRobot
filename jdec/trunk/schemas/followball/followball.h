@@ -16,6 +16,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *            Roberto Calvo Palomino <rocapal@gsyc.escet.urjc.es>
+ *            Jose Antonio Santos Cadena <santoscadenas@gmail.com>
+ *
  */
 
 extern void followball_startup();
