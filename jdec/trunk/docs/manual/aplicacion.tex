@@ -3,9 +3,9 @@
 \label{sec:esquemas}
 
 %hebras de servicio
-Como hemos descrito en la sección \ref{sec:variables}, \textit{jdec} uniformiza el acceso a sensores y actuadores a través de variables compartidas, tanto si provienen del robot real, del robot simulado o de acceso remoto. Sobre este interfaz software
+Como hemos descrito en la sección \ref{sec:sensact}, \textit{jdec} uniformiza el acceso a sensores y actuadores a través de variables compartidas, tanto si provienen del robot real, del robot simulado o de acceso remoto. Sobre este interfaz software
 %suelo software, interfaz de software, suelo estándard
-se escribe el programa de la aplicación robótica. Para mantener este interfaz activo la plataforma ejecuta un conjunto de \textit{hebras de servicio}. Hay hebras de servicio que se encargan de recoger los datos de los sensores locales, de enviar los comandos a los actuadores locales, otras dialogan con el simulador y otras materializan la comunicación con los servidores de red. Cada ejecución de la plataforma se corresponde a una aplicación robótica, y para cada una de ellas se especifica en un fichero de configuración (\texttt{jde.conf}) qué variables perceptivas y de actuación se van a usar y de dónde provienen (robot local, simulador, servidores de red), para que la plataforma ejecute las hebras de servicio oportunas.
+se escribe el programa de la aplicación robótica. Para mantener este interfaz activo la plataforma ejecuta un conjunto de \textit{hebras de servicio}. Hay hebras de servicio que se encargan de recoger los datos de los sensores locales, de enviar los comandos a los actuadores locales, otras dialogan con el simulador y otras materializan la comunicación con los servidores de red. Cada ejecución de la plataforma se corresponde a una aplicación robótica, y para cada una de ellas se especifica en un fichero de configuración (\texttt{jde.conf}) qué variables perceptivas y de actuación se van a usar y de dónde provienen (hardware local, simulador, servidores de red), para que la plataforma ejecute las hebras de servicio oportunas.
 
 %Modelo concurrente
 %aplicación como una, varias o muchas hebras

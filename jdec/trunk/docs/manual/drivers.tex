@@ -4,7 +4,7 @@
 
 El soporte del hardware en \textit{jdec} se realiza mediante \textit{drivers}, estos son módulos independientes que se cargan en tiempo de ejecución y que facilitan el acceso al hardware. Para ello generan esquemas perceptivos y motores, que exportan variables sensoras y de actuación.
 
-Para cargar un nuevo driver primero ha de compilarse, generándose en este proceso un fichero con la extensión \textit{.so} que deberá se colocado en uno de los directorios que se especifiquen en la variable de entorno \texttt{LD\_LIBRARY\_PATH}, o en el \textit{scrpit} \texttt{ponpath} que se proporciona con la plataforma. En segundo lugar se tendrá que modificar el fichero de configuración de \textit{jdec} (\texttt{jde.conf}) para indicarle que se desean cargar drivers. La forma de hacerlo es la siguiente:
+Para cargar un nuevo driver primero ha de compilarse, generándose en este proceso un fichero con la extensión \textit{.so} que deberá ser colocado en uno de los directorios que se especifiquen en la variable de entorno \texttt{LD\_LIBRARY\_PATH}, o en el \textit{scrpit} \texttt{ponpath} que se proporciona con la plataforma. En segundo lugar se tendrá que modificar el fichero de configuración de \textit{jdec} (\texttt{jde.conf}) para indicarle que se desean cargar drivers. La forma de hacerlo es la siguiente:
 
 \begin{verbatim}
 ...

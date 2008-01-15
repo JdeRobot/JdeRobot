@@ -56,6 +56,7 @@ Una de esas plataformas es \textit{jdec}, fruto de una tesis doctoral sobre gene
 
 \subsubsection{Acceso a los sensores y actuadores}
 %acceso a los sensores y actuadores
+\label{sec:sensact}
 En cuanto al acceso a sensores y actuadores, \textit{jdec} ofrece un conjunto de variables perceptivas y de actuación respectivamente. La aplicación robótica obtiene las últimas observaciones sensoriales leyendo las variables perceptivas, que la plataforma mantiene permanentemente actualizadas. La aplicación robótica ordena comandos a los motores escribiendo en las variables de actuación, que la plataforma se encarga de materializar y hacer llegar hasta los actuadores correspondientes. La plataforma \textit{jdec} mantiene activo este interfaz de variables y la aplicación robótica se sitúa encima, leyendo continuamente los datos sensoriales de ese API y escribiendo en él los comandos motores que determina en cada momento. Este API de variables contrasta con la abstracción funcional de otras plataformas. 
 
 \begin{figure}[htb]
@@ -81,7 +82,7 @@ Como veremos en la sección \ref{subsec:drivers}, la misma variable se puede cone
 %\vspace{0.5cm}
 \subsubsection{La aplicación robótica es una colección de esquemas}
 %modelo de esquemas concurrentes
-En cuanto a la arquitectura software concreta, dentro de \textit{jdec} las aplicaciones robóticas se conciben y organizan como un conjunto de esquemas concurrentes. Un \textit{esquema} no es más que una hebra con cierto objetivo, que se ejecuta iterativamente a un ritmo controlado. Para aplicaciones reactivas sencillas, probablemente con un único esquema que tiene muchas iteraciones por segundo resulte suficiente.
+En cuanto a la arquitectura software concreta, dentro de \textit{jdec} las aplicaciones robóticas se conciben y organizan como un conjunto de esquemas concurrentes. Un \textit{esquema} no es más que una hebra con cierto objetivo, que se ejecuta iterativamente a un ritmo controlado. Para aplicaciones reactivas sencillas, probablemente con un único esquema que tenga muchas iteraciones por segundo resulte suficiente.
 
 Para aplicaciones algo más complejas \textit{jdec} propone dividir la funcionalidad en esquemas perceptivos y esquemas de actuación concurrentes, todos al mismo nivel. Los esquemas perceptivos tratan los datos sensoriales y elaboran nueva información, que se ofrece a los demás esquemas como nuevas variables compartidas. Los esquemas de actuación recogen la información sensorial o de otros esquemas perceptivos y toman decisiones de actuación.
 
@@ -144,6 +145,11 @@ Para más información acerca de \texttt{jdec} puedes visitar su página (repara en
       
       \vspace{5 mm}
 
+Una vez descargado se puede actualizar la copia de trabajo sin necesidad de descargarla completamente, utilizando el comando de svn (es recomendable consultar el manual de svn para más información):
+    \begin{verbatim}
+      svn update
+    \end{verbatim}
+
 \subsection{Descripción de drivers y esquemas}
 \subsubsection{Drivers}
 En esta sección ofrecemos una versión resumida de lo que proporciona cada driver. Para más información consulta la sección de configuración.
@@ -155,8 +161,8 @@ En esta sección ofrecemos una versión resumida de lo que proporciona cada driver
       \item \textit{pantilt}: este driver proporciona acceso al cuello mecánico del robot.
       \item \textit{player}: este driver conecta con la aplicación player, que nos da acceso a un robot simulado con \textit{stage} o real.
       \item \textit{mplayer}: este driver nos permite importar las imágenes desde vídeos y nos da acceso a las imágenes de las cámaras conectadas mediante usb así como mediante digitalizadoras o incluso permite importar imágenes desde capturadoras de televisión.
-      \item \textit{graphics\_xforms}: permite obtener soporte para cargar interfaces gráficos creados con xforms en la plataforma.
-      \item \textit{graphics\_gtk}: permite obtener soporte para cargar interfaces gráficos creados con gtk en la plataforma.
+      \item \textit{graphics\_xforms}: permite obtener soporte para cargar en la plataforma interfaces gráficos creados con xforms.
+      \item \textit{graphics\_gtk}: permite obtener soporte para cargar en la plataforma interfaces gráficos creados con gtk.
    \end{enumerate}
 \subsubsection{Schemas}
    \begin{enumerate}
@@ -223,7 +229,7 @@ Descomprimes este paquete y copias todos los archivos que contiene en:
       \begin{verbatim}
 		/usr/lib/win32/
       \end{verbatim}
-Otra forma es instalar una herramienta como Automatix o easyUbuntu.
+Otra forma es instalar una herramienta como Automatix o easyUbuntu que ayuden a realizar esta tarea.
 
      \item \textit{recorder}: Este esquema también necesita mencoder. Ver apartado anterior (\textit{driver mplayer}).
 
@@ -257,10 +263,9 @@ opciones de arranque:
 \begin{verbatim}
 $ jde --help
 jdec 4.2-svn
-Use: jde [config.file] [--gui]
+Use: jde [config.file]
 
      [config.file] Sets an specific config file. Don't use this option to read default configuration.
-           [--gui] Starts JDE with the main gui activated.
 
 
 \end{verbatim}
@@ -278,7 +283,6 @@ This is the shell of jdec 4.2-svn. Available commands:
       list the loaded schemas
   * ps
       print the non-slept schemas, their state and speed
-  * mastergui [on|off]
       show the master GUI of jdec, to visually manage the schema set
 
   * [schemaname]
@@ -289,6 +293,7 @@ This is the shell of jdec 4.2-svn. Available commands:
       show the GUI of the schema
   * guioff [schemaname]
       hide the GUI of the schema
+
 
 \end{verbatim}
 
