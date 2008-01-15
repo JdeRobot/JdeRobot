@@ -61,6 +61,11 @@ enum
 /** max number of characters in file path and name.*/
 #define ROUTE_LEN 255
 
+/** Image standard number of rows*/
+#define SIFNTSC_ROWS 240
+/** Image standard number of columns*/
+#define SIFNTSC_COLUMNS 320
+
 /** mplayer driver instant fps.*/
 int mplayer_fps;
 /** mplayer driver instant resolution.*/

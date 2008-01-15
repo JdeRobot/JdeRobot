@@ -36,6 +36,11 @@
 
 #define square(a)  ((a)*(a))
 
+/** Image standard number of rows*/
+#define SIFNTSC_ROWS 240
+/** Image standard number of columns*/
+#define SIFNTSC_COLUMNS 320
+
 Display *mydisplay;
 int  *myscreen;
 

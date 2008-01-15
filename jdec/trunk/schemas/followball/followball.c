@@ -29,6 +29,11 @@
 #include <colorspaces.h>
 #include "graphics_xforms.h"
 
+/** Image standard number of rows*/
+#define SIFNTSC_ROWS 240
+/** Image standard number of columns*/
+#define SIFNTSC_COLUMNS 320
+
 #define FollowballVER  	"Followball - 2.0.0" 
 
 #define D(x...)                  //printf(x)
@@ -89,6 +94,10 @@ float *mylongitude=NULL; /* degs, pan angle */
 float *mylatitude=NULL; /* degs, tilt angle */
 float *mylongitude_speed=NULL;
 float *mylatitude_speed=NULL;
+float *max_pan=NULL;
+float *min_pan=NULL;
+float *max_tilt=NULL;
+float *min_tilt=NULL;
 
 resumeFn ptmotorsresume, ptencodersresume;
 suspendFn ptmotorssuspend, ptencoderssuspend;
@@ -607,28 +616,28 @@ void pantilt_iteration()
         */
         case 1:                  /* Si esta en el 1 -> Mover hacia abajo y derecha */
           D("OBJETIVO: Primer Cuadrante\n");
-          *mylongitude = -MAX_PAN_ANGLE;
-          *mylatitude =  -MAX_TILT_ANGLE;
+          *mylongitude = *min_pan;
+          *mylatitude =  *min_tilt;
           last_movement=right;
           break;
 
         case 2:                  /* Si esta en el 2 -> Mover hacia abajo e izquierda */
           D("OBJETIVO: Segundo Cuadrante\n");
-          *mylongitude = MAX_PAN_ANGLE;
-          *mylatitude = -MAX_TILT_ANGLE;
+          *mylongitude = *max_pan;
+          *mylatitude = *min_tilt;
           last_movement=left;
           break;
         case 3:                  /* Si esta en el 3 -> Mover hacia arriba e derecha */
           D("OBJETIVO: Tercer Cuadrante\n");
-          *mylongitude = -MAX_PAN_ANGLE;
-          *mylatitude = MAX_TILT_ANGLE;
+          *mylongitude = *min_pan;
+          *mylatitude = *max_tilt;
           last_movement=right;
           break;
 
         case 4:                  /*  Si esta en el 4 -> Mover hacia arriba e izquierda */
           D("OBJETIVO: Cuarto Cuadrante\n");
-          *mylongitude = MAX_PAN_ANGLE;
-          *mylatitude = MAX_TILT_ANGLE;
+          *mylongitude = *max_pan;
+          *mylatitude = *max_tilt;
           last_movement=left;
           break;
 
@@ -659,9 +668,9 @@ void busqueda_iteration()
   if (last_movement==right)
   {
     D("[DERECHA]Busqueda Iteration: pan_angle=%f (MAX=%f) , tilt_angle=%f\n",*mypan_angle, MAX_PAN_ANGLE ,*mytilt_angle);
-    if ( *mypan_angle > -MAX_PAN_ANGLE )
+    if ( *mypan_angle > *min_pan )
     {
-      *mylongitude = -MAX_PAN_ANGLE;
+      *mylongitude = *min_pan;
     }
     else
     {
@@ -673,9 +682,9 @@ void busqueda_iteration()
   else
   {
     D("[IZQUIERDA]Busqueda Iteration: pan_angle=%f (MAX=%f) , tilt_angle=%f\n",*mypan_angle, MAX_PAN_ANGLE ,*mytilt_angle);
-    if ( *mypan_angle < MAX_PAN_ANGLE )
+    if ( *mypan_angle < *max_pan )
     {
-      *mylongitude = MAX_PAN_ANGLE;
+      *mylongitude = *max_pan;
     }
     else
     {
@@ -920,7 +929,10 @@ void followball_resume(int father, int *brothers, arbitration fn)
   //if (ptmotorsresume!=NULL)
   //   ptmotorsresume(followball_id, NULL, NULL);
   
-
+  max_pan=myimport("ptmotors", "max_longitude");
+  max_tilt=myimport("ptmotors", "max_latitude");
+  min_pan=myimport("ptmotors", "min_longitude");
+  min_tilt=myimport("ptmotors", "min_latitude");
 
   /* importamos encoders de pantilt */
 

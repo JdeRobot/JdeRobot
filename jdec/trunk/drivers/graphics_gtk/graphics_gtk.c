@@ -43,6 +43,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include <gtk/gtkgl.h>
 
 /** pthread identifier for jdec graphics_gtk driver thread.*/
 pthread_t graphics_gtk_id;
@@ -134,7 +135,7 @@ void graphics_gtk_close(){
 /**
  * graphics_gtk driver internal thread to run gtk_main, necessary when using gtk.
  */
-void *graphics_gtk_thread(void){
+void *graphics_gtk_thread(void *arg){
    gdk_threads_enter();
    gtk_main();
    gdk_threads_leave();
@@ -157,7 +158,7 @@ void graphics_gtk_iteration(){
 }
 
 /** graphics_gtk driver internal thread.*/
-void *graphics_gtk_thread2(void){
+void *graphics_gtk_thread2(void *arg){
    struct timeval a,b;
    long diff, next;
 
@@ -199,6 +200,8 @@ GladeXML* load_glade (char * file_name){
          return glade_xml_new (fichero, NULL,NULL);
       }
    }
+   fprintf (stderr, "graphics_gtk: I can't load the specified glade file %s\n",
+            file_name);
    return NULL;
 }
 
@@ -218,6 +221,10 @@ void graphics_gtk_startup(char *configfile)
    gdk_threads_init();
    /*Inicializar gtk*/
    gtk_init(NULL, NULL);
+   /* Iniciamos GtkGlExt */
+   gtk_gl_init (NULL, NULL);
+   /*Incializar gl*/
+   gdk_gl_init (NULL, NULL);
 
    myexport ("graphics_gtk", "register_displaycallback", (void *)register_displaycallback);
    myexport ("graphics_gtk", "delete_displaycallback", (void *)delete_displaycallback);

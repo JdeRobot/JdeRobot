@@ -27,6 +27,11 @@
 
 #define HSVtunerVer "hsvtuner 2.8"
 
+/** Image standard number of rows*/
+#define SIFNTSC_ROWS 240
+/** Image standard number of columns*/
+#define SIFNTSC_COLUMNS 320
+
 Display *mydisplay;
 int  *myscreen;
 

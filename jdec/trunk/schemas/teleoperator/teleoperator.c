@@ -186,14 +186,19 @@ void teleoperator_iteration()
 
 void teleoperator_suspend()
 {
-  if ((display_state & DISPLAY_SONARS)!=0) 
-    sonarssuspend();
-  if ((display_state & DISPLAY_LASER)!=0) 
-    lasersuspend();
+  pthread_mutex_lock(&(all[teleoperator_id].mymutex));
+  put_state(teleoperator_id,slept);
+  /* printf("teleoperator: off\n");*/
+  pthread_mutex_unlock(&(all[teleoperator_id].mymutex));
+  
+  if ((display_state & DISPLAY_SONARS)!=0)
+     sonarssuspend();
+  if ((display_state & DISPLAY_LASER)!=0)
+     lasersuspend();
   if ((display_state & DISPLAY_ROBOT)!=0)
-    encoderssuspend();
+     encoderssuspend();
   if ((display_state & BASE_TELEOPERATOR)!=0)
-    motorssuspend();
+     motorssuspend();
   if ((display_state & DISPLAY_COLORIMAGEA)!=0)
      colorAsuspend();
   if ((display_state & DISPLAY_COLORIMAGEB)!=0)
@@ -206,11 +211,6 @@ void teleoperator_suspend()
      ptencoderssuspend();
   if ((display_state & PANTILT_TELEOPERATOR)!=0)
      ptmotorssuspend();
-
-  pthread_mutex_lock(&(all[teleoperator_id].mymutex));
-  put_state(teleoperator_id,slept);
-  /* printf("teleoperator: off\n");*/
-  pthread_mutex_unlock(&(all[teleoperator_id].mymutex));
 }
 
 

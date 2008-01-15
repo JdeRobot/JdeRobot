@@ -799,17 +799,23 @@ void dispatch_subscriptions(struct client * info) {
          switch(i) {
             case LASER_DEVICE:
             {
-               unsigned long int *clock;
-               clock=(unsigned long int *)myimport("laser", "clock");
+               static unsigned long int *clock=NULL;
+               if (clock==NULL)
+                  clock=(unsigned long int *)myimport("laser", "clock");
                if (info->clocks[LASER_DEVICE]!=*clock){
+                  static int *limit=NULL;
                   info->clocks[LASER_DEVICE]=*clock;
                   /*Componer el mensaje*/
                   sprintf(buff,"%d %lu",NETWORKSERVER_laser,
                           info->clocks[LASER_DEVICE]);
-                  variables[i]=myimport("laser", "laser");
-                  for (j=0;j<NUM_LASER; j++){
-                     sprintf(buff+strlen(buff)," %d",
-                             (int)(((int *)variables[i])[j]));
+                  if (limit==NULL){
+                     limit=myimport("laser","number");
+                  }
+                  if (limit!=NULL){
+                     for (j=0;j<*limit; j++){
+                        sprintf(buff+strlen(buff)," %d",
+                                (int)(((int *)variables[i])[j]));
+                     }
                   }
                   sprintf(buff+strlen(buff),"\n");
                   /*Envío del mensaje*/
@@ -819,8 +825,9 @@ void dispatch_subscriptions(struct client * info) {
             }
             case ENCODERS_DEVICE:
             {
-               unsigned long int *clock;
-               clock=(unsigned long int *)myimport("encoders", "clock");
+               static unsigned long int *clock=NULL;
+               if (clock==NULL)
+                  clock=(unsigned long int *)myimport("encoders", "clock");
                if (info->clocks[ENCODERS_DEVICE]!=*clock){
                   info->clocks[ENCODERS_DEVICE]=*clock;
                   /*Composición del mensaje*/
@@ -838,17 +845,23 @@ void dispatch_subscriptions(struct client * info) {
             }
             case SONARS_DEVICE:
             {
-               unsigned long int *clock;
-               clock=(unsigned long int *)myimport("sonars", "clock");
+               static unsigned long int *clock=NULL;
+               if (clock==NULL)
+                  clock=(unsigned long int *)myimport("sonars", "clock");
                if (info->clocks[SONARS_DEVICE]!=clock[0]){
+                  static int *limit=NULL;
                   info->clocks[SONARS_DEVICE]=clock[0];
                   /*Componer el mensaje*/
                   sprintf(buff,"%d %lu",NETWORKSERVER_sonars,
                           info->clocks[SONARS_DEVICE]);
-                  variables[i]=myimport("sonars", "us");
-                  for (j=0;j<NUM_SONARS; j++){
-                     sprintf(buff+strlen(buff)," %d %1.1f", j,
-                             (float)(((float *)variables[i])[j]));
+                  if (limit==NULL){
+                     limit=myimport("laser","number");
+                  }
+                  if (limit!=NULL){
+                     for (j=0;j<*limit; j++){
+                        sprintf(buff+strlen(buff)," %d %1.1f", j,
+                                (float)(((float *)variables[i])[j]));
+                     }
                   }
                   sprintf(buff+strlen(buff),"\n");
                   /*Envío del mensaje*/
@@ -858,8 +871,9 @@ void dispatch_subscriptions(struct client * info) {
             }
             case PANTILT_ENCODERS_DEVICE:
             {
-               unsigned long int *clock;
-               clock=(unsigned long int *)myimport("ptencoders", "clock");
+               static unsigned long int *clock=NULL;
+               if (clock==NULL)
+                  clock=(unsigned long int *)myimport("ptencoders", "clock");
                if (info->clocks[PANTILT_ENCODERS_DEVICE]!=*clock){
                   info->clocks[PANTILT_ENCODERS_DEVICE]=*clock;
                   /*Composición del mensaje*/

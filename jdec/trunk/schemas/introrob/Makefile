@@ -3,7 +3,7 @@ INC-DIR = -I../../core -I../../drivers/graphics_xforms -I. -I/usr/include -I/usr
 LIB-DIR = -L. -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib 
 GCC = gcc
 CFLAGS = -g -pedantic -Wall $(INC-DIR)
-LIBS = -lm -lX11 -lforms 
+LIBS = -lm -lX11 -lforms -lpioneer
 
 introrob: introrobgui.o navegacion.o introrob.o 
 	$(GCC) -shared -Wl,-soname,introrob.so $(LIB-DIR) -o introrob.so introrob.o introrobgui.o navegacion.o $(LIBS)

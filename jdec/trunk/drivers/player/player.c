@@ -35,7 +35,12 @@
 #include <jde.h>
 
 /** player driver command period cycle.*/
-#define PLAYER_COMMAND_CYCLE 75 /* ms */ 
+#define PLAYER_COMMAND_CYCLE 75 /* ms */
+
+/** Robot max speed*/
+#define MAX_VEL 1000 /* mm/sec, hardware limit: 1800 */
+/** Robot max rotation speed*/
+#define MAX_RVEL 180 /* deg/sec, hardware limit: 360 */
 
 /* for player support through the player server */
 /** player driver client structure.*/
@@ -99,16 +104,22 @@ int bumpers_active=0;
 float jde_robot[5];
 /** 'encoders' schema, clock variable.*/
 unsigned long int encoders_clock;
+/** 'encoders' schema variable positions*/
+int encoders_number=5;
 
 /** 'laser' schema, laser information.*/
-int jde_laser[NUM_LASER];
+int jde_laser[PLAYERC_LASER_MAX_SAMPLES];
 /** 'laser' schema, clock variable.*/
 unsigned long int laser_clock;
+/** Number of laser samples*/
+int laser_number=0;
 
 /** 'sonars' schema, sonars information.*/
-float us[NUM_SONARS];
+float us[PLAYERC_SONAR_MAX_SAMPLES];
 /** 'sonars' schema, clock variable.*/
-unsigned long int us_clock[NUM_SONARS];
+unsigned long int us_clock[PLAYERC_SONAR_MAX_SAMPLES];
+/** Number of sonar samples*/
+int sonar_number=0;
 
 /** 'motors' schema, speed control.*/
 float v; /* mm/s */
@@ -575,7 +586,7 @@ void *player_thread(){
 
 /** player driver laser function callback.*/
 void player_laser_callback(){
-   int j=0,cont=0,rel;
+   int j=0/*,cont=0,rel*/;
   
    speedcounter(laser_schema_id);
    laser_clock=tag++;
@@ -584,14 +595,18 @@ void player_laser_callback(){
    /*NUM_LASER readings (181 in the robot, 179 in the simulator) */
    /*rel indica cada cuanto se debe tomar una medida de player para ajustar
      el número de medidas a las de jdec*/
-   rel=player_laser->scan_count/NUM_LASER;
-   while((cont<NUM_LASER)&&(j<player_laser->scan_count)){
-      if (j%rel!=1){
-         jde_laser[cont]=(int)(player_laser->scan[j][0]*1000);
-         cont++;
-      }
-      j++;
+//    rel=player_laser->scan_count/NUM_LASER;
+//    while((cont<NUM_LASER)&&(j<player_laser->scan_count)){
+//       if (j%rel!=1){
+//          jde_laser[cont]=(int)(player_laser->scan[j][0]*1000);
+//          cont++;
+//       }
+//       j++;
+//    }
+   for (j=0; j<player_laser->scan_count; j++){
+      jde_laser[j]=(int)(player_laser->scan[j][0]*1000);
    }
+   laser_number=player_laser->scan_count;
 }
 
 /** player driver encoders function callback.*/
@@ -628,6 +643,7 @@ void player_sonar_callback(void *not_used)
     us_clock[j]=tag;
     tag++;
   }
+  sonar_number=player_sonar->pose_count;
 }
 
 /** player driver sonars function callback.*/
@@ -640,10 +656,10 @@ void player_bumper_callback(void *not_used)
    for (j=0;j<player_bumpers->bumper_count; j++){
       /* for pioneer 16 data per reading */
       jde_bumpers[j]=(float)player_bumpers->bumpers[j];
-      bumpers_number=player_bumpers->bumper_count;
       bumpers_clock=tag;
       tag++;
    }
+   bumpers_number=player_bumpers->bumper_count;
 }
 
 /** player driver battery function callback.*/
@@ -939,6 +955,7 @@ int player_startup(char *configfile){
       myexport("laser","id",&laser_schema_id);
       myexport("laser","laser",&jde_laser);
       myexport("laser","clock", &laser_clock);
+      myexport("laser","number", &laser_number);
       myexport("laser","resume",(void *) &player_laser_resume);
       myexport("laser","suspend",(void *) &player_laser_suspend);
     }
@@ -960,6 +977,7 @@ int player_startup(char *configfile){
       myexport("encoders","id",&encoders_schema_id);
       myexport("encoders","jde_robot",&jde_robot);
       myexport("encoders", "clock", &encoders_clock);
+      myexport("encoders", "number", &encoders_number);
       myexport("encoders","resume",(void *)&player_encoders_resume);
       myexport("encoders","suspend",(void *)&player_encoders_suspend);
     }
@@ -980,7 +998,8 @@ int player_startup(char *configfile){
       num_schemas++;
       myexport("sonars","id",&sonars_schema_id);
       myexport("sonars","us",&us);
-      myexport("sonars", "clock", &us_clock);
+      myexport("sonars","clock", &us_clock);
+      myexport("sonars","number", &sonar_number);
       myexport("sonars","resume",(void *)&player_sonars_resume);
       myexport("sonars","suspend",(void *)&player_sonars_suspend);
     }

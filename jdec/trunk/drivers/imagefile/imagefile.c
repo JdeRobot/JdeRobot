@@ -35,6 +35,11 @@
 /** Max char size for a string buffer.*/
 #define MAX_LINE 1024
 
+/** Image standard number of rows*/
+#define SIFNTSC_ROWS 240
+/** Image standard number of columns*/
+#define SIFNTSC_COLUMNS 320
+
 /** imagefile driver name.*/
 char driver_name[256]="imagefile";
 /** colors detected in config file.*/
@@ -71,6 +76,11 @@ unsigned long int imageC_clock;
 char *colorD; /* sifntsc image itself */
 /** 'colorD' schema clock*/
 unsigned long int imageD_clock;
+
+/** width of each served video**/
+int width[MAXIMAGES];
+/** height of each served video**/
+int height[MAXIMAGES];
 
 /*Contadores de referencias*/
 /** colorA ref counter*/
@@ -433,10 +443,30 @@ int imagefile_parseconf(char *configfile){
 		  }else if(strcmp(word3,"provides")==0){
 		    while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
 		    if(sscanf(buffer_file2,"%s %s %s",word3,word4,word5)==3){
-		      if(strcmp(word4,"colorA")==0){serve_color[0]=1; strcpy(name_color[0],word5);}
-		      else if(strcmp(word4,"colorB")==0){serve_color[1]=1; strcpy(name_color[1],word5);}
-		      else if(strcmp(word4,"colorC")==0){serve_color[2]=1; strcpy(name_color[2],word5);}
-		      else if(strcmp(word4,"colorD")==0){serve_color[3]=1; strcpy(name_color[3],word5);}		      
+		      if(strcmp(word4,"colorA")==0){
+                         serve_color[0]=1;
+                         strcpy(name_color[0],word5);
+                         width[0] = SIFNTSC_COLUMNS;
+                         height[0] = SIFNTSC_ROWS;
+                      }
+		      else if(strcmp(word4,"colorB")==0){
+                         serve_color[1]=1;
+                         strcpy(name_color[1],word5);
+                         width[1] = SIFNTSC_COLUMNS;
+                         height[1] = SIFNTSC_ROWS;
+                      }
+		      else if(strcmp(word4,"colorC")==0){
+                         serve_color[2]=1;
+                         strcpy(name_color[2],word5);
+                         width[2] = SIFNTSC_COLUMNS;
+                         height[2] = SIFNTSC_ROWS;
+                      }
+		      else if(strcmp(word4,"colorD")==0){
+                         serve_color[3]=1;
+                         strcpy(name_color[3],word5);
+                         width[3] = SIFNTSC_COLUMNS;
+                         height[3] = SIFNTSC_ROWS;
+                      }
 		    }else{
 		      printf("imagefile: provides line incorrect\n");
 		    }
@@ -501,10 +531,13 @@ void imagefile_startup(char *configfile)
 	    strcpy(all[num_schemas].name,"colorA");
 	    all[num_schemas].resume = (resumeFn) mycolorA_resume;
 	    all[num_schemas].suspend = (suspendFn) mycolorA_suspend;
+            colorA=(char *)malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
 	    printf("colorA:%s\n",name_color[i]);
             myexport("colorA","id",&colorA_schema_id);
             myexport("colorA","colorA",&colorA);
             myexport("colorA","clock", &imageA_clock);
+            myexport("colorA","width", &width[0]);
+            myexport("colorA","height", &height[0]);
             myexport("colorA","resume",(void *)mycolorA_resume);
             myexport("colorA","suspend",(void *)mycolorA_suspend);
 	  }
@@ -514,10 +547,13 @@ void imagefile_startup(char *configfile)
 	    strcpy(all[num_schemas].name,"colorB");
 	    all[num_schemas].resume = (resumeFn) mycolorB_resume;
 	    all[num_schemas].suspend = (suspendFn) mycolorB_suspend;
+            colorB=(char *)malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
 	    printf("colorB:%s\n",name_color[i]);
             myexport("colorB","id",&colorB_schema_id);
             myexport("colorB","colorB",&colorB);
             myexport("colorB","clock", &imageB_clock);
+            myexport("colorB","width", &width[1]);
+            myexport("colorB","height", &height[1]);
             myexport("colorB","resume",(void *)mycolorB_resume);
             myexport("colorB","suspend",(void *)mycolorB_suspend);
 	  }
@@ -527,10 +563,13 @@ void imagefile_startup(char *configfile)
 	    strcpy(all[num_schemas].name,"colorC");
 	    all[num_schemas].resume = (resumeFn) mycolorC_resume;
 	    all[num_schemas].suspend = (suspendFn) mycolorC_suspend;
+            colorC=(char *)malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
 	    printf("colorC:%s\n",name_color[i]);
             myexport("colorC","id",&colorC_schema_id);
             myexport("colorC","colorC",&colorC);
             myexport("colorC","clock", &imageC_clock);
+            myexport("colorC","width", &width[2]);
+            myexport("colorC","height", &height[2]);
             myexport("colorC","resume",(void *)mycolorC_resume);
             myexport("colorC","suspend",(void *)mycolorC_suspend);
 	  }
@@ -540,10 +579,13 @@ void imagefile_startup(char *configfile)
 	    strcpy(all[num_schemas].name,"colorD");
 	    all[num_schemas].resume = (resumeFn) mycolorD_resume;
 	    all[num_schemas].suspend = (suspendFn) mycolorD_suspend;
+            colorD=(char *)malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
 	    printf("colorD:%s\n",name_color[i]);
             myexport("colorD","id",&colorD_schema_id);
             myexport("colorD","colorD",&colorD);
             myexport("colorD","clock", &imageD_clock);
+            myexport("colorD","width", &width[3]);
+            myexport("colorD","height", &height[3]);
             myexport("colorD","resume",(void *)mycolorD_resume);
             myexport("colorD","suspend",(void *)mycolorD_suspend);
 	  }

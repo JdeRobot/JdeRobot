@@ -49,6 +49,17 @@
 /* Uncomment this for see traces */ 
 #define D(x...) /*printf(x); */  
 
+/* directed perception pantilt limits */
+/** Max pan angle constant*/
+#define MAX_PAN_ANGLE 159.13 /* degrees */
+/** Min pan angle constant*/
+#define MIN_PAN_ANGLE -159.13 /* degrees */
+/** Max tilt angle constant*/
+#define MAX_TILT_ANGLE 30. /* degrees */
+/** Min tilt angle constant*/
+#define MIN_TILT_ANGLE -46. /* degrees */
+/** Max pantilt speed*/
+#define MAX_SPEED_PANTILT 205.89
 
 /** pantilt driver pthread for reading.*/
 pthread_t pantilt_readth;
@@ -117,6 +128,10 @@ float longitude_speed;
 float latitude_speed;
 /** 'ptmotors' schema cycle control variable*/
 int pantiltmotors_cycle;
+/** Max longitude speed*/
+float max_longitude_speed = MAX_SPEED_PANTILT;
+/** Max latitude speed*/
+float max_latitude_speed = MAX_SPEED_PANTILT;
 
 /** 'ptencoders' schema pan angle information*/
 float pan_angle;   /* degs */
@@ -906,6 +921,12 @@ void pantilt_startup(char *configfile)
     myexport("ptmotors","cycle", &pantiltmotors_cycle);
     myexport("ptmotors","resume",(void *)&ptmotors_resume);
     myexport("ptmotors","suspend",(void *)&ptmotors_suspend);
+    myexport("ptmotors", "max_longitude", &max_pan);
+    myexport("ptmotors", "max_latitude", &max_tilt);
+    myexport("ptmotors", "min_longitude", &min_pan);
+    myexport("ptmotors", "min_latitude", &min_tilt);
+    myexport("ptmotors", "max_longitude_speed", &max_longitude_speed);
+    myexport("ptmotors", "max_latitude_speed", &max_latitude_speed);
   }
 
   printf("pantilt driver started up\n");

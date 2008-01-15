@@ -21,10 +21,12 @@
 #include "jde.h"
 #include <forms.h>
 #include "graphics_xforms.h"
+#include "pioneer.h"
 #include "introrob.h"
 #include "introrobgui.h"
 #include "navegacion.h"
-#include "variables.h"
+#include "utilidades.h"
+
 
 #define DISPLAY_ROBOT 0x01UL
 #define DISPLAY_SONARS 0x04UL
@@ -45,7 +47,7 @@ deletedisplay mydelete_displaycallback;
 int introrob_id=0; 
 int introrob_brothers[MAX_SCHEMAS];
 arbitration introrob_callforarbitration;
-int introrob_cycle=100; /* ms */
+int introrob_cycle=150; /* ms */
 
 int *mylaser;
 resumeFn laserresume;
@@ -134,24 +136,26 @@ int absolutas2relativas(Tvoxel in, Tvoxel *out)
 /*  Calcula la posicion relativa respecto del robot de un punto absoluto. El robot se encuentra en robot[0], robot[1] con orientacion robot[2] respecto al sistema de referencia absoluto
 */ 
 {
-  if (out!=NULL)
-    {
-  (*out).x = in.x*jde_robot[3] + in.y*jde_robot[4] - jde_robot[0]*jde_robot[3] - jde_robot[1]*jde_robot[4];
-  (*out).y = in.y*jde_robot[3] - in.x*jde_robot[4] + jde_robot[0]*jde_robot[4] - jde_robot[1]*jde_robot[3];
-    }
-  return 0;
+  if (out!=NULL && myencoders!=NULL){
+     (*out).x = in.x*myencoders[3] + in.y*myencoders[4] -
+           myencoders[0]*myencoders[3] - myencoders[1]*myencoders[4];
+     (*out).y = in.y*myencoders[3] - in.x*myencoders[4] +
+           myencoders[0]*myencoders[4] - myencoders[1]*myencoders[3];
+     return 0;
+  }
+  return 1;
 }
 
 int relativas2absolutas(Tvoxel in, Tvoxel *out)
 /*  Calcula la posicion absoluta de un punto expresado en el sistema de coordenadas solidario al robot. El robot se encuentra en robot[0], robot[1] con orientacion robot[2] respecto al sistema de referencia absoluto
 */ 
 {
-  if (out!=NULL)
-    {
-  (*out).x = in.x*jde_robot[3] - in.y*jde_robot[4] + jde_robot[0];
-  (*out).y = in.y*jde_robot[3] + in.x*jde_robot[4] + jde_robot[1];
-    }
-  return 0;
+  if (out!=NULL && myencoders!=NULL){
+     (*out).x = in.x*myencoders[3] - in.y*myencoders[4] + myencoders[0];
+     (*out).y = in.y*myencoders[3] + in.x*myencoders[4] + myencoders[1];
+     return 0;
+  }
+  return 1;
 }
 
 int pintaSegmento(Tvoxel a, Tvoxel b, int color)
@@ -171,10 +175,10 @@ void introrob_iteration()
   speedcounter(introrob_id);
   /* printf("introrob iteration %d\n",d++);*/
 
-  if (introrob_state==teleoperated)
-    {v=v_teleop;
-    w=w_teleop;
-    }
+  if (introrob_state==teleoperated){
+     v=v_teleop;
+     w=w_teleop;
+  }
   else if (introrob_state==vff) vff_iteration();
   else if (introrob_state==deliberative) deliberative_iteration();
   else if (introrob_state==hybrid) hybrid_iteration();
@@ -339,6 +343,7 @@ void introrob_init(){
       fprintf (stderr, "teleoperator: I can't fetch display from graphics_xforms\n");
       jdeshutdown(1);
    }
+   init_pioneer();
 }
 
 void introrob_startup()
@@ -446,19 +451,19 @@ void introrob_guidisplay()
   
   
   if ((introrob_trackrobot==TRUE)&&
-      ((fabs(jde_robot[0]+introrob_odometrico[0])>(introrob_rango/4.))||
-       (fabs(jde_robot[1]+introrob_odometrico[1])>(introrob_rango/4.))))
-    {introrob_odometrico[0]=-jde_robot[0];
-    introrob_odometrico[1]=-jde_robot[1];
+      ((fabs(myencoders[0]+introrob_odometrico[0])>(introrob_rango/4.))||
+       (fabs(myencoders[1]+introrob_odometrico[1])>(introrob_rango/4.))))
+ {
+    introrob_odometrico[0]=-myencoders[0];
+    introrob_odometrico[1]=-myencoders[1];
     introrob_visual_refresh = TRUE;
-    }
-    
+ }
  
-  if (introrob_visual_refresh==TRUE)
-    {
-      fl_rectbound(0,0,introrob_width,introrob_height,FL_WHITE);   
-      XFlush(mydisplay);
-    }
+ 
+ if (introrob_visual_refresh==TRUE){
+    fl_rectbound(0,0,introrob_width,introrob_height,FL_WHITE);
+    XFlush(mydisplay);
+ }
 
   /* the grid at the floor */
   fl_set_foreground(introrobgui_gc,FL_LEFT_BCOL); 
@@ -516,7 +521,7 @@ void introrob_guidisplay()
   if ((introrob_display_state&DISPLAY_LASER)!=0){
     for(i=0;i<NUM_LASER;i++)
       {
-	laser2xy(i,jde_laser[i],&aa);
+	laser2xy(i,jde_laser[i],&aa, myencoders);
 	xy2introrobcanvas(aa,&introrob_laser_dpy[i]);
       }
     fl_set_foreground(introrobgui_gc,FL_BLUE);
@@ -540,19 +545,19 @@ void introrob_guidisplay()
   if ((introrob_display_state&DISPLAY_ROBOT)!=0){
     fl_set_foreground(introrobgui_gc,FL_MAGENTA);
     /* relleno los nuevos */
-    us2xy(15,0.,0.,&aa);
+    us2xy(15,0.,0.,&aa, myencoders);
     xy2introrobcanvas(aa,&introrob_ego[0]);
-    us2xy(3,0.,0.,&aa);
+    us2xy(3,0.,0.,&aa, myencoders);
     xy2introrobcanvas(aa,&introrob_ego[1]);
-    us2xy(4,0.,0.,&aa);
+    us2xy(4,0.,0.,&aa, myencoders);
     xy2introrobcanvas(aa,&introrob_ego[2]);
-    us2xy(8,0.,0.,&aa);
+    us2xy(8,0.,0.,&aa, myencoders);
     xy2introrobcanvas(aa,&introrob_ego[3]);
-    us2xy(15,0.,0.,&aa);
+    us2xy(15,0.,0.,&aa, myencoders);
     xy2introrobcanvas(aa,&introrob_ego[EGOMAX-1]);
     for(i=0;i<NUM_SONARS;i++)
       {
-	us2xy((15+i)%NUM_SONARS,0.,0.,&aa); /* Da en el Tvoxel aa las coordenadas del sensor, pues es distancia 0 */
+	us2xy((15+i)%NUM_SONARS,0.,0.,&aa, myencoders); /* Da en el Tvoxel aa las coordenadas del sensor, pues es distancia 0 */
 	xy2introrobcanvas(aa,&introrob_ego[i+4]);       
       }
     
@@ -682,7 +687,7 @@ int introrob_mouse_motion_on_micanvas(FL_OBJECT *ob, Window win, int win_width, 
 	sqrt_value=sqrt((diff_x*diff_x)+(diff_y*diff_y));
 	if(diff_y>=0) acos_value=acos(diff_x/sqrt_value);
 	else acos_value=2*PI-acos(diff_x/sqrt_value);
-	diff_w=jde_robot[2]-acos_value;
+	diff_w=myencoders[2]-acos_value;
 	
 	/* shortest way to the robot theta*/
 	if(diff_w>0){

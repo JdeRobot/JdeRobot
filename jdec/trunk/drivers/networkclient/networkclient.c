@@ -43,6 +43,16 @@
 /** networkclient driver messages socket read mode.*/
 #define MESSAGES 1
 
+/** Maximum number of sonar measures (picked from player.h)*/
+#define SONAR_MAX 64
+/** Maximum number of laser measures (picked from player.h)*/
+#define LASER_MAX 1024
+
+/** Image standard number of rows*/
+#define SIFNTSC_ROWS 240
+/** Image standard number of columns*/
+#define SIFNTSC_COLUMNS 320
+
 /** networkclient client name.*/
 char CLIENT_NAME[MAX_CLIENT_NAME]="jdec";
 
@@ -216,16 +226,22 @@ int height[MAXCAM];
 float jde_robot[5];
 /** 'encoders' schema, clock variable.*/
 unsigned long int encoders_clock;
+/** 'encoders' schema variable positions*/
+int encoders_number=5;
 
 /** 'laser' schema, laser information.*/
-int jde_laser[NUM_LASER];
+int jde_laser[LASER_MAX];
 /** 'laser' schema, clock variable.*/
 unsigned long int laser_clock;
+/** Number of laser samples*/
+int laser_number=0;
 
 /** 'sonars' schema, sonars information.*/
-float us[NUM_SONARS];
+float us[SONAR_MAX];
 /** 'sonars' schema, clock variable.*/
-unsigned long int us_clock[NUM_SONARS];
+unsigned long int us_clock[SONAR_MAX];
+/** Number of sonar samples*/
+int sonar_number=0;
 
 /** 'motors' schema, speed control.*/
 float v; /* mm/s */
@@ -1320,6 +1336,7 @@ void *networkclient_laser_thread(void *not_used){
                                jde_laser[sensor++]=l;
                             }
                          }
+                         laser_number=sensor;
                          laser_clock=network_clock;
                       }
                    }
@@ -1471,7 +1488,7 @@ void *networkclient_sonars_thread(void *not_used){
   int readn, beginning,i;
   unsigned long int network_clock;
   int type;
-  int j=0,sensor;
+  int j=0,sensor=0;
   float measure;
 
   /* insert pointer on the input_buffer, in order to complete messages with more than one receptions */
@@ -1537,6 +1554,7 @@ void *networkclient_sonars_thread(void *not_used){
                                 us_clock[sensor]=network_clock;
                              }
                           }
+                          sonar_number=sensor;
                           speedcounter(sonars_schema_id);
                        }
                     }
@@ -2947,6 +2965,7 @@ void networkclient_startup(char *configfile)
     myexport("laser","id",&laser_schema_id);
     myexport("laser","laser",&jde_laser);
     myexport("laser","clock", &laser_clock);
+    myexport("laser","number", &laser_number);
     myexport("laser","resume",(void *) &networkclient_laser_resume);
     myexport("laser","suspend",(void *) &networkclient_laser_suspend);
   }
@@ -2966,6 +2985,7 @@ void networkclient_startup(char *configfile)
     myexport("encoders","id",&encoders_schema_id);
     myexport("encoders","jde_robot",&jde_robot);
     myexport("encoders", "clock", &encoders_clock);
+    myexport("encoders", "number", &encoders_number);
     myexport("encoders","resume",(void *) &networkclient_encoders_resume);
     myexport("encoders","suspend",(void *) &networkclient_encoders_suspend);
   }
@@ -2985,6 +3005,7 @@ void networkclient_startup(char *configfile)
     myexport("sonars","id",&sonars_schema_id);
     myexport("sonars","us",&us);
     myexport("sonars", "clock", &us_clock);
+    myexport("sonars","number", &sonar_number);
     myexport("sonars","resume",(void *)&networkclient_sonars_resume);
     myexport("sonars","suspend",(void *)&networkclient_sonars_suspend);
   }

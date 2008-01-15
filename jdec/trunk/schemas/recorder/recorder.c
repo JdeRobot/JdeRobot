@@ -29,6 +29,10 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
+/** Image standard number of rows*/
+#define SIFNTSC_ROWS 240
+/** Image standard number of columns*/
+#define SIFNTSC_COLUMNS 320
 
 /*Gui declarations*/
 Display *mydisplay;

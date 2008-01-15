@@ -32,7 +32,6 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <math.h>
-#include <pioneer_const.h>
 
 /** Conversion from deg to rad*/
 #define DEGTORAD     (3.14159264 / 180.0)

@@ -47,6 +47,11 @@
 /** Max number of buffers per node.*/
 #define NUM_BUFFERS 8
 
+/** Image standard number of rows*/
+#define SIFNTSC_ROWS 240
+/** Image standard number of columns*/
+#define SIFNTSC_COLUMNS 320
+
 /**
  * Color conversion functions from Bart Nabbe.
  * Corrected by Damien: bad coeficients in YUV2RGB.
