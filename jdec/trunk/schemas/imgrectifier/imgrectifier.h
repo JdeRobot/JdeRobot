@@ -18,33 +18,12 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-#ifndef __OPFLOW__
-#define __OPFLOW__
+extern void imgrectifier_startup();
+extern void imgrectifier_stop()
+extern void imgrectifier_suspend();
+extern void imgrectifier_resume(int father, int *brothers, arbitration fn);
+extern void imgrectifier_guiresume();
+extern void imgrectifier_guisuspend();
 
-typedef struct{
-   float x;
-   float y;
-}floatPoint;
-      
-typedef struct{
-   int calc;
-   unsigned char status;
-   float error;
-   floatPoint dest;
-   float hyp;
-   float angle;
-}t_opflow;
-
-extern void opflow_startup();
-extern void opflow_suspend();
-extern void opflow_resume(int father, int *brothers, arbitration fn);
-extern void opflow_guiresume();
-extern void opflow_guisuspend();
-extern void opflow_stop();
-
-extern int opflow_id; /* schema identifier */
-extern int opflow_cycle; /* ms */
-
-/*Own variables*/
-extern t_opflow *opflow_img; /*matrix with next points*/
-#endif
+extern int imgrectifier_id; /* schema identifier */
+extern int imgrectifier_cycle; /* ms */

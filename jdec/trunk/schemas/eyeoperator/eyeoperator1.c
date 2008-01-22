@@ -24,7 +24,6 @@
 #include "opflow.h"
 #include "eyeoperator1gui.h"
 #include "eyeoperator1.h"
-#include "pioneer.h"
 #include <ipp.h>
 
 #define EYEOPERATORver "eyeoperator1"
@@ -47,6 +46,12 @@ int eyeoperator1_cycle=50; /* ms */
 GC eyeoperator1_gc;
 Window eyeoperator1_window;
 XImage *image;
+
+/** Image standard number of rows*/
+#define SIFNTSC_ROWS 240
+/** Image standard number of columns*/
+#define SIFNTSC_COLUMNS 320
+
 
 Display *mydisplay;
 int  *myscreen;
