@@ -26,6 +26,11 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
+/** Image standard number of rows*/
+#define SIFNTSC_ROWS 240
+/** Image standard number of columns*/
+#define SIFNTSC_COLUMNS 320
+
 int esquema_prueba_id=0;
 int esquema_prueba_brothers[MAX_SCHEMAS];
 arbitration esquema_prueba_callforarbitration;

@@ -1,3 +1,0 @@
-#/bin/bash
-export LD_LIBRARY_PATH=.:/usr/lib:/usr/local/lib:/opt/intel/ipp/5.1/ia32/sharedlib:$HOME/jde-robot:/usr/local/share/jde-robot/:$LD_LIBRARY_PATH
-echo updating LD_LIBRARY_PATH
