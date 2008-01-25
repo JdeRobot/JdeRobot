@@ -1,7 +1,6 @@
 #include "jde.h"
 #include "pioneer.h"
 #include "forms.h"
-#include "utilidades.h"
 #include "introrob.h"
 
 void vff_iteration(void)
@@ -44,6 +43,6 @@ void visualizacion(void)
   /* borra la el segmento pintado en la ultima iteracion */
   pintaSegmento(c,d,FL_WHITE); 
   c.x=0.; c.y=0.; /* en mm */
-  d.x=jde_robot[0]; d.y=jde_robot[1]; /* en mm */
+  d.x=robot[0]; d.y=robot[1]; /* en mm */
   pintaSegmento(c,d,FL_BLUE);
 }

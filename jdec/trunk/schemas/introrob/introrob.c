@@ -25,7 +25,6 @@
 #include "introrob.h"
 #include "introrobgui.h"
 #include "navegacion.h"
-#include "utilidades.h"
 
 
 #define DISPLAY_ROBOT 0x01UL
@@ -49,16 +48,16 @@ int introrob_brothers[MAX_SCHEMAS];
 arbitration introrob_callforarbitration;
 int introrob_cycle=150; /* ms */
 
-int *mylaser;
+int *mylaser=NULL;
 resumeFn laserresume;
 suspendFn lasersuspend;
 
-float *myencoders;
+float *myencoders=NULL;
 resumeFn encodersresume;
 suspendFn encoderssuspend;
 
-float *myv;
-float *myw;
+float *myv=NULL;
+float *myw=NULL;
 resumeFn motorsresume;
 suspendFn motorssuspend;
 
@@ -172,8 +171,19 @@ int pintaSegmento(Tvoxel a, Tvoxel b, int color)
 
 void introrob_iteration()
 {
+  int i;
   speedcounter(introrob_id);
   /* printf("introrob iteration %d\n",d++);*/
+
+  if (myencoders!=NULL){
+     for (i=0;i<5; i++)
+       robot[i]= myencoders[i];
+  }
+
+  if (mylaser!=NULL){
+     for (i=0; i<NUM_LASER; i++)
+       laser[i]= mylaser[i];
+  }
 
   if (introrob_state==teleoperated){
      v=v_teleop;
@@ -183,22 +193,14 @@ void introrob_iteration()
   else if (introrob_state==deliberative) deliberative_iteration();
   else if (introrob_state==hybrid) hybrid_iteration();
   else {v=0;w=0;}
+
   /*Mover los valores de la variables de trabajo a las variables actuadoras
     del robot que han sido importadas*/
   if (myv!=NULL)
      *myv=v;
   if (myw!=NULL)
      *myw=w;
-  if (myencoders!=NULL){
-     int i;
-     for (i=0;i<5; i++)
-        myencoders[i]=jde_robot[i];
-  }
-  if (mylaser!=NULL){
-     int i;
-     for (i=0; i<NUM_LASER; i++)
-        mylaser[i]=jde_laser[i];
-  }
+
 }
 
 
@@ -235,7 +237,7 @@ void introrob_resume(int father, int *brothers, arbitration fn)
   introrob_callforarbitration=fn;
   put_state(introrob_id,notready);
 
-  mylaser=(int *)myimport("laser","jde_laser");
+  mylaser=(int *)myimport("laser","laser");
   laserresume=(resumeFn)myimport("laser","resume");
   lasersuspend=(suspendFn)myimport("laser","suspend");
 
@@ -442,7 +444,6 @@ void introrob_guidisplay()
     }
   else introrob_iteracion_display++;
 
-
   k=k+1.;
   sprintf(text,"%.1f",k);
   fl_set_object_label(fd_introrobgui->fps,text);
@@ -517,18 +518,21 @@ void introrob_guidisplay()
       /*for(i=0;i<NUM_LASER;i++) XDrawPoint(display,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy[i].x,introrob_laser_dpy[i].y);*/
       XDrawPoints(mydisplay,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy,NUM_LASER,CoordModeOrigin);
     }
-  
+ 
   if ((introrob_display_state&DISPLAY_LASER)!=0){
+    /* check to avoid the segmentation fault in case GUI is activated before the schema imports mylaser */
+    if (mylaser!=NULL){
     for(i=0;i<NUM_LASER;i++)
       {
-	laser2xy(i,jde_laser[i],&aa, myencoders);
+	laser2xy(i,mylaser[i],&aa, myencoders);
 	xy2introrobcanvas(aa,&introrob_laser_dpy[i]);
       }
     fl_set_foreground(introrobgui_gc,FL_BLUE);
     /*for(i=0;i<NUM_LASER;i++) XDrawPoint(display,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy[i].x,introrob_laser_dpy[i].y);*/
     XDrawPoints(mydisplay,introrob_canvas_win,introrobgui_gc,introrob_laser_dpy,NUM_LASER,CoordModeOrigin);
   }
-  
+  }
+
   
   /* VISUALIZACION: pintar o borrar de el PROPIO ROBOT.
      Siempre hay un repintado total. Esta es la ultima estructura que se se pinta, para que ninguna otra se solape encima */
@@ -633,7 +637,7 @@ int introrob_button_pressed_on_micanvas(FL_OBJECT *ob, Window win, int win_width
       introrob_mouse_new=1;
       
       /*printf("(%d,%d) Canvas: Click on (%.2f,%.2f)\n",x,y,introrob_mouse_x,introrob_mouse_y);
-	printf("robot_x=%.2f robot_y=%.2f robot_theta=%.2f\n",jde_robot[0],jde_robot[1],jde_robot[2]);*/
+	printf("robot_x=%.2f robot_y=%.2f robot_theta=%.2f\n",myencoders[0],myencoders[1],myencoders[2]);*/
       
     }else if(introrob_mouse_button==MOUSEWHEELDOWN){
       /* a button has been pressed */

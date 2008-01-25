@@ -17,6 +17,7 @@
  *
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
+#include "pioneer.h"
 
 extern void introrob_startup();
 extern void introrob_suspend();
@@ -32,3 +33,14 @@ extern void introrob_guisuspend();
 
 #define PI 3.14159265
 
+extern float introrob_mouse_x, introrob_mouse_y;
+/* absolute position of the point clicked with the central mouse button */
+
+int absolutas2relativas(Tvoxel in, Tvoxel *out);
+int relativas2absolutas(Tvoxel in, Tvoxel *out);
+int pintaSegmento(Tvoxel a, Tvoxel b, int color);
+ 
+float v;
+float w;
+float robot[5];
+float laser[NUM_LASER];
