@@ -19,6 +19,7 @@
  */
 
 extern void hsvtuner_startup();
+extern void hsvtuner_stop();
 extern void hsvtuner_suspend();
 extern void hsvtuner_resume(int father, int *brothers, arbitration fn);
 extern void hsvtuner_guiresume();

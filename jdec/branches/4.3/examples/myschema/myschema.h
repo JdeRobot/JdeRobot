@@ -19,6 +19,7 @@
  */
 
 extern void myschema_startup();
+extern void myschema_stop();
 extern void myschema_suspend();
 extern void myschema_resume(int father, int *brothers, arbitration fn);
 extern void myschema_guiresume();

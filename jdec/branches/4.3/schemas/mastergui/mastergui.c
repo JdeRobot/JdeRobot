@@ -29,7 +29,7 @@ int mastergui_brothers[MAX_SCHEMAS];
 arbitration mastergui_callforarbitration;
 
 enum mastergui_states {init,t1,r1,t2,r2,t3,r3,t4,end};
-FD_masterguigui *fd_masterguigui;
+FD_masterguigui *fd_masterguigui=NULL;
 
 #define PUSHED 1
 #define RELEASED 0
@@ -188,10 +188,15 @@ void gui_init(){
 
 /*Al suspender el esquema*/
 void mastergui_stop(){
+  if (fd_masterguigui!=NULL)
+    {
+      if (all[mastergui_id].guistate==on) 
+	fl_hide_form(fd_masterguigui->masterguigui);
+      fl_free_form(fd_masterguigui->masterguigui);
+    }
+  printf ("mastergui close\n");
 }
 
-void mastergui_close(){
-}
 
 void mastergui_suspend()
 {

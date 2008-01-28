@@ -187,9 +187,10 @@ void *graphics_gtk_thread2(void *arg){
  * @returns the newly created GladeXML object, or NULL on failure.
  */
 GladeXML* load_glade (char * file_name){
-   char *directorio, *path2;
+   char *directorio, *path2, path_cp[PATH_SIZE];
    
-   path2=path;
+   strncpy(path_cp, path, PATH_SIZE);
+   path2=path_cp;
 
    while ((directorio=strsep(&path2,":"))!=NULL){
       char fichero[1024];

@@ -46,7 +46,7 @@ int opengldemo_brothers[MAX_SCHEMAS];
 arbitration opengldemo_callforarbitration;
 int opengldemo_cycle=1000; /* ms */
 
-FD_opengldemogui *fd_opengldemogui;
+FD_opengldemogui *fd_opengldemogui=NULL;
 
 #define PI 3.141592654
 #define MAXWORLD 30.
@@ -55,6 +55,13 @@ char rotar=1;
 float xcam,ycam,zcam,foax,foay,foaz;
 
 void opengldemo_stop(){
+if (fd_opengldemogui!=NULL)
+    {
+      if (all[opengldemo_id].guistate==on) 
+	fl_hide_form(fd_opengldemogui->opengldemogui);
+      fl_free_form(fd_opengldemogui->opengldemogui);
+    }
+  printf ("opengldemo close\n");
 }
 
 void opengldemo_iteration()

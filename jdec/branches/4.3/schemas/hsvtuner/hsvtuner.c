@@ -46,7 +46,7 @@ int hsvtuner_brothers[MAX_SCHEMAS];
 arbitration hsvtuner_callforarbitration;
 int hsvtuner_cycle=100; /* ms */
 
-FD_hsvtunergui *fd_hsvtunergui;
+FD_hsvtunergui *fd_hsvtunergui=NULL;
 
 /* Necesarias para las Xlib */
 GC hsvtuner_gc;
@@ -641,13 +641,21 @@ void hsvtuner_init(){
    }
 }
 
-void hsvtuner_close()
+void hsvtuner_stop()
 {
+
+  /*
   pthread_mutex_lock(&(all[hsvtuner_id].mymutex));
   hsvtuner_suspend();  
   pthread_mutex_unlock(&(all[hsvtuner_id].mymutex));
   sleep(2);
-  fl_free_form(fd_hsvtunergui->hsvtunergui);
+  */
+  if (fd_hsvtunergui!=NULL)
+    {
+      if (all[hsvtuner_id].guistate==on) 
+	fl_hide_form(fd_hsvtunergui->hsvtunergui);
+      fl_free_form(fd_hsvtunergui->hsvtunergui);
+    }
   printf ("hsvtuner close\n");
 }
 

@@ -64,7 +64,7 @@ int followball_brothers[MAX_SCHEMAS];
 arbitration followball_callforarbitration;
 int followball_cycle=30;         /* ms */
 
-FD_followballgui *fd_followballgui;
+FD_followballgui *fd_followballgui=NULL;
 
 /* Necesarias para las Xlib */
 GC followball_gc;
@@ -1049,6 +1049,17 @@ void followball_init(){
          printf ("ofplow: I can't fetch delete_displaycallback from graphics_xforms\n");
       }
    }
+}
+
+void followball_stop()
+{
+  if (fd_followballgui!=NULL)
+    {
+      if (all[followball_id].guistate==on) 
+	fl_hide_form(fd_followballgui->followballgui); 
+      fl_free_form(fd_followballgui->followballgui);
+    }
+  printf ("followball close\n");
 }
 
 void followball_startup()

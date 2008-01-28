@@ -19,9 +19,10 @@
  */
 
 extern void teleoperator_startup();
+extern void teleoperator_stop();
 extern void teleoperator_suspend();
 extern void teleoperator_resume(int father, int *brothers, arbitration fn);
 extern void teleoperator_guiresume();
 extern void teleoperator_guisuspend();
-extern void teleoperator_stop();
+
 

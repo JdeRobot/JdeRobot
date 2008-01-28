@@ -150,6 +150,13 @@ int recordergui_setupDisplay(void)
 }
 
 void recorder_stop(){
+ if (fd_recordergui!=NULL)
+    {
+      if (all[recorder_id].guistate==on) 
+	fl_hide_form(fd_recordergui->recordergui);
+      fl_free_form(fd_recordergui->recordergui);
+    }
+  printf ("recorder close\n");
 }
 
 void recorder_iteration(){

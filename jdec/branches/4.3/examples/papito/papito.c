@@ -124,8 +124,19 @@ void papito_init(){
 
 /*Al suspender el esquema*/
 void papito_fin(){
+}
+
+void papito_stop(){
    if (hijo_state==ON)
       hijosuspend();
+
+   if (fd_papitogui!=NULL)
+   {
+      if (all[papito_id].guistate==on)
+         fl_hide_form(fd_papitogui->papitogui);
+      fl_free_form(fd_papitogui->papitogui);
+   }
+   printf ("papito close\n");
 }
 
 void papito_suspend()
