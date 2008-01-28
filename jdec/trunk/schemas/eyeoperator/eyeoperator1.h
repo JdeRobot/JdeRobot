@@ -19,6 +19,7 @@
  */
 
 extern void eyeoperator1_startup();
+extern void eyeoperator1_stop();
 extern void eyeoperator1_suspend();
 extern void eyeoperator1_resume(int father, int *brothers, arbitration fn);
 extern void eyeoperator1_guiresume();

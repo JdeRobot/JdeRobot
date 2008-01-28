@@ -37,7 +37,7 @@ int eyeoperator1_id=0;
 int eyeoperator1_brothers[MAX_SCHEMAS];
 arbitration eyeoperator1_callforarbitration;
 
-FD_eyeoperator1gui *fd_eyeoperator1gui;
+FD_eyeoperator1gui *fd_eyeoperator1gui=NULL;
 
 /* exported variables */
 int eyeoperator1_cycle=50; /* ms */
@@ -498,6 +498,17 @@ void eyeoperator1_startup()
 		    NULL);
    eyeoperator1_init();
    pthread_mutex_unlock(&(all[eyeoperator1_id].mymutex));
+}
+
+void eyeoperator1_stop()
+{
+  if (fd_eyeoperator1gui!=NULL)
+    {
+      if (all[eyeoperator1_id].guistate==on) 
+	fl_hide_form(fd_eyeoperator1gui->eyeoperator1gui);
+      fl_free_form(fd_eyeoperator1gui->eyeoperator1gui);
+    }
+  printf ("eyeoperator1 close\n");
 }
 
 void eyeoperator1_guidisplay()

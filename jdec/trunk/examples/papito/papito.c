@@ -38,7 +38,7 @@ int papito_cycle=100; /* ms */
 enum papito_states {init,hijos,end};
 enum hijo_states {ON, OFF};
 static int papito_state;
-FD_papitogui *fd_papitogui;
+FD_papitogui *fd_papitogui=NULL;
 static int hijo_state=OFF;
 int d=0;
 
@@ -123,9 +123,17 @@ void papito_init(){
 }
 
 /*Al suspender el esquema*/
-void papito_fin(){
+void papito_stop(){
    if (hijo_state==ON)
       hijosuspend();
+
+ if (fd_papitogui!=NULL)
+    {
+      if (all[papito_id].guistate==on) 
+	fl_hide_form(fd_papitogui->papitogui);
+      fl_free_form(fd_papitogui->papitogui);
+    }
+  printf ("papito close\n");
 }
 
 void papito_suspend()

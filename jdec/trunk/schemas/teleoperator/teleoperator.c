@@ -136,13 +136,11 @@ resumeFn colorDresume;
 suspendFn colorDsuspend;
 
 
-FD_teleoperatorgui *fd_teleoperatorgui;
+FD_teleoperatorgui *fd_teleoperatorgui=NULL;
 GC teleoperatorgui_gc;
 Window teleoperatorgui_win; 
 unsigned long display_state;
 
-void teleoperator_stop(){
-}
 
 void teleoperator_iteration()
 {  
@@ -329,13 +327,22 @@ void *teleoperator_thread(void *not_used)
     }
 }
 
-void teleoperator_close()
+void teleoperator_stop()
 {
+  /*
   pthread_mutex_lock(&(all[teleoperator_id].mymutex));
   teleoperator_suspend();  
   pthread_mutex_unlock(&(all[teleoperator_id].mymutex));
   sleep(2);
-  fl_free_form(fd_teleoperatorgui->teleoperatorgui);
+  */
+ if (fd_teleoperatorgui!=NULL)
+    {
+      if (all[teleoperator_id].guistate==on) 
+	fl_hide_form(fd_teleoperatorgui->teleoperatorgui);
+      fl_free_form(fd_teleoperatorgui->teleoperatorgui);
+    }
+  printf ("teleoperator close\n");
+
   free(imagenA_buf);
   free(imagenB_buf);
   free(imagenC_buf);

@@ -19,6 +19,7 @@
  */
 
 extern void papito_startup();
+extern void papito_stop();
 extern void papito_suspend();
 extern void papito_resume(int father, int *brothers, arbitration fn);
 extern void papito_guiresume();

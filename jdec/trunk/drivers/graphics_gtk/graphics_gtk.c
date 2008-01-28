@@ -51,10 +51,16 @@ pthread_t graphics_gtk_id;
 pthread_t graphics_gtk_id2;
 
 /** graphics_gtk driver name.*/
-char driver_name[256]="graphics_gtk";
+static char driver_name[256]="graphics_gtk";
 
 /** Graphics_gtk thread will iterate each \ref graphics_gtk_cycle  ms */
 int graphics_gtk_cycle=70; /* ms */
+
+/** The maximum path size*/
+#define PATH_SIZE 512
+
+/** The loaded path from config file*/
+static char path[PATH_SIZE];
 
 /* GRAPHICS_GTK DRIVER FUNCTIONS */
 
@@ -127,8 +133,6 @@ int delete_displaycallback(guidisplay f)
  * This function kills driver threads
  */
 void graphics_gtk_close(){
-   pthread_kill (graphics_gtk_id, 15);
-   pthread_kill (graphics_gtk_id2, 15);
    printf("driver graphics_gtk off\n");
 }
 
@@ -183,12 +187,10 @@ void *graphics_gtk_thread2(void *arg){
  * @returns the newly created GladeXML object, or NULL on failure.
  */
 GladeXML* load_glade (char * file_name){
-   char *path, *directorio, *path2;
-   char cp_path[1024];
-
-   path=getenv("LD_LIBRARY_PATH"); /*Capture enviroment variable*/
-   strncpy(cp_path,path, 1024);
-   path2=cp_path;
+   char *directorio, *path2, path_cp[PATH_SIZE];
+   
+   strncpy(path_cp, path, PATH_SIZE);
+   path2=path_cp;
 
    while ((directorio=strsep(&path2,":"))!=NULL){
       char fichero[1024];
@@ -214,6 +216,27 @@ GladeXML* load_glade (char * file_name){
  */
 void graphics_gtk_startup(char *configfile)
 {
+   FILE *c_file=NULL;
+   int find=0;
+   char buff[512];
+   
+   /* Find the path in the confifile*/
+   c_file=fopen(configfile, "r");
+   if (c_file==NULL){
+      perror("graphics_gtk");
+   }
+
+   while (fgets(buff, 512, c_file)!=NULL && !find){
+      char word1[512], word2[512];
+      if (sscanf (buff, "%s %s",word1, word2)==2){
+         if (strcmp(word1, "path")==0){
+            strcpy (path, word2);
+            find=1;
+         }
+      }
+   }
+
+   /* Setup gtk*/
    printf ("Loading GTK support...\n");
    /* Iniciamos hilos gdk */
    g_thread_init(NULL);

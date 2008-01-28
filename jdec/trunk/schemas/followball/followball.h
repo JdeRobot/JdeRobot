@@ -22,6 +22,7 @@
  */
 
 extern void followball_startup();
+extern void followball_stop();
 extern void followball_suspend();
 extern void followball_resume(int father, int *brothers, arbitration fn);
 extern void followball_guiresume();

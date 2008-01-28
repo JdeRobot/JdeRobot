@@ -64,7 +64,7 @@ int opflow_id=0;
 int opflow_brothers[MAX_SCHEMAS];
 arbitration opflow_callforarbitration;
 
-FD_opflowgui *fd_opflowgui;
+FD_opflowgui *fd_opflowgui=NULL;
 
 /* exported variables */
 int opflow_cycle=80; /* ms */
@@ -821,6 +821,13 @@ void *opflow_thread(void *not_used)
 }
 
 void opflow_stop(){
+if (fd_opflowgui!=NULL)
+    {
+      if (all[opflow_id].guistate==on) 
+	fl_hide_form(fd_opflowgui->opflowgui);
+      fl_free_form(fd_opflowgui->opflowgui);
+    }
+  printf ("opflow close\n");
 }
 
 void opflow_startup()

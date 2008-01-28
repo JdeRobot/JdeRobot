@@ -64,7 +64,7 @@ suspendFn motorssuspend;
 enum introrobstates {teleoperated,vff,deliberative,hybrid};
 int introrob_state;
 
-FD_introrobgui *fd_introrobgui;
+FD_introrobgui *fd_introrobgui=NULL;
 GC introrobgui_gc;
 Window  introrob_canvas_win;
 unsigned long introrob_display_state;
@@ -346,6 +346,17 @@ void introrob_init(){
       jdeshutdown(1);
    }
    init_pioneer();
+}
+
+void introrob_stop()
+{
+  if (fd_introrobgui!=NULL)
+    {
+      if (all[introrob_id].guistate==on) 
+	fl_hide_form(fd_introrobgui->introrobgui);
+      fl_free_form(fd_introrobgui->introrobgui);
+    }
+  printf ("introrob close\n");
 }
 
 void introrob_startup()

@@ -52,6 +52,12 @@ typedef struct sharedname{
 /** List with the shared variables and functions*/
 static Tsharedname *sharedlist=NULL;
 
+/** Defines de path variable size*/
+#define PATH_SIZE 512
+
+/** The modules path*/
+char path[PATH_SIZE];
+
 /** The jdec prompt*/
 #define PROMPT "jdec$ "
 
@@ -369,7 +375,31 @@ static char configfile[MAX_BUFFER];
 static int driver_section=0;
 
 /**
- * Loads a shema
+ * @brief This function loads a module and returns a reference to its handler
+ * 
+ * @param module_name String containing the name of the module
+ * @return A pointer to the handler
+ */
+void* load_module(char* module_name){
+   char *path2;
+   char path_cp[PATH_SIZE];
+   char *directorio;
+   void *handler=NULL;
+
+   strncpy(path_cp, path, PATH_SIZE);
+   path2=path_cp;
+   while ((directorio=strsep(&path2,":"))!=NULL && handler==NULL){
+      char fichero[512];
+      strncpy(fichero, directorio, 512);
+      strncat(fichero,"/", 512-strlen(fichero));
+      strncat(fichero, module_name, 512-strlen(fichero));
+      handler = dlopen(fichero, RTLD_LAZY);
+   }
+   return handler;
+}
+
+/**
+ * Loads a schema
  * @param name The schema's name
  * @return Always 1
  */
@@ -387,16 +417,7 @@ int jde_loadschema(char *name)
   strcpy(n,name); strcat(n,".so");
   /*  all[num_schemas].handle = dlopen(n,RTLD_LAZY|RTLD_GLOBAL);*/
   /* Schemas don't share their global variables, to avoid symbol collisions */
-  all[num_schemas].handle = dlopen(n,RTLD_LAZY);
-
-  if (  NULL == all[num_schemas].handle ) {
-    strcpy(n, "./");
-    strcat(n, name) ; 
-    strcat(n, ".so"); 
-    printf("name %s\n", n);
-    all[num_schemas].handle = dlopen(n,RTLD_LAZY);
-  }
-  
+  all[num_schemas].handle = load_module(n);
 
   if (!(all[num_schemas].handle)) { 
     fprintf(stderr,"%s\n",dlerror());
@@ -475,14 +496,7 @@ int jde_loaddriver(char *name)
 
   strcpy(n,name); strcat(n,".so");
   /* Drivers don't share their global variables, to avoid the symbol collisions */
-  mydrivers[num_drivers].handle = dlopen(n,RTLD_LAZY);
-
-  if (  NULL == mydrivers[num_drivers].handle ) {
-    strcpy(n, "./");
-    strcat(n, name) ; 
-    strcat(n, ".so"); 
-    mydrivers[num_drivers].handle = dlopen(n,RTLD_LAZY);
-  }
+  mydrivers[num_drivers].handle = load_module(n);
 
   if (!(mydrivers[num_drivers].handle))
     { fprintf(stderr,"%s\n",dlerror());
@@ -591,6 +605,14 @@ int jde_readline(FILE *myfile)
       while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
       driver_section=0;
     }
+    else if(strcmp (word, "path")==0){
+       /*Loads the path*/
+       while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')
+              &&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t'))
+          j++;
+       sscanf(&buffer_file[j],"%s",word);
+       strncpy(path, word, PATH_SIZE);
+    }
     else{
       if(driver_section==0) printf("i don't know what to do with: %s\n",buffer_file);
     }
@@ -677,6 +699,7 @@ int main(int argc, char** argv)
     }
  
   /* read the configuration file: load drivers and schemas */
+  path[0]='\0';
   printf("Reading configuration...\n");
   do {
     i=jde_readline(config);

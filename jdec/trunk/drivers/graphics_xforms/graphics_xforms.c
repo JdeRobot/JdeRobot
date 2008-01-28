@@ -343,7 +343,7 @@ static void graphics_xforms_iteration()
 
 /** graphics_xforms driver function finalize.*/
 void graphics_xforms_close(){
-   pthread_kill (graphics_xforms_id, 15);
+  /*  pthread_kill (graphics_xforms_id, 15);*/
    printf("driver graphics_xforms off\n");
 }
 

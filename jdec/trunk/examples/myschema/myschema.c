@@ -36,7 +36,7 @@ arbitration myschema_callforarbitration;
 
 enum myschema_states {init,t1,r1,t2,r2,t3,r3,t4,end};
 static int myschema_state;
-FD_myschemagui *fd_myschemagui;
+FD_myschemagui *fd_myschemagui=NULL;
 
 /* exported variables */
 int myschema_cycle=100; /* ms */
@@ -98,7 +98,14 @@ void myschema_init(){
 }
 
 /*Al suspender el esquema*/
-void myschema_fin(){
+void myschema_stop(){
+ if (fd_myschemagui!=NULL)
+    {
+      if (all[myschema_id].guistate==on) 
+	fl_hide_form(fd_myschemagui->myschemagui);
+      fl_free_form(fd_myschemagui->myschemagui);
+    }
+  printf ("myschema close\n");
 }
 
 

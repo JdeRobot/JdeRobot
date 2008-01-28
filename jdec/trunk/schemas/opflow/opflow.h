@@ -36,11 +36,11 @@ typedef struct{
 }t_opflow;
 
 extern void opflow_startup();
+extern void opflow_stop();
 extern void opflow_suspend();
 extern void opflow_resume(int father, int *brothers, arbitration fn);
 extern void opflow_guiresume();
 extern void opflow_guisuspend();
-extern void opflow_stop();
 
 extern int opflow_id; /* schema identifier */
 extern int opflow_cycle; /* ms */
