@@ -6,7 +6,7 @@ UTILS = fuzzylib progeo colorspaces
 
 all: 
 	CURDIR=`pwd`;
-	cd core && make
+	cd base && make
 	cd $(CURDIR)
 
 	CURDIR=`pwd`;
@@ -45,7 +45,7 @@ all:
 
 clean:
 	CURDIR=`pwd`;
-	cd core && make clean
+	cd base && make clean
 	cd $(CURDIR)/docs && rm -rf html
 	for i in $(UTILS); do (echo "Cleaning " $$i); \
 	cd $(CURDIR) ;\

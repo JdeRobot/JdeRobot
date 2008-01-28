@@ -1,5 +1,5 @@
 JDEDIR = /usr/local
-INC-DIR = -I../../core -I../../utils/colorspaces -I. -I/usr/include -I/usr/X11R6/include -I/usr/include/X11 -I/usr/local/include -I/usr/include/X11 -I$(JDEDIR)/include/jde-robot -I../../drivers/graphics_xforms
+INC-DIR = -I../../base -I../../utils/colorspaces -I. -I/usr/include -I/usr/X11R6/include -I/usr/include/X11 -I/usr/local/include -I/usr/include/X11 -I$(JDEDIR)/include/jde-robot -I../../drivers/graphics_xforms
 LIB-DIR = -L../../utils/colorspaces -L. -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib 
 GCC = gcc
 CFLAGS = -g -O2 -Wall $(INC-DIR)
