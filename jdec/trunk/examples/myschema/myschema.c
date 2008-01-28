@@ -98,6 +98,9 @@ void myschema_init(){
 }
 
 /*Al suspender el esquema*/
+void myschema_fin(){
+}
+
 void myschema_stop(){
  if (fd_myschemagui!=NULL)
     {

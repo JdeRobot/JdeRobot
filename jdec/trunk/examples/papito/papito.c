@@ -123,6 +123,9 @@ void papito_init(){
 }
 
 /*Al suspender el esquema*/
+void papito_fin(){
+}
+
 void papito_stop(){
    if (hijo_state==ON)
       hijosuspend();
