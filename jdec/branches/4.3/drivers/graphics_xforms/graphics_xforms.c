@@ -343,7 +343,6 @@ static void graphics_xforms_iteration()
 
 /** graphics_xforms driver function finalize.*/
 void graphics_xforms_close(){
-   pthread_kill (graphics_xforms_id, 15);
    printf("driver graphics_xforms off\n");
 }
 
@@ -361,7 +360,7 @@ void *graphics_xforms_thread(void *id){
       diff = (b.tv_sec-a.tv_sec)*1000000+b.tv_usec-a.tv_usec;
       next = graphics_xforms_cycle*1000-diff-10000;
       /* discounts 10ms taken by calling usleep itself */
-      if (next>0) usleep(graphics_xforms_cycle*1000-diff);
+      if (next>0) usleep(next);
       else;
       /* Time interval violated but don't bother with 
       any warning message, just display as fast as it can */

@@ -2,7 +2,7 @@ JDEDIR = /usr/local
 EVILIBDIR = ./EVILib/
 INC-DIR = -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include \
           -I/usr/X11R6/include/X11 -I$(JDEDIR)/include/jde-robot \
-          -I/usr/include/X11/ -I$(EVILIBDIR) -I../../core
+          -I/usr/include/X11/ -I$(EVILIBDIR) -I../../base
 LIB-DIR = -L. -L/usr/lib -L/usr/local/lib -L/usr/X11R6/lib -L /usr/local/lib \
           -L $(EVILIBDIR)
 GCC = gcc

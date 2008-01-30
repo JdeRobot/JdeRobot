@@ -35,15 +35,15 @@ typedef struct{
    float angle;
 }t_opflow;
 
-extern void myschema_startup();
-extern void myschema_suspend();
-extern void myschema_resume(int father, int *brothers, arbitration fn);
-extern void myschema_guiresume();
-extern void myschema_guisuspend();
-extern void myschema_stop();
+extern void opflow_startup();
+extern void opflow_suspend();
+extern void opflow_resume(int father, int *brothers, arbitration fn);
+extern void opflow_guiresume();
+extern void opflow_guisuspend();
+extern void opflow_stop();
 
-extern int myschema_id; /* schema identifier */
-extern int myschema_cycle; /* ms */
+extern int opflow_id; /* schema identifier */
+extern int opflow_cycle; /* ms */
 
 /*Own variables*/
 extern t_opflow *opflow_img; /*matrix with next points*/

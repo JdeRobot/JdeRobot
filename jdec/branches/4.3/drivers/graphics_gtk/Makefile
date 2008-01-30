@@ -1,7 +1,7 @@
 JDEDIR = /usr/local
 INC-DIRGTK = `pkg-config --cflags gtkglext-1.0 gdkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0`
 LIB-DIRGTK = `pkg-config --libs gtkglext-1.0 gdkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0`
-INC-DIR = -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/X11R6/include/X11 -I../../core $(INC-DIRGTK)
+INC-DIR = -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/X11R6/include/X11 -I../../base $(INC-DIRGTK)
 LIB-DIR = -L. -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib $(LIB-DIRGTK)
 GCC = gcc
 CFLAGS = -g -pedantic -Bsymbolic -Wall $(INC-DIR)

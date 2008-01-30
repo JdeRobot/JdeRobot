@@ -1,5 +1,5 @@
 JDEDIR = /usr/local
-INC-DIR = -I. -I../../core -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/X11R6/include/X11 -I/usr/local/include/jde-robot
+INC-DIR = -I. -I../../base -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/X11R6/include/X11 -I/usr/local/include/jde-robot
 LIB-DIR = -L. -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib 
 GCC = gcc
 CFLAGS = -g -pedantic -Bsymbolic -Wall $(INC-DIR)

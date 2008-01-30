@@ -585,9 +585,9 @@ void mplayer_start(int i){
       close(0); dup(file);
       close(1); dup(file);
       close(2); dup(file);
-	    
-      execlp("mencoder","mencoder",fifo1[i],"-nosound","-o",fifo2[i],
-             "-ovc","raw","-of","rawvideo","-vf","format=bgr24",NULL);
+
+      execlp("mencoder","mencoder",fifo1[i],"-nosound", "-cache", "4096", "-o",
+             fifo2[i], "-ovc","raw","-of","rawvideo","-vf","format=bgr24",NULL);
       printf("Error executing mencoder\n");
       exit(1);
    }
