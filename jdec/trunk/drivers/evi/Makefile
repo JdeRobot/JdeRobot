@@ -7,7 +7,7 @@ LIB-DIR = -L. -L/usr/lib -L/usr/local/lib -L/usr/X11R6/lib -L /usr/local/lib \
           -L $(EVILIBDIR)
 GCC = gcc
 GPP = g++
-CFLAGS = -g -ggdb -Wall -ffast-math -O6 -D_SMP_ -DMODULE -D_KERNEL_ \
+CFLAGS = -g -ggdb -Wall -fPIC -ffast-math -O6 -D_SMP_ -DMODULE -D_KERNEL_ \
          -fexpensive-optimizations
 LIBS = -lm -lX11 -lforms -lXext -lpthread -lstdc++
 WD = $(PWD)
@@ -19,7 +19,7 @@ evi.o: evi.c
 	$(GPP) $(CFLAGS) $(INC-DIR) -fPIC -c $<
 
 camera.o: camera.cpp
-	$(GPP) $(CFLAGS) $(INC-DIR) -o $@ -c $<
+	$(GPP) $(CFLAGS) -fPIC $(INC-DIR) -o $@ -c $<
 
 $(EVILIBDIR)/EVILib.a:
 	cd $(EVILIBDIR); make;

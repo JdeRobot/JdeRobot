@@ -25,7 +25,7 @@
  *  @file evi.c
  *  @author Javier Martín Ramos <j.ramos@pantuflo.es>, Sara Marugán Alonso
  *  @version 0.1
- *  @date 2007.12.05
+ *  @date 2008.01.21
  */
 
 #include <stdio.h>
@@ -410,11 +410,27 @@ void *ZmotorsThread(void *not_used) {
 
 void PTencoders_iteration() {
    speedcounter(PTencoders_schema_id);
-   if(Pan_TiltPosInqCamera(cam, &longitudePoll, &latitudePoll) != 1) {
-      fprintf(stderr, "evi driver: Transmission interrupted\n");
-      evi_close();
-   }
-//    printf("estoy en %f %f\n", longitudePoll, latitudePoll);
+   float currentLongitude, currentLatitude;
+   char incoherente; //boolean
+   do {
+      incoherente = 0;
+      if(Pan_TiltPosInqCamera(cam, &currentLongitude, &currentLatitude) != 1) {
+         fprintf(stderr, "evi driver: Transmission interrupted\n");
+         evi_close();
+      }
+      /* A veces, las consultas por la posición del cuello devuelven valores no
+      coherentes que hemos de ignorar y reiterar la consulta hasta que obtengamos
+      los buenos. */
+
+      incoherente = (currentLongitude < EVILIB_minpan) |
+                    (currentLongitude > EVILIB_maxpan) |
+                    (currentLatitude < EVILIB_mintilt) |
+                    (currentLatitude > EVILIB_maxtilt);
+
+   } while (incoherente);
+
+   longitudePoll = currentLongitude;
+   latitudePoll = currentLatitude;
 }
 
 /** PTencoders poll pthread function.*/
@@ -534,7 +550,8 @@ void PTmotors_iteration() {
    static unsigned char tiltSpeedLUT[(int) EVILIB_max_tspeed_dps * 2];
    static float panSpeed, tiltSpeed;
    static float panPos, tiltPos, lastPanPos, lastTiltPos;
-   static int panSpeedMode, tiltSpeedMode;
+   static int panSpeedMode, tiltSpeedMode, lastPanSpeedMode, lastTiltSpeedMode;
+   static float currentLongitude, currentLatitude;
    int e;
 
    speedcounter(PTmotors_schema_id);
@@ -551,12 +568,6 @@ void PTmotors_iteration() {
          tiltSpeedLUT[i] = degreesPerSecond2TiltSpeed(i/2.);
       }
       initiated++;
-      lastPanPos = 0;
-      lastTiltPos = 0;
-      longitude_speed = 70;
-      latitude_speed = 150;
-      longitude = 0.;
-      latitude = 0.;
    }
 
    panPos = MIN(EVILIB_maxpan, MAX(longitude, EVILIB_minpan) );
@@ -568,23 +579,57 @@ void PTmotors_iteration() {
    panSpeedMode = panSpeedLUT[(int) (panSpeed * 2.)];
    tiltSpeedMode = tiltSpeedLUT[(int) (tiltSpeed * 2.)];
 
-   if ( (tiltSpeedMode > 0) && (panSpeedMode > 0) ) {
-      if ( (tiltPos != lastTiltPos) || (panPos != lastPanPos) ) {
-//          printf("ve a %f %f %d %d \n", panPos, tiltPos, panSpeedMode, tiltSpeedMode);
-         e = Pan_TiltDriveCamera(cam,
-                                 EVILIB_ABSOLUTE,
-                                 panSpeedMode,
-                                 tiltSpeedMode,
-                                 panPos,
-                                 tiltPos,
-                                 EVILIB_NO_WAIT_COMP);
-         if (e != 1) {
-            fprintf(stderr, "evi driver: Transmission interrupted\n");
-            evi_close();
+   while ( !panSpeedMode || !tiltSpeedMode ) {
+      /* La cámara no admite velocidades nulas. Si queremos movernos en un solo
+      eje o parar la cámara necesitamos saber donde estamos para fijar alguna
+      de las coordenadas actuales si su velocidad es cero. */
+      
+      if(Pan_TiltPosInqCamera(cam, &currentLongitude, &currentLatitude) != 1) {
+         fprintf(stderr, "evi driver: Transmission interrupted\n");
+         evi_close();
+      }
+      /* A veces, las consultas por la posición del cuello devuelven valores no
+      coherentes que hemos de ignorar y reiterar la consulta hasta que obtengamos
+      los buenos. */
+
+      if (panSpeedMode == 0) {
+         // Fijar el eje X a la posición actual
+         panPos = currentLongitude;
+         if ( (panPos >= EVILIB_minpan) && (panPos <= EVILIB_maxpan) ) {
+            panSpeedMode = EVILIB_max_pspeed;
+         }
+      }
+      if (tiltSpeedMode == 0) {
+         // Fijar el eje X a la posición actual
+         tiltPos = currentLatitude;
+         if ( (tiltPos >= EVILIB_mintilt) && (tiltPos <= EVILIB_maxtilt) ) {
+            tiltSpeedMode = EVILIB_max_tspeed;
+         }
+      }
+   }
+
+   if ( (tiltPos != lastTiltPos) || (panPos != lastPanPos) ||
+         (panSpeedMode != lastPanSpeedMode) ||
+         (tiltSpeedMode != lastTiltSpeedMode) )
+   {
+         if (panSpeedMode && tiltSpeedMode) {
+//             printf("#evi: longitude %f latitude %f\n", panPos, tiltPos);fflush(NULL);
+            e = Pan_TiltDriveCamera(cam,
+                                    EVILIB_ABSOLUTE,
+                                    panSpeedMode,
+                                    tiltSpeedMode,
+                                    panPos,
+                                    tiltPos,
+                                    EVILIB_NO_WAIT_COMP);
+            if (e != 1) {
+               fprintf(stderr, "evi driver: Transmission interrupted\n");
+               evi_close();
+            }
          }
          lastPanPos = panPos;
          lastTiltPos = tiltPos;
-      }
+         lastPanSpeedMode = panSpeedMode;
+         lastTiltSpeedMode = tiltSpeedMode;
    }
 }
 
