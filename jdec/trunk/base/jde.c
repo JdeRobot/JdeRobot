@@ -612,6 +612,7 @@ int jde_readline(FILE *myfile)
           j++;
        sscanf(&buffer_file[j],"%s",word);
        strncpy(path, word, PATH_SIZE);
+       printf("Plugins path=%s\n");
     }
     else{
       if(driver_section==0) printf("i don't know what to do with: %s\n",buffer_file);

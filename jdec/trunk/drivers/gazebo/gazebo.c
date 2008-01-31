@@ -30,6 +30,29 @@
 #include <gazebo.h>
 #include <jde.h>
 
+/*
+In gazebo.h:
+ 
+GZ_LASER_MAX_RANGES
+GZ_SONAR_MAX_RANGES
+*/
+#define NUM_LASER 180
+#define NUM_SONARS 16
+#define NUM_BUMPERS 10
+#define MAX_VEL 1000 /* mm/sec, hardware limit: 1800 */
+#define MAX_RVEL 180 /* deg/sec, hardware limit: 360 */
+/* SIF image size */
+#define SIFNTSC_ROWS 240
+#define SIFNTSC_COLUMNS 320
+/* directed perception pantilt limits */
+#define MAX_PAN_ANGLE 159.13 /* degrees */
+#define MIN_PAN_ANGLE -159.13 /* degrees */
+#define MAX_TILT_ANGLE 30. /* degrees */
+#define MIN_TILT_ANGLE -46. /* degrees */
+#define MAX_SPEED_PANTILT 205.89
+
+
+
 /** The driver's command thread cycle*/
 #define GAZEBO_COMMAND_CYCLE 100	/* ms */
 /** The driver's main cycle*/
@@ -225,7 +248,8 @@ gazebo_init ()
   return (0);
 }
 
-int gazebo_parseconf(char * );
+int
+gazebo_parseconf (char *configfile);
 
 int
 gazebo_startup (char *configfile)
@@ -235,7 +259,7 @@ gazebo_startup (char *configfile)
   
   if (gazebo_parseconf (configfile) == -1)
     {
-      printf ("gazebo:driver not initialized. Configuration file parsing error.\n");
+      printf ("gazebo: driver not initialized. Configuration file parsing error.\n");
       exit (-1);
     }
   
@@ -308,7 +332,7 @@ gazebo_startup (char *configfile)
   if(serve_motors || serve_encoders){
     if (gz_position_open (position, client, motors_name) != 0) {
       position=NULL;
-      puts ("error apriendo la position");
+      puts ("error while opening position");
     }
   	}
   
@@ -332,7 +356,6 @@ gazebo_startup (char *configfile)
       myexport ("motors", "w", &w);
       myexport ("motors", "resume", (void *) &gazebo_motors_resume);
       myexport ("motors", "suspend", (void *) &gazebo_motors_suspend);
-      printf("******En startup exportando..... motors_s_i %i, resume motors_resume %i, suspend motors_suspend %i \n",motors_schema_id,gazebo_motors_resume, gazebo_motors_suspend);
       v=0; w=0;
     }
   
@@ -604,7 +627,7 @@ gazebo_ptz_cmd_suspend ()
   if ((serve_ptz_cmd) && (ptz_cmd_active))
     {
       ptz_cmd_active = 0;
-      printf ("Gazebo: ptz command suspend\n");
+      printf ("gazebo: ptz command suspend\n");
       put_state (ptz_cmd_schema_id, slept);
     }
   return 0;
@@ -632,7 +655,7 @@ gazebo_ptz_enc_suspend ()
   if ((serve_ptz_enc) && (ptz_enc_active))
     {
       ptz_enc_active = 0;
-      printf ("Gazebo: ptz encoders suspend\n");
+      printf ("gazebo: ptz encoders suspend\n");
       put_state (ptz_enc_schema_id, slept);
     }
   return 0;
@@ -919,7 +942,7 @@ gazebo_encoders_resume (int father, int *brothers, arbitration fn)
     {
       encoders_active = 1;
       put_state (encoders_schema_id, winner);
-      printf ("Gazebo: encoders resume\n");
+      printf ("gazebo: encoders resume\n");
       all[encoders_schema_id].father = father;
       all[encoders_schema_id].fps = 0.;
       all[encoders_schema_id].k = 0;
@@ -936,7 +959,7 @@ gazebo_encoders_suspend ()
     {
       encoders_active = 0;
       put_state (encoders_schema_id, slept);
-      printf ("Gazebo: encoders suspend\n");
+      printf ("gazebo: encoders suspend\n");
     }
   return 0;
 }
@@ -987,7 +1010,7 @@ gazebo_sonars_suspend ()
     {
       sonars_active = 0;
       put_state (sonars_schema_id, slept);
-      printf ("player: sonars suspend\n");
+      printf ("gazebo: sonars suspend\n");
     }
   return 0;
 }
@@ -1427,6 +1450,8 @@ gazebo_parseconf (char *configfile)
 			     &colorC_name,
 			     &colorD_name
   };
+
+
   if (!conf)
     return (-1);
   while (!feof (conf))
@@ -1443,7 +1468,7 @@ gazebo_parseconf (char *configfile)
 	}
       if (!ItIsAGaceboLine)
 	continue;
-      puts (cpLinea);
+      /* puts (cpLinea);*/
       /*tenemos lineas de nuestro driver */
       if (strstr (cpLinea, "end_driver"))
 	break;
@@ -1460,7 +1485,7 @@ gazebo_parseconf (char *configfile)
 		{		/*Stereo left dispsrity */
 		  pLine1 = strstr (pLine2, " ");
 		  pLine1[0] = (char) 0;
-		  printf ("Nombre del estero leftd:%s:\n", pLine2);
+		  /* printf ("Nombre del estero leftd:%s:\n", pLine2); */
 		  strcpy (colorX_name[colors]->gazebo_id, pLine2);
 		  colorX_name[colors]->tipo = 4;	/*left disparity */
 		}
@@ -1470,7 +1495,7 @@ gazebo_parseconf (char *configfile)
 		  pLine1 = strstr (pLine2, " ");
 		  pLine1[0] = (char) 0;
 		  strcpy (colorX_name[colors]->gazebo_id, pLine2);	/*stereo id */
-		  printf ("Nombre del estero rightd:%s:\n", pLine2);
+		  /* printf ("Nombre del estero rightd:%s:\n", pLine2); */
 		  colorX_name[colors]->tipo = 5;	/*right disparity */
 		}
 	      
@@ -1479,8 +1504,7 @@ gazebo_parseconf (char *configfile)
 		  pLine1 = strstr (pLine2, " ");
 		  if (pLine1)
 		    pLine1[0] = (char) 0;
-		  printf ("Nombre de stereo encontrado en left:%s:\n",
-			  pLine2);
+		  /* printf ("Nombre de stereo encontrado en left:%s:\n", pLine2); */
 		  strcpy (colorX_name[colors]->gazebo_id, pLine2);	/*stereo id */
 		  colorX_name[colors]->tipo = 2;	/* left */
 		}
@@ -1490,8 +1514,7 @@ gazebo_parseconf (char *configfile)
 		  pLine1 = strstr (pLine2, " ");
 		  if (pLine1)
 		    pLine1[0] = (char) 0;
-		  printf ("Nombre de stereo encontrado en right:%s:\n",
-			  pLine2);
+		  /* printf ("Nombre de stereo encontrado en right:%s:\n", pLine2);*/
 		  strcpy (colorX_name[colors]->gazebo_id, pLine2);	/*stereo id */
 		  colorX_name[colors]->tipo = 3;	/*right */
 		}
@@ -1513,7 +1536,7 @@ gazebo_parseconf (char *configfile)
 	  for (i = 0; isspace (pLine2[0]); pLine2++);	//salto blancos
 	  pLine1 = strstr (pLine2, "\n");
 	  pLine1[0] = (char) 0;
-          printf("El nombre del laser es :%s:\n",pLine2);
+          /* printf("El nombre del laser es :%s:\n",pLine2); */
 	  strncpy (laser_name, pLine2, MAX_MODEL_ID);
 	}
       
@@ -1524,7 +1547,7 @@ gazebo_parseconf (char *configfile)
 	  for (; isspace (pLine2[0]); pLine2++);	//salto blancos
 	  pLine1 = strstr (pLine2, "\n");
 	  pLine1[0] = (char) 0;
-          printf("El nombre para motores es  :%s:\n",pLine2);
+          /* printf("El nombre para motores es  :%s:\n",pLine2); */
 	  strncpy (motors_name, pLine2, MAX_MODEL_ID);
 	}
       
@@ -1535,7 +1558,7 @@ gazebo_parseconf (char *configfile)
 	  for (i = 0; isspace (pLine2[0]); pLine2++);	//salto blancos
 	  pLine1 = strstr (pLine2, "\n");
 	  pLine1[0] = (char) 0;
-          printf("El nombre para encoders :%s:\n",pLine2);
+          /* printf("El nombre para encoders :%s:\n",pLine2);*/
 	  strncpy (position_name, pLine2, MAX_MODEL_ID);
 	}
 
@@ -1546,7 +1569,7 @@ gazebo_parseconf (char *configfile)
 	  for (i = 0; isspace (pLine2[0]); pLine2++);	//salto blancos
 	  pLine1 = strstr (pLine2, "\n");
 	  pLine1[0] = (char) 0;
-          printf("El nombre para sonar es  :%s:\n",pLine2);
+	  /*  printf("El nombre para sonar es  :%s:\n",pLine2);*/
 	  strncpy (sonar_name, pLine2, MAX_MODEL_ID);
 	}
       
@@ -1557,7 +1580,7 @@ gazebo_parseconf (char *configfile)
 	  for (i = 0; isspace (pLine2[0]); pLine2++);	//salto blancos
 	  pLine1 = strstr (pLine2, "\n");
 	  pLine1[0] = (char) 0;
-          printf("El nombre para pantilt es  :%s:\n",pLine2);
+	  /*   printf("El nombre para pantilt es  :%s:\n",pLine2);*/
 	  strncpy (ptz_name, pLine2, MAX_MODEL_ID);
 	}
       
