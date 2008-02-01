@@ -26,6 +26,9 @@
 /** Maximum buffer size (for strings)*/
 #define MAX_BUFFER 1024
 
+/** Concurrency control when shutting down*/
+pthread_mutex_t shuttingdown_mutex;
+
 /* hierarchy */
 /** Array with all the loaded schemas*/
 JDESchema all[MAX_SCHEMAS];
@@ -182,24 +185,39 @@ void null_arbitration()
  */
 void jdeshutdown(int sig)
 {
+  static int shuttingdown=0;
+  int shutdown=0;
   int i;
 
-  /* unload all the schemas loaded as plugins */
-  for(i=0;i<num_schemas;i++)
-    {
-      if (all[i].close!=NULL) all[i].close();
-      if (all[i].handle!=NULL) dlclose(all[i].handle);
-    }
-  
-  /* unload all the drivers loaded as plugins */
-  for(i=0;i<num_drivers;i++)
-    {
-      if (mydrivers[i].close!=NULL) mydrivers[i].close();
-      if (mydrivers[i].handle!=NULL) dlclose(mydrivers[i].handle);
-    }
+  pthread_mutex_lock(&shuttingdown_mutex);
+  if (shuttingdown==0){
+     shutdown=1;
+     shuttingdown++;
+  }
+  else{
+     shutdown=0;
+     fprintf(stderr, "Jde is already shutting down\n");
+  }
+  pthread_mutex_unlock(&shuttingdown_mutex);
 
-  printf("Bye\n");
-  exit(sig);
+  if (shutdown==1){
+     /* unload all the schemas loaded as plugins */
+     for(i=0;i<num_schemas;i++)
+     {
+        if (all[i].close!=NULL) all[i].close();
+        if (all[i].handle!=NULL) dlclose(all[i].handle);
+     }
+
+     /* unload all the drivers loaded as plugins */
+     for(i=0;i<num_drivers;i++)
+     {
+        if (mydrivers[i].close!=NULL) mydrivers[i].close();
+        if (mydrivers[i].handle!=NULL) dlclose(mydrivers[i].handle);
+     }
+
+     printf("Bye\n");
+     exit(sig);
+  }
 }
 
 
@@ -393,7 +411,11 @@ void* load_module(char* module_name){
       strncpy(fichero, directorio, 512);
       strncat(fichero,"/", 512-strlen(fichero));
       strncat(fichero, module_name, 512-strlen(fichero));
+      /* printf ("trying >%s<\n",fichero);*/
       handler = dlopen(fichero, RTLD_LAZY);
+      /* if (handler ==NULL)
+	 fprintf(stderr,"I can't load: %s\n",dlerror());
+      */
    }
    return handler;
 }
@@ -421,7 +443,7 @@ int jde_loadschema(char *name)
 
   if (!(all[num_schemas].handle)) { 
     fprintf(stderr,"%s\n",dlerror());
-    printf("I can't load the %s schema\n",name);
+    printf("I can't load the %s schema or one dynamic library it depends on\n",name);
     exit(1);
   }
   else {
@@ -500,7 +522,7 @@ int jde_loaddriver(char *name)
 
   if (!(mydrivers[num_drivers].handle))
     { fprintf(stderr,"%s\n",dlerror());
-    printf("I can't load the %s driver\n",name);
+    printf("I can't load the %s driver or one dynamic library it depends on\n",name);
     exit(1);
     }
   else 
@@ -612,7 +634,6 @@ int jde_readline(FILE *myfile)
           j++;
        sscanf(&buffer_file[j],"%s",word);
        strncpy(path, word, PATH_SIZE);
-       printf("Plugins path=%s\n");
     }
     else{
       if(driver_section==0) printf("i don't know what to do with: %s\n",buffer_file);
@@ -701,6 +722,7 @@ int main(int argc, char** argv)
  
   /* read the configuration file: load drivers and schemas */
   path[0]='\0';
+  pthread_mutex_init(&shuttingdown_mutex, PTHREAD_MUTEX_TIMED_NP);
   printf("Reading configuration...\n");
   do {
     i=jde_readline(config);

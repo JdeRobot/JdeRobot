@@ -584,7 +584,7 @@ void eyeoperator1_guisuspend_aux(void)
   fl_hide_form(fd_eyeoperator1gui->eyeoperator1gui);
 }
 
-void teleoperator_guisuspend(){
+void eyeoperator1_guisuspend(){
    static callback fn=NULL;
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
@@ -623,7 +623,7 @@ void eyeoperator1_guiresume_aux(void)
   myregister_displaycallback(eyeoperator1_guidisplay);
 }
 
-void teleoperator_guiresume(){
+void eyeoperator1_guiresume(){
    static callback fn=NULL;
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
