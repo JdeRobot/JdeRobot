@@ -495,9 +495,9 @@ void imgrectifier_startup()
   printf("imgrectifier schema started up\n");
   imgrectifier_init();
   
-  myexport("imgrectifier","imgrectifier_cycle",&imgrectifier_cycle);
-  myexport("imgrectifier","imgrectifier_resume",(void *)imgrectifier_resume);
-  myexport("imgrectifier","imgrectifier_suspend",(void *)imgrectifier_suspend);
+  myexport("imgrectifier","cycle",&imgrectifier_cycle);
+  myexport("imgrectifier","resume",(void *)imgrectifier_resume);
+  myexport("imgrectifier","suspend",(void *)imgrectifier_suspend);
   put_state(imgrectifier_id,slept);
 
   /* == inicializamos las variables globales y el display== */

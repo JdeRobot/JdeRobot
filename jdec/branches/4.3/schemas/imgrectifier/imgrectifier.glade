@@ -6,6 +6,7 @@
     <property name="visible">True</property>
     <property name="title" translatable="yes">imgrectifier</property>
     <property name="resizable">False</property>
+    <property name="deletable">False</property>
     <child>
       <widget class="GtkTable" id="table1">
         <property name="visible">True</property>

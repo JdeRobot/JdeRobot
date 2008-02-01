@@ -288,11 +288,16 @@ void esquema_prueba_guiresume(void){
 
    pthread_mutex_lock(&esquema_prueba_gui_mutex);
    if (!cargado){
+      loadglade ld_fn;
       cargado=1;
       pthread_mutex_unlock(&esquema_prueba_gui_mutex);
       /*Cargar la ventana desde el archivo xml .glade*/
       gdk_threads_enter();
-      xml = glade_xml_new ("../schemas/esquema_prueba/esquema_prueba.glade", NULL,NULL);
+      if ((ld_fn=(loadglade)myimport("graphics_gtk","load_glade"))==NULL){
+         fprintf (stderr,"I can't fetch 'load_glade' from 'graphics_gtk'.\n");
+         jdeshutdown(1);
+      }
+      xml = ld_fn ("esquema_prueba.glade");
       if (xml==NULL){
          fprintf(stderr, "Error al cargar la interfaz gráfica\n");
          jdeshutdown(1);

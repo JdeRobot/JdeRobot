@@ -26,6 +26,9 @@
 /** Maximum buffer size (for strings)*/
 #define MAX_BUFFER 1024
 
+/** Concurrency control when shutting down*/
+pthread_mutex_t shuttingdown_mutex;
+
 /* hierarchy */
 /** Array with all the loaded schemas*/
 JDESchema all[MAX_SCHEMAS];
@@ -182,24 +185,38 @@ void null_arbitration()
  */
 void jdeshutdown(int sig)
 {
+  static int shuttingdown=0;
+  int shutdown=0;
   int i;
 
-  /* unload all the schemas loaded as plugins */
-  for(i=0;i<num_schemas;i++)
-    {
-      if (all[i].close!=NULL) all[i].close();
-      if (all[i].handle!=NULL) dlclose(all[i].handle);
-    }
-  
-  /* unload all the drivers loaded as plugins */
-  for(i=0;i<num_drivers;i++)
-    {
-      if (mydrivers[i].close!=NULL) mydrivers[i].close();
-      if (mydrivers[i].handle!=NULL) dlclose(mydrivers[i].handle);
-    }
+  pthread_mutex_lock(&shuttingdown_mutex);
+  if (shuttingdown==0){
+     shutdown=1;
+  }
+  else{
+     shutdown=0;
+     fprintf(stderr, "Jde is already shutting down\n");
+  }
+  pthread_mutex_unlock(&shuttingdown_mutex);
 
-  printf("Bye\n");
-  exit(sig);
+  if (shutdown==1){
+     /* unload all the schemas loaded as plugins */
+     for(i=0;i<num_schemas;i++)
+     {
+        if (all[i].close!=NULL) all[i].close();
+        if (all[i].handle!=NULL) dlclose(all[i].handle);
+     }
+
+     /* unload all the drivers loaded as plugins */
+     for(i=0;i<num_drivers;i++)
+     {
+        if (mydrivers[i].close!=NULL) mydrivers[i].close();
+        if (mydrivers[i].handle!=NULL) dlclose(mydrivers[i].handle);
+     }
+
+     printf("Bye\n");
+     exit(sig);
+  }
 }
 
 
@@ -700,6 +717,7 @@ int main(int argc, char** argv)
  
   /* read the configuration file: load drivers and schemas */
   path[0]='\0';
+  pthread_mutex_init(&shuttingdown_mutex, PTHREAD_MUTEX_TIMED_NP);
   printf("Reading configuration...\n");
   do {
     i=jde_readline(config);

@@ -131,6 +131,7 @@ void load_1() {
 	matColors[2] = 0.066667;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0.062745, 0.062745, 0.066667);
 	glBegin(GL_QUADS);
 	glNormal3f(0.991729, 0.106632, -0.071261);
 	glVertex3f(-1.007638, -1.219279, 1.501634);
@@ -6542,6 +6543,7 @@ void load_2() {
 	matColors[2] = 0.066667;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0.062745, 0.062745, 0.066667);
 	glBegin(GL_QUADS);
 	glNormal3f(0.991729, 0.106632, -0.071261);
 	glVertex3f(-1.018415, 1.690616, 1.500768);
@@ -12953,6 +12955,7 @@ void load_3() {
 	matColors[2] = 0.017316;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0.773190, 0.932781, 0.017316);
 	glBegin(GL_TRIANGLES);
 	glNormal3f(0.685873, -0.317362, 0.654836);
 	glVertex3f(-0.895601, 1.718077, 1.516831);
@@ -13076,6 +13079,7 @@ void load_4() {
 	matColors[2] = 0.800000;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0.800000, 0.800000, 0.800000);
 	glBegin(GL_TRIANGLES);
 	glNormal3f(0.000000, 0.000000, -1.000000);
 	glVertex3f(0.512899, 0.895206, 6.227566);
@@ -15167,6 +15171,7 @@ void load_5() {
 	matColors[2] = 0.799920;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0.800000, 0.799920, 0.799920);
 	glBegin(GL_QUADS);
 	glNormal3f(0.577319, -0.577349, -0.577319);
 	glVertex3f(-0.292504, 1.402836, 5.520004);
@@ -15342,6 +15347,7 @@ void load_6() {
 	matColors[2] = 0.000000;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0,0,0);
 	glBegin(GL_QUADS);
 	glNormal3f(0.301492, 0.301492, -0.904508);
 	glVertex3f(0.813352, -0.570647, 5.407064);
@@ -16083,6 +16089,7 @@ void load_7() {
 	matColors[2] = 0.000000;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0, 0, 0);
 	glBegin(GL_QUADS);
 	glNormal3f(0.577349, 0.577349, -0.577349);
 	glVertex3f(0.877993, -0.332096, 5.126026);
@@ -16154,6 +16161,7 @@ void load_8() {
 	matColors[2] = 0.000000;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0, 0, 0);
 	glBegin(GL_QUADS);
 	glNormal3f(0.577349, 0.577349, -0.577349);
 	glVertex3f(0.879297, 0.270253, 4.571537);
@@ -16275,6 +16283,7 @@ void load_9() {
 	matColors[2] = 0.800000;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0.8, 0.8, 0.8);
 	glBegin(GL_QUADS);
 	glNormal3f(-0.577349, 0.577319, -0.577349);
 	glVertex3f(1.067217, 0.728733, 4.101844);
@@ -16346,6 +16355,7 @@ void load_10() {
 	matColors[2] = 0.104624;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0.104624, 0.104624, 0.104624);
 	glBegin(GL_TRIANGLES);
 	glNormal3f(0.257637, -0.966216, -0.000275);
 	glVertex3f(0.299106, -0.010533, 2.428316);
@@ -17277,6 +17287,7 @@ void load_11() {
 	matColors[2] = 0.858247;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0.222054, 0.597184, 0.858247);
 	glBegin(GL_QUADS);
 	glNormal3f(0.577349, 0.577349, -0.577349);
 	glVertex3f(1.053373, -0.771469, 2.424965);
@@ -17528,6 +17539,7 @@ void load_12() {
 	matColors[2] = 0.000000;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0, 0, 0);
 	glBegin(GL_QUADS);
 	glNormal3f(0.623890, 0.577349, 0.526658);
 	glVertex3f(1.064986, 1.325268, 0.655804);
@@ -18145,6 +18157,7 @@ void load_14() {
 	matColors[2] = 0.000000;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0.301816, 0.344790, 0.0);
 	glBegin(GL_TRIANGLES);
 	glNormal3f(-0.446669, 0.000000, -0.894681);
 	glVertex3f(-2.637763, 1.090398, 2.241001);
@@ -24300,6 +24313,7 @@ void load_15() {
 	matColors[2] = 0.007843;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0.898039, 0.125490, 0.007843);
 	glBegin(GL_QUADS);
 	glNormal3f(0.633076, 0.250679, -0.732353);
 	glVertex3f(0.290165, -1.127358, 0.643951);
@@ -24769,6 +24783,7 @@ void load_15() {
 	matColors[2] = 0.007843;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0.898039, 0.125490, 0.007843);
 	glBegin(GL_QUADS);
 	glNormal3f(0.575915, 0.575793, -0.580279);
 	glVertex3f(0.285599, -1.126825, 0.342417);
@@ -24840,6 +24855,7 @@ void load_16() {
 	matColors[2] = 0.007843;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0.898039, 0.125490, 0.007843);
 	glBegin(GL_TRIANGLES);
 	glNormal3f(-0.000488, -0.999969, 0.000000);
 	glVertex3f(-1.886022, 0.016335, 1.836434);
@@ -25267,6 +25283,7 @@ void load_17() {
 	matColors[2] = 0.000000;
 	matColors[3] = 1.000000;
 	glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,matColors);
+        glColor3f(0, 0, 0);
 	glBegin(GL_QUADS);
 	glNormal3f(0.376751, 0.406079, 0.832545);
 	glVertex3f(0.752234, -1.270885, 2.359936);
