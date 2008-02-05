@@ -7,6 +7,7 @@ void vff_iteration(void)
 {
   v=0;
   w=40;
+  /*  printf("laser[90]=%.2f, X=%.2f, Y=%.2f, Theta=%.2f\n",laser[90],robot[0],robot[1],robot[2]*RADTODEG);*/
 }
 
 void deliberative_iteration(void)
