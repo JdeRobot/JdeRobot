@@ -1,4 +1,3 @@
-include makeinclude
 
 #########################
 
@@ -17,6 +16,8 @@ LOCAL_FILES = EVILib.o\
 #########################
 
 ALL = $(LOCAL_FILES)
+OPTIONS = -g -ggdb -Wall -fPIC -ffast-math -O6 -D_SMP_ -DMODULE -D_KERNEL_ \
+         -fexpensive-optimizations
 
 main: $(ALL)
 
