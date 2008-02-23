@@ -42,6 +42,13 @@
 /** Robot max rotation speed*/
 #define MAX_RVEL 180 /* deg/sec, hardware limit: 360 */
 
+/** Maximum number of laser measures*/
+#define MAX_LASER 720
+/** Maximum number of sonar measures*/
+#define MAX_SONAR 100
+/** Maximum number of bumpers*/
+#define MAX_BUMPER 100
+
 /* for player support through the player server */
 /** player driver client structure.*/
 playerc_client_t *player_client;
@@ -108,16 +115,18 @@ unsigned long int encoders_clock;
 int encoders_number=5;
 
 /** 'laser' schema, laser information.*/
-int jde_laser[PLAYERC_LASER_MAX_SAMPLES];
+int jde_laser[MAX_LASER];
 /** 'laser' schema, clock variable.*/
 unsigned long int laser_clock;
 /** Number of laser samples*/
 int laser_number=0;
+/** Angular resolution samples per degree */
+int laser_resolution=0;
 
 /** 'sonars' schema, sonars information.*/
-float us[PLAYERC_SONAR_MAX_SAMPLES];
+float us[MAX_SONAR];
 /** 'sonars' schema, clock variable.*/
-unsigned long int us_clock[PLAYERC_SONAR_MAX_SAMPLES];
+unsigned long int us_clock[MAX_SONAR];
 /** Number of sonar samples*/
 int sonar_number=0;
 
@@ -129,7 +138,7 @@ float w; /* deg/s*/
 int motors_cycle;
 
 /** 'bumpers' schema bumpers information*/
-unsigned char jde_bumpers[PLAYERC_BUMPER_MAX_SAMPLES];
+unsigned char jde_bumpers[MAX_BUMPER];
 /** 'bumpers' schema clock variable*/
 unsigned long int bumpers_clock;
 /** numbers of bumpers*/
@@ -177,15 +186,18 @@ static float w_sp=0.;
 /** player driver last v speed command sent to the motors.*/
 static float v_sp=0.;
 
-/* PLAYER DRIVER FUNCTIONS */
-/** player driver closing function invoked when stopping driver.*/
-void player_close(){
-  player_close_command=1;
-  playerc_client_disconnect(player_client);
-  playerc_client_destroy(player_client);
-  printf("disconnected from Player\n");
-}
+/*Callback declaration*/
+/** player driver laser function callback.*/
+void player_laser_callback();
+/** player driver encoders function callback.*/
+void player_encoders_callback(void *not_used);
+/** player driver sonars function callback.*/
+void player_sonar_callback(void *not_used);
+/** player driver sonars function callback.*/
+void player_bumper_callback(void *not_used);
 
+
+/* PLAYER DRIVER FUNCTIONS */
 /** laser resume function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
@@ -535,78 +547,123 @@ void *player_thread(){
   */
 
   printf("player: player thread started up\n");
-
+  
   do{
 
-    pthread_mutex_lock(&mymutex);
+    if (player_close_command==0){
 
-    if (state==slept){
-      printf("player: player thread in sleep mode\n");
-      pthread_cond_wait(&condition,&mymutex);
-      printf("player: player thread woke up\n");
-      pthread_mutex_unlock(&mymutex);
-      
-    }else{
-      
-      pthread_mutex_unlock(&mymutex);
-      
-      gettimeofday(&t,NULL);
-      now=t.tv_sec*1000000+t.tv_usec;   
+       pthread_mutex_lock(&mymutex);
+       if (state==slept){
+          printf("player: player thread in sleep mode\n");
+          pthread_cond_wait(&condition,&mymutex);
+          printf("player: player thread woke up\n");
+          pthread_mutex_unlock(&mymutex);
+
+       }else{
+
+          pthread_mutex_unlock(&mymutex);
+
+          gettimeofday(&t,NULL);
+          now=t.tv_sec*1000000+t.tv_usec;
       /*printf("%ld, %ld\n",now-before,now-lastmotor);
-      before=now;
+          before=now;
       */
 
-      /* sending motors command */
-      if((serve_motors)&&(motors_active))
-	{
-	if ((now-lastmotor) > PLAYER_COMMAND_CYCLE*1000)
-	  { lastmotor=now;
-	  player_motors_iteration();
-	  }
-	}
-      /* player_motors_iteration();*/
+          /* sending motors command */
+          if((serve_motors)&&(motors_active))
+          {
+             if ((now-lastmotor) > PLAYER_COMMAND_CYCLE*1000)
+             { lastmotor=now;
+             player_motors_iteration();
+             }
+          }
+          /* player_motors_iteration();*/
 
-      /* reading from player server */
-      playerc_client_read(player_client);
-      
+          /* reading from player server */
+          playerc_client_read(player_client);
+
       /*
-      gettimeofday(&t,NULL);
-      now=t.tv_sec*1000000+t.tv_usec;
-      howmany++;
-      if ((now-last)>10000000)
-            {fprintf(stderr,"player: client -> %d iterations in 10 secs\n",howmany);
-              last = now;
-              howmany=0;
-            }   
+          gettimeofday(&t,NULL);
+          now=t.tv_sec*1000000+t.tv_usec;
+          howmany++;
+          if ((now-last)>10000000)
+          {fprintf(stderr,"player: client -> %d iterations in 10 secs\n",howmany);
+          last = now;
+          howmany=0;
+       }
       */
+       }
     }
   }while(player_close_command==0);
-  pthread_exit(0);
+  playerc_client_disconnect(player_client);
+//   playerc_client_destroy(player_client);
+}
+
+/** player driver closing function invoked when stopping driver.*/
+void player_close(){
+   player_close_command=1;
+   player_laser_suspend();
+   player_encoders_suspend();
+   player_sonars_suspend();
+   player_bumpers_suspend();
+   player_motors_suspend();
+
+   if (serve_encoders==1){
+      playerc_client_delcallback(player_client,&(player_position->info),
+                                 &player_encoders_callback,&(player_position));
+   }
+   if (serve_sonars==1){
+      playerc_client_addcallback(player_client,&(player_sonar->info),
+                                 &player_sonar_callback,&(player_sonar->scan));
+   }
+   if (serve_laser==1){
+      playerc_client_addcallback(player_client,&(player_laser->info),
+                                 &player_laser_callback,&(player_laser->scan));
+   }
+   if (serve_bumpers==1){
+      playerc_client_addcallback(player_client,&(player_bumpers->info),
+                                 &player_bumper_callback,
+                                 &(player_bumpers->bumpers));
+   }
+
+   pthread_cond_signal(&condition);
+   printf("disconnected from Player\n");
 }
 
 /** player driver laser function callback.*/
 void player_laser_callback(){
-   int j=0/*,cont=0,rel*/;
+   int j=0, i=0;
+   int player_resolution;
+   int jump;
+   int offset;
   
    speedcounter(laser_schema_id);
    laser_clock=tag++;
 
-   /*player ofrece 360 medidas cada 0.5 angulos, por lo k solo cojemos los angulos "enteros", 181 medidas*/
-   /*NUM_LASER readings (181 in the robot, 179 in the simulator) */
-   /*rel indica cada cuanto se debe tomar una medida de player para ajustar
-     el número de medidas a las de jdec*/
-//    rel=player_laser->scan_count/NUM_LASER;
-//    while((cont<NUM_LASER)&&(j<player_laser->scan_count)){
-//       if (j%rel!=1){
-//          jde_laser[cont]=(int)(player_laser->scan[j][0]*1000);
-//          cont++;
-//       }
-//       j++;
-//    }
-   for (j=0; j<player_laser->scan_count; j++){
-      jde_laser[j]=(int)(player_laser->scan[j][0]*1000);
+   /*Now we must transform player resolution into user defined resolution*/
+   player_resolution=1/(RADTODEG*player_laser->scan_res);
+   jump=player_resolution / laser_resolution;
+ 
+   /*Check if is possible serve this resolution and number of measures*/
+   if (jump==0){
+      fprintf(stderr,"player: I can't serve laser at %d measures per degree\n",
+              laser_resolution);
+      jdeshutdown(-1);
    }
-   laser_number=player_laser->scan_count;
+   else if((player_laser->scan_count/jump) < laser_number){
+      fprintf(stderr,"player: I can't serve laser at %d measures\n",
+              laser_number);
+      jdeshutdown(-1);
+   }
+
+   offset=((player_laser->scan_count/jump)-laser_number)/2;
+   i=0;
+   j=offset;
+   while(j<player_laser->scan_count && i<laser_number){
+      jde_laser[i]=(int)(player_laser->scan[j][0]*1000);
+      j=j+jump;
+      i++;
+   }
 }
 
 /** player driver encoders function callback.*/
@@ -637,6 +694,11 @@ void player_sonar_callback(void *not_used)
   
   speedcounter(sonars_schema_id);  
 
+  if (player_sonar->pose_count > MAX_SONAR){
+     fprintf (stderr, "player: I can't serve %d sonar measures, maximum %d.\n",
+              player_sonar->pose_count, MAX_SONAR);
+     jdeshutdown(-1);
+  }
   for (j=0;j<player_sonar->pose_count; j++){
     /* for pioneer 16 data per reading */
     us[j]=(float)player_sonar->scan[j]*1000;
@@ -652,7 +714,13 @@ void player_bumper_callback(void *not_used)
    int j;
   
    speedcounter(bumpers_schema_id);
-
+   
+   if (player_bumpers->bumper_count > MAX_BUMPER){
+      fprintf (stderr, "player: I can't serve %d bumper measures, maximum %d.\n",
+               player_bumpers->bumper_count, MAX_BUMPER);
+      jdeshutdown(-1);
+   }
+   
    for (j=0;j<player_bumpers->bumper_count; j++){
       /* for pioneer 16 data per reading */
       jde_bumpers[j]=(float)player_bumpers->bumpers[j];
@@ -859,10 +927,23 @@ int player_parseconf(char *configfile){
 		    end_section=1; end_parse=1;
 
 		  }else if(strcmp(word3,"provides")==0){
-		    while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
-		    if(sscanf(buffer_file2,"%s %s",word3,word4)>1){
-
-		      if(strcmp(word4,"laser")==0) serve_laser=1;
+                    int words;
+		    while((buffer_file2[z]!='\n') && (buffer_file2[z]!=' ') &&
+                                         (buffer_file2[z]!='\0') &&
+                                         (buffer_file2[z]!='\t'))
+                    {
+                       z++;
+                    }
+		    if((words=sscanf(buffer_file2,"%s %s %s %s",word3,word4,word5,word6))>1){
+		      if(strcmp(word4,"laser")==0 && words==4){
+                         serve_laser=1;
+                         laser_number=atoi(word5);
+                         laser_resolution=atoi(word6);
+                         if (laser_number > MAX_LASER){
+                            fprintf (stderr, "player: %d laser measures cannot be served, maximum %d.\n",
+                                     laser_number, MAX_LASER);
+                         }
+                      }
 		      else if(strcmp(word4,"sonars")==0) serve_sonars=1;
 		      else if(strcmp(word4,"encoders")==0) serve_encoders=1;
 		      else if(strcmp(word4,"motors")==0) serve_motors=1;
@@ -922,6 +1003,7 @@ int player_parseconf(char *configfile){
  *  @param configfile path and name to the config file of this driver.*/
 int player_startup(char *configfile){
 
+  pthread_mutex_init(&mymutex,PTHREAD_MUTEX_TIMED_NP);
   /* we call the function to parse the config file */
   if(player_parseconf(configfile)==-1){
     printf("player: cannot initiate driver. configfile parsing error.\n");
@@ -956,6 +1038,7 @@ int player_startup(char *configfile){
       myexport("laser","laser",&jde_laser);
       myexport("laser","clock", &laser_clock);
       myexport("laser","number", &laser_number);
+      myexport("laser","resolution", &laser_resolution);
       myexport("laser","resume",(void *) &player_laser_resume);
       myexport("laser","suspend",(void *) &player_laser_suspend);
     }
