@@ -35,6 +35,8 @@
 #include <glcanvas.h>
 #include "pioneeropengl.h"
 
+int finish_flag=0;
+
 #define MOUSELEFT 1
 #define MOUSEMIDDLE 2
 #define MOUSERIGHT 3
@@ -241,7 +243,7 @@ void *teleoperator_thread(void *not_used)
   struct timeval a,b;
   long diff, next;
 
-  for(;;)
+  for(;finish_flag==0;)
     {
       pthread_mutex_lock(&(all[teleoperator_id].mymutex));
 
@@ -336,17 +338,20 @@ void teleoperator_stop()
   sleep(2);
   */
  if (fd_teleoperatorgui!=NULL)
-    {
-      if (all[teleoperator_id].guistate==on) 
-	fl_hide_form(fd_teleoperatorgui->teleoperatorgui);
-      fl_free_form(fd_teleoperatorgui->teleoperatorgui);
+ {
+    if (all[teleoperator_id].guistate==on){
+       teleoperator_guisuspend();
+       all[teleoperator_id].guistate=off;
     }
-  printf ("teleoperator close\n");
+ }
+ teleoperator_suspend();
+ finish_flag=1;
+ printf ("teleoperator close\n");
 
-  free(imagenA_buf);
+  /*free(imagenA_buf);
   free(imagenB_buf);
   free(imagenC_buf);
-  free(imagenD_buf);  
+  free(imagenD_buf);*/  
 }
 
 

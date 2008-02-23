@@ -572,7 +572,14 @@ void mplayer_start(int i){
    char str3[100];
 
    umask (0000);
-	 
+   if (pid_mplayer[i]!=-1){
+      kill (pid_mplayer[i], 9);
+      wait (NULL);
+   }
+   if (pid_mencoder[i]!=-1){
+      kill (pid_mencoder[i], 9);
+      wait (NULL);
+   }
    unlink (fifo1[i]);
    unlink (fifo2[i]);
    if ( (mkfifo (fifo1[i], 0600) != 0) ||
@@ -680,10 +687,6 @@ void *mplayer_thread(void *id){
                Seguramente ya hayan muerto y eso devuelve error*/
                close(fifo);
 
-               kill (pid_mplayer[i], 9);
-               wait (NULL);
-               kill (pid_mencoder[i], 9);
-               wait (NULL);
                mplayer_start(i);
                if ((fifo=open (fifo2[i],O_RDONLY))==-1){
                   perror("");
@@ -1219,8 +1222,8 @@ void mplayer_startup(char *configfile)
 
    for (i=0; i<MAXVIDS; i++){
       /*inicializar todos los mplayer y mencoder*/
-      pid_mplayer[i]=0;
-      pid_mencoder[i]=0;
+      pid_mplayer[i]=-1;
+      pid_mencoder[i]=-1;
       if (serve_color[i]==1){
          mplayer_start(i);
       }

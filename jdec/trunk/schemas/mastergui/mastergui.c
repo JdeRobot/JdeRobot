@@ -190,9 +190,12 @@ void gui_init(){
 void mastergui_stop(){
   if (fd_masterguigui!=NULL)
     {
-      if (all[mastergui_id].guistate==on) 
-	fl_hide_form(fd_masterguigui->masterguigui);
-      fl_free_form(fd_masterguigui->masterguigui);
+      if (all[mastergui_id].guistate==on){
+         mastergui_guisuspend();
+         all[mastergui_id].guistate=off;
+      }
+// 	fl_hide_form(fd_masterguigui->masterguigui);
+//       fl_free_form(fd_masterguigui->masterguigui);
     }
   printf ("mastergui close\n");
 }

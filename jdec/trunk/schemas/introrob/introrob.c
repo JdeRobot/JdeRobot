@@ -31,6 +31,8 @@
 #define DISPLAY_SONARS 0x04UL
 #define DISPLAY_LASER 0x08UL
 
+int finish_flag=0; 
+
 /*Gui declarations*/
 Display *mydisplay;
 int  *myscreen;
@@ -260,7 +262,7 @@ void *introrob_thread(void *not_used)
   struct timeval a,b;
   long diff, next;
 
-  for(;;)
+  for(;finish_flag==0;)
     {
       pthread_mutex_lock(&(all[introrob_id].mymutex));
 
@@ -350,11 +352,13 @@ void introrob_init(){
 
 void introrob_stop()
 {
+  finish_flag=1;
   if (fd_introrobgui!=NULL)
     {
-      if (all[introrob_id].guistate==on) 
-	fl_hide_form(fd_introrobgui->introrobgui);
-      fl_free_form(fd_introrobgui->introrobgui);
+      if (all[introrob_id].guistate==on){
+        introrob_guisuspend();
+        all[introrob_id].guistate=off;
+      }
     }
   printf ("introrob close\n");
 }
