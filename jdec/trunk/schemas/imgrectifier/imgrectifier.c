@@ -17,6 +17,7 @@
  *
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  *  Authors : Kachach Redouane
+ *  Authors : José Antonio Santos Cadenas <santoscadenas@gmail.com>
  */
 
 #include "jde.h"
@@ -31,12 +32,24 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_multifit.h>
 
-
-/** Image standard number of rows*/
-#define SIFNTSC_ROWS 240
-/** Image standard number of columns*/
-#define SIFNTSC_COLUMNS 320
-
+/* Clallback definition */
+gboolean on_delete_window (GtkWidget *widget, GdkEvent *event, gpointer user_data);
+void on_image_sel_changed(GtkComboBoxEntry *img_sel, gpointer user_data);
+void on_image_sel_changed(GtkComboBoxEntry *img_sel, gpointer user_data);
+void on_descartar_imagen_clicked(GtkButton *button, gpointer user_data);
+void on_rectificar_clicked(GtkButton *button, gpointer user_data);
+void on_descartar_rectificada_clicked(GtkButton *button, gpointer user_data);
+void on_undo_clicked(GtkButton *button, gpointer user_data);
+void on_undo_2_clicked(GtkButton *button, gpointer user_data);
+void on_modo_rectangulo_clicked(GtkToggleButton *button, gpointer user_data);
+void on_imagen_de_entrada_release(GtkButton *button, gpointer user_data);
+void on_imagen_rectificada_release(GtkButton *button, gpointer user_data);
+void on_help_clicked(GtkButton *button, gpointer user_data);
+gboolean on_help_destroy (GtkWidget *widget, GdkEvent *event, gpointer user_data);
+void on_help_close (GtkWidget *widget, GdkEvent *event, gpointer user_data);
+      
+int *width=NULL;
+int *height=NULL;
 
 /*Gui callbacks*/
 registerdisplay myregister_displaycallback=NULL;
@@ -53,13 +66,14 @@ static int imgrectifier_state;
 int imgrectifier_cycle=100; /* ms */
 
 /*imported variables */
-unsigned char **mycolorA=NULL;
+unsigned char **mycolor=NULL;
 resumeFn myresume=NULL;
 suspendFn mysuspend=NULL;
+pthread_mutex_t colorchange_mutex;
 
 /*Para el gui con gtk*/
-GladeXML *xml; /*Fichero xml*/
-GtkWidget *win;
+GladeXML *xml=NULL; /*Fichero xml*/
+GtkWidget *win=NULL;
 
 /** ============= Variable propios del esquema ============= */
 #define DRAW 1
@@ -99,6 +113,7 @@ int modo_rectangulo_on=0;
 unsigned char *imagen_capturada;
 unsigned char *imagen_rectificada;
 /** ============== fin de declaracion esquema ============== */
+
 
 void imgrectifier_iteration()
 {  
@@ -286,8 +301,8 @@ void rectificar_imagen(){
     lo copiamos (pintamos un pixel del mismo color en la imagen rectificada).
   */
   
-  for (i=0; i<240; i++){
-    for (j=0; j<320; j++){
+  for (i=0; i<(*height); i++){
+    for (j=0; j<(*width); j++){
       
       calcular_correspondencia(j,i,&p);
     
@@ -296,11 +311,11 @@ void rectificar_imagen(){
 	  sino lo pintamos en blando
       */
       
-      offset2 = i*320+j;
+      offset2 = i*(*width)+j;
       if (imagen_rectificada && imagen_capturada){
-	if ((p.x>0) && (p.y>0) && (p.x<=320) && (p.y<=240)){
+	if ((p.x>0) && (p.y>0) && (p.x<=(*width)) && (p.y<=(*height))){
 	  
-	  offset = p.y*320+p.x;
+	  offset = p.y*(*width)+p.x;
 	  
 	  imagen_rectificada[offset2*3] = imagen_capturada[offset*3+2];
 	  imagen_rectificada[offset2*3+1] = imagen_capturada[offset*3+1];
@@ -326,17 +341,6 @@ void imgrectifier_suspend()
   mysuspend();
   pthread_mutex_unlock(&(all[imgrectifier_id].mymutex));
   /*  printf("imgrectifier: suelto-suspend\n");*/
-}
-
-void imgrectifier_imports(){
-   mycolorA=(unsigned char **)myimport("colorA","colorA");
-   myresume=(resumeFn)myimport("colorA", "resume");
-   mysuspend=(resumeFn)myimport("colorA", "suspend");
-   if (mycolorA==NULL){
-      printf("imgrectifier: Warning \"colorA\" symbol not resolved\n");
-      jdeshutdown(1);
-   }
-   myresume(imgrectifier_id,NULL,NULL);
 }
 
 void imgrectifier_resume(int father, int *brothers, arbitration fn)
@@ -366,7 +370,6 @@ void imgrectifier_resume(int father, int *brothers, arbitration fn)
   put_state(imgrectifier_id,notready);
   printf("imgrectifier: on\n");
   pthread_cond_signal(&(all[imgrectifier_id].condition));
-  imgrectifier_imports();
   pthread_mutex_unlock(&(all[imgrectifier_id].mymutex));
 }
 
@@ -431,12 +434,21 @@ void *imgrectifier_thread(void *not_used)
 void reset(){
   
   int i;
+  static int init=0;
   /* ============================================================== */
 
-  sistema_lineal_ecuaciones = malloc(NUMEC*sizeof(int*));
-  for (i=0; i<NUMEC; i++)
-    sistema_lineal_ecuaciones[i] = malloc(9*sizeof(int));
-  
+  if (init==0){
+     sistema_lineal_ecuaciones = malloc(NUMEC*sizeof(int*));
+     for (i=0; i<NUMEC; i++)
+        sistema_lineal_ecuaciones[i] = malloc(9*sizeof(int));
+     init=1;
+  }
+  else{
+     if (imagen_rectificada!=NULL)
+        free(imagen_rectificada);
+  }
+  if (width!=NULL && height!=NULL)
+     imagen_rectificada = (unsigned char*)malloc((*width)*(*height)*3*sizeof(char));
   
   /* inicializamos el array de los puntos elegidos */
   for (i=0; i<NUMPUNTOS; i++){
@@ -451,16 +463,15 @@ void reset(){
   
   /* inicialiazamos la imagen rectificada con el color gris*/
   /*TODO Mover esto cuando se pinta bien la imagen recitifacada */
-  
-  imagen_rectificada = (unsigned char*)malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3*sizeof(char));
-  
-  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-    { 
-      imagen_rectificada[i*3] = 120;
-      imagen_rectificada[i*3+1] = 120;
-      imagen_rectificada[i*3+2] = 120;
-    }
-  
+
+  if (height!=NULL && width!=NULL){
+     for(i=0; i<(*height)*(*width); i++)
+     { 
+        imagen_rectificada[i*3] = 120;
+        imagen_rectificada[i*3+1] = 120;
+        imagen_rectificada[i*3+2] = 120;
+     }
+  }
   next_point_en_entrada = 0;
   next_point_en_rectificada = 0;
 
@@ -495,31 +506,67 @@ void imgrectifier_startup()
   printf("imgrectifier schema started up\n");
   imgrectifier_init();
   
-  myexport("imgrectifier","imgrectifier_cycle",&imgrectifier_cycle);
-  myexport("imgrectifier","imgrectifier_resume",(void *)imgrectifier_resume);
-  myexport("imgrectifier","imgrectifier_suspend",(void *)imgrectifier_suspend);
+  myexport("imgrectifier","cycle",&imgrectifier_cycle);
+  myexport("imgrectifier","resume",(void *)imgrectifier_resume);
+  myexport("imgrectifier","suspend",(void *)imgrectifier_suspend);
   put_state(imgrectifier_id,slept);
 
   /* == inicializamos las variables globales y el display== */
-  reset();
-  
-  modo_rectangulo_on = 0;
+  pthread_mutex_init(&colorchange_mutex,PTHREAD_MUTEX_TIMED_NP);
 
+  reset();
+
+  modo_rectangulo_on = 0;
+  
   pthread_create(&(all[imgrectifier_id].mythread),NULL,imgrectifier_thread,NULL);
   pthread_mutex_unlock(&(all[imgrectifier_id].mymutex));
 }
 
 /*Callbacks*/
+
+gboolean on_delete_window (GtkWidget *widget, GdkEvent *event, gpointer user_data){
+   gtk_widget_hide(widget);
+   gtk_widget_queue_draw(widget);
+   return TRUE;
+}
+
+void on_image_sel_changed(GtkComboBoxEntry *img_sel, gpointer user_data){
+   /*Check value*/
+   void *value;
+   char **color;
+   value=(char *)gtk_combo_box_get_active_text((GtkComboBox *)img_sel);
+
+   color=myimport(value,value);
+   if (color!=NULL){
+      pthread_mutex_lock(&colorchange_mutex);
+      if (mysuspend!=NULL)
+         mysuspend();
+      mycolor=(unsigned char **)color;
+      myresume=(resumeFn)myimport(value, "resume");
+      mysuspend=(resumeFn)myimport(value, "suspend");
+      width=(int *)myimport(value,"width");
+      height=(int *)myimport(value,"height");
+      myresume(imgrectifier_id,NULL,NULL);
+      if (imagen_capturada)
+         free(imagen_capturada);
+      imagen_capturada=NULL;
+      reset();
+      on_descartar_rectificada_clicked(NULL, NULL);
+      on_descartar_imagen_clicked(NULL, NULL);
+      pthread_mutex_unlock(&colorchange_mutex);
+   }
+}
+
 void on_capturar_imagen_clicked(GtkButton *button, gpointer user_data){
    int i;
    /** Reservamos memoria si todavia no lo hemos hecho */
    if (!imagen_capturada){
-      imagen_capturada = (unsigned char*)malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3*sizeof(char));
+      imagen_capturada = (unsigned char*)malloc((*width)*(*height)*3*sizeof(char));
    }
-   memcpy(imagen_capturada, (unsigned char *)*mycolorA, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+   memcpy(imagen_capturada, (unsigned char *)*mycolor, (*width)*(*height)*3);
 
    /** inicializamos la imagen rectificada tambien */
-   for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++){
+   for(i=0; i<(*height)*(*width); i++){
       imagen_rectificada[i*3] = 120;
       imagen_rectificada[i*3+1] = 120;
       imagen_rectificada[i*3+2] = 120;
@@ -527,8 +574,10 @@ void on_capturar_imagen_clicked(GtkButton *button, gpointer user_data){
 }
 
 void on_descartar_imagen_clicked(GtkButton *button, gpointer user_data){
-   free(imagen_capturada);
-   imagen_capturada = 0x0;
+   if (imagen_capturada!=NULL){
+      free(imagen_capturada);
+      imagen_capturada = 0x0;
+   }
    reset();
 }
 
@@ -542,17 +591,19 @@ void on_descartar_rectificada_clicked(GtkButton *button, gpointer user_data){
    for (i=0; i<NUMEC; i++)
       sistema_lineal_ecuaciones[i] = malloc(9*sizeof(int));
 
-   for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++)
-   {
-      imagen_rectificada[i*3+0] = 120;
-      imagen_rectificada[i*3+1] = 120;
-      imagen_rectificada[i*3+2] = 120;
-   }
+   if (height!=NULL && width!=NULL){
+      for(i=0; i<(*height)*(*width); i++)
+      {
+         imagen_rectificada[i*3+0] = 120;
+         imagen_rectificada[i*3+1] = 120;
+         imagen_rectificada[i*3+2] = 120;
+      }
 
-   /* inicializamos el array de los puntos elegidos */
-   for (i=0; i<NUMPUNTOS; i++){
-      pnts_elegidos_en_img_rectificada[i].x =-1;
-      pnts_elegidos_en_img_rectificada[i].y =-1;
+      /* inicializamos el array de los puntos elegidos */
+      for (i=0; i<NUMPUNTOS; i++){
+         pnts_elegidos_en_img_rectificada[i].x =-1;
+         pnts_elegidos_en_img_rectificada[i].y =-1;
+      }
    }
 
    next_point_en_rectificada=0;
@@ -576,7 +627,6 @@ void on_undo_2_clicked(GtkButton *button, gpointer user_data){
 
 void on_modo_rectangulo_clicked(GtkToggleButton *button, gpointer user_data){
    int i;
-   printf ("se ejecuta\n");
    if (gtk_toggle_button_get_active(button)){
       modo_rectangulo_on = 1;
       next_point_en_rectificada = 0;
@@ -665,6 +715,21 @@ void on_imagen_rectificada_release(GtkButton *button, gpointer user_data){
    }
 }
 
+void on_help_clicked(GtkButton *button, gpointer user_data){
+   gtk_widget_show(GTK_WIDGET(glade_xml_get_widget(xml, "about_imgrectifier")));
+}
+
+void on_help_close (GtkWidget *widget, GdkEvent *event, gpointer user_data){
+   gtk_widget_hide(GTK_WIDGET(glade_xml_get_widget(xml, "about_imgrectifier")));
+   gtk_widget_queue_draw(GTK_WIDGET(glade_xml_get_widget(xml, "about_imgrectifier")));
+}
+
+gboolean on_help_destroy (GtkWidget *widget, GdkEvent *event, gpointer user_data){
+   gtk_widget_hide(widget);
+   gtk_widget_queue_draw(widget);
+   return TRUE;
+}
+
 void imgrectifier_guidisplay()
 {
   /* variables para dibujar la imagen */
@@ -673,208 +738,231 @@ void imgrectifier_guidisplay()
   unsigned char *source_image;
   int i,j,k,point,ancho_del_cruz;
   int from,to,inc;
+  int old_height, old_width;
 
-  if (tmp_image==NULL)
-     tmp_image = (unsigned char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
-  if (tmp_image_rect==NULL)
-     tmp_image_rect = (unsigned char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+  pthread_mutex_lock(&colorchange_mutex);
+  if (width!=NULL && height!=NULL){
+     if (tmp_image==NULL){
+        tmp_image = (unsigned char *) malloc((*width)*(*height)*3);
+        old_height=(*height);
+        old_width=(*width);
+     }
+     if (tmp_image_rect==NULL){
+        tmp_image_rect = (unsigned char *) malloc((*width)*(*height)*3);
+     }
 
-  /* Creamos una copia temporal de la imagen rectificada */
-  tmp_image_rect = memcpy(tmp_image_rect, imagen_rectificada, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+     if (old_height!=(*height) || old_width!=(*width)){
+        free(tmp_image);
+        tmp_image = (unsigned char *) malloc((*width)*(*height)*3);
+        free(tmp_image_rect);
+        tmp_image_rect = (unsigned char *) malloc((*width)*(*height)*3);
+        old_height=(*height);
+        old_width=(*width);
+     }
 
-  ancho_del_cruz = 5;
+
+     /* Creamos una copia temporal de la imagen rectificada */
+     tmp_image_rect = memcpy(tmp_image_rect, imagen_rectificada, (*width)*(*height)*3);
+
+     ancho_del_cruz = 5;
  
   /** 
-      Si se ha capturada una imagen, la visualizamos, sino seguirimos
-      visualizando la imagen de entrada hasta que el usuario capture otra
-      imagen para usarla como base de rectificación
-  */
+     Si se ha capturada una imagen, la visualizamos, sino seguirimos
+     visualizando la imagen de entrada hasta que el usuario capture otra
+     imagen para usarla como base de rectificación
+   */
 
-  if (imagen_capturada){
-    source_image = imagen_capturada;
-  }else{
-    source_image = *mycolorA;
-  }
+     if (imagen_capturada){
+        source_image = imagen_capturada;
+     }else{
+        source_image = *mycolor;
+     }
 
-  if ((NUMPUNTOS == next_point_en_entrada) && (imagen_capturada)){
-     gtk_widget_set_sensitive(glade_xml_get_widget(xml, "rectificar"),TRUE);
-  }
-  else{
-     gtk_widget_set_sensitive(glade_xml_get_widget(xml, "rectificar"),FALSE);
-  }
+     if ((NUMPUNTOS == next_point_en_entrada) && (imagen_capturada)){
+        gtk_widget_set_sensitive(glade_xml_get_widget(xml, "rectificar"),TRUE);
+     }
+     else{
+        gtk_widget_set_sensitive(glade_xml_get_widget(xml, "rectificar"),FALSE);
+     }
 
-  /* copiamos el contenido de colorA en el array-imagen tmp_image */
-  for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) 
-    {
-      tmp_image[i*3]=source_image[i*3+2];
-      tmp_image[i*3+1]=source_image[i*3+1];
-      tmp_image[i*3+2]=source_image[i*3];
-    }
+     /* copiamos el contenido de colorA en el array-imagen tmp_image */
+     for(i=0; i<(*height)*(*width); i++)
+     {
+        tmp_image[i*3]=source_image[i*3+2];
+        tmp_image[i*3+1]=source_image[i*3+1];
+        tmp_image[i*3+2]=source_image[i*3];
+     }
   
-    if (gtk_toggle_button_get_active((GtkToggleButton *)glade_xml_get_widget(xml,"hide_selected_points"))==FALSE){
+     if (gtk_toggle_button_get_active((GtkToggleButton *)glade_xml_get_widget(xml,"hide_selected_points"))==FALSE){
     
-    for (j=0; j<NUMPUNTOS; j++)
-      {
+        for (j=0; j<NUMPUNTOS; j++)
+        {
 	
-	point = pnts_elegidos_en_img_entrada[j].y*320 + pnts_elegidos_en_img_entrada[j].x;
+           point = pnts_elegidos_en_img_entrada[j].y*(*width) + pnts_elegidos_en_img_entrada[j].x;
 
-	/* point > 0 si ha sido actualizado por lo menos una vez */
-	if (point > 0){
+           /* point > 0 si ha sido actualizado por lo menos una vez */
+           if (point > 0){
 	  
-	  if (pnts_elegidos_en_img_entrada[j].draw == UNDODRAW){
+              if (pnts_elegidos_en_img_entrada[j].draw == UNDODRAW){
 	    
-	    /* dibujamos una linea horizontal */
-	    for (i=-ancho_del_cruz; i<ancho_del_cruz; i=i+2){
-	      tmp_image[(point+i)*3] = 100;
-	      tmp_image[(point+i)*3+1] = 100;
-	      tmp_image[(point+i)*3+2] = 150;
-	    }
+                 /* dibujamos una linea horizontal */
+                 for (i=-ancho_del_cruz; i<ancho_del_cruz; i=i+2){
+                    tmp_image[(point+i)*3] = 100;
+                    tmp_image[(point+i)*3+1] = 100;
+                    tmp_image[(point+i)*3+2] = 150;
+                 }
 	    
-	    k=0;
-	    /* dibujamos una linea vertical */
-	    for (i=-ancho_del_cruz*320; k<2*ancho_del_cruz; i+=320){
-	      k++;
-	      tmp_image[(point+i)*3] = 100;
-	      tmp_image[(point+i)*3+1] = 100;
-	      tmp_image[(point+i)*3+2] = 150;
-	    }
+                 k=0;
+                 /* dibujamos una linea vertical */
+                 for (i=-ancho_del_cruz*(*width); k<2*ancho_del_cruz; i+=(*width)){
+                    k++;
+                    tmp_image[(point+i)*3] = 100;
+                    tmp_image[(point+i)*3+1] = 100;
+                    tmp_image[(point+i)*3+2] = 150;
+                 }
 	    
-	  }else{
+              }else{
 	    
-	    /* dibujamos una linea horizontal */
-	    for (i=-ancho_del_cruz; i<ancho_del_cruz; i++){
-	      tmp_image[(point+i)*3] = 0;
-	      tmp_image[(point+i)*3+1] = 0;
-	      tmp_image[(point+i)*3+2] = 255;
-	    }
+                 /* dibujamos una linea horizontal */
+                 for (i=-ancho_del_cruz; i<ancho_del_cruz; i++){
+                    tmp_image[(point+i)*3] = 0;
+                    tmp_image[(point+i)*3+1] = 0;
+                    tmp_image[(point+i)*3+2] = 255;
+                 }
 	    
-	    k=0;
-	    /* dibujamos una linea vertical */
-	    for (i=-ancho_del_cruz*320; k<2*ancho_del_cruz; i+=320){
-	      k++;
-	      tmp_image[(point+i)*3] = 0;
-	      tmp_image[(point+i)*3+1] = 0;
-	      tmp_image[(point+i)*3+2] = 255;
-	    }
-	  }
-	}
-      }
+                 k=0;
+                 /* dibujamos una linea vertical */
+                 for (i=-ancho_del_cruz*(*width); k<2*ancho_del_cruz; i+=(*width)){
+                    k++;
+                    tmp_image[(point+i)*3] = 0;
+                    tmp_image[(point+i)*3+1] = 0;
+                    tmp_image[(point+i)*3+2] = 255;
+                 }
+              }
+           }
+        }
     
-    for (j=0; j<NUMPUNTOS; j++)
-      {
+        for (j=0; j<NUMPUNTOS; j++)
+        {
 	
-	point = pnts_elegidos_en_img_rectificada[j].y*320 + 
-	  pnts_elegidos_en_img_rectificada[j].x;
+           point = pnts_elegidos_en_img_rectificada[j].y*(*width) +
+                 pnts_elegidos_en_img_rectificada[j].x;
 	
-	/* point > 0 si ha sido actualizado por lo menos una vez */
-	if (point > 0){
+           /* point > 0 si ha sido actualizado por lo menos una vez */
+           if (point > 0){
 
-	  if (pnts_elegidos_en_img_rectificada[j].draw == UNDODRAW){
+              if (pnts_elegidos_en_img_rectificada[j].draw == UNDODRAW){
 	    
-	    /* dibujamos una linea horizontal */
-	    for (i=-ancho_del_cruz; i<ancho_del_cruz; i=i+2){
-	      tmp_image_rect[(point+i)*3] = 100;
-	      tmp_image_rect[(point+i)*3+1] = 100;
-	      tmp_image_rect[(point+i)*3+2] = 150;
-	    }
+                 /* dibujamos una linea horizontal */
+                 for (i=-ancho_del_cruz; i<ancho_del_cruz; i=i+2){
+                    tmp_image_rect[(point+i)*3] = 100;
+                    tmp_image_rect[(point+i)*3+1] = 100;
+                    tmp_image_rect[(point+i)*3+2] = 150;
+                 }
 	    
-	    k=0;
-	    /* dibujamos una linea vertical */
-	    for (i=-ancho_del_cruz*320; k<2*ancho_del_cruz; i+=320){
-	      k++;
-	      tmp_image_rect[(point+i)*3] = 100;
-	      tmp_image_rect[(point+i)*3+1] = 100;
-	      tmp_image_rect[(point+i)*3+2] = 150;
-	    }
+                 k=0;
+                 /* dibujamos una linea vertical */
+                 for (i=-ancho_del_cruz*(*width); k<2*ancho_del_cruz; i+=(*width)){
+                    k++;
+                    tmp_image_rect[(point+i)*3] = 100;
+                    tmp_image_rect[(point+i)*3+1] = 100;
+                    tmp_image_rect[(point+i)*3+2] = 150;
+                 }
 
-	  }else{
+              }else{
 
-	    if (pnts_elegidos_en_img_rectificada[j].x<160){
-	      from = 0;
-	      to = (320-pnts_elegidos_en_img_rectificada[j].x);
-	      inc=1;
+                 if (pnts_elegidos_en_img_rectificada[j].x<((*width)/2)){
+                    from = 0;
+                    to = ((*width)-pnts_elegidos_en_img_rectificada[j].x);
+                    inc=1;
 
-	      /* dibujamos una linea horizontal */
-	      for (i=from; i<to; i=i+inc){
-		tmp_image_rect[(point+i)*3] = 255;
-		tmp_image_rect[(point+i)*3+1] = 0;
-		tmp_image_rect[(point+i)*3+2] = 0;
-	      }
+                    /* dibujamos una linea horizontal */
+                    for (i=from; i<to; i=i+inc){
+                       tmp_image_rect[(point+i)*3] = 255;
+                       tmp_image_rect[(point+i)*3+1] = 0;
+                       tmp_image_rect[(point+i)*3+2] = 0;
+                    }
 
-	    }else{
-	      from = (pnts_elegidos_en_img_rectificada[j].x);
-	      to = 0;
-	      inc=-1;
+                 }else{
+                    from = (pnts_elegidos_en_img_rectificada[j].x);
+                    to = 0;
+                    inc=-1;
 
-	      /* dibujamos una linea horizontal */
-	      for (i=from; i>to; i=i+inc){
-		tmp_image_rect[(point-i)*3] = 255;
-		tmp_image_rect[(point-i)*3+1] = 0;
-		tmp_image_rect[(point-i)*3+2] = 0;
-	      }
+                    /* dibujamos una linea horizontal */
+                    for (i=from; i>to; i=i+inc){
+                       tmp_image_rect[(point-i)*3] = 255;
+                       tmp_image_rect[(point-i)*3+1] = 0;
+                       tmp_image_rect[(point-i)*3+2] = 0;
+                    }
 	      
-	    }
+                 }
 
-	    if (pnts_elegidos_en_img_rectificada[j].y<120){
-	      from = -320;
-	      to = (240-pnts_elegidos_en_img_rectificada[j].y);
-	      inc=320;
+                 if (pnts_elegidos_en_img_rectificada[j].y<((*height)/2)){
+                    from = -(*width);
+                    to = ((*height)-pnts_elegidos_en_img_rectificada[j].y);
+                    inc=(*width);
 	      
-	      k=0;
-	      /* dibujamos una linea vertical */
-	      for (i=from; k<to; i+=inc){
-		k++;
-		tmp_image_rect[(point+i)*3] = 255;
-		tmp_image_rect[(point+i)*3+1] = 0;
-		tmp_image_rect[(point+i)*3+2] = 0;
-	      }
-	    }else{
+                    k=0;
+                    /* dibujamos una linea vertical */
+                    for (i=from; k<to; i+=inc){
+                       k++;
+                       tmp_image_rect[(point+i)*3] = 255;
+                       tmp_image_rect[(point+i)*3+1] = 0;
+                       tmp_image_rect[(point+i)*3+2] = 0;
+                    }
+                 }else{
 	      
-	      from = pnts_elegidos_en_img_rectificada[j].y*320;
-	      inc=-320;
-	      to = 0;
+                    from = pnts_elegidos_en_img_rectificada[j].y*(*width);
+                    inc=-(*width);
+                    to = 0;
 
-	      k=pnts_elegidos_en_img_rectificada[j].y;
-	      /* dibujamos una linea vertical */
-	      for (i=from; k>to; i+=inc){
-		k--;
-		tmp_image_rect[(point-i)*3] = 255;
-		tmp_image_rect[(point-i)*3+1] = 0;
-		tmp_image_rect[(point-i)*3+2] = 0;
-	      }
+                    k=pnts_elegidos_en_img_rectificada[j].y;
+                    /* dibujamos una linea vertical */
+                    for (i=from; k>to; i+=inc){
+                       k--;
+                       tmp_image_rect[(point-i)*3] = 255;
+                       tmp_image_rect[(point-i)*3+1] = 0;
+                       tmp_image_rect[(point-i)*3+2] = 0;
+                    }
 	      
-	    }
-	  }
-	}
-      }
-  }
+                 }
+              }
+           }
+        }
+     }
 
-  {
-     GdkPixbuf *imgBuff;
-     GtkImage *image=(GtkImage *)glade_xml_get_widget(xml, "imagen_de_entrada");
-     /* We read from our buffer: colorA */
+     {
+        GdkPixbuf *imgBuff;
+        GtkImage *image=(GtkImage *)glade_xml_get_widget(xml, "imagen_de_entrada");
+        /* We read from our buffer: colorA */
      
-     imgBuff = gdk_pixbuf_new_from_data((unsigned char *)tmp_image,
-                                         GDK_COLORSPACE_RGB,0,8,
-                                         SIFNTSC_COLUMNS,SIFNTSC_ROWS,
-                                         SIFNTSC_COLUMNS*3,NULL,NULL);
+        imgBuff = gdk_pixbuf_new_from_data((unsigned char *)tmp_image,
+                                            GDK_COLORSPACE_RGB,0,8,
+                                            (*width),(*height),
+                                              (*width)*3,NULL,NULL);
 
-     gtk_image_clear(image);
-     gtk_image_set_from_pixbuf(image, imgBuff);
-  }
-  {
-     GdkPixbuf *imgBuff;
-     GtkImage *image=(GtkImage *)glade_xml_get_widget(xml, "imagen_rectificada");
-     /* We read from our buffer: colorA */
+        gtk_image_clear(image);
+        gtk_image_set_from_pixbuf(image, imgBuff);
+     }
+     {
+        GdkPixbuf *imgBuff;
+        GtkImage *image=(GtkImage *)glade_xml_get_widget(xml, "imagen_rectificada");
+        /* We read from our buffer: colorA */
      
-     imgBuff = gdk_pixbuf_new_from_data((unsigned char *)tmp_image_rect,
-                                         GDK_COLORSPACE_RGB,0,8,
-                                         SIFNTSC_COLUMNS,SIFNTSC_ROWS,
-                                         SIFNTSC_COLUMNS*3,NULL,NULL);
+        imgBuff = gdk_pixbuf_new_from_data((unsigned char *)tmp_image_rect,
+                                            GDK_COLORSPACE_RGB,0,8,
+                                            (*width),(*height),
+                                              (*width)*3,NULL,NULL);
 
-     gtk_image_clear(image);
-     gtk_image_set_from_pixbuf(image, imgBuff);
+        gtk_image_clear(image);
+        gtk_image_set_from_pixbuf(image, imgBuff);
+     }
   }
+  pthread_mutex_unlock(&colorchange_mutex);
+  gdk_threads_enter();
+  gtk_window_resize (GTK_WINDOW(win),1,1);
+  gtk_widget_queue_draw(win);
+  gdk_threads_leave();
 }
 
 
@@ -882,9 +970,11 @@ void imgrectifier_guisuspend(void){
    if (win!=NULL){
       gdk_threads_enter();
       gtk_widget_hide(win);
+      gtk_widget_queue_draw(win);
       gdk_threads_leave();
    }
-   mysuspend();
+   if (mysuspend!=NULL)
+      mysuspend();
    mydelete_displaycallback(imgrectifier_guidisplay);
 }
 
@@ -909,6 +999,10 @@ void imgrectifier_guiresume(void){
          jdeshutdown(1);
       }
       win = glade_xml_get_widget(xml, "window1");
+      if (win==NULL){
+         fprintf(stderr, "Error al cargar la interfaz gráfica\n");
+         jdeshutdown(1);
+      }
       /*Conectar los callbacks*/
       {
          g_signal_connect (G_OBJECT (glade_xml_get_widget(xml,"capturar_imagen")),
@@ -929,15 +1023,20 @@ void imgrectifier_guiresume(void){
                            "button_press_event", G_CALLBACK (on_imagen_de_entrada_release), NULL);
          g_signal_connect (G_OBJECT (glade_xml_get_widget(xml,"evento_imagen_rectificada")),
                            "button_press_event", G_CALLBACK (on_imagen_rectificada_release), NULL);
+         g_signal_connect(G_OBJECT(glade_xml_get_widget(xml, "image_selection")),
+                          "changed", G_CALLBACK(on_image_sel_changed), NULL);
+         g_signal_connect(G_OBJECT(win), "delete-event",
+                          G_CALLBACK(on_delete_window), NULL);
+         g_signal_connect(G_OBJECT(glade_xml_get_widget(xml, "help")),
+                          "clicked", G_CALLBACK(on_help_clicked), NULL);
+         g_signal_connect(G_OBJECT(glade_xml_get_widget(xml, "about_imgrectifier")),
+                          "response", G_CALLBACK(on_help_close), NULL);
+         g_signal_connect(G_OBJECT(glade_xml_get_widget(xml, "about_imgrectifier")),
+                          "delete-event", G_CALLBACK(on_help_destroy), NULL);
       }
-      if (win==NULL){
-         fprintf(stderr, "Error al cargar la interfaz gráfica\n");
-         jdeshutdown(1);
-      }
-      else{
-         gtk_widget_show(win);
-         gtk_widget_queue_draw(GTK_WIDGET(win));
-      }
+      gtk_widget_show(win);
+      gtk_widget_queue_draw(GTK_WIDGET(win));
+      
       gdk_threads_leave();
    }
    else{
@@ -947,7 +1046,8 @@ void imgrectifier_guiresume(void){
       gtk_widget_queue_draw(GTK_WIDGET(win));
       gdk_threads_leave();
    }
-   
-   myresume(imgrectifier_id,NULL,NULL);
+
+   if (myresume !=NULL)
+      myresume(imgrectifier_id,NULL,NULL);
    myregister_displaycallback(imgrectifier_guidisplay);
 }
