@@ -620,41 +620,36 @@ int introrob_button_pressed_on_micanvas(FL_OBJECT *ob, Window win, int win_width
   /* in order to know the mouse button that created the event */
   introrob_mouse_button=xev->xkey.keycode;
   if(introrob_canvas_mouse_button_pressed==0){
-    if ((introrob_mouse_button==MOUSEMIDDLE))
+    if (introrob_mouse_button==MOUSELEFT)
       {
-	/* Target for VFF navigation getting mouse coordenates */
+	/* getting mouse coordenates. win will be always the canvas window, because this callback has been defined only for that canvas */  
       fl_get_win_mouse(win,&x,&y,&keymap);
+      /* from graphical coordinates to spatial ones */
       ygraf=((float) (introrob_height/2-y))/introrob_escala;
       xgraf=((float) (x-introrob_width/2))/introrob_escala;
+
+      /* Target for VFF navigation getting mouse coordenates */
       oldvfftarget.x=vfftarget.x;
       oldvfftarget.y=vfftarget.y;
       vfftarget.y=(ygraf-introrob_odometrico[1])*introrob_odometrico[3]+(-xgraf+introrob_odometrico[0])*introrob_odometrico[4];
       vfftarget.x=(ygraf-introrob_odometrico[1])*introrob_odometrico[4]+(xgraf-introrob_odometrico[0])*introrob_odometrico[3];
-        }
-    else if((introrob_mouse_button==MOUSELEFT)||(introrob_mouse_button==MOUSERIGHT)){
-      /* a button has been pressed */
-      introrob_canvas_mouse_button_pressed=1;
-      
-      /* getting mouse coordenates. win will be always the canvas window, because this callback has been defined only for that canvas */  
-      fl_get_win_mouse(win,&introrob_x_canvas,&introrob_y_canvas,&keymap);
-      old_introrob_x_canvas=introrob_x_canvas;
-      old_introrob_y_canvas=introrob_y_canvas;
-      
-      /* from graphical coordinates to spatial ones */
-      ygraf=((float) (introrob_height/2-introrob_y_canvas))/introrob_escala;
-      xgraf=((float) (introrob_x_canvas-introrob_width/2))/introrob_escala;
-      introrob_mouse_y=(ygraf-introrob_odometrico[1])*introrob_odometrico[3]+(-xgraf+introrob_odometrico[0])*introrob_odometrico[4];
-      introrob_mouse_x=(ygraf-introrob_odometrico[1])*introrob_odometrico[4]+(xgraf-introrob_odometrico[0])*introrob_odometrico[3];
+      introrob_mouse_y=vfftarget.y;
+      introrob_mouse_x=vfftarget.x;
       introrob_mouse_new=1;
-      
-      /*printf("(%d,%d) Canvas: Click on (%.2f,%.2f)\n",x,y,introrob_mouse_x,introrob_mouse_y);
-	printf("robot_x=%.2f robot_y=%.2f robot_theta=%.2f\n",myencoders[0],myencoders[1],myencoders[2]);*/
-      
-    }else if(introrob_mouse_button==MOUSEWHEELDOWN){
+      }
+    else if ((introrob_mouse_button==MOUSERIGHT)||(introrob_mouse_button==MOUSEMIDDLE))
+      {
+	introrob_canvas_mouse_button_pressed=1;
+	/* For canvas displacement on 2D world (mouseright) or teleoperation (mousemiddle) */
+	fl_get_win_mouse(win,&introrob_x_canvas,&introrob_y_canvas,&keymap);
+	old_introrob_x_canvas=introrob_x_canvas;
+	old_introrob_y_canvas=introrob_y_canvas;
+      }
+    else if(introrob_mouse_button==MOUSEWHEELDOWN){
       /* a button has been pressed */
       introrob_canvas_mouse_button_pressed=1;
 
-      /* modifing scale */
+      /* modifing scale of the visualization window */
       introrob_rango-=1000;
       if(introrob_rango<=RANGO_MIN) introrob_rango=RANGO_MIN;
       fl_set_slider_value(fd_introrobgui->escala,introrob_rango);
@@ -665,7 +660,7 @@ int introrob_button_pressed_on_micanvas(FL_OBJECT *ob, Window win, int win_width
       /* a button has been pressed */
       introrob_canvas_mouse_button_pressed=1;
 
-      /* modifing scale */
+      /* modifing scale of the visualization window */
       introrob_rango+=1000;
       if(introrob_rango>=RANGO_MAX) introrob_rango=RANGO_MAX;
       fl_set_slider_value(fd_introrobgui->escala,introrob_rango);
@@ -689,7 +684,7 @@ int introrob_mouse_motion_on_micanvas(FL_OBJECT *ob, Window win, int win_width, 
     /* getting mouse coordenates. win will be always the canvas window, because this callback has been defined only for that canvas */  
     fl_get_win_mouse(win,&introrob_x_canvas,&introrob_y_canvas,&keymap);
 
-    if(introrob_mouse_button==MOUSELEFT){
+    if(introrob_mouse_button==MOUSEMIDDLE){
       if (introrob_state==teleoperated)
 	{
 	/* robot is being moved using the canvas */
@@ -748,14 +743,13 @@ int introrob_mouse_motion_on_micanvas(FL_OBJECT *ob, Window win, int win_width, 
       }
       
     }else if(introrob_mouse_button==MOUSERIGHT){
-
       /* getting difference between old and new coordenates */
       diff_x=(old_introrob_x_canvas-introrob_x_canvas);
       diff_y=(introrob_y_canvas-old_introrob_y_canvas);
       old_introrob_x_canvas=introrob_x_canvas;
       old_introrob_y_canvas=introrob_y_canvas;
 
-      /* changing odometric range */
+      /* changing the visualization window position */
       introrob_odometrico[0]+=introrob_rango*(diff_x)*(0.005);
       introrob_odometrico[1]+=introrob_rango*(diff_y)*(0.005);
       introrob_visual_refresh=TRUE;
@@ -771,7 +765,7 @@ int introrob_button_released_on_micanvas(FL_OBJECT *ob, Window win, int win_widt
   
   if(introrob_canvas_mouse_button_pressed==1){
 
-    if(introrob_mouse_button==MOUSELEFT){
+    if(introrob_mouse_button==MOUSEMIDDLE){
       if (introrob_state==teleoperated){
 	/* robot is being stopped */
 	introrob_robot_mouse_motion=1;
