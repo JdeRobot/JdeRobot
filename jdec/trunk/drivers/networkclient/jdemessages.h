@@ -84,6 +84,7 @@ typedef enum {
    NETWORKSERVER_pantilt_reset,
    NETWORKSERVER_pantilt_origin,
    NETWORKSERVER_pantilt_halt,
+
    NETWORKSERVER_grey8bpp_image_query,
    NETWORKSERVER_grey8bpp_image,
    NETWORKSERVER_logpolar_image_query,
@@ -91,7 +92,18 @@ typedef enum {
    NETWORKSERVER_y8bpp_sifntsc_image_query,
    NETWORKSERVER_y8bpp_sifntsc_image,
    NETWORKSERVER_rgb24bpp_sifntsc_image_query,
-   NETWORKSERVER_rgb24bpp_sifntsc_image
+   NETWORKSERVER_rgb24bpp_sifntsc_image,
+
+   NETWORKSERVER_zoom_encoders,
+   NETWORKSERVER_zoom_limits_query,
+   NETWORKSERVER_zoom_limits,
+   NETWORKSERVER_zoom_position,
+
+   NETWORKSERVER_subscribe_zoom_encoders,
+   NETWORKSERVER_unsubscribe_zoom_encoders,
+
+
+   NETWORKSERVER_error
 }JDESocket_Messages;
 
 #endif

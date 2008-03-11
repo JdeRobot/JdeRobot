@@ -88,6 +88,13 @@ void cambiar_imagen(int i){
 }
 
 /*Callbacks*/
+gboolean on_delete_window (GtkWidget *widget, GdkEvent *event, gpointer user_data){
+   gdk_threads_leave();
+   image_viewer_guisuspend();
+   gdk_threads_enter();
+   return TRUE;
+}
+
 void on_img_sel_changed(GtkComboBoxEntry *img_sel, gpointer user_data){
    /*Hay que comprobar el valor que tiene*/
    char *valor;
@@ -202,6 +209,7 @@ void image_viewer_imports(){
 /*Exportar símbolos*/
 void image_viewer_exports(){
 
+   myexport("image_viewer", "id", &image_viewer_id);
    myexport("image_viewer","cycle",&image_viewer_cycle);
    myexport("image_viewer","resume",(void *)image_viewer_resume);
    myexport("image_viewer","suspend",(void *)image_viewer_suspend);
@@ -355,12 +363,13 @@ void image_viewer_guidisplay(){
 
 
 void image_viewer_guisuspend(void){
+   mydelete_displaycallback(image_viewer_guidisplay);
    if (win!=NULL){
       gdk_threads_enter();
       gtk_widget_hide(win);
       gdk_threads_leave();
    }
-   mydelete_displaycallback(image_viewer_guidisplay);
+   all[image_viewer_id].guistate=pending_off;
 }
 
 void image_viewer_guiresume(void){
@@ -390,6 +399,8 @@ void image_viewer_guiresume(void){
          sel_ent=(GtkComboBoxEntry *)glade_xml_get_widget(xml, "img_sel");
          g_signal_connect(G_OBJECT(sel_ent), "changed",
                           G_CALLBACK(on_img_sel_changed), NULL);
+         g_signal_connect(G_OBJECT(win), "delete-event",
+                          G_CALLBACK(on_delete_window), NULL);
       }
       if (win==NULL){
          fprintf(stderr, "Error al cargar la interfaz gráfica\n");
@@ -415,5 +426,6 @@ void image_viewer_guiresume(void){
    }
 
    myregister_displaycallback(image_viewer_guidisplay);
+   all[image_viewer_id].guistate=pending_on;
 }
 

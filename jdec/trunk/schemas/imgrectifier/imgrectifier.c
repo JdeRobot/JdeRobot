@@ -23,6 +23,7 @@
 #include "jde.h"
 #include "limits.h"
 #include "graphics_gtk.h"
+#include <imgrectifier.h>
 
 #include <glade/glade.h>
 #include <gtk/gtk.h>
@@ -31,6 +32,8 @@
 /** Vamos a usar GSL para operaciones matriciales*/
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_multifit.h>
+
+
 
 /* Clallback definition */
 gboolean on_delete_window (GtkWidget *widget, GdkEvent *event, gpointer user_data);
@@ -338,7 +341,8 @@ void imgrectifier_suspend()
   pthread_mutex_lock(&(all[imgrectifier_id].mymutex));
   put_state(imgrectifier_id,slept);
   printf("imgrectifier: off\n");
-  mysuspend();
+  if (mysuspend!=NULL)
+     mysuspend();
   pthread_mutex_unlock(&(all[imgrectifier_id].mymutex));
   /*  printf("imgrectifier: suelto-suspend\n");*/
 }
@@ -505,7 +509,8 @@ void imgrectifier_startup()
   pthread_mutex_lock(&(all[imgrectifier_id].mymutex));
   printf("imgrectifier schema started up\n");
   imgrectifier_init();
-  
+
+  myexport("imgrectifier","id",&imgrectifier_id);
   myexport("imgrectifier","cycle",&imgrectifier_cycle);
   myexport("imgrectifier","resume",(void *)imgrectifier_resume);
   myexport("imgrectifier","suspend",(void *)imgrectifier_suspend);
@@ -525,8 +530,9 @@ void imgrectifier_startup()
 /*Callbacks*/
 
 gboolean on_delete_window (GtkWidget *widget, GdkEvent *event, gpointer user_data){
-   gtk_widget_hide(widget);
-   gtk_widget_queue_draw(widget);
+   gdk_threads_leave();
+   imgrectifier_guisuspend();
+   gdk_threads_enter();
    return TRUE;
 }
 
@@ -967,6 +973,7 @@ void imgrectifier_guidisplay()
 
 
 void imgrectifier_guisuspend(void){
+   mydelete_displaycallback(imgrectifier_guidisplay);
    if (win!=NULL){
       gdk_threads_enter();
       gtk_widget_hide(win);
@@ -975,7 +982,7 @@ void imgrectifier_guisuspend(void){
    }
    if (mysuspend!=NULL)
       mysuspend();
-   mydelete_displaycallback(imgrectifier_guidisplay);
+   all[imgrectifier_id].guistate=pending_off;
 }
 
 void imgrectifier_guiresume(void){

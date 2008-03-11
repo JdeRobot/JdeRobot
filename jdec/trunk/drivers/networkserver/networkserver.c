@@ -55,8 +55,10 @@
 #define VARCOLORB_DEVICE 11
 #define VARCOLORC_DEVICE 12
 #define VARCOLORD_DEVICE 13
+#define ZOOM_ENCODERS_DEVICE 14
+#define ZOOM_MOTORS_DEVICE 15
       /* number of devices */
-#define MAXDEVICE 14
+#define MAXDEVICE 16
 
 
 /* networkserver driver API options */
@@ -208,18 +210,15 @@ int networkserver_parseconf(char *configfile){
                         /* first word of the line */
                         if (sscanf(buffer_file2,"%s",word3)==1){
                            if (strcmp(word3,"end_driver")==0) {
-                              while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
                               driver_config_parsed=1;
                               end_section=1;
                               end_parse=1;
 		    
                            }else if (strcmp(word3,"driver")==0) {
-                              while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
                               printf("networkserver: error in config file.\n'end_section' keyword required before starting new driver section.\n");
                               end_section=1; end_parse=1;
 
                            }else if(strcmp(word3,"serves")==0){
-                              while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) z++;
                               if(sscanf(buffer_file2,"%s %s %s",word3,word4,word5)>2){
 		      
                                  if((strcmp(word4,"colorA")==0)&&(serve_device[COLORA_DEVICE]==0)){
@@ -260,13 +259,49 @@ int networkserver_parseconf(char *configfile){
                               }
                               else if(sscanf(buffer_file2,"%s %s",word3,word4)>1){
 		      
-                                 if((strcmp(word4,"laser")==0)&&(serve_device[LASER_DEVICE]==0)){serve_device[LASER_DEVICE]=1;}
-                                 else if((strcmp(word4,"sonars")==0)&&(serve_device[SONARS_DEVICE]==0)){serve_device[SONARS_DEVICE]=1;}
-                                 else if((strcmp(word4,"encoders")==0)&&(serve_device[ENCODERS_DEVICE]==0)){serve_device[ENCODERS_DEVICE]=1;}
-                                 else if((strcmp(word4,"motors")==0)&&(serve_device[MOTORS_DEVICE]==0)){serve_device[MOTORS_DEVICE]=1;}
-                                 else if((strcmp(word4,"pantiltencoders")==0)&&(serve_device[PANTILT_ENCODERS_DEVICE]==0)){serve_device[PANTILT_ENCODERS_DEVICE]=1;}
-                                 else if((strcmp(word4,"pantiltmotors")==0)&&(serve_device[PANTILT_MOTORS_DEVICE]==0)){serve_device[PANTILT_MOTORS_DEVICE]=1;}
-                                 else{printf("networkserver: serves line incorrect\n");}
+                                 if ((strcmp(word4,"laser")==0) &&
+                                     (serve_device[LASER_DEVICE]==0))
+                                 {
+                                    serve_device[LASER_DEVICE]=1;
+                                 }
+                                 else if ((strcmp(word4,"sonars")==0) &&
+                                           (serve_device[SONARS_DEVICE]==0))
+                                 {
+                                    serve_device[SONARS_DEVICE]=1;
+                                 }
+                                 else if ((strcmp(word4,"encoders")==0) &&
+                                           (serve_device[ENCODERS_DEVICE]==0))
+                                 {
+                                    serve_device[ENCODERS_DEVICE]=1;
+                                 }
+                                 else if ((strcmp(word4,"motors")==0) &&
+                                           (serve_device[MOTORS_DEVICE]==0))
+                                 {
+                                    serve_device[MOTORS_DEVICE]=1;
+                                 }
+                                 else if ((strcmp(word4,"pantiltencoders")==0) &&
+                                           (serve_device[PANTILT_ENCODERS_DEVICE]==0))
+                                 {
+                                    serve_device[PANTILT_ENCODERS_DEVICE]=1;
+                                 }
+                                 else if ((strcmp(word4,"pantiltmotors")==0) &&
+                                           (serve_device[PANTILT_MOTORS_DEVICE]==0))
+                                 {
+                                    serve_device[PANTILT_MOTORS_DEVICE]=1;
+                                 }
+                                 else  if ((strcmp(word4,"zencoders")==0) &&
+                                           (serve_device[ZOOM_ENCODERS_DEVICE]==0))
+                                 {
+                                    serve_device[ZOOM_ENCODERS_DEVICE]=1;
+                                 }
+                                 else if ((strcmp(word4,"zmotors")==0) &&
+                                           (serve_device[ZOOM_MOTORS_DEVICE]==0))
+                                 {
+                                    serve_device[ZOOM_MOTORS_DEVICE]=1;
+                                 }
+                                 else{
+                                    printf("networkserver: serves line incorrect\n");
+                                 }
                               }
 
                            }else if(strcmp(word3,"socket")==0){
@@ -479,9 +514,9 @@ void init(){
                static float *pantilt_motors[4];
                variables[i]=pantilt_motors;
                pantilt_motors[0]=myimport ("ptmotors", "longitude");
-               pantilt_motors[1]=myimport ("ptencoders", "latitude");
+               pantilt_motors[1]=myimport ("ptmotors", "latitude");
                pantilt_motors[2]=myimport ("ptmotors", "longitude_speed");
-               pantilt_motors[3]=myimport ("ptencoders", "latitude_speed");
+               pantilt_motors[3]=myimport ("ptmotors", "latitude_speed");
                resume[i]=(resumeFn) myimport("ptmotors", "resume");
                suspend[i]=(suspendFn) myimport("ptmotors", "suspend");
                if (!pantilt_motors[0] || !pantilt_motors[1] ||
@@ -489,6 +524,37 @@ void init(){
                {
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'pantilt_motors', they'll not be served\n");
+               }
+               else{
+                  resume[i](-1, NULL, NULL);
+               }
+               break;
+            }
+            case ZOOM_ENCODERS_DEVICE:
+            {
+               variables[i]=myimport("zencoders", "zoom_position");
+               resume[i]=(resumeFn) myimport("zencoders", "resume");
+               suspend[i]=(suspendFn) myimport("zencoders", "suspend");
+               if (!variables[i]){
+                  serve_device[i]=0;
+                  fprintf (stderr, "I can't fetch 'zencoders', it'll not be served\n");
+               }
+               else{
+                  resume[i](-1, NULL, NULL);
+               }
+               break;
+            }
+            case ZOOM_MOTORS_DEVICE:
+            {
+               static float *zoom_motors[2];
+               variables[i]=zoom_motors;
+               zoom_motors[0]=myimport("zmotors", "zoom");
+               zoom_motors[1]=myimport("zmotors", "zoom_speed");
+               resume[i]=(resumeFn) myimport("zmotors", "resume");
+               suspend[i]=(suspendFn) myimport("zmotors", "suspend");
+               if (!zoom_motors[0] || !zoom_motors[1]){
+                  serve_device[i]=0;
+                  fprintf (stderr, "I can't fetch 'zmotors', it'll not be served\n");
                }
                else{
                   resume[i](-1, NULL, NULL);
@@ -758,17 +824,85 @@ void dispatch_petition(struct client *info, char *petition) {
 
 
    else if (codigo_mensaje==NETWORKSERVER_pantilt_position){
-      float lat, longt, lat_sp, longt_sp;
       if (serve_device[PANTILT_MOTORS_DEVICE]==1){
+         float lat, longt, lat_sp, longt_sp;
          if (sscanf(petition,"%ld %f %f %f %f",&codigo_mensaje,&longt, &lat,
-             &longt_sp, &lat_sp)!=5)
-            printf ("No entiendo el mensaje de motores del pantilt.\n");
+             &longt_sp, &lat_sp)<5)
+            printf ("No entiendo el mensaje de motores del pantilt.\n"
+                   "%s\n",petition);
          else{
             *(((float **)(variables[PANTILT_MOTORS_DEVICE]))[0])=longt;
             *(((float **)(variables[PANTILT_MOTORS_DEVICE]))[1])=lat;
             *(((float **)(variables[PANTILT_MOTORS_DEVICE]))[2])=longt_sp;
-            *(((float **)(variables[PANTILT_MOTORS_DEVICE]))[4])=lat_sp;
+            *(((float **)(variables[PANTILT_MOTORS_DEVICE]))[3])=lat_sp;
          }
+      }
+   }
+
+   else if (codigo_mensaje==NETWORKSERVER_pantilt_limits_query){
+      if (serve_device[PANTILT_MOTORS_DEVICE]==1){
+         char buff[MAX_MESSAGE];
+         float *max_long=myimport("ptmotors", "max_longitude");
+         float *max_lat=myimport("ptmotors", "max_latitude");
+         float *min_long=myimport("ptmotors", "min_longitude");
+         float *min_lat=myimport("ptmotors", "min_latitude");
+         float *max_long_sp=myimport("ptmotors", "max_longitude_speed");
+         float *max_lat_sp=myimport("ptmotors", "max_latitude_speed");
+
+         if (max_long!=NULL && max_lat!=NULL && min_long!=NULL && min_lat!=NULL
+              && max_long_sp!=NULL && max_lat_sp!=NULL)
+         {
+            snprintf (buff, MAX_MESSAGE, "%d %.2f %.2f %.2f %.2f %.2f %.2f\n",
+                      NETWORKSERVER_pantilt_limits, *max_long, *max_lat,
+                      *min_long, *min_lat, *max_long_sp, *max_lat_sp);
+         }
+         else{
+            snprintf (buff, MAX_MESSAGE,
+                      "%d Error importing 'ptmotors' varialbes\n",
+                      NETWORKSERVER_error);
+         }
+         my_write(info->cs,buff, strlen(buff));
+      }
+   }
+
+   else if (codigo_mensaje==NETWORKSERVER_subscribe_zoom_encoders){
+      if (serve_device[ZOOM_ENCODERS_DEVICE])
+         info->subscriptions[ZOOM_ENCODERS_DEVICE]=1;
+   }
+   else if (codigo_mensaje==NETWORKSERVER_unsubscribe_zoom_encoders){
+      info->subscriptions[ZOOM_ENCODERS_DEVICE]=0;
+   }
+
+
+   else if (codigo_mensaje==NETWORKSERVER_zoom_position){
+      if (serve_device[PANTILT_MOTORS_DEVICE]==1){
+         float z, z_sp;
+         if (sscanf(petition,"%ld %f %f",&codigo_mensaje,&z, &z_sp)!=3)
+            printf ("No entiendo el mensaje de motores del zoom.\n");
+         else{
+            *(((float **)(variables[ZOOM_MOTORS_DEVICE]))[0])=z;
+            *(((float **)(variables[ZOOM_MOTORS_DEVICE]))[1])=z_sp;
+         }
+      }
+   }
+
+   else if (codigo_mensaje==NETWORKSERVER_zoom_limits_query){
+      if (serve_device[PANTILT_MOTORS_DEVICE]==1){
+         char buff[MAX_MESSAGE];
+         float *max_z=myimport("zmotors", "max_zoom");
+         float *min_z=myimport("zmotors", "min_zoom");
+         float *max_z_sp=myimport("zmotors", "max_zoom_speed");
+
+         if (max_z!=NULL && min_z!=NULL && max_z_sp!=NULL){
+            snprintf (buff, MAX_MESSAGE, "%d %.2f %.2f %.2f\n",
+                      NETWORKSERVER_zoom_limits, *max_z, *min_z, *max_z_sp);
+         }
+         else{
+            snprintf (buff, MAX_MESSAGE,
+                      "%d Error importing 'zmotors' varialbes\n",
+                      NETWORKSERVER_error);
+         }
+         my_write(info->cs,buff, strlen(buff));
       }
    }
 
@@ -878,11 +1012,29 @@ void dispatch_subscriptions(struct client * info) {
                   info->clocks[PANTILT_ENCODERS_DEVICE]=*clock;
                   /*Composición del mensaje*/
                   sprintf(buff, "%d %lu", NETWORKSERVER_pantilt_encoders,
-                          info->clocks[ENCODERS_DEVICE]);
+                          info->clocks[PANTILT_ENCODERS_DEVICE]);
                   sprintf(buff+strlen(buff)," %1.1f %1.1f\n",
                           (float)((float *)variables[i])[0],
                            (float)((float *)variables[i])[1]);
                   /*Envía tipo, hora, pan, tilt*/
+                  /*Envío del mensaje*/
+                  my_write(info->cs, buff, strlen(buff));
+               }
+               break;
+            }
+            case ZOOM_ENCODERS_DEVICE:
+            {
+               static unsigned long int *clock=NULL;
+               if (clock==NULL)
+                  clock=(unsigned long int *)myimport("zencoders", "clock");
+               if (info->clocks[ZOOM_ENCODERS_DEVICE]!=*clock){
+                  info->clocks[ZOOM_ENCODERS_DEVICE]=*clock;
+                  /*Composición del mensaje*/
+                  sprintf(buff, "%d %lu", NETWORKSERVER_zoom_encoders,
+                          info->clocks[ZOOM_ENCODERS_DEVICE]);
+                  sprintf(buff+strlen(buff)," %1.1f\n",
+                          ((float *)variables[i])[0]);
+                  /*Envía tipo, hora, zoom*/
                   /*Envío del mensaje*/
                   my_write(info->cs, buff, strlen(buff));
                }

@@ -19,7 +19,7 @@
  */
 
 extern void imgrectifier_startup();
-extern void imgrectifier_stop()
+extern void imgrectifier_stop();
 extern void imgrectifier_suspend();
 extern void imgrectifier_resume(int father, int *brothers, arbitration fn);
 extern void imgrectifier_guiresume();

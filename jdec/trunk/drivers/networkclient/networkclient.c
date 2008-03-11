@@ -56,9 +56,6 @@
 /** networkclient client name.*/
 char CLIENT_NAME[MAX_CLIENT_NAME]="jdec";
 
-/** networkclient max number of devices.*/
-#define MAXDEVICE 14
-
 /** Maximum number of images served*/
 #define MAXCAM 8
 
@@ -90,6 +87,13 @@ char CLIENT_NAME[MAX_CLIENT_NAME]="jdec";
 #define VARCOLORC_DEVICE 12
 /** networkclient varcolorD device id.*/
 #define VARCOLORD_DEVICE 13
+/** networkclient zencoders device id*/
+#define ZOOM_ENCODERS_DEVICE 14
+/** networkclient zmotors device id*/
+#define ZOOM_MOTORS_DEVICE 15
+
+/** networkclient max number of devices.*/
+#define MAXDEVICE 16
 
 /* 4 images, 4 robot devices and 2 devices for pantilt */
 /** networkclient pthreads structure.*/
@@ -157,18 +161,53 @@ int motors_schema_id;
 int ptmotors_schema_id;
 /** id for pantilt encoders schema.*/
 int ptencoders_schema_id;
+/** id for zoom motors schema.*/
+int zmotors_schema_id;
+/** id for zoom encoders schema.*/
+int zencoders_schema_id;
 
 /*API Variables servidas*/
+/** 'zmotors' schema zoom control*/
+float zoom;
+/** 'zmotors' schema zoom speed control*/
+float zoom_speed;
+/** 'zmotors' schema cycle control variable*/
+int zmotors_cycle;
+/** 'zmotors' schema maximum pantilt zoom value*/
+float max_zoom;
+/** 'zmotors' schema minimum pantilt zoom value*/
+float min_zoom;
+/** 'zmotors' schema maximum pantilt zoom speed value*/
+float max_zoom_speed;
+
+/** 'zencoders' schema zoom positions*/
+float zoom_position;
+/** 'zencoders' schema clock*/
+unsigned long int zencoders_clock;
+
+
 /** 'ptmotors' schema longitude control*/
-float longitude; /* degs, pan angle */
+float longitude=0; /* degs, pan angle */
 /** 'ptmotors' schema latitude control*/
-float latitude; /* degs, tilt angle */
+float latitude=0; /* degs, tilt angle */
 /** 'ptmotors' schema longitude speed control*/
 float longitude_speed;
 /** 'ptmotors' schema latitude speed control*/
 float latitude_speed;
 /** 'ptmotors' schema cycle control variable*/
 int pantiltmotors_cycle;
+/** 'ptmotors' schema maximum pantilt longitude value*/
+float max_longitude;
+/** 'ptmotors' schema minimum pantilt longitude value*/
+float min_longitude;
+/** 'ptmotors' schema maximum pantilt latitude value*/
+float max_latitude;
+/** 'ptmotors' schema minimum pantilt latitude value*/
+float min_latitude;
+/** 'ptmotors' schema maximum pantilt longitude speed value*/
+float max_longitude_speed;
+/** 'ptmotors' schema maximum pantilt latitude speed value*/
+float max_latitude_speed;
 
 /** 'ptencoders' schema pan angle information*/
 float pan_angle;   /* degs */
@@ -280,6 +319,10 @@ int varcolorD_refs=0;
 int ptmotors_refs=0;
 /** ptencoders ref counter*/
 int ptencoders_refs=0;
+/** zmotors ref counter*/
+int zmotors_refs=0;
+/** zencoders ref counter*/
+int zencoders_refs=0;
 
 /** mutex for ref counters*/
 pthread_mutex_t refmutex;
@@ -327,7 +370,7 @@ void networkclient_close(){
 
   if(serve_device[PANTILT_MOTORS_DEVICE]){
     /* pthread_mutex_lock(&mymutex[PANTILT_MOTORS_DEVICE]);*/
-    sprintf(last_message,"%ld %1.1f %1.1f\n",(long int)NETWORKSERVER_pantilt_position,0.,0.);
+    sprintf(last_message,"%ld %1.1f %1.1f %1.1f %1.1f\n", (long int)NETWORKSERVER_pantilt_position,longitude,latitude,longitude_speed,latitude_speed);
     write(device_socket[PANTILT_MOTORS_DEVICE],last_message,strlen(last_message));
     /* pthread_mutex_unlock(&mymutex[PANTILT_MOTORS_DEVICE]);*/
 
@@ -381,6 +424,121 @@ void networkclient_close(){
   }
 
   printf("driver networkclient off\n");
+}
+
+/** zencoders resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param fn arbitration function for this schema.
+ *  @return integer resuming result.*/
+int networkclient_zencoders_resume(int father, int *brothers, arbitration fn){
+   pthread_mutex_lock(&refmutex);
+   if (zencoders_refs>0){
+      zencoders_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      zencoders_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[ZOOM_ENCODERS_DEVICE==0])&&(serve_device[ZOOM_ENCODERS_DEVICE])){
+         char message_out[MAX_MESSAGE];
+      
+         printf("zencoders schema resume (networkclient driver)\n");
+         all[zencoders_schema_id].father = father;
+         all[zencoders_schema_id].fps = 0.;
+         all[zencoders_schema_id].k =0;
+         put_state(zencoders_schema_id,winner);
+
+         device_active[ZOOM_ENCODERS_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[ZOOM_ENCODERS_DEVICE]);
+         sprintf(message_out,"%d\n",NETWORKSERVER_subscribe_zoom_encoders);
+         write(device_socket[ZOOM_ENCODERS_DEVICE],message_out,strlen(message_out));
+         state[ZOOM_ENCODERS_DEVICE]=winner;
+         pthread_cond_signal(&condition[ZOOM_ENCODERS_DEVICE]);
+         pthread_mutex_unlock(&mymutex[ZOOM_ENCODERS_DEVICE]);
+      }
+   }
+   return 0;
+}
+
+/** zencoders suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
+int networkclient_zencoders_suspend(){
+   pthread_mutex_lock(&refmutex);
+   if (zencoders_refs>1){
+      zencoders_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      zencoders_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[ZOOM_ENCODERS_DEVICE])&&(serve_device[ZOOM_ENCODERS_DEVICE])){
+         char message_out[MAX_MESSAGE];
+
+         printf("zencoders schema suspend (networkclient driver)\n");
+         device_active[ZOOM_ENCODERS_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[ZOOM_ENCODERS_DEVICE]);
+         sprintf(message_out,"%d\n",NETWORKSERVER_unsubscribe_zoom_encoders);
+         write(device_socket[ZOOM_ENCODERS_DEVICE],message_out,strlen(message_out));
+         put_state(zencoders_schema_id,slept);
+         state[ZOOM_ENCODERS_DEVICE]=slept;
+         pthread_mutex_unlock(&mymutex[ZOOM_ENCODERS_DEVICE]);
+      }
+   }
+   return 0;
+}
+
+/** zmotors resume function following jdec platform API schemas.
+ *  @param father Father id for this schema.
+ *  @param brothers Brothers for this schema.
+ *  @param fn arbitration function for this schema.
+ *  @return integer resuming result.*/
+int networkclient_zoommotors_resume(int father, int *brothers, arbitration fn){
+   pthread_mutex_lock(&refmutex);
+   if (zmotors_refs>0){
+      zmotors_refs++;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      zmotors_refs=1;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[ZOOM_MOTORS_DEVICE==0])&&(serve_device[ZOOM_MOTORS_DEVICE])){
+         printf("zmotors schema resume (networkclient driver)\n");
+         all[zmotors_schema_id].father = father;
+         all[zmotors_schema_id].fps = 0.;
+         all[zmotors_schema_id].k =0;
+         put_state(zmotors_schema_id,winner);
+         device_active[ZOOM_MOTORS_DEVICE]=1;
+         pthread_mutex_lock(&mymutex[ZOOM_MOTORS_DEVICE]);
+         state[ZOOM_MOTORS_DEVICE]=winner;
+         pthread_cond_signal(&condition[ZOOM_MOTORS_DEVICE]);
+         pthread_mutex_unlock(&mymutex[ZOOM_MOTORS_DEVICE]);
+      }
+   }
+   return 0;
+}
+
+/** zoommotors suspend function following jdec platform API schemas.
+ *  @return integer suspending result.*/
+int networkclient_zoommotors_suspend(){
+   pthread_mutex_lock(&refmutex);
+   if (zmotors_refs>1){
+      zmotors_refs--;
+      pthread_mutex_unlock(&refmutex);
+   }
+   else{
+      zmotors_refs=0;
+      pthread_mutex_unlock(&refmutex);
+      if((device_active[ZOOM_MOTORS_DEVICE])&&(serve_device[ZOOM_MOTORS_DEVICE])){
+         printf("zmotors schema suspend (networkclient driver)\n");
+         device_active[ZOOM_MOTORS_DEVICE]=0;
+         pthread_mutex_lock(&mymutex[ZOOM_MOTORS_DEVICE]);
+         put_state(zmotors_schema_id,slept);
+         state[ZOOM_MOTORS_DEVICE]=slept;
+         pthread_mutex_unlock(&mymutex[ZOOM_MOTORS_DEVICE]);
+      }
+   }
+   return 0;
 }
 
 /** pantiltencoders resume function following jdec platform API schemas.
@@ -1158,6 +1316,139 @@ int networkclient_varcolorD_suspend(){
    return 0;
 }
 
+/** networkclient driver pthread function for zoomencoders reception.*/
+void *networkclient_zoomencoders_thread(void *not_used){
+   int j=0;
+   long int readn=0,bytes_readn=0,start=0;
+   int zoomencoders_trac;
+   char message_in[MAX_MESSAGE];
+   char lastmessage[MAX_MESSAGE];
+
+   printf("networkclient zoomencoders thread started\n");
+
+   do{
+
+      pthread_mutex_lock(&mymutex[ZOOM_ENCODERS_DEVICE]);
+
+      if (state[ZOOM_ENCODERS_DEVICE]==slept){
+         printf("networkclient zoomencoders thread goes sleep mode\n");
+         pthread_cond_wait(&condition[ZOOM_ENCODERS_DEVICE],&mymutex[ZOOM_ENCODERS_DEVICE]);
+         printf("networkclient zoomencoders thread woke up\n");
+         pthread_mutex_unlock(&mymutex[ZOOM_ENCODERS_DEVICE]);
+      }else{
+      
+         pthread_mutex_unlock(&mymutex[ZOOM_ENCODERS_DEVICE]);
+      
+         /* reading from socket */
+         readn=read(device_socket[ZOOM_ENCODERS_DEVICE],&(message_in[zoomencoders_trac]),MAX_MESSAGE-zoomencoders_trac);
+         bytes_readn=readn;
+
+         switch(readn){
+            case 0: exit(1); break;
+            case -1: break; /* nothing to read */
+            default:
+
+               start=0;
+               for(j=zoomencoders_trac;(j<MAX_MESSAGE)&&(j<zoomencoders_trac+bytes_readn);j++){
+                  if (message_in[j]=='\n'){
+                     int type;
+                     unsigned long int network_clock;
+		
+                     strncpy(lastmessage,&message_in[start],j-start);
+                     lastmessage[j-start]='\0';
+                     start=j+1;
+
+                     if (sscanf(lastmessage,"%d %lu",&type,&network_clock)!=2) {
+                        printf("networkclient: i don't understand message from networkserver to zoomencoders: (%s)\n",lastmessage);
+                     }else{
+
+                        int k=0;
+                        while((lastmessage[k]!='\n')&&(lastmessage[k]!=' ')&&(lastmessage[k]!='\0')) k++;
+                        k++;
+                        while((lastmessage[k]!='\n')&&(lastmessage[k]!=' ')&&(lastmessage[k]!='\0')) k++;
+                        if (type == NETWORKSERVER_zoom_encoders) {
+                           sscanf(&lastmessage[++j],"%f\n",&zoom_position);
+                           zencoders_clock=network_clock;
+                           speedcounter(zencoders_schema_id);
+                        }
+                     }
+                  }
+               }
+         }
+      }
+   }while(networkclient_close_command==0);
+   pthread_exit(0);
+}
+
+/** networkclient driver pthread function for zoommotors reception.*/
+void *networkclient_zoommotors_thread(void *not_used){
+
+   char zoommotors_out[MAX_MESSAGE];
+   
+   struct timeval a,b;
+   long diff, next;
+
+   FILE *server;
+
+   printf("networkclient zoommotors thread started\n");
+
+   /* Capture limits from server*/
+   sprintf(zoommotors_out,"%ld\n", (long int)NETWORKSERVER_zoom_limits_query);
+   write (device_socket[ZOOM_MOTORS_DEVICE], zoommotors_out,
+          strlen(zoommotors_out));
+   if ((server=fdopen(device_socket[ZOOM_MOTORS_DEVICE], "r+"))==NULL){
+      fprintf (stderr, "zmotors: I can't caputure limits from server: can't open\n");
+      jdeshutdown(-1);
+   }
+   if (fgets(zoommotors_out, MAX_MESSAGE, server)==NULL){
+      fprintf (stderr, "zmotors: I can't caputure limits from server: can't read\n");
+      jdeshutdown(-1);
+   }
+   {
+      long int type;
+      int readed;
+      readed=sscanf (zoommotors_out, "%ld %f %f %f\n", &type, &max_zoom,
+                     &min_zoom, &max_zoom_speed);
+      if (readed != 4 || type!=NETWORKSERVER_zoom_limits){
+         fprintf (stderr, "zmotors: I can't caputure limits from server: bad parameters\n");
+         fprintf (stderr, "zmotors: %s\n", zoommotors_out);
+         jdeshutdown(-1);
+      }
+   }
+   printf ("zmotors: limits captured\n");
+
+   do{
+      speedcounter(zmotors_schema_id);
+      pthread_mutex_lock(&mymutex[ZOOM_MOTORS_DEVICE]);
+
+      if (state[ZOOM_MOTORS_DEVICE]==slept){
+         printf("networkclient zoommotors thread goes sleep mode\n");
+         pthread_cond_wait(&condition[ZOOM_MOTORS_DEVICE],&mymutex[ZOOM_MOTORS_DEVICE]);
+         printf("networkclient zoommotors thread woke up\n");
+         pthread_mutex_unlock(&mymutex[ZOOM_MOTORS_DEVICE]);
+      }else{
+
+         gettimeofday(&a,NULL);
+         sprintf(zoommotors_out,"%ld %1.1f %1.1f\n",
+                 (long int)NETWORKSERVER_zoom_position,zoom_position,
+                  zoom_position);
+         write(device_socket[ZOOM_MOTORS_DEVICE],zoommotors_out,strlen(zoommotors_out));
+         pthread_mutex_unlock(&mymutex[ZOOM_MOTORS_DEVICE]);
+         gettimeofday(&b,NULL);
+
+         diff = (b.tv_sec-a.tv_sec)*1000000+b.tv_usec-a.tv_usec;
+         next = motors_cycle*1000-diff-10000;
+      
+         if (next>0)
+            usleep(zmotors_cycle*1000-diff);
+         else {
+            usleep(zmotors_cycle*1000);
+         }
+      }
+   }while(networkclient_close_command==0);
+   pthread_exit(0);
+}
+
 /** networkclient driver pthread function for pantiltencoders reception.*/
 void *networkclient_pantiltencoders_thread(void *not_used){
   int j=0;
@@ -1230,8 +1521,36 @@ void *networkclient_pantiltmotors_thread(void *not_used){
    struct timeval a,b;
    long diff, next;
 
+   FILE *server;
+
    printf("networkclient pantiltmotors thread started\n");
 
+   /* Capture limits from server*/
+   sprintf(pantiltmotors_out,"%ld\n", (long int)NETWORKSERVER_pantilt_limits_query);
+   write (device_socket[PANTILT_MOTORS_DEVICE], pantiltmotors_out,
+          strlen(pantiltmotors_out));
+   if ((server=fdopen(device_socket[PANTILT_MOTORS_DEVICE], "r+"))==NULL){
+      fprintf (stderr, "ptmotors: I can't caputure limits from server: can't open\n");
+      jdeshutdown(-1);
+   }
+   if (fgets(pantiltmotors_out, MAX_MESSAGE, server)==NULL){
+      fprintf (stderr, "ptmotors: I can't caputure limits from server: can't read\n");
+      jdeshutdown(-1);
+   }
+   {
+      long int type;
+      int readed;
+            readed=sscanf (pantiltmotors_out, "%ld %f %f %f %f %f %f\n", &type,
+                           &max_longitude, &max_latitude, &min_longitude,
+                           &min_latitude, &max_longitude_speed, &max_latitude_speed);
+      if (readed != 7 || type!=NETWORKSERVER_pantilt_limits){
+         fprintf (stderr, "ptmotors: I can't caputure limits from server: bad parameters\n");
+         jdeshutdown(-1);
+      }
+   }
+   printf ("ptmotors: limits captured\n");
+
+   
    do{
       speedcounter(ptmotors_schema_id);
       pthread_mutex_lock(&mymutex[PANTILT_MOTORS_DEVICE]);
@@ -2535,18 +2854,38 @@ int networkclient_parseconf(char *configfile){
 			strcpy(hostname[MOTORS_DEVICE],word5);
 			port[MOTORS_DEVICE]=atoi(word6);
 		      }
-		      else if((strcmp(word4,"pantiltencoders")==0)&&(serve_device[PANTILT_ENCODERS_DEVICE]==0)){
+		      else if((strcmp(word4,"pantiltencoders")==0) &&
+                               (serve_device[PANTILT_ENCODERS_DEVICE]==0))
+                      {
 			serve_device[PANTILT_ENCODERS_DEVICE]=1;
 			device_active[PANTILT_ENCODERS_DEVICE]=0;
 			strcpy(hostname[PANTILT_ENCODERS_DEVICE],word5);
 			port[PANTILT_ENCODERS_DEVICE]=atoi(word6);
 		      }
-		      else if((strcmp(word4,"pantiltmotors")==0)&&(serve_device[PANTILT_MOTORS_DEVICE]==0)){
+		      else if((strcmp(word4,"pantiltmotors")==0) &&
+                               (serve_device[PANTILT_MOTORS_DEVICE]==0))
+                      {
 			serve_device[PANTILT_MOTORS_DEVICE]=1;
 			device_active[PANTILT_MOTORS_DEVICE]=0;
 			strcpy(hostname[PANTILT_MOTORS_DEVICE],word5);
 			port[PANTILT_MOTORS_DEVICE]=atoi(word6);
 		      }
+                      else if((strcmp(word4,"zoomencoders")==0) &&
+                               (serve_device[ZOOM_ENCODERS_DEVICE]==0))
+                      {
+                         serve_device[ZOOM_ENCODERS_DEVICE]=1;
+                         device_active[ZOOM_ENCODERS_DEVICE]=0;
+                         strcpy(hostname[ZOOM_ENCODERS_DEVICE],word5);
+                         port[ZOOM_ENCODERS_DEVICE]=atoi(word6);
+                      }
+                      else if((strcmp(word4,"zoommotors")==0) &&
+                               (serve_device[ZOOM_MOTORS_DEVICE]==0))
+                      {
+                         serve_device[ZOOM_MOTORS_DEVICE]=1;
+                         device_active[ZOOM_MOTORS_DEVICE]=0;
+                         strcpy(hostname[ZOOM_MOTORS_DEVICE],word5);
+                         port[ZOOM_MOTORS_DEVICE]=atoi(word6);
+                      }
 		      else{
 			printf("networkclient: provides line incorrect\n");
 		      }
@@ -2629,16 +2968,54 @@ int networkclient_init(){
       /*if(fcntl(device_socket[i], F_SETFL, O_NONBLOCK) < 0) { printf("fcntl FSETFL, O_NONBLOCK\n");  exit(1);}*/
 
       switch(i){
-      case COLORA_DEVICE: printf("networkclient: connecting to networkserver for colorA at %s:%d ",hostname[i],port[i]); break;
-      case COLORB_DEVICE: printf("networkclient: connecting to networkserver for colorB at %s:%d ",hostname[i],port[i]); break;
-      case COLORC_DEVICE: printf("networkclient: connecting to networkserver for colorC at %s:%d ",hostname[i],port[i]); break;
-      case COLORD_DEVICE: printf("networkclient: connecting to networkserver for colorD at %s:%d ",hostname[i],port[i]); break;
-      case PANTILT_ENCODERS_DEVICE: printf("networkclient: connecting to networkserver for pantiltencoders at %s:%d ",hostname[i],port[i]); break;
-      case PANTILT_MOTORS_DEVICE: printf("networkclient: connecting to networkserver for pantiltmotors at %s:%d ",hostname[i],port[i]); break;
-      case LASER_DEVICE: printf("networkclient: connecting to networkserver for laser at %s:%d ",hostname[i],port[i]); break;
-      case SONARS_DEVICE: printf("networkclient: connecting to networkserver for sonars at %s:%d ",hostname[i],port[i]); break;
-      case ENCODERS_DEVICE: printf("networkclient: connecting to networkserver for encoders at %s:%d ",hostname[i],port[i]); break;
-      case MOTORS_DEVICE: printf("networkclient: connecting to networkserver for motors at %s:%d ",hostname[i],port[i]); break;
+      case COLORA_DEVICE:
+         printf("networkclient: connecting to networkserver for colorA at %s:%d ",
+                hostname[i],port[i]);
+         break;
+      case COLORB_DEVICE:
+         printf("networkclient: connecting to networkserver for colorB at %s:%d ",
+                hostname[i],port[i]);
+         break;
+      case COLORC_DEVICE:
+         printf("networkclient: connecting to networkserver for colorC at %s:%d ",
+                hostname[i],port[i]);
+         break;
+      case COLORD_DEVICE:
+         printf("networkclient: connecting to networkserver for colorD at %s:%d ",
+                hostname[i],port[i]);
+         break;
+      case PANTILT_ENCODERS_DEVICE:
+         printf("networkclient: connecting to networkserver for pantiltencoders"
+                " at %s:%d ",hostname[i],port[i]);
+         break;
+      case PANTILT_MOTORS_DEVICE:
+         printf("networkclient: connecting to networkserver for pantiltmotors"
+                " at %s:%d ",hostname[i],port[i]);
+         break;
+      case LASER_DEVICE:
+         printf("networkclient: connecting to networkserver for laser at %s:%d ",
+                hostname[i],port[i]);
+         break;
+      case SONARS_DEVICE:
+         printf("networkclient: connecting to networkserver for sonars at %s:%d ",
+                hostname[i],port[i]);
+         break;
+      case ENCODERS_DEVICE:
+         printf("networkclient: connecting to networkserver for encoders at %s:%d ",
+                hostname[i],port[i]);
+         break;
+      case MOTORS_DEVICE:
+         printf("networkclient: connecting to networkserver for motors at %s:%d ",
+                hostname[i],port[i]);
+         break;
+      case ZOOM_ENCODERS_DEVICE:
+         printf("networkclient: connecting to networkserver for zoomencoders"
+               " at %s:%d ",hostname[i],port[i]);
+         break;
+      case ZOOM_MOTORS_DEVICE:
+         printf("networkclient: connecting to networkserver for zoommotors"
+               " at %s:%d ",hostname[i],port[i]);
+         break;
       }
       
       if (device_socket[i]<0){
@@ -2655,46 +3032,68 @@ int networkclient_init(){
       state[i]=slept;
       switch(i){
       case COLORA_DEVICE:
-         pthread_create(&network_thread[COLORA_DEVICE],NULL,networkclient_colorA_thread,NULL);
+         pthread_create(&network_thread[COLORA_DEVICE],NULL,
+                         networkclient_colorA_thread,NULL);
          break;
       case COLORB_DEVICE:
-         pthread_create(&network_thread[COLORB_DEVICE],NULL,networkclient_colorB_thread,NULL);
+         pthread_create(&network_thread[COLORB_DEVICE],NULL,
+                         networkclient_colorB_thread,NULL);
          break;
       case COLORC_DEVICE:
-         pthread_create(&network_thread[COLORC_DEVICE],NULL,networkclient_colorC_thread,NULL);
+         pthread_create(&network_thread[COLORC_DEVICE],NULL,
+                         networkclient_colorC_thread,NULL);
          break;
       case COLORD_DEVICE:
-         pthread_create(&network_thread[COLORD_DEVICE],NULL,networkclient_colorD_thread,NULL);
+         pthread_create(&network_thread[COLORD_DEVICE],NULL,
+                         networkclient_colorD_thread,NULL);
          break;
       case VARCOLORA_DEVICE:
-         pthread_create(&network_thread[VARCOLORA_DEVICE],NULL,networkclient_varcolorA_thread,NULL);
+         pthread_create(&network_thread[VARCOLORA_DEVICE],NULL,
+                         networkclient_varcolorA_thread,NULL);
          break;
       case VARCOLORB_DEVICE:
-         pthread_create(&network_thread[VARCOLORB_DEVICE],NULL,networkclient_varcolorB_thread,NULL);
+         pthread_create(&network_thread[VARCOLORB_DEVICE],NULL,
+                         networkclient_varcolorB_thread,NULL);
          break;
       case VARCOLORC_DEVICE:
-         pthread_create(&network_thread[VARCOLORC_DEVICE],NULL,networkclient_varcolorC_thread,NULL);
+         pthread_create(&network_thread[VARCOLORC_DEVICE],NULL,
+                         networkclient_varcolorC_thread,NULL);
          break;
       case VARCOLORD_DEVICE:
-         pthread_create(&network_thread[VARCOLORD_DEVICE],NULL,networkclient_varcolorD_thread,NULL);
+         pthread_create(&network_thread[VARCOLORD_DEVICE],NULL,
+                         networkclient_varcolorD_thread,NULL);
          break;
       case PANTILT_ENCODERS_DEVICE:
-         pthread_create(&network_thread[PANTILT_ENCODERS_DEVICE],NULL,networkclient_pantiltencoders_thread,NULL);
+         pthread_create(&network_thread[PANTILT_ENCODERS_DEVICE],NULL
+               ,networkclient_pantiltencoders_thread,NULL);
          break;
       case PANTILT_MOTORS_DEVICE:
-         pthread_create(&network_thread[PANTILT_MOTORS_DEVICE],NULL,networkclient_pantiltmotors_thread,NULL);
+         pthread_create(&network_thread[PANTILT_MOTORS_DEVICE],NULL,
+                         networkclient_pantiltmotors_thread,NULL);
          break;
       case LASER_DEVICE:
-         pthread_create(&network_thread[LASER_DEVICE],NULL,networkclient_laser_thread,NULL);
+         pthread_create(&network_thread[LASER_DEVICE],NULL,
+                         networkclient_laser_thread,NULL);
          break;
       case SONARS_DEVICE:
-         pthread_create(&network_thread[SONARS_DEVICE],NULL,networkclient_sonars_thread,NULL);
+         pthread_create(&network_thread[SONARS_DEVICE],NULL,
+                         networkclient_sonars_thread,NULL);
          break;
       case ENCODERS_DEVICE:
-         pthread_create(&network_thread[ENCODERS_DEVICE],NULL,networkclient_encoders_thread,NULL);
+         pthread_create(&network_thread[ENCODERS_DEVICE],NULL,
+                         networkclient_encoders_thread,NULL);
          break;
       case MOTORS_DEVICE:
-         pthread_create(&network_thread[MOTORS_DEVICE],NULL,networkclient_motors_thread,NULL);
+         pthread_create(&network_thread[MOTORS_DEVICE],NULL,
+                         networkclient_motors_thread,NULL);
+         break;
+      case ZOOM_ENCODERS_DEVICE:
+         pthread_create(&network_thread[ZOOM_ENCODERS_DEVICE],NULL
+               ,networkclient_zoomencoders_thread,NULL);
+         break;
+      case ZOOM_MOTORS_DEVICE:
+         pthread_create(&network_thread[ZOOM_MOTORS_DEVICE],NULL,
+                         networkclient_zoommotors_thread,NULL);
          break;
       }
       pthread_mutex_unlock(&mymutex[i]);
@@ -2939,7 +3338,7 @@ void networkclient_startup(char *configfile)
     all[num_schemas].close = NULL;
     all[num_schemas].handle = NULL;
     num_schemas++;
-    pantiltmotors_cycle=150; /*Ajusta el cilo de envío de órdenes a los motores*/
+    pantiltmotors_cycle=150; /*Ajusta el ciclo de envío de órdenes a los motores*/
     myexport("ptmotors","id",&ptmotors_schema_id);
     myexport("ptmotors","longitude",&longitude);
     myexport("ptmotors","latitude",&latitude);
@@ -2948,6 +3347,12 @@ void networkclient_startup(char *configfile)
     myexport("ptmotors","cycle", &pantiltmotors_cycle);
     myexport("ptmotors","resume",(void *)&networkclient_pantiltmotors_resume);
     myexport("ptmotors","suspend",(void *)&networkclient_pantiltmotors_suspend);
+    myexport("ptmotors", "max_longitude", &max_longitude);
+    myexport("ptmotors", "max_latitude", &max_latitude);
+    myexport("ptmotors", "min_longitude", &min_longitude);
+    myexport("ptmotors", "min_latitude", &min_latitude);
+    myexport("ptmotors", "max_longitude_speed", &max_longitude_speed);
+    myexport("ptmotors", "max_latitude_speed", &max_latitude_speed);
   }
   if(serve_device[LASER_DEVICE]){
     all[num_schemas].id = (int *) &laser_schema_id;
@@ -3029,6 +3434,49 @@ void networkclient_startup(char *configfile)
     myexport("motors","cycle",&motors_cycle);
     myexport("motors","resume",(void *)&networkclient_motors_resume);
     myexport("motors","suspend",(void *)&networkclient_motors_suspend);
+  }
+  if(serve_device[ZOOM_ENCODERS_DEVICE]){
+     all[num_schemas].id = (int *) &zencoders_schema_id;
+     strcpy(all[num_schemas].name,"zencoders");
+     all[num_schemas].resume = (resumeFn) networkclient_zencoders_resume;
+     all[num_schemas].suspend = (suspendFn) networkclient_zencoders_suspend;
+     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+     (*(all[num_schemas].id)) = num_schemas;
+     all[num_schemas].fps = 0.;
+     all[num_schemas].k =0;
+     all[num_schemas].state=slept;
+     all[num_schemas].close = NULL;
+     all[num_schemas].handle = NULL;
+     num_schemas++;
+     myexport("zencoders","id",&zencoders_schema_id);
+     myexport("zencoders","zoom_position",&zoom_position);
+     myexport("zencoders", "clock", &zencoders_clock);
+     myexport("zencoders","resume",(void *)&networkclient_zencoders_resume);
+     myexport("zencoders","suspend",(void *)&networkclient_zencoders_suspend);
+  }
+  if(serve_device[ZOOM_MOTORS_DEVICE]){
+     all[num_schemas].id = (int *) &zmotors_schema_id;
+     strcpy(all[num_schemas].name,"zmotors");
+     all[num_schemas].resume = (resumeFn) networkclient_zoommotors_resume;
+     all[num_schemas].suspend = (suspendFn) networkclient_zoommotors_suspend;
+     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+     (*(all[num_schemas].id)) = num_schemas;
+     all[num_schemas].fps = 0.;
+     all[num_schemas].k =0;
+     all[num_schemas].state=slept;
+     all[num_schemas].close = NULL;
+     all[num_schemas].handle = NULL;
+     num_schemas++;
+     zmotors_cycle=100; /*Ajusta el ciclo de envío de órdenes a los motores*/
+     myexport("zmotors","id",&zmotors_schema_id);
+     myexport("zmotors","zoom",&zoom);
+     myexport("zmotors","zoom_speed",&zoom_speed);
+     myexport("zmotors","cycle", &zmotors_cycle);
+     myexport("zmotors","resume",(void *)&networkclient_zoommotors_resume);
+     myexport("zmotors","suspend",(void *)&networkclient_zoommotors_suspend);
+     myexport("zmotors", "max_zoom", &max_zoom);
+     myexport("zmotors", "min_zoom", &min_zoom);
+     myexport("zmotors", "max_zoom_speed", &max_zoom_speed);
   }
 
   printf("networkclient driver started up\n");
