@@ -202,14 +202,14 @@ void jdeshutdown(int sig)
 
   if (shutdown==1){
      /* unload all the schemas loaded as plugins */
-     for(i=0;i<num_schemas;i++)
+    for(i=num_schemas-1;i>=0;i--)
      {
         if (all[i].close!=NULL) all[i].close();
         if (all[i].handle!=NULL) dlclose(all[i].handle);
      }
 
      /* unload all the drivers loaded as plugins */
-     for(i=0;i<num_drivers;i++)
+     for(i=num_drivers-1;i>=0;i--)
      {
         if (mydrivers[i].close!=NULL) mydrivers[i].close();
         if (mydrivers[i].handle!=NULL) dlclose(mydrivers[i].handle);
