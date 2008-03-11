@@ -632,9 +632,10 @@ void player_close(){
 
 /** player driver laser function callback.*/
 void player_laser_callback(){
-   int j=0, i=0;
+   int i=0;
+   double j=0.0;
    int player_resolution;
-   int jump;
+   double jump;
    int offset;
   
    speedcounter(laser_schema_id);
@@ -642,10 +643,10 @@ void player_laser_callback(){
 
    /*Now we must transform player resolution into user defined resolution*/
    player_resolution=1/(RADTODEG*player_laser->scan_res);
-   jump=player_resolution / laser_resolution;
+   jump=(double)player_resolution / (double)laser_resolution;
  
    /*Check if is possible serve this resolution and number of measures*/
-   if (jump==0){
+   if (jump < 1.0){
       fprintf(stderr,"player: I can't serve laser at %d measures per degree\n",
               laser_resolution);
       jdeshutdown(-1);
@@ -660,7 +661,7 @@ void player_laser_callback(){
    i=0;
    j=offset;
    while(j<player_laser->scan_count && i<laser_number){
-      jde_laser[i]=(int)(player_laser->scan[j][0]*1000);
+      jde_laser[i]=(int)(player_laser->scan[(int)j][0]*1000);
       j=j+jump;
       i++;
    }
