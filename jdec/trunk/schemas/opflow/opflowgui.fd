@@ -1,0 +1,239 @@
+Magic: 13000
+
+Internal Form Definition File
+    (do not change)
+
+Number of forms: 1
+Unit of measure: FL_COORD_PIXEL
+
+=============== FORM ===============
+Name: opflowgui
+Width: 570
+Height: 450
+Number of Objects: 11
+
+--------------------
+class: FL_BOX
+type: UP_BOX
+box: 0 0 570 450
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLUE
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_FRAME
+type: ENGRAVED_FRAME
+box: 230 20 320 240
+boxtype: FL_NO_BOX
+colors: FL_BLACK FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: old image
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: old_img
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 230 270 100 40
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_BLACK
+alignment: FL_ALIGN_CENTER
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Show op. flow
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: show_arrows
+callback: 
+argument: 
+
+--------------------
+class: FL_VALSLIDER
+type: HOR_SLIDER
+box: 230 390 320 30
+boxtype: FL_DOWN_BOX
+colors: FL_LIGHTER_COL1 FL_LIGHTER_COL1
+alignment: FL_ALIGN_BOTTOM
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Min_eig
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: min_eig
+callback: 
+argument: 
+	bounds: 0 4
+	value: 0,8
+	slsize: 0,05
+
+--------------------
+class: FL_VALSLIDER
+type: VERT_SLIDER
+box: 30 20 30 280
+boxtype: FL_DOWN_BOX
+colors: FL_LIGHTER_COL1 FL_LIGHTER_COL1
+alignment: FL_ALIGN_BOTTOM
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Layers
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: layers
+callback: 
+argument: 
+	bounds: 20 1
+	precision: 0
+	value: 5
+	slsize: 0,15
+	step: 1
+
+--------------------
+class: FL_VALSLIDER
+type: VERT_SLIDER
+box: 80 20 30 280
+boxtype: FL_DOWN_BOX
+colors: FL_LIGHTER_COL1 FL_LIGHTER_COL1
+alignment: FL_ALIGN_BOTTOM
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Num. iter.
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: num_iters
+callback: 
+argument: 
+	bounds: 20 1
+	precision: 0
+	value: 7
+	slsize: 0,15
+	step: 1
+
+--------------------
+class: FL_VALSLIDER
+type: HOR_SLIDER
+box: 230 340 320 30
+boxtype: FL_DOWN_BOX
+colors: FL_LIGHTER_COL1 FL_LIGHTER_COL1
+alignment: FL_ALIGN_BOTTOM
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Max_eig
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: max_eig
+callback: 
+argument: 
+	bounds: 0 3
+	value: 0,8
+	slsize: 0,05
+
+--------------------
+class: FL_VALSLIDER
+type: VERT_SLIDER
+box: 130 20 30 280
+boxtype: FL_DOWN_BOX
+colors: FL_LIGHTER_COL1 FL_LIGHTER_COL1
+alignment: FL_ALIGN_BOTTOM
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Min. mov.
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: min_mov
+callback: 
+argument: 
+	bounds: 5 0,01
+	value: 1,5
+	slsize: 0,15
+	step: 0,01
+
+--------------------
+class: FL_VALSLIDER
+type: VERT_SLIDER
+box: 180 20 30 280
+boxtype: FL_DOWN_BOX
+colors: FL_LIGHTER_COL1 FL_LIGHTER_COL1
+alignment: FL_ALIGN_BOTTOM
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Max err.
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: max_error
+callback: 
+argument: 
+	bounds: 40 0
+	precision: 0
+	value: 30
+	slsize: 0,15
+	step: 0,01
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 340 270 100 40
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_BLACK
+alignment: FL_ALIGN_CENTER
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Show interesting points
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: show_interesting_p
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 450 270 100 40
+boxtype: FL_UP_BOX
+colors: FL_COL1 FL_BLACK
+alignment: FL_ALIGN_CENTER
+style: FL_BOLD_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Show mask
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: show_mask
+callback: 
+argument: 
+
+==============================
+create_the_forms

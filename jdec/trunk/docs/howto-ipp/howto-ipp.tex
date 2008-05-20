@@ -1,0 +1,242 @@
+\documentclass[oneside,a4paper,12pt]{article}
+\usepackage[latin1]{inputenc}
+\usepackage[spanish,activeacute]{babel}
+\usepackage{geometry}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{a4wide}
+\usepackage[normalsize]{subfigure}
+\usepackage{titlesec}
+
+\geometry{a4paper, left=3.5cm, right=2cm, top=3cm, bottom=2.0cm, headsep=1.5cm}
+
+\begin{document}
+
+\thispagestyle{empty}
+\baselineskip 1.35\baselineskip
+\vspace{2cm}
+\begin{figure}[htb]
+   \centerline{\resizebox{.50\textwidth}{!}{\includegraphics{figs/logo_urjc}}}
+   \vspace{2cm}
+   \centerline{\resizebox{.50\textwidth}{!}{\includegraphics{figs/logo}}}
+\end{figure}
+
+\begin{center}
+  {\Large {\bf HOWTO DE IPP }}
+  \vspace{2cm}
+\\Jos\'e Antonio Santos Cadenas
+\end{center}
+\newpage
+
+
+\section{Introducci\'on}
+
+La biblioteca IPP (Integrated Performance Primitives) de Intel es una biblioteca que permite mejorar el rendimiento de nuestras aplicaciones, ya que implementa funciones que realizan sus operaciones utilizando instrucciones del procesador más eficientes.
+
+En concreto ofrece funciones con alto rendimiento para:
+\begin{itemize}
+\item Trabajo con imágenes
+\item Trabajo con matrices
+\item Procesamiento de señales
+\item Criptografía
+\end{itemize}
+
+Para más información a cerca de las ventajas de ipp se puede consultar su documentación en el directorio \textit{doc} de la distribución instalada. En él encontraremos un nutrido manual en el que se explican detalladamente todas las funciones implementadas en la biblioteca. Así como algunas pinceladas generales y tutoriales de uso para familiarizarnos con la biblioteca.
+
+\section{Instalaci\'on}
+
+Para instalar IPP hay que descargar en primer lugar el paquete de instalación de la página web de intel\footnote{http://www.intel.com/cd/software/products/asmo-na/eng/perflib/ipp/302910.htm}.
+
+Para ello se elige el tipo de licencia que se desea. En mi caso elegí la licencia gratuita y no comercial para GNU/Linux y acepté los términos. Una vez aceptada la licencia, hay que seleccionar el producto a descargar, en este caso seleccionamos ``Intel® Integrated Performance Primitives (Intel® IPP) for Linux''. En este apartado nos pedirá una dirección de  email para registrarnos, a esta dirección nos enviará el número de licencia que tendremos que utilizar durante el período de instalación. \\
+
+Una vez registrados nos aparecerá una página como la de la figura \ref{fig:descarga}. Elegimos el paquete que nos convenga, para 32 o 64 bits (según la tecnología que se emplee). En mi caso seleccioné el paquete para IA-32 (marcado en la figura). Seleccionamos y comenzará la descarga.\\
+
+\begin{figure}
+	\begin{center}
+		\includegraphics[scale=0.6]{figs/web1.png}
+	\end{center}
+	\caption{Selección de los paquetes de descarga.}
+	\label{fig:descarga}
+\end{figure}
+
+Cuando finalice la descarga se extrae el contenido del archivo comprimido (tgz). Se nos creará un directorio llamado \textit{l\_ipp\_ia32\_p\_5.2.XXX}, dentro del cual existe un archivo de instalación llamado \textit{install.sh}. Le otorgaremos permisos de ejecución en caso de no tenerlos y lo ejecutamos.\\
+
+Nos irán apareciendo ventanas más o menos como las que siguen:\\
+
+\begin{tabular}{|p{14cm}|}
+		\hline
+	\begin{scriptsize}
+	\begin{verbatim}
+Please make your selection by entering an option:
+
+      1. Install as a root.
+      2. Install as sudo to root.
+      3. Install as current user.
+      h. Help.
+      x. Exit.
+
+Please type a selection:
+	\end{verbatim}
+	\end{scriptsize}
+	\\
+	\hline
+\end{tabular}\\
+
+En este caso si se está utilizando ubuntu y se tienen los permisos adecuado (se es usuario con permisos para hacer sudo) lo mejor es seleccionar la opción 2. Nos pide la contraseña y continúa.\\
+
+En este caso nos preguntará por la acción que deseamos realizar, elegimos la opción 1 (install) y nos preguntará por la forma de aportar la licencia.
+
+\begin{tabular}{|p{14cm}|}
+		\hline
+	\begin{scriptsize}
+	\begin{verbatim}
+===============================================================================
+Welcome to the Intel(R) Integrated Performance Primitives v5.2 for Linux* on IA-32 Intel(R) Architecture Installation
+
+Please make your selection by entering an option from the choices below:
+
+        1. Install
+        2. Readme
+        3. Release Notes
+        4. Installation Guide
+        h. Help
+        x. Exit
+
+Please type a selection:   1
+
+===============================================================================
+Provide a Serial Number or License File
+
+Please make your selection by entering an option from the choices below:
+
+        1. Provide your serial number [Recommended]
+             Use this option  if  you  have  a  serial number  to  install  and
+             register  your  software.  The Intel(R) Software Setup  Assistant
+             may connect to the Intel(R) Software Development Products Registration Center
+             to verify your serial number. Please refer to the Intel(R) Privacy Policy
+             regarding the collection and handling of your personal information.
+             Your Serial Number is in XXXX-XXXXXXXX format.
+        2. Provide the absolute path for an existing license file.
+             Use this option if you have obtained a license file instead of a
+             serial number.
+        3. Where do I find my Serial Number?
+        4. Intel(R) Privacy Policy
+        b. Go Back.
+        h. Help.
+        x. Exit.
+
+Please type a selection or Serial Number:
+	\end{verbatim}
+	\end{scriptsize}
+	\\
+	\hline
+\end{tabular}\\
+
+Si tenemos acceso a internet elegiremos la opción 1 en otro caso seleccionaremos la opción 2 para poder introducir la licencia mediante el archivo que nos han enviado por correo electrónico (.lic).
+
+Eligiendo la opción 1 introducimos el número de licencia y continuamos.\\
+
+\begin{tabular}{|p{14cm}|}
+		\hline
+	\begin{scriptsize}
+	\begin{verbatim}
+Enter Serial Number:   XXXX-XXXXXXXX
+
+The  Intel(R) Software  Setup Assistant  may  attempt to  connect  to  the
+Intel(R) Software Development Products Registration Center to validate your Serial Number.
+ This may take several minutes depending on your network.  Please wait...
+
+You may press Ctrl+C to cancel.
+Extracting...           ###############################################################[100%]
+
+Would you like to install the following?
+    Intel(R) IPP 5.2 for Linux* on IA-32 Intel(R) Architecture
+<Enter> to continue, or x to exit: 
+--------------------------------------------------------------------------------
+Please read the following license agreement carefully.  Prior to installing the
+software, you will be asked to agree to the terms and conditions of the
+following license agreement.
+--------------------------------------------------------------------------------
+Please press Enter to continue.
+	\end{verbatim}
+	\end{scriptsize}
+	\\
+	\hline
+\end{tabular}\\
+
+En este momento aparece la licencia y al final de la misma nos pregunta:\\
+
+\begin{tabular}{|p{14cm}|}
+		\hline
+	\begin{scriptsize}
+	\begin{verbatim}
+Enter 'accept' to continue, 'reject' to exit
+	\end{verbatim}
+	\end{scriptsize}
+	\\
+	\hline
+\end{tabular}\\
+
+Tecleamos \textit{accept} y pulsamos \textit{enter}. Posteriormente nos pregunta por la ruta en la que deseamos instalar, en mi caso he dejado la que viene por defecto, así que simplemente acepto pulsando \textit{enter}. En otro caso se especificará la ruta y se aceptará del mismo modo.
+
+Esperamos un rato y nos informará de que ya está instalado. Pulsamos \textit{enter} para que borre los archivos temporales y una vez más para salir del programa de instalación.
+
+\section{Utilizaci\'on en programas}
+
+Para poder utilizar la biblioteca hay que incluir su archivo de cabecera en nuestro código con:\\
+
+\begin{tabular}{|p{14cm}|}
+		\hline
+	\begin{scriptsize}
+	\begin{verbatim}
+#include<ipp.h>
+	\end{verbatim}
+	\end{scriptsize}
+	\\
+	\hline
+\end{tabular}\\
+
+Posteriormente a la hora de compilar hay que añadir unos flags para que se encuentre ese archivo de cabecera y las bibliotecas dinámicas correspondientes.
+
+Con este flag se consigue que se busque el archivo de cabecera en la ruta apropiada.\\
+
+\begin{tabular}{|p{14cm}|}
+		\hline
+	\begin{scriptsize}
+	\begin{verbatim}
+-I/opt/intel/ipp/5.2/ia32/include
+	\end{verbatim}
+	\end{scriptsize}
+	\\
+	\hline
+\end{tabular}\\
+
+Y estos ayudan a que se encuentren y enlacen en tiempo de ejecución las bibliotecas dinámicas que implementan el código.\\
+
+\begin{tabular}{|p{14cm}|}
+		\hline
+	\begin{scriptsize}
+	\begin{verbatim}
+-L/opt/intel/ipp/5.2/ia32/lib -L/opt/intel/ipp/5.2/ia32/sharedlib
+
+-lippaca6 -lippacpx -lippac -lippact7 -lippacv8 -lippacw7 -lippcca6
+-lippccpx -lippcc -lippcct7 -lippccv8 -lippccw7 -lippcha6 -lippchpx 
+-lippch -lippcht7 -lippchv8 -lippchw7 -lippcore -lippcva6 -lippcvpx 
+-lippcv -lippcvt7 -lippcvv8 -lippcvw7 -lippdca6 -lippdcpx -lippdc 
+-lippdct7 -lippdcv8 -lippdcw7 -lippia6 -lippipx -lippi -lippit7
+-lippiv8 -lippiw7 -lippja6 -lippjpx -lippj -lippjt7 -lippjv8 -lippjw7 
+-lippma6 -lippmpx -lippm -lippmt7 -lippmv8 -lippmw7 -lippsa6 
+-lippsca6 -lippscpx -lippsc -lippsct7 -lippscv8 -lippscw7 -lippspx 
+-lippsra6 -lippsrpx -lippsr -lippsrt7 -lippsrv8 -lippsrw7 -lipps 
+-lippst7 -lippsv8 -lippsw7 -lippvca6 -lippvcpx -lippvc -lippvct7 
+-lippvcv8 -lippvcw7 -lippvma6 -lippvmpx -lippvm -lippvmt7 
+-lippvmv8 -lippvmw7
+	\end{verbatim}
+	\end{scriptsize}
+	\\
+	\hline
+\end{tabular}\\
+
+\end{document}
+
+
