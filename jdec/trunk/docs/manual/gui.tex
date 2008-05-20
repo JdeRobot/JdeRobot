@@ -1,0 +1,288 @@
+\newpage
+\section{Interfaz gráfica de la aplicación robótica}
+\label{sec:gui}
+
+Para que las aplicaciones, y el propio \textit{jdec}, puedan disponer de interfaces gráficas ha de cargarse un driver que aporte soporte para la interfaz gráfica necesaria. Actualmente se dispone de soporte para \textit{Xforms} y para \textit{GTK}.
+
+Aunque la interfaz gráfica no es indispensable para generar y materializar el comportamiento autónomo en el robot, normalmente resulta muy útil como herramienta de depuración. Además de las posibilidades de interacción con el usuario, la interfaz gráfica permite la visualización en tiempo de ejecución de estructuras y variables internas (e.g. representaciones del mundo, mapas, estados, etc.). 
+
+\subsection{Xforms}
+
+El driver \textit{graphics\_xforms} es el que aporta soporte para las interfaces generadas para \textit{Xforms}. Este driver inicia una conexión con el servidor X para poder mostrar ventanas \textit{Xforms}. En segundo lugar, genera una hebra adicional que se encarga de mantener la interfaz gráfica de los esquemas asociados a él y de atender las peticiones del usuario a través de los botones y otros \textit{widgets}.
+
+La hebra se ejecuta a un ritmo controlado. Las aplicaciones que corren a bordo de los robots deben encargarse de proporcionar las funciones para refrescar y atender a los botones, así como para mostrar u ocultar el \textit{display}. Si bien estas funciones se llamarán desde la hebra del driver. En el apartado siguiente se explica detalladamente cómo programar un esquema utilizando el driver xforms.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=15cm]{figs/mastergui}
+\end{center}
+\caption{Interfaz gráfica del esquema \textit{mastergui} (control de \textit{jde}) utilizando el driver \textit{graphics\_xforms}}
+\label{fig:gui}
+\end{figure}
+
+\subsubsection{Programar una interfaz gráfica utilizando el driver \textit{graphics\_xforms}}
+
+Para empezar, hay que generar la interfaz gráfica. Para ello \textit{Xforms} aporta una aplicación llamada \textit{fdesign} que permite generar interfaces gráficas de forma sencilla, simplemente arrastrando \textit{widgets} con el ratón, además permite generar el código fuente que generará la ventana en tiempo de ejecución.
+
+Una vez generada la interfaz, hay que programar una serie de funciones para que la interfaz pueda ser utilizada por el driver.
+
+El API de \textit{jdec} establece que los esquemas implementen dos funciones relacionadas con su interfaz gráfica (ver tabla \ref{tabla:interfazesquema} en página \pageref{tabla:interfazesquema}) estas son \texttt{guiresume} \texttt{guisuspend}. La primera de ellas arranca el \textit{display} del esquema, y la segunda lo detiene.
+
+En el caso de \textit{Xforms} todas las funciones de la biblioteca Xforms se deben llamar desde un único hilo de ejecución, por ello se han desarrollado \textit{callbacks} para que sea el hilo que ejecuta del driver el que finalmente ejecute éstas funciones.
+
+\begin{table}
+   \begin{lstlisting}[language=C]
+
+void myschema_guisuspend_aux(void){
+  /*Da de baja el refresco del display y el control de botones*/
+  mydelete_buttonscallback(myschema_guibuttons);
+  mydelete_displaycallback(myschema_guidisplay);
+  /*Oculta el formulario*/
+  fl_hide_form(fd_myschemagui->myschemagui);
+}
+
+void myschema_guisuspend(){
+   callback fn;
+   if((fn=(callback)myimport("graphics_xforms","suspend_callback"))!=NULL){
+      fn ((gui_function)myschema_guisuspend_aux);
+   }
+}
+
+void myschema_guiresume_aux(void){
+  static int k=0;
+
+  if (k==0) /* not initialized */
+    {
+      k++;
+      fd_myschemagui = create_form_myschemagui(); /*Se crea el display*/
+      fl_set_form_position(fd_myschemagui->myschemagui,400,50);
+    }
+  /*Llamada a las funciones que registran el refresco del display y del
+    control de los botones*/
+  myregister_buttonscallback(myschema_guibuttons);
+  myregister_displaycallback(myschema_guidisplay);
+  /*Mostrar el formulario*/
+  fl_show_form(fd_myschemagui->myschemagui,FL_PLACE_POSITION,
+                FL_FULLBORDER,"myschema");
+}
+
+void myschema_guiresume(){
+   callback fn;
+   if((fn=(callback)myimport("graphics_xforms","resume_callback"))!=NULL){
+      fn ((gui_function)myschema_guiresume_aux);
+   }
+}
+
+   \end{lstlisting}
+   \caption{Funciones \textit{guiresume} y \textit{guisuspend}}
+   \label{tab:resume_xforms}
+\end{table}
+
+En la tabla \ref{tab:resume_xforms} se puede ver cómo han de implementarse estas funciones:
+ \begin{itemize}
+  \item La función \textbf{\texttt{guiresume}} importa del driver de \textit{xforms} un puntero a una función que permite registrar nuestro propio \texttt{guiresume} (\texttt{guiresume\_aux}) para que sea llamado desde el hilo del driver.
+
+  \item La función \textbf{\texttt{guiresume\_aux}} es la que inicializa el \textit{display} en la primera llamada que se realiza y la que registra los \textit{callbacks} de los botones y el \textit{display} (que provoca que se refresque la visualización y se atienda a los botones) además esta función es la encargada de mostrar el formulario.
+
+  \item La función \textbf{\texttt{guisuspend}} importa del driver una función que permite que sea el hilo del driver el que ejecute la función \textit{suspend} que se le indique.
+
+  \item La función \textbf{\texttt{guisuspend\_aux}} es la que debe ejecutarse desde el hilo del driver. Esta función da de baja el registro de las funciones de \textit{callback} del \textit{display} y de los botones. Además se oculta el formulario correspondiente.
+
+ \end{itemize}
+
+\begin{table}
+\begin{lstlisting}[language=C]
+ registerbuttons myregister_buttonscallback;
+ registerdisplay myregister_displaycallback;
+ deletebuttons mydelete_buttonscallback;
+ deletedisplay mydelete_displaycallback;
+
+ void myschema_init(){
+   if (myregister_buttonscallback==NULL){
+      if ((myregister_buttonscallback=
+            (registerbuttons)myimport ("graphics_xforms",
+                                       "register_buttonscallback"))==NULL){
+         printf("I can't fetch register_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_buttonscallback=
+            (deletebuttons)myimport ("graphics_xforms",
+                                     "delete_buttonscallback"))==NULL){
+         printf("I can't fetch delete_buttonscallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((myregister_displaycallback=
+            (registerdisplay)myimport ("graphics_xforms",
+                                       "register_displaycallback"))==NULL){
+         printf("I can't fetch register_displaycallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_displaycallback=
+            (deletedisplay)myimport ("graphics_xforms",
+                                     "delete_displaycallback"))==NULL){
+         printf("I can't fetch delete_displaycallback from graphics_xforms\n");
+         jdeshutdown(1);
+      }
+   }
+}
+
+void myschema_guibuttons(void *obj){
+  /*En esta fución se comprueba que botón o widget ha sido utilizado
+    e implementa la reacción esperada*/
+}
+
+void myschema_guidisplay(){
+  /*En esta función se realizan las labores de refresco del display*/
+}
+\end{lstlisting}
+\caption{Funciones para el refresco del \textit{display} y el control de botones}
+\label{tab:register-delete}
+\end{table}
+
+Como se puede observar en la tabla \ref{tab:resume_xforms}, para suscribir y borrar los refrescos del \textit{display} y los \textit{callbacks} de los botones, es necesario llamar a varias funciones (\texttt{myregister\_buttonscallback}, \texttt{myregister\_displaycallback}, \texttt{mydelete\_buttonscallback}, \texttt{mydelete\_displaycallback}). Estas funciones deben ser declaradas e importadas del driver de la forma que se observa en la función \texttt{init} de la tabla \ref{tab:register-delete}. La declaración del tipo de la función se encuentra en el archivo de cabecera del driver (\texttt{graphics\_xforms.h}).
+
+El driver también exporta un puntero a la variable de tipo \texttt{Display} y un puntero a la variable \texttt{screen} para los casos en los que se vayan a mostrar imágenes. Para importar estas variables a nuestro esquema se utilizará la función \texttt{myimport} que proporciona la plataforma utilizando como nombre de esquema ``graphics\_xforms'' y como nombres de variables ``display'' y ``screen''.
+
+Para tener más contexto acerca de la programación de interfaces utilizando este driver, es recomendable ver código de esquemas que también lo utilicen.
+
+\subsection{GTK}
+
+El driver \textit{graphics\_gtk} aporta soporte para programar esquemas cuya interfaz gráfica se implemente con GTK.
+
+Este driver realiza la inicialización de la biblioteca y arranca dos hilos de ejecución. Uno para el hilo principal de GTK (\texttt{gtk\_main}) y otro que actualiza los \textit{displays} de todos los esquemas registrados.
+
+\subsubsection{Programar una interfaz gráfica utilizando el driver \textit{graphics\_gtk}}
+
+Para programar una aplicación, el primer paso es generar la interfaz. Para ello se ha de utilizar la aplicación \textit{glade} (está disponible en los repositorios de ubuntu). El formato en que \textit{glade} guarda las interfaces será el que se utilice para cargar dinámicamente (en tiempo de ejecución) dicha interfaz.
+
+Una vez se ha desarrollado la interfaz hay que programar una serie de funciones básicas para que todo funcione correctamente.
+
+\begin{table}
+ \begin{lstlisting}[language=C]
+void esquema_prueba_guiresume(void){
+   static int cargado=0;
+   static pthread_mutex_t esquema_prueba_gui_mutex;
+
+   pthread_mutex_lock(&esquema_prueba_gui_mutex);
+   if (!cargado){
+      cargado=1;
+      pthread_mutex_unlock(&esquema_prueba_gui_mutex);
+      /*Cargar la ventana desde el archivo xml .glade*/
+      gdk_threads_enter();
+      xml = glade_xml_new("../schemas/esquema_prueba/esquema_prueba.glade",
+                          NULL,NULL);
+      if (xml==NULL){
+         fprintf(stderr, "Error al cargar la interfaz gráfica\n");
+         jdeshutdown(1);
+      }
+      win = glade_xml_get_widget(xml, "window1");
+      /*Conectar los callbacks*/
+      {
+         GtkToggleButton *button1;
+         button1=(GtkToggleButton *)glade_xml_get_widget(xml, "togglebutton1");
+         g_signal_connect (G_OBJECT (button1), "clicked",
+                           G_CALLBACK (on_togglebutton1_clicked), NULL);
+      }
+      if (win==NULL){
+         fprintf(stderr, "Error al cargar la interfaz gráfica\n");
+         jdeshutdown(1);
+      }
+      else{
+         gtk_widget_show(win);
+         gtk_widget_queue_draw(GTK_WIDGET(win));
+      }
+      gdk_threads_leave();
+   }
+   else{
+      pthread_mutex_unlock(&esquema_prueba_gui_mutex);
+      gdk_threads_enter();
+      gtk_widget_show(win);
+      gtk_widget_queue_draw(GTK_WIDGET(win));
+      gdk_threads_leave();
+   }
+   myregister_displaycallback(esquema_prueba_guidisplay);
+}
+ \end{lstlisting}
+ \caption{Función \texttt{guiresume} de un esquema con interfaz \textit{GTK}}
+ \label{tab:gtk-guiresume}
+\end{table}
+
+\begin{table}
+ \begin{lstlisting}[language=C]
+void esquema_prueba_guisuspend(void){
+   if (win!=NULL){
+      gdk_threads_enter();
+      gtk_widget_hide(win);
+      gdk_threads_leave();
+   }
+   mydelete_displaycallback(esquema_prueba_guidisplay);
+}
+ \end{lstlisting}
+ \caption{Función \texttt{guisuspend} de un esquema con interfaz \textit{GTK}}
+ \label{tab:gtk-guisuspend}
+\end{table}
+
+\begin{table}
+ \begin{lstlisting}[language=C]
+registerdisplay myregister_displaycallback;
+deletedisplay mydelete_displaycallback;
+ 
+void esquema_prueba_guidisplay(){
+   if (display_imageA){
+      /*Obtener el widget de la imagen desde el archivo xml*/
+      GtkImage *image = GTK_IMAGE(glade_xml_get_widget(xml, "image1"));
+
+      gdk_threads_enter();
+      /*Refrescar la imagen en el display*/
+      gtk_widget_queue_draw(GTK_WIDGET(image));
+      gdk_threads_leave();
+   }
+}
+
+void esquema_prueba_init(){
+   if (myregister_displaycallback==NULL){
+      if ((myregister_displaycallback=
+          (registerdisplay)myimport ("graphics_gtk",
+                                     "register_displaycallback"))==NULL){
+         printf ("I can't fetch register_displaycallback from graphics_gtk\n");
+         jdeshutdown(1);
+      }
+      if ((mydelete_displaycallback=
+          (deletedisplay)myimport ("graphics_gtk",
+                                   "delete_displaycallback"))==NULL){
+         jdeshutdown(1);
+         printf ("I can't fetch delete_displaycallback from graphics_gtk\n");
+      }
+   }
+}
+
+ \end{lstlisting}
+ \caption{Funciones para registrar el \textit{callback} del \textit{display}}
+ \label{tab:gtk-guidisplay}
+\end{table}
+
+\begin{itemize}
+ \item \textbf{\texttt{guiresume}}: la función que se muestra en la tabla \ref{tab:gtk-guiresume} se utiliza para mostrar el \textit{display}. La primera vez que se llama a esta función se carga la interfaz gráfica y se asignan las funciones de \textit{callback} a los diferentes eventos de cada \textit{widget} (habrá que programar estas funciones para que se atiendan los eventos correctamente). Por último la función registra el \textit{callback} de refresco del \textit{display}.
+ \item \textbf{\texttt{guisuspend}}: la función de la tabla \ref{tab:gtk-guisuspend} se utiliza para ocultar el \textit{display} y eliminar la suscripción al \textit{callback} de refresco de la interfaz.
+ \item \textbf{\texttt{guidisplay}}: esta es la función que se ejecuta cada vez que se quiere refrescar la interfaz. Se puede ver en la tabla \ref{tab:gtk-guidisplay}.
+\end{itemize}
+
+Para poder realizar el registro de la función \texttt{guidisplay} hay que importar las funciones \texttt{register\_displaycallback} y \texttt{delete\_displaycallback} del driver \texttt{graphics\_gtk} de la forma que se observa en la función \texttt{init} en la tabla \ref{tab:gtk-guidisplay}.
+
+Para ganar experiencia en interfaces \textit{GTK} es recomendable leer algún manual, así como conocer el API de \textit{GTK}\footnote{http://library.gnome.org/devel/gtk/stable/}.
+
+El driver provee además una función que facilita la carga del fichero .glade. De tal forma que simplemente hay que poner el fichero .glade en el mismo directorio que el plugin (archivo .so) para que el programa lo encuentre y lo carge. La función se exporta con el nombre ``load\_glade'' y su declaración está en el fichero de cabecera del driver (ver tabla \ref{tab:gtk-carga}). Esta función se utilizará en lugar de \textit{glade\_xml\_new}.
+
+\begin{table}
+ \begin{lstlisting}[language=C]
+/**
+ * Search in the path the .glade file and loads it
+ * @param file_name The name of the .glade file
+ * @returns the newly created GladeXML object, or NULL on failure.
+ */
+typedef GladeXML* (*loadglade) (char * file_name);
+
+ \end{lstlisting}
+ \caption{Función que carga el fichero .glade}
+ \label{tab:gtk-carga}
+\end{table}
