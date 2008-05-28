@@ -1,0 +1,2 @@
+SUBDIRS=@DRIVERS@
+MAINTAINERCLEANFILES = Makefile.in Makefile
