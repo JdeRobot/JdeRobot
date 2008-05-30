@@ -27,7 +27,8 @@ EVILIB_SOURCES = $(EVILIB_DIR)/EVI-D100.c++ \
 evi_la_SOURCES = $(EVILIB_SOURCES) evi.cpp camera.cpp evi.h camera.h
 evi_la_LDFLAGS = -module -avoid-version @EVI_LIBS@
 evi_la_CXXFLAGS = @EVI_CFLAGS@ -I$(top_srcdir)/base
+evi_ladir = @CFGDIR@
+dist_evi_la_DATA = evi.conf
 
-EXTRA_DIST = evi.conf
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
