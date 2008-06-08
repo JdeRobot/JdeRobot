@@ -144,9 +144,10 @@ typedef struct {
 
   /**
    * Pointer to the schema's startup function
+   * @param configfile Path and name to the config file of this schema.
    * @return void
    */
-  void (*startup)(void);
+  void (*startup)(char *configfile);
   /**
    * Pointer to the schema's close function
    * @return void

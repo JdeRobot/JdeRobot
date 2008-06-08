@@ -660,8 +660,10 @@ void hsvtuner_stop()
 }
 
 
-void hsvtuner_startup()
+void hsvtuner_startup(char *configfile)
 {
+
+  printf("Hsvtuner schema loaded with '%s' as configuration file\n",configfile);
   draw_hsvmap(disco_buf, SMAX);
   v_min=0.; v_max=255.;
   h_min=0.; h_max=1.;

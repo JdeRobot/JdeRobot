@@ -18,7 +18,7 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-#define thisrelease "jdec 4.2-svn"
+#define thisrelease "jdec 4.3-svn"
 
 #include "jde.h"
 #include "dlfcn.h"
@@ -390,8 +390,8 @@ int serve_keyboardmessage(char *mensaje)
 /** Name of the configuration file used by jde*/
 static char configfile[MAX_BUFFER];
 /** When reading any driver section from the configuration file */
-static int driver_section=0;
-
+static int driver_configuration_section=0;
+static int schema_configuration_section=0;
 /**
  * @brief This function loads a module and returns a reference to its handler
  * 
@@ -450,7 +450,7 @@ int jde_loadschema(char *name)
       /* symbols from the plugin: */
       dlerror();
       strcpy(n,name); strcat(n,"_startup");
-      all[num_schemas].startup = (void (*)(void)) dlsym(all[num_schemas].handle,n);  
+      all[num_schemas].startup = (void (*)(char *)) dlsym(all[num_schemas].handle,n);  
       if ((error=dlerror()) != NULL)
 	printf("WARNING: Unresolved symbol %s in %s schema\n",n,name);
 
@@ -558,8 +558,8 @@ int jde_readline(FILE *myfile)
 
 {
 #define limit 256
-  char word[limit];
-  int i=0,j=0;
+  char word[limit], word2[limit];
+  int i=0,j=0,k=0,words=0;
   char buffer_file[limit]; 
   resumeFn r;
   suspendFn s;
@@ -588,55 +588,104 @@ int jde_readline(FILE *myfile)
   if (sscanf(buffer_file,"%s",word)!=1) return 0; 
   /* return EOF; empty line*/
   else {
-    if (strcmp(word,"load")==0)
+    if ((strcmp(word,"load")==0)||(strcmp(word,"load_schema")==0))
       {
 	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
-	sscanf(&buffer_file[j],"%s",word);
-	jde_loadschema(word);
-	(*all[num_schemas-1].startup)();
+	words=sscanf(&buffer_file[j],"%s %s",word,word2);
+
+	if (words==1){
+	  jde_loadschema(word);
+	  (*all[num_schemas-1].startup)(configfile);
+	}
+	else if (words==2){
+	  jde_loadschema(word);
+	  (*all[num_schemas-1].startup)(word2);
+	}
+	else 
+	  printf("Bad line in configuration file %s, ignoring it. Load_schema only accepts one or two parameters: schema_name [schemaconfigfile]\n Offending line: '%s'\n", configfile, buffer_file);	
       }
-    else if (strcmp(word,"resume")==0)
+    
+    else if (strcmp(word,"schema")==0)
+      {
+	if(schema_configuration_section==0) schema_configuration_section=1; 
+	else{
+	  printf("Error in configuration file %s. Schema's configuration section without 'end_schema' line\n", configfile);
+	  exit(-1);
+	}
+      }
+    else if(strcmp(word,"end_schema")==0)
+      schema_configuration_section=0;
+
+    else if ((strcmp(word,"resume")==0) ||
+	     (strcmp(word,"run")==0)||
+	     (strcmp(word,"on")==0))
       {
 	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
 	sscanf(&buffer_file[j],"%s",word);
 	r=(resumeFn)myimport(word,"resume");
 	if (r!=NULL) r(SHELLHUMAN,NULL,NULL);
 	}
-    else if (strcmp(word,"suspend")==0)
-	{
-	  while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
-	  sscanf(&buffer_file[j],"%s",word);
-	  s=(suspendFn)myimport(word,"suspend");
-	  if (s!=NULL) s();
-	}
-    else if (strcmp(word,"driver")==0)
+
+    else if ((strcmp(word,"guiresume")==0)||
+              (strcmp(word,"guion")==0))
       {
-	if(driver_section==0){
-	  while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
-	  sscanf(&buffer_file[j],"%s",word);
-	  driver_section=1;
+	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
+	sscanf(&buffer_file[j],"%s",word);
+	for(k=0;k<num_schemas;k++)
+	  {
+	    if (strcmp(all[k].name,word)==0) {
+	      if (all[k].guiresume!=NULL)
+		all[k].guiresume();
+	      all[k].guistate=on;
+	      break;
+	    }
+	  }
+	if (k==num_schemas) 
+	  printf("Error in configuration file %s. Have you already loaded the schema before the offending line:' %s'\n", configfile, buffer_file);
+      }
+
+
+    else if (strcmp(word,"load_driver")==0)
+      {
+	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
+	words=sscanf(&buffer_file[j],"%s %s",word,word2);
+
+	if (words==1){
 	  jde_loaddriver(word);
 	  (*mydrivers[num_drivers-1].startup)(configfile);
-	  /*	  (*mydrivers[num_drivers-1].resume)();*/
-	}else{
-	  printf("error in config file. driver section without 'end_driver' keyword in file\n");
+	}
+	else if (words==2){
+	  jde_loaddriver(word);
+	  (*mydrivers[num_drivers-1].startup)(word2);
+	}
+	else 
+	  printf("Bad line in configuration file %s, ignoring it. Load_driver only accepts one or two parameters: driver_name [driverconfigfile]\n Offending line: '%s'\n", configfile, buffer_file);
+      }
+
+    else if (strcmp(word,"driver")==0)
+      {
+	if(driver_configuration_section==0) driver_configuration_section=1;	 
+	else{
+	  printf("Error in configuration file %s. Driver's configuration section without 'end_driver' line\n", configfile);
 	  exit(-1);
 	}
       }
-    else if(strcmp(word,"end_driver")==0){
-      while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
-      driver_section=0;
-    }
-    else if(strcmp (word, "path")==0){
+    else if(strcmp(word,"end_driver")==0)
+      driver_configuration_section=0;
+    
+    else if(strcmp (word,"path")==0){
        /*Loads the path*/
        while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')
               &&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t'))
           j++;
        sscanf(&buffer_file[j],"%s",word);
        strncpy(path, word, PATH_SIZE);
-    }
+    }    
+    
     else{
-      if(driver_section==0) printf("i don't know what to do with: %s\n",buffer_file);
+      if ((driver_configuration_section==0) &&
+	  (schema_configuration_section==0))
+	printf("I don't know what to do with: %s\n",buffer_file);
     }
     return 0;
   }
