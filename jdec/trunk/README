@@ -1,7 +1,6 @@
-jde.c 
-Grupo de Robotica 
-http://www.robotica-urjc.es
-https://trac.robotica-urjc.es/jde
+Jde Project, web page: http://jde.gsyc.es
+https://trac.jde.gsyc.es/jde
+Grupo de Robotica URJC, http://www.robotica-urjc.es
 
 jde.c is a software development suite for robotics applications,
 written in C language. It provides a programming environment where the
