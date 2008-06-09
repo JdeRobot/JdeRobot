@@ -1062,7 +1062,7 @@ void followball_stop()
   printf ("followball close\n");
 }
 
-void followball_startup()
+void followball_startup(char *configfile)
 {
   printf("followball_startup\n"); 
   draw_hsimap(disco_buf, SMAX);

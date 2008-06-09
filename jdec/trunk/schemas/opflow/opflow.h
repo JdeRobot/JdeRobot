@@ -35,7 +35,7 @@ typedef struct{
    float angle;
 }t_opflow;
 
-extern void opflow_startup();
+extern void opflow_startup(char *configfile);
 extern void opflow_stop();
 extern void opflow_suspend();
 extern void opflow_resume(int father, int *brothers, arbitration fn);

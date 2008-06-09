@@ -248,7 +248,7 @@ void *wiimote_viewer_thread(void *not_used)
    }
 }
 
-void wiimote_viewer_startup()
+void wiimote_viewer_startup(char *configfile)
 {
   pthread_mutex_lock(&(all[wiimote_viewer_id].mymutex));
   printf("wiimote_viewer schema started up\n");

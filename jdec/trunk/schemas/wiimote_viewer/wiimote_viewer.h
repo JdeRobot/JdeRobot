@@ -18,7 +18,7 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void wiimote_viewer_startup();
+extern void wiimote_viewer_startup(char *configfile);
 extern void wiimote_viewer_suspend();
 extern void wiimote_viewer_resume(int father, int *brothers, arbitration fn);
 extern void wiimote_viewer_guiresume();

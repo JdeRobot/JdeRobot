@@ -241,7 +241,7 @@ void *papito_thread(void *not_used)
    }
 }
 
-void papito_startup()
+void papito_startup(char *configfile)
 {
   pthread_mutex_lock(&(all[papito_id].mymutex));
   printf("papito schema started up\n");

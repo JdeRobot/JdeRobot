@@ -504,7 +504,7 @@ void imgrectifier_stop()
 }
 
 
-void imgrectifier_startup()
+void imgrectifier_startup(char *configfile)
 {
   pthread_mutex_lock(&(all[imgrectifier_id].mymutex));
   printf("imgrectifier schema started up\n");

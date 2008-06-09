@@ -19,7 +19,7 @@
  */
 #include "pioneer.h"
 
-extern void introrob_startup();
+extern void introrob_startup(char *configfile);
 extern void introrob_stop();
 extern void introrob_suspend();
 extern void introrob_resume(int father, int *brothers, arbitration fn);

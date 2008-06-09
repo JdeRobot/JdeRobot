@@ -18,7 +18,7 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void imgrectifier_startup();
+extern void imgrectifier_startup(char *configfile);
 extern void imgrectifier_stop();
 extern void imgrectifier_suspend();
 extern void imgrectifier_resume(int father, int *brothers, arbitration fn);

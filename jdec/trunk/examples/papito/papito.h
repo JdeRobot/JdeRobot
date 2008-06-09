@@ -18,7 +18,7 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void papito_startup();
+extern void papito_startup(char *configfile);
 extern void papito_stop();
 extern void papito_suspend();
 extern void papito_resume(int father, int *brothers, arbitration fn);

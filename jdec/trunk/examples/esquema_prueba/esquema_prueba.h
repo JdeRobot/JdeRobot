@@ -18,7 +18,7 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void esquema_prueba_startup();
+extern void esquema_prueba_startup(char *configfile);
 extern void esquema_prueba_suspend();
 extern void esquema_prueba_resume(int father, int *brothers, arbitration fn);
 extern void esquema_prueba_guiresume();

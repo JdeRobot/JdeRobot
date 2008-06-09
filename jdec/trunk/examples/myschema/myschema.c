@@ -211,7 +211,7 @@ void *myschema_thread(void *not_used)
    }
 }
 
-void myschema_startup()
+void myschema_startup(char *configfile)
 {
   pthread_mutex_lock(&(all[myschema_id].mymutex));
   printf("myschema schema started up\n");

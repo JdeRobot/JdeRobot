@@ -18,7 +18,7 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void opengl_viewer_startup();
+extern void opengl_viewer_startup(char *configfile);
 extern void opengl_viewer_suspend();
 extern void opengl_viewer_resume(int father, int *brothers, arbitration fn);
 extern void opengl_viewer_guiresume();

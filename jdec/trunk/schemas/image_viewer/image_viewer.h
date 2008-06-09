@@ -18,7 +18,7 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void image_viewer_startup();
+extern void image_viewer_startup(char *configfile);
 extern void image_viewer_suspend();
 extern void image_viewer_resume(int father, int *brothers, arbitration fn);
 extern void image_viewer_guiresume();

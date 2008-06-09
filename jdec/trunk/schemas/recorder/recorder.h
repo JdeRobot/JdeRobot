@@ -18,7 +18,7 @@
  *  Authors : José Antonio Santos Cadenas <santoscadenas@gmail.com>
  */
 
-extern void recorder_startup();
+extern void recorder_startup(char *configfile);
 extern void recorder_stop();
 extern void recorder_suspend();
 extern void recorder_resume(int father, int *brothers, arbitration fn);

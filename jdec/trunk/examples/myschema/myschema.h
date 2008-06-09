@@ -18,7 +18,7 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void myschema_startup();
+extern void myschema_startup(char *configfile);
 extern void myschema_stop();
 extern void myschema_suspend();
 extern void myschema_resume(int father, int *brothers, arbitration fn);

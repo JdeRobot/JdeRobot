@@ -830,7 +830,7 @@ if (fd_opflowgui!=NULL)
   printf ("opflow close\n");
 }
 
-void opflow_startup()
+void opflow_startup(char *configfile)
 {
    int i;
    pthread_mutex_lock(&(all[opflow_id].mymutex));

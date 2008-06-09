@@ -246,7 +246,7 @@ void *esquema_prueba_thread(void *not_used)
    }
 }
 
-void esquema_prueba_startup()
+void esquema_prueba_startup(char *configfile)
 {
   pthread_mutex_lock(&(all[esquema_prueba_id].mymutex));
   printf("esquema_prueba schema started up\n");

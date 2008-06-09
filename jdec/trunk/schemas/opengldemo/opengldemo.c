@@ -194,7 +194,7 @@ void opengldemo_init(){
    }
 }
 
-void opengldemo_startup()
+void opengldemo_startup(char *configfile)
 {
   pthread_mutex_lock(&(all[opengldemo_id].mymutex));
   printf("opengldemo schema started up\n");

@@ -18,7 +18,7 @@
  *  Authors : José Antonio Santos Cadenas <santoscadenas@gmail.com>
  */
 
-extern void eyeoperator4_startup();
+extern void eyeoperator4_startup(char *configfile);
 extern void eyeoperator4_suspend();
 extern void eyeoperator4_resume(int father, int *brothers, arbitration fn);
 extern void eyeoperator4_guiresume();

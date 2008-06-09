@@ -363,7 +363,7 @@ void introrob_stop()
   printf ("introrob close\n");
 }
 
-void introrob_startup()
+void introrob_startup(char *configfile)
 {
   pthread_mutex_lock(&(all[introrob_id].mymutex));
   myexport("introrob","id",&introrob_id);

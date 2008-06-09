@@ -338,7 +338,7 @@ void recorder_init(){
    }
 }
 
-void recorder_startup()
+void recorder_startup(char *configfile)
 {
   int i;
   pthread_mutex_lock(&(all[recorder_id].mymutex));

@@ -19,7 +19,7 @@
  *            José Antonio Santos Cadenas <santoscadenas@gmail.com>
  */
 
-extern void mastergui_startup();
+extern void mastergui_startup(char *configfile);
 extern void mastergui_stop();
 extern void mastergui_suspend();
 extern void mastergui_resume(int father, int *brothers, arbitration fn);

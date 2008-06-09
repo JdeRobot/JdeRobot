@@ -468,7 +468,7 @@ void eyeoperator1_init(){
    }
 }
 
-void eyeoperator1_startup()
+void eyeoperator1_startup(char *configfile)
 {
    int i;
    pthread_mutex_lock(&(all[eyeoperator1_id].mymutex));

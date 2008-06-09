@@ -214,7 +214,7 @@ void mastergui_resume(int father, int *brothers, arbitration fn)
    put_state(mastergui_id, winner);
 }
 
-void mastergui_startup()
+void mastergui_startup(char *configfile)
 {
    pthread_mutex_lock(&(all[mastergui_id].mymutex));
    printf("mastergui schema started up\n");

@@ -18,7 +18,7 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void teleoperator_startup();
+extern void teleoperator_startup(char *configfile);
 extern void teleoperator_stop();
 extern void teleoperator_suspend();
 extern void teleoperator_resume(int father, int *brothers, arbitration fn);

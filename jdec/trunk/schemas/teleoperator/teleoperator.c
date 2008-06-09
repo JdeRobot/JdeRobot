@@ -355,7 +355,7 @@ void teleoperator_stop()
 }
 
 
-void teleoperator_startup()
+void teleoperator_startup(char *configfile)
 {
   samplesource=NULL;
   virtualcam.posx=-150;

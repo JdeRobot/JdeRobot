@@ -338,7 +338,7 @@ void *image_viewer_thread(void *not_used)
    }
 }
 
-void image_viewer_startup()
+void image_viewer_startup(char *configfile)
 {
   pthread_mutex_lock(&(all[image_viewer_id].mymutex));
   printf("image_viewer schema started up\n");
