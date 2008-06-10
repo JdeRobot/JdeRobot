@@ -56,7 +56,7 @@ void RGB2HSV_printHSI (struct HSV*);
 void RGB2HSV_test();
 
 /// \brief Returns the translation from RGB to HSV
-static inline const struct HSV* RGB2HSV_getHSV (int R, int G, int B)  { return LUT_RGB2HSV[R>>2][G>>2][B>>2]; };
+static inline const struct HSV* RGB2HSV_getHSV (int R, int G, int B)  { return LUT_RGB2HSV[R>>2][G>>2][B>>2]; }
 
 /// \brief Returns the translation from HSV to RGB
 void hsv2rgb(double H, double S, double V, double *r, double *g, double *b);
