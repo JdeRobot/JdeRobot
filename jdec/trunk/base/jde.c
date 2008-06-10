@@ -327,7 +327,7 @@ int serve_keyboardmessage(char *mensaje)
        jdeshutdown(0);
     else if ((strcmp(word,"help")==0) ||
               (strcmp(word,"?")==0))
-       printf("This is the shell of %s. Available commands:\n  * quit\n  * help\n  * ls\n      list the loaded schemas\n  * ps\n      print the non-slept schemas, their state and speed\n      show the master GUI of jdec, to visually manage the schema set\n\n  * [schemaname]\n      run the schema\n  * kill [schemaname]\n      move the schema to slept state\n  * guion [schemaname]\n      show the GUI of the schema\n  * guioff [schemaname]\n      hide the GUI of the schema\n",thisrelease);
+       printf("This is the shell of %s. Available commands:\n  * quit\n  * help\n  * ls\n      list the loaded schemas\n  * ps\n      print the non-slept schemas, their state and speed\n\n  * [schemaname]\n      run the schema\n  * kill [schemaname]\n      move the schema to slept state, stop the schema\n  * guion [schemaname]\n      show the GUI of the schema\n  * guioff [schemaname]\n      hide the GUI of the schema\n",thisrelease);
     else if ((strcmp(word,"ls")==0)||
               (strcmp(word,"list")==0) ||
               (strcmp(word,"LS")==0) ||
