@@ -224,7 +224,7 @@ int mycolorA_resume(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[0]);
-         /*printf("colorA schema resume (mplayer driver)\n");*/
+         /* printf("colorA schema resume (mplayer driver)\n");*/
          all[colorA_schema_id].father = father;
          all[colorA_schema_id].fps = 0.;
          all[colorA_schema_id].k =0;
@@ -244,6 +244,7 @@ int mycolorA_suspend(){
    if((serve_color[0]==1)&&(color_active[0]==0)){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[0]);
+      /*printf("colorA schema suspend (mplayer driver)\n");*/
       put_state(colorA_schema_id,slept);
    }
    else
@@ -268,7 +269,7 @@ int mycolorB_resume(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[1]);
-         /*printf("colorB schema resume (mplayer driver)\n");*/
+	 /* printf("colorB schema resume (mplayer driver)\n");*/
          all[colorB_schema_id].father = father;
          all[colorB_schema_id].fps = 0.;
          all[colorB_schema_id].k =0;
@@ -288,7 +289,7 @@ int mycolorB_suspend(){
     if((serve_color[1]==1)&&(color_active[1]==0)){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[1]);
-      /*printf("colorB schema suspend (mplayer driver)\n");*/
+      /* printf("colorB schema suspend (mplayer driver)\n");*/
       put_state(colorB_schema_id,slept);
    }
    else
@@ -313,7 +314,7 @@ int mycolorC_resume(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[2]);
-         /*printf("colorC schema resume (mplayer driver)\n");*/
+	 /* printf("colorC schema resume (mplayer driver)\n");*/
          all[colorC_schema_id].father = father;
          all[colorC_schema_id].fps = 0.;
          all[colorC_schema_id].k =0;
@@ -333,7 +334,7 @@ int mycolorC_suspend(){
    if((serve_color[2]==1)&&(color_active[2]==0)){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[2]);
-      /*printf("colorC schema suspend (mplayer driver)\n");*/
+      /* printf("colorC schema suspend (mplayer driver)\n"); */
       put_state(colorC_schema_id,slept);
    }
    else
@@ -359,7 +360,7 @@ int mycolorD_resume(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[3]);
-         /*printf("colorD schema resume (mplayer driver)\n");*/
+	 /* printf("colorD schema resume (mplayer driver)\n");*/
          all[colorD_schema_id].father = father;
          all[colorD_schema_id].fps = 0.;
          all[colorD_schema_id].k =0;
@@ -379,7 +380,7 @@ int mycolorD_suspend(){
    if((serve_color[3]==1)&&(color_active[3]==0)){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[3]);
-      /*printf("colorD schema suspend (mplayer driver)\n");*/
+      /* printf("colorD schema suspend (mplayer driver)\n"); */
       put_state(colorD_schema_id,slept);
    }
    else
@@ -563,6 +564,17 @@ int myvarcolorD_suspend(){
    return 0;
 }
 
+/** mplayer driver function to create 2 fifos required to capture images using mplayer+mencoder
+ *  @param i selected color to launch a mplayer thread.*/
+void mplayer_fifocreate(int i){
+   umask (0000);
+   unlink (fifo1[i]);
+   unlink (fifo2[i]);
+   if ( (mkfifo (fifo1[i], 0600) != 0) ||
+	(mkfifo (fifo2[i], 0600) != 0) )
+     jdeshutdown (1);
+}
+
 /** mplayer driver function to start a mplayer process for a selected color.
  *  @param i selected color to launch a mplayer thread.*/
 void mplayer_start(int i){
@@ -571,7 +583,6 @@ void mplayer_start(int i){
    char str2[100];
    char str3[100];
 
-   umask (0000);
    if (pid_mplayer[i]!=-1){
       kill (pid_mplayer[i], 9);
       wait (NULL);
@@ -580,12 +591,7 @@ void mplayer_start(int i){
       kill (pid_mencoder[i], 9);
       wait (NULL);
    }
-   unlink (fifo1[i]);
-   unlink (fifo2[i]);
-   if ( (mkfifo (fifo1[i], 0600) != 0) ||
-         (mkfifo (fifo2[i], 0600) != 0) )
-      jdeshutdown (1);
-
+  
    if ((pid_mencoder[i]=fork()) == 0) {/* We create a new process...
       // ... close its stdin, stdout & stderr ...*/
       char cache_size[20];
@@ -687,6 +693,7 @@ void *mplayer_thread(void *id){
                Seguramente ya hayan muerto y eso devuelve error*/
                close(fifo);
 
+	       mplayer_fifocreate(i);
                mplayer_start(i);
                if ((fifo=open (fifo2[i],O_RDONLY))==-1){
                   perror("");
@@ -864,7 +871,38 @@ int mplayer_parseconf(char *configfile){
                               words=sscanf(buffer_file2,"%s %s %s %s %s %s %s",
                                            word3,word4,word5,word6,word7,word8,
                                            word9);
-                              if(words==4){
+			      if (words==3) {
+				printf("mplayer: %s from %s\n",word4,word5);
+                                 if(strcmp(word4,"colorA")==0){
+                                    serve_color[0]=1;
+                                    strcpy (video_files[0],word5);
+                                    width[0] = SIFNTSC_COLUMNS;
+                                    height[0] = SIFNTSC_ROWS;
+                                    input_type[0]=VIDEO;
+				 }
+				 else if(strcmp(word4,"colorB")==0){
+                                    serve_color[1]=1;
+                                    strcpy (video_files[1],word5);
+                                    width[1] = SIFNTSC_COLUMNS;
+                                    height[1] = SIFNTSC_ROWS;
+                                    input_type[1]=VIDEO;
+				 }
+				 else if(strcmp(word4,"colorC")==0){
+				   serve_color[2]=1;
+				   strcpy (video_files[2],word5);
+				   width[2] = SIFNTSC_COLUMNS;
+				   height[2] = SIFNTSC_ROWS;
+				   input_type[2]=VIDEO;
+				 }
+				 else if(strcmp(word4,"colorD")==0){
+				   serve_color[3]=1;
+				   strcpy (video_files[3],word5);
+				   width[3] = SIFNTSC_COLUMNS;
+				   height[3] = SIFNTSC_ROWS;
+				   input_type[3]=VIDEO;
+				 }
+			      }
+                              else if(words==4){
                                  printf("mplayer: %s from %s\n",word4,word5);
                                  if(strcmp(word4,"colorA")==0){
                                     serve_color[0]=1;
@@ -983,6 +1021,35 @@ int mplayer_parseconf(char *configfile){
                                     }
                                  }
                               }
+
+                              else if (words==5){
+                                 printf("mplayer: %s from %s\n",word4,word5);
+                                 if(strcmp(word4,"varcolorA")==0){
+                                    serve_color[4]=1;
+                                    strcpy (video_files[4],word5);
+                                    width[4] = atoi(word6);
+                                    height[4] = atoi(word7);
+                                    input_type[4]=VIDEO;
+                                 }else if(strcmp(word4,"varcolorB")==0){
+                                    serve_color[5]=1;
+                                    strcpy (video_files[5],word5);
+                                    width[5] = atoi(word6);
+                                    height[5] = atoi(word7);
+                                    input_type[5]=VIDEO;
+				 }else if(strcmp(word4,"varcolorC")==0){
+                                    serve_color[6]=1;
+                                    strcpy (video_files[6],word5);
+                                    width[6] = atoi(word6);
+                                    height[6] = atoi(word7);
+                                    input_type[6]=VIDEO;
+				 }else if(strcmp(word4,"varcolorD")==0){
+                                    serve_color[7]=1;
+                                    strcpy (video_files[7],word5);
+                                    width[7] = atoi(word6);
+                                    height[7] = atoi(word7);
+                                    input_type[7]=VIDEO;
+				 }
+			      }
                               else if (words==6){
                                  printf("mplayer: %s from %s\n",word4,word5);
                                  if(strcmp(word4,"varcolorA")==0){
@@ -1141,6 +1208,13 @@ void mplayer_startup(char *configfile)
       color_active[i]=0;
    }
 
+  /* we call the function to parse the config file */
+   if(mplayer_parseconf(configfile)==-1){
+      printf("mplayer: cannot initiate driver. configfile parsing error.\n");
+      exit(-1);
+   }
+
+
    strcpy (directory, "/tmp/jde-mplayer-XXXXXX");
    if (mkdtemp(directory)==NULL){
       perror ("I can't create a temp directory: ");
@@ -1213,22 +1287,15 @@ void mplayer_startup(char *configfile)
       fprintf (stderr, "Can't create temp files\n");
       exit (-1);
    }
-   
-   /* we call the function to parse the config file */
-   if(mplayer_parseconf(configfile)==-1){
-      printf("mplayer: cannot initiate driver. configfile parsing error.\n");
-      exit(-1);
-   }
 
-   for (i=0; i<MAXVIDS; i++){
-      /*inicializar todos los mplayer y mencoder*/
-      pid_mplayer[i]=-1;
-      pid_mencoder[i]=-1;
+  for (i=0; i<MAXVIDS; i++){
+      /*inicializar todos los fifos */
       if (serve_color[i]==1){
-         mplayer_start(i);
+         mplayer_fifocreate(i);
       }
    }
 
+    
    if(mplayer_thread_created==0){
       static int args[MAXVIDS];
       /*Crear hilos para cada imagen*/
@@ -1278,13 +1345,11 @@ void mplayer_startup(char *configfile)
       mplayer_thread_created=1;
       pthread_mutex_unlock(&mymutex);
    }
-   /*Se crean los esquemas que a su vez bloquean a su correspondiente threat
+   /*Se crean los esquemas que a su vez bloquean a su correspondiente thread
    hasta que se active el esquema*/
 
    /*creates new schema for colorA*/
    if(serve_color[0]==1){
-
-      if(pid_mplayer[0]!=0 && pid_mencoder[0]!=0){
          pthread_mutex_lock(&color_mutex[0]);
          all[num_schemas].id = (int *) &colorA_schema_id;
          strcpy(all[num_schemas].name,"colorA");
@@ -1305,15 +1370,11 @@ void mplayer_startup(char *configfile)
          myexport("colorA","suspend",(void *)mycolorA_suspend);
          myexport("colorA","width",&width[0]);
          myexport("colorA","height",&height[0]);
-      }else{
-         serve_color[0]=0;
-         printf("cannot find file for colorA\n");
-      }
+	 mycolorA_resume(SHELLHUMAN,NULL,NULL);
    }
 
    /*creates new schema for colorB*/
    if(serve_color[1]==1){
-      if(pid_mplayer[1]!=0 && pid_mencoder[1]!=0){
          pthread_mutex_lock(&color_mutex[1]);
          all[num_schemas].id = (int *) &colorB_schema_id;
          strcpy(all[num_schemas].name,"colorB");
@@ -1334,15 +1395,11 @@ void mplayer_startup(char *configfile)
          myexport("colorB","suspend",(void *)mycolorB_suspend);
          myexport("colorB","width",&width[1]);
          myexport("colorB","height",&height[1]);
-      }else{
-         serve_color[1]=0;
-         printf("cannot find file for colorB\n");
-      }
+	 mycolorB_resume(SHELLHUMAN,NULL,NULL);
    }
   
    /*creates new schema for colorC*/
    if(serve_color[2]==1){
-      if(pid_mplayer[2]!=0 && pid_mencoder[2]!=0){
          pthread_mutex_lock(&color_mutex[2]);
          all[num_schemas].id = (int *) &colorC_schema_id;
          strcpy(all[num_schemas].name,"colorC");
@@ -1363,15 +1420,11 @@ void mplayer_startup(char *configfile)
          myexport("colorC","suspend",(void *)mycolorC_suspend);
          myexport("colorC","width",&width[2]);
          myexport("colorC","height",&height[2]);
-      }else{
-         serve_color[2]=0;
-         printf("cannot find file for colorC\n");
-      }
+	 mycolorC_resume(SHELLHUMAN,NULL,NULL);
    }
   
    /*creates new schema for colorD*/
    if(serve_color[3]==1){
-      if(pid_mplayer[3]!=0 && pid_mencoder[3]!=0){
          pthread_mutex_lock(&color_mutex[3]);
          all[num_schemas].id = (int *) &colorD_schema_id;
          strcpy(all[num_schemas].name,"colorD");
@@ -1392,14 +1445,11 @@ void mplayer_startup(char *configfile)
          myexport("colorD","suspend",(void *)mycolorD_suspend);
          myexport("colorD","width",&width[3]);
          myexport("colorD","height",&height[3]);
-      }else{
-         serve_color[3]=0;
-         printf("cannot find file for colorD\n");
-      }
+	 mycolorD_resume(SHELLHUMAN,NULL,NULL);
    }
+
    /*creates new schema for varcolorA*/
    if(serve_color[4]==1){
-      if(pid_mplayer[4]!=0 && pid_mencoder[4]!=0){
          pthread_mutex_lock(&color_mutex[4]);
          all[num_schemas].id = (int *) &varcolorA_schema_id;
          strcpy(all[num_schemas].name,"varcolorA");
@@ -1420,15 +1470,11 @@ void mplayer_startup(char *configfile)
          myexport("varcolorA","suspend",(void *)myvarcolorA_suspend);
          myexport("varcolorA","width",&width[4]);
          myexport("varcolorA","height",&height[4]);
-      }else{
-         serve_color[4]=0;
-         printf("cannot find file for varcolorA\n");
-      }
+	 myvarcolorA_resume(SHELLHUMAN,NULL,NULL);
    }
 
    /*creates new schema for varcolorB*/
    if(serve_color[5]==1){
-      if(pid_mplayer[5]!=0 && pid_mencoder[5]!=0){
          pthread_mutex_lock(&color_mutex[5]);
          all[num_schemas].id = (int *) &varcolorB_schema_id;
          strcpy(all[num_schemas].name,"varcolorB");
@@ -1449,15 +1495,11 @@ void mplayer_startup(char *configfile)
          myexport("varcolorB","suspend",(void *)myvarcolorB_suspend);
          myexport("varcolorB","width",&width[5]);
          myexport("varcolorB","height",&height[5]);
-      }else{
-         serve_color[5]=0;
-         printf("cannot find file for varcolorB\n");
-      }
+	 myvarcolorB_resume(SHELLHUMAN,NULL,NULL);
    }
 
    /*creates new schema for varcolorC*/
    if(serve_color[6]==1){
-      if(pid_mplayer[6]!=0 && pid_mencoder[6]!=0){
          pthread_mutex_lock(&color_mutex[6]);
          all[num_schemas].id = (int *) &varcolorC_schema_id;
          strcpy(all[num_schemas].name,"varcolorC");
@@ -1478,15 +1520,11 @@ void mplayer_startup(char *configfile)
          myexport("varcolorC","suspend",(void *)myvarcolorC_suspend);
          myexport("varcolorC","width",&width[6]);
          myexport("varcolorC","height",&height[6]);
-      }else{
-         serve_color[6]=0;
-         printf("cannot find file for varcolorC\n");
-      }
+	 myvarcolorC_resume(SHELLHUMAN,NULL,NULL);
    }
 
    /*creates new schema for varcolorD*/
    if(serve_color[7]==1){
-      if(pid_mplayer[7]!=0 && pid_mencoder[7]!=0){
          pthread_mutex_lock(&color_mutex[7]);
          all[num_schemas].id = (int *) &varcolorD_schema_id;
          strcpy(all[num_schemas].name,"varcolorD");
@@ -1507,9 +1545,42 @@ void mplayer_startup(char *configfile)
          myexport("varcolorD","suspend",(void *)myvarcolorD_suspend);
          myexport("varcolorD","width",&width[7]);
          myexport("varcolorD","height",&height[7]);
-      }else{
-         serve_color[7]=0;
-         printf("cannot find file for varcolorD\n");
-      }
+	 myvarcolorD_resume(SHELLHUMAN,NULL,NULL);
    }
+
+   /* Whenever the mplayer and mencoder processes are launched they start to provide images.
+      They require someone reading them from the last fifo. Otherwise, when connecting to 
+      a streaming image server, the internal buffers (of mplayer, mencoder and the intervening 
+      fifos) are completely filled, which causes a huge delay (several seconds) between the 
+      images delivered by the streaming server now and those delivered to the jdec program (which
+      is reading from the last fifo). Eventually the system reduces such delay and recovers the 
+      liveliness.
+
+      That is why the corresponding schema (colorA,varcolorA,etc) and its thread are started 
+      BEFORE launching the mplayer+encoder processes. When they start running there is already
+      a thread looking for the image data from the last fifo. It avoids the saturation of the 
+      buffers.
+   */
+   for (i=0; i<MAXVIDS; i++){
+     /*inicializar todos los mplayer y mencoder*/
+     pid_mplayer[i]=-1;
+     pid_mencoder[i]=-1;
+     if (serve_color[i]==1){
+       mplayer_start(i);
+       if ((pid_mplayer[i]<=0) || (pid_mencoder[i]<=0))
+	 {
+	   serve_color[i]=0;
+	   printf("cannot find file for ");
+	   if (i==0) printf("colorA\n");
+	   else if (i==1) printf("colorB\n");
+	   else if (i==2) printf("colorC\n");
+	   else if (i==3) printf("colorD\n");
+	   else if (i==4) printf("varcolorA\n");
+	   else if (i==5) printf("varcolorB\n");
+	   else if (i==6) printf("varcolorC\n");
+	   else if (i==7) printf("varcolorD\n");
+	 }
+     }
+   }
+   
 }
