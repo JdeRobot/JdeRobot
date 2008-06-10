@@ -19,7 +19,6 @@
  */
 
 #include <jde.h>
-#include <forms.h>
 #include "graphics_xforms.h"
 #define v3f glVertex3f
 
@@ -27,8 +26,8 @@
 #include <GL/glx.h>
 #include <GL/glu.h>
 
-#include <forms.h>
-#include <glcanvas.h>
+#include <X11/forms.h>
+#include <X11/glcanvas.h>
 #include "opengldemogui.h"
 
 /*Gui declarations*/

@@ -1,3 +1,3 @@
-SUBDIRS = @DRIVERS_SUBDIR@ @SCHEMAS_SUBDIR@ @DOCS_SUBDIR@ @UTILS_SUBDIR@ @EXAMPLES_SUBDIR@ base
+SUBDIRS = base utils drivers schemas docs examples
 EXTRA_DIST = AUTHORS ChangeLog COPYING INSTALL NEWS README TODO
 MAINTAINERCLEANFILES = configure aclocal.m4 Makefile.in Makefile config/*

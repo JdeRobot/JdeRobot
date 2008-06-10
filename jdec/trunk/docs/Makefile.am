@@ -1,4 +1,3 @@
-#SUBDIRS = @DRIVERS_SUBDIR@ @SCHEMAS_SUBDIR@ @DOCS_SUBDIR@ @UTILS_SUBDIR@ @EXAMPLES_SUBDIR@ base
 DOCDIRS = progeo-manual manual howto-ipp howto-gazebo
 DOCS = howto-gazebo/howto-gazebo.pdf howto-ipp/howto-ipp.pdf manual/jdecmanual.pdf progeo-manual/progeo-manual.pdf 
 

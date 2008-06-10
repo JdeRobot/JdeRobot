@@ -19,7 +19,7 @@
  */
 
 #include "jde.h"
-#include <forms.h>
+#include <X11/forms.h>
 #include "graphics_xforms.h"
 #include "opflowgui.h"
 #include "opflow.h"

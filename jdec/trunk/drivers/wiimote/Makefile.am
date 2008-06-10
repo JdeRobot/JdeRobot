@@ -3,9 +3,8 @@ driver_LTLIBRARIES = wiimote.la
 endif
 
 wiimote_la_SOURCES = wiimote.c
-wiimote_la_LDFLAGS = -module -avoid-version @WIIMOTE_LIBS@
-wiimote_la_CFLAGS = @WIIMOTE_CFLAGS@ -I$(top_srcdir)/base
-wiimote_ladir = @CFGDIR@
-dist_wiimote_la_DATA = wiimote.conf
+wiimote_la_LDFLAGS = -module -avoid-version $(WIIMOTE_LIBS)
+wiimote_la_CFLAGS = $(WIIMOTE_CFLAGS) -I$(top_srcdir)/base
+dist_conf_DATA = wiimote.conf
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
