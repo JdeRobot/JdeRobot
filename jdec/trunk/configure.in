@@ -264,8 +264,8 @@ if test "x$with_player" != xno; then
     _SAVE_CFLAGS=$CFLAGS
     _SAVE_CPPFLAGS=$CPPFLAGS
     _SAVE_LIBS=$LIBS
-    CFLAGS="$CFLAGS -I$PLAYER_PREFIX/include $PLAYER_CFLAGS"
-    CPPFLAGS="$CPPFLAGS -I$PLAYER_PREFIX/include $PLAYER_CPPFLAGS"
+    CFLAGS="$CFLAGS -I$PLAYER_PREFIX/include/player-2.0 $PLAYER_CFLAGS"
+    CPPFLAGS="$CPPFLAGS -I$PLAYER_PREFIX/include/player-2.0 $PLAYER_CPPFLAGS"
     LIBS="$LIBS -L$PLAYER_PREFIX/lib $PLAYER_LIBS"
     AC_MSG_NOTICE([*** Checking player:])
     ERRORS=""
@@ -279,7 +279,7 @@ if test "x$with_player" != xno; then
 	AC_MSG_NOTICE([Player disabled: $ERRORS])
 	with_player="no"
     else
-	PLAYER_CFLAGS="-I$PLAYER_PREFIX/include $PLAYER_CFLAGS"
+	PLAYER_CFLAGS="-I$PLAYER_PREFIX/include/player-2.0 $PLAYER_CFLAGS"
 	PLAYER_LIBS="-L$PLAYER_PREFIX/lib $PLAYER_LIBS"
     fi
     CFLAGS=$_SAVE_CFLAGS
