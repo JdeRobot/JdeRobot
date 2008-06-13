@@ -10,6 +10,6 @@ mastergui_la_CFLAGS = $(MASTERGUI_CFLAGS) -I$(top_srcdir)/base -I$(top_srcdir)/d
 BUILT_SOURCES = masterguigui.h
 CLEANFILES = masterguigui.c masterguigui.h
 masterguigui.h: masterguigui.fd
-	$(FDESIGN) -I "X11/forms.h" -convert masterguigui.fd
+	$(FDESIGN) -convert masterguigui.fd
 
 MAINTAINERCLEANFILES = Makefile.in Makefile

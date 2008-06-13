@@ -10,6 +10,6 @@ followball_la_CFLAGS = $(FOLLOWBALL_CFLAGS) -I$(top_srcdir)/base -I$(top_srcdir)
 BUILT_SOURCES = followballgui.h
 CLEANFILES = followballgui.c followballgui.h
 followballgui.h: followballgui.fd
-	$(FDESIGN) -I "X11/forms.h" -convert followballgui.fd
+	$(FDESIGN) -convert followballgui.fd
 
 MAINTAINERCLEANFILES = Makefile.in Makefile

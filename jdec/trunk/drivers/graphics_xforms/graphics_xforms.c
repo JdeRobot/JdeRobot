@@ -44,7 +44,7 @@
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
 #include <X11/Xatom.h>
-#include <X11/forms.h>
+#include <forms.h>
 
 #include "graphics_xforms.h"
 

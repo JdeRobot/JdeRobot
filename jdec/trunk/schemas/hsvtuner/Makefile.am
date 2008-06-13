@@ -10,6 +10,6 @@ hsvtuner_la_CFLAGS = $(HSVTUNER_CFLAGS) -I$(top_srcdir)/base -I$(top_srcdir)/uti
 BUILT_SOURCES = hsvtunergui.h
 CLEANFILES = hsvtunergui.c hsvtunergui.h
 hsvtunergui.h: hsvtunergui.fd
-	$(FDESIGN) -I "X11/forms.h" -convert hsvtunergui.fd
+	$(FDESIGN) -convert hsvtunergui.fd
 
 MAINTAINERCLEANFILES = Makefile.in Makefile

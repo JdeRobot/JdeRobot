@@ -20,7 +20,7 @@
  */
 
 #include "jde.h"
-#include <X11/forms.h>
+#include <forms.h>
 #include "graphics_xforms.h"
 #include "masterguigui.h"
 #include "mastergui.h"

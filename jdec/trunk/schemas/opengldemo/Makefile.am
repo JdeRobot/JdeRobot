@@ -10,6 +10,6 @@ opengldemo_la_CFLAGS = $(OPENGLDEMO_CFLAGS) -I$(top_srcdir)/base -I$(top_srcdir)
 BUILT_SOURCES = opengldemogui.h
 CLEANFILES = opengldemogui.c opengldemogui.h
 opengldemogui.h: opengldemogui.fd
-	$(FDESIGN) -I "X11/forms.h" -convert opengldemogui.fd
+	$(FDESIGN) -convert opengldemogui.fd
 
 MAINTAINERCLEANFILES = Makefile.in Makefile

@@ -10,6 +10,6 @@ recorder_la_CFLAGS = $(RECORDER_CFLAGS) -I$(top_srcdir)/base -I$(top_srcdir)/dri
 BUILT_SOURCES = recordergui.h
 CLEANFILES = recordergui.c recordergui.h
 recordergui.h: recordergui.fd
-	$(FDESIGN) -I "X11/forms.h" -convert recordergui.fd
+	$(FDESIGN) -convert recordergui.fd
 
 MAINTAINERCLEANFILES = Makefile.in Makefile

@@ -26,7 +26,7 @@
 #include <GL/glx.h>
 #include <GL/glu.h>
 
-#include <X11/forms.h>
+#include <forms.h>
 #include <X11/glcanvas.h>
 #include "opengldemogui.h"
 

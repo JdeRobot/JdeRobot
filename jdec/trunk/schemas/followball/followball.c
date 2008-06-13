@@ -22,7 +22,7 @@
  */
 
 #include <jde.h>
-#include <X11/forms.h>
+#include <forms.h>
 #include "followballgui.h"
 #include "followball.h"
 #include <math.h>

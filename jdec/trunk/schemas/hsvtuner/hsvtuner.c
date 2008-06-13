@@ -19,7 +19,7 @@
  */
 
 #include <jde.h>
-#include <X11/forms.h>
+#include <forms.h>
 #include "hsvtunergui.h"
 #include <math.h>
 #include <colorspaces.h>
