@@ -5,10 +5,10 @@ all-local: $(DOCS) html/index.html
 
 # Assuming the package knows how to install itself
 install-data-local: $(DOCS) html/index.html
-	mkdir -p $(docdir); \
-	cp -r html $(docdir)/; \
+	mkdir -p $(DESTDIR)$(docdir); \
+	cp -r html $(DESTDIR)$(docdir)/; \
 	for i in $(DOCS); do \
-		cp $$i $(docdir)/; \
+		cp $$i $(DESTDIR)$(docdir)/; \
 	done
 
 html/index.html: jdec.doxygen
