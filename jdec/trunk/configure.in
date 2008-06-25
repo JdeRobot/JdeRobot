@@ -127,9 +127,9 @@ AC_ARG_ENABLE([drivers-wiimote],
 
 
 AC_ARG_ENABLE([schemas-eyeoperator],
-    [AS_HELP_STRING([--disable-schemas-eyeoperator],[disable eyeoperator1/4 schema compilation])],
+    [AS_HELP_STRING([--enable-schemas-eyeoperator],[enable eyeoperator1/4 schema compilation])],
     [],
-    [enable_schemas_eyeoperator1=yes])
+    [enable_schemas_eyeoperator=no])
 
 AC_ARG_ENABLE([schemas-followball],
     [AS_HELP_STRING([--disable-schemas-followball],[disable followball schema compilation])],
@@ -167,9 +167,9 @@ AC_ARG_ENABLE([schemas-opengldemo],
     [enable_schemas_opengldemo=yes])
 
 AC_ARG_ENABLE([schemas-opflow],
-    [AS_HELP_STRING([--disable-schemas-opflow],[disable opflow schema compilation])],
+    [AS_HELP_STRING([--enable-schemas-opflow],[enable opflow schema compilation])],
     [],
-    [enable_schemas_opflow=yes])
+    [enable_schemas_opflow=no])
 
 AC_ARG_ENABLE([schemas-recorder],
     [AS_HELP_STRING([--disable-schemas-recorder],[disable recorder schema compilation])],
@@ -196,17 +196,17 @@ dnl##### external software FIXME: poner argumento como optativo, escapar []
 AC_ARG_WITH([player],
     [AS_HELP_STRING([--with-player=<path>],[player software prefix path])],
     [],
-    [with_player=""])
+    [with_player="/usr/local"])
 
 AC_ARG_WITH([gazebo],
     [AS_HELP_STRING([--with-gazebo=<path>],[gazebo software prefix path])],
     [],
-    [with_gazebo=""])
+    [with_gazebo="/usr/local"])
 
 AC_ARG_WITH([ipp],
     [AS_HELP_STRING([--with-ipp=<path>],[ipp software prefix path])],
     [],
-    [with_ipp=""])
+    [with_ipp="/usr/local"])
 
 dnl##### precious variables
 dnl # Allow user to define variables
@@ -264,10 +264,12 @@ if test "x$with_player" != xno; then
     _SAVE_CFLAGS=$CFLAGS
     _SAVE_CPPFLAGS=$CPPFLAGS
     _SAVE_LIBS=$LIBS
-    CFLAGS="$CFLAGS -I$PLAYER_PREFIX/include/player-2.0 $PLAYER_CFLAGS"
-    CPPFLAGS="$CPPFLAGS -I$PLAYER_PREFIX/include/player-2.0 $PLAYER_CPPFLAGS"
+    PLAYER_INCLUDE=`find $PLAYER_PREFIX -name "player-*"`
+    CFLAGS="$CFLAGS -I$PLAYER_INCLUDE $PLAYER_CFLAGS"
+    CPPFLAGS="$CPPFLAGS -I$PLAYER_INCLUDE $PLAYER_CPPFLAGS"
     LIBS="$LIBS -L$PLAYER_PREFIX/lib $PLAYER_LIBS"
-    AC_MSG_NOTICE([*** Checking player:])
+    PLAYER_VERSION=`basename $PLAYER_INCLUDE`
+    AC_MSG_NOTICE([*** Checking player: $PLAYER_VERSION])
     ERRORS=""
     AC_CHECK_HEADERS([libplayerc/playerc.h],
 	[],
@@ -279,7 +281,7 @@ if test "x$with_player" != xno; then
 	AC_MSG_NOTICE([Player disabled: $ERRORS])
 	with_player="no"
     else
-	PLAYER_CFLAGS="-I$PLAYER_PREFIX/include/player-2.0 $PLAYER_CFLAGS"
+	PLAYER_CFLAGS="-I$PLAYER_INCLUDE $PLAYER_CFLAGS"
 	PLAYER_LIBS="-L$PLAYER_PREFIX/lib $PLAYER_LIBS"
     fi
     CFLAGS=$_SAVE_CFLAGS
