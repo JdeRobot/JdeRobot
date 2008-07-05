@@ -4,7 +4,7 @@ import random_iface
 
 class sA(schema.Schema):
     def __init__(self,sid,father_sid):
-        Schema.__init__(self,sid,father_sid,self.init,self.get_interface)
+        schema.Schema.__init__(self,sid,father_sid,self.init,self.cast)
         self.seed = 46486422
         self.child = None
         self.child_sr = None
@@ -28,7 +28,7 @@ class sA(schema.Schema):
                                               self.child_interface.get_random())
         return 0
 
-    def get_interface(self,interface_name):
+    def cast(self,interface_name):
         return None
 
 

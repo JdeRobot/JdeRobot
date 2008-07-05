@@ -17,14 +17,16 @@
       arglist = Py_BuildValue("(ii)",sid,father_sid);
       pschema = PyObject_CallObject((PyObject *)sr->cbdata ,arglist);
       Py_DECREF(arglist);
+      fprintf(stderr, "despues de DECREF\n");
       if (pschema) {
-	  int res;
-	  res = SWIG_ConvertPtr(pschema,(void**)&s,SWIGTYPE_p_Schema, SWIG_POINTER_DISOWN);
-	  if (!SWIG_IsOK(res)) {
-	    SWIG_exception_fail(SWIG_ArgError(res), 
-				"in callback schema constructor"); 
-	  }
-	  s->private_data = (void*)pschema;
+	int res;
+	fprintf(stderr, "pschema no es nulo\n");
+	res = SWIG_ConvertPtr(pschema,(void**)&s,SWIGTYPE_p_Schema, SWIG_POINTER_DISOWN);
+	if (!SWIG_IsOK(res)) {
+	  SWIG_exception_fail(SWIG_ArgError(res), 
+			      "in callback schema constructor"); 
+	}
+	s->private_data = (void*)pschema;
       } else {
 	if (PyErr_Occurred())
 	  PyErr_Print();
