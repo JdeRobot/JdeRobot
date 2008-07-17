@@ -1,5 +1,5 @@
 if ENABLE_NETWORKSERVER
-driver_LTLIBRARIES = networkserver.la
+service_LTLIBRARIES = networkserver.la
 endif
 
 networkserver_la_SOURCES = networkserver.c jdemessages.h

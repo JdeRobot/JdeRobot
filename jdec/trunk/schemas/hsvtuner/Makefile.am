@@ -5,8 +5,8 @@ endif
 hsvtuner_la_SOURCES = hsvtuner.c hsvtuner.h hsvtunergui.fd
 nodist_hsvtuner_la_SOURCES = hsvtunergui.c hsvtunergui.h
 hsvtuner_la_LDFLAGS = -module -avoid-version $(HSVTUNER_LIBS)
-hsvtuner_la_LIBADD = $(top_srcdir)/utils/colorspaces/libcolorspaces.la
-hsvtuner_la_CFLAGS = $(HSVTUNER_CFLAGS) -I$(top_srcdir)/base -I$(top_srcdir)/utils/colorspaces -I$(top_srcdir)/drivers/graphics_xforms
+hsvtuner_la_LIBADD = $(top_srcdir)/libs/colorspaces/libcolorspaces.la
+hsvtuner_la_CFLAGS = $(HSVTUNER_CFLAGS) -I$(top_srcdir)/base -I$(top_srcdir)/libs/colorspaces -I$(top_srcdir)/services/graphics_xforms
 BUILT_SOURCES = hsvtunergui.h
 CLEANFILES = hsvtunergui.c hsvtunergui.h
 hsvtunergui.h: hsvtunergui.fd

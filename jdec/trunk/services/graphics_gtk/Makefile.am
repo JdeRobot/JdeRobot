@@ -1,5 +1,5 @@
 if ENABLE_GRAPHICS_GTK
-driver_LTLIBRARIES = graphics_gtk.la
+service_LTLIBRARIES = graphics_gtk.la
 endif
 
 graphics_gtk_la_SOURCES = graphics_gtk.c graphics_gtk.h

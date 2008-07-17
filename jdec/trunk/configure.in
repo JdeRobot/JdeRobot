@@ -31,6 +31,7 @@ includedir='${prefix}/include/jdec'
 
 AC_SUBST([driverdir],['${libdir}/drivers'])
 AC_SUBST([schemadir],['${libdir}/schemas'])
+AC_SUBST([servicedir],['${libdir}/services'])
 AC_SUBST([confdir],['${datadir}/${PACKAGE}/conf'])
 AC_SUBST([gladedir],['${datadir}/${PACKAGE}/glade'])
 
@@ -126,6 +127,16 @@ AC_ARG_ENABLE([drivers-wiimote],
     [enable_drivers_wiimote=yes])
 
 
+AC_ARG_ENABLE([schemas-calibrador],
+    [AS_HELP_STRING([--disable-schemas-calibrador],[disable calibrador schema compilation])],
+    [],
+    [enable_schemas_calibrador=yes])
+
+AC_ARG_ENABLE([schemas-esquema_prueba],
+    [AS_HELP_STRING([--disable-schemas-esquema_prueba],[disable esquema_prueba1 schema compilation])],
+    [],
+    [enable_schemas_esquema_prueba=yes])
+
 AC_ARG_ENABLE([schemas-eyeoperator],
     [AS_HELP_STRING([--enable-schemas-eyeoperator],[enable eyeoperator1/4 schema compilation])],
     [],
@@ -186,11 +197,6 @@ AC_ARG_ENABLE([schemas-wiimote_viewer],
     [],
     [enable_schemas_wiimote_viewer=yes])
 
-dnl# main utils switch
-AC_ARG_ENABLE([utils],
-    [AS_HELP_STRING([--disable-utils],[disable utils compilation])],
-    [],
-    [enable_utils=yes])
 
 dnl##### external software FIXME: poner argumento como optativo, escapar []
 AC_ARG_WITH([player],
@@ -359,7 +365,7 @@ AC_SUBST([IPP_LIBS])
 
 dnl ########################################
 dnl #
-dnl # drivers headers and libraries check
+dnl # drivers headers and libraries checks
 dnl #
 dnl # * <driver>_CFLAGS and <driver>_LIBS can be defined as environment variables in
 dnl #   configure time to set paths and other compile/link options
@@ -535,7 +541,7 @@ AC_SUBST([ENABLED_DRIVERS])
 
 dnl ########################################
 dnl #
-dnl # doc generators check
+dnl # doc checks
 dnl #
 dnl ########################################
 dnl FIXME: que hacer si los chequeos fallan?
@@ -547,13 +553,57 @@ AC_PATH_PROG([BIBTEX],[bibtex])
 
 dnl ########################################
 dnl #
-dnl # schemas generators check
+dnl # schemas checks
 dnl #
 dnl # * <schema>_CFLAGS and <schema>_LIBS can be defined as environment variables in
 dnl #   configure time to set paths and other compile/link options
 dnl #
 dnl ########################################
 AC_MSG_NOTICE([*** Checking schemas:])
+
+dnl # schema calibrador
+AM_CONDITIONAL([ENABLE_CALIBRADOR],[false])
+if test "x$enable_schemas_calibrador" != xno; then
+    AC_MSG_NOTICE([**** Checking schema calibrador:])
+    PKG_CHECK_MODULES([CALIBRADOR],[gsl glib-2.0],
+        [ENABLED_SCHEMAS="$ENABLED_SCHEMAS calibrador"
+	    AM_CONDITIONAL([ENABLE_CALIBRADOR],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-calibrador was given, but there was errors: $CALIBRADOR_PKG_ERRORS])])
+    ERRORS=""
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h glcanvas.h GL/gl.h GL/glx.h GL/glu.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([forms],[main],
+	[CALIBRADOR_LIBS="$CALIBRADOR_LIBS -lforms"],
+	[ERRORS="$ERRORS, libforms not found"],[-lm])
+    AC_CHECK_LIB([X11],[main],
+	[CALIBRADOR_LIBS="$CALIBRADOR_LIBS -lX11"],
+	[ERRORS="$ERRORS, libX11 not found"])
+    AC_CHECK_LIB([formsGL],[main],
+	[CALIBRADOR_LIBS="$CALIBRADOR_LIBS -lformsGL"],
+	[ERRORS="$ERRORS, libformsGL not found"],[-lm])
+    AC_CHECK_LIB([GL],[main],
+	[CALIBRADOR_LIBS="$CALIBRADOR_LIBS -lGL"],
+	[ERRORS="$ERRORS, libGL not found"])
+    AC_CHECK_LIB([GLU],[main],
+	[CALIBRADOR_LIBS="$CALIBRADOR_LIBS -lGLU"],
+	[ERRORS="$ERRORS, libGLU not found"])
+    AC_CHECK_LIB([glut],[main],
+	[CALIBRADOR_LIBS="$CALIBRADOR_LIBS -lglut"],
+	[ERRORS="$ERRORS, libglut not found"])
+    AC_PATH_PROG([FDESIGN],[fdesign],
+	[ERRORS="$ERRORS, fdesign needed to build calibrador schema not found"])
+fi
+
+dnl # schema esquema_prueba
+AM_CONDITIONAL([ENABLE_ESQUEMA_PRUEBA],[false])
+if test "x$enable_schemas_esquema_prueba" != xno; then
+    AC_MSG_NOTICE([**** Checking schema esquema_prueba:])
+    PKG_CHECK_MODULES([ESQUEMA_PRUEBA],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS esquema_prueba"
+	    AM_CONDITIONAL([ENABLE_ESQUEMA_PRUEBA],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-esquema_prueba was given, but there was errors: $ESQUEMA_PRUEBA_PKG_ERRORS])])
+fi
 
 dnl#check eyeoperator1/4
 AM_CONDITIONAL([ENABLE_EYEOPERATOR],[false])
@@ -706,7 +756,7 @@ if test "x$enable_schemas_opengldemo" = xno; then
 else
     ERRORS=""
     AC_MSG_NOTICE([**** Checking schema opengldemo:])
-    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h X11/glcanvas.h GL/gl.h GL/glx.h GL/glu.h],
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h glcanvas.h GL/gl.h GL/glx.h GL/glu.h],
 	[],
 	[ERRORS="$ERRORS, $ac_header not found"])
     AC_CHECK_LIB([forms],[main],
@@ -793,7 +843,7 @@ if test "x$enable_schemas_teleoperator" = xno; then
 else
     ERRORS=""
     AC_MSG_NOTICE([**** Checking schema teleoperator:])
-    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h X11/glcanvas.h GL/gl.h GL/glx.h GL/glu.h],
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h glcanvas.h GL/gl.h GL/glx.h GL/glu.h],
 	[],
 	[ERRORS="$ERRORS, $ac_header not found"])
     AC_CHECK_LIB([forms],[main],
@@ -835,14 +885,10 @@ fi
 
 dnl ########################################
 dnl #
-dnl # utils generators check
+dnl # libs checks
 dnl #
 dnl ########################################
-AM_CONDITIONAL([ENABLE_UTILS],[false])
-if test "x$enable_utils" != xno; then
-    AC_MSG_NOTICE([*** Checking utils:])
-    AM_CONDITIONAL([ENABLE_UTILS],[true])
-fi
+AC_MSG_NOTICE([*** Checking utils:])
 
 
 dnl ########################################
@@ -860,27 +906,26 @@ dnl ########################################
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([base/Makefile])
 dnl # generate utils Makefiles
-AC_CONFIG_FILES([utils/Makefile \
-    utils/colorspaces/Makefile \
-    utils/fuzzylib/Makefile \
-    utils/pioneer/Makefile \
-    utils/progeo/Makefile])
+AC_CONFIG_FILES([libs/Makefile \
+    libs/colorspaces/Makefile \
+    libs/fuzzylib/Makefile \
+    libs/pioneer/Makefile \
+    libs/progeo/Makefile])
 dnl # generate driver Makefiles
 AC_CONFIG_FILES([drivers/Makefile \
     drivers/evi/Makefile \
     drivers/firewire/Makefile \
     drivers/gazebo/Makefile \
-    drivers/graphics_gtk/Makefile \
-    drivers/graphics_xforms/Makefile \
     drivers/imagefile/Makefile \
     drivers/mplayer/Makefile \
     drivers/networkclient/Makefile \
-    drivers/networkserver/Makefile \
     drivers/pantilt/Makefile \
     drivers/player/Makefile \
     drivers/wiimote/Makefile])
 dnl # generate schemas Makefiles
 AC_CONFIG_FILES([schemas/Makefile \
+    schemas/calibrador/Makefile \
+    schemas/esquema_prueba/Makefile \
     schemas/eyeoperator1/Makefile \
     schemas/eyeoperator4/Makefile \
     schemas/followball/Makefile \
@@ -894,8 +939,13 @@ AC_CONFIG_FILES([schemas/Makefile \
     schemas/recorder/Makefile \
     schemas/teleoperator/Makefile \
     schemas/wiimote_viewer/Makefile])
-dnl # generate docs and examples Makefiles
-AC_CONFIG_FILES([docs/Makefile \
-    examples/Makefile])
+
+dnl # generate services Makefiles
+AC_CONFIG_FILES([services/Makefile \
+    services/graphics_gtk/Makefile \
+    services/graphics_xforms/Makefile \
+    services/networkserver/Makefile])
+dnl # generate docs Makefiles
+AC_CONFIG_FILES([docs/Makefile])
 
 AC_OUTPUT

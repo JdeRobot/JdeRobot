@@ -1,5 +1,5 @@
 if ENABLE_GRAPHICS_XFORMS
-driver_LTLIBRARIES = graphics_xforms.la
+service_LTLIBRARIES = graphics_xforms.la
 endif
 
 graphics_xforms_la_SOURCES = graphics_xforms.c graphics_xforms.h

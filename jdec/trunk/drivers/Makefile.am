@@ -1,2 +1,2 @@
-SUBDIRS = evi firewire gazebo graphics_gtk graphics_xforms imagefile mplayer networkclient networkserver pantilt player wiimote
+SUBDIRS = evi firewire gazebo imagefile mplayer networkclient pantilt player wiimote
 MAINTAINERCLEANFILES = Makefile.in Makefile

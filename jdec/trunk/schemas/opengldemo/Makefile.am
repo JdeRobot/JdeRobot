@@ -6,7 +6,7 @@ opengldemo_la_SOURCES = opengldemo.c opengldemo.h opengldemogui.fd
 nodist_opengldemo_la_SOURCES = opengldemogui.c opengldemogui.h
 opengldemo_la_LDFLAGS = -module -avoid-version $(OPENGLDEMO_LIBS)
 opengldemo_la_LIBADD =
-opengldemo_la_CFLAGS = $(OPENGLDEMO_CFLAGS) -I$(top_srcdir)/base -I$(top_srcdir)/drivers/graphics_xforms
+opengldemo_la_CFLAGS = $(OPENGLDEMO_CFLAGS) -I$(top_srcdir)/base -I$(top_srcdir)/services/graphics_xforms
 BUILT_SOURCES = opengldemogui.h
 CLEANFILES = opengldemogui.c opengldemogui.h
 opengldemogui.h: opengldemogui.fd
