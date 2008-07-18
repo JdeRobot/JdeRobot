@@ -82,7 +82,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ../core \
+INPUT                  = ../base \
                          ../
 FILE_PATTERNS          = *.c \
                          *.cc \
