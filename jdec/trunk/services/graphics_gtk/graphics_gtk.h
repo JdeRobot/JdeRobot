@@ -12,12 +12,18 @@
 
 #include <glade/glade-xml.h>
 
+#ifndef __GUI_DISPLAY
+#define __GUI_DISPLAY
 /**
  * Generic display refresh callback function's type definition
  * @return void
  */
 typedef void (*guidisplay)(void);
 
+#endif
+
+#ifndef __REGISTER_DISPLAY
+#define __REGISTER_DISPLAY
 /**
  * Type definition of the generic suscribe function to display callback
  * @param guidisplay The display callback fucntion implemented by the schema
@@ -25,12 +31,18 @@ typedef void (*guidisplay)(void);
  */
 typedef int (*registerdisplay)(guidisplay f);
 
+#endif
+
+#ifndef __DELETE_DISPLAY
+#define __DELETE_DISPLAY
 /**
  * Type definition of the generic suscribe function to display callback
  * @param guidisplay The display callback fucntion implemented by the schema
  * @return 1 if the callback was unregistered correctly, othewise 0
  */
 typedef int (*deletedisplay)(guidisplay f);
+
+#endif
 
 /**
  * Search in the path the .glade file and loads it

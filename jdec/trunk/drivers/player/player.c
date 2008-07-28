@@ -634,7 +634,7 @@ void player_close(){
 void player_laser_callback(){
    int i=0;
    double j=0.0;
-   int player_resolution;
+   double player_resolution;
    double jump;
    int offset;
   
@@ -642,20 +642,20 @@ void player_laser_callback(){
    laser_clock=tag++;
 
    /*Now we must transform player resolution into user defined resolution*/
-   player_resolution=1/(RADTODEG*player_laser->scan_res);
+   player_resolution=(double)1/((double)RADTODEG*(double)player_laser->scan_res);
    jump=(double)player_resolution / (double)laser_resolution;
  
    /*Check if is possible serve this resolution and number of measures*/
-   if (jump < 1.0){
-      fprintf(stderr,"player: I can't serve laser at %d measures per degree\n",
-              laser_resolution);
-      jdeshutdown(-1);
-   }
-   else if((player_laser->scan_count/jump) < laser_number){
-      fprintf(stderr,"player: I can't serve laser at %d measures\n",
-              laser_number);
-      jdeshutdown(-1);
-   }
+//    if (jump < 1.0){
+//       fprintf(stderr,"player: I can't serve laser at %d measures per degree\n",
+//               laser_resolution);
+//       jdeshutdown(-1);
+//    }
+//    else if((player_laser->scan_count/jump) < laser_number){
+//       fprintf(stderr,"player: I can't serve laser at %d measures\n",
+//               laser_number);
+//       jdeshutdown(-1);
+//    }
 
    offset=((player_laser->scan_count/jump)-laser_number)/2;
    i=0;

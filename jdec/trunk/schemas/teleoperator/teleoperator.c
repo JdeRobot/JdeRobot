@@ -53,6 +53,8 @@ int finish_flag=0;
 #define DISPLAY_COLORIMAGED 0x80UL
 #define BASE_TELEOPERATOR 0x100UL
 #define PANTILT_TELEOPERATOR 0x200UL
+#define DISPLAY_ZOOMENCODERS 0x400UL
+#define ZOOM_TELEOPERATOR 0x800UL
 
 #define PI 3.141592654
 #define MAXWORLD 30.
@@ -102,7 +104,7 @@ int teleoperator_cycle=100; /* ms */
 #define joystick_maxRotVel 30 /* deg/sec */
 #define joystick_maxTranVel 500 /* mm/sec */
 float joystick_x, joystick_y;
-float pt_joystick_x, pt_joystick_y;
+float pt_joystick_x, pt_joystick_y, pt_joystick_z;
 int back=0;
 
 float *mysonars=NULL;
@@ -118,11 +120,22 @@ suspendFn motorssuspend;
 
 float *mypan_angle=NULL, *mytilt_angle=NULL;  /* degs */
 float *mylongitude=NULL; /* degs, pan angle */
+float *mylongitude_max=NULL, *mylongitude_min=NULL;
 float *mylatitude=NULL; /* degs, tilt angle */
+float *mylatitude_max=NULL, *mylatitude_min=NULL;
 float *mylongitude_speed=NULL;
+float *mylongitude_speed_max=NULL;
 float *mylatitude_speed=NULL;
 resumeFn ptmotorsresume, ptencodersresume;
 suspendFn ptmotorssuspend, ptencoderssuspend;
+
+float *myzoom_position=NULL;
+float *myzoom=NULL;
+float *myzoom_max=NULL, *myzoom_min=NULL;
+float *myzoom_speed=NULL;
+float *myzoom_speed_max=NULL;
+resumeFn zmotorsresume, zencodersresume;
+suspendFn zmotorssuspend, zencoderssuspend;
 
 char **mycolorA;
 resumeFn colorAresume;
@@ -180,6 +193,16 @@ void teleoperator_iteration()
       *mylatitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
       /*printf("teleoperator: longitude speed %.2f, latitude speed %.2f\n",longitude_speed,latitude_speed);*/
     }
+
+   if ((display_state & ZOOM_TELEOPERATOR)!=0){
+      if (myzoom && myzoom_max && myzoom_min){
+         *myzoom=(*myzoom_min)+pt_joystick_z*((*myzoom_max)-(*myzoom_min));
+      }
+      
+      if (myzoom_speed && myzoom_speed_max){
+         *myzoom_speed=(1.-speed_coef)*(*myzoom_speed_max);
+      }
+   }
   
 }
 
@@ -827,11 +850,17 @@ void teleoperator_guibuttons(void *obj1){
          /*  fl_redraw_object(fd_teleoperatorgui->pantilt_joystick);*/
       }
    }
+   else if (obj == fd_teleoperatorgui->zoom){
+      if ((display_state & ZOOM_TELEOPERATOR)!=0)
+         pt_joystick_z = fl_get_slider_value(obj);
+         printf ("Actualiza pt_joystick_z=%.3f\n", pt_joystick_z);
+   }
    else if (obj == fd_teleoperatorgui->pantilt_origin){
       if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05)
          pt_joystick_x= 1.-(0.-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
       if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05)
          pt_joystick_y= (0.-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
+      pt_joystick_z=0;
    }
    else if (obj == fd_teleoperatorgui->pantilt_stop) {
       /* current pantilt position as initial command, to avoid any movement */
@@ -847,6 +876,7 @@ void teleoperator_guibuttons(void *obj1){
          else
             pt_joystick_y= (0-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
       }
+      pt_joystick_z=0.;
    }
    else if (obj == fd_teleoperatorgui->ptspeed){
       speed_coef = fl_get_slider_value(fd_teleoperatorgui->ptspeed);
@@ -854,6 +884,8 @@ void teleoperator_guibuttons(void *obj1){
          *mylongitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
       if (mylatitude_speed!=NULL)
          *mylatitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
+      if (myzoom_speed && myzoom_speed_max)
+         *myzoom_speed=(1.-speed_coef)*(*myzoom_speed_max);
    }
    else if (obj == fd_teleoperatorgui->sonars){
       if (fl_get_button(fd_teleoperatorgui->sonars)==PUSHED){
@@ -1002,6 +1034,57 @@ void teleoperator_guibuttons(void *obj1){
          display_state = display_state & ~DISPLAY_PANTILTENCODERS;
          if (ptencoderssuspend!=NULL)
             ptencoderssuspend();
+      }
+   }
+   else if (obj == fd_teleoperatorgui->Zmotors){
+      if (fl_get_button(obj)==PUSHED){
+         myzoom=myimport("zmotors", "zoom");
+         myzoom_speed=myimport("zmotors", "zoom_speed");
+         zmotorsresume=(resumeFn)myimport("zmotors","resume");
+         zmotorssuspend=(suspendFn)myimport("zmotors","suspend");
+         myzoom_speed_max=(float *)myimport("zmotors", "max_zoom_speed");
+         myzoom_max=(float *)myimport("zmotors", "max_zoom");
+         myzoom_min=(float *)myimport("zmotors", "min_zoom");
+
+         if (zmotorsresume!=NULL || myzoom!=NULL || myzoom_speed!=NULL ||
+             zmotorssuspend!=NULL || myzoom_speed_max!=NULL ||
+             myzoom_max!=NULL || myzoom_min!=NULL)
+         {
+            display_state = display_state | ZOOM_TELEOPERATOR;
+            zmotorsresume(teleoperator_id, NULL, NULL);
+         }
+         else{
+            display_state = display_state & ~ZOOM_TELEOPERATOR;
+            fl_set_button(obj, RELEASED);
+         }
+      }
+      else {
+         /*safety stop when disabling the teleoperator */
+         /* current pantilt position as initial command, to avoid any movement */
+         if (zmotorssuspend!=NULL){
+            zmotorssuspend();
+         }
+         display_state = display_state & ~ZOOM_TELEOPERATOR;
+      }
+   }
+   else if (obj == fd_teleoperatorgui->Zencod){
+      if (fl_get_button(obj)==PUSHED){
+         myzoom_position=myimport("zencoders", "zoom_position");
+         zencodersresume=(resumeFn)myimport("zencoders", "resume");
+         zencoderssuspend=(suspendFn)(suspendFn)myimport("zencoders", "suspend");
+         if (zencodersresume!=NULL){
+            zencodersresume(teleoperator_id, NULL, NULL);
+            display_state = display_state | DISPLAY_ZOOMENCODERS;
+         }
+         else{
+            fl_set_button(obj, RELEASED);
+            display_state = display_state & ~DISPLAY_ZOOMENCODERS;
+         }
+      }
+      else{
+         display_state = display_state & ~DISPLAY_ZOOMENCODERS;
+         if (zencoderssuspend!=NULL)
+            zencoderssuspend();
       }
    }
    else if (obj == fd_teleoperatorgui->colorA){

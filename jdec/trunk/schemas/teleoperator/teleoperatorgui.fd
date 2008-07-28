@@ -10,7 +10,7 @@ Unit of measure: FL_COORD_PIXEL
 Name: teleoperatorgui
 Width: 880
 Height: 500
-Number of Objects: 42
+Number of Objects: 45
 
 --------------------
 class: FL_BOX
@@ -139,115 +139,6 @@ callback:
 argument: 
 
 --------------------
-class: FL_BEGIN_GROUP
-type: 0
-box: 0 10 10 0
-boxtype: FL_NO_BOX
-colors: FL_COL1 FL_MCOL
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_BLACK
-label: 
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: pantiltjoystick
-callback: 
-argument: 
-
---------------------
-class: FL_POSITIONER
-type: NORMAL_POSITIONER
-box: 430 400 110 50
-boxtype: FL_DOWN_BOX
-colors: FL_DARKER_COL1 FL_DARKTOMATO
-alignment: FL_ALIGN_TOP
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_DARKTOMATO
-label: 
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: pantilt_joystick
-callback: 
-argument: 
-
---------------------
-class: FL_BUTTON
-type: MENU_BUTTON
-box: 490 460 50 20
-boxtype: FL_FRAME_BOX
-colors: FL_DARKER_COL1 FL_DARKGOLD
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_DARKTOMATO
-label: origin
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: pantilt_origin
-callback: 
-argument: 
-
---------------------
-class: FL_BUTTON
-type: MENU_BUTTON
-box: 430 460 50 20
-boxtype: FL_FRAME_BOX
-colors: FL_DARKER_COL1 FL_DARKGOLD
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_DARKTOMATO
-label: stop
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: pantilt_stop
-callback: 
-argument: 
-
---------------------
-class: FL_SLIDER
-type: VERT_SLIDER
-box: 410 400 10 70
-boxtype: FL_FRAME_BOX
-colors: FL_LIGHTER_COL1 FL_DARKTOMATO
-alignment: FL_ALIGN_BOTTOM
-style: FL_NORMAL_STYLE
-size: FL_TINY_SIZE
-lcol: FL_DARKTOMATO
-label: speed
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: ptspeed
-callback: 
-argument: 
-	slsize: 0.00
-
---------------------
-class: FL_END_GROUP
-type: 0
-box: 0 0 0 0
-boxtype: FL_NO_BOX
-colors: FL_COL1 FL_MCOL
-alignment: FL_ALIGN_CENTER
-style: FL_NORMAL_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_BLACK
-label: 
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: 
-callback: 
-argument: 
-
---------------------
 class: FL_TEXT
 type: NORMAL_TEXT
 box: 280 370 110 20
@@ -258,24 +149,6 @@ style: FL_BOLD_STYLE
 size: FL_DEFAULT_SIZE
 lcol: FL_DARKTOMATO
 label: Base Joystick
-shortcut: 
-resize: FL_RESIZE_ALL
-gravity: FL_NoGravity FL_NoGravity
-name: 
-callback: 
-argument: 
-
---------------------
-class: FL_TEXT
-type: NORMAL_TEXT
-box: 420 370 120 20
-boxtype: FL_FLAT_BOX
-colors: FL_COL1 FL_MCOL
-alignment: FL_ALIGN_LEFT|FL_ALIGN_INSIDE
-style: FL_BOLD_STYLE
-size: FL_DEFAULT_SIZE
-lcol: FL_DARKTOMATO
-label: Pantilt Joystick
 shortcut: 
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
@@ -412,7 +285,7 @@ gravity: FL_NoGravity FL_NoGravity
 name: posX
 callback: 
 argument: 
-	slsize: 0.15
+	slsize: 0,00
 
 --------------------
 class: FL_SLIDER
@@ -431,7 +304,7 @@ gravity: FL_NoGravity FL_NoGravity
 name: posY
 callback: 
 argument: 
-	slsize: 0.15
+	slsize: 0,00
 
 --------------------
 class: FL_SLIDER
@@ -450,7 +323,7 @@ gravity: FL_NoGravity FL_NoGravity
 name: posZ
 callback: 
 argument: 
-	slsize: 0.15
+	slsize: 0,00
 
 --------------------
 class: FL_SLIDER
@@ -469,7 +342,7 @@ gravity: FL_NoGravity FL_NoGravity
 name: posR
 callback: 
 argument: 
-	slsize: 0.15
+	slsize: 0,00
 
 --------------------
 class: FL_BUTTON
@@ -774,6 +647,188 @@ shortcut:
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: colorD
+callback: 
+argument: 
+
+--------------------
+class: FL_BEGIN_GROUP
+type: 0
+box: 0 10 10 0
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: pantiltjoystick
+callback: 
+argument: 
+
+--------------------
+class: FL_POSITIONER
+type: NORMAL_POSITIONER
+box: 420 400 110 50
+boxtype: FL_DOWN_BOX
+colors: FL_DARKER_COL1 FL_DARKTOMATO
+alignment: FL_ALIGN_TOP
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: pantilt_joystick
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: MENU_BUTTON
+box: 480 460 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_DARKER_COL1 FL_DARKGOLD
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: origin
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: pantilt_origin
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: MENU_BUTTON
+box: 420 460 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_DARKER_COL1 FL_DARKGOLD
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: stop
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: pantilt_stop
+callback: 
+argument: 
+
+--------------------
+class: FL_SLIDER
+type: VERT_SLIDER
+box: 400 400 10 70
+boxtype: FL_FRAME_BOX
+colors: FL_LIGHTER_COL1 FL_DARKTOMATO
+alignment: FL_ALIGN_BOTTOM
+style: FL_NORMAL_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: speed
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: ptspeed
+callback: 
+argument: 
+	slsize: 0,00
+
+--------------------
+class: FL_END_GROUP
+type: 0
+box: 0 0 0 0
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_TEXT
+type: NORMAL_TEXT
+box: 410 370 120 20
+boxtype: FL_FLAT_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_LEFT|FL_ALIGN_INSIDE
+style: FL_BOLD_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: Pantilt Joystick
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_SLIDER
+type: VERT_SLIDER
+box: 540 370 10 110
+boxtype: FL_FRAME_BOX
+colors: FL_LIGHTER_COL1 FL_DARKTOMATO
+alignment: FL_ALIGN_BOTTOM
+style: FL_NORMAL_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: zoom
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: zoom
+callback: 
+argument: 
+	slsize: 0,00
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 220 340 60 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: Zencod
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: Zencod
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 280 340 60 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: Zmotors
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: Zmotors
 callback: 
 argument: 
 

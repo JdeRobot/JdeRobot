@@ -26,7 +26,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
-#include <cwiid.h>
+#include "wiimote.h"
 
 int wiimote_viewer_id=0;
 int wiimote_viewer_brothers[MAX_SCHEMAS];
@@ -38,18 +38,28 @@ deletedisplay mydelete_displaycallback;
 /*Global variables*/
 unsigned short *buttons=NULL;
 unsigned char *acc=NULL;
+struct nunchuk_state *nunchuk=NULL;
+
 int *buttons_id=NULL;
 int *acc_id=NULL;
+int *nunchuk_id=NULL;
+
 resumeFn buttons_resume=NULL;
 suspendFn buttons_suspend=NULL;
+
 resumeFn acc_resume=NULL;
 suspendFn acc_suspend=NULL;
 
+resumeFn nunchuk_resume=NULL;
+suspendFn nunchuk_suspend=NULL;
+
 int buttons_ok=0;
 int acc_ok=0;
+int nunchuk_ok=0;
 
 int show_buttons=0;
 int show_acc=0;
+int show_nunchuck=0;
 
 
 /* exported variables */
@@ -67,52 +77,98 @@ gboolean on_delete_window (GtkWidget *widget, GdkEvent *event, gpointer user_dat
    return TRUE;
 }
 
-void on_active_buttons_clicked (GtkToggleButton *button, gpointer user_data){
+void on_active_buttons_toggled (GtkCheckMenuItem *menu_item, gpointer user_data){
    if (buttons_ok){
-      if (gtk_toggle_button_get_active(button)){
+      if (gtk_check_menu_item_get_active(menu_item)){
          buttons_resume(wiimote_viewer_id, NULL, NULL);
          show_buttons=1;
+         gtk_widget_show(glade_xml_get_widget(xml, "buttons"));
+         gtk_widget_show(glade_xml_get_widget(xml, "buttons2"));
       }
       else{
          buttons_suspend();
          show_buttons=0;
+         gtk_widget_hide(glade_xml_get_widget(xml, "buttons"));
+         gtk_widget_hide(glade_xml_get_widget(xml, "buttons2"));
       }
    }
 }
 
-void on_active_accs_clicked (GtkToggleButton *button, gpointer user_data){
+void on_active_accs_toggled (GtkCheckMenuItem *menu_item, gpointer user_data){
    if (acc_ok){
-      if (gtk_toggle_button_get_active(button)){
+      if (gtk_check_menu_item_get_active(menu_item)){
          acc_resume(wiimote_viewer_id, NULL, NULL);
          show_acc=1;
+         gtk_widget_show(glade_xml_get_widget(xml, "acc"));
+         gtk_widget_show(glade_xml_get_widget(xml, "acc2"));
       }
       else{
          acc_suspend();
          show_acc=0;
+         gtk_widget_hide(glade_xml_get_widget(xml, "acc"));
+         gtk_widget_hide(glade_xml_get_widget(xml, "acc2"));
+      }
+   }
+}
+
+void on_active_nunchuk_toggled (GtkCheckMenuItem *menu_item, gpointer user_data){
+   if (nunchuk_ok){
+      if (gtk_check_menu_item_get_active(menu_item)){
+         nunchuk_resume(wiimote_viewer_id, NULL, NULL);
+         show_nunchuck=1;
+         gtk_widget_show(glade_xml_get_widget(xml, "nunchuk"));
+         gtk_widget_show(glade_xml_get_widget(xml, "nunchuk2"));
+      }
+      else{
+         nunchuk_suspend();
+         show_nunchuck=0;
+         gtk_widget_hide(glade_xml_get_widget(xml, "nunchuk"));
+         gtk_widget_hide(glade_xml_get_widget(xml, "nunchuk2"));
       }
    }
 }
 
 void wiimote_viewer_iteration(){
+   if (show_nunchuck){
+      /*
+      min_x= 23
+      max_x= 229
+      min_y= 28
+      max_y= 225
+      */
 
+   }
 }
 
 /*Importar símbolos*/
 void wiimote_viewer_imports(){
    buttons=(unsigned short *)myimport("wii_buttons", "buttons0");
    acc=(unsigned char *)myimport("wii_accel", "accel0");
+   nunchuk=(struct nunchuk_state*)myimport("wii_nunchuk", "nunchuk0");
+   
    buttons_id=(int *)myimport("wii_buttons", "id");
-   acc_id=(int *)myimport("wii_accel", "id");;
+   acc_id=(int *)myimport("wii_accel", "id");
+   nunchuk_id=(int *)myimport("wii_nunchuk", "id");
+   
    buttons_resume=(resumeFn)myimport("wii_buttons", "resume");
    buttons_suspend=(suspendFn)myimport("wii_buttons", "suspend");
+   
    acc_resume=(resumeFn )myimport("wii_accel", "resume");
    acc_suspend=(suspendFn )myimport("wii_accel", "suspend");
+   
+   nunchuk_resume=(resumeFn )myimport("wii_nunchuk", "resume");
+   nunchuk_suspend=(suspendFn )myimport("wii_nunchuk", "suspend");
+   
    buttons_ok=!(buttons_resume==NULL || buttons_suspend==NULL || buttons==NULL || buttons_id==NULL);
    if (!buttons_ok){
       printf ("Buttons will not be displayed\n");
    }
    acc_ok=!(acc_resume==NULL || acc_suspend==NULL || acc==NULL || acc_id==NULL);
    if (!acc_ok){
+      printf ("Accelerators will not be displayed\n");
+   }
+   nunchuk_ok=!(nunchuk_resume==NULL || nunchuk_suspend==NULL || nunchuk==NULL || nunchuk_id==NULL);
+   if (!nunchuk_ok){
       printf ("Accelerators will not be displayed\n");
    }
 }
@@ -326,6 +382,40 @@ void wiimote_viewer_guidisplay(){
       gtk_progress_bar_set_fraction ((GtkProgressBar *)glade_xml_get_widget(xml, "accZ"),
                                       0.0);
    }
+   if(show_nunchuck){
+      gtk_progress_bar_set_fraction ((GtkProgressBar *)glade_xml_get_widget(xml, "nunchuk_accX"),
+                                      (float)((*nunchuk).acc[CWIID_X])/(float)CWIID_ACC_MAX);
+      gtk_progress_bar_set_fraction ((GtkProgressBar *)glade_xml_get_widget(xml, "nunchuk_accY"),
+                                      (float)((*nunchuk).acc[CWIID_Y])/(float)CWIID_ACC_MAX);
+      gtk_progress_bar_set_fraction ((GtkProgressBar *)glade_xml_get_widget(xml, "nunchuk_accZ"),
+                                      (float)((*nunchuk).acc[CWIID_Z])/(float)CWIID_ACC_MAX);
+
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glade_xml_get_widget(xml, "btC")),
+                                   ((*nunchuk).buttons & CWIID_NUNCHUK_BTN_C));
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glade_xml_get_widget(xml, "btZ")),
+                                   ((*nunchuk).buttons & CWIID_NUNCHUK_BTN_Z));
+      {
+         char label[5];
+         snprintf (label, 5, "%d", (*nunchuk).stick[CWIID_X]);
+         gtk_label_set_text((GtkLabel *)glade_xml_get_widget(xml, "nunchuk_x"), label);
+         snprintf (label, 5, "%d", (*nunchuk).stick[CWIID_Y]);
+         gtk_label_set_text((GtkLabel *)glade_xml_get_widget(xml, "nunchuk_y"), label);
+      }
+   }
+   else{
+      gtk_progress_bar_set_fraction ((GtkProgressBar *)glade_xml_get_widget(xml, "nunchuk_accX"),
+                                      0.0);
+      gtk_progress_bar_set_fraction ((GtkProgressBar *)glade_xml_get_widget(xml, "nunchuk_accY"),
+                                      0.0);
+      gtk_progress_bar_set_fraction ((GtkProgressBar *)glade_xml_get_widget(xml, "nunchuk_accZ"),
+                                      0.0);
+      
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glade_xml_get_widget(xml, "btC")),
+                                   FALSE);
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(glade_xml_get_widget(xml, "btZ")),
+                                   FALSE);
+   }
+   gtk_window_resize (GTK_WINDOW(win),1,1);
    gtk_widget_queue_draw(win);
    gdk_threads_leave();
 }
@@ -366,10 +456,21 @@ void wiimote_viewer_guiresume(void){
          g_signal_connect(G_OBJECT(win), "delete-event",
                           G_CALLBACK(on_delete_window), NULL);
          g_signal_connect(GTK_WIDGET(glade_xml_get_widget(xml, "active_buttons")),
-                          "clicked", G_CALLBACK(on_active_buttons_clicked), NULL);
+                          "toggled", G_CALLBACK(on_active_buttons_toggled), NULL);
          g_signal_connect(GTK_WIDGET(glade_xml_get_widget(xml, "active_accs")),
-                          "clicked", G_CALLBACK(on_active_accs_clicked), NULL);
+                          "toggled", G_CALLBACK(on_active_accs_toggled), NULL);
+         g_signal_connect(GTK_WIDGET(glade_xml_get_widget(xml, "active_nunchuk")),
+                          "toggled", G_CALLBACK(on_active_nunchuk_toggled), NULL);
       }
+
+      /*Hide frames until they are displayed*/
+      gtk_widget_hide(glade_xml_get_widget(xml, "nunchuk"));
+      gtk_widget_hide(glade_xml_get_widget(xml, "nunchuk2"));
+      gtk_widget_hide(glade_xml_get_widget(xml, "acc"));
+      gtk_widget_hide(glade_xml_get_widget(xml, "acc2"));
+      gtk_widget_hide(glade_xml_get_widget(xml, "buttons"));
+      gtk_widget_hide(glade_xml_get_widget(xml, "buttons2"));
+
       if (win==NULL){
          fprintf(stderr, "Error al cargar la interfaz gráfica\n");
          jdeshutdown(1);

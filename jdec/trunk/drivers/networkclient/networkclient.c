@@ -440,7 +440,7 @@ int networkclient_zencoders_resume(int father, int *brothers, arbitration fn){
    else{
       zencoders_refs=1;
       pthread_mutex_unlock(&refmutex);
-      if((device_active[ZOOM_ENCODERS_DEVICE==0])&&(serve_device[ZOOM_ENCODERS_DEVICE])){
+      if((device_active[ZOOM_ENCODERS_DEVICE]==0)&&(serve_device[ZOOM_ENCODERS_DEVICE])){
          char message_out[MAX_MESSAGE];
       
          printf("zencoders schema resume (networkclient driver)\n");
@@ -502,7 +502,7 @@ int networkclient_zoommotors_resume(int father, int *brothers, arbitration fn){
    else{
       zmotors_refs=1;
       pthread_mutex_unlock(&refmutex);
-      if((device_active[ZOOM_MOTORS_DEVICE==0])&&(serve_device[ZOOM_MOTORS_DEVICE])){
+      if((device_active[ZOOM_MOTORS_DEVICE]==0)&&(serve_device[ZOOM_MOTORS_DEVICE])){
          printf("zmotors schema resume (networkclient driver)\n");
          all[zmotors_schema_id].father = father;
          all[zmotors_schema_id].fps = 0.;
@@ -555,7 +555,7 @@ int networkclient_pantiltencoders_resume(int father, int *brothers, arbitration 
    else{
       ptencoders_refs=1;
       pthread_mutex_unlock(&refmutex);
-      if((device_active[PANTILT_ENCODERS_DEVICE==0])&&(serve_device[PANTILT_ENCODERS_DEVICE])){
+      if((device_active[PANTILT_ENCODERS_DEVICE]==0)&&(serve_device[PANTILT_ENCODERS_DEVICE])){
          char message_out[MAX_MESSAGE];
       
          printf("ptencoders schema resume (networkclient driver)\n");
@@ -617,7 +617,7 @@ int networkclient_pantiltmotors_resume(int father, int *brothers, arbitration fn
    else{
       ptmotors_refs=1;
       pthread_mutex_unlock(&refmutex);
-      if((device_active[PANTILT_MOTORS_DEVICE==0])&&(serve_device[PANTILT_MOTORS_DEVICE])){
+      if((device_active[PANTILT_MOTORS_DEVICE]==0)&&(serve_device[PANTILT_MOTORS_DEVICE])){
          printf("ptmotors schema resume (networkclient driver)\n");
          all[ptmotors_schema_id].father = father;
          all[ptmotors_schema_id].fps = 0.;
@@ -1430,8 +1430,8 @@ void *networkclient_zoommotors_thread(void *not_used){
 
          gettimeofday(&a,NULL);
          sprintf(zoommotors_out,"%ld %1.1f %1.1f\n",
-                 (long int)NETWORKSERVER_zoom_position,zoom_position,
-                  zoom_position);
+                 (long int)NETWORKSERVER_zoom_position,zoom,
+                  zoom_speed);
          write(device_socket[ZOOM_MOTORS_DEVICE],zoommotors_out,strlen(zoommotors_out));
          pthread_mutex_unlock(&mymutex[ZOOM_MOTORS_DEVICE]);
          gettimeofday(&b,NULL);

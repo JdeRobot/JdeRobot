@@ -7,14 +7,14 @@ GCC = gcc
 CFLAGS = -g -pedantic -Wall $(INC-DIR)
 LIBS = -lm 
 
-opengl_viewer: opengl_viewer.o pioneeropengl.o
-	$(GCC) -shared -Wl,-soname,opengl_viewer.so $(LIB-DIR) -o opengl_viewer.so opengl_viewer.o pioneeropengl.o  $(LIBS)
+opengl_viewer: opengl_viewer.o obj_loader.o
+	$(GCC) -shared -Wl,-soname,opengl_viewer.so $(LIB-DIR) -o opengl_viewer.so opengl_viewer.o obj_loader.o $(LIBS)
 
 opengl_viewer.o: opengl_viewer.c
 	$(GCC) $(CFLAGS) -fPIC -c opengl_viewer.c
 
-pioneeropengl.o: pioneeropengl.c pioneeropengl.h
-	$(GCC) $(CFLAGS) -fPIC -c pioneeropengl.c
+obj_loader.o: obj_loader.c obj_loader.h
+	$(GCC) $(CFLAGS) -fPIC -c obj_loader.c
 
 clean:
 	rm -f *.o opengl_viewer.so

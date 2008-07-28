@@ -28,8 +28,7 @@
 #include <gtk/gtkgl.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-
-#include <pioneeropengl.h>
+#include "obj_loader.h"
 
 #define DISTANCE_MAX 25.0
 
@@ -44,8 +43,11 @@ registerdisplay myregister_displaycallback;
 deletedisplay mydelete_displaycallback;
 
 /*Global variables*/
-float phi=0, theta=0, escala=1;
+float eye_posx=0, eye_posy=0, eye_posz=0, incx=0, incy=0;
 float old_x=0, old_y=0;
+float escala=1.;
+
+obj_type obj;/*Object loaded from .obj file*/
 
 
 /* exported variables */
@@ -58,7 +60,81 @@ GtkWidget *drawing_area;
 
 pthread_mutex_t gl_mutex;
 
+void Cobre (void)
+{
+   float ambiente[] = {0.33f, 0.26f, 0.23f, 1.0f};
+   float difusa[] = {0.50f, 0.11f, 0.00f, 1.0f};
+   float especular[] = {0.95f, 0.73f, 0.00f, 1.0f};
+   glMaterialfv (GL_FRONT, GL_AMBIENT, ambiente);
+   glMaterialfv (GL_FRONT, GL_DIFFUSE, difusa);
+   glMaterialfv (GL_FRONT, GL_SPECULAR, especular);
+   glMaterialf (GL_FRONT, GL_SHININESS, 93.0f);
+}
+
+void Bone (void)
+{
+   float ambiente[] = {0.7f, 0.7f, 0.3f, 1.0f};
+   float difusa[] = {0.9f, 0.9f, 0.8f, 1.0f};
+   float especular[] = {0.05f, 0.05f, 0.05f, 1.0f};
+   glMaterialfv (GL_FRONT, GL_AMBIENT, ambiente);
+   glMaterialfv (GL_FRONT, GL_DIFFUSE, difusa);
+   glMaterialfv (GL_FRONT, GL_SPECULAR, especular);
+   glMaterialf (GL_FRONT, GL_SHININESS, 0.1f);
+}
+
+void Luz0 (void)
+{
+   float luz0_posicion[] = {20.f, 15.f, 3.f, 1.f};
+   float luz0_ambiente[] = {0.5f, 0.5f, 0.5f, 1.f};
+   float luz0_difusa[] = {.8f , .8f, .8f, 1.f};
+   float luz0_especular[] = {.5f, .5f, .5f, 1.f};
+   int i;
+
+   for (i=0; i<3; i++){
+      luz0_ambiente[i]=gtk_adjustment_get_value(gtk_range_get_adjustment((GtkRange *)glade_xml_get_widget(xml,"ambient")));
+      luz0_difusa[i]=gtk_adjustment_get_value(gtk_range_get_adjustment((GtkRange *)glade_xml_get_widget(xml,"diffuse")));
+      luz0_especular[i]=gtk_adjustment_get_value(gtk_range_get_adjustment((GtkRange *)glade_xml_get_widget(xml,"specular")));
+   }
+   luz0_posicion[0]=gtk_adjustment_get_value(gtk_range_get_adjustment((GtkRange *)glade_xml_get_widget(xml,"x")));
+   luz0_posicion[1]=gtk_adjustment_get_value(gtk_range_get_adjustment((GtkRange *)glade_xml_get_widget(xml,"y")));
+   luz0_posicion[2]=gtk_adjustment_get_value(gtk_range_get_adjustment((GtkRange *)glade_xml_get_widget(xml,"z")));
+ 
+   glLightfv (GL_LIGHT0, GL_POSITION, luz0_posicion);
+   glLightfv (GL_LIGHT0, GL_AMBIENT, luz0_ambiente);
+   glLightfv (GL_LIGHT0, GL_DIFFUSE, luz0_difusa);
+   glLightfv (GL_LIGHT0, GL_SPECULAR, luz0_especular);
+   glEnable(GL_LIGHT0);
+}
+
+void Luz1 (void)
+{
+   float luz0_posicion[] = {20.f, 15.f, 3.f, 0.f};
+   float luz0_ambiente[] = {0.5f, 0.5f, 0.5f, 1.f};
+   float luz0_difusa[] = {.8f , .8f, .8f, 1.f};
+   float luz0_especular[] = {.5f, .5f, .5f, 1.f};
+   int i;
+
+   for (i=0; i<3; i++){
+      luz0_ambiente[i]=gtk_adjustment_get_value(gtk_range_get_adjustment((GtkRange *)glade_xml_get_widget(xml,"ambient")));
+      luz0_difusa[i]=gtk_adjustment_get_value(gtk_range_get_adjustment((GtkRange *)glade_xml_get_widget(xml,"diffuse")));
+      luz0_especular[i]=gtk_adjustment_get_value(gtk_range_get_adjustment((GtkRange *)glade_xml_get_widget(xml,"specular")));
+   }
+   luz0_posicion[0]=gtk_adjustment_get_value(gtk_range_get_adjustment((GtkRange *)glade_xml_get_widget(xml,"x")));
+   luz0_posicion[1]=gtk_adjustment_get_value(gtk_range_get_adjustment((GtkRange *)glade_xml_get_widget(xml,"y")));
+   luz0_posicion[2]=gtk_adjustment_get_value(gtk_range_get_adjustment((GtkRange *)glade_xml_get_widget(xml,"z")));
+ 
+   glLightfv (GL_LIGHT0, GL_POSITION, luz0_posicion);
+   glLightfv (GL_LIGHT0, GL_AMBIENT, luz0_ambiente);
+   glLightfv (GL_LIGHT0, GL_DIFFUSE, luz0_difusa);
+   glLightfv (GL_LIGHT0, GL_SPECULAR, luz0_especular);
+   glEnable(GL_LIGHT0);
+}
+
 /*Callbacks*/
+void on_hscale_move_slider (GtkRange *range, GtkScrollType scroll, gpointer user_data){
+   gtk_widget_queue_draw (drawing_area);
+}
+
 static gboolean configure_event (GtkWidget *widget, GdkEventConfigure *event, gpointer data) {
    GLfloat w;
    GLfloat h;
@@ -82,7 +158,8 @@ static gboolean configure_event (GtkWidget *widget, GdkEventConfigure *event, gp
    glViewport(0, 0, w, h);
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
-/*    glOrtho(-1, 1, -1, 1, -1, 1);*/
+   gluPerspective(60.0,1.0,1.0,100.0);
+   glTranslatef(0.0,0.0,-5.0);
 
    if (w > h) {
       glViewport (0, (h - w) / 2, w, w);
@@ -93,10 +170,6 @@ static gboolean configure_event (GtkWidget *widget, GdkEventConfigure *event, gp
 
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
-
-   glScalef(escala, escala, escala);
-   glRotatef (phi, 1.0, 0.0, 0.0);
-   glRotatef (theta, 0.0, 1.0, 0.0);
    
    if (gdk_gl_drawable_is_double_buffered (gldrawable)){
       gdk_gl_drawable_swap_buffers (gldrawable);
@@ -113,14 +186,11 @@ static gboolean configure_event (GtkWidget *widget, GdkEventConfigure *event, gp
 static gboolean expose_event (GtkWidget *widget, GdkEventExpose *event, gpointer data) {
    GdkGLContext *glcontext;
    GdkGLDrawable *gldrawable;
-
-   GLfloat L0pos[] = { 100, 100, 100 };
-   GLfloat L1pos[] = { 100, 100, 100 };
-   GLfloat L2pos[] = { 100, 100, 100 };
-   GLfloat L3pos[] = { -100, -100, -100 };
-   GLfloat L4pos[] = { -100, -100, -100 };
-   GLfloat L5pos[] = { -100, -100, -100 };
-
+   double VUPx, VUPy, VUPz;
+ 
+   VUPx=-cos(3.14/2-(incy/20*2*3.14))*cos(incx/20*2*3.14); // Coordenada X del vector hacia arriba de la cámara
+   VUPy=sin(3.14/2-(incy/20*2*3.14)); // Coordenada X del vector hacia arriba de la cámara
+   VUPz=-cos(3.14/2-(incy/20*2*3.14))*sin(incx/20*2*3.14); // Coordenada X del vector hacia arriba de la cámara
 
    pthread_mutex_lock(&gl_mutex);
    
@@ -136,46 +206,25 @@ static gboolean expose_event (GtkWidget *widget, GdkEventExpose *event, gpointer
    glLoadIdentity();
    
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//    gluPerspective (45.0, 1.0, 1, DISTANCE_MAX + 2);
-//    gluPerspective (45.0, 1.0, 1, DISTANCE_MAX + 2);
+   glEnable (GL_DEPTH_TEST);
+   glEnable(GL_LIGHTING); /*Habilita la iluminación.*/
+   glEnable(GL_NORMALIZE); /*Normaliza las normales.*/
 
    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-   
-   glLightfv (GL_LIGHT0, GL_POSITION, L0pos);
-   glLightfv (GL_LIGHT1, GL_POSITION, L1pos);
-   glLightfv (GL_LIGHT2, GL_POSITION, L2pos);
-   glLightfv (GL_LIGHT3, GL_POSITION, L3pos);
-   glLightfv (GL_LIGHT4, GL_POSITION, L4pos);
-   glLightfv (GL_LIGHT5, GL_POSITION, L5pos);
-   
-   glRotatef (phi, 1.0, 0.0, 0.0);
-   glRotatef (theta, 0.0, 1.0, 0.0);
 
+   gluLookAt (eye_posx, eye_posy, eye_posz,0.0,0.0,0.0,VUPx,VUPy,VUPz); // Posicionamos la Cámara
+   
+   Luz1();
+   
    glScalef (escala, escala, escala);
 
-   glEnable (GL_DEPTH_TEST);
-   glColor3f(1,0.5,1);
-   {
-      GLfloat angulo;
-      int i;
-      glBegin(GL_LINES);
-      for (i=0; i<360; i+=3)
-      {
-         angulo = (GLfloat)i*3.14159f/180.0f; // grados a radianes
-         glVertex3f(0.0f, 0.0f, 0.0f);
-         glVertex3f(cos(angulo), sin(angulo), 0.0f);
-      }
-      glEnd();
-   }
-   glColor3f(1.0,1.0,0.);
-   glBegin(GL_TRIANGLES);
-   {
-      glVertex3f(-0.8,-1,-1);
-      glVertex3f(1,-0.8,-1);
-      glVertex3f(0,1,-1);
-   }
-   glEnd();
-   loadModel();
+//    glTranslatef(theta*0.1,phi*0.1,-5.0);
+//    glRotatef (phi, 1.0, 0.0, 0.0);
+//    glRotatef (theta, 0.0, 1.0, 0.0);
+   
+   Bone();
+   
+   show_object(&obj);
 
    if (gdk_gl_drawable_is_double_buffered (gldrawable)){
       gdk_gl_drawable_swap_buffers (gldrawable);
@@ -196,13 +245,6 @@ static void realize (GtkWidget *widget, gpointer data) {
       GdkGLContext *glcontext = gtk_widget_get_gl_context (widget);
       GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable (widget);
 
-      GLfloat ambient[] = {1.0, 1.0, 1.0, 1.0};
-      GLfloat diffuse[] = {1.0, 1.0, 1.0, 1.0};
-      GLfloat position[] = {0.0, 3.0, 3.0, 0.0};
-
-      GLfloat lmodel_ambient[] = {0.2, 0.2, 0.2, 1.0};
-      GLfloat local_view[] = {0.0};
-
       /*** OpenGL BEGIN ***/
       if (!gdk_gl_drawable_gl_begin (gldrawable, glcontext)){
          pthread_mutex_unlock(&gl_mutex);
@@ -213,30 +255,11 @@ static void realize (GtkWidget *widget, gpointer data) {
       glLoadIdentity();
       
       glEnable (GL_DEPTH_TEST);
-      glEnable(GL_TEXTURE_2D);                     /* Enable Texture Mapping */
       glClearColor(1.0f, 1.0f, 1.0f, 1.0f);        /* This Will Clear The Background Color To White */
       glClearDepth(1.0);                           /* Enables Clearing Of The Depth Buffer */
 
-      glLightfv (GL_LIGHT0, GL_AMBIENT, ambient);
-      glLightfv (GL_LIGHT0, GL_DIFFUSE, diffuse);
-      glLightfv (GL_LIGHT0, GL_POSITION, position);
-      glLightModelfv (GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
-      glLightModelfv (GL_LIGHT_MODEL_LOCAL_VIEWER, local_view);
-
-      glDepthFunc(GL_LESS);                        /* The Type Of Depth Test To Do */
-      glEnable (GL_LIGHTING);
-      glEnable (GL_LIGHT0);
-      glEnable (GL_AUTO_NORMAL);
-      glEnable (GL_NORMALIZE);
-
-      glEnable(GL_DEPTH_TEST);                     /* Enables Depth Testing */
-      glShadeModel(GL_SMOOTH);                     /* Enables Smooth Color Shading */
-
       glMatrixMode(GL_PROJECTION);
       glLoadIdentity();                            /* Reset The Projection Matrix */
-
-      glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
       gdk_gl_drawable_gl_end (gldrawable);
       /*** OpenGL END ***/
@@ -253,21 +276,28 @@ static gboolean button_press_event (GtkWidget *widget, GdkEventButton *event, gp
 static gboolean motion_notify_event (GtkWidget *widget, GdkEventButton *event, gpointer data) {
    float x=event->x;
    float y=event->y;
+   incx+=(x-old_x)*(1./escala);
+   incy+=(y-old_y)*(1./escala);
+   
    if (GDK_BUTTON1_MASK){ /*Si está pulsado el botón 1*/
-      theta -= x - old_x;
-      phi -= y - old_y;
+      eye_posx =80*cos(incy/20*2*3.14)*cos(incx/20*2*3.14); // Posición de la cámara en coord. Polares en X
+      eye_posy =80*sin(incy/20*2*3.14); // Posición de la cámara en coord. Polares en Y
+      eye_posz =80*cos(incy/20*2*3.14)*sin(incx/20*2*3.14); // Posición de la cámara en coord. Polares en Z
+      
       gtk_widget_queue_draw (widget);
       old_x=x;
       old_y=y;
-//       gdk_window_invalidate_rect (widget->window, &widget->allocation, FALSE);
+      return TRUE;
    }
+   return FALSE;
 }
 
 static gboolean scroll_event (GtkRange *range, GdkEventScroll *event, gpointer data){
-   if (event->direction == GDK_SCROLL_DOWN)
-      escala-=0.02;
+   if (event->direction == GDK_SCROLL_DOWN){
+      escala*=0.95;
+   }
    if (event->direction == GDK_SCROLL_UP)
-      escala+=0.02;
+      escala*=1.05;
    gtk_widget_queue_draw(GTK_WIDGET((GtkWidget *)data));
    
    return TRUE;
@@ -300,6 +330,12 @@ void opengl_viewer_init(){
          jdeshutdown(1);
          printf ("I can't fetch delete_displaycallback from graphics_gtk\n");
       }
+   }
+   obj.vertices=NULL;
+   obj.surfaces=NULL;
+   /*Load object from file*/
+   if (load_object("./esqueleto2.obj", &obj)!=0){
+      jdeshutdown(1);
    }
    pthread_mutex_init(&gl_mutex, PTHREAD_MUTEX_TIMED_NP);
 }
@@ -521,6 +557,19 @@ void opengl_viewer_guiresume(void){
                         G_CALLBACK (motion_notify_event), NULL);
       g_signal_connect (G_OBJECT (drawing_area), "scroll-event",
                         G_CALLBACK (scroll_event), drawing_area);
+
+      g_signal_connect (G_OBJECT (glade_xml_get_widget(xml, "diffuse")), "value_changed",
+                        G_CALLBACK (on_hscale_move_slider), NULL);
+      g_signal_connect (G_OBJECT (glade_xml_get_widget(xml, "ambient")), "value_changed",
+                        G_CALLBACK (on_hscale_move_slider), NULL);
+      g_signal_connect (G_OBJECT (glade_xml_get_widget(xml, "specular")), "value_changed",
+                        G_CALLBACK (on_hscale_move_slider), NULL);
+      g_signal_connect (G_OBJECT (glade_xml_get_widget(xml, "x")), "value_changed",
+                        G_CALLBACK (on_hscale_move_slider), NULL);
+      g_signal_connect (G_OBJECT (glade_xml_get_widget(xml, "y")), "value_changed",
+                        G_CALLBACK (on_hscale_move_slider), NULL);
+      g_signal_connect (G_OBJECT (glade_xml_get_widget(xml, "z")), "value_changed",
+                        G_CALLBACK (on_hscale_move_slider), NULL);
       
       gdk_threads_leave();
    }
