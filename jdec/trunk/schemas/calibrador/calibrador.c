@@ -1252,7 +1252,7 @@ void rq_decomp(double* solucion,
 		     gsl_matrix_get(Q_prima,1,n)*-1
 		     );
       gsl_matrix_set(R_prima,n,1,
-		     gsl_matrix_get(Q_prima,n,1)*-1
+		     gsl_matrix_get(R_prima,n,1)*-1
 		     );
     }
   }
