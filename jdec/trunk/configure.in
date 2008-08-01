@@ -731,23 +731,10 @@ AM_CONDITIONAL([ENABLE_MASTERGUI],[false])
 if test "x$enable_schemas_mastergui" != xno; then
     ERRORS=""
     AC_MSG_NOTICE([**** Checking schema mastergui:])
-    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
-	[],
-	[ERRORS="$ERRORS, $ac_header not found"])
-    AC_CHECK_LIB([forms],[main],
-	[MASTERGUI_LIBS="$MASTERGUI_LIBS -lforms"],
-	[ERRORS="$ERRORS, libforms not found"],[-lm])
-    AC_CHECK_LIB([X11],[main],
-	[MASTERGUI_LIBS="$MASTERGUI_LIBS -lX11"],
-	[ERRORS="$ERRORS, libX11 not found"])
-    AC_PATH_PROG([FDESIGN],[fdesign],
-	[ERRORS="$ERRORS, fdesign needed to build mastergui schema not found"])
-    if test "$ERRORS"; then
-	AC_MSG_FAILURE([--enable-schemas-mastergui was given, but there was errors: $ERRORS])
-    else
-	ENABLED_SCHEMAS="$ENABLED_SCHEMAS mastergui"
-	AM_CONDITIONAL([ENABLE_MASTERGUI],[true])
-    fi
+    PKG_CHECK_MODULES([MASTERGUI],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS mastergui"
+	    AM_CONDITIONAL([ENABLE_MASTERGUI],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-mastergui was given, but there was errors: $MASTERGUI_PKG_ERRORS])])
 fi
 
 dnl # schema opengldemo
