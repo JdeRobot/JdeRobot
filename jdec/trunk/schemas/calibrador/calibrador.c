@@ -594,6 +594,7 @@ void draw_camera(double ppx, double ppy, int camera){
      punto*/
   float inc_x = 1./ANCHO_IMAGEN;
   float inc_y = 1./LARGO_IMAGEN;
+  float _z = -1.0;
   
   int i,j,offset,red,green,blue;
 
@@ -644,44 +645,43 @@ void draw_camera(double ppx, double ppy, int camera){
 	  /* pintamos el punto correspondiente en el
 	     escenario pintado con OGL */
 	  glBegin(GL_POINTS);
-	  v3f(-0.5+(inc_x*i),0.5-(inc_y*j),-1 );   
+	  v3f(0.5-(inc_x*i),0.5-(inc_y*j),-1 );   
 	  glEnd();
 	}
   
   /* fin dibujamos el rectangulo */
-  
+
   glColor3f( 1.0, 0.0, 0.0 );  
   glBegin(GL_LINES);
   v3f( 0.0, 0.0, 0.0 );   
-  v3f( -0.5, 0.5, -1.0 );   
+  v3f( 0.5, 0.5, _z);   
   glEnd();
 
   glColor3f( 0.0, 1.0, 0.0 );  
   glBegin(GL_LINES);
   v3f( 0.0, 0.0, 0.0 );   
-  v3f( 0.5, 0.5, -1.0 );   
+  v3f( -0.5, 0.5, _z );   
   glEnd();
 
   glColor3f( 0.0, 0.0, 1.0 );  
   glBegin(GL_LINES);
   v3f( 0.0, 0.0, 0.0 );   
-  v3f( 0.5, -0.5, -1.0 );   
+  v3f( -0.5, -0.5, _z );   
   glEnd();
-  
+
   glColor3f( 1.0, 1.0, 0.0 );  
   glBegin(GL_LINES);
   v3f( 0.0, 0.0, 0.0 );   
-  v3f( -0.5, -0.5, -1.0 );   
+  v3f( 0.5, -0.5, _z);   
   glEnd();
 
   glBegin(GL_LINES);
   glColor3f( 0.0, 1.0, 0.0 );  
   v3f( 0.0, 0.0, 0.0 );   
-  v3f( -0.5+ppx,-0.5+ppy, -1.0 );   
+  v3f( -0.5+ppx, -0.5+ppy, _z );   
   glEnd();
 
-
-  /* Por alguna razon, el tamaño maximo que se puede utilizar para un punto
+  /* Por alguna razon, el tama�o maximo que se puede utilizar para un punto
      es de un solo pixel que es practicamente invisible para un ser humano.
      Visto esto, se ha decidido usar un cubo de un lado muy pequeño para 
      dibujar "puntos grandes
@@ -725,35 +725,45 @@ void draw_camera_conection(gsl_vector* T1,gsl_vector* T2){
 
 void set_camera_pos(int camara, gsl_matrix* K, gsl_matrix* R, gsl_vector* T ){
 
-  double psi,theta,gama;
   float ppx = gsl_matrix_get(K,0,2)/ANCHO_IMAGEN;
   float ppy = gsl_matrix_get(K,1,2)/ANCHO_IMAGEN;
-  
-  /* Aplicamos las transformaciones necesarias, para pasar
-     de nuestra mariz de rotacion a la angulos Euler */
+  GLdouble m[16];
 
-  theta = acos(gsl_matrix_get(R,2,2));
-  gama = acos(gsl_matrix_get(R,2,1)/-sin(theta));
-  psi = asin(gsl_matrix_get(R,0,2)/sin(theta));
-  theta = rad2deg(theta);
-  gama  = rad2deg(gama);
-  psi = rad2deg(psi);
+  memset(m, 0, 16*sizeof(GLdouble));
+
+  /* formating the rotation matrix to be used by OGL */
+
+  m[0] = gsl_matrix_get(R,0,0);
+  m[1] = gsl_matrix_get(R,0,1);
+  m[2] = gsl_matrix_get(R,0,2);
+  m[3] = 0;
   
+  m[4] = gsl_matrix_get(R,1,0); 
+  m[5] = gsl_matrix_get(R,1,1);
+  m[6] = gsl_matrix_get(R,1,2);
+  m[7] = 0;
+  
+  m[8] = gsl_matrix_get(R,2,0);
+  m[9] = gsl_matrix_get(R,2,1);
+  m[10] = gsl_matrix_get(R,2,2);
+  m[11] = 0; 
+  
+  m[12] = 0;
+  m[13] = 0;
+  m[14] = 0;
+  m[15] = 1;
+
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+
   glTranslatef(
 	       -(float)gsl_vector_get(T,0)/10.0,
 	       -(float)gsl_vector_get(T,1)/10.0,
 	       -(float)gsl_vector_get(T,2)/10.0
 	       );
-  
-  /* Rotacion de gama grados en Z*/
-  glRotatef(gama,0.,0.,1.);
-  /* Rotacion de gama grados en X*/
-  glRotatef(theta,1.,0.,0.);
-  /* Rotacion de gama grados en Z*/
-  glRotatef(psi,0.,0.,1.);
 
+  /* Rotation by multiplying the actual matrix by the rotation matrix m */
+  glMultMatrixd(m);
   draw_camera(ppx, ppy, camara);
 }
 
