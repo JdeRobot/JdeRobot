@@ -15,28 +15,15 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  Authors : José Antonio Santos Cadenas <santoscadenas@gmail.com>
  */
-typedef struct{
-   float x;
-   float y;
-}floatPoint;
-      
-typedef struct{
-   int calc;
-   unsigned char status;
-   float error;
-   floatPoint dest;
-   float hyp;
-   float angle;
-}t_opflow;
 
-extern void prueba_ipp_startup(char *configfile);
-extern void prueba_ipp_suspend();
-extern void prueba_ipp_resume(int father, int *brothers, arbitration fn);
-extern void prueba_ipp_guiresume();
-extern void prueba_ipp_guisuspend();
-extern void prueba_ipp_stop();
+extern void ipp_demo_startup(char *configfile);
+extern void ipp_demo_suspend();
+extern void ipp_demo_resume(int father, int *brothers, arbitration fn);
+extern void ipp_demo_guiresume();
+extern void ipp_demo_guisuspend();
+extern void ipp_demo_stop();
 
-extern int prueba_ipp_id; /* schema identifier */
-extern int prueba_ipp_cycle; /* ms */
+extern int ipp_demo_id; /* schema identifier */
+extern int ipp_demo_cycle; /* ms */
