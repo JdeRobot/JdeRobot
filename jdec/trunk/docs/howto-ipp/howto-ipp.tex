@@ -97,7 +97,7 @@ Una vez registrados nos aparecerá una página como la de la figura \ref{fig:desca
 	\label{fig:descarga}
 \end{figure}
 
-Cuando finalice la descarga se extrae el contenido del archivo comprimido (tgz). Se nos creará un directorio llamado \textit{l\_ipp\_ia32\_p\_5.2.XXX}, dentro del cual existe un archivo de instalación llamado \textit{install.sh}. Le otorgaremos permisos de ejecución en caso de no tenerlos y lo ejecutamos.\\
+Cuando finalice la descarga se extrae el contenido del archivo comprimido (tgz). Se nos creará un directorio llamado \textit{l\_ipp\_ia32\_p\_5.3.XXX}, dentro del cual existe un archivo de instalación llamado \textit{install.sh}. Le otorgaremos permisos de ejecución en caso de no tenerlos y lo ejecutamos.\\
 
 Nos irán apareciendo ventanas más o menos como las que siguen:\\
 
@@ -129,7 +129,7 @@ En este caso nos preguntará por la acción que deseamos realizar, elegimos la opc
 	\begin{scriptsize}
 	\begin{verbatim}
 ===============================================================================
-Welcome to the Intel(R) Integrated Performance Primitives v5.2 for Linux* on IA-32 Intel(R) Architecture Installation
+Welcome to the Intel(R) Integrated Performance Primitives v5.3.2.068 for Linux* on IA-32 Intel(R) Architecture Installation
 
 Please make your selection by entering an option from the choices below:
 
@@ -188,7 +188,7 @@ You may press Ctrl+C to cancel.
 Extracting...           ###############################################################[100%]
 
 Would you like to install the following?
-    Intel(R) IPP 5.2 for Linux* on IA-32 Intel(R) Architecture
+    Intel(R) IPP 5.3.2.068 for Linux* on IA-32 Intel(R) Architecture
 <Enter> to continue, or x to exit: 
 --------------------------------------------------------------------------------
 Please read the following license agreement carefully.  Prior to installing the
@@ -242,20 +242,20 @@ Con este flag se consigue que se busque el archivo de cabecera en la ruta apropi
 		\hline
 	\begin{scriptsize}
 	\begin{verbatim}
--I/opt/intel/ipp/5.2/ia32/include
+-I/opt/intel/ipp/5.3.2.068/ia32/include
 	\end{verbatim}
 	\end{scriptsize}
 	\\
 	\hline
 \end{tabular}\\
 
-Y estos ayudan a que se encuentren y enlacen en tiempo de ejecución las bibliotecas dinámicas que implementan el código.\\
+Y estos ayudan a que se encuentren y enlacen en tiempo de ejecución las bibliotecas dinámicas que implementan el código. El directorio de ubicacion de las librerias puede variar dependiendo de la version de las librerias de IPP\\
 
 \begin{tabular}{|p{14cm}|}
 		\hline
 	\begin{scriptsize}
 	\begin{verbatim}
--L/opt/intel/ipp/5.2/ia32/lib -L/opt/intel/ipp/5.2/ia32/sharedlib
+-L/opt/intel/ipp/5.3.2.068/ia32/lib -L/opt/intel/ipp/5.3.2.068/ia32/sharedlib
 
 -lippaca6 -lippacpx -lippac -lippact7 -lippacv8 -lippacw7 -lippcca6
 -lippccpx -lippcc -lippcct7 -lippccv8 -lippccw7 -lippcha6 -lippchpx 
@@ -269,6 +269,20 @@ Y estos ayudan a que se encuentren y enlacen en tiempo de ejecución las bibliote
 -lippst7 -lippsv8 -lippsw7 -lippvca6 -lippvcpx -lippvc -lippvct7 
 -lippvcv8 -lippvcw7 -lippvma6 -lippvmpx -lippvm -lippvmt7 
 -lippvmv8 -lippvmw7
+	\end{verbatim}
+	\end{scriptsize}
+	\\
+	\hline
+\end{tabular}\\
+
+Para poder utilizar las librerias hay que crear una variable de sistema
+
+\begin{tabular}{|p{14cm}|}
+		\hline
+	\begin{scriptsize}
+	\begin{verbatim}
+export LD_LIBRARY_PATH=.:/usr/lib:/lib:/lib/tls/i686/cmov:/usr/local/lib:
+/opt/intel/ipp/5.1/ia32/sharedlib:$HOME/jde-robot:/usr/local/share/jde-robot/:$LD_LIBRARY_PATH
 	\end{verbatim}
 	\end{scriptsize}
 	\\
@@ -300,6 +314,20 @@ Algunos ejemplos:
 
    \end{lstlisting}
 
+  \item Convertir una imagen con una profundidad de 1 byte  a otra de 3 bytes
+
+	En este caso lo que realizamos es fusionar los 3 valores de cada color en una sola imagen. Al ser el valor de los 3 colores igual para cada pixel, esto nos devolvera una imagen en escala de grises con 3 bytes por pixel.
+   \begin{lstlisting}[language=C]
+
+	Ipp8u *imageSalida;
+	Ipp8u *arr[3];
+	arr[0] = (Ipp8u*)imageBN;
+	arr[1] = (Ipp8u*)imageBN;
+	arr[2] = (Ipp8u*)imageBN;
+	ippiCopy_8u_P3C3R(arr, ancho, (Ipp8u*)imageSalida, ancho*3, imgtam);
+
+   \end{lstlisting}
+
   \item Multiplicar dos imágenes píxel a píxel
 
    \begin{lstlisting}[language=C]
@@ -308,7 +336,7 @@ Algunos ejemplos:
 
    imgtam.height=alto;
    imgtam.width=ancho;
-   
+
    ippiMulScale_8u_C3R((Ipp8u *)img_origen, tam_fila_origen1,
                         (Ipp8u *)img_origen_2, tam_fila_origen2,
                         (Ipp8u *)img_destino, tam_fila_destino, imgtam);
@@ -327,6 +355,33 @@ Algunos ejemplos:
                       ancho*4, imgtam, ippAxsVertical);
 
    \end{lstlisting}
+
+   \item{Como redimensionar una imagen}
+
+   Para redimensionar una imagen se utiliza la siguiente funcion:
+
+   \begin{lstlisting}[language=C]
+
+	IppiSize imgtam;
+	float factor =0.5;
+	IppiRect oriRoi;
+	IppiRect dstRoi;
+	oriRoi.x=0;
+	oriRoi.y=0;
+	oriRoi.width=320;
+	oriRoi.height=240;
+	dstRoi.x=0;
+	dstRoi.y=0;
+	dstRoi.width=320*factor;
+	dstRoi.height=240*factor;
+	ippiResizeSqrPixel_8u_C3R((Ipp8u*)imageOrigen, imgtam, ancho*3,
+										oriRoi, (Ipp8u*)imageDestino,
+										ancho*factor*3, dstRoi, factor,
+										factor, 1, 1, IPPI_INTER_NN,
+										pBuffer);
+
+   \end{lstlisting}
+   La variable factor es la relación entre la variable original, de forma que un valor de 0.5 divide el ancho y el largo de la imagen a la mitad y un valor de 2 aumenta el ancho y el largo al doble
    
 \end{itemize}
 
@@ -361,6 +416,36 @@ Algunos ejemplos:
                         (Ipp8u*)img_destino, tam_fila*4, imgtam);
 
    \end{lstlisting}
+
+
+\subsection{Cómo aplicar un filtro de bordes}
+
+ Para realizar un filtro de bordes a una imagen se puede utilizar las siguientes función:
+
+   \begin{lstlisting}[language=C]
+
+	IppiSize roi;
+	roi.width = 320;
+	roi.height = 240;
+	int size;
+	Ipp8u *buffer;
+	ippiCannyGetSize(roi, &size);
+	buffer = ippsMalloc_8u(size);
+	Ipp32f low=1.0f;
+	Ipp32f high=200.0f;
+
+	ippiFilterSobelNegVertBorder_8u16s_C1R ((Ipp8u*)imageBN, ancho,
+											image3X, ancho*2, roi, ippMskSize3x3,
+											ippBorderConst, 0, buffer);
+	ippiFilterSobelHorizBorder_8u16s_C1R ((Ipp8u*)imageBN, ancho,
+											image3Y, ancho*2, roi, ippMskSize3x3,
+											ippBorderConst, 0, pBuffer);
+	ippiCanny_16s8u_C1R(image3X, ancho*2, image3Y, ancho*2,
+								(Ipp8u*)imageResultadoBN, ancho, roi,
+								low, high, buffer);
+   \end{lstlisting}
+
+ Los valores high y low se pueden cambiar para obtener distintos valores del filtro de bordes. Tanto la imagen de salida como la imagen de entrada (imageResultadoBN, imageBN) son imagenes en blanco y negro con una profundidad de un byte.
 
 \subsection{Cómo calcular flujo óptico}
 El cálculo del flujo óptico es una operación compleja y costosa computacionalmente. El método propuesto en este apartado es el algoritmo de Lukas-Kanade. A pesar de que existe una función que realiza el cálculo mediante este método, es necesario transformar las imágenes de entrada para que coincidan con el tipo de entrada de la función, así como buscar los puntos relevantes sobre los que calcular el flujo.\
@@ -516,5 +601,4 @@ Por último se libera el espacio reservado previamente.\
    \end{lstlisting}
 
 \end{document}
-
 
