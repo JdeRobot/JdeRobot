@@ -10,6 +10,10 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+/*jdec includes*/
+#include <loader.h>
+#include <sfactory.h>
+
 /* The names of functions that actually do the manipulation. */
 int com_list(char *);
 int com_view(char *);
@@ -21,14 +25,16 @@ int com_help(char *);
 int com_cd(char *);
 int com_quit(char *);
 
+int com_load(char *);
+int com_lsloaded(char *);
 
 /* A structure which contains information on the commands this program
    can understand. */
 
 typedef struct {
-  char *name;			/* User printable name of the function. */
+  const char *name;		/* User printable name of the function. */
   rl_icpfunc_t *func;		/* Function to call to do the job. */
-  char *doc;			/* Documentation for this function.  */
+  const char *doc;		/* Documentation for this function.  */
 } COMMAND;
 
 COMMAND commands[] = {
@@ -36,15 +42,17 @@ COMMAND commands[] = {
   { "help", com_help, "Display this text" },
   { "?", com_help, "Synonym for `help'" },
   { "ls", com_list, "Synonym for `list'" },
+  { "lsl", com_lsloaded, "List loaded components" },
+  { "load", com_load, "Load shared object" },
   { "pwd", com_pwd, "Print the current working directory" },
   { "quit", com_quit, "Quit using jdeC" },
   { "view", com_view, "View the contents of FILE" },
-  { (char *)NULL, (rl_icpfunc_t *)NULL, (char *)NULL }
+  { (const char *)NULL, (rl_icpfunc_t *)NULL, (const char *)NULL }
 };
 
 /* Forward declarations. */
 char *stripwhite (char *string);
-COMMAND *find_command (char *name);
+COMMAND *find_command (const char *name);
 void initialize_readline ();
 int execute_line (char *line);
 
@@ -105,7 +113,7 @@ execute_line (char *line){
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
 COMMAND *
-find_command (char *name){
+find_command (const char *name){
   register int i;
 
   for (i = 0; commands[i].name; i++)
@@ -182,7 +190,7 @@ command_completion (const char *text,int start, int end){
 char *
 command_generator (const char *text,int state){
   static int list_index, len;
-  char *name;
+  const char *name;
 
   /* If this is a new word to complete, initialize now.  This includes
      saving the length of TEXT for efficiency, and initializing the index
@@ -194,7 +202,7 @@ command_generator (const char *text,int state){
     }
 
   /* Return the next name which partially matches from the command list. */
-  while (name = commands[list_index].name)
+  while ((name = commands[list_index].name))
     {
       list_index++;
 
@@ -219,7 +227,7 @@ static char syscom[1024];
 /* Return non-zero if ARG is a valid argument for CALLER, else print
    an error message and return zero. */
 int
-valid_argument (char *caller, char *arg){
+valid_argument (const char *caller, const char *arg){
   if (!arg || !*arg)
     {
       fprintf (stderr, "%s: Argument required.\n", caller);
@@ -232,10 +240,12 @@ valid_argument (char *caller, char *arg){
 /* List the file(s) named in arg. */
 int
 com_list (char *arg){
-  if (!arg)
-    arg = "";
+  const char *a = arg;
 
-  sprintf (syscom, "ls -FClg %s", arg);
+  if (!a)
+    a = "";
+
+  sprintf (syscom, "ls -FClg %s", a);
   return (system (syscom));
 }
 
@@ -302,7 +312,7 @@ com_cd (char *arg){
       return 1;
     }
 
-  com_pwd ("");
+  com_pwd (0);
   return (0);
 }
 
@@ -328,4 +338,23 @@ int
 com_quit (char *arg){
   done = 1;
   return (0);
+}
+
+/* Load ARG so. */
+int
+com_load (char *arg){
+  if (!valid_argument ("load", arg))
+    return 1;
+
+  if (load_so (arg) != 0)
+    return 1;
+
+  return 0;
+}
+
+/*List loaded components*/
+int
+com_lsloaded(char *arg) {
+  print_sfactories();
+  return 0;
 }
