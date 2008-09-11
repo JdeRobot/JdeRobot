@@ -15,6 +15,14 @@ int init(Schema* const s) {
   return 0;
 }
 
+int iteration(Schema* const s) {
+  static int i = 0;
+  Pdata* my_pdata = (Pdata*)s->private_data;
+
+  fprintf(stderr,"executing iteration %d on schema %d...\n",i++,s->sid);
+  return 0;
+}
+
 void* cast(Schema* const s,
 	   const char* interface_name) {
   return 0;/*no interface implemented*/
@@ -29,6 +37,7 @@ Schema* new_sA(SFactory* sf, const int sid) {
 
   return new_Schema(sid,
 		    &init,0,
+		    &iteration,0,
 		    &cast,0,
 		    my_pdata);
 }

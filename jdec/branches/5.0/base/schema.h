@@ -16,6 +16,7 @@ typedef struct Schema* Schema_p;
 typedef Schema* (*schema_ctor_f)(SFactory_p sf,const int sid);
 typedef void (*schema_dtor_f)(SFactory_p sf, Schema* s);
 typedef int (*schema_init_f)(Schema_p const s);
+typedef int (*schema_iteration_f)(Schema_p const s);
 typedef void* (*schema_cast_f)(Schema_p const s,
 			       const char* interface_name);
 
@@ -37,7 +38,7 @@ typedef struct SFactory{
   void destroy(Schema_p s);
   static int add(SFactory* const sf);
   static SFactory* search(const char* interface_name);
-  static void print();
+  static void list();
 #endif /*__cplusplus*/
 }SFactory;
 
@@ -45,6 +46,8 @@ typedef struct Schema{
   int sid;
   schema_init_f init_cb;
   void* init_cbdata;
+  schema_iteration_f iteration_cb;
+  void* iteration_cbdata;
   schema_cast_f cast_cb;
   void* cast_cbdata;
   void* private_data;
@@ -52,14 +55,17 @@ typedef struct Schema{
   Schema(const int sid);
   Schema(const int sid,
 	 schema_init_f const init_cb,void* const init_cbdata,
+	 schema_iteration_f const iteration_cb,void* const iteration_cbdata,
 	 schema_cast_f const cast_cb,
 	 void* const cast_cbdata,
 	 void* const private_data = 0);
   virtual ~Schema();
   virtual int init() = 0;
+  virtual int iteration() = 0;
   virtual void* cast(const char* interface_name) = 0;
 private:
   static int sinit(Schema* const s);
+  static int siteration(Schema* const s);
   static void* scast(Schema* const s, const char* interface_name);
 #endif /*__cplusplus*/
 }Schema;
@@ -89,7 +95,8 @@ int add_sfactory(SFactory* const sf);
 */
 SFactory* search_sfactory(const char* interface_name);
 
-void print_sfactories();
+void list_sfactories();
+void list_instances();
 
 #ifdef __cplusplus
 #define ADD_SFACTORY(SNAME,SINTERFACE,CTOR,DTOR,PDATA)    \
@@ -105,7 +112,10 @@ __attribute__((constructor)) void __add_sfactory() { \
 
 /*Schema fucntions*/
 Schema* new_Schema(const int sid,
-		   schema_init_f const init_cb,void* const init_cbdata,
+		   schema_init_f const init_cb,
+		   void* const init_cbdata,
+		   schema_iteration_f const iteration_cb,
+		   void* const iteration_cbdata,
 		   schema_cast_f const cast_cb,
 		   void* const cast_cbdata,
 		   void* const private_data = 0);
@@ -114,6 +124,7 @@ void delete_Schema(Schema* const s);
 
 /*Schema API*/
 int Schema_init(Schema* const s);
+int Schema_iteration(Schema* const s);
 void* Schema_cast(Schema* const s, const char* interface_name);
 int Schema_cmp(Schema* const a, Schema* const b);
 

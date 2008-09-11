@@ -12,7 +12,7 @@
 
 /*jdec includes*/
 #include <loader.h>
-#include <sfactory.h>
+#include <schema.h>
 
 /* The names of functions that actually do the manipulation. */
 int com_list(char *);
@@ -26,28 +26,38 @@ int com_cd(char *);
 int com_quit(char *);
 
 int com_load(char *);
-int com_lsloaded(char *);
 
 /* A structure which contains information on the commands this program
    can understand. */
 
 typedef struct {
+  const char *name;
+  const char *doc;
+} SUBCOMMAND;
+
+typedef struct {
   const char *name;		/* User printable name of the function. */
   rl_icpfunc_t *func;		/* Function to call to do the job. */
-  const char *doc;		/* Documentation for this function.  */
+  const char *doc;		/* Documentation for this function.*/
+  SUBCOMMAND *subcommands;
 } COMMAND;
 
+/*list subcommands*/
+SUBCOMMAND ls_subcommands[] = { 
+  {"sfactories", "List schema factories"},
+  { (const char *)NULL, (const char *)NULL }
+};
+
 COMMAND commands[] = {
-  { "cd", com_cd, "Change to directory DIR" },
-  { "help", com_help, "Display this text" },
-  { "?", com_help, "Synonym for `help'" },
-  { "ls", com_list, "Synonym for `list'" },
-  { "lsl", com_lsloaded, "List loaded components" },
-  { "load", com_load, "Load shared object" },
-  { "pwd", com_pwd, "Print the current working directory" },
-  { "quit", com_quit, "Quit using jdeC" },
-  { "view", com_view, "View the contents of FILE" },
-  { (const char *)NULL, (rl_icpfunc_t *)NULL, (const char *)NULL }
+  { "cd", com_cd, "Change to directory DIR", NULL },
+  { "help", com_help, "Display this text", NULL},
+  { "?", com_help, "Synonym for `help'", NULL },
+  { "ls", com_list, "Synonym for `list'", ls_subcommands },
+  { "load", com_load, "Load shared object", NULL },
+  { "pwd", com_pwd, "Print the current working directory", NULL },
+  { "quit", com_quit, "Quit using jdeC", NULL },
+  { "view", com_view, "View the contents of FILE", NULL },
+  { (const char *)NULL, (rl_icpfunc_t *)NULL, (const char *)NULL, NULL }
 };
 
 /* Forward declarations. */
@@ -189,7 +199,7 @@ command_completion (const char *text,int start, int end){
    start at the top of the list. */
 char *
 command_generator (const char *text,int state){
-  static int list_index, len;
+  static int list_index, len, cmd_index;
   const char *name;
 
   /* If this is a new word to complete, initialize now.  This includes
@@ -199,6 +209,7 @@ command_generator (const char *text,int state){
     {
       list_index = 0;
       len = strlen (text);
+      cmd_index = 0;
     }
 
   /* Return the next name which partially matches from the command list. */
@@ -207,6 +218,7 @@ command_generator (const char *text,int state){
       list_index++;
 
       if (strncmp (name, text, len) == 0)
+	
         return (strdup(name));
     }
 
@@ -241,12 +253,20 @@ valid_argument (const char *caller, const char *arg){
 int
 com_list (char *arg){
   const char *a = arg;
+  int rc = 0;
 
   if (!a)
     a = "";
 
-  sprintf (syscom, "ls -FClg %s", a);
-  return (system (syscom));
+  if (strcmp(a,"#sfactories") == 0)
+    list_sfactories();
+  else if (strcmp(a,"#instances") == 0)
+    list_instances();
+  else {
+    sprintf (syscom, "ls -FClg %s", a);
+    rc = system (syscom);
+  }
+  return rc;
 }
 
 int
@@ -349,12 +369,5 @@ com_load (char *arg){
   if (load_so (arg) != 0)
     return 1;
 
-  return 0;
-}
-
-/*List loaded components*/
-int
-com_lsloaded(char *arg) {
-  print_sfactories();
   return 0;
 }

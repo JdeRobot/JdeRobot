@@ -98,13 +98,20 @@ SFactory* search_sfactory(const char* interface_name) {
   return 0;
 }
 
-void print_sfactories() {
+void list_sfactories() {
   GList* i;
 
   for (i = g_list_first(sfactories); i != 0; i = g_list_next(i))
     printf("%s->%s\n",
 	   ((SFactory*)i->data)->schema_name,
 	   ((SFactory*)i->data)->interface_name);
+}
+
+void list_instances() {
+  GList* i;
+
+  for (i = g_list_first(instances); i != 0; i = g_list_next(i))
+    printf("%d\n",((Schema*)i->data)->sid);
 }
   
 #ifdef __cplusplus
@@ -136,8 +143,8 @@ SFactory* SFactory::search(const char* interface_name) {
   return search_sfactory(interface_name);
 }
 
-void SFactory::print() {
-  print_sfactories();
+void SFactory::list() {
+  list_sfactories();
 }
 
 #endif /*__cplusplus*/
