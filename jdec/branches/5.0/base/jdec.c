@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <glib.h>
 
 /*jdec includes*/
 #include <loader.h>
@@ -16,6 +17,8 @@
 
 /* The names of functions that actually do the manipulation. */
 int com_list(char *);
+int com_listf(char *);
+//int com_listi(char *);
 int com_view(char *);
 int com_rename(char *);
 int com_stat(char *);
@@ -23,42 +26,52 @@ int com_pwd(char *);
 int com_delete(char *);
 int com_help(char *);
 int com_cd(char *);
-int com_quit(char *);
+int com_exit(char *);
 
 int com_load(char *);
+int com_sfactory(char *);
 
 /* A structure which contains information on the commands this program
    can understand. */
 
-typedef struct {
-  const char *name;
-  const char *doc;
-} SUBCOMMAND;
 
 typedef struct {
   const char *name;		/* User printable name of the function. */
   rl_icpfunc_t *func;		/* Function to call to do the job. */
   const char *doc;		/* Documentation for this function.*/
-  SUBCOMMAND *subcommands;
 } COMMAND;
 
-/*list subcommands*/
-SUBCOMMAND ls_subcommands[] = { 
-  {"sfactories", "List schema factories"},
-  { (const char *)NULL, (const char *)NULL }
-};
+enum STATES { BASE, FACTORY, INSTANCE };
+typedef struct {
+  STATES state;
+  COMMAND *cmds;
+  void *pdata;
+} PSTATE;
+
 
 COMMAND commands[] = {
-  { "cd", com_cd, "Change to directory DIR", NULL },
-  { "help", com_help, "Display this text", NULL},
-  { "?", com_help, "Synonym for `help'", NULL },
-  { "ls", com_list, "Synonym for `list'", ls_subcommands },
-  { "load", com_load, "Load shared object", NULL },
-  { "pwd", com_pwd, "Print the current working directory", NULL },
-  { "quit", com_quit, "Quit using jdeC", NULL },
-  { "view", com_view, "View the contents of FILE", NULL },
-  { (const char *)NULL, (rl_icpfunc_t *)NULL, (const char *)NULL, NULL }
+  { "cd", com_cd, "Change to directory DIR" },
+  { "help", com_help, "Display this text" },
+  { "?", com_help, "Synonym for `help'" },
+  { "list", com_list, "List files" },
+  { "ls", com_list, "Synonym for `list'" },
+  { "listf", com_listf, "List loaded factories" },
+  { "lf", com_listf, "Synonym for `listf'" },
+  { "load", com_load, "Load shared object" },
+  { "pwd", com_pwd, "Print the current working directory" },
+  { "exit", com_exit, "Quit using jdeC" },
+  { "view", com_view, "View the contents of FILE" },
+  { (const char *)NULL, (rl_icpfunc_t *)NULL, (const char *)NULL }
 };
+
+COMMAND fcommands[] = {
+  { "help", com_help, "Display this text" },
+  { "?", com_help, "Synonym for `help'" },
+  { "exit", com_exit, "Exit factory mode" },
+  { (const char *)NULL, (rl_icpfunc_t *)NULL, (const char *)NULL }
+};
+
+COMMAND sf_cmd = { "", com_sfactory, "" };
 
 /* Forward declarations. */
 char *stripwhite (char *string);
@@ -69,6 +82,9 @@ int execute_line (char *line);
 /* When non-zero, this global means the user is done using this program. */
 int done;
 
+/*Parsing state*/
+PSTATE pstate = {BASE, commands, 0};
+
 int
 main (int argc,char **argv){
   char *line, *s;
@@ -77,24 +93,23 @@ main (int argc,char **argv){
 
   /* Loop reading and executing lines until the user quits. */
   while(done == 0){
-      line = readline ("jdeC $> ");
-
-      if (!line)
-        break;
-
-      /* Remove leading and trailing whitespace from the line.
-         Then, if there is anything left, add it to the history list
-         and execute it. */
-      s = stripwhite (line);
-
-      if (*s)
-        {
-          add_history (s);
-          execute_line (s);
-        }
-      printf("%s\n",s);
-      free (line);
+    line = readline ("jdeC $> ");
+    
+    if (!line)
+      break;
+    
+    /* Remove leading and trailing whitespace from the line.
+       Then, if there is anything left, add it to the history list
+       and execute it. */
+    s = stripwhite (line);
+    
+    if (*s) {
+      add_history (s);
+      execute_line (s);
     }
+    printf("%s\n",s);
+    free (line);
+  }
   printf("Bye!\n");
   exit (0);
 }
@@ -104,17 +119,35 @@ int
 execute_line (char *line){
   COMMAND *command;
   char *word;
+  const GList *sf_list_index;
+  char str[256];
 
   /* Isolate the command word. */
   word = strsep(&line," ");
 
   command = find_command (word);
 
-  if (!command)
-    {
-      fprintf (stderr, "%s: No such command for jdeC.\n", word);
-      return (-1);
+  if (!command) {
+    /*search in loaded factories*/
+    sf_list_index = list_sfactories();
+    while( sf_list_index != 0 ) {
+      sprintf(str,"F_%s[%s]",((SFactory*)sf_list_index->data)->schema_name,
+	      ((SFactory*)sf_list_index->data)->interface_name);
+      sf_list_index = g_list_next(sf_list_index);
+      if (strcmp (str, text) == 0) {
+	pstate.state = FACTORY;
+	pstate.cmds = fcommands;
+	pstate.pdata = sf_list_index->data;
+	command = sf_cmd;
+	break;
+      }
     }
+  }
+
+  if (!command) {
+    fprintf (stderr, "%s: No such command for jdeC.\n", word);
+    return (-1);
+  }
 
   /* Call the function. */
   return ((*(command->func)) (line));
@@ -125,7 +158,7 @@ execute_line (char *line){
 COMMAND *
 find_command (const char *name){
   register int i;
-
+    
   for (i = 0; commands[i].name; i++)
     if (strcmp (name, commands[i].name) == 0)
       return (&commands[i]);
@@ -199,28 +232,48 @@ command_completion (const char *text,int start, int end){
    start at the top of the list. */
 char *
 command_generator (const char *text,int state){
-  static int list_index, len, cmd_index;
+  static int list_index, len;
+  static const GList *sf_list_index, *i_list_index;
   const char *name;
+  char str[256];
 
   /* If this is a new word to complete, initialize now.  This includes
      saving the length of TEXT for efficiency, and initializing the index
      variable to 0. */
-  if (!state)
-    {
+  if (!state) {
       list_index = 0;
+      sf_list_index = list_sfactories();
+      i_list_index = list_instances();
       len = strlen (text);
-      cmd_index = 0;
-    }
+  }
 
-  /* Return the next name which partially matches from the command list. */
-  while ((name = commands[list_index].name))
-    {
-      list_index++;
-
-      if (strncmp (name, text, len) == 0)
+  /* Return the next name which partially matches from the command
+     list. */
+  while ((name = commands[list_index].name)) {
+    list_index++;
 	
-        return (strdup(name));
-    }
+    if (strncmp (name, text, len) == 0)   
+      return (strdup(name));
+  }
+
+  /*search on factory names*/
+  while( sf_list_index != 0) {
+    sprintf(str,"F_%s[%s]",((SFactory*)sf_list_index->data)->schema_name,
+	    ((SFactory*)sf_list_index->data)->interface_name);
+    sf_list_index = g_list_next(sf_list_index);
+    if (strncmp (str, text, len) == 0)
+      return (strdup(str));
+  }
+
+  /*search on instances names*/
+  /* while( i_list_index != 0 ) { */
+/*     sprintf(str,"%s@%s",((SFactory*)i_list_index->data)->schema_name, */
+/* 	    ((SFactory*)i_list_index->data)->interface_name); */
+/*     i_list_index = g_list_next(i_list_index); */
+/*     if (strncmp (str, text, len) == 0) */
+/*       return (strdup(str)); */
+/*   } */
+
 
   /* If no names matched, then return NULL. */
   return ((char *)NULL);
@@ -267,6 +320,13 @@ com_list (char *arg){
     rc = system (syscom);
   }
   return rc;
+}
+
+/* List the file(s) named in arg. */
+int
+com_listf (char *arg){
+  print_sfactories();
+  return 0;
 }
 
 int
@@ -355,7 +415,7 @@ com_pwd (char *ignore){
 /* The user wishes to quit using this program.  Just set DONE
    non-zero. */
 int
-com_quit (char *arg){
+com_exit (char *arg){
   done = 1;
   return (0);
 }

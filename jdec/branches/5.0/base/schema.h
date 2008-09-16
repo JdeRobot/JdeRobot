@@ -95,8 +95,11 @@ int add_sfactory(SFactory* const sf);
 */
 SFactory* search_sfactory(const char* interface_name);
 
-void list_sfactories();
-void list_instances();
+void print_sfactories();
+const GList* list_sfactories();
+
+void print_instances();
+const GList* list_instances();
 
 #ifdef __cplusplus
 #define ADD_SFACTORY(SNAME,SINTERFACE,CTOR,DTOR,PDATA)    \

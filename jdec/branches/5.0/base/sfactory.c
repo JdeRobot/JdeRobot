@@ -98,7 +98,11 @@ SFactory* search_sfactory(const char* interface_name) {
   return 0;
 }
 
-void list_sfactories() {
+const GList* list_sfactories() {
+  return sfactories;
+}
+
+void print_sfactories() {
   GList* i;
 
   for (i = g_list_first(sfactories); i != 0; i = g_list_next(i))
@@ -107,7 +111,11 @@ void list_sfactories() {
 	   ((SFactory*)i->data)->interface_name);
 }
 
-void list_instances() {
+const GList* list_instances() {
+  return instances;
+}
+
+void print_instances() {
   GList* i;
 
   for (i = g_list_first(instances); i != 0; i = g_list_next(i))
