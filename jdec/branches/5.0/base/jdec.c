@@ -29,7 +29,7 @@ int com_cd(char *);
 int com_exit(char *);
 
 int com_load(char *);
-int com_sfactory(char *);
+//int com_sfactory(char *);
 
 /* A structure which contains information on the commands this program
    can understand. */
@@ -44,12 +44,13 @@ typedef struct {
 enum STATES { BASE, FACTORY, INSTANCE };
 typedef struct {
   STATES state;
-  COMMAND *cmds;
+  COMMAND *commands;
+  char prompt[256];
   void *pdata;
 } PSTATE;
 
 
-COMMAND commands[] = {
+COMMAND bcommands[] = {
   { "cd", com_cd, "Change to directory DIR" },
   { "help", com_help, "Display this text" },
   { "?", com_help, "Synonym for `help'" },
@@ -63,6 +64,7 @@ COMMAND commands[] = {
   { "view", com_view, "View the contents of FILE" },
   { (const char *)NULL, (rl_icpfunc_t *)NULL, (const char *)NULL }
 };
+const char *bprompt = "jdeC $> ";
 
 COMMAND fcommands[] = {
   { "help", com_help, "Display this text" },
@@ -70,8 +72,9 @@ COMMAND fcommands[] = {
   { "exit", com_exit, "Exit factory mode" },
   { (const char *)NULL, (rl_icpfunc_t *)NULL, (const char *)NULL }
 };
+const char *fprompt = "jdeC[%s@%s] $> ";
 
-COMMAND sf_cmd = { "", com_sfactory, "" };
+//COMMAND sf_cmd = { "", com_sfactory, "" };
 
 /* Forward declarations. */
 char *stripwhite (char *string);
@@ -82,8 +85,13 @@ int execute_line (char *line);
 /* When non-zero, this global means the user is done using this program. */
 int done;
 
-/*Parsing state*/
-PSTATE pstate = {BASE, commands, 0};
+/* Parsing state.
+   Global var modified in:
+       main()
+       execute_line()
+       com_exit()
+*/
+PSTATE pstate;
 
 int
 main (int argc,char **argv){
@@ -91,9 +99,16 @@ main (int argc,char **argv){
 
   initialize_readline ();	/* Bind our completer. */
 
+  /*initialize pstate*/
+  pstate.state = BASE;
+  pstate.commands = bcommands;
+  strncpy(pstate.prompt,bprompt,256);
+  pstate.prompt[255] = '\0';
+  pstate.pdata = NULL;
+
   /* Loop reading and executing lines until the user quits. */
   while(done == 0){
-    line = readline ("jdeC $> ");
+    line = readline (pstate.prompt);
     
     if (!line)
       break;
@@ -122,36 +137,36 @@ execute_line (char *line){
   const GList *sf_list_index;
   char str[256];
 
-  /* Isolate the command word. */
+  /* Isolate the command word.
+     line is modified if token was found, see strsep(3) */
   word = strsep(&line," ");
 
   command = find_command (word);
+  if (command)
+    return ((*(command->func)) (line));
 
-  if (!command) {
-    /*search in loaded factories*/
-    sf_list_index = list_sfactories();
-    while( sf_list_index != 0 ) {
-      sprintf(str,"F_%s[%s]",((SFactory*)sf_list_index->data)->schema_name,
-	      ((SFactory*)sf_list_index->data)->interface_name);
-      sf_list_index = g_list_next(sf_list_index);
-      if (strcmp (str, text) == 0) {
-	pstate.state = FACTORY;
-	pstate.cmds = fcommands;
-	pstate.pdata = sf_list_index->data;
-	command = sf_cmd;
-	break;
-      }
+  /*search in loaded factories*/
+  sf_list_index = list_sfactories();
+  while( sf_list_index != 0 ) {
+    sprintf(str,"F_%s[%s]",((SFactory*)sf_list_index->data)->schema_name,
+	    ((SFactory*)sf_list_index->data)->interface_name);
+    sf_list_index = g_list_next(sf_list_index);
+    if (strcmp (str, word) == 0) {
+      pstate.state = FACTORY;
+      pstate.commands = fcommands;
+      snprintf(pstate.prompt,256,fprompt,
+	       ((SFactory*)sf_list_index->data)->schema_name,
+	       ((SFactory*)sf_list_index->data)->interface_name);
+      pstate.pdata = sf_list_index->data;
+      return 0;
     }
   }
 
-  if (!command) {
-    fprintf (stderr, "%s: No such command for jdeC.\n", word);
-    return (-1);
-  }
-
-  /* Call the function. */
-  return ((*(command->func)) (line));
+  /* no command or factory name found*/
+  fprintf (stderr, "%s: No such command for jdeC.\n", word);
+  return (-1);
 }
+
 
 /* Look up NAME as the name of a command, and return a pointer to that
    command.  Return a NULL pointer if NAME isn't a command name. */
@@ -159,9 +174,9 @@ COMMAND *
 find_command (const char *name){
   register int i;
     
-  for (i = 0; commands[i].name; i++)
-    if (strcmp (name, commands[i].name) == 0)
-      return (&commands[i]);
+  for (i = 0; pstate.commands[i].name; i++)
+    if (strcmp (name, pstate.commands[i].name) == 0)
+      return (&pstate.commands[i]);
 
   return ((COMMAND *)NULL);
 }
@@ -249,7 +264,7 @@ command_generator (const char *text,int state){
 
   /* Return the next name which partially matches from the command
      list. */
-  while ((name = commands[list_index].name)) {
+  while ((name = pstate.commands[list_index].name)) {
     list_index++;
 	
     if (strncmp (name, text, len) == 0)   
@@ -351,11 +366,11 @@ com_help (char *arg){
   register int i;
   int printed = 0;
 
-  for (i = 0; commands[i].name; i++)
+  for (i = 0; pstate.commands[i].name; i++)
     {
-      if (!*arg || (strcmp (arg, commands[i].name) == 0))
+      if (!*arg || (strcmp (arg, pstate.commands[i].name) == 0))
         {
-          printf ("%s\t\t%s.\n", commands[i].name, commands[i].doc);
+          printf ("%s\t\t%s.\n", pstate.commands[i].name, pstate.commands[i].doc);
           printed++;
         }
     }
@@ -364,7 +379,7 @@ com_help (char *arg){
     {
       printf ("No commands match `%s'.  Possibilties are:\n", arg);
 
-      for (i = 0; commands[i].name; i++)
+      for (i = 0; pstate.commands[i].name; i++)
         {
           /* Print in six columns. */
           if (printed == 6)
@@ -373,7 +388,7 @@ com_help (char *arg){
               printf ("\n");
             }
 
-          printf ("%s\t", commands[i].name);
+          printf ("%s\t", pstate.commands[i].name);
           printed++;
         }
 
@@ -416,7 +431,21 @@ com_pwd (char *ignore){
    non-zero. */
 int
 com_exit (char *arg){
-  done = 1;
+  switch(pstate.state){
+  case BASE:
+    done = 1;
+    break;
+  case FACTORY:
+    break;
+  case INSTANCE:
+    break;
+  }
+  pstate.state = BASE;
+  pstate.commands = bcommands;
+  strncpy(pstate.prompt,bprompt,256);
+  pstate.prompt[255] = '\0';
+  pstate.pdata = NULL;
+
   return (0);
 }
 
@@ -431,3 +460,6 @@ com_load (char *arg){
 
   return 0;
 }
+
+//int com_sfactory(char *fname){
+  
