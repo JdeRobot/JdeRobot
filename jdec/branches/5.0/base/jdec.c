@@ -30,6 +30,7 @@ int com_exit(char *);
 
 int com_load(char *);
 //int com_sfactory(char *);
+int com_finstance(char *);
 
 /* A structure which contains information on the commands this program
    can understand. */
@@ -68,10 +69,14 @@ const char *bprompt = "jdeC $> ";
 
 COMMAND fcommands[] = {
   { "help", com_help, "Display this text" },
+  { "instance", com_finstance, "Create a new instance" },
   { "?", com_help, "Synonym for `help'" },
   { "exit", com_exit, "Exit factory mode" },
   { (const char *)NULL, (rl_icpfunc_t *)NULL, (const char *)NULL }
 };
+
+/*format strings used for factory cmds and prompts*/
+const char *fcmd = "%s@%s";
 const char *fprompt = "jdeC[%s@%s] $> ";
 
 //COMMAND sf_cmd = { "", com_sfactory, "" };
@@ -111,19 +116,20 @@ main (int argc,char **argv){
     line = readline (pstate.prompt);
     
     if (!line)
-      break;
+      com_exit(NULL);
+    else {
+      /* Remove leading and trailing whitespace from the line.
+	 Then, if there is anything left, add it to the history list
+	 and execute it. */
+      s = stripwhite (line);
     
-    /* Remove leading and trailing whitespace from the line.
-       Then, if there is anything left, add it to the history list
-       and execute it. */
-    s = stripwhite (line);
-    
-    if (*s) {
-      add_history (s);
-      execute_line (s);
+      if (*s) {
+	add_history (s);
+	execute_line (s);
+      }
+      //printf("%s\n",s);
+      free (line);
     }
-    printf("%s\n",s);
-    free (line);
   }
   printf("Bye!\n");
   exit (0);
@@ -148,9 +154,8 @@ execute_line (char *line){
   /*search in loaded factories*/
   sf_list_index = list_sfactories();
   while( sf_list_index != 0 ) {
-    sprintf(str,"F_%s[%s]",((SFactory*)sf_list_index->data)->schema_name,
+    sprintf(str,fcmd,((SFactory*)sf_list_index->data)->schema_name,
 	    ((SFactory*)sf_list_index->data)->interface_name);
-    sf_list_index = g_list_next(sf_list_index);
     if (strcmp (str, word) == 0) {
       pstate.state = FACTORY;
       pstate.commands = fcommands;
@@ -160,6 +165,7 @@ execute_line (char *line){
       pstate.pdata = sf_list_index->data;
       return 0;
     }
+    sf_list_index = g_list_next(sf_list_index);
   }
 
   /* no command or factory name found*/
@@ -272,8 +278,8 @@ command_generator (const char *text,int state){
   }
 
   /*search on factory names*/
-  while( sf_list_index != 0) {
-    sprintf(str,"F_%s[%s]",((SFactory*)sf_list_index->data)->schema_name,
+  while( pstate.state != FACTORY && sf_list_index != 0) {
+    sprintf(str,fcmd,((SFactory*)sf_list_index->data)->schema_name,
 	    ((SFactory*)sf_list_index->data)->interface_name);
     sf_list_index = g_list_next(sf_list_index);
     if (strncmp (str, text, len) == 0)
@@ -321,20 +327,12 @@ valid_argument (const char *caller, const char *arg){
 int
 com_list (char *arg){
   const char *a = arg;
-  int rc = 0;
 
   if (!a)
     a = "";
 
-  if (strcmp(a,"#sfactories") == 0)
-    list_sfactories();
-  else if (strcmp(a,"#instances") == 0)
-    list_instances();
-  else {
-    sprintf (syscom, "ls -FClg %s", a);
-    rc = system (syscom);
-  }
-  return rc;
+  sprintf (syscom, "ls -FClg %s", a);
+  return system (syscom);
 }
 
 /* List the file(s) named in arg. */
@@ -366,35 +364,30 @@ com_help (char *arg){
   register int i;
   int printed = 0;
 
-  for (i = 0; pstate.commands[i].name; i++)
-    {
-      if (!*arg || (strcmp (arg, pstate.commands[i].name) == 0))
-        {
-          printf ("%s\t\t%s.\n", pstate.commands[i].name, pstate.commands[i].doc);
-          printed++;
-        }
+  for (i = 0; pstate.commands[i].name; i++){
+    if (!arg || (strcmp (arg, pstate.commands[i].name) == 0)) {
+      printf ("%s\t\t%s.\n", pstate.commands[i].name, pstate.commands[i].doc);
+      printed++;
+    }
+  }
+
+  if (!printed) {
+    printf ("No commands match `%s'.  Possibilties are:\n", arg);
+
+    for (i = 0; pstate.commands[i].name; i++) {
+      /* Print in six columns. */
+      if (printed == 6)	{
+	printed = 0;
+	printf ("\n");
+      }
+
+      printf ("%s\t", pstate.commands[i].name);
+      printed++;
     }
 
-  if (!printed)
-    {
-      printf ("No commands match `%s'.  Possibilties are:\n", arg);
-
-      for (i = 0; pstate.commands[i].name; i++)
-        {
-          /* Print in six columns. */
-          if (printed == 6)
-            {
-              printed = 0;
-              printf ("\n");
-            }
-
-          printf ("%s\t", pstate.commands[i].name);
-          printed++;
-        }
-
-      if (printed)
-        printf ("\n");
-    }
+    if (printed)
+      printf ("\n");
+  }
   return (0);
 }
 
@@ -445,6 +438,7 @@ com_exit (char *arg){
   strncpy(pstate.prompt,bprompt,256);
   pstate.prompt[255] = '\0';
   pstate.pdata = NULL;
+  printf ("\n");
 
   return (0);
 }
@@ -463,3 +457,6 @@ com_load (char *arg){
 
 //int com_sfactory(char *fname){
   
+int com_finstance(char *) {
+  return 0;
+}
