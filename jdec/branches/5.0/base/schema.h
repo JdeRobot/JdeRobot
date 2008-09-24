@@ -36,9 +36,11 @@ typedef struct SFactory{
   virtual ~SFactory();
   Schema_p create();
   void destroy(Schema_p s);
-  static int add(SFactory* const sf);
-  static SFactory* search(const char* interface_name);
-  static void list();
+  const GList* get_instances();
+  static int add_factory(SFactory* const sf);
+  //static int del_factory(SFactory* const sf);
+  static SFactory* search_factory(const char* interface_name);
+  static const GList* get_factories();
 #endif /*__cplusplus*/
 }SFactory;
 
@@ -63,6 +65,9 @@ typedef struct Schema{
   virtual int init() = 0;
   virtual int iteration() = 0;
   virtual void* cast(const char* interface_name) = 0;
+  static const GList* get_instances();
+  static int add_instance(Schema* const s);
+  static int del_instance(Schema* const s);
 private:
   static int sinit(Schema* const s);
   static int siteration(Schema* const s);
@@ -71,7 +76,7 @@ private:
 }Schema;
 
 
-/*SFactory functions*/
+/*SFactory methods*/
 SFactory* new_SFactory(const char* schema_name,
 		       const char* interface_name,
 		       schema_ctor_f const schema_ctor,
@@ -80,40 +85,49 @@ SFactory* new_SFactory(const char* schema_name,
 void delete_SFactory(SFactory* const sf);
 Schema* SFactory_create(SFactory* const sf);
 void SFactory_destroy(SFactory* const sf, Schema* s);
+const GList* SFactory_get_instances(SFactory* const sf);
 
+/*SFactory static methods*/
 /*
-  add_sfactory
+  SFactory_add_factory
   Adds sf sfactory to the list.
   sf isn't copied so it must be not deallocated
 */
-int add_sfactory(SFactory* const sf);
+int SFactory_add_factory(SFactory* const sf);
+
 
 /*
-  search_sfactory
+  SFactory_del_factory
+  Del sf sfactory from the list.
+*/
+//int SFactory_del_factory(SFactory* const sf);
+
+/*
+  SFactory_search_factory
   Search a sfactory that implements interface_name.
   A copy is returned that must be deallocated.
 */
-SFactory* search_sfactory(const char* interface_name);
+SFactory* SFactory_search_factory(const char* interface_name);
 
-void print_sfactories();
-const GList* list_sfactories();
-
-void print_instances();
-const GList* list_instances();
+/*
+  SFactory_get_factories
+  Get the list of factories loaded
+*/
+const GList* SFactory_get_factories();
 
 #ifdef __cplusplus
 #define ADD_SFACTORY(SNAME,SINTERFACE,CTOR,DTOR,PDATA)    \
 static SFactory __reg(SNAME,SINTERFACE,CTOR,DTOR,PDATA); \
-static int __loaded = SFactory::add(&__reg);
+static int __loaded = SFactory::add_factory(&__reg);
 #else
 #define ADD_SFACTORY(SNAME,SINTERFACE,CTOR,DTOR,PDATA)    \
 static SFactory __reg = {SNAME,SINTERFACE,CTOR,DTOR,PDATA}; \
 __attribute__((constructor)) void __add_sfactory() { \
-   add_sfactory(&__reg); \
+   SFactory_add_factory(&__reg); \
 }
 #endif
 
-/*Schema fucntions*/
+/*Schema functions*/
 Schema* new_Schema(const int sid,
 		   schema_init_f const init_cb,
 		   void* const init_cbdata,
@@ -129,7 +143,11 @@ void delete_Schema(Schema* const s);
 int Schema_init(Schema* const s);
 int Schema_iteration(Schema* const s);
 void* Schema_cast(Schema* const s, const char* interface_name);
-int Schema_cmp(Schema* const a, Schema* const b);
+  //int Schema_cmp(Schema* const a, Schema* const b);
+
+int Schema_add_instance(Schema* const s);
+int Schema_del_instance(Schema* const s);
+const GList* Schema_get_instances();
 
 
 

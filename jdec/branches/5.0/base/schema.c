@@ -1,9 +1,12 @@
 #include <schema.h>
 #include <stdlib.h>
 #include <assert.h>
+
+/*Schema instances list*/
+static GList* instances = 0;
+
 #ifdef __cplusplus
 #include <iostream>
-
 class SchemaC: public Schema {
 public:
   SchemaC(const int sid,
@@ -27,7 +30,6 @@ public:
   }
 };
 #endif
-
 
 
 Schema* new_Schema(const int sid,
@@ -98,6 +100,20 @@ int Schema_cmp(Schema* const a, Schema* const b) {
     return 1;
 }
 
+int Schema_add_instance(Schema* const s) {
+  instances = g_list_append(instances,s);
+  return g_list_length(instances);
+}
+
+int Schema_del_instance(Schema* const s) {
+  instances = g_list_remove(instances,s);
+  return g_list_length(instances);
+}
+
+const GList* Schema_get_instances() {
+  return instances;
+}
+
 #ifdef __cplusplus
 #include <iostream>
 Schema::Schema(const int sid)
@@ -120,6 +136,18 @@ Schema::Schema(const int sid,
      private_data(private_data) {}
 
 Schema::~Schema() {}
+
+const GList* Schema::get_instances() {
+  return Schema_get_instances();
+}
+
+int Schema::add_instance(Schema* const s) {
+  return Schema_add_instance(s);
+}
+
+int Schema::del_instance(Schema* const s) {
+  return Schema_del_instance(s);
+}
 
 int Schema::sinit(Schema* const s) {
   return s->init();

@@ -59,6 +59,8 @@ COMMAND bcommands[] = {
   { "ls", com_list, "Synonym for `list'" },
   { "listf", com_listf, "List loaded factories" },
   { "lf", com_listf, "Synonym for `listf'" },
+  { "listi", com_listi, "List created instances" },
+  { "li", com_listi, "Synonym for `listi'" },
   { "load", com_load, "Load shared object" },
   { "pwd", com_pwd, "Print the current working directory" },
   { "exit", com_exit, "Quit using jdeC" },
@@ -70,6 +72,8 @@ const char *bprompt = "jdeC $> ";
 COMMAND fcommands[] = {
   { "help", com_help, "Display this text" },
   { "instance", com_finstance, "Create a new instance" },
+  { "listi", com_listi, "List created instances of this factory" },
+  { "li", com_listi, "Synonym for `listi'" },
   { "?", com_help, "Synonym for `help'" },
   { "exit", com_exit, "Exit factory mode" },
   { (const char *)NULL, (rl_icpfunc_t *)NULL, (const char *)NULL }
@@ -152,7 +156,7 @@ execute_line (char *line){
     return ((*(command->func)) (line));
 
   /*search in loaded factories*/
-  sf_list_index = list_sfactories();
+  sf_list_index = SFactory_get_factories();
   while( sf_list_index != 0 ) {
     sprintf(str,fcmd,((SFactory*)sf_list_index->data)->schema_name,
 	    ((SFactory*)sf_list_index->data)->interface_name);
@@ -263,8 +267,8 @@ command_generator (const char *text,int state){
      variable to 0. */
   if (!state) {
       list_index = 0;
-      sf_list_index = list_sfactories();
-      i_list_index = list_instances();
+      sf_list_index = SFactory_get_factories();
+      //i_list_index = Schema_get_instances();
       len = strlen (text);
   }
 
@@ -287,13 +291,13 @@ command_generator (const char *text,int state){
   }
 
   /*search on instances names*/
-  /* while( i_list_index != 0 ) { */
-/*     sprintf(str,"%s@%s",((SFactory*)i_list_index->data)->schema_name, */
-/* 	    ((SFactory*)i_list_index->data)->interface_name); */
-/*     i_list_index = g_list_next(i_list_index); */
-/*     if (strncmp (str, text, len) == 0) */
-/*       return (strdup(str)); */
-/*   } */
+  while( i_list_index != 0 ) {
+    sprintf(str,"%s@%s",((SFactory*)i_list_index->data)->schema_name,
+	    ((SFactory*)i_list_index->data)->interface_name);
+    i_list_index = g_list_next(i_list_index);
+    if (strncmp (str, text, len) == 0)
+      return (strdup(str));
+  }
 
 
   /* If no names matched, then return NULL. */
@@ -338,7 +342,13 @@ com_list (char *arg){
 /* List the file(s) named in arg. */
 int
 com_listf (char *arg){
-  print_sfactories();
+  const GList* i;
+
+  for (i = SFactory_get_factories(); i != 0; i = g_list_next(i))
+    printf("%s implementing %s\n",
+	   ((SFactory*)i->data)->schema_name,
+	   ((SFactory*)i->data)->interface_name);
+
   return 0;
 }
 
@@ -457,6 +467,10 @@ com_load (char *arg){
 
 //int com_sfactory(char *fname){
   
-int com_finstance(char *) {
+int com_finstance(char *arg) {
+  Schema* i;
+
+  if (pstate.state == FACTORY && pstate.pdata )
+    i = SFactory_create((SFactory*)pstate.pdata);
   return 0;
 }

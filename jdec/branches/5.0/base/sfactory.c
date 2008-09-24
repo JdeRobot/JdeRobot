@@ -5,9 +5,6 @@
 /*Factories list*/
 static GList* sfactories = 0;
 
-/*Schema instances list*/
-static GList* instances = 0;
-
 /*Schema identification*/
 static int sid = 0;
 
@@ -63,17 +60,17 @@ void delete_SFactory(SFactory* const sf) {
 Schema* SFactory_create(SFactory* const sf) {
   Schema* s = sf->schema_ctor(sf,sid++);
   sf->instances = g_list_append(sf->instances,s);
-  instances = g_list_append(instances,s);
+  Schema_add_instance(s);
   return s;
 }
 
 void SFactory_destroy(SFactory* const sf, Schema* s) {
   sf->instances = g_list_remove(sf->instances,s);
-  instances = g_list_remove(instances,s);
+  Schema_del_instance(s);
   sf->schema_dtor(sf,s);
 }
 
-int add_sfactory(SFactory* const sf) {
+int SFactory_add_factory(SFactory* const sf) {
   sfactories = g_list_append(sfactories,sf);
   fprintf(stderr, "%s: registering %s, implements %s\n",
 	  __PRETTY_FUNCTION__,sf->schema_name,sf->interface_name);
@@ -81,11 +78,14 @@ int add_sfactory(SFactory* const sf) {
   return g_list_length(sfactories);
 }
 
+//int SFactory_del_factory(SFactory* const sf) {
+//}
+
 int interface_cmp(const GList* a, const char* b) {
   return strcmp(((SFactory*)a->data)->interface_name,b);
 }
 
-SFactory* search_sfactory(const char* interface_name) {
+SFactory* SFactory_search_factory(const char* interface_name) {
   GList* e;
 
   e = g_list_find_custom(sfactories,(gpointer)interface_name,
@@ -98,29 +98,29 @@ SFactory* search_sfactory(const char* interface_name) {
   return 0;
 }
 
-const GList* list_sfactories() {
+const GList* SFactory_get_factories() {
   return sfactories;
 }
 
-void print_sfactories() {
-  GList* i;
+/* void print_sfactories() { */
+/*   GList* i; */
 
-  for (i = g_list_first(sfactories); i != 0; i = g_list_next(i))
-    printf("%s->%s\n",
-	   ((SFactory*)i->data)->schema_name,
-	   ((SFactory*)i->data)->interface_name);
+/*   for (i = g_list_first(sfactories); i != 0; i = g_list_next(i)) */
+/*     printf("%s->%s\n", */
+/* 	   ((SFactory*)i->data)->schema_name, */
+/* 	   ((SFactory*)i->data)->interface_name); */
+/* } */
+
+const GList* SFactory_get_instances(SFactory* const sf) {
+  return sf->instances;
 }
 
-const GList* list_instances() {
-  return instances;
-}
+/* void print_instances() { */
+/*   GList* i; */
 
-void print_instances() {
-  GList* i;
-
-  for (i = g_list_first(instances); i != 0; i = g_list_next(i))
-    printf("%d\n",((Schema*)i->data)->sid);
-}
+/*   for (i = g_list_first(instances); i != 0; i = g_list_next(i)) */
+/*     printf("%d\n",((Schema*)i->data)->sid); */
+/* } */
   
 #ifdef __cplusplus
 SFactory::SFactory(const char* schema_name,
@@ -143,16 +143,20 @@ void SFactory::destroy(Schema* s) {
   SFactory_destroy(this,s);
 }
 
-int SFactory::add(SFactory* const sf) {
-  return add_sfactory(sf);
+const GList* SFactory::get_instances() {
+  return SFactory_get_instances(this);
 }
 
-SFactory* SFactory::search(const char* interface_name) {
-  return search_sfactory(interface_name);
+int SFactory::add_factory(SFactory* const sf) {
+  return SFactory_add_factory(sf);
 }
 
-void SFactory::list() {
-  list_sfactories();
+SFactory* SFactory::search_factory(const char* interface_name) {
+  return SFactory_search_factory(interface_name);
+}
+
+const GList* SFactory::get_factories() {
+  return SFactory_get_factories();
 }
 
 #endif /*__cplusplus*/
