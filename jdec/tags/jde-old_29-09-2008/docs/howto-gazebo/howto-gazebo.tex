@@ -1,0 +1,454 @@
+\documentclass[oneside,a4paper,12pt]{article}
+\usepackage[latin1]{inputenc}
+\usepackage[spanish,activeacute]{babel}
+\usepackage{geometry}
+\usepackage{makeidx}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{a4wide}
+\usepackage[normalsize]{subfigure}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{titlesec}
+
+%\DeclareGraphicsExtensions{.jpg,.pdf,.png,.ps}
+%\geometry{a4paper, left=3.5cm, right=2cm, top=3cm, bottom=2.0cm, headsep=1.5cm}
+
+\title{\textbf{HOWTO de Gazebo}}
+\author{Víctor M. Hidalgo, Jose María Cañas}
+\date{}
+\makeindex
+
+\begin{document}
+
+\maketitle
+
+\begin{figure}[htb]
+\begin{center}
+ \includegraphics[width=2cm]{figs/logo}
+\end{center}
+\end{figure}
+
+
+\tableofcontents
+
+\section{Introducci\'on}
+
+Gazebo es un simulador multirrobot para entornos abiertos, que es capaz de simular un conjunto de robots, sensores y objetos en un entorno tridimensional. Ademas incorpora simulacion f'isica realista, de modo que los objetos tienen masa, se pueden empujar unos a otros, etc. Entre los sensores que simula se incluyen c\'amaras como la sonyVID30, la canonVCC4 y c\'amaras genericas, asi como un par estereo.
+
+El simulador Gazebo se encuadra dentro del entorno software abierto Player/Stage/Gazebo, y la p\'agina web oficial del proyecto es la  http://playerstage.sourceforge.net desde donde se puede descargar el c\'odigo fuente y ver la documentaci\'on actualizada.
+
+
+Este manual describe como instalar \textit{gazebo}, para la posterior utilización de éste en \textit{jde}. B'asicamente el simuldor gazebo se lanzar\'a como un programa separado, con el mundo a simular especificado en un fichero de configuraci'on. Ese mundo simulado tendr\'a uno o mas robots, dotados cada uno de ellos con sus sensores y sus actuadores. Con jdec podemos conectar un entorno jdec a cada uno de los robots de ese mundo simulado, para gobernar el comportamiento de ese robot. Para ello hay que cargar el driver de gazebo en jdec y configurarlo adecuadamente para corresponder los sensores y actuadores en jdec con los respectivos en gazebo.
+
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=8cm]{figs/gazebo}
+  \end{center}
+  \caption{Gazebo}
+  \label{fig:gazebo}
+\end{figure}
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=12cm]{figs/gazebo_cliente}
+  \end{center}
+  \caption{Gazebo desde jde}
+  \label{fig:gazebo_cliente}
+\end{figure}
+
+
+\section{Instalación}
+
+Antes de comenzar a instalar gazebo, debes tener aceleración gráfica
+ via hardware. Para comprobar esto ejecuta por consola el
+siguiente comando: glxinfo | grep rendering. La salida de este debe
+ser: direct rendering: Yes. Si no es asi, no tienes aceleración
+gráfica vía hardware.  Además deben instalarse los siguientes paquetes:
+
+\begin{itemize}
+\item{\bf{SWIG 1.3}, Simplified Wrapper and Interface Generator }
+\item{\bf{wxPython 2.6}, Python bindings for wxWidgets}
+\item{\bf{ODE 0.5} Open Dynamics Engine}
+\item{\bf{GDAL}, Geospatial Data Abstraction Library }
+\end{itemize}
+
+Incluso antes de instalar los paquetes que acabamos de comentar, convienente configurar nuestro sistema con algunos paths y librerias adicionales. Los path son los siguientes: 
+
+\begin{verbatim}
+export PATH=/usr/local/bin:PATH
+export CPATH=/usr/local/include:CPATH
+export LIBRARY_PATH=/usr/local/lib:LIBRARY_PATH
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:PKG_CONFIG_PATH
+export PYTHONPATH=/usr/local/lib/python2.3/site-packages:PYTHONPATH
+\end{verbatim}
+
+\subsection{Instalacion en Ubuntu dapper}
+
+Las librerias que yo instale fueron las siguientes: libjasper-1.701-1, libjasper-1.701-dev,libdc1394, libdc1394-dev, gsl-bin, libgsl0, libgsl0-dev, libjpeg, libjpeg-dev, liftiff, libtiff-dev, libpng, libpng-dev, libgnomecanvas2-common, libgnomecanvas2-dev, imagemagick, python-dev, ffmpeg, libcv, libgeos-dev, libxerces-dev, libhdf4g-dev, libungif4-dev, libnetcdf-dev, netcdfg-dev, libcfitsio-dev, libpq-dev, libgtk, automake1.9, autoconf,bison-1.35, python2.4-dev,libtdl. 
+
+\textbf{Importante}: seguramente haga falta alguna libreria más por instalar, que en estos momentos no recuerdo. En ese caso enviar un correo electronico diciendo la libreria en cuestion a alguna de las siguientes direcciones: jmplaza@gsyc.es, hbmhidalgo@gmail.com. 
+
+Una vez habiendo instalado estas librerias y configurado nuestro sistema con los path ya mencionados empezamos a instalar los paquetes que harán falta para instalar gazebo.
+
+\subsubsection{Instalación de SWIG 1.3}
+
+Este paquete se puede instalar mediante un paquete debian, o a través de svn. Mi recomendación es que sea a través de svn. Si decidis hacerlo con el paquete debian, podeis tener problemas de paquetes rotos, en este caso para solucionarlo hacer lo siguiente: aptitude update, aptitude dist-upgrade. Si decidis hacerlo por svn, ejecutar pa siguiente linea en consola: 
+\begin{verbatim}
+ svn co https://swig.svn.sourceforge.net/svnroot/swig/trunk swig
+\end{verbatim} 
+
+Despues realizar los siguientes pasos : 
+\begin{verbatim}
+  cd swig
+  ./autogen.sh
+  ./configure 
+  make
+  make install
+\end{verbatim}
+
+
+\subsubsection{Instalación de wxPython 2.6}
+
+Hay que modificar el fichero source.list a mi me valio con tener los mismos repositorios que los que hay en los ordenadores del laboratorio de robotica.
+
+Los siguientes pasos son:
+
+\begin{verbatim}
+sudo apt-get update
+sudo apt-get install python-wxgtk2.6 python-wxtools wx2.6-i18n
+\end{verbatim}
+
+
+\subsubsection{Instalación de ODE 0.5}
+
+Descargar ODE-0.5 de http://opende.sourceforge.net/snapshots/. Una vez
+descargagado y descomprimido el archivo hay que  modificar el archivo
+de configuración config/user-settings  para habilitar la línea
+OPCODE\_DIRECTORY=OPCODE.
+
+ Una vez hecho esto debemos ejecutar. 
+\begin{verbatim}
+  sh autogen.sh
+  ./configure --with-trimesh=opcode --enable-double-precision
+   make 
+  make install
+\end{verbatim}
+
+Para probar que esta bien instalado ejecutar los ejemplos que se encuentran en el subidrecotorio: ode/test
+
+\subsubsection{Instalación de GDAL}
+
+Para instalar gdal lo puedes hacer atraves de apt-get install o
+descargarte la version 1.2.1 (o superior)  de http://www.gdal.org/. Si
+te descargas la version tienes que realizar los siguientes pasos: 
+
+\begin{verbatim}
+ tar xvzg gdal-1.2.1.tar.gz
+ cd gdal-1.2.1
+ ./configure --without-python
+ make
+ su
+ make install
+\end{verbatim}
+
+\subsubsection{Instalación de Gazebo 0.7}
+
+Una vez descargado y descomprimido llevar a cabo los siguientes pasos:
+
+\begin{verbatim}
+./configure
+make
+make install
+\end{verbatim}
+
+
+\subsection{Instalación de Gazebo 0.7 en Ubuntu Gutsy}
+La instalación de gazebo 0.7 en Ubuntu Gutsy, es exactamente igual que
+en Ubuntu dapper, excepto en la instalación de ODE. Para empezar
+debemos instalar la version 0.9 de ODE en vez de la 0.5. Para instalar
+esta versión los pasos son los siguientes.
+
+\begin{verbatim}
+ sh autogen.sh
+ ./configure --enable-release --enable-double-precision --with-trimesh=opcode 
+  make 
+  make install
+\end{verbatim}
+
+\subsection{Instalaci\'on en Fedora Core 5}
+
+
+\subsection{Ejecución de Gazebo}
+
+Para poder ejecutar gazebo, ejecuta por linea de comandos lo siguiente:
+
+\begin{verbatim}
+wxgazebo /usr/local/share/gazebo/worlds/xxxx.world
+\end{verbatim}
+
+Donde xxxx.world se corresponde con los mundos de ejemplo que hay en dicho direcotrio. Así pues, para ejecuntar gazebo con jde, primero tendremos que ejecutar el servidor de gazebo con wxgazebo, y despues cargar los schemas correspondientes que usen gazebo. Para ello hay que cargar primero el driver de gazebo.
+
+\section{Mundos en gazebo}
+
+En esta sección explicaremos como crear un mundo en gazebo. Para hacer esto más facil, pondremos un ejemplo y lo iremos comentando. Pero antes de nada seria bueno que mirases esta página: http://playerstage.sourceforge.net/doc/Gazebo-manual-0.7.0-html/modules.html, en ella encontraras todos los objetos y sus propiedades que se pueden incluir en un mundo de gazebo.
+
+Amtes de empezar a comentar los mundos de gazebo hay que destacar, que los mundo de gazebos están escritos en XML. El archivo del mundo contiene una descripción del mundo que será simulado por gazebo. Este mundo describe los robots, sus sensores, las luces (sin ellas la imagen se veria negra) y los componenetes de la interfaz de usuario. Ahora pasamos a ver el ejemplo de un mundo.
+
+Todo mundo en gazebo comienza con una cabecera xml, esta será igual para todos los mundos y será la siguiente: 
+
+\begin{verbatim}
+<?xml version="1.0"?>
+<gz:world xmlns:gz="http://playerstage.sourceforge.net/gazebo/xmlschema/#gz"
+ xmlns:model="http://playerstage.sourceforge.net/gazebo/xmlschema/#model" 
+ xmlns:window="http://playerstage.sourceforge.net/gazebo/xmlschema/#window" 
+ xmlns:params="http://playerstage.sourceforge.net/gazebo/xmlschema/#params">
+\end{verbatim}
+
+El modelo de camara del observador proporciona una vista através de la cual los usuarios pueden ver la simulación. Ahora pasaremos a comentar algunas de sus propiedades.
+
+\begin{itemize}
+\item{La propiedad \textit{id} sirve para identificar la cámara del
+    observador}
+\item{ \textit{xyz} sirve para colocar la camara observadora en la
+    posicion x y z que le digamos}
+\item{ \textit{rpy} se corresponde con el roll (rotación) , pitch
+    (inclinacion) , yaw(hacia donde mira la cámara en el plano)}
+\item{imagsize, tamaño de la imagen}
+\item{updateRate frames por segundo}
+\item{displayRays, si es true se verán los rayos laser en la imagen}
+\end{itemize}
+\begin{verbatim}
+  <model:ObserverCam>
+    <id>userCam0</id>
+    <xyz>0.080 -1.355 0.814</xyz>
+    <rpy>-0 15 90</rpy>
+    <imageSize>640 480</imageSize>
+    <updateRate>10</updateRate>
+    <displayRays>true</displayRays>
+  </model:ObserverCam>
+\end{verbatim}
+
+El GroundPlane simula un plano llano, a este plano le podemos introducir textura, cambiarle la dimensión con la propiedadad size (por defecto 100 X 100). La propiedad id sirve para identificarlo dentro del mundo simulado de gazebo.
+
+\begin{verbatim}
+  <model:GroundPlane>
+    <id>ground1</id>
+  </model:GroundPlane>
+\end{verbatim}
+
+La fuente de luz sirve para que no veamos una imagen negra desde la cámara del observador. La propiedad \textit{id} nos identificará la luz en el mundo simulado, y la propiedad \textit{xyz} nos dirá de que posición viene la luz en el mundo.
+
+\begin{verbatim}
+  <model:LightSource>
+    <id>0</id>
+    <xyz>-10.000 -10.000 100.000</xyz>
+  </model:LightSource>
+\end{verbatim}
+
+Los simpleSolid, pueden ser cilindros, esferas o cajas. Además tienen masa y podran colisionar contra otros sólidos o objetos. Ahora vamos a ver sus propiedades más generales: 
+
+\begin{itemize}
+\item{\textit{id} identifica al solido en el mundo}
+\item{\textit{xyz} nos dice la posición en la que se encuentra el
+  sólido}
+\item{\textit{shape} con esta propiedad diremos si el sólido es un
+cilindro, una caja o una esfera}
+\item{\textit{color} pondremos el color al sólido}
+\item{\textit{gravity} con esta propiedad diremos si afecta la gravedad al sólido, si esta propiedad fuese true el solido siempre aparecerá sobre el suelo o sobre otro objeto, no pudiendose corresponder con la posición que le decimos en \textit{xyz} ya que la altura cambiaría}
+\item{\textit{size} tamaño del sólido}
+\end{itemize}
+\begin{verbatim}
+  <model:SimpleSolid>
+    <id>sphere</id>
+    <xyz>1 0 0.2</xyz>
+    <shape>sphere</shape>
+    <color>1 0 0</color>
+    <gravity>false</gravity>
+    <size>0.4</size>
+  </model:SimpleSolid>
+\end{verbatim}
+
+Para finalizar de comentar los mundos simulados en gazebo, comentaremos como simular un robot pioneer, con laser y cámara. El robot Pioneer vendrá identificado con la etiqueta \textit{id}, y su posicion vendrça dada por las etiqueteas \textit{bf} y \textit{rpy}, dentro del pioneer pondremos las etiquetas necesarias para simular el láser y la cámara. De estas propiedades las únicas que no hemos visto a lo largo de esta capítulo son las etiquetas de \textit{rayCount} es el número de rayos del láser, \textit{rangeCount} que es el rango de lecturas simuladas generadas.
+
+\begin{verbatim}
+   <model:Pioneer2DX>
+    <id>robot2</id>
+    <xyz>-0.007 -0.007 0.234</xyz>
+    <rpy>-0 -0 0</rpy>
+    <model:SickLMS200>
+      <id>laser2</id>
+      <xyz>0.0 0 0</xyz> 
+      <rayCount>180</rayCount>
+      <rangeCount>180</rangeCount>
+    </model:SickLMS200>
+    <model:SonyVID30>
+      <id>camera1</id>
+      <xyz>0 0 0.30</xyz>
+      <rpy>0 0 0</rpy>
+    </model:SonyVID30>
+  </model:Pioneer2DX>
+\end{verbatim}
+
+Una vez habiendo comentado cada parte del mundo por separado, ponemos todo el código del mundo junto y este es el resultado:
+
+\begin{verbatim}
+<?xml version="1.0"?>
+<gz:world xmlns:gz="http://playerstage.sourceforge.net/gazebo/xmlschema/#gz"
+ xmlns:model="http://playerstage.sourceforge.net/gazebo/xmlschema/#model" 
+ xmlns:window="http://playerstage.sourceforge.net/gazebo/xmlschema/#window" 
+ xmlns:params="http://playerstage.sourceforge.net/gazebo/xmlschema/#params">
+
+  <model:ObserverCam>
+    <id>userCam0</id>
+    <xyz>0.080 -1.355 0.814</xyz>
+    <rpy>-0 15 90</rpy>
+    <imageSize>640 480</imageSize>
+    <updateRate>10</updateRate>
+    <displayRays>true</displayRays>
+  </model:ObserverCam>
+
+  <model:GroundPlane>
+    <id>ground1</id>
+  </model:GroundPlane>
+
+  <model:LightSource>
+    <id>0</id>
+    <xyz>-10.000 -10.000 100.000</xyz>
+  </model:LightSource>
+
+  <model:SimpleSolid>
+    <id>sphere_1</id>
+    <xyz>1 0 0.2</xyz>
+    <shape>sphere</shape>
+    <color>1 0 0</color>
+    <gravity>false</gravity>
+    <size>0.4</size>
+  </model:SimpleSolid>
+
+  <model:SimpleSolid>
+    <id>sphere_1</id>
+    <xyz>1 2 0.2</xyz>
+    <shape>sphere</shape>
+    <color>0.6 0.1 0</color>
+    <gravity>false</gravity>
+    <size>0.6</size>
+  </model:SimpleSolid>
+
+  <model:SimpleSolid>
+    <xyz>2 3 0.2</xyz>
+    <shape>box</shape>
+    <size>0.70 0.70 0.50</size>
+    <color>3.0 1.0 1.0</color>
+    <textureFile>ground.ppm</textureFile>     
+  </model:SimpleSolid>
+
+   <model:Pioneer2DX>
+    <id>robot2</id>
+    <xyz>-0.007 -0.007 0.234</xyz>
+    <rpy>-0 -0 0</rpy>
+    <model:SickLMS200>
+      <id>laser2</id>
+      <xyz>0.0 0 0</xyz> 
+      <rayCount>180</rayCount>
+      <rangeCount>180</rangeCount>
+    </model:SickLMS200>
+    <model:SonyVID30>
+      <id>camera1</id>
+      <xyz>0 0 0.30</xyz>
+      <rpy>0 0 0</rpy>
+    </model:SonyVID30>
+  </model:Pioneer2DX>
+</gz:world>
+\end{verbatim}
+
+\section{Texturas en Gazebo}
+En este apartado explicaremos como introducir texturas en los modelos
+de gazebo. Para poder introducir la textura que queramos debemos
+copiarla al directorio:\\ /usr/local/share/gazebo/worlds/, es en este
+directorio donde gazebo buscará las texturas que le indiquemos en el
+mundo.
+\\
+Los dos unicos módelos a los cuales se les puede introducir texturas
+son: Road y  simpleSolid. Por lo tanto para poder introducir texturas a
+los demás modelos deberemos modificar en el fichero de este modelo, el
+método nombreModelo::OdeLoad() . Los modelos se encuentran en el siguiente directorio:
+gazebo/server/models/.
+\\
+A continuación vamos a ver como modficar dicho método con un
+ejemplo. En nuestro ejemplo vamos a introducir texturas en el modelo
+Carchasis. Para empezar abrimos el fichero Carchasis.cc y nos situamos
+en el método Carchasis::OdeLoad(). Buscamos la instrucción donde se
+carga el color del modelo:\\
+\begin{verbatim}
+ geom->SetColor( node->GetColor("color", GzColor(1.0, 1.0, 1.0)));
+\end{verbatim}
+
+despues de esta instrucción añadimos lo siguiente: 
+
+\begin{verbatim}
+  textureFile = node->SearchFilename("textureFile","/usr/local/share/gazebo/worlds" , NULL);
+  if (textureFile)
+  {
+    printf("loading texture file [%s] for CarChasis", textureFile);  
+    if (geom->SetTexture2DFile(textureFile) != 0)
+    {
+      printf("unable to load texture file");
+      return -1;
+    }
+  }
+\end{verbatim}
+
+
+En la siguiente figura podemos observar como se ha introducido
+texturas en el modelo Carchasis.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=8cm]{figs/texturas}
+  \end{center}
+  \caption{Texturas en gazebo}
+  \label{fig:gazebo}
+\end{figure}
+
+\section{Importando cámaras de Gazebo}
+
+En este capítulo vamos a ver como importar las imágenes sintéticas generadas por la cámara simulada de gazebo a progeo. La idea es entender la relación entre el modelo de cámara opengl (que es el que usa gazebo), con el modelo de cámara progeo (que es el que usa jde). 
+
+La gran diferencia entre estos dos modelos, se encuentra en como define cada uno los parametros intrínsecos, opengl (Gazego) maneja relación de aspecto y progeo maneja focal y centro óptico. Por otro lado los parametros extrinsecos, son iguales para ambos modelos (Focus of attention y un roll).
+
+Pero vayamos por partes, primero vamos a ver el modelo de cámara de gazebo. Gazebo usa la proyección perspectiva de Opengl estandar (modelo pin-Hole). La relación de aspecto para cada cámara esta definida por cuatro atributos:
+
+\begin{itemize}
+\item{El ángulo de vista horizontol (fovy)}
+\item{El ratio de aspecto (ancho/altura)}
+\item{Las distancias nearClip y farClip. Con la distancia nearClip, haremos que la cámara que no vea objetos que estén a un distancia menor que  ésta, Y con la distancia farClip haremos que la cámara no vea objetos que están a una distancia mayor que ésta}
+\end{itemize}
+
+Estos cuatro par\'ametros, lo podemos ver en la figura \ref{fig:gazebo} gráficamente para poder entenderlos mejor.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=10cm]{figs/GazeboCamara}
+  \end{center}
+  \caption{Modelo de cámara de Gazebo}
+  \label{fig:gazebo}
+\end{figure}
+
+Una vez visto el modelo de cámara Gazebo, vamos a pasar a ver como importar este modelo a progeo. Antes hemos hablado que los parametros intrínsecos de progeo se basan en la distancia focal y el centro óptico. Al estar trabajando con una camará simulada, esta será ideal por lo que el centro óptico será 120,160. Sin embargo, obtener la focal no es tan fácil. Dicha focal la calculamos a partir de la fórmula \ref{equ:formula}, que es la que relaciona progeo con Gazebo.
+
+\begin{equation}
+  \Phi = 2  \arctan{\frac{altura}{2f}}\label{equ:formula}
+\end{equation}
+
+Despejando de la fórmula anterior, obtenemos la fórmula para calcular la focal.
+
+\begin{equation}
+  f = \frac{altura}{2 \tan{\frac{\Phi}{2}}}
+\end{equation}
+
+Siendo: f la distancia focal, altura el número de pixeles de la imagen a lo alto y $\Phi$ el ángulo de apertura.
+
+\end{document}
+
