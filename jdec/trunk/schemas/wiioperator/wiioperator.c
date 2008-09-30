@@ -20,7 +20,7 @@
 
 #include "jde.h"
 #include "wiioperator.h"
-#include "wiimote.h"
+#include <wiimote.h>
 
 int wiioperator_id=0;
 int wiioperator_brothers[MAX_SCHEMAS];

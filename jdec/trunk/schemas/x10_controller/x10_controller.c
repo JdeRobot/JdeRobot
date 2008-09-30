@@ -21,7 +21,7 @@
 #include "jde.h"
 #include "x10_controller.h"
 #include "graphics_gtk.h"
-#include "x10.h"
+#include <x10.h>
 
 #include <glade/glade.h>
 #include <gtk/gtk.h>

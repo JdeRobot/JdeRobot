@@ -20,13 +20,13 @@
 
 #include "jde.h"
 #include "wiimote_viewer.h"
-#include "graphics_gtk.h"
+#include <graphics_gtk.h>
 
 #include <glade/glade.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
-#include "wiimote.h"
+#include <wiimote.h>
 
 int wiimote_viewer_id=0;
 int wiimote_viewer_brothers[MAX_SCHEMAS];
