@@ -149,17 +149,11 @@ AC_ARG_ENABLE([schemas-calibrador],
     [],
     [enable_schemas_calibrador=yes])
 
-# AC_ARG_ENABLE([schemas-esquema_prueba],
-#     [AS_HELP_STRING([--disable-schemas-esquema_prueba],
-# 	    [disable esquema_prueba1 schema compilation])],
-#     [],
-#     [enable_schemas_esquema_prueba=yes])
-
-AC_ARG_ENABLE([schemas-eyeoperator],
-    [AS_HELP_STRING([--enable-schemas-eyeoperator],
-	    [enable eyeoperator1/4 schema compilation])],
-    [],
-    [enable_schemas_eyeoperator=no])
+dnl AC_ARG_ENABLE([schemas-eyeoperator],
+dnl     [AS_HELP_STRING([--enable-schemas-eyeoperator],
+dnl 	    [enable eyeoperator1/4 schema compilation])],
+dnl     [],
+dnl     [enable_schemas_eyeoperator=no])
 
 AC_ARG_ENABLE([schemas-followball],
     [AS_HELP_STRING([--disable-schemas-followball],
@@ -191,12 +185,6 @@ AC_ARG_ENABLE([schemas-introrob],
     [],
     [enable_schemas_introrob=yes])
 
-# AC_ARG_ENABLE([schemas-ipp_demo],
-#     [AS_HELP_STRING([--disable-schemas-ipp_demo],
-# 	    [disable ipp_demo schema compilation])],
-#     [],
-#     [enable_schemas_ipp_demo=yes])
-
 AC_ARG_ENABLE([schemas-mastergui],
     [AS_HELP_STRING([--disable-schemas-mastergui],
 	    [disable mastergui schema compilation])],
@@ -221,17 +209,11 @@ AC_ARG_ENABLE([schemas-opengl_viewer],
     [],
     [enable_schemas_opengl_viewer=yes])
 
-AC_ARG_ENABLE([schemas-opflow],
-    [AS_HELP_STRING([--enable-schemas-opflow],
-	    [enable opflow schema compilation])],
-    [],
-    [enable_schemas_opflow=no])
-
-# AC_ARG_ENABLE([schemas-papito],
-#     [AS_HELP_STRING([--enable-schemas-papito],
-# 	    [enable papito schema compilation])],
-#     [],
-#     [enable_schemas_papito=no])
+dnl AC_ARG_ENABLE([schemas-opflow],
+dnl     [AS_HELP_STRING([--enable-schemas-opflow],
+dnl 	    [enable opflow schema compilation])],
+dnl     [],
+dnl     [enable_schemas_opflow=no])
 
 AC_ARG_ENABLE([schemas-recorder],
     [AS_HELP_STRING([--disable-schemas-recorder],
@@ -275,10 +257,10 @@ AC_ARG_WITH([gazebo],
     [],
     [with_gazebo="/usr/local"])
 
-AC_ARG_WITH([ipp],
-    [AS_HELP_STRING([--with-ipp=<path>],[ipp software prefix path])],
-    [],
-    [with_ipp="/usr/local"])
+dnl AC_ARG_WITH([ipp],
+dnl     [AS_HELP_STRING([--with-ipp=<path>],[ipp software prefix path])],
+dnl     [],
+dnl     [with_ipp="/usr/local"])
 
 dnl##### precious variables
 dnl # Allow user to define variables
@@ -396,37 +378,37 @@ fi
 AC_SUBST([GAZEBO_CFLAGS])
 AC_SUBST([GAZEBO_LIBS])
 
-AC_ARG_VAR([IPP_CFLAGS],[C compiler flags for ipp])
-AC_ARG_VAR([IPP_LIBS],[linker flags for ipp])
-if test "x$with_ipp" != xno; then
-    IPP_PREFIX=$with_ipp
-    _SAVE_CFLAGS=$CFLAGS
-    _SAVE_CPPFLAGS=$CPPFLAGS
-    _SAVE_LIBS=$LIBS
-    CFLAGS="$CFLAGS -I$IPP_PREFIX/include $IPP_CFLAGS"
-    CPPFLAGS="$CPPFLAGS -I$IPP_PREFIX/include $IPP_CPPFLAGS"
-    LIBS="$LIBS -L$IPP_PREFIX/lib $IPP_LIBS"
-    AC_MSG_NOTICE([*** Checking ipp:])
-    ERRORS=""
-    AC_CHECK_HEADERS([ipp.h],
-	[],
-	[ERRORS="$ac_header not found"])
-    AC_CHECK_LIB([ippcore],[main],
-	[],
-	[ERRORS="$ERRORS, libippcore not found"])
-    if test "$ERRORS"; then
-	AC_MSG_NOTICE([Ipp disabled: $ERRORS])
-	with_ipp="no"
-    else
-	IPP_CFLAGS="-I$IPP_PREFIX/include $IPP_CFLAGS"
-	IPP_LIBS="-L$IPP_PREFIX/lib $IPP_LIBS"
-    fi
-    CFLAGS=$_SAVE_CFLAGS
-    CPPFLAGS=$_SAVE_CPPFLAGS
-    LIBS=$_SAVE_LIBS
-fi
-AC_SUBST([IPP_CFLAGS])
-AC_SUBST([IPP_LIBS])
+dnl AC_ARG_VAR([IPP_CFLAGS],[C compiler flags for ipp])
+dnl AC_ARG_VAR([IPP_LIBS],[linker flags for ipp])
+dnl if test "x$with_ipp" != xno; then
+dnl     IPP_PREFIX=$with_ipp
+dnl     _SAVE_CFLAGS=$CFLAGS
+dnl     _SAVE_CPPFLAGS=$CPPFLAGS
+dnl     _SAVE_LIBS=$LIBS
+dnl     CFLAGS="$CFLAGS -I$IPP_PREFIX/include $IPP_CFLAGS"
+dnl     CPPFLAGS="$CPPFLAGS -I$IPP_PREFIX/include $IPP_CPPFLAGS"
+dnl     LIBS="$LIBS -L$IPP_PREFIX/lib $IPP_LIBS"
+dnl     AC_MSG_NOTICE([*** Checking ipp:])
+dnl     ERRORS=""
+dnl     AC_CHECK_HEADERS([ipp.h],
+dnl 	[],
+dnl 	[ERRORS="$ac_header not found"])
+dnl     AC_CHECK_LIB([ippcore],[main],
+dnl 	[],
+dnl 	[ERRORS="$ERRORS, libippcore not found"])
+dnl     if test "$ERRORS"; then
+dnl 	AC_MSG_NOTICE([Ipp disabled: $ERRORS])
+dnl 	with_ipp="no"
+dnl     else
+dnl 	IPP_CFLAGS="-I$IPP_PREFIX/include $IPP_CFLAGS"
+dnl 	IPP_LIBS="-L$IPP_PREFIX/lib $IPP_LIBS"
+dnl     fi
+dnl     CFLAGS=$_SAVE_CFLAGS
+dnl     CPPFLAGS=$_SAVE_CPPFLAGS
+dnl     LIBS=$_SAVE_LIBS
+dnl fi
+dnl AC_SUBST([IPP_CFLAGS])
+dnl AC_SUBST([IPP_LIBS])
 
 
 dnl ########################################
@@ -661,44 +643,34 @@ if test "x$enable_schemas_calibrador" != xno; then
 	[ERRORS="$ERRORS, fdesign needed to build calibrador schema not found"])
 fi
 
-# dnl # schema esquema_prueba
-# AM_CONDITIONAL([ENABLE_ESQUEMA_PRUEBA],[false])
-# if test "x$enable_schemas_esquema_prueba" != xno; then
-#     AC_MSG_NOTICE([**** Checking schema esquema_prueba:])
-#     PKG_CHECK_MODULES([ESQUEMA_PRUEBA],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
-# 	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS esquema_prueba"
-# 	    AM_CONDITIONAL([ENABLE_ESQUEMA_PRUEBA],[true])],
-# 	[AC_MSG_FAILURE([--enable-schemas-esquema_prueba was given, but there was errors: $ESQUEMA_PRUEBA_PKG_ERRORS])])
-# fi
-
-dnl#check eyeoperator1/4
-AM_CONDITIONAL([ENABLE_EYEOPERATOR],[false])
-if test "x$enable_schemas_eyeoperator" != xno; then
-    ERRORS=""
-    AC_MSG_NOTICE([**** Checking schema eyeoperator1/4:])
-    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
-	[],
-	[EYEOPERATOR_PKG_ERRORS="$EYEOPERATOR_PKG_ERRORS, $ac_header not found"])
-    AC_CHECK_LIB([forms],[main],
-	[EYEOPERATOR_LIBS="$EYEOPERATOR_LIBS -lforms"],
-	[ERRORS="$ERRORS, libforms not found"],[-lm])
-    AC_CHECK_LIB([X11],[main],
-	[EYEOPERATOR_LIBS="$EYEOPERATOR_LIBS -lX11"],
-	[ERRORS="$ERRORS, libX11 not found"])
-    AC_PATH_PROG([FDESIGN],[fdesign],
-	[ERRORS="$ERRORS, fdesign needed to build eyeoperator schema not found"])
-    if test "x$with_ipp" = xno; then
-	ERRORS="$ERRORS, ipp software not found, use --with-ipp=<path>"
-    fi
-    if test "$ERRORS"; then
-	AC_MSG_FAILURE([--enable-schemas-eyeoperator was given, but there was errors: $ERRORS])
-    else
-	ENABLED_SCHEMAS="$ENABLED_SCHEMAS eyeoperator"
-	AM_CONDITIONAL([ENABLE_EYEOPERATOR],[true])
-    fi
-    CFLAGS=$_SAVE_CFLAGS
-    LIBS=$_SAVE_LIBS
-fi
+dnl dnl#check eyeoperator1/4
+dnl AM_CONDITIONAL([ENABLE_EYEOPERATOR],[false])
+dnl if test "x$enable_schemas_eyeoperator" != xno; then
+dnl     ERRORS=""
+dnl     AC_MSG_NOTICE([**** Checking schema eyeoperator1/4:])
+dnl     AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
+dnl 	[],
+dnl 	[EYEOPERATOR_PKG_ERRORS="$EYEOPERATOR_PKG_ERRORS, $ac_header not found"])
+dnl     AC_CHECK_LIB([forms],[main],
+dnl 	[EYEOPERATOR_LIBS="$EYEOPERATOR_LIBS -lforms"],
+dnl 	[ERRORS="$ERRORS, libforms not found"],[-lm])
+dnl     AC_CHECK_LIB([X11],[main],
+dnl 	[EYEOPERATOR_LIBS="$EYEOPERATOR_LIBS -lX11"],
+dnl 	[ERRORS="$ERRORS, libX11 not found"])
+dnl     AC_PATH_PROG([FDESIGN],[fdesign],
+dnl 	[ERRORS="$ERRORS, fdesign needed to build eyeoperator schema not found"])
+dnl     if test "x$with_ipp" = xno; then
+dnl 	ERRORS="$ERRORS, ipp software not found, use --with-ipp=<path>"
+dnl     fi
+dnl     if test "$ERRORS"; then
+dnl 	AC_MSG_FAILURE([--enable-schemas-eyeoperator was given, but there was errors: $ERRORS])
+dnl     else
+dnl 	ENABLED_SCHEMAS="$ENABLED_SCHEMAS eyeoperator"
+dnl 	AM_CONDITIONAL([ENABLE_EYEOPERATOR],[true])
+dnl     fi
+dnl     CFLAGS=$_SAVE_CFLAGS
+dnl     LIBS=$_SAVE_LIBS
+dnl fi
 
 dnl # schema followball
 AM_CONDITIONAL([ENABLE_FOLLOWBALL],[false])
@@ -871,32 +843,32 @@ if test "x$enable_schemas_opengl_viewer" != xno; then
 	[AC_MSG_FAILURE([--enable-schemas-opengl_viewer was given, but there was errors: $OPENGL_VIEWER_PKG_ERRORS])])
 fi
 
-dnl # schema opflow
-AM_CONDITIONAL([ENABLE_OPFLOW],[false])
-if test "x$enable_schemas_opflow" != xno; then
-    ERRORS=""
-    AC_MSG_NOTICE([**** Checking schema opflow:])
-    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
-	[],
-	[ERRORS="$ERRORS, $ac_header not found"])
-    AC_CHECK_LIB([forms],[main],
-	[OPFLOW_LIBS="$OPFLOW_LIBS -lforms"],
-	[ERRORS="$ERRORS, libforms not found"],[-lm])
-    AC_CHECK_LIB([X11],[main],
-	[OPFLOW_LIBS="$OPFLOW_LIBS -lX11"],
-	[ERRORS="$ERRORS, libX11 not found"])
-    AC_PATH_PROG([FDESIGN],[fdesign],
-	[ERRORS="$ERRORS, fdesign needed to build opflow schema not found"])
-    if test "x$with_ipp" = xno; then
-	ERRORS="$ERRORS, ipp software not found, use --with-ipp=<path>"
-    fi
-    if test "$ERRORS"; then
-	AC_MSG_FAILURE([--enable-schemas-opflow was given, but there was errors: $ERRORS])
-    else
-	ENABLED_SCHEMAS="$ENABLED_SCHEMAS opflow"
-	AM_CONDITIONAL([ENABLE_OPFLOW],[true])
-    fi
-fi
+dnl dnl # schema opflow
+dnl AM_CONDITIONAL([ENABLE_OPFLOW],[false])
+dnl if test "x$enable_schemas_opflow" != xno; then
+dnl     ERRORS=""
+dnl     AC_MSG_NOTICE([**** Checking schema opflow:])
+dnl     AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
+dnl 	[],
+dnl 	[ERRORS="$ERRORS, $ac_header not found"])
+dnl     AC_CHECK_LIB([forms],[main],
+dnl 	[OPFLOW_LIBS="$OPFLOW_LIBS -lforms"],
+dnl 	[ERRORS="$ERRORS, libforms not found"],[-lm])
+dnl     AC_CHECK_LIB([X11],[main],
+dnl 	[OPFLOW_LIBS="$OPFLOW_LIBS -lX11"],
+dnl 	[ERRORS="$ERRORS, libX11 not found"])
+dnl     AC_PATH_PROG([FDESIGN],[fdesign],
+dnl 	[ERRORS="$ERRORS, fdesign needed to build opflow schema not found"])
+dnl     if test "x$with_ipp" = xno; then
+dnl 	ERRORS="$ERRORS, ipp software not found, use --with-ipp=<path>"
+dnl     fi
+dnl     if test "$ERRORS"; then
+dnl 	AC_MSG_FAILURE([--enable-schemas-opflow was given, but there was errors: $ERRORS])
+dnl     else
+dnl 	ENABLED_SCHEMAS="$ENABLED_SCHEMAS opflow"
+dnl 	AM_CONDITIONAL([ENABLE_OPFLOW],[true])
+dnl     fi
+dnl fi
 
 dnl # schema recorder
 AM_CONDITIONAL([ENABLE_RECORDER],[false])
@@ -1044,8 +1016,6 @@ AC_CONFIG_FILES([services/Makefile \
 dnl # generate schemas Makefiles
 AC_CONFIG_FILES([schemas/Makefile \
     schemas/calibrador/Makefile \
-    schemas/eyeoperator1/Makefile \
-    schemas/eyeoperator4/Makefile \
     schemas/followball/Makefile \
     schemas/hsvtuner/Makefile \
     schemas/image_viewer/Makefile \
@@ -1055,7 +1025,6 @@ AC_CONFIG_FILES([schemas/Makefile \
     schemas/myschema/Makefile \
     schemas/opengldemo/Makefile \
     schemas/opengl_viewer/Makefile \
-    schemas/opflow/Makefile \
     schemas/recorder/Makefile \
     schemas/teleoperator/Makefile \
     schemas/wiimote_viewer/Makefile \
