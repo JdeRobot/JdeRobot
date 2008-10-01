@@ -127,7 +127,7 @@ float longitude_speed;
 /** 'ptmotors' schema latitude speed control*/
 float latitude_speed;
 /** 'ptmotors' schema cycle control variable*/
-int pantiltmotors_cycle;
+int pantiltmotors_cycle=100;
 /** Max longitude speed*/
 float max_longitude_speed = MAX_SPEED_PANTILT;
 /** Max latitude speed*/
