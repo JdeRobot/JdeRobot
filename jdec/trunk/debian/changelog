@@ -1,0 +1,5 @@
+JDE (4.3.0) UNRELEASED; urgency=low
+
+  * Fix Bug: pantiltmotors_cycle was not initialized [gdago,rocapal]
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Thu, 02 Oct 2008 00:51:00 +0200
