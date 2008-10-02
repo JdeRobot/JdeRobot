@@ -1,4 +1,4 @@
-JDE (4.3.0) UNRELEASED; urgency=low
+jde (4.3.0) UNRELEASED; urgency=low
 
   * Fix Bug: pantiltmotors_cycle was not initialized [gdago,rocapal]
 
