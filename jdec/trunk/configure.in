@@ -248,12 +248,12 @@ AC_ARG_ENABLE([schemas-x10_controller],
 
 dnl##### external software FIXME: poner argumento como optativo, escapar []
 AC_ARG_WITH([player],
-    [AS_HELP_STRING([--with-player=<path>],[player software prefix path])],
+    [AS_HELP_STRING([--with-player=<path>],[player software prefix path. Default /usr/local])],
     [],
     [with_player="/usr/local"])
 
 AC_ARG_WITH([gazebo],
-    [AS_HELP_STRING([--with-gazebo=<path>],[gazebo software prefix path])],
+    [AS_HELP_STRING([--with-gazebo=<path>],[gazebo software prefix path. Default /usr/local])],
     [],
     [with_gazebo="/usr/local"])
 
