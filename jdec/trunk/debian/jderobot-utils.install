@@ -1,0 +1,4 @@
+debian/tmp/usr/lib/jdec/*.so*		/usr/lib/jde-robot/
+debian/tmp/usr/lib/jdec/*.la		/usr/lib/jde-robot/
+debian/tmp/usr/include/jdec/*.h		/usr/include/jde-robot/ 
+

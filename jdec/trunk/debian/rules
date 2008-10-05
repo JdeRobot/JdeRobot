@@ -66,8 +66,9 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/jde.
-	$(MAKE) DESTDIR=$(CURDIR)/debian/jde install
-
+	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
+	
+	dh_install
 
 # Build architecture-independent files here.
 binary-indep: build install
@@ -98,8 +99,9 @@ binary-arch: build install
 	dh_fixperms
 #	dh_perl
 #	dh_makeshlibs
+#	dh_shlibdeps -L jderobot-drivers -l debian/tmp/usr/lib/jdec/drivers/
+#	dh_shlibdeps -L jderobot-schemas -l debian/tmp/usr/lib/jdec/schemas
 	dh_installdeb
-	dh_shlibdeps
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
