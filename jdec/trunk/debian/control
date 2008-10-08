@@ -10,7 +10,7 @@ Package: jderobot
 Section: net
 Architecture: i386
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Recommends: jderobot-schemes, jderobot-drivers, jderobot-utils
+Recommends: jderobot-schemes, jderobot-drivers, jderobot-libs
 Suggests: jderobot-doc
 Description: jde is a software development suite for robotics applications.
  jde.c is a software development suite for robotics applications, written
@@ -22,7 +22,7 @@ Package: jderobot-schemes
 Section: net
 Architecture: i386
 Depends: ${shlibs:Depends}, jderobot
-Recommends: jderobot-drivers, jderobot-utils
+Recommends: jderobot-drivers, jderobot-libs
 Suggests: jderobot-doc
 Description: jde is a software development suite for robotics applications (schemes)
  jde.c is a software development suite for robotics applications, written
@@ -34,7 +34,7 @@ Package: jderobot-drivers
 Section: net
 Architecture: i386
 Depends: ${shlibs:Depends}, jderobot
-Recommends: jderobot-schemes, jderobot-utils
+Recommends: jderobot-schemes, jderobot-libs
 Suggests: jderobot-doc
 Description: jde is a software development suite for robotics applications (drivers)
  jde.c is a software development suite for robotics applications, written
@@ -46,7 +46,7 @@ Package: jderobot-services
 Section: net
 Architecture: i386
 Depends: ${shlibs:Depends}, jderobot
-Recommends: jderobot-schemes, jderobot-utils
+Recommends: jderobot-schemes, jderobot-libs
 Suggests: jderobot-doc
 Description: jde is a software development suite for robotics applications (services)
  jde.c is a software development suite for robotics applications, written
@@ -54,13 +54,13 @@ Description: jde is a software development suite for robotics applications (serv
  program is made up of a collection of several concurrent asynchronous threads
  named schemas. It is based on JDE cognitive architecture for autonomous robots
 
-Package: jderobot-utils
+Package: jderobot-libs
 Section: net
 Architecture: i386
 Depends: ${shlibs:Depends}, jderobot
 Recommends: jderobot-schemes, jderobot-drivers
 Suggests: jderobot-doc
-Description: jde is a software development suite for robotics applications (utils)
+Description: jde is a software development suite for robotics applications (libs)
  jde.c is a software development suite for robotics applications, written
  in C language. It provides a programming environment where the robot control
  program is made up of a collection of several concurrent asynchronous threads
@@ -70,7 +70,7 @@ Package: jderobot-doc
 Section: doc
 Architecture: any
 Depends: ${shlibs:Depends}
-Recommends: jderobot-doc, jderobot-schemes, jderobot-drivers, jderobot-utils
+Recommends: jderobot-doc, jderobot-schemes, jderobot-drivers, jderobot-libs
 Description: jde is a software development suite for robotics applications (documentation)
  jde.c is a software development suite for robotics applications, written
  in C language. It provides a programming environment where the robot control

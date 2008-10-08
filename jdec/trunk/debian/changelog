@@ -1,5 +1,11 @@
 jde (4.3.0) UNRELEASED; urgency=low
 
+  * Changes in debian package structure
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Wed, 08 Oct 2008 23:20:23 +0200
+
+jde (4.3.0) UNRELEASED; urgency=low
+
   * Create several debian packages for the application
 
  -- Roberto Calvo <rocapal@gsyc.es>  Sun, 05 Oct 2008 19:07:48 +0200

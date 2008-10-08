@@ -1,1 +1,1 @@
-debian/tmp/usr/lib/jdec/services/*.so	/usr/local/share/jde-robot/services
+debian/tmp/usr/lib/jdec/services/*.so	/usr/share/jde-robot/services
