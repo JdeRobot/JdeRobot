@@ -1,6 +1,7 @@
 jde (4.3.0) UNRELEASED; urgency=low
 
   * Changes in debian package structure
+  * modify library path in jde.conf
 
  -- Roberto Calvo <rocapal@gsyc.es>  Wed, 08 Oct 2008 23:20:23 +0200
 

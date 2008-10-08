@@ -1,1 +1,1 @@
-debian/tmp/usr/lib/jdec/schemas/*.so    /usr/share/jde-robot/schemas/
+debian/tmp/usr/lib/jdec/schemas/*.so    /usr/lib/jde-robot/schemas/
