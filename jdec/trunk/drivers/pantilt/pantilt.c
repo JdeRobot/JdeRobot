@@ -523,6 +523,7 @@ void pantiltmotors_iteration()
   if (longspeed==0.0) {
     sprintf(pantilt_out,"PS0\n");
     SendCmd(pantilt_out);
+    longspeed_last=longspeed;
   }
   else {
 
@@ -541,6 +542,7 @@ void pantiltmotors_iteration()
   if (latspeed==0.0) {
     sprintf(pantilt_out,"TS0\n");
     SendCmd(pantilt_out);
+    latspeed_last=latspeed;
   } 
   else {
 
