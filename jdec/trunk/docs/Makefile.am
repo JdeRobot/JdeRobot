@@ -1,7 +1,9 @@
 DOCDIRS = progeo-manual manual howto-ipp howto-gazebo
 DOCS = howto-gazebo/howto-gazebo.pdf howto-ipp/howto-ipp.pdf manual/jdecmanual.pdf progeo-manual/progeo-manual.pdf 
 
+if ENABLE_DOCS
 all-local: $(DOCS) html/index.html
+endif
 
 # Assuming the package knows how to install itself
 install-data-local: $(DOCS) html/index.html

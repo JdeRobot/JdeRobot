@@ -246,6 +246,12 @@ AC_ARG_ENABLE([schemas-x10_controller],
     [enable_schemas_x10_controller=yes])
 
 
+AC_ARG_ENABLE([docs],
+    [AS_HELP_STRING([--disable-docs],
+	    [disable docs compilation])],
+    [],
+    [enable_docs=yes])
+
 dnl##### external software FIXME: poner argumento como optativo, escapar []
 AC_ARG_WITH([player],
     [AS_HELP_STRING([--with-player=<path>],[player software prefix path. Default /usr/local])],
@@ -618,7 +624,7 @@ if test "x$enable_schemas_calibrador" != xno; then
 	    AM_CONDITIONAL([ENABLE_CALIBRADOR],[true])],
 	[AC_MSG_FAILURE([--enable-schemas-calibrador was given, but there was errors: $CALIBRADOR_PKG_ERRORS])])
     ERRORS=""
-    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h glcanvas.h GL/gl.h GL/glx.h GL/glu.h],
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h glcanvas.h GL/gl.h GL/glx.h GL/glu.h GL/freeglut_std.h],
 	[],
 	[ERRORS="$ERRORS, $ac_header not found"])
     AC_CHECK_LIB([forms],[main],
@@ -960,19 +966,51 @@ dnl #
 dnl # doc checks
 dnl #
 dnl ########################################
-dnl FIXME: que hacer si los chequeos fallan?
-AC_PATH_PROG([DOXYGEN],[doxygen])
-AC_PATH_PROG([LATEX],[latex])
-AC_PATH_PROG([PDFLATEX],[pdflatex])
-AC_PATH_PROG([DVIPS],[dvips])
-AC_PATH_PROG([BIBTEX],[bibtex])
+AM_CONDITIONAL([ENABLE_DOCS],[false])
+if test "x$enable_docs" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking docs:])
+    AC_PATH_PROG([DOXYGEN],[doxygen],[no])
+    if test "x$DOXYGEN" = xno; then
+	ERRORS="doxygen not found"
+    fi
+    AC_PATH_PROG([LATEX],[latex],[no])
+    if test "x$LATEX" = xno; then
+	ERRORS="$ERRORS, latex not found"
+    fi
+    AC_PATH_PROG([PDFLATEX],[pdflatex],[no])
+    if test "x$PDFLATEX" = xno; then
+	ERRORS="$ERRORS, pdflatex not found"
+    fi
+    AC_PATH_PROG([LATEX2HTML],[latex2html],[no])
+    if test "x$LATEX2HTML" = xno; then
+	ERRORS="$ERRORS, latex2html not found"
+    fi
+    AC_PATH_PROG([DOT],[dot],[no])
+    if test "x$DOT" = xno; then
+	ERRORS="$ERRORS, dot not found"
+    fi
+    AC_PATH_PROG([DVIPS],[dvips],[no])
+    if test "x$DVIPS" = xno; then
+	ERRORS="$ERRORS, dvips not found"
+    fi
+    AC_PATH_PROG([BIBTEX],[bibtex],[no])
+    if test "x$BIBTEX" = xno; then
+	ERRORS="$ERRORS, bibtex not found"
+    fi
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-docs was given, but there was errors: $ERRORS])
+    else
+	AM_CONDITIONAL([ENABLE_DOCS],[true])
+    fi
+fi
+
 
 dnl ########################################
 dnl #
 dnl # libs checks
 dnl #
 dnl ########################################
-AC_MSG_NOTICE([*** Checking utils:])
 
 
 dnl ########################################
