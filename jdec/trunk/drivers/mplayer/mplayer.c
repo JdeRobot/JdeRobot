@@ -183,6 +183,8 @@ char *varcolorD; /* sifntsc image itself */
 /** 'varcolorD' schema clock*/
 unsigned long int varimageD_clock;
 
+char *driver;
+
 
 /* MPLAYER DRIVER FUNCTIONS */
 
@@ -204,6 +206,7 @@ void mplayer_close(){
    if (rmdir (directory)<0){
       perror ("I can't delete temp dir: ");
    }
+   free(driver);
    mplayer_close_command=1;
    printf("driver mplayer off\n");
 }
@@ -625,32 +628,32 @@ void mplayer_start(int i){
             exit(1);
             break;
          case V4LCAM:
-            sprintf(str3, "driver=v4l:width=%d:height=%d:device=%s",
-                    width[i], height[i], devices[i]);
+            sprintf(str3, "driver=%s:width=%d:height=%d:device=%s",
+                    driver, width[i], height[i], devices[i]);
             execlp("mplayer","mplayer","tv://", "-tv", str3 ,"-vo", str2,
                    "-vf", str, "-ao","null","-slave",NULL);
             printf("Error executing mplayer\n");
             exit(1);
             break;
          case V4LTV:
-            sprintf(str3, "driver=v4l:width=%d:height=%d:device=%s:input=0",
-                    width[i], height[i], devices[i]);
+            sprintf(str3, "driver=%s:width=%d:height=%d:device=%s:input=0",
+                    driver, width[i], height[i], devices[i]);
             execlp("mplayer","mplayer","tv://", "-tv", str3 ,"-vo", str2,
                    "-vf", str, "-ao","null","-slave",NULL);
             printf("Error executing mplayer\n");
             exit(1);
             break;
          case V4LCOMP:
-            sprintf(str3, "driver=v4l:width=%d:height=%d:device=%s:input=1",
-                    width[i], height[i], devices[i]);
+            sprintf(str3, "driver=%s:width=%d:height=%d:device=%s:input=1",
+                    driver, width[i], height[i], devices[i]);
             execlp("mplayer","mplayer","tv://", "-tv", str3 ,"-vo", str2,
                    "-vf", str, "-ao","null","-slave",NULL);
             printf("Error executing mplayer\n");
             exit(1);
             break;
          case V4LSVID:
-            sprintf(str3, "driver=v4l:width=%d:height=%d:device=%s:input=2",
-                    width[i], height[i], devices[i]);
+            sprintf(str3, "driver=%s:width=%d:height=%d:device=%s:input=2",
+                    driver, width[i], height[i], devices[i]);
             execlp("mplayer","mplayer","tv://", "-tv", str3 ,"-vo", str2,
                    "-vf", str, "-ao","null","-slave",NULL);
             printf("Error executing mplayer\n");
@@ -949,8 +952,15 @@ int mplayer_parseconf(char *configfile){
                                        repeat[3] = 0;
                                  }
                               }
-                              else if((words==5) && (strcmp(word5,"v4l")==0)){
+                              else if((words==5) && ((strcmp(word5,"v4l")==0) || (strcmp(word5,"v4l2")==0))){
                                  printf("mplayer: %s from device %s\n",word4,word6);
+                                 if (strcmp(word5,"v4l\0")==0) {
+					driver=malloc(4);
+                                 	strcpy(driver,"v4l");
+				 } else if (strcmp(word5,"v4l2")==0) {
+					driver=malloc(5);
+                                 	strcpy(driver,"v4l2");
+				 }
                                  if(strcmp(word4,"colorA")==0){
                                     serve_color[0]=1;
                                     strcpy (devices[0],word6);
@@ -1098,8 +1108,15 @@ int mplayer_parseconf(char *configfile){
                                  }
 
                               }
-                              else if ((words==7) && (strcmp(word5,"v4l")==0)){
+                              else if ((words==7) && ((strcmp(word5,"v4l")==0) || (strcmp(word5,"v4l2")==0))) {
                                  printf("mplayer: %s from device %s\n",word4,word6);
+                                 if (strcmp(word5,"v4l")==0) {
+					driver=malloc(4);
+                                 	strcpy(driver,"v4l");
+				 } else if (strcmp(word5,"v4l2")==0) {
+					driver=malloc(5);
+                                 	strcpy(driver,"v4l2");
+				 }
                                  if(strcmp(word4,"varcolorA")==0){
                                     serve_color[4]=1;
                                     strcpy (devices[4],word6);
