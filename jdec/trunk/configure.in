@@ -311,6 +311,12 @@ AC_CHECK_LIB([pthread],[pthread_create],
     [CFLAGS="$CFLAGS -pthread -D_REENTRANT -D_POSIX_PTHREAD_SEMANTICS"],
     AC_MSG_ERROR([pthread library not found]))
 
+dnl # check m
+AC_CHECK_HEADERS([math.h])
+AC_CHECK_LIB([m],[floor],
+    [LIBS="$LIBS -lm"],
+    AC_MSG_ERROR([m library not found]))
+
 
 dnl ########################################
 dnl #
@@ -426,6 +432,12 @@ dnl #   configure time to set paths and other compile/link options
 dnl #
 dnl ########################################
 AC_MSG_NOTICE([*** Checking drivers:])
+DRIVER_CFLAGS=''
+DRIVER_LIBS=''
+DRIVER_LDFLAGS='-Bsymbolic'
+AC_ARG_VAR([DRIVER_CFLAGS],[C compiler flags used with drivers])
+AC_ARG_VAR([DRIVER_LIBS],[libraries to pass to the linker used with drivers])
+AC_ARG_VAR([DRIVER_LDFLAGS],[linker flags used with drivers])
 
 AM_CONDITIONAL([ENABLE_EVI],[false])
 if test "x$enable_drivers_evi" != xno; then
@@ -539,6 +551,7 @@ if test "x$enable_drivers_wiimote" != xno; then
 	ENABLED_DRIVERS="$ENABLED_DRIVERS wiimote"
 	AM_CONDITIONAL([ENABLE_WIIMOTE],[true])
     fi
+    AC_SUBST([WIIMOTE_LIBS])
 fi
 
 AM_CONDITIONAL([ENABLE_X10],[false])
@@ -558,10 +571,17 @@ dnl # * <service>_CFLAGS and <service>_LIBS can be defined as environment variab
 dnl #   configure time to set paths and other compile/link options
 dnl #
 dnl ########################################
-dnl#check graphics_gtk deps
+AC_MSG_NOTICE([*** Checking services:])
+SERVICE_CFLAGS=''
+SERVICE_LIBS=''
+SERVICE_LDFLAGS='-Bsymbolic'
+AC_ARG_VAR([SERVICE_CFLAGS],[C compiler flags used with services])
+AC_ARG_VAR([SERVICE_LIBS],[libraries to pass to the linker used with services])
+AC_ARG_VAR([SERVICE_LDFLAGS],[linker flags used with services])
+
 AM_CONDITIONAL([ENABLE_GRAPHICS_GTK],[false])
 if test "x$enable_services_graphics_gtk" != xno; then
-    AC_MSG_NOTICE([**** Checking driver graphics_gtk:])
+    AC_MSG_NOTICE([**** Checking service graphics_gtk:])
     PKG_CHECK_MODULES([GRAPHICS_GTK],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
 	[ENABLED_SERVICES="$ENABLED_SERVICES graphics_gtk"
 	    AM_CONDITIONAL([ENABLE_GRAPHICS_GTK],[true])],
@@ -577,7 +597,7 @@ dnl#check graphics_xforms deps
 AM_CONDITIONAL([ENABLE_GRAPHICS_XFORMS],[false])
 if test "x$enable_services_graphics_xforms" != xno; then
     ERRORS=""
-    AC_MSG_NOTICE([**** Checking driver graphics_xforms:])
+    AC_MSG_NOTICE([**** Checking service graphics_xforms:])
     AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
 	[],
 	[ERRORS="$ERRORS, $ac_header not found"])
@@ -593,12 +613,13 @@ if test "x$enable_services_graphics_xforms" != xno; then
 	ENABLED_SERVICES="$ENABLED_SERVICES graphics_xforms"
 	AM_CONDITIONAL([ENABLE_GRAPHICS_XFORMS],[true])
     fi
+    AC_SUBST([GRAPHICS_XFORMS_LIBS])
 fi
 
 dnl#check networkserver deps
 AM_CONDITIONAL([ENABLE_NETWORKSERVER],[false])
 if test "x$enable_services_networkserver" != xno; then
-    AC_MSG_NOTICE([**** Checking driver networkserver:])
+    AC_MSG_NOTICE([**** Checking service networkserver:])
     ENABLED_SERVICES="$ENABLED_SERVICES networkserver"
     AM_CONDITIONAL([ENABLE_NETWORKSERVER],[true])
 fi
@@ -614,6 +635,12 @@ dnl #   configure time to set paths and other compile/link options
 dnl #
 dnl ########################################
 AC_MSG_NOTICE([*** Checking schemas:])
+SCHEMA_CFLAGS=''
+SCHEMA_LIBS=''
+SCHEMA_LDFLAGS='-Bsymbolic'
+AC_ARG_VAR([SCHEMA_CFLAGS],[C compiler flags used with schemas])
+AC_ARG_VAR([SCHEMA_LIBS],[libraries to pass to the linker used with schemas])
+AC_ARG_VAR([SCHEMA_LDFLAGS],[linker flags used with schemas])
 
 dnl # schema calibrador
 AM_CONDITIONAL([ENABLE_CALIBRADOR],[false])
@@ -647,6 +674,7 @@ if test "x$enable_schemas_calibrador" != xno; then
 	[ERRORS="$ERRORS, libglut not found"])
     AC_PATH_PROG([FDESIGN],[fdesign],
 	[ERRORS="$ERRORS, fdesign needed to build calibrador schema not found"])
+    AC_SUBST([CALIBRADOR_LIBS])
 fi
 
 dnl dnl#check eyeoperator1/4
@@ -700,6 +728,7 @@ if test "x$enable_schemas_followball" != xno; then
 	ENABLED_SCHEMAS="$ENABLED_SCHEMAS followball"
 	AM_CONDITIONAL([ENABLE_FOLLOWBALL],[true])
     fi
+    AC_SUBST([FOLLOWBALL_LIBS])
 fi
 
 dnl # schema hsvtuner
@@ -724,6 +753,7 @@ if test "x$enable_schemas_hsvtuner" != xno; then
 	ENABLED_SCHEMAS="$ENABLED_SCHEMAS hsvtuner"
 	AM_CONDITIONAL([ENABLE_HSVTUNER],[true])
     fi
+    AC_SUBST([HSVTUNER_LIBS])
 fi
 
 dnl # schema image_viewer
@@ -768,6 +798,7 @@ if test "x$enable_schemas_introrob" != xno; then
 	ENABLED_SCHEMAS="$ENABLED_SCHEMAS introrob"
 	AM_CONDITIONAL([ENABLE_INTROROB],[true])
     fi
+    AC_SUBST([INTROROB_LIBS])
 fi
 
 dnl # schema mastergui
@@ -803,6 +834,7 @@ if test "x$enable_schemas_myschema" != xno; then
 	ENABLED_SCHEMAS="$ENABLED_SCHEMAS myschema"
 	AM_CONDITIONAL([ENABLE_MYSCHEMA],[true])
     fi
+    AC_SUBST([MYSCHEMA_LIBS])
 fi
 
 dnl # schema opengldemo
@@ -836,6 +868,7 @@ if test "x$enable_schemas_opengldemo" != xno; then
 	ENABLED_SCHEMAS="$ENABLED_SCHEMAS opengldemo"
 	AM_CONDITIONAL([ENABLE_OPENGLDEMO],[true])
     fi
+    AC_SUBST([OPENGLDEMO_LIBS])
 fi
 
 dnl # schema opengl_viewer
@@ -898,6 +931,7 @@ if test "x$enable_schemas_recorder" != xno; then
 	ENABLED_SCHEMAS="$ENABLED_SCHEMAS recorder"
 	AM_CONDITIONAL([ENABLE_RECORDER],[true])
     fi
+    AC_SUBST([RECORDER_LIBS])
 fi
 
 dnl # schema teleoperator
@@ -931,6 +965,7 @@ if test "x$enable_schemas_teleoperator" != xno; then
 	ENABLED_SCHEMAS="$ENABLED_SCHEMAS teleoperator"
 	AM_CONDITIONAL([ENABLE_TELEOPERATOR],[true])
     fi
+    AC_SUBST([TELEOPERATOR_LIBS])
 fi
 
 dnl # schema wiimote_viewer
