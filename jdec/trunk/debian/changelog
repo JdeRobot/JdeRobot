@@ -1,3 +1,9 @@
+jde (4.3.0-beta-245) unstable; urgency=low
+
+  * Fixed Bug #191: 
+
+ -- Roberto Calvo <rocapal@gsyc.es> Fri, 14 Nov 2008 23:10:53 +0100   
+
 jde (4.3.0-beta-243) unstable; urgency=low
 
   * Fixed Bug #190: 
