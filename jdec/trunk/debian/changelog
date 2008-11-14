@@ -1,3 +1,14 @@
+jde (4.3.0-beta-243) unstable; urgency=low
+
+  * Fixed Bug #190: 
+  * Soluciona problemas con variables del configure que no se exportaban
+  correctamente, dejando mal enlazados varios drivers/esquemas.
+
+  * Fixed Bug #165 (gdago)
+  * Fixed Bug #177 (dlobato)
+
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 02 Nov 2008 21:05:08 +0100
 
 jde (4.3.0-beta-1) unstable; urgency=low
 
