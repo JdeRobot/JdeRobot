@@ -1,3 +1,11 @@
+jde (4.3.0-beta-249) unstable; urgency=low
+
+  * Fix Bug: add glade path in jde.conf
+  * Add new LICENSE: GPL v3.0
+  * Change license in mastergui interface
+
+ -- Roberto Calvo <rocapal@gsyc.es> Sun, 16 Nov 2008 13:03:13 +0100
+
 jde (4.3.0-beta-245) unstable; urgency=low
 
   * Fixed Bug #191: 
@@ -12,7 +20,6 @@ jde (4.3.0-beta-243) unstable; urgency=low
 
   * Fixed Bug #165 (gdago)
   * Fixed Bug #177 (dlobato)
-
 
  -- Roberto Calvo <rocapal@gsyc.es>  Sun, 02 Nov 2008 21:05:08 +0100
 
