@@ -324,103 +324,31 @@ dnl # external software check
 dnl #
 dnl ########################################
 AC_ARG_VAR([PLAYER_CFLAGS],[C compiler flags for player])
+AC_ARG_VAR([PLAYER_CPPFLAGS],[C processor flags for player])
 AC_ARG_VAR([PLAYER_LIBS],[linker flags for player])
 if test "x$with_player" != xno; then
     PLAYER_PREFIX=$with_player
-    _SAVE_CFLAGS=$CFLAGS
-    _SAVE_CPPFLAGS=$CPPFLAGS
-    _SAVE_LIBS=$LIBS
     PLAYER_INCLUDE=`find $PLAYER_PREFIX -name "player-*"`
-    CFLAGS="$CFLAGS -I$PLAYER_INCLUDE $PLAYER_CFLAGS"
-    CPPFLAGS="$CPPFLAGS -I$PLAYER_INCLUDE $PLAYER_CPPFLAGS"
-    LIBS="$LIBS -L$PLAYER_PREFIX/lib $PLAYER_LIBS"
     PLAYER_VERSION=`basename $PLAYER_INCLUDE`
-    AC_MSG_NOTICE([*** Checking player: $PLAYER_VERSION])
-    ERRORS=""
-    AC_CHECK_HEADERS([libplayerc/playerc.h],
-	[],
-	[ERRORS="$ac_header not found"])
-    AC_CHECK_LIB([playerc],[main],
-	[],
-	[ERRORS="$ERRORS, libplayerc not found"])
-    if test "$ERRORS"; then
-	AC_MSG_NOTICE([Player disabled: $ERRORS])
-	with_player="no"
-    else
-	PLAYER_CFLAGS="-I$PLAYER_INCLUDE $PLAYER_CFLAGS"
-	PLAYER_LIBS="-L$PLAYER_PREFIX/lib $PLAYER_LIBS"
-    fi
-    CFLAGS=$_SAVE_CFLAGS
-    CPPFLAGS=$_SAVE_CPPFLAGS
-    LIBS=$_SAVE_LIBS
+    PLAYER_CFLAGS="$PLAYER_CFLAGS -I$PLAYER_INCLUDE"
+    PLAYER_CPPFLAGS="$PLAYER_CPPFLAGS -I$PLAYER_INCLUDE"
+    PLAYER_LIBS="$PLAYER_LIBS -L$PLAYER_PREFIX/lib"
 fi
-AC_SUBST([PLAYER_CFLAGS])
-AC_SUBST([PLAYER_LIBS])
+AC_SUBST([PLAYER_PREFIX])
+AC_SUBST([PLAYER_INCLUDE])
+AC_SUBST([PLAYER_VERSION])
+
 
 
 AC_ARG_VAR([GAZEBO_CFLAGS],[C compiler flags for gazebo])
 AC_ARG_VAR([GAZEBO_LIBS],[linker flags for gazebo])
 if test "x$with_gazebo" != xno; then
     GAZEBO_PREFIX=$with_gazebo
-    _SAVE_CFLAGS=$CFLAGS
-    _SAVE_CPPFLAGS=$CPPFLAGS
-    _SAVE_LIBS=$LIBS
-    CFLAGS="$CFLAGS -I$GAZEBO_PREFIX/include $GAZEBO_CFLAGS"
-    CPPFLAGS="$CPPFLAGS -I$GAZEBO_PREFIX/include $GAZEBO_CPPFLAGS"
-    LIBS="$LIBS -L$GAZEBO_PREFIX/lib $GAZEBO_LIBS"
-    AC_MSG_NOTICE([*** Checking gazebo:])
-    ERRORS=""
-    AC_CHECK_HEADERS([gazebo.h],
-	[],
-	[ERRORS="$ac_header not found"])
-    AC_CHECK_LIB([gazebo],[main],
-	[],
-	[ERRORS="$ERRORS, libgazebo not found"])
-    if test "$ERRORS"; then
-	AC_MSG_NOTICE([Gazebo disabled: $ERRORS])
-	with_gazebo="no"
-    else
-	GAZEBO_CFLAGS="-I$GAZEBO_PREFIX/include $GAZEBO_CFLAGS"
-	GAZEBO_LIBS="-L$GAZEBO_PREFIX/lib $GAZEBO_LIBS"
-    fi
-    CFLAGS=$_SAVE_CFLAGS
-    CPPFLAGS=$_SAVE_CPPFLAGS
-    LIBS=$_SAVE_LIBS
+    GAZEBO_CFLAGS="$GAZEBO_CFLAGS -I$GAZEBO_PREFIX/include"
+    GAZEBO_CPPFLAGS="$GAZEBO_CPPFLAGS -I$GAZEBO_PREFIX/include"
+    GAZEBO_LIBS="$GAZEBO_LIBS -L$GAZEBO_PREFIX/lib"
 fi
-AC_SUBST([GAZEBO_CFLAGS])
-AC_SUBST([GAZEBO_LIBS])
-
-dnl AC_ARG_VAR([IPP_CFLAGS],[C compiler flags for ipp])
-dnl AC_ARG_VAR([IPP_LIBS],[linker flags for ipp])
-dnl if test "x$with_ipp" != xno; then
-dnl     IPP_PREFIX=$with_ipp
-dnl     _SAVE_CFLAGS=$CFLAGS
-dnl     _SAVE_CPPFLAGS=$CPPFLAGS
-dnl     _SAVE_LIBS=$LIBS
-dnl     CFLAGS="$CFLAGS -I$IPP_PREFIX/include $IPP_CFLAGS"
-dnl     CPPFLAGS="$CPPFLAGS -I$IPP_PREFIX/include $IPP_CPPFLAGS"
-dnl     LIBS="$LIBS -L$IPP_PREFIX/lib $IPP_LIBS"
-dnl     AC_MSG_NOTICE([*** Checking ipp:])
-dnl     ERRORS=""
-dnl     AC_CHECK_HEADERS([ipp.h],
-dnl 	[],
-dnl 	[ERRORS="$ac_header not found"])
-dnl     AC_CHECK_LIB([ippcore],[main],
-dnl 	[],
-dnl 	[ERRORS="$ERRORS, libippcore not found"])
-dnl     if test "$ERRORS"; then
-dnl 	AC_MSG_NOTICE([Ipp disabled: $ERRORS])
-dnl 	with_ipp="no"
-dnl     else
-dnl 	IPP_CFLAGS="-I$IPP_PREFIX/include $IPP_CFLAGS"
-dnl 	IPP_LIBS="-L$IPP_PREFIX/lib $IPP_LIBS"
-dnl     fi
-dnl     CFLAGS=$_SAVE_CFLAGS
-dnl     CPPFLAGS=$_SAVE_CPPFLAGS
-dnl     LIBS=$_SAVE_LIBS
-dnl fi
-dnl AC_SUBST([IPP_CFLAGS])
-dnl AC_SUBST([IPP_LIBS])
+AC_SUBST([GAZEBO_PREFIX])
 
 
 dnl ########################################
@@ -457,17 +385,29 @@ fi
 
 AM_CONDITIONAL([ENABLE_GAZEBO],[false])
 if test "x$enable_drivers_gazebo" != xno; then
-    ERRORS=""
+    _SAVE_CFLAGS=$CFLAGS
+    _SAVE_CPPFLAGS=$CPPFLAGS
+    _SAVE_LIBS=$LIBS
+    CFLAGS="$CFLAGS $GAZEBO_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $GAZEBO_CPPFLAGS"
+    LIBS="$LIBS $GAZEBO_LIBS"
     AC_MSG_NOTICE([**** Checking driver gazebo:])
-    if test "x$with_gazebo" = xno; then
-	ERRORS="gazebo software not found, use --with-gazebo=<path>"
-    fi
+    ERRORS=""
+    AC_CHECK_HEADERS([gazebo.h],
+	[],
+	[ERRORS="$ac_header not found"])
+    AC_CHECK_LIB([gazebo],[main],
+	[GAZEBO_LIBS="$GAZEBO_LIBS -lgazebo"],
+	[ERRORS="$ERRORS, libgazebo not found. Use --with-gazebo flag"])
     if test "$ERRORS"; then
 	AC_MSG_FAILURE([--enable-drivers-gazebo was given, but there was errors: $ERRORS])
     else
 	ENABLED_DRIVERS="$ENABLED_DRIVERS gazebo"
 	AM_CONDITIONAL([ENABLE_GAZEBO],[true])
     fi
+    CFLAGS=$_SAVE_CFLAGS
+    CPPFLAGS=$_SAVE_CPPFLAGS
+    LIBS=$_SAVE_LIBS
 fi
 
 AM_CONDITIONAL([ENABLE_IMAGEFILE],[false])
@@ -515,17 +455,35 @@ fi
 
 AM_CONDITIONAL([ENABLE_PLAYER],[false])
 if test "x$enable_drivers_player" != xno; then
+    _SAVE_CFLAGS=$CFLAGS
+    _SAVE_CPPFLAGS=$CPPFLAGS
+    _SAVE_LIBS=$LIBS
+    CFLAGS="$CFLAGS $PLAYER_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $PLAYER_CPPFLAGS"
+    LIBS="$LIBS $PLAYER_LIBS"
+    AC_MSG_NOTICE([*** Checking driver player:])
     ERRORS=""
-    AC_MSG_NOTICE([**** Checking driver player:])
-    if test "x$with_player" = xno; then
-	ERRORS="player software not found, use --with-player=<path>"
-    fi
+    AC_CHECK_HEADERS([libplayerc/playerc.h],
+	[],
+	[ERRORS="$ac_header not found"])
+    AC_CHECK_LIB([playerc],[main],
+	[PLAYER_LIBS="$PLAYER_LIBS -lplayerc"],
+	[ERRORS="$ERRORS, libplayerc not found. Use --with-player flag"])
+    AC_CHECK_LIB([playerxdr],[main],
+	[PLAYER_LIBS="$PLAYER_LIBS -lplayerxdr"],
+	[ERRORS="$ERRORS, libplayerxdr not found. Use --with-player flag"])
+    AC_CHECK_LIB([playererror],[main],
+	[PLAYER_LIBS="$PLAYER_LIBS -lplayererror"],
+	[ERRORS="$ERRORS, libplayererror not found. Use --with-player flag"])
     if test "$ERRORS"; then
 	AC_MSG_FAILURE([--enable-drivers-player was given, but there was errors: $ERRORS])
     else
 	ENABLED_DRIVERS="$ENABLED_DRIVERS player"
 	AM_CONDITIONAL([ENABLE_PLAYER],[true])
     fi
+    CFLAGS=$_SAVE_CFLAGS
+    CPPFLAGS=$_SAVE_CPPFLAGS
+    LIBS=$_SAVE_LIBS
 fi
 
 AM_CONDITIONAL([ENABLE_VIDEO4LINUX],[false])
@@ -1079,6 +1037,7 @@ AC_CONFIG_FILES([drivers/Makefile \
     drivers/pantilt/Makefile \
     drivers/player/Makefile \
     drivers/video4linux/Makefile \
+    drivers/video4linux2/Makefile \
     drivers/wiimote/Makefile \
     drivers/x10/Makefile])
 dnl # generate services Makefiles
