@@ -1,3 +1,13 @@
+jde (4.3.0-beta-255) unstable; urgency=low
+
+  * Fixed bug #194 (dlobato) 
+  * Add -O2 compile option in g++ and gcc. (rocapal)
+  * Fixed likn errors in player driver #195 (dlobato) 
+  * Autotoolized new video4linux2 driver #184 (dlobato) 
+  * Add new license header with GPL v3.0 (rocapal)
+
+ -- Roberto Calvo <rocapal@gsyc.es> Sat, 22 Nov 2008 12:47:04 +0100
+
 jde (4.3.0-beta-249) unstable; urgency=low
 
   * Fix Bug: add glade path in jde.conf
