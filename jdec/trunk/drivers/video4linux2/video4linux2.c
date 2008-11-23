@@ -47,6 +47,9 @@
 
 #include <linux/videodev2.h>
 
+/** Constants */
+const int RGB24_FORMAT = 861030210;
+
 /** Struct to save the buffers */
 struct buffer {
         void *                  start;
@@ -60,7 +63,7 @@ int finish_flag=0;
 /** Max number of cameras served by this video4linux2 driver.*/
 #define MAXCAM 4
 /** Buffers used in each camera */
-#define MAXBUFFERS 2
+#define MAXBUFFERS 4
 /** File descriptors for /dev/video cameras.*/
 int fdv4l[MAXCAM];
 /** Video capability option.*/
@@ -535,7 +538,7 @@ int myvarcolorD_suspend(){
 	Conversion sacada de la wikipedia 
 	http://en.wikipedia.org/wiki/YUV
 */
-void YUV2RGB (unsigned char y, unsigned char u, unsigned char v, unsigned char *r, unsigned char *g, unsigned char *b) {
+inline void YUV2RGB (unsigned char y, unsigned char u, unsigned char v, unsigned char *r, unsigned char *g, unsigned char *b) {
 int r1,g1,b1;
 
 r1 = y + (( (u-128)*1814 ) >> 10);
@@ -560,20 +563,21 @@ if (b1 > 255) b1=255;
 
 void *video4linux2_thread0() {
   int cam=0; /* thread0 => cam =0 */
-  int color; /* the color (colorA,colorB...) already served by this thread */
+  int color = 0; /* the color (colorA,colorB...) already served by this thread */
   int i,j;
-  unsigned char *dest;
-  size_t length;
+  unsigned char *dest=NULL;
+  size_t length = 0;
   unsigned char *buf_temp;
   unsigned char r,g,b,y1,y2,u,v;
   struct v4l2_buffer buf;
 
   printf("video4linux: thread %d started\n",cam);
 
-  for(j=0;j<MAXDEST;j++)
-    if ((color_requested[j]) && (color_v4l[j]==cam))
-      {color=j;
-      }
+  for(j=0;j<MAXDEST;j++) {
+    if ((color_requested[j]) && (color_v4l[j]==cam)) {
+	color=j;
+    }
+  }
 
   if (color==colorA) dest=(unsigned char*)colorA_image;
   else if (color==colorB) dest=(unsigned char*)colorB_image;
@@ -585,7 +589,7 @@ void *video4linux2_thread0() {
   else if (color==varcolorD) dest=(unsigned char*)varcolorD_image;
 
 	/* inicializacion de parametros dependiendo del formato del video */
-	if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_RGB24) {
+	if (format[cam].fmt.pix.pixelformat == RGB24_FORMAT) {
 		length = v4l_width[cam]*v4l_height[cam]*3;
 	
 	} else if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_YUYV) {
@@ -620,13 +624,13 @@ void *video4linux2_thread0() {
 		}
 
 		/* Copiamos el buffer dependiendo del formato */
-		if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_RGB24) {
+		if (format[cam].fmt.pix.pixelformat == RGB24_FORMAT) {
 			memcpy(dest, buffers[cam][buf.index].start, length);
 
 		} else if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_YUYV) {
 			buf_temp=buffers[cam][buf.index].start;
 
-			/* realizamos la conversion de YUYV a V4L2_PIX_FMT_RGB24 */
+			/* realizamos la conversion de YUYV a RGB24_FORMAT */
 			for (i=0; i<v4l_width[cam]*v4l_height[cam]/2; i++) {
 				y1 = buf_temp[i*4+0];
 				y2 = buf_temp[i*4+2];
@@ -661,21 +665,22 @@ void *video4linux2_thread0() {
 
 
 void *video4linux2_thread1(){
-  int cam=0; /* thread0 => cam =0 */
-  int color; /* the color (colorA,colorB...) already served by this thread */
+  int cam=1; /* thread0 => cam =0 */
+  int color = 0; /* the color (colorA,colorB...) already served by this thread */
   int i,j;
-  unsigned char *dest;
-  size_t length;
+  unsigned char *dest=NULL;
+  size_t length = 0;
   unsigned char *buf_temp;
   unsigned char r,g,b,y1,y2,u,v;
   struct v4l2_buffer buf;
 
   printf("video4linux: thread %d started\n",cam);
 
-  for(j=0;j<MAXDEST;j++)
-    if ((color_requested[j]) && (color_v4l[j]==cam))
-      {color=j;
-      }
+  for(j=0;j<MAXDEST;j++) {
+    if ((color_requested[j]) && (color_v4l[j]==cam)) {
+	color=j;
+    }
+  }
 
   if (color==colorA) dest=(unsigned char*)colorA_image;
   else if (color==colorB) dest=(unsigned char*)colorB_image;
@@ -687,7 +692,7 @@ void *video4linux2_thread1(){
   else if (color==varcolorD) dest=(unsigned char*)varcolorD_image;
 
 	/* inicializacion de parametros dependiendo del formato del video */
-	if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_RGB24) {
+	if (format[cam].fmt.pix.pixelformat == RGB24_FORMAT) {
 		length = v4l_width[cam]*v4l_height[cam]*3;
 	
 	} else if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_YUYV) {
@@ -722,13 +727,13 @@ void *video4linux2_thread1(){
 		}
 
 		/* Copiamos el buffer dependiendo del formato */
-		if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_RGB24) {
+		if (format[cam].fmt.pix.pixelformat == RGB24_FORMAT) {
 			memcpy(dest, buffers[cam][buf.index].start, length);
 
 		} else if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_YUYV) {
 			buf_temp=buffers[cam][buf.index].start;
 
-			/* realizamos la conversion de YUYV a V4L2_PIX_FMT_RGB24 */
+			/* realizamos la conversion de YUYV a RGB24_FORMAT */
 			for (i=0; i<v4l_width[cam]*v4l_height[cam]/2; i++) {
 				y1 = buf_temp[i*4+0];
 				y2 = buf_temp[i*4+2];
@@ -762,21 +767,22 @@ void *video4linux2_thread1(){
 
 
 void *video4linux2_thread2(){
-  int cam=0; /* thread0 => cam =0 */
-  int color; /* the color (colorA,colorB...) already served by this thread */
+  int cam=2; /* thread0 => cam =0 */
+  int color = 0; /* the color (colorA,colorB...) already served by this thread */
   int i,j;
-  unsigned char *dest;
-  size_t length;
+  unsigned char *dest=NULL;
+  size_t length = 0;
   unsigned char *buf_temp;
   unsigned char r,g,b,y1,y2,u,v;
   struct v4l2_buffer buf;
 
   printf("video4linux: thread %d started\n",cam);
 
-  for(j=0;j<MAXDEST;j++)
-    if ((color_requested[j]) && (color_v4l[j]==cam))
-      {color=j;
-      }
+  for(j=0;j<MAXDEST;j++) {
+    if ((color_requested[j]) && (color_v4l[j]==cam)) {
+	color=j;
+    }
+  }
 
   if (color==colorA) dest=(unsigned char*)colorA_image;
   else if (color==colorB) dest=(unsigned char*)colorB_image;
@@ -788,7 +794,7 @@ void *video4linux2_thread2(){
   else if (color==varcolorD) dest=(unsigned char*)varcolorD_image;
 
 	/* inicializacion de parametros dependiendo del formato del video */
-	if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_RGB24) {
+	if (format[cam].fmt.pix.pixelformat == RGB24_FORMAT) {
 		length = v4l_width[cam]*v4l_height[cam]*3;
 	
 	} else if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_YUYV) {
@@ -823,13 +829,13 @@ void *video4linux2_thread2(){
 		}
 
 		/* Copiamos el buffer dependiendo del formato */
-		if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_RGB24) {
+		if (format[cam].fmt.pix.pixelformat == RGB24_FORMAT) {
 			memcpy(dest, buffers[cam][buf.index].start, length);
 
 		} else if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_YUYV) {
 			buf_temp=buffers[cam][buf.index].start;
 
-			/* realizamos la conversion de YUYV a V4L2_PIX_FMT_RGB24 */
+			/* realizamos la conversion de YUYV a RGB24_FORMAT */
 			for (i=0; i<v4l_width[cam]*v4l_height[cam]/2; i++) {
 				y1 = buf_temp[i*4+0];
 				y2 = buf_temp[i*4+2];
@@ -863,21 +869,22 @@ void *video4linux2_thread2(){
 
 
 void *video4linux2_thread3(){
-  int cam=0; /* thread0 => cam =0 */
-  int color; /* the color (colorA,colorB...) already served by this thread */
+  int cam=3; /* thread0 => cam =0 */
+  int color = 0; /* the color (colorA,colorB...) already served by this thread */
   int i,j;
-  unsigned char *dest;
-  size_t length;
+  unsigned char *dest=NULL;
+  size_t length = 0;
   unsigned char *buf_temp;
   unsigned char r,g,b,y1,y2,u,v;
   struct v4l2_buffer buf;
 
   printf("video4linux: thread %d started\n",cam);
 
-  for(j=0;j<MAXDEST;j++)
-    if ((color_requested[j]) && (color_v4l[j]==cam))
-      {color=j;
-      }
+  for(j=0;j<MAXDEST;j++) {
+    if ((color_requested[j]) && (color_v4l[j]==cam)) {
+	color=j;
+    }
+  }
 
   if (color==colorA) dest=(unsigned char*)colorA_image;
   else if (color==colorB) dest=(unsigned char*)colorB_image;
@@ -889,7 +896,7 @@ void *video4linux2_thread3(){
   else if (color==varcolorD) dest=(unsigned char*)varcolorD_image;
 
 	/* inicializacion de parametros dependiendo del formato del video */
-	if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_RGB24) {
+	if (format[cam].fmt.pix.pixelformat == RGB24_FORMAT) {
 		length = v4l_width[cam]*v4l_height[cam]*3;
 	
 	} else if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_YUYV) {
@@ -924,13 +931,13 @@ void *video4linux2_thread3(){
 		}
 
 		/* Copiamos el buffer dependiendo del formato */
-		if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_RGB24) {
+		if (format[cam].fmt.pix.pixelformat == RGB24_FORMAT) {
 			memcpy(dest, buffers[cam][buf.index].start, length);
 
 		} else if (format[cam].fmt.pix.pixelformat == V4L2_PIX_FMT_YUYV) {
 			buf_temp=buffers[cam][buf.index].start;
 
-			/* realizamos la conversion de YUYV a V4L2_PIX_FMT_RGB24 */
+			/* realizamos la conversion de YUYV a RGB24_FORMAT */
 			for (i=0; i<v4l_width[cam]*v4l_height[cam]/2; i++) {
 				y1 = buf_temp[i*4+0];
 				y2 = buf_temp[i*4+2];
@@ -1210,10 +1217,6 @@ int video4linux2_init(){
 			perror("VIDIOC_CROPCAP");
 			return -1;
 		}
-		printf("bounds: %d %d %d %d\n", cropcap.bounds.left, 
-cropcap.bounds.top, cropcap.bounds.width, cropcap.bounds.height);
-		printf("defrect: %d %d %d %d\n", cropcap.defrect.left, 
-cropcap.defrect.top, cropcap.defrect.width, cropcap.defrect.height);
 
 		memset(&crop, 0, sizeof(&crop));
 		crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -1262,16 +1265,17 @@ cropcap.defrect.top, cropcap.defrect.width, cropcap.defrect.height);
 		}
 		format[n].fmt.pix.width = v4l_width[n];
 		format[n].fmt.pix.height = v4l_height[n];
-		format[n].fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24;
+		format[n].fmt.pix.pixelformat = RGB24_FORMAT;
 		if (-1 == ioctl (fdv4l[n], VIDIOC_TRY_FMT, &format[n])) {
 			/* Si NO sólo cambiamos el tamaño de la imagen */
 			format[n].type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			if (-1 == ioctl (fdv4l[n], VIDIOC_G_FMT, &format[n])) {
+			if (-1 == ioctl (fdv4l[n], VIDIOC_G_FMT, &format[n])) { 
 				perror("VIDIOC_G_FMT");
 				return -1;
 			}
 			format[n].fmt.pix.width = v4l_width[n];
 			format[n].fmt.pix.height = v4l_height[n];
+			format[n].fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
 			if (-1 == ioctl (fdv4l[n], VIDIOC_S_FMT, &format[n])) {
 				perror("VIDIOC_S_FMT");
 				return -1;
@@ -1304,6 +1308,7 @@ cropcap.defrect.top, cropcap.defrect.width, cropcap.defrect.height);
 			}
 			if (fmtdesc.pixelformat == format[n].fmt.pix.pixelformat) {
 				printf(" %dx%d - %s - %X\n", format[n].fmt.pix.width, format[n].fmt.pix.height, fmtdesc.description, fmtdesc.pixelformat);
+				printf(" colorspace %d\n", format[n].fmt.pix.colorspace);
 				break;
 			}
 		}
@@ -1367,7 +1372,7 @@ cropcap.defrect.top, cropcap.defrect.width, cropcap.defrect.height);
 			}
 		}
 		/* Inicializamos los bufferes */
-		for (i = 0; i < n_buffers; ++i) {
+		for (i = 0; i < req.count; ++i) {
 			memset(&buf, 0, sizeof(&buf));
 
 			buf.type        = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -1446,13 +1451,13 @@ cropcap.defrect.top, cropcap.defrect.width, cropcap.defrect.height);
     myexport("colorB","suspend",(void *)mycolorB_suspend);
 
     if (color_v4l[colorB]==0)
-      pthread_create(&(all[num_schemas].mythread),NULL,video4linux2_thread0,NULL); 
+      pthread_create(&(all[num_schemas].mythread),NULL,video4linux2_thread0,NULL);
     else if (color_v4l[colorB]==1)
-      pthread_create(&(all[num_schemas].mythread),NULL,video4linux2_thread1,NULL); 
+      pthread_create(&(all[num_schemas].mythread),NULL,video4linux2_thread1,NULL);
     else if (color_v4l[colorB]==2)
-      pthread_create(&(all[num_schemas].mythread),NULL,video4linux2_thread2,NULL); 
+      pthread_create(&(all[num_schemas].mythread),NULL,video4linux2_thread2,NULL);
     else if (color_v4l[colorB]==3)
-      pthread_create(&(all[num_schemas].mythread),NULL,video4linux2_thread3,NULL); 
+      pthread_create(&(all[num_schemas].mythread),NULL,video4linux2_thread3,NULL);
 
     num_schemas++;
   }
@@ -1668,10 +1673,20 @@ cropcap.defrect.top, cropcap.defrect.width, cropcap.defrect.height);
 /** Function will end execution of the driver, closing file descriptors and stopping devices.*/
 void video4linux2_close(){
   int i;
+  enum v4l2_buf_type type;
 
   finish_flag=1;
   sleep(1);
-  for(i=0;i<MAXCAM;i++){if(v4l_requested[i]) close(fdv4l[i]);}
+  for (i=0;i<MAXCAM;i++) {
+	if(v4l_requested[i]) close(fdv4l[i]);
+
+	/* Paramos el streaming */
+	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	if (-1 == ioctl (fdv4l[i], VIDIOC_STREAMOFF, &type)) {
+		perror("VIDIOC_STREAMOFF");
+		return -1;
+	}
+  }
   printf("driver video4linux2 off\n");
 }
 
