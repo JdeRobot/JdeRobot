@@ -1,3 +1,9 @@
+jde (4.3.0-beta-256) unstable; urgency=low
+
+  * Fix Bug: the logitech cams are initialized ok! (gabella)
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Tue, 09 Dec 2008 01:01:42 +0100
+
 jde (4.3.0-beta-255) unstable; urgency=low
 
   * Fixed bug #194 (dlobato) 
