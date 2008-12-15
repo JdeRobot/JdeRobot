@@ -15,7 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : David Lobato <dlobato@gsyc.escet.urjc.es>, Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, JoseMaria Cañas <jmplaza@gsyc.escet.urjc.es>, José Antonio Santos <santoscadenas@gmail.com>
+ *  Authors : David Lobato <dav.lobato@gmail.com>, Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es>, JoseMaria Cañas <jmplaza@gsyc.escet.urjc.es>, José Antonio Santos <santoscadenas@gmail.com>
  */
 
 /**

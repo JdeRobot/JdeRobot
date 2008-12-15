@@ -32,8 +32,8 @@ includedir='${prefix}/include/jdec'
 AC_SUBST([driverdir],['${libdir}/drivers'])
 AC_SUBST([schemadir],['${libdir}/schemas'])
 AC_SUBST([servicedir],['${libdir}/services'])
-AC_SUBST([confdir],['${datadir}/${PACKAGE}/conf'])
-AC_SUBST([gladedir],['${datadir}/${PACKAGE}/glade'])
+AC_SUBST([confdir],['${pkgdatadir}/conf'])
+AC_SUBST([gladedir],['${pkgdatadir}/glade'])
 
 dnl ########################################
 dnl #
@@ -208,12 +208,6 @@ AC_ARG_ENABLE([schemas-opengl_viewer],
 	    [disable opengl_viewer schema compilation])],
     [],
     [enable_schemas_opengl_viewer=yes])
-
-dnl AC_ARG_ENABLE([schemas-opflow],
-dnl     [AS_HELP_STRING([--enable-schemas-opflow],
-dnl 	    [enable opflow schema compilation])],
-dnl     [],
-dnl     [enable_schemas_opflow=no])
 
 AC_ARG_ENABLE([schemas-recorder],
     [AS_HELP_STRING([--disable-schemas-recorder],
@@ -840,33 +834,6 @@ if test "x$enable_schemas_opengl_viewer" != xno; then
 	[AC_MSG_FAILURE([--enable-schemas-opengl_viewer was given, but there was errors: $OPENGL_VIEWER_PKG_ERRORS])])
 fi
 
-dnl dnl # schema opflow
-dnl AM_CONDITIONAL([ENABLE_OPFLOW],[false])
-dnl if test "x$enable_schemas_opflow" != xno; then
-dnl     ERRORS=""
-dnl     AC_MSG_NOTICE([**** Checking schema opflow:])
-dnl     AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
-dnl 	[],
-dnl 	[ERRORS="$ERRORS, $ac_header not found"])
-dnl     AC_CHECK_LIB([forms],[main],
-dnl 	[OPFLOW_LIBS="$OPFLOW_LIBS -lforms"],
-dnl 	[ERRORS="$ERRORS, libforms not found"],[-lm])
-dnl     AC_CHECK_LIB([X11],[main],
-dnl 	[OPFLOW_LIBS="$OPFLOW_LIBS -lX11"],
-dnl 	[ERRORS="$ERRORS, libX11 not found"])
-dnl     AC_PATH_PROG([FDESIGN],[fdesign],
-dnl 	[ERRORS="$ERRORS, fdesign needed to build opflow schema not found"])
-dnl     if test "x$with_ipp" = xno; then
-dnl 	ERRORS="$ERRORS, ipp software not found, use --with-ipp=<path>"
-dnl     fi
-dnl     if test "$ERRORS"; then
-dnl 	AC_MSG_FAILURE([--enable-schemas-opflow was given, but there was errors: $ERRORS])
-dnl     else
-dnl 	ENABLED_SCHEMAS="$ENABLED_SCHEMAS opflow"
-dnl 	AM_CONDITIONAL([ENABLE_OPFLOW],[true])
-dnl     fi
-dnl fi
-
 dnl # schema recorder
 AM_CONDITIONAL([ENABLE_RECORDER],[false])
 if test "x$enable_schemas_recorder" != xno; then
@@ -967,29 +934,9 @@ if test "x$enable_docs" != xno; then
     if test "x$DOXYGEN" = xno; then
 	ERRORS="doxygen not found"
     fi
-    AC_PATH_PROG([LATEX],[latex],[no])
-    if test "x$LATEX" = xno; then
-	ERRORS="$ERRORS, latex not found"
-    fi
-    AC_PATH_PROG([PDFLATEX],[pdflatex],[no])
-    if test "x$PDFLATEX" = xno; then
-	ERRORS="$ERRORS, pdflatex not found"
-    fi
-    AC_PATH_PROG([LATEX2HTML],[latex2html],[no])
-    if test "x$LATEX2HTML" = xno; then
-	ERRORS="$ERRORS, latex2html not found"
-    fi
     AC_PATH_PROG([DOT],[dot],[no])
     if test "x$DOT" = xno; then
 	ERRORS="$ERRORS, dot not found"
-    fi
-    AC_PATH_PROG([DVIPS],[dvips],[no])
-    if test "x$DVIPS" = xno; then
-	ERRORS="$ERRORS, dvips not found"
-    fi
-    AC_PATH_PROG([BIBTEX],[bibtex],[no])
-    if test "x$BIBTEX" = xno; then
-	ERRORS="$ERRORS, bibtex not found"
     fi
     if test "$ERRORS"; then
 	AC_MSG_FAILURE([--enable-docs was given, but there was errors: $ERRORS])
