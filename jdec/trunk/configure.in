@@ -13,7 +13,7 @@ dnl #
 dnl # Autoconf and automake initialization
 dnl #
 dnl ########################################
-AC_INIT([jdec],[4.2])
+AC_INIT([jdec],[4.3])
 AC_CONFIG_AUX_DIR([config])
 dnl # AC_PREFIX_DEFAULT([/usr/local/jdec-AC_PACKAGE_VERSION])
 dnl#init automake
@@ -491,7 +491,7 @@ AM_CONDITIONAL([ENABLE_WIIMOTE],[false])
 if test "x$enable_drivers_wiimote" != xno; then
     ERRORS=""
     AC_MSG_NOTICE([**** Checking driver wiimote:])
-    AC_CHECK_HEADERS([cwiid.h],
+    AC_CHECK_HEADERS([bluetooth/bluetooth.h cwiid.h],
 	[],
 	[ERRORS="$ERRORS, $ac_header not found"])
     AC_CHECK_LIB([cwiid],[main],
