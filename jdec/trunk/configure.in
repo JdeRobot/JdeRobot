@@ -197,6 +197,12 @@ AC_ARG_ENABLE([schemas-myschema],
     [],
     [enable_schemas_myschema=yes])
 
+AC_ARG_ENABLE([schemas-opencvdemo],
+    [AS_HELP_STRING([--disable-schemas-opencvdemo],
+	    [disable opencvdemo schema compilation])],
+    [],
+    [enable_schemas_opencvdemo=yes])
+
 AC_ARG_ENABLE([schemas-opengldemo],
     [AS_HELP_STRING([--disable-schemas-opengldemo],
 	    [disable opengldemo schema compilation])],
@@ -789,6 +795,16 @@ if test "x$enable_schemas_myschema" != xno; then
     AC_SUBST([MYSCHEMA_LIBS])
 fi
 
+dnl # schema opencvdemo
+AM_CONDITIONAL([ENABLE_OPENCVDEMO],[false])
+if test "x$enable_schemas_opencvdemo" != xno; then
+    AC_MSG_NOTICE([**** Checking schema opencvdemo:])
+    PKG_CHECK_MODULES([OPENCVDEMO],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0 opencv],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS opencvdemo"
+	    AM_CONDITIONAL([ENABLE_OPENCVDEMO],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-opencvdemo was given, but there was errors: $OPENCVDEMO_PKG_ERRORS])])
+fi
+
 dnl # schema opengldemo
 AM_CONDITIONAL([ENABLE_OPENGLDEMO],[false])
 if test "x$enable_schemas_opengldemo" != xno; then
@@ -1002,6 +1018,7 @@ AC_CONFIG_FILES([schemas/Makefile \
     schemas/introrob/Makefile \
     schemas/mastergui/Makefile \
     schemas/myschema/Makefile \
+    schemas/opencvdemo/Makefile \
     schemas/opengldemo/Makefile \
     schemas/opengl_viewer/Makefile \
     schemas/recorder/Makefile \
