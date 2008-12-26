@@ -37,11 +37,13 @@ extern void introrob_guisuspend();
 extern float introrob_mouse_x, introrob_mouse_y;
 /* absolute position of the point clicked with the central mouse button */
 
-int absolutas2relativas(Tvoxel in, Tvoxel *out);
-int relativas2absolutas(Tvoxel in, Tvoxel *out);
-int pintaSegmento(Tvoxel a, Tvoxel b, int color);
- 
-float v;
-float w;
-float robot[5];
-float laser[NUM_LASER];
+extern int absolutas2relativas(Tvoxel in, Tvoxel *out);
+extern int relativas2absolutas(Tvoxel in, Tvoxel *out);
+extern int pintaSegmento(Tvoxel a, Tvoxel b, int color);
+
+
+extern float v;
+extern float w;
+extern float robot[5];
+extern float laser[NUM_LASER];
+extern char imagenRGB[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3];

@@ -27,15 +27,15 @@
 #include "navegacion.h"
 
 
-#define DISPLAY_ROBOT 0x01UL
-#define DISPLAY_SONARS 0x04UL
-#define DISPLAY_LASER 0x08UL
-
-int finish_flag=0; 
+int introrob_id=0; 
+int introrob_brothers[MAX_SCHEMAS];
+arbitration introrob_callforarbitration;
+int introrob_cycle=100; /* ms */
 
 /*Gui declarations*/
 Display *mydisplay;
 int  *myscreen;
+
 
 /*Gui callbacks*/
 registerbuttons myregister_buttonscallback;
@@ -45,31 +45,36 @@ deletedisplay mydelete_displaycallback;
 
 
 
-int introrob_id=0; 
-int introrob_brothers[MAX_SCHEMAS];
-arbitration introrob_callforarbitration;
-int introrob_cycle=150; /* ms */
+char imagenRGB[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3];
+char **mycolorA=NULL;
+resumeFn colorAresume;
+suspendFn colorAsuspend;
 
+float laser[NUM_LASER];
 int *mylaser=NULL;
 resumeFn laserresume;
 suspendFn lasersuspend;
 
+float robot[5];
 float *myencoders=NULL;
 resumeFn encodersresume;
 suspendFn encoderssuspend;
 
+float v;
+float w;
 float *myv=NULL;
 float *myw=NULL;
 resumeFn motorsresume;
 suspendFn motorssuspend;
 
-enum introrobstates {teleoperated,vff,deliberative,hybrid};
+enum introrobstates {teleoperated,yourcode};
 int introrob_state;
 
 FD_introrobgui *fd_introrobgui=NULL;
 GC introrobgui_gc;
+GC introrobgui_colorA_gc;
 Window  introrob_canvas_win;
-unsigned long introrob_display_state;
+Window  introrob_colorA_win;
 int introrob_visual_refresh=FALSE;
 int introrob_iteracion_display=0;
 int introrob_canvas_mouse_button_pressed=0;
@@ -79,6 +84,12 @@ FL_Coord introrob_x_canvas,introrob_y_canvas,old_introrob_x_canvas,old_introrob_
 float introrob_mouse_x, introrob_mouse_y;
 Tvoxel vfftarget,oldvfftarget;
 int introrob_mouse_new=0;
+
+#define DISPLAY_ROBOT 0x01UL
+#define DISPLAY_COLORA 0x02UL
+#define DISPLAY_LASER 0x04UL
+#define DISPLAY_MOTORS 0x04UL
+unsigned long introrob_display_state=0;
 
 #define PUSHED 1
 #define RELEASED 0 
@@ -93,6 +104,13 @@ float introrob_odometrico[5];
 #define RANGO_INICIAL 4000. /* en mm */
 float introrob_rango=(float)RANGO_INICIAL; /* Rango de visualizacion en milimetros */
 
+static int vmode;
+static XImage *imagenA;
+static char *imagenA_buf;
+static long int tabla[256]; 
+/* tabla con la traduccion de niveles de gris a numero de pixel en Pseudocolor-8bpp. Cada numero de pixel apunta al valor adecuado del ColorMap, con el color adecuado instalado */
+
+
 #define EGOMAX NUM_SONARS+5
 XPoint introrob_ego[EGOMAX];
 int numintrorob_ego=0;
@@ -101,20 +119,10 @@ int visual_delete_introrob_ego=FALSE;
 XPoint introrob_laser_dpy[NUM_LASER];
 int visual_delete_introrob_laser=FALSE;
 
-XPoint introrob_us_dpy[NUM_SONARS*2];
-int visual_delete_introrob_us=FALSE;
-
 #define joystick_maxRotVel 30 /* deg/sec */
 #define joystick_maxTranVel 500 /* mm/sec */
 float v_teleop, w_teleop;
 
-const char *introrob_range(FL_OBJECT *ob, double value, int prec)
-{
-static char buf[32];
-
-sprintf(buf,"%.1f",value/1000.);
-return buf;
-}
 
 int xy2introrobcanvas(Tvoxel point, XPoint* grafico)
      /* return -1 if point falls outside the canvas */
@@ -174,6 +182,7 @@ int pintaSegmento(Tvoxel a, Tvoxel b, int color)
 void introrob_iteration()
 {
   int i;
+
   speedcounter(introrob_id);
   /* printf("introrob iteration %d\n",d++);*/
 
@@ -181,19 +190,25 @@ void introrob_iteration()
      for (i=0;i<5; i++)
        robot[i]= myencoders[i];
   }
-
-  if (mylaser!=NULL){
-     for (i=0; i<NUM_LASER; i++)
-       laser[i]= mylaser[i];
+  
+  if (mycolorA!=NULL){ 
+    for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++) { 
+      imagenRGB[i*3]=(*mycolorA)[i*3]; /* Blue Byte */
+      imagenRGB[i*3+1]=(*mycolorA)[i*3+1]; /* Green Byte */
+      imagenRGB[i*3+2]=(*mycolorA)[i*3+2]; /* Red Byte */
+    }
   }
 
+  if (mylaser!=NULL){
+    for (i=0; i<NUM_LASER; i++)
+      laser[i]= mylaser[i];
+  }
+  
   if (introrob_state==teleoperated){
      v=v_teleop;
      w=w_teleop;
   }
-  else if (introrob_state==vff) vff_iteration();
-  else if (introrob_state==deliberative) deliberative_iteration();
-  else if (introrob_state==hybrid) hybrid_iteration();
+  else if (introrob_state==yourcode) yourcode_iteration();
   else {v=0;w=0;}
 
   /*Mover los valores de la variables de trabajo a las variables actuadoras
@@ -210,12 +225,23 @@ void introrob_suspend()
 {
   pthread_mutex_lock(&(all[introrob_id].mymutex));
   put_state(introrob_id,slept);
-  all[introrob_id].children[(*(int *)myimport("laser","id"))]=FALSE;
-  all[introrob_id].children[(*(int *)myimport("motors","id"))]=FALSE;
-  all[introrob_id].children[(*(int *)myimport("encoders","id"))]=FALSE;
-  lasersuspend();
-  encoderssuspend();
-  motorssuspend();
+
+  if (mycolorA!=NULL){
+     all[introrob_id].children[(*(int *)myimport("colorA","id"))]=FALSE;
+     colorAsuspend();
+   }
+  if (mylaser!=NULL){
+    all[introrob_id].children[(*(int *)myimport("laser","id"))]=FALSE;
+    lasersuspend();
+  }
+  if (myencoders!=NULL){
+    all[introrob_id].children[(*(int *)myimport("encoders","id"))]=FALSE;
+    encoderssuspend();
+  }
+  if ((myv!=NULL)&&(myw!=NULL)){
+    all[introrob_id].children[(*(int *)myimport("motors","id"))]=FALSE;
+    motorssuspend();
+  }
   printf("introrob: off\n");
   pthread_mutex_unlock(&(all[introrob_id].mymutex));
 }
@@ -239,18 +265,35 @@ void introrob_resume(int father, int *brothers, arbitration fn)
   introrob_callforarbitration=fn;
   put_state(introrob_id,notready);
 
+  introrob_display_state=0;
+  mycolorA=myimport("colorA", "colorA");
+  colorAresume=(resumeFn)myimport("colorA", "resume");
+  colorAsuspend=(suspendFn)myimport("colorA", "suspend");
+  if (mycolorA==NULL)
+    {printf("No image source found. Check your jde configuration file. I go on anyway\n");}
+  else introrob_display_state = introrob_display_state | DISPLAY_COLORA;  
+
   mylaser=(int *)myimport("laser","laser");
   laserresume=(resumeFn)myimport("laser","resume");
   lasersuspend=(suspendFn)myimport("laser","suspend");
+  if (mylaser==NULL)
+    {printf("No laser source found. Check your jde configuration file. I go on anyway\n");}
+  else introrob_display_state = introrob_display_state | DISPLAY_LASER;
 
   myencoders=(float *)myimport("encoders","jde_robot");
   encodersresume=(resumeFn)myimport("encoders","resume");
   encoderssuspend=(suspendFn)myimport("encoders","suspend");
+  if (myencoders==NULL)
+    {printf("No encoders source found. Check your jde configuration file. I go on anyway\n");}
+  else introrob_display_state = introrob_display_state | DISPLAY_ROBOT;
 
   myv=(float *)myimport("motors","v");
   myw=(float *)myimport("motors","w");
   motorsresume=(resumeFn)myimport("motors","resume");
   motorssuspend=(suspendFn)myimport("motors","suspend");
+  if ((myv==NULL)||(myw==NULL)) 
+    {printf("No motors found. Check your jde configuration file. I go on anyway\n");}
+  else introrob_display_state = introrob_display_state | DISPLAY_MOTORS;
 
   printf("introrob: on\n");
   pthread_cond_signal(&(all[introrob_id].condition));
@@ -262,7 +305,7 @@ void *introrob_thread(void *not_used)
   struct timeval a,b;
   long diff, next;
 
-  for(;finish_flag==0;)
+  for(;;)
     {
       pthread_mutex_lock(&(all[introrob_id].mymutex));
 
@@ -282,12 +325,22 @@ void *introrob_thread(void *not_used)
 	      v=0; w=0; 
 	      v_teleop=0; w_teleop=0;
 	      /* start the winner state from controlled motor values */ 
-	      all[introrob_id].children[(*(int *)myimport("laser","id"))]=TRUE;
-	      all[introrob_id].children[(*(int *)myimport("motors","id"))]=TRUE;
-	      all[introrob_id].children[(*(int *)myimport("encoders","id"))]=TRUE;
-	      laserresume(introrob_id,NULL,NULL);
-	      encodersresume(introrob_id,NULL,NULL);
-	      motorsresume(introrob_id,NULL,NULL);
+	      if (mycolorA!=NULL){
+		all[introrob_id].children[(*(int *)myimport("colorA","id"))]=TRUE;
+		colorAresume(introrob_id,NULL,NULL);
+	      }
+	      if (mylaser!=NULL){
+		all[introrob_id].children[(*(int *)myimport("laser","id"))]=TRUE;
+		laserresume(introrob_id,NULL,NULL);
+	      }
+	      if (myencoders!=NULL){
+		all[introrob_id].children[(*(int *)myimport("encoders","id"))]=TRUE;
+		encodersresume(introrob_id,NULL,NULL);
+	      }
+	      if ((myv!=NULL)&&(myw!=NULL)){
+		all[introrob_id].children[(*(int *)myimport("motors","id"))]=TRUE;
+		motorsresume(introrob_id,NULL,NULL);
+	      }
 	    }	  
 	  else if (all[introrob_id].state==winner);
 
@@ -319,40 +372,10 @@ void *introrob_thread(void *not_used)
     }
 }
 
-void introrob_init(){
-   if (myregister_buttonscallback==NULL){
-      if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
-         printf ("I can't fetch register_buttonscallback from graphics_xforms\n");
-         jdeshutdown(1);
-      }
-      if ((mydelete_buttonscallback=(deletebuttons)myimport ("graphics_xforms", "delete_buttonscallback"))==NULL){
-         printf ("I can't fetch delete_buttonscallback from graphics_xforms\n");
-         jdeshutdown(1);
-      }
-      if ((myregister_displaycallback=(registerdisplay)myimport ("graphics_xforms", "register_displaycallback"))==NULL){
-         printf ("I can't fetch register_displaycallback from graphics_xforms\n");
-         jdeshutdown(1);
-      }
-      if ((mydelete_displaycallback=(deletedisplay)myimport ("graphics_xforms", "delete_displaycallback"))==NULL){
-         jdeshutdown(1);
-         printf ("I can't fetch delete_displaycallback from graphics_xforms\n");
-      }
-   }
-
-   if ((myscreen=(int *)myimport("graphics_xforms", "screen"))==NULL){
-      fprintf (stderr, "teleoperator: I can't fetch screen from graphics_xforms\n");
-      jdeshutdown(1);
-   }
-   if ((mydisplay=(Display *)myimport("graphics_xforms", "display"))==NULL){
-      fprintf (stderr, "teleoperator: I can't fetch display from graphics_xforms\n");
-      jdeshutdown(1);
-   }
-   init_pioneer();
-}
 
 void introrob_stop()
+/* introrob_close */
 {
-  finish_flag=1;
   if (fd_introrobgui!=NULL)
     {
       if (all[introrob_id].guistate==on){
@@ -360,6 +383,7 @@ void introrob_stop()
         all[introrob_id].guistate=off;
       }
     }
+  introrob_suspend();
   printf ("introrob close\n");
 }
 
@@ -372,9 +396,35 @@ void introrob_startup(char *configfile)
   printf("introrob schema started up\n");
   put_state(introrob_id,slept);
   pthread_create(&(all[introrob_id].mythread),NULL,introrob_thread,NULL);
-  introrob_init();
-  pthread_mutex_unlock(&(all[introrob_id].mymutex));
 
+  if (myregister_buttonscallback==NULL){
+    if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
+      printf ("I can't fetch register_buttonscallback from graphics_xforms\n");
+      jdeshutdown(1);
+    }
+    if ((mydelete_buttonscallback=(deletebuttons)myimport ("graphics_xforms", "delete_buttonscallback"))==NULL){
+      printf ("I can't fetch delete_buttonscallback from graphics_xforms\n");
+      jdeshutdown(1);
+    }
+    if ((myregister_displaycallback=(registerdisplay)myimport ("graphics_xforms", "register_displaycallback"))==NULL){
+      printf ("I can't fetch register_displaycallback from graphics_xforms\n");
+      jdeshutdown(1);
+    }
+    if ((mydelete_displaycallback=(deletedisplay)myimport ("graphics_xforms", "delete_displaycallback"))==NULL){
+      jdeshutdown(1);
+      printf ("I can't fetch delete_displaycallback from graphics_xforms\n");
+    }
+    if ((myscreen=(int *)myimport("graphics_xforms", "screen"))==NULL){
+      fprintf (stderr, "introrob: I can't fetch screen from graphics_xforms\n");
+      jdeshutdown(1);
+    }
+    if ((mydisplay=(Display *)myimport("graphics_xforms", "display"))==NULL){
+      fprintf (stderr, "introrob: I can't fetch display from graphics_xforms\n");
+      jdeshutdown(1);
+    }
+  }
+  init_pioneer();
+  pthread_mutex_unlock(&(all[introrob_id].mymutex));
   introrob_state=teleoperated;
 }
 
@@ -423,17 +473,9 @@ void introrob_guibuttons(void *obj1)
       v_teleop=0.;
       w_teleop=0.;
     } 
-  else if (obj == fd_introrobgui->vff)
+  else if (obj == fd_introrobgui->yourcode)
     {
-      if (fl_get_button(fd_introrobgui->vff)==PUSHED) introrob_state=vff;
-    }
-  else if (obj == fd_introrobgui->deliberative)
-    {
-      if (fl_get_button(fd_introrobgui->deliberative)==PUSHED) introrob_state=deliberative;
-    }
-  else if (obj == fd_introrobgui->hybrid)
-    {
-      if (fl_get_button(fd_introrobgui->hybrid)==PUSHED) introrob_state=hybrid;
+      if (fl_get_button(fd_introrobgui->yourcode)==PUSHED) introrob_state=yourcode;
     }
   else if (obj == fd_introrobgui->teleoperated);
   {
@@ -444,13 +486,14 @@ void introrob_guibuttons(void *obj1)
 void introrob_guidisplay()
 {
   char text[80]="";
-  static float k=0;
-  int i;
+  static int it=0;
   Tvoxel aa,bb;
   static XPoint targetgraf;
   XPoint a,b;
+  int i,c,row,j,k;
 
   fl_redraw_object(fd_introrobgui->joystick);
+  /*fl_redraw_object(fd_introrobgui->escala);*/
 
   /* slow refresh of the complete introrob gui, needed because incremental refresh misses window occlusions */
   if (introrob_iteracion_display*introrob_cycle>FORCED_REFRESH) 
@@ -459,8 +502,8 @@ void introrob_guidisplay()
     }
   else introrob_iteracion_display++;
 
-  k=k+1.;
-  sprintf(text,"%.1f",k);
+  it=it+1;
+  sprintf(text,"%d",it);
   fl_set_object_label(fd_introrobgui->fps,text);
 
   fl_winset(introrob_canvas_win); 
@@ -502,27 +545,6 @@ void introrob_guidisplay()
     }
   /* fl_set_foreground(introrobgui_gc,FL_RIGHT_BCOL); */
   
-  /* VISUALIZACION de una instantanea ultrasonica **
-  if ((((introrob_display_state&DISPLAY_SONARS)!=0)&&(introrob_visual_refresh==FALSE))
-      || (visual_delete_introrob_us==TRUE))
-    {  
-      fl_set_foreground(introrobgui_gc,FL_WHITE); 
-      ** clean last sonars, but only if there wasn't a total refresh. In case of total refresh the white rectangle already cleaned all **
-      for(i=0;i<NUM_SONARS*2;i+=2) XDrawLine(display,introrob_canvas_win,introrobgui_gc,introrob_us_dpy[i].x,introrob_us_dpy[i].y,introrob_us_dpy[i+1].x,introrob_us_dpy[i+1].y);
-      
-    }
-  
-  if ((introrob_display_state&DISPLAY_SONARS)!=0){
-    for(i=0;i<NUM_SONARS;i++)
-      {us2xy(i,0.,0.,&aa); ** Da en el Tvoxel aa las coordenadas del sensor, pues es distancia 0 **
-      xy2introrobcanvas(aa,&introrob_us_dpy[2*i]);
-      us2xy(i,us[i],0.,&aa);
-      xy2introrobcanvas(aa,&introrob_us_dpy[2*i+1]);
-      }
-    fl_set_foreground(introrobgui_gc,FL_PALEGREEN);
-    for(i=0;i<NUM_SONARS*2;i+=2) XDrawLine(display,introrob_canvas_win,introrobgui_gc,introrob_us_dpy[i].x,introrob_us_dpy[i].y,introrob_us_dpy[i+1].x,introrob_us_dpy[i+1].y);
-  }
-  */
   
   /* VISUALIZACION de una instantanea laser*/
   if ((((introrob_display_state&DISPLAY_LASER)!=0)&&(introrob_visual_refresh==FALSE))
@@ -585,10 +607,65 @@ void introrob_guidisplay()
     for(i=0;i<numintrorob_ego;i++) XDrawLine(mydisplay,introrob_canvas_win,introrobgui_gc,introrob_ego[i].x,introrob_ego[i].y,introrob_ego[i+1].x,introrob_ego[i+1].y);
   }
 
+  /* visualization of colorA */
+  if ((introrob_display_state&DISPLAY_COLORA)!=0){
+    /* Pasa de la imagen capturada a la imagen para visualizar (imagenA_buf),
+       "cambiando" de formato adecuadamente */
+    if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8)){
+      for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++){
+	c=i%(SIFNTSC_COLUMNS);
+	row=i/(SIFNTSC_COLUMNS);
+	j=row*SIFNTSC_COLUMNS+c;
+	if (mycolorA!=NULL)
+	  imagenA_buf[i]= (unsigned char)tabla[(unsigned char)((*mycolorA)[j*3])];
+	else
+	  imagenA_buf[i]= (unsigned char)tabla[(unsigned char)(0)];
+      }
+    }
+    else if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)){
+      for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++){ 
+	c=i%(SIFNTSC_COLUMNS);
+	row=i/SIFNTSC_COLUMNS;
+	j=row*SIFNTSC_COLUMNS+c;
+	if (mycolorA!=NULL){
+	  imagenA_buf[i*2+1]=(0xf8&((*mycolorA)[j*3+2]))+((0xe0&((*mycolorA)[j*3+1]))>>5);
+	  imagenA_buf[i*2]=((0xf8&((*mycolorA)[j*3]))>>3)+((0x1c&((*mycolorA)[j*3+1]))<<3);
+	}
+	else{
+	  imagenA_buf[i*2+1]=(0xf8&(0))+((0xe0&(0))>>5);
+	  imagenA_buf[i*2]=((0xf8&(0))>>3)+((0x1c&(0))<<3);
+	}
+      }
+    }
+    else if (((vmode==TrueColor)&&(fl_state[vmode].depth==24)) ||
+	     ((vmode==TrueColor)&&(fl_state[vmode].depth==32)))
+      {
+        for(i=0; i<SIFNTSC_ROWS*SIFNTSC_COLUMNS; i++){
+	  c=i%SIFNTSC_COLUMNS;
+	  row=i/SIFNTSC_COLUMNS;
+	  j=row*SIFNTSC_COLUMNS+c;
+	  if (mycolorA!=NULL){
+	    imagenA_buf[i*4]=(*mycolorA)[j*3]; /* Blue Byte */
+	    imagenA_buf[i*4+1]=(*mycolorA)[j*3+1]; /* Green Byte */
+	    imagenA_buf[i*4+2]=(*mycolorA)[j*3+2]; /* Red Byte */
+	  }
+	  else{
+	    imagenA_buf[i*4]=0; /* Blue Byte */
+	    imagenA_buf[i*4+1]=0; /* Green Byte */
+	    imagenA_buf[i*4+2]=0; /* Red Byte */
+	  }
+	  imagenA_buf[i*4+3]=UCHAR_MAX; /* alpha Byte */
+        }
+      }
 
+    /* Draw *myscreen onto display */
+       XPutImage(mydisplay,introrob_colorA_win,introrobgui_colorA_gc,imagenA,0,0,fd_introrobgui->ventanaA->x+1, fd_introrobgui->ventanaA->y+1, SIFNTSC_COLUMNS, SIFNTSC_ROWS);
+    
+  }
+  
  
   /* visualization of VFF target */
-  if ((introrob_state==vff)||(introrob_state==teleoperated))
+  if ((introrob_state==yourcode)||(introrob_state==teleoperated))
     {
       if ((oldvfftarget.x!=vfftarget.x)||(oldvfftarget.y!=vfftarget.y))
 	/* the target has changed, do its last position must be cleaned from the canvas */
@@ -606,7 +683,6 @@ void introrob_guidisplay()
 
    /* clear all flags. If they were set at the beginning, they have been already used in this iteration */
   introrob_visual_refresh=FALSE;
-  visual_delete_introrob_us=FALSE; 
   visual_delete_introrob_laser=FALSE; 
   visual_delete_introrob_ego=FALSE;
 
@@ -801,6 +877,7 @@ void introrob_guisuspend_aux(void)
 
 void introrob_guisuspend(){
    static callback fn=NULL;
+
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
          fn ((gui_function)introrob_guisuspend_aux);
@@ -815,6 +892,12 @@ void introrob_guiresume_aux(void)
 {
   static int k=0;
   XGCValues gc_values;
+  XWindowAttributes win_attributes;
+  XColor nuevocolor;
+  int pixelNum, numCols;
+  int allocated_colors=0, non_allocated_colors=0;
+
+   
 
   if (k==0) /* not initialized */
     {
@@ -827,9 +910,7 @@ void introrob_guiresume_aux(void)
       introrob_odometrico[3]= cos(0.);
       introrob_odometrico[4]= sin(0.);
 
-      introrob_display_state = introrob_display_state | DISPLAY_LASER;
-      introrob_display_state = introrob_display_state | DISPLAY_SONARS;
-      introrob_display_state = introrob_display_state | DISPLAY_ROBOT;
+      
 
       fd_introrobgui = create_form_introrobgui();
       fl_set_form_position(fd_introrobgui->introrobgui,400,50);
@@ -838,15 +919,81 @@ void introrob_guiresume_aux(void)
       gc_values.graphics_exposures = False;
       introrobgui_gc = XCreateGC(mydisplay, introrob_canvas_win, GCGraphicsExposures, &gc_values);  
 
+
+      /* Utilizan el Visual (=estructura de color) y el colormap con que este operando el programa principal con su Xforms. No crea un nuevo colormap, sino que modifica el que se estaba usando a traves de funciones de Xforms*/
+ /* Tiene que ir despues de la inicializacion de Forms, pues hace uso de informacion que la libreria rellena en tiempo de ejecucion al iniciarse */
+      introrob_colorA_win= FL_ObjWin(fd_introrobgui->ventanaA);
+      XGetWindowAttributes(mydisplay, introrob_colorA_win, &win_attributes);
+      XMapWindow(mydisplay, introrob_colorA_win);
+      /*XSelectInput(display, introrob_colorA_win, ButtonPress|StructureNotifyMask);*/   
+      gc_values.graphics_exposures = False;
+      introrobgui_colorA_gc = XCreateGC(mydisplay, introrob_colorA_win, GCGraphicsExposures, &gc_values);
+
+      vmode= fl_get_vclass();
+      if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
+	{printf("introrob: truecolor 16 bpp\n");
+	  imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2);    
+	  imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),win_attributes.depth, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+	}
+      else if ((vmode==TrueColor)&&(fl_state[vmode].depth==24)) 
+	{ printf("introrob: truecolor 24 bpp\n");
+	  imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
+	  imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+	}
+      else if ((vmode==TrueColor)&&(fl_state[vmode].depth==32)) 
+	{ printf("introrob: truecolor 24 bpp\n");
+	  imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
+	  imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+	}
+      else if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8)) 
+	{
+	  numCols = 256;
+	  for (pixelNum=0; pixelNum<numCols; pixelNum++) 
+	    {
+	      nuevocolor.pixel=0;
+	      nuevocolor.red=pixelNum<<8;
+	      nuevocolor.green=pixelNum<<8;
+	      nuevocolor.blue=pixelNum<<8;
+	      nuevocolor.flags=DoRed|DoGreen|DoBlue;
+	      
+	      /*if (XAllocColor(display,DefaultColormap(display,*myscreen),&nuevocolor)==False) tabla[pixelNum]=tabla[pixelNum-1];*/
+	      if (XAllocColor(mydisplay,fl_state[vmode].colormap,&nuevocolor)==False) {tabla[pixelNum]=tabla[pixelNum-1]; non_allocated_colors++;}
+	      else {tabla[pixelNum]=nuevocolor.pixel;allocated_colors++;}
+	    }
+	  printf("introrob: depth= %d\n", fl_state[vmode].depth); 
+	  printf("introrob: colormap got %d colors, %d non_allocated colors\n",allocated_colors,non_allocated_colors);
+	  
+	  imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS);    
+	  imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+	}
+      else 
+	{
+	  perror("Unsupported color mode in X server");exit(1);
+	}
+
+
       /* canvas handlers */
       fl_add_canvas_handler(fd_introrobgui->micanvas,ButtonPress,introrob_button_pressed_on_micanvas,NULL);
       fl_add_canvas_handler(fd_introrobgui->micanvas,ButtonRelease,introrob_button_released_on_micanvas,NULL);
       fl_add_canvas_handler(fd_introrobgui->micanvas,MotionNotify,introrob_mouse_motion_on_micanvas,NULL);
-    }
+
+      /* initial values */
+      introrob_width = fd_introrobgui->micanvas->w;
+      introrob_height = fd_introrobgui->micanvas->h;
+      introrob_trackrobot=TRUE;
+      fl_set_button(fd_introrobgui->track_robot,PUSHED);
+      fl_set_slider_bounds(fd_introrobgui->escala,RANGO_MAX,RANGO_MIN);
+      fl_set_slider_value(fd_introrobgui->escala,RANGO_INICIAL);
+      introrob_escala = introrob_width/introrob_rango;
+      introrob_state=teleoperated;
+      fl_set_button(fd_introrobgui->teleoperated,PUSHED); 
+   }
   else 
     {
       fl_show_form(fd_introrobgui->introrobgui,FL_PLACE_POSITION,FL_FULLBORDER,"introrob");
       introrob_canvas_win= FL_ObjWin(fd_introrobgui->micanvas);
+      introrob_colorA_win = FL_ObjWin(fd_introrobgui->ventanaA);
+  /* the window (introrob_colorA_win) changes every time the form is hided and showed again. They need to be updated before displaying anything again */
     }
 
   /* Empiezo con el canvas en blanco */
@@ -856,17 +1003,8 @@ void introrob_guiresume_aux(void)
   fl_rectbound(0,0,introrob_width,introrob_height,FL_WHITE);   
   /*  XFlush(display);*/
   
-  introrob_trackrobot=TRUE;
-  fl_set_button(fd_introrobgui->track_robot,PUSHED);
-  
-  fl_set_slider_bounds(fd_introrobgui->escala,RANGO_MAX,RANGO_MIN);
-  fl_set_slider_filter(fd_introrobgui->escala,introrob_range); /* Para poner el valor del slider en metros en pantalla */
-  fl_set_slider_value(fd_introrobgui->escala,RANGO_INICIAL);
-  introrob_escala = introrob_width/introrob_rango;
+  fl_set_slider_value(fd_introrobgui->escala,introrob_rango);
 
-
-  introrob_state=teleoperated;
-  fl_set_button(fd_introrobgui->teleoperated,PUSHED);
   fl_set_positioner_xvalue(fd_introrobgui->joystick,0.5);
   fl_set_positioner_yvalue(fd_introrobgui->joystick,0.);
   v_teleop=0.;
@@ -874,13 +1012,16 @@ void introrob_guiresume_aux(void)
 
   fl_set_positioner_xvalue(fd_introrobgui->center,0.5);
   fl_set_positioner_yvalue(fd_introrobgui->center,0.5);
-	
+
+  fl_redraw_form(fd_introrobgui->introrobgui);
+
   myregister_buttonscallback(introrob_guibuttons);
   myregister_displaycallback(introrob_guidisplay);
 }
 
 void introrob_guiresume(){
    static callback fn=NULL;
+
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
          fn ((gui_function)introrob_guiresume_aux);
