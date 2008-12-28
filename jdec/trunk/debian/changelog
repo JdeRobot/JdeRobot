@@ -1,6 +1,12 @@
+jde (4.3.0-beta-267) unstable; urgency=low
+
+  * add opencvdemo.conf in jderobot-doc package
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 28 Dec 2008 22:52:50 +0100
+
 jde (4.3.0-beta-266) unstable; urgency=low
 
- * include opencvdemo directory in subdirs (rocapal)
+  * include opencvdemo directory in subdirs (rocapal)
 
  -- Roberto Calvo <rocapal@gsyc.es>  Sun, 28 Dec 2008 21:21:40 +0100
 
