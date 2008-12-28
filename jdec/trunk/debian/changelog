@@ -1,3 +1,9 @@
+jde (4.3.0-beta-266) unstable; urgency=low
+
+ * include opencvdemo directory in subdirs (rocapal)
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 28 Dec 2008 21:21:40 +0100
+
 jde (4.3.0-beta-265) unstable; urgency=low
 
   * firewire driver disabled (rocapal)
