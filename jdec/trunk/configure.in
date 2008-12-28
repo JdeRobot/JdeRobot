@@ -13,7 +13,7 @@ dnl #
 dnl # Autoconf and automake initialization
 dnl #
 dnl ########################################
-AC_INIT([jdec],[4.3])
+AC_INIT([jde-robot],[4.3])
 AC_CONFIG_AUX_DIR([config])
 dnl # AC_PREFIX_DEFAULT([/usr/local/jdec-AC_PACKAGE_VERSION])
 dnl#init automake
@@ -26,8 +26,8 @@ AC_PROG_LIBTOOL
 AC_SUBST([LIBTOOL_DEPS])
 
 dnl#init dirs
-libdir='${exec_prefix}/lib/jdec'
-includedir='${prefix}/include/jdec'
+libdir='${exec_prefix}/lib/jde-robot'
+includedir='${prefix}/include/jde-robot'
 
 AC_SUBST([driverdir],['${libdir}/drivers'])
 AC_SUBST([schemadir],['${libdir}/schemas'])

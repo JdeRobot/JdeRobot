@@ -1,3 +1,19 @@
+jde (4.3.0-beta-265) unstable; urgency=low
+
+  * firewire driver disabled (rocapal)
+  * create /etc/ld.so.conf.d/jderobot.conf file to ldconfig (rocapal)
+  * change path to library and includes to "jde-robot" (rocapal)
+  * Fixed #208: (jmplaza) 
+  * new configure.in that takes account for the new schema: opencvdemo (eperdes)
+  * new schema opencvdemo (eperdes)
+  * Bug #207 fixed (dlobato)
+  * Bug #200 fixed (dlobato)
+  * Fixed #199 (dlobato)
+  * Fixed #202 (dlobato)
+  * Fixed #201 (jmplaza) 
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 28 Dec 2008 17:52:08 +0100
+
 jde (4.3.0-beta-256) unstable; urgency=low
 
   * Fix Bug: the logitech cams are initialized ok! (gabella)
