@@ -1,3 +1,13 @@
+jde (4.3.0-beta-269) unstable; urgency=low
+
+  * [jmplaza] ticket#209 solved: imagefile driver accepts now varcolorA, 
+    varcolorB, varcolorC and varcolorD interfaces. Their sizes may be 
+    specified in the configuration file, but the autosize feature has also 
+    been implemented. With autosize no image size must be setup in 
+    the configuration file, the driver itself takes the size from the image source file. 
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sat, 03 Jan 2009 23:59:26 +0100
+
 jde (4.3.0-beta-267) unstable; urgency=low
 
   * add opencvdemo.conf in jderobot-doc package
