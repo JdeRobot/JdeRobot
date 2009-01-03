@@ -100,8 +100,7 @@ void on_img_sel_changed(GtkComboBoxEntry *img_sel, gpointer user_data){
    char *valor;
    valor=(char *)gtk_combo_box_get_active_text((GtkComboBox *)img_sel);
    /*Importar los valores oportunos y modificar la selección*/
-   printf (valor);
-   printf("\n");
+   printf ("image_viewer: %s\n",valor);
    if (strcmp(valor,"colorA")==0){
       if (image_selected!=0){
          width[0]=myimport("colorA","width");
