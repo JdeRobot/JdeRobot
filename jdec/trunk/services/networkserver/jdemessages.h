@@ -1,3 +1,28 @@
+/*
+ *
+ *  Copyright (C) 1997-2008 JDE Developers Team
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see http://www.gnu.org/licenses/.
+ *
+ *  Authors : Jose Antonio Santos Cadenas <santoscadenas@gmail.com>
+ *            Javier Martin Ramos <xaverbrennt@yahoo.es>
+ *            Jose Maria Cañas <jmplaza@gsyc.escet.urjc.es>
+ *
+ *
+ */
+
+
 /* 
  Communications always starts with the client sending its own name, a string of MAX_CLIENT_NAME chars, to the server.
 

@@ -1,28 +1,22 @@
 /*
- *  Copyright (C) 2007 Jose Maria Cañas Plaza
  *
- *  This program is free software; you can redistribute it and/or modify
+ *  Copyright (C) 1997-2008 JDE Developers Team
+ *
+ *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
+ *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- */
-
-/**
- *  jdec video4linux2 driver provides video images to color variables from video4linux2 devices, such as USB or BT878 cameras.
+ *  along with this program.  If not, see http://www.gnu.org/licenses/.
  *
- *  @file video4linux2.c
- *  @author Antonio Pineda Cabello <apineda@gsyc.escet.urjc.es> and Jose Maria Ca�as Plaza <jmplaza@gsyc.escet.urjc.es>
- *  @version 4.1
- *  @date 30-05-2007
+ *  Authors : Jose Maria Cañas <jmplaza@gsyc.escet.urjc.es>
+ *
  */
 
 #include <stdio.h>
