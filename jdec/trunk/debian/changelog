@@ -1,3 +1,9 @@
+jde (4.3.0-rc1) unstable; urgency=low
+
+  * Change licence header to GPL v3.0
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 04 Jan 2009 15:48:50 +0100
+
 jde (4.3.0-beta-269) unstable; urgency=low
 
   * [jmplaza] ticket#209 solved: imagefile driver accepts now varcolorA, 
