@@ -38,6 +38,8 @@ void update_camera_matrix(TPinHoleCamera *camera)
   float r;
   /* a very small value but not infinite!! */
   float SMALL=0.0001;
+  double t;
+  float ux,uy,uz,vx,vy,vz,wx,wy,wz;
 	
   camera->foa.H=1.;
   camera->position.H=1;
@@ -49,9 +51,32 @@ void update_camera_matrix(TPinHoleCamera *camera)
   r=(float)sqrt((double)(rab31*rab31+rab32*rab32+rab33*rab33)); 
   rab31=rab31/r; rab32=rab32/r; rab33=rab33/r;
 
-  /* this was commented in the previous version. only else branch of this if was valid. test it!!*/	
+  /* Second method:*/
+  wx=rab31;
+  wy=rab32;
+  wz=rab33;
+  t = atan2(-wx,wy);
+  vx=(float)cos(t);
+  vy=(float)sin(t);
+  vz=0.;
+  ux=vy*wz-wy*vz;
+  uy=-vx*wz+wx*vz;
+  uz=vx*wy-wx*vy;
+  if (uz<0.)
+    {vx=-vx; vy=-vy; vz=-vz; 
+      ux=-ux; uy=-uy; uz=-uz;}      
+  rab11=ux;
+  rab12=uy;
+  rab13=uz;
+  rab21=vx;
+  rab22=vy;
+  rab23=vz;
+
+  /* First method:
+   * this was commented in the previous version. only else branch of this if was valid. test it!!*	
+  
   if ((rab31<SMALL) && (rab31>-SMALL) && (rab32<SMALL) && (rab32>-SMALL))
-    /* u3 = OZ or FA=camera position */
+    * u3 = OZ or FA=camera position *
     {
       rab11=1.; rab12=0.; rab13=0.;
       rab21=0.; rab22=1.; rab23=0.;
@@ -66,6 +91,7 @@ void update_camera_matrix(TPinHoleCamera *camera)
     r=(float)sqrt((double)(rab21*rab21+rab22*rab22+rab23*rab23));
     rab21=rab21/r; rab22=rab22/r; rab23=rab23/r;
   }
+  */
 		
   rc11=cos(camera->roll); rc12=sin(camera->roll); rc13=0.;
   rc21=-sin(camera->roll); rc22=cos(camera->roll); rc23=0.;
@@ -80,6 +106,7 @@ void update_camera_matrix(TPinHoleCamera *camera)
   camera->rt31=rc31*rab11+rc32*rab21+rc33*rab31;
   camera->rt32=rc31*rab12+rc32*rab22+rc33*rab32;
   camera->rt33=rc31*rab13+rc32*rab23+rc33*rab33;
+
   camera->rt14=-camera->position.X*camera->rt11-camera->position.Y*camera->rt12-camera->position.Z*camera->rt13;
   camera->rt24=-camera->position.X*camera->rt21-camera->position.Y*camera->rt22-camera->position.Z*camera->rt23;
   camera->rt34=-camera->position.X*camera->rt31-camera->position.Y*camera->rt32-camera->position.Z*camera->rt33;
