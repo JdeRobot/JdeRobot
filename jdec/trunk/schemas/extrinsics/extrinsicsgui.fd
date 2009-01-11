@@ -10,7 +10,7 @@ Unit of measure: FL_COORD_PIXEL
 Name: extrinsicsgui
 Width: 760
 Height: 530
-Number of Objects: 21
+Number of Objects: 22
 
 --------------------
 class: FL_BOX
@@ -52,7 +52,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 670 10 80 20
+box: 680 10 70 20
 boxtype: FL_FRAME_BOX
 colors: FL_DARKCYAN FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -150,7 +150,7 @@ class: FL_VALSLIDER
 type: VERT_NICE_SLIDER
 box: 510 120 30 340
 boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_BLUE
+colors: FL_COL1 FL_RED
 alignment: FL_ALIGN_BOTTOM
 style: FL_NORMAL_STYLE
 size: FL_TINY_SIZE
@@ -170,7 +170,7 @@ class: FL_VALSLIDER
 type: VERT_NICE_SLIDER
 box: 550 120 30 340
 boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_BLUE
+colors: FL_COL1 FL_RED
 alignment: FL_ALIGN_BOTTOM
 style: FL_NORMAL_STYLE
 size: FL_TINY_SIZE
@@ -190,7 +190,7 @@ class: FL_VALSLIDER
 type: VERT_NICE_SLIDER
 box: 590 120 30 340
 boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_BLUE
+colors: FL_COL1 FL_RED
 alignment: FL_ALIGN_BOTTOM
 style: FL_NORMAL_STYLE
 size: FL_TINY_SIZE
@@ -210,7 +210,7 @@ class: FL_VALSLIDER
 type: HOR_NICE_SLIDER
 box: 360 480 390 30
 boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_BLUE
+colors: FL_COL1 FL_RED
 alignment: FL_ALIGN_BOTTOM
 style: FL_NORMAL_STYLE
 size: FL_TINY_SIZE
@@ -228,7 +228,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 440 20 80 30
+box: 590 10 80 30
 boxtype: FL_FRAME_BOX
 colors: FL_PALEGREEN FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -266,7 +266,7 @@ class: FL_VALSLIDER
 type: VERT_NICE_SLIDER
 box: 650 130 20 200
 boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_PALEGREEN
+colors: FL_COL1 FL_BLUE
 alignment: FL_ALIGN_BOTTOM
 style: FL_NORMAL_STYLE
 size: FL_TINY_SIZE
@@ -339,7 +339,7 @@ argument: 0
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 440 50 80 30
+box: 440 10 70 30
 boxtype: FL_FRAME_BOX
 colors: FL_PALEGREEN FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -357,7 +357,7 @@ argument:
 --------------------
 class: FL_BUTTON
 type: NORMAL_BUTTON
-box: 440 80 80 30
+box: 510 10 70 30
 boxtype: FL_FRAME_BOX
 colors: FL_PALEGREEN FL_GREEN
 alignment: FL_ALIGN_CENTER
@@ -377,7 +377,7 @@ class: FL_VALSLIDER
 type: VERT_NICE_SLIDER
 box: 680 130 20 200
 boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_PALEGREEN
+colors: FL_COL1 FL_BLUE
 alignment: FL_ALIGN_BOTTOM
 style: FL_NORMAL_STYLE
 size: FL_TINY_SIZE
@@ -397,7 +397,7 @@ class: FL_VALSLIDER
 type: VERT_NICE_SLIDER
 box: 710 130 20 200
 boxtype: FL_FRAME_BOX
-colors: FL_COL1 FL_PALEGREEN
+colors: FL_COL1 FL_BLUE
 alignment: FL_ALIGN_BOTTOM
 style: FL_NORMAL_STYLE
 size: FL_TINY_SIZE
@@ -411,6 +411,24 @@ callback:
 argument: 
 	precision: 0
 	slsize: 0.00
+
+--------------------
+class: FL_CHECKBUTTON
+type: PUSH_BUTTON
+box: 350 60 80 40
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_YELLOW
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: fixed FOA
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: fixedFOA
+callback: 
+argument: 
 
 ==============================
 create_the_forms

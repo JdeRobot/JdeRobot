@@ -1,3 +1,24 @@
+/*
+ *
+ *  Copyright (C) 1997-2008 JDE Developers Team
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see http://www.gnu.org/licenses/. 
+ *
+ *  Authors : José María Cañas Plaza <jmplaza@gsyc.es>, Antonio Pineda <apineda@gsyc.es>
+ *
+ */
+
 #include <math.h>
 #include "jde.h"
 #include "forms.h"
@@ -38,6 +59,7 @@ FD_extrinsicsgui *fd_extrinsicsgui;
 char mybuffer[SIFNTSC_ROWS*SIFNTSC_COLUMNS*3];
 char myvirtual_buffer[SIFNTSC_ROWS*SIFNTSC_COLUMNS*3];
 int flip_images = 0;
+int fixedFOA = 0;
 
 int aux_point_x, aux_point_y;
 int mouse_pressed=0; /*it hasn't been pushed yet*/
@@ -316,7 +338,7 @@ void absolutas2relativas(HPoint3D abs, HPoint3D *rel)
       (*rel).X=(*rel).X/(*rel).H;
       (*rel).Y=(*rel).Y/(*rel).H;
       (*rel).Z=(*rel).Z/(*rel).H;
-	  (*rel).H=(*rel).H/(*rel).H;
+      (*rel).H=(*rel).H/(*rel).H;
     }
 }
 
@@ -736,6 +758,7 @@ void set_sliders_position()
 void extrinsics_guibuttons(void *obj){
   float a,b,rxy,lati,longi,r;
   float px,py,pz,inc_lati,inc_longi;
+  float deltaX,deltaY,deltaZ;
 
   /* now we check every object to see if it has changed */
   if (obj == fd_extrinsicsgui->exit_button){ /* EXIT BUTTON */
@@ -747,6 +770,13 @@ void extrinsics_guibuttons(void *obj){
     }else{
       flip_images = 1;
     }
+  }
+  else if (obj == fd_extrinsicsgui->fixedFOA){ /* FixedFOA BUTTON */
+    if (fl_get_button(fd_extrinsicsgui->fixedFOA)==RELEASED){
+      fixedFOA = 0;
+    }else{
+      fixedFOA = 1;
+    }
     
   }else if (obj == fd_extrinsicsgui->save){ /* EXPORT BUTTON */
       save_cam(cameraOUTfile);
@@ -757,10 +787,19 @@ void extrinsics_guibuttons(void *obj){
 
   }else if((obj == fd_extrinsicsgui->x_cam_slider)||(obj == fd_extrinsicsgui->y_cam_slider)||(obj == fd_extrinsicsgui->z_cam_slider)){
     /* CAMERA POSITION SLIDERS */
-    mycameras[mycam].position.X=(float) fl_get_slider_value(fd_extrinsicsgui->x_cam_slider);
-    mycameras[mycam].position.Y=(float) fl_get_slider_value(fd_extrinsicsgui->y_cam_slider);
-    mycameras[mycam].position.Z=(float) fl_get_slider_value(fd_extrinsicsgui->z_cam_slider);
+    deltaX=(float) fl_get_slider_value(fd_extrinsicsgui->x_cam_slider)-mycameras[mycam].position.X;
+    deltaY=(float) fl_get_slider_value(fd_extrinsicsgui->y_cam_slider)-mycameras[mycam].position.Y;
+    deltaZ=(float) fl_get_slider_value(fd_extrinsicsgui->z_cam_slider)-mycameras[mycam].position.Z;
+    mycameras[mycam].position.X+=deltaX;
+    mycameras[mycam].position.Y+=deltaY;
+    mycameras[mycam].position.Z+=deltaZ;
     mycameras[mycam].position.H=1.;
+    if (fixedFOA==0)
+      {
+	mycameras[mycam].foa.X+=deltaX;
+	mycameras[mycam].foa.Y+=deltaY;
+	mycameras[mycam].foa.Z+=deltaZ;
+      }
     update_camera_matrix(&mycameras[mycam]);
     /*mydebug();*/
 
@@ -1510,6 +1549,8 @@ int virtual_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, 
 }
 
 int color_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, void *xev){
+ float deltaX,deltaY,deltaZ;
+ HPoint3D newpos,ZaxisRel;
 
   /*event was making click with a mouse button*/
   if(event==FL_PUSH){
@@ -1532,44 +1573,25 @@ int color_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my,int key, vo
       aux_point_y=y;
       
     }else if((key==4)||(key==5)){
-      /*
-      if(key==4){
-	r=fl_get_slider_value(fd_extrinsicsgui->radious_slider)-500;
-      }else if(key==5){
-	r=fl_get_slider_value(fd_extrinsicsgui->radious_slider)+500;
-      }
-      
-      if(r<=0.){
-	r=0.;
-	fl_set_slider_value(fd_extrinsicsgui->radious_slider,(double)r);
-      }else if(r>=MAX_Z){
-	r=MAX_Z;
-	fl_set_slider_value(fd_extrinsicsgui->radious_slider,(double)r);
-	
-      }else if((r>0.)&&(r<MAX_Z)){
-	if(key==4){
-	  fl_set_slider_value(fd_extrinsicsgui->radious_slider,(double)fl_get_slider_value(fd_extrinsicsgui->radious_slider)-500);
-	}else{
-	  fl_set_slider_value(fd_extrinsicsgui->radious_slider,(double)fl_get_slider_value(fd_extrinsicsgui->radious_slider)+500);
-	}
-      }
-      */
-      /*
-      px=r*cos(lati)*cos(longi);
-      py=r*cos(lati)*sin(longi);
-      pz=r*sin(lati);
-      fl_set_slider_value(fd_extrinsicsgui->x_cam_slider,(double)px);
-      fl_set_slider_value(fd_extrinsicsgui->y_cam_slider,(double)py);
-      fl_set_slider_value(fd_extrinsicsgui->z_cam_slider,(double)pz);
-      
-      mycameras[mycam].position.X=px;
-      mycameras[mycam].position.Y=py;
-      mycameras[mycam].position.Z=pz;
+     
+      if (key==5) ZaxisRel.Z=-50; /* wheel, up */
+      else if (key==4) ZaxisRel.Z=50; /* wheel, down */
+      ZaxisRel.X=0.; ZaxisRel.Y=0.; ZaxisRel.H=1.; 
+      relativas2absolutas(ZaxisRel,&newpos);
+      deltaX=newpos.X-mycameras[mycam].position.X;
+      deltaY=newpos.Y-mycameras[mycam].position.Y;
+      deltaZ=newpos.Z-mycameras[mycam].position.Z;
+     
+      mycameras[mycam].position.X+=deltaX;
+      mycameras[mycam].position.Y+=deltaY;
+      mycameras[mycam].position.Z+=deltaZ;
       mycameras[mycam].position.H=1.;
+      mycameras[mycam].foa.X+=deltaX;
+      mycameras[mycam].foa.Y+=deltaY;
+      mycameras[mycam].foa.Z+=deltaZ;
+      mycameras[mycam].foa.H=1.;
       update_camera_matrix(&mycameras[mycam]);
-
-      set_sliders_position();
-      */
+      set_sliders_position();     
     }
 
   }else if((event==FL_MOUSE)&&(mouse_pressed==1)&&((key==1)||(key==3))) /*El evento es mantener pulsado boton del raton*/
