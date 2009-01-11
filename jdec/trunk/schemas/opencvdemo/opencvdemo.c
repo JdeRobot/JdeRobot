@@ -498,11 +498,12 @@ void convolution() {
 	}
 
 	CvMat *mask; 
-	IplImage *src, *dst;
+	IplImage *src, *tmp, *dst;
 	int i, h, w;
 	int elems = sizekernel*sizekernel;
 
 	src = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
+	tmp = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
 	dst = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
 	mask = cvCreateMat(sizekernel, sizekernel, CV_32FC1);
 
@@ -510,17 +511,26 @@ void convolution() {
 	for(i=0;i<elems;i++) {
 		h = i/sizekernel;
 		w = i%sizekernel;
-		cvSet2D(mask,h, w, cvScalar(kernel[i],0,0,0));
+		if(modulo > 1)
+			cvSet2D(mask,h, w, cvScalar(kernel[i]/modulo,0,0,0));
+		else
+			cvSet2D(mask,h, w, cvScalar(kernel[i],0,0,0));
 	}
 
 	memcpy(src->imageData, image, src->width*src->height*src->nChannels);
 
-	cvFilter2D(src, dst, mask, cvPoint(-1,-1));
+	if (offset != 0) {
+		cvFilter2D(src, tmp, mask, cvPoint(-1,-1));
+		/*Add offset*/
+		cvAddS(tmp, cvScalarAll(offset), dst, 0);
+	} else
+		cvFilter2D(src, dst, mask, cvPoint(-1,-1));
 
 	memcpy(image_aux, dst->imageData, src->width*src->height*src->nChannels);
 
 	cvReleaseMat(&mask);
 	cvReleaseImage(&src);
+	cvReleaseImage(&tmp);
 	cvReleaseImage(&dst);
 }
 
