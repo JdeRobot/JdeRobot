@@ -14,8 +14,12 @@ FOApositionH 1.000000
 roll 0.
 
  #intrinsics 
-f 505.850830
+fx 505.850830
+fy 505.850830
+skew 0.000000
 u0 120
 v0 160
 #u0 142.600006
 #v0 150.399994
+columns 320
+rows 240

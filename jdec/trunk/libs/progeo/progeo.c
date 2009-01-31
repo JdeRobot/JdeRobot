@@ -23,10 +23,6 @@
 #include <math.h>
 #include <stdio.h>
 
-/* SIF image size */
-#define SIFNTSC_ROWS 240
-#define SIFNTSC_COLUMNS 320
-
 #define PI 3.141592654
 
 int debug=0;
@@ -116,13 +112,13 @@ void update_camera_matrix(TPinHoleCamera *camera)
   camera->rt44=1.;
 	
   /* intrinsics parameters */
-  camera->k11=camera->fdist;  camera->k12=0.; camera->k13=camera->u0; camera->k14=0.;
-  camera->k21=0.; camera->k22=camera->fdist;  camera->k23=camera->v0; camera->k24=0.;
+  camera->k11=camera->fdistx;  camera->k12=camera->skew*camera->fdisty; camera->k13=camera->u0; camera->k14=0.; 
+  camera->k21=0.; camera->k22=camera->fdisty;  camera->k23=camera->v0; camera->k24=0.;
   camera->k31=0.; camera->k32=0.; camera->k33=1.; camera->k34=0.;
 		 		
   if (debug==1) printf("Camera %s Located at (%.f,%.f,%.f)\n",camera->name,camera->position.X,camera->position.Y,camera->position.Z);
   if (debug==1) printf("Camera %s Orientation: pointing towards FocusOfAtention (%.f,%.f,%.f), roll (%.f)\n",camera->name,camera->foa.X,camera->foa.Y,camera->foa.Z,camera->roll*360./(2*PI));
-  if (debug==1) printf("Camera %s f= %.5f y0=%d x0=%d\n",camera->name,camera->fdist,(int)camera->v0,(int)camera->u0);
+  if (debug==1) printf("Camera %s fx= %.5f fy= %.5f skew= %.5f y0=%d x0=%d\n",camera->name, camera->fdistx, camera->fdisty, camera->skew,(int)camera->v0,(int)camera->u0);
   if (debug==1) printf("Camera %s K matrix\n %.3f %.1f %.1f %.1f\n %.1f %.3f %.1f %.1f\n %.1f %.1f %.1f %.1f\n",camera->name,camera->k11,camera->k12,camera->k13,camera->k14,camera->k21,camera->k22,camera->k23,camera->k24,camera->k31,camera->k32,camera->k33,camera->k34);
   if (debug==1) printf("Camera %s RT matrix\n %.1f %.1f %.1f %.1f\n %.1f %.1f %.1f %.1f\n %.1f %.1f %.1f %.1f\n %.1f %.1f %.1f %.1f\n",camera->name,camera->rt11,camera->rt12,camera->rt13,camera->rt14,camera->rt21,camera->rt22,camera->rt23,camera->rt24,camera->rt31,camera->rt32,camera->rt33,camera->rt34,camera->rt41,camera->rt42,camera->rt43,camera->rt44);	
 }
@@ -243,7 +239,9 @@ int backproject(HPoint3D *out, HPoint2D in, TPinHoleCamera camera)
       myin.x=in.x*camera.k11/in.h;
       myin.y=in.y*camera.k11/in.h;
 	
-      ik11=(1./camera.k11); ik12=0.; ik13=-(camera.k13/camera.k11);
+      ik11=(1./camera.k11); 
+      ik12=-camera.k12/(camera.k11*camera.k22);
+      ik13=(camera.k12*camera.k23-camera.k13*camera.k22)/(camera.k22*camera.k11); 
       ik21=0.; ik22=(1./camera.k22); ik23=-(camera.k23/camera.k22);
       ik31=0.; ik32=0.; ik33=1.;
 	
@@ -284,9 +282,9 @@ int backproject(HPoint3D *out, HPoint2D in, TPinHoleCamera camera)
   return(output);
 }
 
-/* if p1 and p2 can't be drawed in a 320x240 image, then it will return 0.
+/* if p1 and p2 can't be drawed in a camera.cols X camera.rows image, then it will return 0.
    otherwise it will return 1 and gooda & goodb will be the correct points in the image to be drawn */
-int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b)
+int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b, TPinHoleCamera camera)
 /* it takes care of important features: before/behind the focal plane, inside/outside the image frame */
 {
   
@@ -296,8 +294,8 @@ int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b)
   float Xmax,Xmin,Ymax,Ymin;
   float papb=0.;
   
-  Xmin=0.; Xmax=SIFNTSC_ROWS-1.; Ymin=0.; Ymax=SIFNTSC_COLUMNS-1.;
-  /* Watchout!: they can't reach 240 or 320, their are not valid values for the pixels */
+  Xmin=0.; Xmax=camera.rows-1.; Ymin=0.; Ymax=camera.columns-1.;
+  /* Watchout!: they can't reach camera.rows or camera.columns, their are not valid values for the pixels */
   
   l0.x=0.; l0.y=1.; l0.h=-Ymin;
   l1.x=0.; l1.y=1.; l1.h=-Ymax;
@@ -547,7 +545,9 @@ void display_camerainfo(TPinHoleCamera camera){
   printf("Camera %s\n\n",camera.name);
   printf("     Position: (X,Y,Z,H)=(%.1f,%.1f,%.1f,%.1f)\n",camera.position.X,camera.position.Y,camera.position.Z,camera.position.H);
   printf("     Focus of Attention: (x,y,z,h)=(%.1f,%.1f,%.1f,%.1f)\n\n",camera.foa.X,camera.foa.Y,camera.foa.Z,camera.foa.H);
-  printf("     Focus Distance: %.1f mm\n",camera.fdist);
+  printf("     Focus DistanceX(vertical): %.1f mm\n",camera.fdistx);
+  printf("     Focus DistanceY(horizontal): %.1f mm\n",camera.fdisty);
+  printf("     Skew: %.5f \n",camera.skew);
   printf("     Optical Center: (x,y)=(%.1f,%.1f)\n\n",camera.u0,camera.v0);
   printf("     K Matrix: | %.1f %.1f %.1f %.1f |\n",camera.k11,camera.k12,camera.k13,camera.k14);
   printf("               | %.1f %.1f %.1f %.1f |\n",camera.k21,camera.k22,camera.k23,camera.k24);

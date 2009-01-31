@@ -366,9 +366,13 @@ void save_cam(char *fich_sal)
   fprintf(salida,"FOApositionH %f\n",mycameras[mycam].foa.H);
   fprintf(salida,"roll %f\n",mycameras[mycam].roll);
   fprintf(salida,"\n #intrinsics\n");
-  fprintf(salida,"f %f\n",mycameras[mycam].fdist);
+  fprintf(salida,"fx %f\n",mycameras[mycam].fdistx);
+  fprintf(salida,"fy %f\n",mycameras[mycam].fdisty);
+  fprintf(salida,"skew %f\n",mycameras[mycam].skew);
   fprintf(salida,"u0 %f\n",mycameras[mycam].u0);
   fprintf(salida,"v0 %f\n",mycameras[mycam].v0);
+  fprintf(salida,"columns %d\n",mycameras[mycam].columns);
+  fprintf(salida,"rows %d\n",mycameras[mycam].rows);
   fclose(salida);
 }
 
@@ -444,7 +448,20 @@ int load_cam_line(FILE *myfile)
     }
     else if (strcmp(word1,"f")==0){
       sscanf(buffer_file,"%s %s",word1,word2);
-      mycameras[mycam].fdist=(float)atof(word2);
+      mycameras[mycam].fdistx=(float)atof(word2);
+      mycameras[mycam].fdisty=(float)atof(word2);
+     }
+    else if (strcmp(word1,"fx")==0){
+      sscanf(buffer_file,"%s %s",word1,word2);
+      mycameras[mycam].fdistx=(float)atof(word2);
+    }
+    else if (strcmp(word1,"fy")==0){
+      sscanf(buffer_file,"%s %s",word1,word2);
+      mycameras[mycam].fdisty=(float)atof(word2);
+     }
+    else if (strcmp(word1,"skew")==0){
+      sscanf(buffer_file,"%s %s",word1,word2);
+      mycameras[mycam].skew=(float)atof(word2);
      }
     else if (strcmp(word1,"u0")==0){
       sscanf(buffer_file,"%s %s",word1,word2);
@@ -453,7 +470,15 @@ int load_cam_line(FILE *myfile)
     else if (strcmp(word1,"v0")==0){
       sscanf(buffer_file,"%s %s",word1,word2);
       mycameras[mycam].v0=(float)atof(word2);
-    }
+    } 
+    else if (strcmp(word1,"columns")==0){
+      sscanf(buffer_file,"%s %s",word1,word2);
+      mycameras[mycam].columns=(int)atof(word2);
+    } 
+    else if (strcmp(word1,"rows")==0){
+      sscanf(buffer_file,"%s %s",word1,word2);
+      mycameras[mycam].rows=(int)atof(word2);
+    } 
   }
  return 1;
 }
@@ -712,7 +737,16 @@ void extrinsics_startup(char *configfile)
      printf("extrinsics: configuration file %s\n",configfile);
      do{i=load_worldline(myconfig);}while(i!=EOF);
      fclose(myconfig);
+
+     /* default values for camera parameters */
+     mycameras[mycam].columns = SIFNTSC_COLUMNS;
+     mycameras[mycam].rows = SIFNTSC_ROWS;
+     mycameras[mycam].v0 = SIFNTSC_COLUMNS/2;
+     mycameras[mycam].u0 = SIFNTSC_ROWS/2;
+     mycameras[mycam].skew = 0.;
+     /* load real info for the camera */
      load_cam(cameraINfile);
+
      /* for the undo operation be ready from the very beginning */
      save_cam(cameraOUTfile); 
    }
@@ -726,11 +760,15 @@ void extrinsics_startup(char *configfile)
   mycameras[vcam].foa.Y = 1975.0;
   mycameras[vcam].foa.Z = -225.0;
   mycameras[vcam].foa.H = 1.;
-  mycameras[vcam].fdist = (float)ISIGHT_PINHOLE_FDIST;
+  mycameras[vcam].fdistx = (float)ISIGHT_PINHOLE_FDIST;
+  mycameras[vcam].fdisty = (float)ISIGHT_PINHOLE_FDIST;
   mycameras[vcam].u0 = (float)ISIGHT_PINHOLE_U0;
   mycameras[vcam].v0 = (float)ISIGHT_PINHOLE_V0;
   mycameras[vcam].roll = 0.0;
-  update_camera_matrix(&mycameras[vcam]);
+  mycameras[vcam].skew = 0.0; 
+  mycameras[vcam].columns = SIFNTSC_COLUMNS;
+  mycameras[vcam].rows = SIFNTSC_ROWS;
+  update_camera_matrix(&mycameras[vcam]); 
 }
 
 
@@ -749,7 +787,7 @@ void set_sliders_position()
   fl_set_slider_value(fd_extrinsicsgui->roll_slider,(double)((mycameras[mycam].roll*360)/(2*PI)));
 
   /* intrinsics */
-  fl_set_slider_value(fd_extrinsicsgui->focus_slider,(double)mycameras[mycam].fdist);
+  fl_set_slider_value(fd_extrinsicsgui->focus_slider,(double)mycameras[mycam].fdisty);
   fl_set_slider_value(fd_extrinsicsgui->u0,(double)mycameras[mycam].u0);
   fl_set_slider_value(fd_extrinsicsgui->v0,(double)mycameras[mycam].v0);
 }
@@ -862,7 +900,8 @@ void extrinsics_guibuttons(void *obj){
   
   }else if(obj == fd_extrinsicsgui->focus_slider){ /* FOCUS DISTANCE SLIDER */
 
-    mycameras[mycam].fdist=(float) fl_get_slider_value(fd_extrinsicsgui->focus_slider);
+    mycameras[mycam].fdisty=(float) fl_get_slider_value(fd_extrinsicsgui->focus_slider);
+    mycameras[mycam].fdistx=(float) fl_get_slider_value(fd_extrinsicsgui->focus_slider);
     update_camera_matrix(&mycameras[mycam]);
     /*mydebug();*/
 
@@ -881,90 +920,75 @@ void extrinsics_guibuttons(void *obj){
 }
 
 
-/* int draws an image on an FL_IMAGE XForms object */
-int lineinimage(char *img, int xa, int ya, int xb, int yb, FL_COLOR thiscolor,int columns,int rows)
-{
-  
+
+int drawline(HPoint2D p1, HPoint2D p2, FL_COLOR thiscolor, TPinHoleCamera camera, char *img)
+/* it takes care of important features */
+/* before/behind the focal plane, inside/outside the image frame */
+{  
+  int xa,ya,xb,yb;
+  HPoint2D gooda,goodb;
   float L;
   int i,imax,r,g,b;
   int lastx,lasty,thisx,thisy,lastcount;
-  int threshold=1;
+  int threshold=1; 
   int Xmax,Xmin,Ymax,Ymin;
   
-  Xmin=0; Xmax=columns-1; Ymin=0; Ymax=rows-1;
+  if(displayline(p1,p2,&gooda,&goodb,camera)==1)
+    {
+      xa=(int)gooda.y;
+      ya=camera.rows-1-(int)gooda.x;
+      xb=(int)goodb.y;
+      yb=camera.rows-1-(int)goodb.x;
 
-  /* In this image always graf coordinates x=horizontal, y=vertical, starting at the top left corner of the image.
-     They can't reach 240 or 320, their are not valid values for the pixels. */
-  
-  if (thiscolor==FL_BLACK) {r=0;g=0;b=0;}
-  else if (thiscolor==FL_RED) {r=255;g=0;b=0;} 
-  else if (thiscolor==FL_GREEN) {r=0;g=255;b=0;} 
-  else if (thiscolor==FL_BLUE) {r=0;g=0;b=255;} 
-  else if (thiscolor==FL_PALEGREEN) {r=113;g=198;b=113;} 
-  else if (thiscolor==FL_WHEAT) {r=255;g=231;b=155;}
-  else if (thiscolor==FL_DEEPPINK) {r=213;g=85;b=178; }   
-  else {r=0;g=0;b=0;}
-  
-  /* first, check both points are inside the limits and draw them */
-  if ((xa>=Xmin) && (xa<Xmax+1) && (ya>=Ymin) && (ya<Ymax+1) &&
-      (xb>=Xmin) && (xb<Xmax+1) && (yb>=Ymin) && (yb<Ymax+1)){
-    /* draw both points */
-    
-    img[(columns*ya+xa)*3+0]=b;
-    img[(columns*ya+xa)*3+1]=g;
-    img[(columns*ya+xa)*3+2]=r;
-    img[(columns*yb+xb)*3+0]=b;
-    img[(columns*yb+xb)*3+1]=g;
-    img[(columns*yb+xb)*3+2]=r;
-    
-    L=(float)sqrt((double)((xb-xa)*(xb-xa)+(yb-ya)*(yb-ya)));
-    imax=3*(int)L+1;
-    lastx=xa; lasty=xb; lastcount=0;
-    for(i=0;i<=imax;i++){
-      thisy=(int)((float)ya+(float)i/(float)imax*(float)(yb-ya));
-      thisx=(int)((float)xa+(float)i/(float)imax*(float)(xb-xa));
-      if ((thisy==lasty)&&(thisx==lastx)) lastcount++;
-      else{ 
-	if (lastcount>=threshold){ /* draw that point in the image */
-	  img[(columns*lasty+lastx)*3+0]=b;
-	  img[(columns*lasty+lastx)*3+1]=g;
-	  img[(columns*lasty+lastx)*3+2]=r;
+      Xmin=0; Xmax=camera.columns-1; Ymin=0; Ymax=camera.rows-1;
+      
+      /* In this image always graf coordinates x=horizontal, y=vertical, starting at the top left corner of the image.
+	 They can't reach 240 or 320, their are not valid values for the pixels. */
+      
+      if (thiscolor==FL_BLACK) {r=0;g=0;b=0;}
+      else if (thiscolor==FL_RED) {r=255;g=0;b=0;} 
+      else if (thiscolor==FL_GREEN) {r=0;g=255;b=0;} 
+      else if (thiscolor==FL_BLUE) {r=0;g=0;b=255;} 
+      else if (thiscolor==FL_PALEGREEN) {r=113;g=198;b=113;} 
+      else if (thiscolor==FL_WHEAT) {r=255;g=231;b=155;}
+      else if (thiscolor==FL_DEEPPINK) {r=213;g=85;b=178; }   
+      else {r=0;g=0;b=0;}
+      
+      /* first, check both points are inside the limits and draw them */
+      if ((xa>=Xmin) && (xa<Xmax+1) && (ya>=Ymin) && (ya<Ymax+1) &&
+	  (xb>=Xmin) && (xb<Xmax+1) && (yb>=Ymin) && (yb<Ymax+1)){
+	/* draw both points */
+	
+	img[(camera.columns*ya+xa)*3+0]=b;
+	img[(camera.columns*ya+xa)*3+1]=g;
+	img[(camera.columns*ya+xa)*3+2]=r;
+	img[(camera.columns*yb+xb)*3+0]=b;
+	img[(camera.columns*yb+xb)*3+1]=g;
+	img[(camera.columns*yb+xb)*3+2]=r;
+	
+	L=(float)sqrt((double)((xb-xa)*(xb-xa)+(yb-ya)*(yb-ya)));
+	imax=3*(int)L+1;
+	lastx=xa; lasty=xb; lastcount=0;
+	for(i=0;i<=imax;i++){
+	  thisy=(int)((float)ya+(float)i/(float)imax*(float)(yb-ya));
+	  thisx=(int)((float)xa+(float)i/(float)imax*(float)(xb-xa));
+	  if ((thisy==lasty)&&(thisx==lastx)) lastcount++;
+	  else{ 
+	    if (lastcount>=threshold){ /* draw that point in the image */
+	      img[(camera.columns*lasty+lastx)*3+0]=b;
+	      img[(camera.columns*lasty+lastx)*3+1]=g;
+	      img[(camera.columns*lasty+lastx)*3+2]=r;
+	    }
+	    lasty=thisy; 
+	    lastx=thisx; 
+	    lastcount=0;
+	  }
 	}
-	lasty=thisy; 
-	lastx=thisx; 
-	lastcount=0;
+	return 0; 
       }
+      else return -1;
     }
-    return 0; 
-  }
   else return -1;
-}
-
-int virtual_drawline(HPoint2D p1, HPoint2D p2, FL_COLOR colour)
-/* it takes care of important features */
-/* before/behind the focal plane, inside/outside the image frame */
-{
-  HPoint2D gooda,goodb;
-
-  if(displayline(p1,p2,&gooda,&goodb)==1)
-    {
-      lineinimage(myvirtual_buffer,(int)gooda.y,SIFNTSC_ROWS-1-(int)gooda.x,(int)goodb.y,SIFNTSC_ROWS-1-(int)goodb.x,colour,SIFNTSC_COLUMNS,SIFNTSC_ROWS);
-    }
-  return 0;
-}
-
-int drawline(HPoint2D p1, HPoint2D p2, FL_COLOR colour)
-/* it takes care of important features */
-/* before/behind the focal plane, inside/outside the image frame */
-{
-  HPoint2D gooda,goodb;
-
-  if(displayline(p1,p2,&gooda,&goodb)==1)
-    {
-      lineinimage(mybuffer,(int)gooda.y,SIFNTSC_ROWS-1-(int)gooda.x,(int)goodb.y,SIFNTSC_ROWS-1-(int)goodb.x,colour,SIFNTSC_COLUMNS,SIFNTSC_ROWS);
-    }
-
-  return 0;
 }
 
 void extrinsics_guidisplay(){
@@ -1005,7 +1029,7 @@ void extrinsics_guidisplay(){
   for(i=0;i<room_lines;i++){
     project(room[i*2+0],&a,mycameras[mycam]);
     project(room[i*2+1],&b,mycameras[mycam]);
-    drawline(a,b,FL_RED);
+    drawline(a,b,FL_RED,mycameras[mycam],mybuffer);
   }
   /* cross at the optical center */
   fila=SIFNTSC_ROWS-1-(int)mycameras[mycam].u0;
@@ -1091,7 +1115,7 @@ void extrinsics_guidisplay(){
   H2.Z=0;
   project(H1,&a,mycameras[mycam]);
   project(H2,&b,mycameras[mycam]);
-  drawline(a,b,FL_GREEN);
+  drawline(a,b,FL_GREEN,mycameras[mycam],mybuffer);
 
   /* rendering of virtual image */
   /* reset_virtual_buffer */
@@ -1107,47 +1131,47 @@ void extrinsics_guidisplay(){
   backproject(&a3A,a,mycameras[mycam]);
   project(a3A,&a,mycameras[vcam]);
   project(mycameras[mycam].position,&b,mycameras[vcam]);
-  virtual_drawline(a,b,FL_DEEPPINK);
+  drawline(a,b,FL_DEEPPINK,mycameras[vcam],myvirtual_buffer);
   a.x=0.;
   a.y=SIFNTSC_COLUMNS-1.;
   a.h=1.;
   backproject(&a3B,a,mycameras[mycam]);
   project(a3B,&a,mycameras[vcam]);
   project(mycameras[mycam].position,&b,mycameras[vcam]);
-  virtual_drawline(a,b,FL_DEEPPINK);
+  drawline(a,b,FL_DEEPPINK,mycameras[vcam],myvirtual_buffer);
   a.x=0.;
   a.y=0.;
   a.h=1.;
   backproject(&a3C,a,mycameras[mycam]);
   project(a3C,&a,mycameras[vcam]);
   project(mycameras[mycam].position,&b,mycameras[vcam]);
-  virtual_drawline(a,b,FL_DEEPPINK);
+  drawline(a,b,FL_DEEPPINK,mycameras[vcam],myvirtual_buffer);
   a.x=SIFNTSC_ROWS-1.;
   a.y=0.;
   a.h=1.;
   backproject(&a3D,a,mycameras[mycam]);
   project(a3D,&a,mycameras[vcam]);
   project(mycameras[mycam].position,&b,mycameras[vcam]);
-  virtual_drawline(a,b,FL_DEEPPINK);
+  drawline(a,b,FL_DEEPPINK,mycameras[vcam],myvirtual_buffer);
 	
   project(a3A,&a,mycameras[vcam]);
   project(a3B,&b,mycameras[vcam]);
-  virtual_drawline(a,b,FL_DEEPPINK);
+  drawline(a,b,FL_DEEPPINK,mycameras[vcam],myvirtual_buffer);
   project(a3B,&a,mycameras[vcam]);
   project(a3C,&b,mycameras[vcam]);
-  virtual_drawline(a,b,FL_DEEPPINK);
+  drawline(a,b,FL_DEEPPINK,mycameras[vcam],myvirtual_buffer);
   project(a3C,&a,mycameras[vcam]);
   project(a3D,&b,mycameras[vcam]);
-  virtual_drawline(a,b,FL_DEEPPINK);
+  drawline(a,b,FL_DEEPPINK,mycameras[vcam],myvirtual_buffer);
   project(a3D,&a,mycameras[vcam]);
   project(a3A,&b,mycameras[vcam]);
-  virtual_drawline(a,b,FL_DEEPPINK);
+  drawline(a,b,FL_DEEPPINK,mycameras[vcam],myvirtual_buffer);
 				
   /* room in virtual camera */
   for(i=0;i<room_lines;i++){
     project(room[i*2+0],&a,mycameras[vcam]);
     project(room[i*2+1],&b,mycameras[vcam]);
-    virtual_drawline(a,b,FL_BLACK);
+    drawline(a,b,FL_BLACK,mycameras[vcam],myvirtual_buffer);
   }
 
  /* Draw XY, XZ, YZ grids */
@@ -1155,28 +1179,28 @@ void extrinsics_guidisplay(){
     {
       project(gridXY[2*i],&a,mycameras[vcam]);
       project(gridXY[2*i+1],&b,mycameras[vcam]);
-      virtual_drawline(a,b,FL_RED);
+      drawline(a,b,FL_RED,mycameras[vcam],myvirtual_buffer);
       project(gridXY[2*SLOTS+2*i],&a,mycameras[vcam]);
       project(gridXY[2*SLOTS+2*i+1],&b,mycameras[vcam]);
-      virtual_drawline(a,b,FL_RED);
+      drawline(a,b,FL_RED,mycameras[vcam],myvirtual_buffer);
     }
   for(i=0;i<SLOTS;i++)
     {
       project(gridYZ[2*i],&a,mycameras[vcam]);
       project(gridYZ[2*i+1],&b,mycameras[vcam]);
-      virtual_drawline(a,b,FL_PALEGREEN);
+      drawline(a,b,FL_PALEGREEN,mycameras[vcam],myvirtual_buffer);
       project(gridYZ[2*SLOTS+2*i],&a,mycameras[vcam]);
       project(gridYZ[2*SLOTS+2*i+1],&b,mycameras[vcam]);
-      virtual_drawline(a,b,FL_PALEGREEN);
+      drawline(a,b,FL_PALEGREEN,mycameras[vcam],myvirtual_buffer);
     }
   for(i=0;i<SLOTS;i++)
     {
       project(gridXZ[2*i],&a,mycameras[vcam]);
       project(gridXZ[2*i+1],&b,mycameras[vcam]);
-      virtual_drawline(a,b,FL_BLUE);
+      drawline(a,b,FL_BLUE,mycameras[vcam],myvirtual_buffer);
       project(gridXZ[2*SLOTS+2*i],&a,mycameras[vcam]);
       project(gridXZ[2*SLOTS+2*i+1],&b,mycameras[vcam]);
-      virtual_drawline(a,b,FL_BLUE);
+      drawline(a,b,FL_BLUE,mycameras[vcam],myvirtual_buffer);
     }
 
   /* camera axis in virtual camera */
@@ -1186,21 +1210,21 @@ void extrinsics_guidisplay(){
   relativas2absolutas(XaxisRel,&Xaxis);
   project(mycameras[mycam].position,&a,mycameras[vcam]);
   project(Xaxis,&b,mycameras[vcam]);
-  virtual_drawline(a,b,FL_PALEGREEN);
+  drawline(a,b,FL_PALEGREEN,mycameras[vcam],myvirtual_buffer);
   relativas2absolutas(YaxisRel,&Yaxis);
   project(mycameras[mycam].position,&a,mycameras[vcam]);
   project(Yaxis,&b,mycameras[vcam]);
-  virtual_drawline(a,b,FL_BLUE);
+  drawline(a,b,FL_BLUE,mycameras[vcam],myvirtual_buffer);
   relativas2absolutas(ZaxisRel,&Zaxis);
   project(mycameras[mycam].position,&a,mycameras[vcam]);
   project(Zaxis,&b,mycameras[vcam]);
-  virtual_drawline(a,b,FL_RED);
+  drawline(a,b,FL_RED,mycameras[vcam],myvirtual_buffer);
 
  /*cameras axis*/
   project(mycameras[mycam].position,&a,mycameras[vcam]);
   project(mycameras[mycam].foa,&b,mycameras[vcam]);
   /*FL_WHEAT,FL_PALEGREEN*/
-  virtual_drawline(a,b,FL_RED);  
+  drawline(a,b,FL_RED,mycameras[vcam],myvirtual_buffer);  
 
 
 

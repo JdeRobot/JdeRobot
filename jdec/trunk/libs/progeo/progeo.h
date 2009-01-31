@@ -47,12 +47,19 @@ typedef struct {
   HPoint3D position; /* camera 3d position in mm */
   HPoint3D foa; /* camera 3d focus of attention in mm */
   float roll; /* camera roll position angle in rads */
-  float fdist; /* focus distance in mm*/
+  float fdistx; /* focus x distance in mm*/
+  float fdisty; /* focus y distance in mm*/
   float u0,v0; /* pixels */
+  float skew; /*angle between the x and y pixel axes in rads*/
+  int rows; /* image height in pixels */
+  int columns; /* image width in pixels */
   /* camera K matrix */
   float k11,k12,k13,k14,k21,k22,k23,k24,k31,k32,k33,k34;
   /* camera rotation + translation matrix */
   float rt11,rt12,rt13,rt14,rt21,rt22,rt23,rt24,rt31,rt32,rt33,rt34,rt41,rt42,rt43,rt44;
+  /* distortion parameters */
+  float d1,d2,d3,d4,d5,d6;
+  float dx,dy;
   /* top right and bottom left points */
   HPoint3D tr, bl;
   /* name */
@@ -77,5 +84,5 @@ extern void update_camera_matrix(TPinHoleCamera *camera);
 extern void update_stereocamera_matrix(TPinHoleStereocamera *stereo);
 extern int project(HPoint3D in, HPoint2D *out, TPinHoleCamera camera);
 extern int backproject(HPoint3D *out, HPoint2D in, TPinHoleCamera camera);
-extern int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b);
+extern int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b, TPinHoleCamera camera);
 extern void display_camerainfo(TPinHoleCamera camera);
