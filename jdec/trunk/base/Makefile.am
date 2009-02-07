@@ -4,7 +4,7 @@ AM_CPPFLAGS = -D CONFIGDIR=\"$(confdir)\" @CPPFLAGS@
 
 jde_SOURCES = jde.c
 nodist_jde_SOURCES = jde.conf
-jde_LDFLAGS = -rdynamic
+jde_LDFLAGS = -rdynamic -lreadline
 dist_conf_DATA = jde.conf
 
 include_HEADERS = jde.h

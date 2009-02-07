@@ -47,6 +47,9 @@
 #define FALSE        0
 #endif
 
+/** Maximum buffer size (for strings)*/
+#define MAX_BUFFER 512
+
 #ifdef __cplusplus
  extern "C" {
 #endif
