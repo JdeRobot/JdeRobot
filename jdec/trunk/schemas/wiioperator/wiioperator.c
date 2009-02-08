@@ -33,20 +33,20 @@ int wiioperator_cycle=30; /* ms */
 
 /* Imported symbols*/
 unsigned short *buttons=NULL;
-resumeFn buttons_resume=NULL;
-suspendFn buttons_suspend=NULL;
+runFn buttons_run=NULL;
+stopFn buttons_stop=NULL;
 
 struct nunchuk_state *nunchuk=NULL;
-resumeFn nunchuk_resume=NULL;
-suspendFn nunchuk_suspend=NULL;
+runFn nunchuk_run=NULL;
+stopFn nunchuk_stop=NULL;
 
 int use_nunchuck=0;
 
 float *v=NULL;
 float *w=NULL;
 
-resumeFn motors_resume=NULL;
-suspendFn motors_suspend=NULL;
+runFn motors_run=NULL;
+stopFn motors_stop=NULL;
 
 int init=0;
 
@@ -124,23 +124,23 @@ void wiioperator_iteration(){
 /*Importar símbolos*/
 void wiioperator_imports(){
    buttons=(unsigned short *)myimport ("wii_buttons","buttons0");
-   buttons_resume=(resumeFn)myimport ("wii_buttons","resume");
-   buttons_suspend=(suspendFn)myimport ("wii_buttons","suspend");
+   buttons_run=(runFn)myimport ("wii_buttons","run");
+   buttons_stop=(stopFn)myimport ("wii_buttons","stop");
 
    nunchuk=(struct nunchuk_state*)myimport("wii_nunchuk", "nunchuk0");
-   nunchuk_resume=(resumeFn )myimport("wii_nunchuk", "resume");
-   nunchuk_suspend=(suspendFn )myimport("wii_nunchuk", "suspend");
+   nunchuk_run=(runFn )myimport("wii_nunchuk", "run");
+   nunchuk_stop=(stopFn )myimport("wii_nunchuk", "stop");
 
    v=myimport("motors","v");
    w=myimport("motors","w");
-   motors_resume=(resumeFn)myimport("motors","resume");
-   motors_suspend=(suspendFn)myimport("motors","suspend");
+   motors_run=(runFn)myimport("motors","run");
+   motors_stop=(stopFn)myimport("motors","stop");
 
-   if (!nunchuk || !nunchuk_resume || !nunchuk_suspend){
+   if (!nunchuk || !nunchuk_run || !nunchuk_stop){
       fprintf (stderr, "WARNING: I can't import symbols from "
             "wii_nunchuk, trying whith buttons\n");
       use_nunchuck=0;
-      if (!buttons || !buttons_resume || !buttons_suspend)
+      if (!buttons || !buttons_run || !buttons_stop)
       {
          fprintf (stderr, "ERROR: I can't import necessary symbols from "
                "wii_buttons\n");
@@ -151,7 +151,7 @@ void wiioperator_imports(){
       use_nunchuck=1;
    }
 
-   if ( !v || !w || !motors_resume || !motors_suspend){
+   if ( !v || !w || !motors_run || !motors_stop){
       fprintf (stderr, "ERROR: I can't import necessary symbols from "
             "motors\n");
       jdeshutdown(-1);
@@ -163,38 +163,31 @@ void wiioperator_exports(){
 
    myexport("wiioperator", "id", &wiioperator_id);
    myexport("wiioperator","cycle",&wiioperator_cycle);
-   myexport("wiioperator","resume",(void *)wiioperator_resume);
-   myexport("wiioperator","suspend",(void *)wiioperator_suspend);
+   myexport("wiioperator","run",(void *)wiioperator_run);
+   myexport("wiioperator","stop",(void *)wiioperator_stop);
 }
 
-/*Las inicializaciones van en esta parte*/
-void wiioperator_init(){
+
+
+void wiioperator_terminate(){
 }
 
-/*Al suspender el esquema*/
-void wiioperator_end(){
-}
-
-void wiioperator_stop(){
-}
-
-void wiioperator_suspend()
+void wiioperator_stop()
 {
   pthread_mutex_lock(&(all[wiioperator_id].mymutex));
   put_state(wiioperator_id,slept);
   printf("wiioperator: off\n");
   pthread_mutex_unlock(&(all[wiioperator_id].mymutex));
-  wiioperator_end();
-  buttons_suspend();
+  buttons_stop();
   if (use_nunchuck){
-     nunchuk_suspend();
+     nunchuk_stop();
   }
-  motors_suspend();
+  motors_stop();
   init=0;
 }
 
 
-void wiioperator_resume(int father, int *brothers, arbitration fn)
+void wiioperator_run(int father, int *brothers, arbitration fn)
 {
   int i;
 
@@ -207,7 +200,7 @@ void wiioperator_resume(int father, int *brothers, arbitration fn)
     }
 
   pthread_mutex_lock(&(all[wiioperator_id].mymutex));
-  /* this schema resumes its execution with no children at all */
+  /* this schema runs its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[wiioperator_id].children[i]=FALSE;
   all[wiioperator_id].father=father;
   if (brothers!=NULL)
@@ -222,11 +215,11 @@ void wiioperator_resume(int father, int *brothers, arbitration fn)
   pthread_cond_signal(&(all[wiioperator_id].condition));
   pthread_mutex_unlock(&(all[wiioperator_id].mymutex));
   wiioperator_imports();
-  buttons_resume(wiioperator_id, NULL, NULL);
+  buttons_run(wiioperator_id, NULL, NULL);
   if (use_nunchuck){
-     nunchuk_resume(wiioperator_id, NULL, NULL);
+     nunchuk_run(wiioperator_id, NULL, NULL);
   }
-  motors_resume(wiioperator_id, NULL, NULL);
+  motors_run(wiioperator_id, NULL, NULL);
   if (use_nunchuck){
      printf ("wiioperator: Please put the nunchuck joistick in a centered "
            "position and push 'C' button to start driving\n");
@@ -289,7 +282,7 @@ void *wiioperator_thread(void *not_used)
    }
 }
 
-void wiioperator_startup(char *configfile)
+void wiioperator_init(char *configfile)
 {
   pthread_mutex_lock(&(all[wiioperator_id].mymutex));
   printf("wiioperator schema started up\n");
@@ -297,7 +290,6 @@ void wiioperator_startup(char *configfile)
   put_state(wiioperator_id,slept);
   pthread_create(&(all[wiioperator_id].mythread),NULL,wiioperator_thread,NULL);
   pthread_mutex_unlock(&(all[wiioperator_id].mymutex));
-  wiioperator_init();
 }
 
 void wiioperator_guidisplay(){

@@ -84,7 +84,7 @@ pthread_cond_t condition;
 /** player driver name.*/
 char driver_name[256]="player";
 /** player driver variable to detect when pthread must end its execution.*/
-int player_close_command=0;
+int player_terminate_command=0;
 
 /** player driver variable to check if laser device was detected in config.*/
 int serve_laser=0;
@@ -199,12 +199,12 @@ void player_bumper_callback(void *not_used);
 
 
 /* PLAYER DRIVER FUNCTIONS */
-/** laser resume function following jdec platform API schemas.
+/** laser run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
-int player_laser_resume(int father, int *brothers, arbitration fn)
+int player_laser_run(int father, int *brothers, arbitration fn)
 {
    pthread_mutex_lock(&refmutex);
    if (laser_refs>0){
@@ -217,7 +217,7 @@ int player_laser_resume(int father, int *brothers, arbitration fn)
       if((serve_laser)&&(laser_active==0)){
          laser_active=1;
          put_state(laser_schema_id,winner);
-         printf("laser schema resume (player driver)\n");
+         printf("laser schema run (player driver)\n");
          all[laser_schema_id].father = father;
          all[laser_schema_id].fps = 0.;
          all[laser_schema_id].k =0;
@@ -234,9 +234,9 @@ int player_laser_resume(int father, int *brothers, arbitration fn)
    return 0;
 }
 
-/** laser suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int player_laser_suspend(){
+/** laser stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int player_laser_stop(){
    pthread_mutex_lock(&refmutex);
    if (laser_refs>1){
       laser_refs--;
@@ -248,7 +248,7 @@ int player_laser_suspend(){
       if((serve_laser)&&(laser_active)){
          laser_active=0;
          put_state(laser_schema_id,slept);
-         printf("laser schema suspend (player driver)\n");
+         printf("laser schema stop (player driver)\n");
          if((encoders_active==0)&&(sonars_active==0)&&(motors_active==0)&&(bumpers_active==0)){
             /* player thread goes sleep */
             pthread_mutex_lock(&mymutex);
@@ -260,12 +260,12 @@ int player_laser_suspend(){
    return 0;
 }
 
-/** encoders resume function following jdec platform API schemas.
+/** encoders run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
-int player_encoders_resume(int father, int *brothers, arbitration fn)
+int player_encoders_run(int father, int *brothers, arbitration fn)
 {
    pthread_mutex_lock(&refmutex);
    if (encoders_refs>0){
@@ -278,7 +278,7 @@ int player_encoders_resume(int father, int *brothers, arbitration fn)
       if((serve_encoders)&&(encoders_active==0)){
          encoders_active=1;
          put_state(encoders_schema_id,winner);
-         printf("encoders schema resume (player driver)\n");
+         printf("encoders schema run (player driver)\n");
          all[encoders_schema_id].father = father;
          all[encoders_schema_id].fps = 0.;
          all[encoders_schema_id].k =0;
@@ -295,9 +295,9 @@ int player_encoders_resume(int father, int *brothers, arbitration fn)
    return 0;
 }
 
-/** encoders suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int player_encoders_suspend(){
+/** encoders stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int player_encoders_stop(){
    pthread_mutex_lock(&refmutex);
    if (encoders_refs>1){
       encoders_refs--;
@@ -309,7 +309,7 @@ int player_encoders_suspend(){
       if((serve_encoders)&&(encoders_active)){
          encoders_active=0;
          put_state(encoders_schema_id,slept);
-         printf("encoders schema suspend (player driver)\n");
+         printf("encoders schema stop (player driver)\n");
          if((laser_active==0)&&(sonars_active==0)&&(motors_active==0)&&(bumpers_active==0)){
             /* player thread goes sleep */
             pthread_mutex_lock(&mymutex);
@@ -321,12 +321,12 @@ int player_encoders_suspend(){
    return 0;
 }
 
-/** sonars resume function following jdec platform API schemas.
+/** sonars run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
-int player_sonars_resume(int father, int *brothers, arbitration fn){
+int player_sonars_run(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
    if (sonars_refs>0){
       sonars_refs++;
@@ -338,7 +338,7 @@ int player_sonars_resume(int father, int *brothers, arbitration fn){
       if((serve_sonars)&&(sonars_active==0)){
          sonars_active=1;
          put_state(sonars_schema_id,winner);
-         printf("sonars schema resume (player driver)\n");
+         printf("sonars schema run (player driver)\n");
          all[sonars_schema_id].father = father;
          all[sonars_schema_id].fps = 0.;
          all[sonars_schema_id].k =0;
@@ -355,9 +355,9 @@ int player_sonars_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** sonars suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int player_sonars_suspend(){
+/** sonars stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int player_sonars_stop(){
    pthread_mutex_lock(&refmutex);
    if (sonars_refs>1){
       sonars_refs--;
@@ -369,7 +369,7 @@ int player_sonars_suspend(){
       if((serve_sonars)&&(sonars_active)){
          sonars_active=0;
          put_state(sonars_schema_id,slept);
-         printf("sonars schema suspend (player driver)\n");
+         printf("sonars schema stop (player driver)\n");
          if((laser_active==0)&&(encoders_active==0)&&(motors_active==0)&&(bumpers_active==0)){
             /* player thread goes to sleep */
             pthread_mutex_lock(&mymutex);
@@ -381,12 +381,12 @@ int player_sonars_suspend(){
    return 0;
 }
 
-/** bumpers resume function following jdec platform API schemas.
+/** bumpers run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
-int player_bumpers_resume(int father, int *brothers, arbitration fn){
+int player_bumpers_run(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
    if (bumpers_refs>0){
       bumpers_refs++;
@@ -398,7 +398,7 @@ int player_bumpers_resume(int father, int *brothers, arbitration fn){
       if((serve_bumpers)&&(bumpers_active==0)){
          bumpers_active=1;
          put_state(bumpers_schema_id,winner);
-         printf("bumpers schema resume (player driver)\n");
+         printf("bumpers schema run (player driver)\n");
          all[bumpers_schema_id].father = father;
          all[bumpers_schema_id].fps = 0.;
          all[bumpers_schema_id].k =0;
@@ -415,9 +415,9 @@ int player_bumpers_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** bumpers suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int player_bumpers_suspend(){
+/** bumpers stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int player_bumpers_stop(){
    pthread_mutex_lock(&refmutex);
    if (bumpers_refs>1){
       bumpers_refs--;
@@ -429,7 +429,7 @@ int player_bumpers_suspend(){
       if((serve_bumpers)&&(bumpers_active)){
          bumpers_active=0;
          put_state(bumpers_schema_id,slept);
-         printf("bumpers schema suspend (player driver)\n");
+         printf("bumpers schema stop (player driver)\n");
          if((laser_active==0)&&(encoders_active==0)&&(motors_active==0)&&(sonars_active==0)){
             /* player thread goes to sleep */
             pthread_mutex_lock(&mymutex);
@@ -441,12 +441,12 @@ int player_bumpers_suspend(){
    return 0;
 }
 
-/** motors resume function following jdec platform API schemas.
+/** motors run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
-int player_motors_resume(int father, int *brothers, arbitration fn){
+int player_motors_run(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
    if (motors_refs>0){
       motors_refs++;
@@ -458,7 +458,7 @@ int player_motors_resume(int father, int *brothers, arbitration fn){
       if((serve_motors)&&(motors_active==0)){
          motors_active=1;
          put_state(motors_schema_id,winner);
-         printf("motors schema resume (player driver)\n");
+         printf("motors schema run (player driver)\n");
          all[motors_schema_id].father = father;
          all[motors_schema_id].fps = 0.;
          all[motors_schema_id].k =0;
@@ -474,9 +474,9 @@ int player_motors_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** motors suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int player_motors_suspend(){
+/** motors stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int player_motors_stop(){
    pthread_mutex_lock(&refmutex);
    if (motors_refs>1){
       motors_refs--;
@@ -492,7 +492,7 @@ int player_motors_suspend(){
 
          motors_active=0;
          put_state(motors_schema_id,slept);
-         printf("motors schema resume (player driver)\n");
+         printf("motors schema run (player driver)\n");
          if((laser_active==0)&&(encoders_active==0)&&(sonars_active==0)&&(bumpers_active==0)){
             pthread_mutex_lock(&mymutex);
             state=slept;
@@ -551,7 +551,7 @@ void *player_thread(){
   
   do{
 
-    if (player_close_command==0){
+    if (player_terminate_command==0){
 
        pthread_mutex_lock(&mymutex);
        if (state==slept){
@@ -595,19 +595,19 @@ void *player_thread(){
       */
        }
     }
-  }while(player_close_command==0);
+  }while(player_terminate_command==0);
   playerc_client_disconnect(player_client);
 //   playerc_client_destroy(player_client);
 }
 
 /** player driver closing function invoked when stopping driver.*/
-void player_close(){
-   player_close_command=1;
-   player_laser_suspend();
-   player_encoders_suspend();
-   player_sonars_suspend();
-   player_bumpers_suspend();
-   player_motors_suspend();
+void player_terminate(){
+   player_terminate_command=1;
+   player_laser_stop();
+   player_encoders_stop();
+   player_sonars_stop();
+   player_bumpers_stop();
+   player_motors_stop();
 
    if (serve_encoders==1){
       playerc_client_delcallback(player_client,&(player_position->info),
@@ -743,7 +743,7 @@ void player_battery_callback(void *not_used)
 
 /** player driver init function. It will start all player required devices and setting them the default configuration.
  *  @return 0 if initialitation was successful or -1 if something went wrong.*/
-int player_init(){
+int player_deviceinit(){
 
   printf("connecting to Player Server at '%s:%d'\n",playerhost,playerport);
   player_client = playerc_client_create(NULL,playerhost,playerport);
@@ -1003,7 +1003,7 @@ int player_parseconf(char *configfile){
 
 /** player driver startup function following jdec platform API for drivers.
  *  @param configfile path and name to the config file of this driver.*/
-int player_startup(char *configfile){
+int player_init(char *configfile){
 
   pthread_mutex_init(&mymutex,PTHREAD_MUTEX_TIMED_NP);
   /* we call the function to parse the config file */
@@ -1013,7 +1013,7 @@ int player_startup(char *configfile){
   }
 
   /* player initialitation */
-  player_init();
+  player_deviceinit();
 
   /* player thread creation */
   pthread_mutex_lock(&mymutex);
@@ -1021,19 +1021,19 @@ int player_startup(char *configfile){
   pthread_create(&player_th,NULL,player_thread,NULL);
   pthread_mutex_unlock(&mymutex);
 
-  /* resume and suspend asignments */
+  /* run and stop asignments */
   if(serve_laser)
     {
       all[num_schemas].id = (int *) &laser_schema_id;
       strcpy(all[num_schemas].name,"laser");
-      all[num_schemas].resume = (resumeFn) player_laser_resume;
-      all[num_schemas].suspend = (suspendFn) player_laser_suspend;
+      all[num_schemas].run = (runFn) player_laser_run;
+      all[num_schemas].stop = (stopFn) player_laser_stop;
       printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k =0;
       all[num_schemas].state=slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport("laser","id",&laser_schema_id);
@@ -1041,96 +1041,96 @@ int player_startup(char *configfile){
       myexport("laser","clock", &laser_clock);
       myexport("laser","number", &laser_number);
       myexport("laser","resolution", &laser_resolution);
-      myexport("laser","resume",(void *) &player_laser_resume);
-      myexport("laser","suspend",(void *) &player_laser_suspend);
+      myexport("laser","run",(void *) &player_laser_run);
+      myexport("laser","stop",(void *) &player_laser_stop);
     }
 
   if(serve_encoders)
     {
       all[num_schemas].id = (int *) &encoders_schema_id;
       strcpy(all[num_schemas].name,"encoders");
-      all[num_schemas].resume = (resumeFn) player_encoders_resume;
-      all[num_schemas].suspend = (suspendFn) player_encoders_suspend;
+      all[num_schemas].run = (runFn) player_encoders_run;
+      all[num_schemas].stop = (stopFn) player_encoders_stop;
       printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k =0;
       all[num_schemas].state=slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport("encoders","id",&encoders_schema_id);
       myexport("encoders","jde_robot",&jde_robot);
-      myexport("encoders", "clock", &encoders_clock);
-      myexport("encoders", "number", &encoders_number);
-      myexport("encoders","resume",(void *)&player_encoders_resume);
-      myexport("encoders","suspend",(void *)&player_encoders_suspend);
+      myexport("encoders","clock", &encoders_clock);
+      myexport("encoders","number", &encoders_number);
+      myexport("encoders","run",(void *)&player_encoders_run);
+      myexport("encoders","stop",(void *)&player_encoders_stop);
     }
 
   if(serve_sonars)
     {
       all[num_schemas].id = (int *) &sonars_schema_id;
       strcpy(all[num_schemas].name,"sonars");
-      all[num_schemas].resume = (resumeFn) player_sonars_resume;
-      all[num_schemas].suspend = (suspendFn) player_sonars_suspend;
+      all[num_schemas].run = (runFn) player_sonars_run;
+      all[num_schemas].stop = (stopFn) player_sonars_stop;
       printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k =0;
       all[num_schemas].state=slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport("sonars","id",&sonars_schema_id);
       myexport("sonars","us",&us);
       myexport("sonars","clock", &us_clock);
       myexport("sonars","number", &sonar_number);
-      myexport("sonars","resume",(void *)&player_sonars_resume);
-      myexport("sonars","suspend",(void *)&player_sonars_suspend);
+      myexport("sonars","run",(void *)&player_sonars_run);
+      myexport("sonars","stop",(void *)&player_sonars_stop);
     }
 
   if(serve_motors)
     {
       all[num_schemas].id = (int *) &motors_schema_id;
       strcpy(all[num_schemas].name,"motors");
-      all[num_schemas].resume = (resumeFn) player_motors_resume;
-      all[num_schemas].suspend = (suspendFn) player_motors_suspend;
+      all[num_schemas].run = (runFn) player_motors_run;
+      all[num_schemas].stop = (stopFn) player_motors_stop;
       printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k =0;
       all[num_schemas].state=slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport("motors","id",&motors_schema_id);
       myexport("motors","v",&v);
       myexport("motors","w",&w);
       myexport("motors","cycle",&motors_cycle);
-      myexport("motors","resume",(void *)&player_motors_resume);
-      myexport("motors","suspend",(void *)&player_motors_suspend);
+      myexport("motors","run",(void *)&player_motors_run);
+      myexport("motors","stop",(void *)&player_motors_stop);
     }
 
   if(serve_bumpers)
     {
        all[num_schemas].id = (int *) &bumpers_schema_id;
        strcpy(all[num_schemas].name,"bumpers");
-       all[num_schemas].resume = (resumeFn) player_bumpers_resume;
-       all[num_schemas].suspend = (suspendFn) player_bumpers_suspend;
+       all[num_schemas].run = (runFn) player_bumpers_run;
+       all[num_schemas].stop = (stopFn) player_bumpers_stop;
        printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
        (*(all[num_schemas].id)) = num_schemas;
        all[num_schemas].fps = 0.;
        all[num_schemas].k =0;
        all[num_schemas].state=slept;
-       all[num_schemas].close = NULL;
+       all[num_schemas].terminate = NULL;
        all[num_schemas].handle = NULL;
        num_schemas++;
        myexport("bumpers","id",&bumpers_schema_id);
        myexport("bumpers","bumpers",&jde_bumpers);
        myexport("bumpers","number",&bumpers_number);
        myexport("bumpers","clock", &bumpers_clock);
-       myexport("bumpers","resume",(void *) &player_bumpers_resume);
-       myexport("bumpers","suspend",(void *) &player_bumpers_suspend);
+       myexport("bumpers","run",(void *) &player_bumpers_run);
+       myexport("bumpers","stop",(void *) &player_bumpers_stop);
     }
   return 0;
 }

@@ -18,12 +18,14 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void myschema_startup(char *configfile);
+extern void myschema_init(char *configfile);
+extern void myschema_terminate();
+
 extern void myschema_stop();
-extern void myschema_suspend();
-extern void myschema_resume(int father, int *brothers, arbitration fn);
-extern void myschema_guiresume();
-extern void myschema_guisuspend();
+extern void myschema_run(int father, int *brothers, arbitration fn);
+
+extern void myschema_show();
+extern void myschema_hide();
 
 extern int myschema_id; /* schema identifier */
 extern int myschema_cycle; /* ms */

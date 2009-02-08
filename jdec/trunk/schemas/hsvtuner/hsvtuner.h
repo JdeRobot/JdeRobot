@@ -18,12 +18,14 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void hsvtuner_startup(char *configfile);
+extern void hsvtuner_init(char *configfile);
+extern void hsvtuner_terminate();
+
 extern void hsvtuner_stop();
-extern void hsvtuner_suspend();
-extern void hsvtuner_resume(int father, int *brothers, arbitration fn);
-extern void hsvtuner_guiresume();
-extern void hsvtuner_guisuspend();
+extern void hsvtuner_run(int father, int *brothers, arbitration fn);
+
+extern void hsvtuner_show();
+extern void hsvtuner_hide();
 
 extern int hsvtuner_id; /* schema identifier */
 extern int hsvtuner_cycle; /* ms */

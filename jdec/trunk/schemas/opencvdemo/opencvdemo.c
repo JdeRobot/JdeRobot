@@ -40,8 +40,8 @@ arbitration opencvdemo_callforarbitration;
 int* width;
 int* height;
 char** color;
-resumeFn color_resume;
-suspendFn color_suspend;
+runFn color_run;
+stopFn color_stop;
 int image_ok=0;
 int show_image=0;
 
@@ -94,7 +94,7 @@ void free_image();
 /*Callbacks*/
 gboolean on_delete_window (GtkWidget *widget, GdkEvent *event, gpointer user_data){
    gdk_threads_leave();
-   opencvdemo_guisuspend();
+   opencvdemo_hide();
    gdk_threads_enter();
    return TRUE;
 }
@@ -102,13 +102,13 @@ gboolean on_delete_window (GtkWidget *widget, GdkEvent *event, gpointer user_dat
 void on_active_image_toggled (GtkCheckMenuItem *menu_item, gpointer user_data){
    if (image_ok){
       if (gtk_check_menu_item_get_active(menu_item)){
-		color_resume(opencvdemo_id,NULL,NULL);
+		color_run(opencvdemo_id,NULL,NULL);
 		load_image();
          show_image=1;
       }
       else{
 		free_image();
-		color_suspend();
+		color_stop();
          show_image=0;
       }
    }
@@ -575,10 +575,10 @@ void opencvdemo_imports(){
 	width=myimport("varcolorA","width");
 	height=myimport("varcolorA","height");
 	color=myimport("varcolorA","varcolorA");
-	color_resume=(resumeFn)myimport("varcolorA","resume");
-	color_suspend=(suspendFn)myimport("varcolorA","suspend");
+	color_run=(runFn)myimport("varcolorA","run");
+	color_stop=(stopFn)myimport("varcolorA","stop");
 
-	image_ok=!(width==NULL || height==NULL || color==NULL || color_resume==NULL || color_suspend==NULL);
+	image_ok=!(width==NULL || height==NULL || color==NULL || color_run==NULL || color_stop==NULL);
    if (!image_ok){
       printf ("Can't load image\n");
 		jdeshutdown(1);
@@ -589,11 +589,11 @@ void opencvdemo_exports(){
 
    myexport("opencvdemo", "id", &opencvdemo_id);
    myexport("opencvdemo","cycle",&opencvdemo_cycle);
-   myexport("opencvdemo","resume",(void *)opencvdemo_resume);
-   myexport("opencvdemo","suspend",(void *)opencvdemo_suspend);
+   myexport("opencvdemo","run",(void *)opencvdemo_run);
+   myexport("opencvdemo","stop",(void *)opencvdemo_stop);
 }
 
-void opencvdemo_init(){
+void opencvdemo_guiinit(){
    if (myregister_displaycallback==NULL){
       if ((myregister_displaycallback=
            (registerdisplay)myimport ("graphics_gtk",
@@ -612,23 +612,19 @@ void opencvdemo_init(){
    }
 }
 
-void opencvdemo_end(){
+void opencvdemo_terminate(){
 }
 
-void opencvdemo_stop(){
-}
-
-void opencvdemo_suspend()
+void opencvdemo_stop()
 {
   pthread_mutex_lock(&(all[opencvdemo_id].mymutex));
   put_state(opencvdemo_id,slept);
   printf("opencvdemo: off\n");
   pthread_mutex_unlock(&(all[opencvdemo_id].mymutex));
-  opencvdemo_end();
 }
 
 
-void opencvdemo_resume(int father, int *brothers, arbitration fn)
+void opencvdemo_run(int father, int *brothers, arbitration fn)
 {
   int i;
 
@@ -641,7 +637,7 @@ void opencvdemo_resume(int father, int *brothers, arbitration fn)
     }
 
   pthread_mutex_lock(&(all[opencvdemo_id].mymutex));
-  /* this schema resumes its execution with no children at all */
+  /* this schema runs its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[opencvdemo_id].children[i]=FALSE;
   all[opencvdemo_id].father=father;
   if (brothers!=NULL)
@@ -928,7 +924,7 @@ int opencvdemo_parseconf(char *configfile){
 		return -1;
 }
 
-void opencvdemo_startup(char *configfile)
+void opencvdemo_init(char *configfile)
 {
 	/*Read the configfile*/
    	if(opencvdemo_parseconf(configfile)==-1){
@@ -942,7 +938,7 @@ void opencvdemo_startup(char *configfile)
   	put_state(opencvdemo_id,slept);
   	pthread_create(&(all[opencvdemo_id].mythread),NULL,opencvdemo_thread,NULL);
   	pthread_mutex_unlock(&(all[opencvdemo_id].mymutex));
-  	opencvdemo_init();
+  	opencvdemo_guiinit();
 }
 
 void opencvdemo_guidisplay(){
@@ -984,7 +980,7 @@ void opencvdemo_guidisplay(){
 }
 
 
-void opencvdemo_guisuspend(void){
+void opencvdemo_hide(void){
    mydelete_displaycallback(opencvdemo_guidisplay);
    if (win!=NULL){
       gdk_threads_enter();
@@ -994,7 +990,7 @@ void opencvdemo_guisuspend(void){
    all[opencvdemo_id].guistate=pending_off;
 }
 
-void opencvdemo_guiresume(void){
+void opencvdemo_show(void){
    static int cargado=0;
    static pthread_mutex_t opencvdemo_gui_mutex;
 

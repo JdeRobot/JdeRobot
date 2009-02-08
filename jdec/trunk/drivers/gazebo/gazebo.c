@@ -109,26 +109,26 @@ int client_id = 0;
 /* Jde and drivers stuff declarations */
 pthread_t gazebo_th;
 void *gazebo_thread (void *not_used);
-int gazebo_encoders_resume (int father, int *brothers, arbitration fn);
-int gazebo_encoders_suspend ();
-int gazebo_motors_resume (int father, int *brothers, arbitration fn);
-int gazebo_motors_suspend ();
-int gazebo_camera0_resume (int father, int *brothers, arbitration fn);
-int gazebo_camera0_suspend ();
-int gazebo_camera1_resume (int father, int *brothers, arbitration fn);
-int gazebo_camera1_suspend ();
-int gazebo_camera2_resume (int father, int *brothers, arbitration fn);
-int gazebo_camera2_suspend ();
-int gazebo_camera3_resume (int father, int *brothers, arbitration fn);
-int gazebo_camera3_suspend ();
-int gazebo_laser_resume (int father, int *brothers, arbitration fn);
-int gazebo_laser_suspend ();
-int gazebo_sonars_resume (int father, int *brothers, arbitration fn);
-int gazebo_sonars_suspend ();
-int gazebo_ptz_cmd_resume (int father, int *brothers, arbitration fn);
-int gazebo_ptz_cmd_suspend ();
-int gazebo_ptz_enc_resume (int father, int *brothers, arbitration fn);
-int gazebo_ptz_enc_suspend ();
+int gazebo_encoders_run (int father, int *brothers, arbitration fn);
+int gazebo_encoders_stop ();
+int gazebo_motors_run (int father, int *brothers, arbitration fn);
+int gazebo_motors_stop ();
+int gazebo_camera0_run (int father, int *brothers, arbitration fn);
+int gazebo_camera0_stop ();
+int gazebo_camera1_run (int father, int *brothers, arbitration fn);
+int gazebo_camera1_stop ();
+int gazebo_camera2_run (int father, int *brothers, arbitration fn);
+int gazebo_camera2_stop ();
+int gazebo_camera3_run (int father, int *brothers, arbitration fn);
+int gazebo_camera3_stop ();
+int gazebo_laser_run (int father, int *brothers, arbitration fn);
+int gazebo_laser_stop ();
+int gazebo_sonars_run (int father, int *brothers, arbitration fn);
+int gazebo_sonars_stop ();
+int gazebo_ptz_cmd_run (int father, int *brothers, arbitration fn);
+int gazebo_ptz_cmd_stop ();
+int gazebo_ptz_enc_run (int father, int *brothers, arbitration fn);
+int gazebo_ptz_enc_stop ();
 
 /* Operation functions declaration. 
  * They do the data transfer job */
@@ -157,7 +157,7 @@ pthread_cond_t condition;
 
 
 char driver_name[256] = "gazebo";
-int gazebo_close_command = 0;
+int gazebo_terminate_command = 0;
 
 int serve_laser = 0, 
   serve_encoders = 0, 
@@ -207,7 +207,7 @@ float l_speed;
 /*Fin variables a exportar*/
 
 int
-gazebo_init ()
+gazebo_deviceinit ()
 {
   
   printf ("connecting to Gazebo Server");
@@ -254,7 +254,7 @@ int
 gazebo_parseconf (char *configfile);
 
 int
-gazebo_startup (char *configfile)
+gazebo_init (char *configfile)
 {
   puts ("Starting gazebo");
   fflush (stdout);
@@ -322,7 +322,7 @@ gazebo_startup (char *configfile)
     strcpy (stereo_name, colorD_name.gazebo_id);
   }
   
-  gazebo_init ();
+  gazebo_deviceinit ();
   
   /* gazebo thread creation */
   pthread_mutex_lock (&mymutex);
@@ -342,22 +342,22 @@ gazebo_startup (char *configfile)
     {
       all[num_schemas].id = (int *) &motors_schema_id;
       strcpy (all[num_schemas].name, "motors");
-      all[num_schemas].resume = (resumeFn) gazebo_motors_resume;
-      all[num_schemas].suspend = (suspendFn) gazebo_motors_suspend;
+      all[num_schemas].run = (runFn) gazebo_motors_run;
+      all[num_schemas].stop = (stopFn) gazebo_motors_stop;
       printf ("%s schema loaded (id %d)\n", all[num_schemas].name,
 	      num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k = 0;
       all[num_schemas].state = slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport ("motors", "id", &motors_schema_id);
       myexport ("motors", "v", &v);
       myexport ("motors", "w", &w);
-      myexport ("motors", "resume", (void *) &gazebo_motors_resume);
-      myexport ("motors", "suspend", (void *) &gazebo_motors_suspend);
+      myexport ("motors", "run", (void *) &gazebo_motors_run);
+      myexport ("motors", "stop", (void *) &gazebo_motors_stop);
       v=0; w=0;
     }
   
@@ -365,36 +365,36 @@ gazebo_startup (char *configfile)
     {
       all[num_schemas].id = (int *) &laser_schema_id;
       strcpy (all[num_schemas].name, "laser");
-      all[num_schemas].resume = (resumeFn) gazebo_laser_resume;
-      all[num_schemas].suspend = (suspendFn) gazebo_laser_suspend;
+      all[num_schemas].run = (runFn) gazebo_laser_run;
+      all[num_schemas].stop = (stopFn) gazebo_laser_stop;
       printf ("%s schema loaded (id %d)\n", all[num_schemas].name,
 	      num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k = 0;
       all[num_schemas].state = slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport ("laser", "id", &laser_schema_id);
       myexport ("laser", "laser", &jde_laser);
-      myexport ("laser", "resume", (void *) &gazebo_laser_resume);
-      myexport ("laser", "suspend", (void *) &gazebo_laser_suspend);
+      myexport ("laser", "run", (void *) &gazebo_laser_run);
+      myexport ("laser", "stop", (void *) &gazebo_laser_stop);
     }
 
   if (serve_ptz_cmd)
     {
       all[num_schemas].id = (int *) &ptz_cmd_schema_id;
       strcpy (all[num_schemas].name, "ptz_cmd");
-      all[num_schemas].resume = (resumeFn) gazebo_ptz_cmd_resume;
-      all[num_schemas].suspend = (suspendFn) gazebo_ptz_cmd_suspend;
+      all[num_schemas].run = (runFn) gazebo_ptz_cmd_run;
+      all[num_schemas].stop = (stopFn) gazebo_ptz_cmd_stop;
       printf ("%s schema loaded (id %d)\n", all[num_schemas].name,
 	      num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k = 0;
       all[num_schemas].state = slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport("ptz", "id", &ptz_cmd_schema_id);
@@ -402,16 +402,16 @@ gazebo_startup (char *configfile)
       myexport("ptmotors", "latitude",&latitude);
       myexport("ptmotors", "longitude_speed",&longitude_speed);
       myexport("ptmotors","latitude_speed",&l_speed);
-      myexport("ptmotors","resume",(void *)&gazebo_ptz_cmd_resume);
-      myexport("ptmotors", "suspend",(void *)&gazebo_ptz_cmd_suspend);
+      myexport("ptmotors","run",(void *)&gazebo_ptz_cmd_run);
+      myexport("ptmotors", "stop",(void *)&gazebo_ptz_cmd_stop);
     }
   
   if (serve_ptz_enc)
     {
       all[num_schemas].id = (int *) &ptz_enc_schema_id;
       strcpy (all[num_schemas].name, "ptz_enc");
-      all[num_schemas].resume = (resumeFn) gazebo_ptz_enc_resume;
-      all[num_schemas].suspend = (suspendFn) gazebo_ptz_enc_suspend;
+      all[num_schemas].run = (runFn) gazebo_ptz_enc_run;
+      all[num_schemas].stop = (stopFn) gazebo_ptz_enc_stop;
       printf ("%s schema loaded (id %d)\n", all[num_schemas].name,
 	      num_schemas);
       
@@ -419,56 +419,56 @@ gazebo_startup (char *configfile)
       all[num_schemas].fps = 0.;
       all[num_schemas].k = 0;
       all[num_schemas].state = slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport ("ptz", "id", &ptz_enc_schema_id);
       myexport ("ptz", "pan_angle", &pan_angle);
       myexport ("ptz", "tilt_angle", &tilt_angle);
-      myexport("ptencoders","resume",(void *)&gazebo_ptz_enc_resume);
-      myexport("ptencoders","suspend",(void *)&gazebo_ptz_enc_suspend);
+      myexport("ptencoders","run",(void *)&gazebo_ptz_enc_run);
+      myexport("ptencoders","stop",(void *)&gazebo_ptz_enc_stop);
       }
   
   if (serve_sonars)
     {
       all[num_schemas].id = (int *) &sonars_schema_id;
       strcpy (all[num_schemas].name, "sonars");
-      all[num_schemas].resume = (resumeFn) gazebo_sonars_resume;
-      all[num_schemas].suspend = (suspendFn) gazebo_sonars_suspend;
+      all[num_schemas].run = (runFn) gazebo_sonars_run;
+      all[num_schemas].stop = (stopFn) gazebo_sonars_stop;
       printf ("%s schema loaded (id %d)\n", all[num_schemas].name,
 	      num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k = 0;
       all[num_schemas].state = slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport ("sonars", "id", &sonars_schema_id);
       myexport ("sonars", "us", &us);
-      myexport ("sonars", "resume", (void *) &gazebo_sonars_resume);
-      myexport ("sonars", "suspend", (void *) &gazebo_sonars_suspend);
+      myexport ("sonars", "run", (void *) &gazebo_sonars_run);
+      myexport ("sonars", "stop", (void *) &gazebo_sonars_stop);
     }
 
   if (serve_encoders)
     {
       all[num_schemas].id = (int *) &encoders_schema_id;
       strcpy (all[num_schemas].name, "encoders");
-      all[num_schemas].resume = (resumeFn) gazebo_encoders_resume;
-      all[num_schemas].suspend = (suspendFn) gazebo_encoders_suspend;
+      all[num_schemas].run = (runFn) gazebo_encoders_run;
+      all[num_schemas].stop = (stopFn) gazebo_encoders_stop;
       printf ("%s schema loaded (id %d)\n", all[num_schemas].name,
 	      num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k = 0;
       all[num_schemas].state = slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport ("encoders", "id", &encoders_schema_id);
       myexport ("encoders", "jde_robot", &jde_robot);
-      myexport ("encoders", "resume", (void *) &gazebo_encoders_resume);
-      myexport ("encoders", "suspend", (void *) &gazebo_encoders_suspend);
+      myexport ("encoders", "run", (void *) &gazebo_encoders_run);
+      myexport ("encoders", "stop", (void *) &gazebo_encoders_stop);
     }
 
   if (serve_color[0])
@@ -477,21 +477,21 @@ gazebo_startup (char *configfile)
       pthread_mutex_lock(&color_mutex[0]);
       all[num_schemas].id = (int *) &camera_schema_id[0];
       strcpy (all[num_schemas].name, "colorA");
-      all[num_schemas].resume = (resumeFn) gazebo_camera0_resume;
-      all[num_schemas].suspend = (suspendFn) gazebo_camera0_suspend;
+      all[num_schemas].run = (runFn) gazebo_camera0_run;
+      all[num_schemas].stop = (stopFn) gazebo_camera0_stop;
       printf ("%s schema loaded (id %d)\n", all[num_schemas].name,
 	      num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k = 0;
       all[num_schemas].state = slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport("colorA","id",&camera_schema_id[0]);
       myexport("colorA","colorA",&colorA);
-      myexport("colorA","resume",(void *)gazebo_camera0_resume);
-      myexport("colorA","suspend",(void *)gazebo_camera0_suspend);
+      myexport("colorA","run",(void *)gazebo_camera0_run);
+      myexport("colorA","stop",(void *)gazebo_camera0_stop);
     }
 
   if (serve_color[1])
@@ -500,21 +500,21 @@ gazebo_startup (char *configfile)
       pthread_mutex_lock(&color_mutex[1]);
       all[num_schemas].id = (int *) &camera_schema_id[1];
       strcpy (all[num_schemas].name, "colorB");
-      all[num_schemas].resume = (resumeFn) gazebo_camera1_resume;
-      all[num_schemas].suspend = (suspendFn) gazebo_camera1_suspend;
+      all[num_schemas].run = (runFn) gazebo_camera1_run;
+      all[num_schemas].stop = (stopFn) gazebo_camera1_stop;
       printf ("%s schema loaded (id %d)\n", all[num_schemas].name,
 	      num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k = 0;
       all[num_schemas].state = slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport("colorB","id",&camera_schema_id[1]);
       myexport("colorB","colorB",&colorB);
-      myexport("colorB","resume",(void *)gazebo_camera1_resume);
-      myexport("colorB","suspend",(void *)gazebo_camera1_suspend);
+      myexport("colorB","run",(void *)gazebo_camera1_run);
+      myexport("colorB","stop",(void *)gazebo_camera1_stop);
     }
   if (serve_color[2])
     {
@@ -522,8 +522,8 @@ gazebo_startup (char *configfile)
       pthread_mutex_lock(&color_mutex[2]);
       all[num_schemas].id = (int *) &camera_schema_id[2];
       strcpy (all[num_schemas].name, "colorC");
-      all[num_schemas].resume = (resumeFn) gazebo_camera2_resume;
-      all[num_schemas].suspend = (suspendFn) gazebo_camera2_suspend;
+      all[num_schemas].run = (runFn) gazebo_camera2_run;
+      all[num_schemas].stop = (stopFn) gazebo_camera2_stop;
 
       printf ("%s schema loaded (id %d)\n", all[num_schemas].name,
 	      num_schemas);
@@ -531,13 +531,13 @@ gazebo_startup (char *configfile)
       all[num_schemas].fps = 0.;
       all[num_schemas].k = 0;
       all[num_schemas].state = slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport("colorC","id",&camera_schema_id[2]);
       myexport("colorC","colorC",&colorC);
-      myexport("colorC","resume",(void *)gazebo_camera2_resume);
-      myexport("colorC","suspend",(void *)gazebo_camera2_suspend);
+      myexport("colorC","run",(void *)gazebo_camera2_run);
+      myexport("colorC","stop",(void *)gazebo_camera2_stop);
 
     }
 
@@ -547,30 +547,30 @@ gazebo_startup (char *configfile)
       pthread_mutex_lock(&color_mutex[3]);
       all[num_schemas].id = (int *) &camera_schema_id[3];
       strcpy (all[num_schemas].name, "colorD");
-      all[num_schemas].resume = (resumeFn) gazebo_camera3_resume;
-      all[num_schemas].suspend = (suspendFn) gazebo_camera3_suspend;
+      all[num_schemas].run = (runFn) gazebo_camera3_run;
+      all[num_schemas].stop = (stopFn) gazebo_camera3_stop;
       printf ("%s schema loaded (id %d)\n", all[num_schemas].name,
 	      num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k = 0;
       all[num_schemas].state = slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport("colorD","id",&camera_schema_id[3]);
       myexport("colorD","colorD",&colorD);
-      myexport("colorD","resume",(void *)gazebo_camera3_resume);
-      myexport("colorD","suspend",(void *)gazebo_camera3_suspend);
+      myexport("colorD","run",(void *)gazebo_camera3_run);
+      myexport("colorD","stop",(void *)gazebo_camera3_stop);
     }
 
   return 0;
 }
 
 void
-gazebo_close ()
+gazebo_terminate ()
 {
-  gazebo_close_command = 1;
+  gazebo_terminate_command = 1;
   if (position)
     {
       gz_position_close (position);
@@ -597,7 +597,7 @@ gazebo_close ()
 
 
 int
-gazebo_ptz_cmd_resume (int father, int *brothers, arbitration fn)
+gazebo_ptz_cmd_run (int father, int *brothers, arbitration fn)
 {
   
   if ((serve_ptz_cmd) && (ptz_cmd_active == 0))
@@ -614,7 +614,7 @@ gazebo_ptz_cmd_resume (int father, int *brothers, arbitration fn)
       latitude=0.0;
       
       put_state (ptz_cmd_schema_id, winner);
-      printf ("gazebo: ptz command  resume\n");
+      printf ("gazebo: ptz command  run\n");
       
       all[ptz_cmd_schema_id].father = father;
       all[ptz_cmd_schema_id].fps = 0.;
@@ -624,19 +624,19 @@ gazebo_ptz_cmd_resume (int father, int *brothers, arbitration fn)
 }
 
 int
-gazebo_ptz_cmd_suspend ()
+gazebo_ptz_cmd_stop ()
 {
   if ((serve_ptz_cmd) && (ptz_cmd_active))
     {
       ptz_cmd_active = 0;
-      printf ("gazebo: ptz command suspend\n");
+      printf ("gazebo: ptz command stop\n");
       put_state (ptz_cmd_schema_id, slept);
     }
   return 0;
 }
 
 int
-gazebo_ptz_enc_resume (int father, int *brothers, arbitration fn)
+gazebo_ptz_enc_run (int father, int *brothers, arbitration fn)
 {
   
   if ((serve_ptz_enc) && (ptz_enc_active == 0))
@@ -652,19 +652,19 @@ gazebo_ptz_enc_resume (int father, int *brothers, arbitration fn)
 }
 
 int
-gazebo_ptz_enc_suspend ()
+gazebo_ptz_enc_stop ()
 {
   if ((serve_ptz_enc) && (ptz_enc_active))
     {
       ptz_enc_active = 0;
-      printf ("gazebo: ptz encoders suspend\n");
+      printf ("gazebo: ptz encoders stop\n");
       put_state (ptz_enc_schema_id, slept);
     }
   return 0;
 }
 
 int
-gazebo_camera0_resume (int father, int *brothers, arbitration fn)
+gazebo_camera0_run (int father, int *brothers, arbitration fn)
 {
   if (colorA_name.tipo == 1)
     {
@@ -707,7 +707,7 @@ gazebo_camera0_resume (int father, int *brothers, arbitration fn)
 }
 
 int
-gazebo_camera1_resume (int father, int *brothers, arbitration fn)
+gazebo_camera1_run (int father, int *brothers, arbitration fn)
 {
   if (colorB_name.tipo == 1)
     {
@@ -749,7 +749,7 @@ gazebo_camera1_resume (int father, int *brothers, arbitration fn)
 }
 
 int
-gazebo_camera2_resume (int father, int *brothers, arbitration fn)
+gazebo_camera2_run (int father, int *brothers, arbitration fn)
 {
   if (colorC_name.tipo == 1)
     {
@@ -791,7 +791,7 @@ gazebo_camera2_resume (int father, int *brothers, arbitration fn)
 }
 
 int
-gazebo_camera3_resume (int father, int *brothers, arbitration fn)
+gazebo_camera3_run (int father, int *brothers, arbitration fn)
 {
   if (colorD_name.tipo == 1)
     {
@@ -836,7 +836,7 @@ gazebo_camera3_resume (int father, int *brothers, arbitration fn)
 
 
 int
-gazebo_camera0_suspend ()
+gazebo_camera0_stop ()
 {
   color_active[0]--;
   if ((serve_color[0]) && (color_active[0]==0))
@@ -861,7 +861,7 @@ gazebo_camera0_suspend ()
 }
 
 int
-gazebo_camera1_suspend ()
+gazebo_camera1_stop ()
 {
   color_active[1]--;
   if ((serve_color[1]) && (color_active[1]))
@@ -885,7 +885,7 @@ gazebo_camera1_suspend ()
 }
 
 int
-gazebo_camera2_suspend ()
+gazebo_camera2_stop ()
 {
   color_active[2]--;
   if ((serve_color[2]) && (color_active[2]))
@@ -909,13 +909,13 @@ gazebo_camera2_suspend ()
 }
 
 int
-gazebo_camera3_suspend ()
+gazebo_camera3_stop ()
 {
    color_active[3]--;
   if ((serve_color[3]) && (color_active[3]))
     {
       pthread_mutex_lock(&color_mutex[3]);
-      printf ("gazebo: camera 3 suspend\n");
+      printf ("gazebo: camera 3 stop\n");
       put_state (camera_schema_id[2], slept);
       if (camera[3])
 	{
@@ -937,14 +937,14 @@ gazebo_camera3_suspend ()
 
 
 int
-gazebo_encoders_resume (int father, int *brothers, arbitration fn)
+gazebo_encoders_run (int father, int *brothers, arbitration fn)
 {
 
   if ((serve_encoders) && (encoders_active == 0))
     {
       encoders_active = 1;
       put_state (encoders_schema_id, winner);
-      printf ("gazebo: encoders resume\n");
+      printf ("gazebo: encoders run\n");
       all[encoders_schema_id].father = father;
       all[encoders_schema_id].fps = 0.;
       all[encoders_schema_id].k = 0;
@@ -954,20 +954,20 @@ gazebo_encoders_resume (int father, int *brothers, arbitration fn)
 }
 
 int
-gazebo_encoders_suspend ()
+gazebo_encoders_stop ()
 {
 
   if ((serve_encoders) && (encoders_active))
     {
       encoders_active = 0;
       put_state (encoders_schema_id, slept);
-      printf ("gazebo: encoders suspend\n");
+      printf ("gazebo: encoders stop\n");
     }
   return 0;
 }
 
 int
-gazebo_sonars_resume (int father, int *brothers, arbitration fn)
+gazebo_sonars_run (int father, int *brothers, arbitration fn)
 {
   if ((serve_sonars) && (sonars_active == 0))
     {
@@ -989,7 +989,7 @@ gazebo_sonars_resume (int father, int *brothers, arbitration fn)
 
       put_state (sonars_schema_id, winner);
 
-      printf ("gazebo: sonars resume\n");
+      printf ("gazebo: sonars run\n");
 
       all[sonars_schema_id].father = father;
       all[sonars_schema_id].fps = 0.;
@@ -999,7 +999,7 @@ gazebo_sonars_resume (int father, int *brothers, arbitration fn)
 }
 
 int
-gazebo_sonars_suspend ()
+gazebo_sonars_stop ()
 {
   if (sonar)
     {
@@ -1012,13 +1012,13 @@ gazebo_sonars_suspend ()
     {
       sonars_active = 0;
       put_state (sonars_schema_id, slept);
-      printf ("gazebo: sonars suspend\n");
+      printf ("gazebo: sonars stop\n");
     }
   return 0;
 }
 
 int
-gazebo_motors_resume (int father, int *brothers, arbitration fn)
+gazebo_motors_run (int father, int *brothers, arbitration fn)
 {
   
   //position->data->cmd_enable_motors = 1;
@@ -1026,7 +1026,7 @@ gazebo_motors_resume (int father, int *brothers, arbitration fn)
     {
       put_state (motors_schema_id, winner);
       motors_active = 1;
-      printf ("gazebo: motors resume\n");
+      printf ("gazebo: motors run\n");
       all[motors_schema_id].father = father;
       all[motors_schema_id].fps = 0.;
       all[motors_schema_id].k = 0;
@@ -1035,7 +1035,7 @@ gazebo_motors_resume (int father, int *brothers, arbitration fn)
 }
 
 int
-gazebo_motors_suspend ()
+gazebo_motors_stop ()
 {
 
   if ((serve_motors) && (motors_active))
@@ -1048,14 +1048,14 @@ gazebo_motors_suspend ()
       position->data->cmd_vel_pos[0] = v_sp;	//Velocidad en X 
       position->data->cmd_vel_rot[2] = w_sp;	//Velocidad en Z
       gz_position_unlock (position);
-      printf ("gazebo: motors suspend\n");
+      printf ("gazebo: motors stop\n");
       put_state (motors_schema_id, slept);
     }
   return 0;
 }
 
 int
-gazebo_laser_resume (int father, int *brothers, arbitration fn)
+gazebo_laser_run (int father, int *brothers, arbitration fn)
 {
 
   laser = gz_laser_alloc ();
@@ -1069,7 +1069,7 @@ gazebo_laser_resume (int father, int *brothers, arbitration fn)
     {
       laser_active = 1;
       put_state (laser_schema_id, winner);
-      printf ("gazebo: laser resume\n");
+      printf ("gazebo: laser run\n");
       all[laser_schema_id].father = father;
       all[laser_schema_id].fps = 0.;
       all[laser_schema_id].k = 0;
@@ -1078,14 +1078,14 @@ gazebo_laser_resume (int father, int *brothers, arbitration fn)
 }
 
 int
-gazebo_laser_suspend ()
+gazebo_laser_stop ()
 {
 
   if ((serve_laser) && (laser_active))
     {
       laser_active = 0;
       put_state (laser_schema_id, slept);
-      printf ("gazebo: laser suspend\n");
+      printf ("gazebo: laser stop\n");
 
       if (laser)
 	{
@@ -1223,7 +1223,7 @@ gazebo_thread (void *not_used)
 
 	}
     }
-  while (gazebo_close_command == 0);
+  while (gazebo_terminate_command == 0);
   pthread_exit (0);
 }
 

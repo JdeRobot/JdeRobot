@@ -53,7 +53,7 @@ char rotar=1;
 /* ventana de visualizacion 3d */
 float xcam,ycam,zcam,foax,foay,foaz;
 
-void opengldemo_stop(){
+void opengldemo_terminate(){
 if (fd_opengldemogui!=NULL)
     {
       if (all[opengldemo_id].guistate==on) 
@@ -70,18 +70,18 @@ void opengldemo_iteration()
 }
 
 
-void opengldemo_suspend()
+void opengldemo_stop()
 {
-  /* printf("opengldemo: cojo-suspend\n");*/
+  /* printf("opengldemo: cojo-stop\n");*/
   pthread_mutex_lock(&(all[opengldemo_id].mymutex));
   put_state(opengldemo_id,slept);
   printf("opengldemo: off\n");
   pthread_mutex_unlock(&(all[opengldemo_id].mymutex));
-  /*  printf("opengldemo: suelto-suspend\n");*/
+  /*  printf("opengldemo: suelto-stop\n");*/
 }
 
 
-void opengldemo_resume(int father, int *brothers, arbitration fn)
+void opengldemo_run(int father, int *brothers, arbitration fn)
 {
   int i; 
   
@@ -94,7 +94,7 @@ void opengldemo_resume(int father, int *brothers, arbitration fn)
     }
 
   pthread_mutex_lock(&(all[opengldemo_id].mymutex));
-  /* this schema resumes its execution with no children at all */
+  /* this schema runs its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[opengldemo_id].children[i]=FALSE;
   all[opengldemo_id].father=father;
   if (brothers!=NULL)
@@ -163,7 +163,7 @@ void *opengldemo_thread(void *not_used)
     }
 }
 
-void opengldemo_init(){
+void opengldemo_guiinit(){
    if (myregister_buttonscallback==NULL){
       if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
          printf ("I can't fetch register_buttonscallback from graphics_xforms\n");
@@ -193,13 +193,13 @@ void opengldemo_init(){
    }
 }
 
-void opengldemo_startup(char *configfile)
+void opengldemo_init(char *configfile)
 {
   pthread_mutex_lock(&(all[opengldemo_id].mymutex));
   printf("opengldemo schema started up\n");
   put_state(opengldemo_id,slept);
   pthread_create(&(all[opengldemo_id].mythread),NULL,opengldemo_thread,NULL);
-  opengldemo_init();
+  opengldemo_guiinit();
   pthread_mutex_unlock(&(all[opengldemo_id].mymutex));
 }
 
@@ -472,7 +472,7 @@ void opengldemo_guidisplay()
 }
 
 
-void opengldemo_guisuspend_aux(void)
+void opengldemo_hide_aux(void)
 {
   /*  all[opengldemo_id].gui=FALSE;*/
   mydelete_buttonscallback(opengldemo_guibuttons);
@@ -480,19 +480,19 @@ void opengldemo_guisuspend_aux(void)
   fl_hide_form(fd_opengldemogui->opengldemogui);
 }
 
-void opengldemo_guisuspend(void){
+void opengldemo_hide(void){
    static callback fn=NULL;
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
-         fn ((gui_function)opengldemo_guisuspend_aux);
+         fn ((gui_function)opengldemo_hide_aux);
       }
    }
    else{
-      fn ((gui_function)opengldemo_guisuspend_aux);
+      fn ((gui_function)opengldemo_hide_aux);
    }
 }
 
-void opengldemo_guiresume_aux(void)
+void opengldemo_show_aux(void)
 {
   static int k=0;
 
@@ -531,15 +531,15 @@ void opengldemo_guiresume_aux(void)
 
 }
 
-void opengldemo_guiresume(void){
+void opengldemo_show(void){
    static callback fn=NULL;
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
-         fn ((gui_function)opengldemo_guiresume_aux);
+         fn ((gui_function)opengldemo_show_aux);
       }
    }
    else{
-      fn ((gui_function)opengldemo_guiresume_aux);
+      fn ((gui_function)opengldemo_show_aux);
    }
 }
 

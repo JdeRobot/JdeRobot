@@ -18,12 +18,14 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void wiimote_viewer_startup(char *configfile);
-extern void wiimote_viewer_suspend();
-extern void wiimote_viewer_resume(int father, int *brothers, arbitration fn);
-extern void wiimote_viewer_guiresume();
-extern void wiimote_viewer_guisuspend();
+extern void wiimote_viewer_init(char *configfile);
+extern void wiimote_viewer_terminate();
+
 extern void wiimote_viewer_stop();
+extern void wiimote_viewer_run(int father, int *brothers, arbitration fn);
+
+extern void wiimote_viewer_show();
+extern void wiimote_viewer_hide();
 
 extern int wiimote_viewer_id; /* schema identifier */
 extern int wiimote_viewer_cycle; /* ms */

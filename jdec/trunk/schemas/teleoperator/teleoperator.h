@@ -18,11 +18,14 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void teleoperator_startup(char *configfile);
+extern void teleoperator_init(char *configfile);
+extern void teleoperator_terminate();
+
 extern void teleoperator_stop();
-extern void teleoperator_suspend();
-extern void teleoperator_resume(int father, int *brothers, arbitration fn);
-extern void teleoperator_guiresume();
-extern void teleoperator_guisuspend();
+extern void teleoperator_run(int father, int *brothers, arbitration fn);
 
+extern void teleoperator_show();
+extern void teleoperator_hide();
 
+extern int teleoperator_id; /* schema identifier */
+extern int teleoperator_cycle; /* ms */

@@ -81,7 +81,7 @@ int mplayer_cleaned_up=0;
 /** mplayer driver variable to detect when the driver has been setup.*/
 int mplayer_setup=0;
 /** mplayer driver variable to detect when pthreads must end their execution.*/
-int mplayer_close_command=0;
+int mplayer_terminate_command=0;
 
 /* mplayer driver API options */
 /** mplayer driver name.*/
@@ -181,7 +181,7 @@ char *driver;
 /* MPLAYER DRIVER FUNCTIONS */
 
 /** mplayer driver function to kill every mplayer and mencoder called.*/
-void mplayer_close(){
+void mplayer_terminate(){
    int i;
 
    /*Hacer unlink los fifos y matar a los hijos mplayer y  mencoder*/
@@ -199,16 +199,16 @@ void mplayer_close(){
       perror ("I can't delete temp dir: ");
    }
    free(driver);
-   mplayer_close_command=1;
+   mplayer_terminate_command=1;
    printf("driver mplayer off\n");
 }
 
-/** colorA resume function following jdec platform API schemas.
+/** colorA run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
-int mycolorA_resume(int father, int *brothers, arbitration fn){
+int mycolorA_run(int father, int *brothers, arbitration fn){
    if(serve_color[0]==1){
       pthread_mutex_lock(&refmutex);
       color_active[0]++;
@@ -219,7 +219,7 @@ int mycolorA_resume(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[0]);
-         /* printf("colorA schema resume (mplayer driver)\n");*/
+         /* printf("colorA schema run (mplayer driver)\n");*/
          all[colorA_schema_id].father = father;
          all[colorA_schema_id].fps = 0.;
          all[colorA_schema_id].k =0;
@@ -231,15 +231,15 @@ int mycolorA_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** colorA suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int mycolorA_suspend(){
+/** colorA stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int mycolorA_stop(){
    pthread_mutex_lock(&refmutex);
    color_active[0]--;
    if((serve_color[0]==1)&&(color_active[0]==0)){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[0]);
-      /*printf("colorA schema suspend (mplayer driver)\n");*/
+      /*printf("colorA schema stop (mplayer driver)\n");*/
       put_state(colorA_schema_id,slept);
    }
    else
@@ -247,12 +247,12 @@ int mycolorA_suspend(){
    return 0;
 }
 
-/** colorB resume function following jdec platform API schemas.
+/** colorB run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
-int mycolorB_resume(int father, int *brothers, arbitration fn){
+int mycolorB_run(int father, int *brothers, arbitration fn){
    if(serve_color[1]==1)
    {
       pthread_mutex_lock(&refmutex);
@@ -264,7 +264,7 @@ int mycolorB_resume(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[1]);
-	 /* printf("colorB schema resume (mplayer driver)\n");*/
+	 /* printf("colorB schema run (mplayer driver)\n");*/
          all[colorB_schema_id].father = father;
          all[colorB_schema_id].fps = 0.;
          all[colorB_schema_id].k =0;
@@ -276,15 +276,15 @@ int mycolorB_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** colorB suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int mycolorB_suspend(){
+/** colorB stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int mycolorB_stop(){
    pthread_mutex_lock(&refmutex);
    color_active[1]--;
     if((serve_color[1]==1)&&(color_active[1]==0)){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[1]);
-      /* printf("colorB schema suspend (mplayer driver)\n");*/
+      /* printf("colorB schema stop (mplayer driver)\n");*/
       put_state(colorB_schema_id,slept);
    }
    else
@@ -292,12 +292,12 @@ int mycolorB_suspend(){
    return 0;
 }
 
-/** colorC resume function following jdec platform API schemas.
+/** colorC run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
-int mycolorC_resume(int father, int *brothers, arbitration fn){
+int mycolorC_run(int father, int *brothers, arbitration fn){
    if(serve_color[2]==1)
    {
       pthread_mutex_lock(&refmutex);
@@ -309,7 +309,7 @@ int mycolorC_resume(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[2]);
-	 /* printf("colorC schema resume (mplayer driver)\n");*/
+	 /* printf("colorC schema run (mplayer driver)\n");*/
          all[colorC_schema_id].father = father;
          all[colorC_schema_id].fps = 0.;
          all[colorC_schema_id].k =0;
@@ -321,15 +321,15 @@ int mycolorC_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** colorC suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int mycolorC_suspend(){
+/** colorC stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int mycolorC_stop(){
    pthread_mutex_lock(&refmutex);
    color_active[2]--;
    if((serve_color[2]==1)&&(color_active[2]==0)){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[2]);
-      /* printf("colorC schema suspend (mplayer driver)\n"); */
+      /* printf("colorC schema stop (mplayer driver)\n"); */
       put_state(colorC_schema_id,slept);
    }
    else
@@ -337,12 +337,12 @@ int mycolorC_suspend(){
    return 0;
 }
 
-/** colorD resume function following jdec platform API schemas.
+/** colorD run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
-int mycolorD_resume(int father, int *brothers, arbitration fn){
+int mycolorD_run(int father, int *brothers, arbitration fn){
 
    if(serve_color[3]==1)
    {
@@ -355,7 +355,7 @@ int mycolorD_resume(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[3]);
-	 /* printf("colorD schema resume (mplayer driver)\n");*/
+	 /* printf("colorD schema run (mplayer driver)\n");*/
          all[colorD_schema_id].father = father;
          all[colorD_schema_id].fps = 0.;
          all[colorD_schema_id].k =0;
@@ -367,15 +367,15 @@ int mycolorD_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** colorD suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int mycolorD_suspend(){
+/** colorD stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int mycolorD_stop(){
    pthread_mutex_lock(&refmutex);
    color_active[3]--;
    if((serve_color[3]==1)&&(color_active[3]==0)){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[3]);
-      /* printf("colorD schema suspend (mplayer driver)\n"); */
+      /* printf("colorD schema stop (mplayer driver)\n"); */
       put_state(colorD_schema_id,slept);
    }
    else
@@ -383,12 +383,12 @@ int mycolorD_suspend(){
    return 0;
 }
 
-/** varcolorA resume function following jdec platform API schemas.
+/** varcolorA run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
-int myvarcolorA_resume(int father, int *brothers, arbitration fn){
+int myvarcolorA_run(int father, int *brothers, arbitration fn){
    if(serve_color[4]==1){
       pthread_mutex_lock(&refmutex);
       color_active[4]++;
@@ -399,7 +399,7 @@ int myvarcolorA_resume(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[4]);
-         /*printf("varcolorA schema resume (mplayer driver)\n");*/
+         /*printf("varcolorA schema run (mplayer driver)\n");*/
          all[varcolorA_schema_id].father = father;
          all[varcolorA_schema_id].fps = 0.;
          all[varcolorA_schema_id].k =0;
@@ -411,28 +411,28 @@ int myvarcolorA_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** varcolorA suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int myvarcolorA_suspend(){
+/** varcolorA stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int myvarcolorA_stop(){
    pthread_mutex_lock(&refmutex);
    color_active[4]--;
    if((serve_color[4]==1)&&(color_active[4]==0)){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[4]);
       put_state(varcolorA_schema_id,slept);
-      /*printf("varcolorA schema suspend (mplayer driver)\n");*/
+      /*printf("varcolorA schema stop (mplayer driver)\n");*/
    }
    else
       pthread_mutex_unlock(&refmutex);
    return 0;
 }
 
-/** varcolorB resume function following jdec platform API schemas.
+/** varcolorB run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
-int myvarcolorB_resume(int father, int *brothers, arbitration fn){
+int myvarcolorB_run(int father, int *brothers, arbitration fn){
    if(serve_color[5]==1){
       pthread_mutex_lock(&refmutex);
       color_active[5]++;
@@ -443,7 +443,7 @@ int myvarcolorB_resume(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[5]);
-         /*printf("varcolorB schema resume (mplayer driver)\n");*/
+         /*printf("varcolorB schema run (mplayer driver)\n");*/
          all[varcolorB_schema_id].father = father;
          all[varcolorB_schema_id].fps = 0.;
          all[varcolorB_schema_id].k =0;
@@ -455,28 +455,28 @@ int myvarcolorB_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** varcolorB suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int myvarcolorB_suspend(){
+/** varcolorB stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int myvarcolorB_stop(){
    pthread_mutex_lock(&refmutex);
    color_active[5]--;
    if((serve_color[5]==1)&&(color_active[5]==0)){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[5]);
       put_state(varcolorB_schema_id,slept);
-      /*printf("varcolorB schema suspend (mplayer driver)\n");*/
+      /*printf("varcolorB schema stop (mplayer driver)\n");*/
    }
    else
       pthread_mutex_unlock(&refmutex);
    return 0;
 }
 
-/** varcolorC resume function following jdec platform API schemas.
+/** varcolorC run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
-int myvarcolorC_resume(int father, int *brothers, arbitration fn){
+int myvarcolorC_run(int father, int *brothers, arbitration fn){
    if(serve_color[6]==1){
       pthread_mutex_lock(&refmutex);
       color_active[6]++;
@@ -487,7 +487,7 @@ int myvarcolorC_resume(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[6]);
-         /*printf("varcolorC schema resume (mplayer driver)\n");*/
+         /*printf("varcolorC schema run (mplayer driver)\n");*/
          all[varcolorC_schema_id].father = father;
          all[varcolorC_schema_id].fps = 0.;
          all[varcolorC_schema_id].k =0;
@@ -499,28 +499,28 @@ int myvarcolorC_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** varcolorC suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int myvarcolorC_suspend(){
+/** varcolorC stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int myvarcolorC_stop(){
    pthread_mutex_lock(&refmutex);
    color_active[6]--;
    if((serve_color[6]==1)&&(color_active[6]==0)){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[6]);
       put_state(varcolorC_schema_id,slept);
-      /*printf("varcolorC schema suspend (mplayer driver)\n");*/
+      /*printf("varcolorC schema stop (mplayer driver)\n");*/
    }
    else
       pthread_mutex_unlock(&refmutex);
    return 0;
 }
 
-/** varcolorD resume function following jdec platform API schemas.
+/** varcolorD run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
-int myvarcolorD_resume(int father, int *brothers, arbitration fn){
+int myvarcolorD_run(int father, int *brothers, arbitration fn){
    if(serve_color[7]==1){
       pthread_mutex_lock(&refmutex);
       color_active[7]++;
@@ -531,7 +531,7 @@ int myvarcolorD_resume(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[7]);
-         /*printf("varcolorD schema resume (mplayer driver)\n");*/
+         /*printf("varcolorD schema run (mplayer driver)\n");*/
          all[varcolorD_schema_id].father = father;
          all[varcolorD_schema_id].fps = 0.;
          all[varcolorD_schema_id].k =0;
@@ -543,16 +543,16 @@ int myvarcolorD_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** varcolorD suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int myvarcolorD_suspend(){
+/** varcolorD stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int myvarcolorD_stop(){
    pthread_mutex_lock(&refmutex);
    color_active[7]--;
    if((serve_color[7]==1)&&(color_active[7]==0)){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[7]);
       put_state(varcolorD_schema_id,slept);
-      /*printf("varcolorD schema suspend (mplayer driver)\n");*/
+      /*printf("varcolorD schema stop (mplayer driver)\n");*/
    }
    else
       pthread_mutex_unlock(&refmutex);
@@ -752,7 +752,7 @@ void *mplayer_thread(void *id){
 
       lastimage++;
 
-   }while(mplayer_close_command==0);
+   }while(mplayer_terminate_command==0);
    close(fifo);
    pthread_exit(0);
 }
@@ -1207,7 +1207,7 @@ int mplayer_parseconf(char *configfile){
 
 /** mplayer driver startup function following jdec platform API for drivers.
  *  @param configfile path and name to the config file of this driver.*/
-void mplayer_startup(char *configfile)
+void mplayer_init(char *configfile)
 {
    int i;
 
@@ -1362,24 +1362,24 @@ void mplayer_startup(char *configfile)
          pthread_mutex_lock(&color_mutex[0]);
          all[num_schemas].id = (int *) &colorA_schema_id;
          strcpy(all[num_schemas].name,"colorA");
-         all[num_schemas].resume = (resumeFn) mycolorA_resume;
-         all[num_schemas].suspend = (suspendFn) mycolorA_suspend;
+         all[num_schemas].run = (runFn) mycolorA_run;
+         all[num_schemas].stop = (stopFn) mycolorA_stop;
          printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
          (*(all[num_schemas].id)) = num_schemas;
          all[num_schemas].fps = 0.;
          all[num_schemas].k =0;
          all[num_schemas].state=slept;
-         all[num_schemas].close = NULL;
+         all[num_schemas].terminate = NULL;
          all[num_schemas].handle = NULL;
          num_schemas++;
          myexport("colorA","id",&colorA_schema_id);
          myexport("colorA","colorA",&colorA);
          myexport("colorA","clock", &imageA_clock);
-         myexport("colorA","resume",(void *)mycolorA_resume);
-         myexport("colorA","suspend",(void *)mycolorA_suspend);
+         myexport("colorA","run",(void *)mycolorA_run);
+         myexport("colorA","stop",(void *)mycolorA_stop);
          myexport("colorA","width",&width[0]);
          myexport("colorA","height",&height[0]);
-	 mycolorA_resume(SHELLHUMAN,NULL,NULL);
+	 mycolorA_run(SHELLHUMAN,NULL,NULL);
    }
 
    /*creates new schema for colorB*/
@@ -1387,24 +1387,24 @@ void mplayer_startup(char *configfile)
          pthread_mutex_lock(&color_mutex[1]);
          all[num_schemas].id = (int *) &colorB_schema_id;
          strcpy(all[num_schemas].name,"colorB");
-         all[num_schemas].resume = (resumeFn) mycolorB_resume;
-         all[num_schemas].suspend = (suspendFn) mycolorB_suspend;
+         all[num_schemas].run = (runFn) mycolorB_run;
+         all[num_schemas].stop = (stopFn) mycolorB_stop;
          printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
          (*(all[num_schemas].id)) = num_schemas;
          all[num_schemas].fps = 0.;
          all[num_schemas].k =0;
          all[num_schemas].state=slept;
-         all[num_schemas].close = NULL;
+         all[num_schemas].terminate = NULL;
          all[num_schemas].handle = NULL;
          num_schemas++;
          myexport("colorB","id",&colorB_schema_id);
          myexport("colorB","colorB",&colorB);
          myexport("colorB","clock", &imageB_clock);
-         myexport("colorB","resume",(void *)mycolorB_resume);
-         myexport("colorB","suspend",(void *)mycolorB_suspend);
+         myexport("colorB","run",(void *)mycolorB_run);
+         myexport("colorB","stop",(void *)mycolorB_stop);
          myexport("colorB","width",&width[1]);
          myexport("colorB","height",&height[1]);
-	 mycolorB_resume(SHELLHUMAN,NULL,NULL);
+	 mycolorB_run(SHELLHUMAN,NULL,NULL);
    }
   
    /*creates new schema for colorC*/
@@ -1412,24 +1412,24 @@ void mplayer_startup(char *configfile)
          pthread_mutex_lock(&color_mutex[2]);
          all[num_schemas].id = (int *) &colorC_schema_id;
          strcpy(all[num_schemas].name,"colorC");
-         all[num_schemas].resume = (resumeFn) mycolorC_resume;
-         all[num_schemas].suspend = (suspendFn) mycolorC_suspend;
+         all[num_schemas].run = (runFn) mycolorC_run;
+         all[num_schemas].stop = (stopFn) mycolorC_stop;
          printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
          (*(all[num_schemas].id)) = num_schemas;
          all[num_schemas].fps = 0.;
          all[num_schemas].k =0;
          all[num_schemas].state=slept;
-         all[num_schemas].close = NULL;
+         all[num_schemas].terminate = NULL;
          all[num_schemas].handle = NULL;
          num_schemas++;
          myexport("colorC","id",&colorC_schema_id);
          myexport("colorC","colorC",&colorC);
          myexport("colorC","clock", &imageC_clock);
-         myexport("colorC","resume",(void *)mycolorC_resume);
-         myexport("colorC","suspend",(void *)mycolorC_suspend);
+         myexport("colorC","run",(void *)mycolorC_run);
+         myexport("colorC","stop",(void *)mycolorC_stop);
          myexport("colorC","width",&width[2]);
          myexport("colorC","height",&height[2]);
-	 mycolorC_resume(SHELLHUMAN,NULL,NULL);
+	 mycolorC_run(SHELLHUMAN,NULL,NULL);
    }
   
    /*creates new schema for colorD*/
@@ -1437,24 +1437,24 @@ void mplayer_startup(char *configfile)
          pthread_mutex_lock(&color_mutex[3]);
          all[num_schemas].id = (int *) &colorD_schema_id;
          strcpy(all[num_schemas].name,"colorD");
-         all[num_schemas].resume = (resumeFn) mycolorD_resume;
-         all[num_schemas].suspend = (suspendFn) mycolorD_suspend;
+         all[num_schemas].run = (runFn) mycolorD_run;
+         all[num_schemas].stop = (stopFn) mycolorD_stop;
          printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
          (*(all[num_schemas].id)) = num_schemas;
          all[num_schemas].fps = 0.;
          all[num_schemas].k =0;
          all[num_schemas].state=slept;
-         all[num_schemas].close = NULL;
+         all[num_schemas].terminate = NULL;
          all[num_schemas].handle = NULL;
          num_schemas++;
          myexport("colorD","id",&colorD_schema_id);
          myexport("colorD","colorD",&colorD);
          myexport("colorD","clock", &imageD_clock);
-         myexport("colorD","resume",(void *)mycolorD_resume);
-         myexport("colorD","suspend",(void *)mycolorD_suspend);
+         myexport("colorD","run",(void *)mycolorD_run);
+         myexport("colorD","stop",(void *)mycolorD_stop);
          myexport("colorD","width",&width[3]);
          myexport("colorD","height",&height[3]);
-	 mycolorD_resume(SHELLHUMAN,NULL,NULL);
+	 mycolorD_run(SHELLHUMAN,NULL,NULL);
    }
 
    /*creates new schema for varcolorA*/
@@ -1462,24 +1462,24 @@ void mplayer_startup(char *configfile)
          pthread_mutex_lock(&color_mutex[4]);
          all[num_schemas].id = (int *) &varcolorA_schema_id;
          strcpy(all[num_schemas].name,"varcolorA");
-         all[num_schemas].resume = (resumeFn) myvarcolorA_resume;
-         all[num_schemas].suspend = (suspendFn) myvarcolorA_suspend;
+         all[num_schemas].run = (runFn) myvarcolorA_run;
+         all[num_schemas].stop = (stopFn) myvarcolorA_stop;
          printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
          (*(all[num_schemas].id)) = num_schemas;
          all[num_schemas].fps = 0.;
          all[num_schemas].k =0;
          all[num_schemas].state=slept;
-         all[num_schemas].close = NULL;
+         all[num_schemas].terminate = NULL;
          all[num_schemas].handle = NULL;
          num_schemas++;
          myexport("varcolorA","id",&varcolorA_schema_id);
          myexport("varcolorA","varcolorA",&varcolorA);
          myexport("varcolorA","clock", &varimageA_clock);
-         myexport("varcolorA","resume",(void *)myvarcolorA_resume);
-         myexport("varcolorA","suspend",(void *)myvarcolorA_suspend);
+         myexport("varcolorA","run",(void *)myvarcolorA_run);
+         myexport("varcolorA","stop",(void *)myvarcolorA_stop);
          myexport("varcolorA","width",&width[4]);
          myexport("varcolorA","height",&height[4]);
-	 myvarcolorA_resume(SHELLHUMAN,NULL,NULL);
+	 myvarcolorA_run(SHELLHUMAN,NULL,NULL);
    }
 
    /*creates new schema for varcolorB*/
@@ -1487,24 +1487,24 @@ void mplayer_startup(char *configfile)
          pthread_mutex_lock(&color_mutex[5]);
          all[num_schemas].id = (int *) &varcolorB_schema_id;
          strcpy(all[num_schemas].name,"varcolorB");
-         all[num_schemas].resume = (resumeFn) myvarcolorB_resume;
-         all[num_schemas].suspend = (suspendFn) myvarcolorB_suspend;
+         all[num_schemas].run = (runFn) myvarcolorB_run;
+         all[num_schemas].stop = (stopFn) myvarcolorB_stop;
          printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
          (*(all[num_schemas].id)) = num_schemas;
          all[num_schemas].fps = 0.;
          all[num_schemas].k =0;
          all[num_schemas].state=slept;
-         all[num_schemas].close = NULL;
+         all[num_schemas].terminate = NULL;
          all[num_schemas].handle = NULL;
          num_schemas++;
          myexport("varcolorB","id",&varcolorB_schema_id);
          myexport("varcolorB","varcolorB",&varcolorB);
          myexport("varcolorB","clock", &varimageB_clock);
-         myexport("varcolorB","resume",(void *)myvarcolorB_resume);
-         myexport("varcolorB","suspend",(void *)myvarcolorB_suspend);
+         myexport("varcolorB","run",(void *)myvarcolorB_run);
+         myexport("varcolorB","stop",(void *)myvarcolorB_stop);
          myexport("varcolorB","width",&width[5]);
          myexport("varcolorB","height",&height[5]);
-	 myvarcolorB_resume(SHELLHUMAN,NULL,NULL);
+	 myvarcolorB_run(SHELLHUMAN,NULL,NULL);
    }
 
    /*creates new schema for varcolorC*/
@@ -1512,24 +1512,24 @@ void mplayer_startup(char *configfile)
          pthread_mutex_lock(&color_mutex[6]);
          all[num_schemas].id = (int *) &varcolorC_schema_id;
          strcpy(all[num_schemas].name,"varcolorC");
-         all[num_schemas].resume = (resumeFn) myvarcolorC_resume;
-         all[num_schemas].suspend = (suspendFn) myvarcolorC_suspend;
+         all[num_schemas].run = (runFn) myvarcolorC_run;
+         all[num_schemas].stop = (stopFn) myvarcolorC_stop;
          printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
          (*(all[num_schemas].id)) = num_schemas;
          all[num_schemas].fps = 0.;
          all[num_schemas].k =0;
          all[num_schemas].state=slept;
-         all[num_schemas].close = NULL;
+         all[num_schemas].terminate = NULL;
          all[num_schemas].handle = NULL;
          num_schemas++;
          myexport("varcolorC","id",&varcolorC_schema_id);
          myexport("varcolorC","varcolorC",&varcolorC);
          myexport("varcolorC","clock", &varimageC_clock);
-         myexport("varcolorC","resume",(void *)myvarcolorC_resume);
-         myexport("varcolorC","suspend",(void *)myvarcolorC_suspend);
+         myexport("varcolorC","run",(void *)myvarcolorC_run);
+         myexport("varcolorC","stop",(void *)myvarcolorC_stop);
          myexport("varcolorC","width",&width[6]);
          myexport("varcolorC","height",&height[6]);
-	 myvarcolorC_resume(SHELLHUMAN,NULL,NULL);
+	 myvarcolorC_run(SHELLHUMAN,NULL,NULL);
    }
 
    /*creates new schema for varcolorD*/
@@ -1537,24 +1537,24 @@ void mplayer_startup(char *configfile)
          pthread_mutex_lock(&color_mutex[7]);
          all[num_schemas].id = (int *) &varcolorD_schema_id;
          strcpy(all[num_schemas].name,"varcolorD");
-         all[num_schemas].resume = (resumeFn) myvarcolorD_resume;
-         all[num_schemas].suspend = (suspendFn) myvarcolorD_suspend;
+         all[num_schemas].run = (runFn) myvarcolorD_run;
+         all[num_schemas].stop = (stopFn) myvarcolorD_stop;
          printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
          (*(all[num_schemas].id)) = num_schemas;
          all[num_schemas].fps = 0.;
          all[num_schemas].k =0;
          all[num_schemas].state=slept;
-         all[num_schemas].close = NULL;
+         all[num_schemas].terminate = NULL;
          all[num_schemas].handle = NULL;
          num_schemas++;
          myexport("varcolorD","id",&varcolorD_schema_id);
          myexport("varcolorD","varcolorD",&varcolorD);
          myexport("varcolorD","clock", &varimageD_clock);
-         myexport("varcolorD","resume",(void *)myvarcolorD_resume);
-         myexport("varcolorD","suspend",(void *)myvarcolorD_suspend);
+         myexport("varcolorD","run",(void *)myvarcolorD_run);
+         myexport("varcolorD","stop",(void *)myvarcolorD_stop);
          myexport("varcolorD","width",&width[7]);
          myexport("varcolorD","height",&height[7]);
-	 myvarcolorD_resume(SHELLHUMAN,NULL,NULL);
+	 myvarcolorD_run(SHELLHUMAN,NULL,NULL);
    }
 
    /* Whenever the mplayer and mencoder processes are launched they start to provide images.

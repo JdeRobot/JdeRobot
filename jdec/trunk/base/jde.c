@@ -302,14 +302,14 @@ void jdeshutdown(int sig)
      /* unload all the schemas loaded as plugins */
     for(i=num_schemas-1;i>=0;i--)
      {
-        if (all[i].close!=NULL) all[i].close();
+        if (all[i].terminate!=NULL) all[i].terminate();
         if (all[i].handle!=NULL) dlclose(all[i].handle);
      }
 
      /* unload all the drivers loaded as plugins */
      for(i=num_drivers-1;i>=0;i--)
      {
-        if (mydrivers[i].close!=NULL) mydrivers[i].close();
+        if (mydrivers[i].terminate!=NULL) mydrivers[i].terminate();
         if (mydrivers[i].handle!=NULL) dlclose(mydrivers[i].handle);
      }
 
@@ -363,6 +363,7 @@ void *cronos_thread(void *not_used)
 static char configfile[MAX_BUFFER];
 /** When reading any driver section from the configuration file */
 static int driver_configuration_section=0;
+static int service_configuration_section=0;
 static int schema_configuration_section=0;
 /**
  * @brief This function loads a module and returns a reference to its handler
@@ -421,8 +422,8 @@ int jde_loadschema(char *name)
   else {
       /* symbols from the plugin: */
       dlerror();
-      strcpy(n,name); strcat(n,"_startup");
-      all[num_schemas].startup = (void (*)(char *)) dlsym(all[num_schemas].handle,n);  
+      strcpy(n,name); strcat(n,"_init");
+      all[num_schemas].init = (void (*)(char *)) dlsym(all[num_schemas].handle,n);  
       if ((error=dlerror()) != NULL)
 	printf("WARNING: Unresolved symbol %s in %s schema\n",n,name);
 
@@ -433,32 +434,32 @@ int jde_loadschema(char *name)
         printf("WARNING: Unresolved symbol %s in %s schema\n",n,name);
 
       dlerror();
-      strcpy(n,name); strcat(n,"_resume");
-      all[num_schemas].resume = (void (*)(int,int *,arbitration)) dlsym(all[num_schemas].handle,n);  
-      if ((error=dlerror()) != NULL)
-	printf("WARNING: Unresolved symbol %s in %s schema\n",n,name);
-
-      dlerror();
-      strcpy(n,name); strcat(n,"_suspend");
-      all[num_schemas].suspend = (void (*)(void)) dlsym(all[num_schemas].handle,n);  
+      strcpy(n,name); strcat(n,"_run");
+      all[num_schemas].run = (void (*)(int,int *,arbitration)) dlsym(all[num_schemas].handle,n);  
       if ((error=dlerror()) != NULL)
 	printf("WARNING: Unresolved symbol %s in %s schema\n",n,name);
 
       dlerror();
       strcpy(n,name); strcat(n,"_stop");
-      all[num_schemas].close = (void (*)(void)) dlsym(all[num_schemas].handle,n);
+      all[num_schemas].stop = (void (*)(void)) dlsym(all[num_schemas].handle,n);  
+      if ((error=dlerror()) != NULL)
+	printf("WARNING: Unresolved symbol %s in %s schema\n",n,name);
+
+      dlerror();
+      strcpy(n,name); strcat(n,"_stop");
+      all[num_schemas].terminate = (void (*)(void)) dlsym(all[num_schemas].handle,n);
       if ((error=dlerror()) != NULL)
          printf("WARNING: Unresolved symbol %s in %s schema\n",n,name);
 
       dlerror();
-      strcpy(n,name); strcat(n,"_guiresume");
-      all[num_schemas].guiresume = (void (*)(void)) dlsym(all[num_schemas].handle,n);  
+      strcpy(n,name); strcat(n,"_show");
+      all[num_schemas].show = (void (*)(void)) dlsym(all[num_schemas].handle,n);  
       if ((error=dlerror()) != NULL)
 	printf("WARNING: Unresolved symbol %s in %s schema\n",n,name);
       
       dlerror();
-      strcpy(n,name); strcat(n,"_guisuspend");
-      all[num_schemas].guisuspend = (void (*)(void)) dlsym(all[num_schemas].handle,n);  
+      strcpy(n,name); strcat(n,"_hide");
+      all[num_schemas].hide = (void (*)(void)) dlsym(all[num_schemas].handle,n);  
       if ((error=dlerror()) != NULL)
 	printf("WARNING: Unresolved symbol %s in %s schema\n",n,name);
   
@@ -470,7 +471,7 @@ int jde_loadschema(char *name)
       all[num_schemas].guistate=off;
       pthread_mutex_init(&all[num_schemas].mymutex,PTHREAD_MUTEX_TIMED_NP);
       pthread_cond_init(&all[num_schemas].condition,NULL);
-      /* the thread is created on startup. This is the load */
+      /* the thread is created on schema's init execution. This only is the load of the schema */
 
       printf("%s schema loaded (id %d)\n",name,(*(all[num_schemas].id)));
       num_schemas++;
@@ -501,14 +502,14 @@ int jde_loaddriver(char *name)
     {
       /* symbols from the plugin: */
       dlerror();
-      strcpy(n,name); strcat(n,"_startup");
-      mydrivers[num_drivers].startup = (void (*)(char *)) dlsym(mydrivers[num_drivers].handle,n); 
+      strcpy(n,name); strcat(n,"_init");
+      mydrivers[num_drivers].init = (void (*)(char *)) dlsym(mydrivers[num_drivers].handle,n); 
       if ((error=dlerror()) != NULL)
 	printf("WARNING: Unresolved symbol %s in %s driver\n",n,name);
 
       dlerror();
-      strcpy(n,name); strcat(n,"_close");
-      mydrivers[num_drivers].close = (void (*)()) dlsym(mydrivers[num_drivers].handle,n); 
+      strcpy(n,name); strcat(n,"_terminate");
+      mydrivers[num_drivers].terminate = (void (*)()) dlsym(mydrivers[num_drivers].handle,n); 
       if ((error=dlerror()) != NULL)
 	printf("WARNING: Unresolved symbol %s in %s driver\n",n,name);
 
@@ -526,13 +527,13 @@ int jde_loaddriver(char *name)
  * @returns EOF in detects end of such file. Otherwise returns 0.
  */
 int jde_readline(FILE *myfile)
-     /* To startup non-basic schemas, just raise the flag, putting the in active state. It will effectively start up in main, after the "startup" of all basic schemas */
+     /* To init non-basic schemas, just raise the flag, putting the in active state. It will effectively start up in main, after the "init" of all basic schemas */
 
 {
   char word[MAX_BUFFER], word2[MAX_BUFFER];
   int i=0,j=0,k=0,words=0;
   char buffer_file[MAX_BUFFER]; 
-  resumeFn r;
+  runFn r;
   
   buffer_file[0]=fgetc(myfile);
   if (buffer_file[0]==EOF) return EOF;
@@ -565,11 +566,11 @@ int jde_readline(FILE *myfile)
 
 	if (words==1){
 	  jde_loadschema(word);
-	  (*all[num_schemas-1].startup)(configfile);
+	  (*all[num_schemas-1].init)(configfile);
 	}
 	else if (words==2){
 	  jde_loadschema(word);
-	  (*all[num_schemas-1].startup)(word2);
+	  (*all[num_schemas-1].init)(word2);
 	}
 	else 
 	  printf("Bad line in configuration file %s, ignoring it. Load_schema only accepts one or two parameters: schema_name [schemaconfigfile]\n Offending line: '%s'\n", configfile, buffer_file);	
@@ -592,20 +593,21 @@ int jde_readline(FILE *myfile)
       {
 	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
 	sscanf(&buffer_file[j],"%s",word);
-	r=(resumeFn)myimport(word,"resume");
+	r=(runFn)myimport(word,"run");
 	if (r!=NULL) r(SHELLHUMAN,NULL,NULL);
 	}
 
     else if ((strcmp(word,"guiresume")==0)||
-              (strcmp(word,"guion")==0))
+              (strcmp(word,"guion")==0)||
+              (strcmp(word,"show")==0))
       {
 	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
 	sscanf(&buffer_file[j],"%s",word);
 	for(k=0;k<num_schemas;k++)
 	  {
 	    if (strcmp(all[k].name,word)==0) {
-	      if (all[k].guiresume!=NULL)
-		all[k].guiresume();
+	      if (all[k].show!=NULL)
+		all[k].show();
 	      all[k].guistate=on;
 	      break;
 	    }
@@ -615,18 +617,19 @@ int jde_readline(FILE *myfile)
       }
 
 
-    else if (strcmp(word,"load_driver")==0)
+    else if ((strcmp(word,"load_driver")==0) ||
+	     (strcmp(word,"load_service")==0))
       {
 	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
 	words=sscanf(&buffer_file[j],"%s %s",word,word2);
 
 	if (words==1){
 	  jde_loaddriver(word);
-	  (*mydrivers[num_drivers-1].startup)(configfile);
+	  (*mydrivers[num_drivers-1].init)(configfile);
 	}
 	else if (words==2){
 	  jde_loaddriver(word);
-	  (*mydrivers[num_drivers-1].startup)(word2);
+	  (*mydrivers[num_drivers-1].init)(word2);
 	}
 	else 
 	  printf("Bad line in configuration file %s, ignoring it. Load_driver only accepts one or two parameters: driver_name [driverconfigfile]\n Offending line: '%s'\n", configfile, buffer_file);
@@ -634,15 +637,28 @@ int jde_readline(FILE *myfile)
 
     else if (strcmp(word,"driver")==0)
       {
-	if(driver_configuration_section==0) driver_configuration_section=1;	 
+	if(driver_configuration_section==0) driver_configuration_section=1;
 	else{
 	  printf("Error in configuration file %s. Driver's configuration section without 'end_driver' line\n", configfile);
 	  exit(-1);
 	}
       }
-    else if(strcmp(word,"end_driver")==0)
+    else if (strcmp(word,"end_driver")==0)
       driver_configuration_section=0;
     
+
+    else if (strcmp(word,"service")==0)
+      {
+	if(service_configuration_section==0) service_configuration_section=1;
+	else{
+	  printf("Error in configuration file %s. Service's configuration section without 'end_service' line\n", configfile);
+	  exit(-1);
+	}
+      }
+    else if (strcmp(word,"end_service")==0)
+      service_configuration_section=0;
+    
+
     else if(strcmp (word,"path")==0){
        /*Loads the path*/
        while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')
@@ -654,6 +670,7 @@ int jde_readline(FILE *myfile)
     
     else{
       if ((driver_configuration_section==0) &&
+	  (service_configuration_section==0) &&
 	  (schema_configuration_section==0))
 	printf("I don't know what to do with: %s\n",buffer_file);
     }
@@ -808,8 +825,8 @@ execute_line (char *line){
 
   /*search in loaded schemas*/
   if ((s=find_schema(word)) != 0){/*cmd is a schema name->run it*/
-    if (s->resume != NULL)
-      s->resume(SHELLHUMAN,NULL,NULL);
+    if (s->run != NULL)
+      s->run(SHELLHUMAN,NULL,NULL);
     return 0;
   }
     
@@ -1143,10 +1160,10 @@ com_load_driver (char *arg){
   words=sscanf(arg,"%s %s",word,word2);
   if (words == 1){
     jde_loaddriver(word);
-    (*mydrivers[num_drivers-1].startup)(configfile);
+    (*mydrivers[num_drivers-1].init)(configfile);
   }else if (words==2){
     jde_loaddriver(word);
-    (*mydrivers[num_drivers-1].startup)(word2);
+    (*mydrivers[num_drivers-1].init)(word2);
   }else{
     fprintf (stderr, "load_driver command accept 1 or 2 args only: load_driver <driver.so> [<config file>]");	
     return 1;
@@ -1165,10 +1182,10 @@ com_load_schema (char *arg){
   words=sscanf(arg,"%s %s",word,word2);
   if (words == 1){
     jde_loadschema(word);
-    (*all[num_schemas-1].startup)(configfile);
+    (*all[num_schemas-1].init)(configfile);
   }else if (words==2){
     jde_loadschema(word);
-    (*all[num_schemas-1].startup)(word2);
+    (*all[num_schemas-1].init)(word2);
   }else{
     fprintf (stderr, "load_schema command accept 1 or 2 args only: load_schema <schema.so> [<config file>]");	
     return 1;
@@ -1228,8 +1245,8 @@ com_run (char *arg){
   }else
     return 1;
 
-  if (s->resume != NULL)
-    s->resume(SHELLHUMAN,NULL,NULL);
+  if (s->run != NULL)
+    s->run(SHELLHUMAN,NULL,NULL);
 
   return 0;
 }
@@ -1250,8 +1267,8 @@ com_stop (char *arg){
   }else
     return 1;
 
-  if (s->suspend != NULL)
-    s->suspend();
+  if (s->stop != NULL)
+    s->stop();
 
   return 0;
 }
@@ -1272,8 +1289,8 @@ com_show (char *arg){
   }else
     return 1;
   
-  if (s->guiresume != NULL) {
-    s->guiresume();
+  if (s->show != NULL) {
+    s->show();
     s->guistate=on;
   }
   return 0;
@@ -1295,8 +1312,8 @@ com_hide (char *arg){
   }else
     return 1;
 
-  if (s->guisuspend!=NULL) {
-    s->guisuspend();
+  if (s->hide!=NULL) {
+    s->hide();
     s->guistate=on;
   }
   return 0;
@@ -1306,11 +1323,11 @@ int
 com_init (char *arg){
   JDESchema *s = (JDESchema*)shstate.pdata;
 
-  if (s->startup != NULL) {
+  if (s->init != NULL) {
     if (!valid_argument ("init", arg))/*no args, use global configfile*/
-      s->startup(configfile);
+      s->init(configfile);
     else
-      s->startup(arg);
+      s->init(arg);
   }
 
   return 0;
@@ -1320,8 +1337,8 @@ int
 com_terminate (char *arg){
   JDESchema *s = (JDESchema*)shstate.pdata;
   
-  if (s->close != NULL)
-    s->close();
+  if (s->terminate != NULL)
+    s->terminate();
 
   return 0;
 }

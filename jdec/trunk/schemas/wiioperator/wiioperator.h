@@ -18,12 +18,15 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void wiioperator_startup(char *configfile);
-extern void wiioperator_suspend();
-extern void wiioperator_resume(int father, int *brothers, arbitration fn);
-extern void wiioperator_guiresume();
-extern void wiioperator_guisuspend();
+extern void wiioperator_init(char *configfile);
+extern void wiioperator_terminate();
+
 extern void wiioperator_stop();
+extern void wiioperator_run(int father, int *brothers, arbitration fn);
+
+extern void wiioperator_show();
+extern void wiioperator_hide();
+
 
 extern int wiioperator_id; /* schema identifier */
 extern int wiioperator_cycle; /* ms */

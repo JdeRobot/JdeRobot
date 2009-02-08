@@ -47,25 +47,25 @@ deletedisplay mydelete_displaycallback;
 
 char imagenRGB[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3];
 char **mycolorA=NULL;
-resumeFn colorAresume;
-suspendFn colorAsuspend;
+runFn colorArun;
+stopFn colorAstop;
 
 float laser[NUM_LASER];
 int *mylaser=NULL;
-resumeFn laserresume;
-suspendFn lasersuspend;
+runFn laserrun;
+stopFn laserstop;
 
 float robot[5];
 float *myencoders=NULL;
-resumeFn encodersresume;
-suspendFn encoderssuspend;
+runFn encodersrun;
+stopFn encodersstop;
 
 float v;
 float w;
 float *myv=NULL;
 float *myw=NULL;
-resumeFn motorsresume;
-suspendFn motorssuspend;
+runFn motorsrun;
+stopFn motorsstop;
 
 enum introrobstates {teleoperated,yourcode};
 int introrob_state;
@@ -221,38 +221,38 @@ void introrob_iteration()
 }
 
 
-void introrob_suspend()
+void introrob_stop()
 {
   pthread_mutex_lock(&(all[introrob_id].mymutex));
   put_state(introrob_id,slept);
 
   if (mycolorA!=NULL){
      all[introrob_id].children[(*(int *)myimport("colorA","id"))]=FALSE;
-     colorAsuspend();
+     colorAstop();
    }
   if (mylaser!=NULL){
     all[introrob_id].children[(*(int *)myimport("laser","id"))]=FALSE;
-    lasersuspend();
+    laserstop();
   }
   if (myencoders!=NULL){
     all[introrob_id].children[(*(int *)myimport("encoders","id"))]=FALSE;
-    encoderssuspend();
+    encodersstop();
   }
   if ((myv!=NULL)&&(myw!=NULL)){
     all[introrob_id].children[(*(int *)myimport("motors","id"))]=FALSE;
-    motorssuspend();
+    motorsstop();
   }
   printf("introrob: off\n");
   pthread_mutex_unlock(&(all[introrob_id].mymutex));
 }
 
 
-void introrob_resume(int father, int *brothers, arbitration fn)
+void introrob_run(int father, int *brothers, arbitration fn)
 {
   int i;
  
   pthread_mutex_lock(&(all[introrob_id].mymutex));
-  /* this schema resumes its execution with no children at all */
+  /* this schema runs its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[introrob_id].children[i]=FALSE;
  
   all[introrob_id].father=father;
@@ -267,30 +267,30 @@ void introrob_resume(int father, int *brothers, arbitration fn)
 
   introrob_display_state=0;
   mycolorA=myimport("colorA", "colorA");
-  colorAresume=(resumeFn)myimport("colorA", "resume");
-  colorAsuspend=(suspendFn)myimport("colorA", "suspend");
+  colorArun=(runFn)myimport("colorA", "run");
+  colorAstop=(stopFn)myimport("colorA", "stop");
   if (mycolorA==NULL)
     {printf("No image source found. Check your jde configuration file. I go on anyway\n");}
   else introrob_display_state = introrob_display_state | DISPLAY_COLORA;  
 
   mylaser=(int *)myimport("laser","laser");
-  laserresume=(resumeFn)myimport("laser","resume");
-  lasersuspend=(suspendFn)myimport("laser","suspend");
+  laserrun=(runFn)myimport("laser","run");
+  laserstop=(stopFn)myimport("laser","stop");
   if (mylaser==NULL)
     {printf("No laser source found. Check your jde configuration file. I go on anyway\n");}
   else introrob_display_state = introrob_display_state | DISPLAY_LASER;
 
   myencoders=(float *)myimport("encoders","jde_robot");
-  encodersresume=(resumeFn)myimport("encoders","resume");
-  encoderssuspend=(suspendFn)myimport("encoders","suspend");
+  encodersrun=(runFn)myimport("encoders","run");
+  encodersstop=(stopFn)myimport("encoders","stop");
   if (myencoders==NULL)
     {printf("No encoders source found. Check your jde configuration file. I go on anyway\n");}
   else introrob_display_state = introrob_display_state | DISPLAY_ROBOT;
 
   myv=(float *)myimport("motors","v");
   myw=(float *)myimport("motors","w");
-  motorsresume=(resumeFn)myimport("motors","resume");
-  motorssuspend=(suspendFn)myimport("motors","suspend");
+  motorsrun=(runFn)myimport("motors","run");
+  motorsstop=(stopFn)myimport("motors","stop");
   if ((myv==NULL)||(myw==NULL)) 
     {printf("No motors found. Check your jde configuration file. I go on anyway\n");}
   else introrob_display_state = introrob_display_state | DISPLAY_MOTORS;
@@ -327,19 +327,19 @@ void *introrob_thread(void *not_used)
 	      /* start the winner state from controlled motor values */ 
 	      if (mycolorA!=NULL){
 		all[introrob_id].children[(*(int *)myimport("colorA","id"))]=TRUE;
-		colorAresume(introrob_id,NULL,NULL);
+		colorArun(introrob_id,NULL,NULL);
 	      }
 	      if (mylaser!=NULL){
 		all[introrob_id].children[(*(int *)myimport("laser","id"))]=TRUE;
-		laserresume(introrob_id,NULL,NULL);
+		laserrun(introrob_id,NULL,NULL);
 	      }
 	      if (myencoders!=NULL){
 		all[introrob_id].children[(*(int *)myimport("encoders","id"))]=TRUE;
-		encodersresume(introrob_id,NULL,NULL);
+		encodersrun(introrob_id,NULL,NULL);
 	      }
 	      if ((myv!=NULL)&&(myw!=NULL)){
 		all[introrob_id].children[(*(int *)myimport("motors","id"))]=TRUE;
-		motorsresume(introrob_id,NULL,NULL);
+		motorsrun(introrob_id,NULL,NULL);
 	      }
 	    }	  
 	  else if (all[introrob_id].state==winner);
@@ -373,26 +373,25 @@ void *introrob_thread(void *not_used)
 }
 
 
-void introrob_stop()
-/* introrob_close */
+void introrob_terminate()
 {
   if (fd_introrobgui!=NULL)
     {
       if (all[introrob_id].guistate==on){
-        introrob_guisuspend();
+        introrob_hide();
         all[introrob_id].guistate=off;
       }
     }
-  introrob_suspend();
-  printf ("introrob close\n");
+  introrob_stop();
+  printf ("introrob terminated\n");
 }
 
-void introrob_startup(char *configfile)
+void introrob_init(char *configfile)
 {
   pthread_mutex_lock(&(all[introrob_id].mymutex));
   myexport("introrob","id",&introrob_id);
-  myexport("introrob","resume",(void *) &introrob_resume);
-  myexport("introrob","suspend",(void *) &introrob_suspend);
+  myexport("introrob","run",(void *) &introrob_run);
+  myexport("introrob","stop",(void *) &introrob_stop);
   printf("introrob schema started up\n");
   put_state(introrob_id,slept);
   pthread_create(&(all[introrob_id].mythread),NULL,introrob_thread,NULL);
@@ -866,7 +865,7 @@ int introrob_button_released_on_micanvas(FL_OBJECT *ob, Window win, int win_widt
 }
 
 
-void introrob_guisuspend_aux(void)
+void introrob_hide_aux(void)
 {
   v_teleop=0; w_teleop=0; 
   /* to make a safety stop when the robot is being teleoperated from GUI */
@@ -875,20 +874,20 @@ void introrob_guisuspend_aux(void)
   fl_hide_form(fd_introrobgui->introrobgui);
 }
 
-void introrob_guisuspend(){
+void introrob_hide(){
    static callback fn=NULL;
 
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
-         fn ((gui_function)introrob_guisuspend_aux);
+         fn ((gui_function)introrob_hide_aux);
       }
    }
    else{
-      fn ((gui_function)introrob_guisuspend_aux);
+      fn ((gui_function)introrob_hide_aux);
    }
 }
 
-void introrob_guiresume_aux(void)
+void introrob_show_aux(void)
 {
   static int k=0;
   XGCValues gc_values;
@@ -1019,15 +1018,15 @@ void introrob_guiresume_aux(void)
   myregister_displaycallback(introrob_guidisplay);
 }
 
-void introrob_guiresume(){
+void introrob_show(){
    static callback fn=NULL;
 
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
-         fn ((gui_function)introrob_guiresume_aux);
+         fn ((gui_function)introrob_show_aux);
       }
    }
    else{
-      fn ((gui_function)introrob_guiresume_aux);
+      fn ((gui_function)introrob_show_aux);
    }
 }

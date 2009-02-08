@@ -149,6 +149,12 @@ AC_ARG_ENABLE([schemas-calibrador],
     [],
     [enable_schemas_calibrador=yes])
 
+AC_ARG_ENABLE([schemas-extrinsics],
+    [AS_HELP_STRING([--disable-schemas-extrinsics],
+	    [disable extrinsics schema compilation])],
+    [],
+    [enable_schemas_extrinsics=yes])
+
 dnl AC_ARG_ENABLE([schemas-eyeoperator],
 dnl     [AS_HELP_STRING([--enable-schemas-eyeoperator],
 dnl 	    [enable eyeoperator1/4 schema compilation])],
@@ -641,6 +647,30 @@ if test "x$enable_schemas_calibrador" != xno; then
     AC_SUBST([CALIBRADOR_LIBS])
 fi
 
+dnl # schema extrinsics
+AM_CONDITIONAL([ENABLE_EXTRINSICS],[false])
+if test "x$enable_schemas_extrinsics" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking schema extrinsics:])
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([forms],[main],
+	[EXTRINSICS_LIBS="$EXTRINSICS_LIBS -lforms"],
+	[ERRORS="$ERRORS, libforms not found"],[-lm])
+    AC_CHECK_LIB([X11],[main],
+	[EXTRINSICS_LIBS="$EXTRINSICS_LIBS -lX11"],
+	[ERRORS="$ERRORS, libX11 not found"])
+    AC_PATH_PROG([FDESIGN],[fdesign],
+	[ERRORS="$ERRORS, fdesign needed to build extrinsics schema not found"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-schemas-extrinsics was given, but there was errors: $ERRORS])
+    else
+	ENABLED_SCHEMAS="$ENABLED_SCHEMAS extrinsics"
+	AM_CONDITIONAL([ENABLE_EXTRINSICS],[true])
+    fi
+    AC_SUBST([EXTRINSICS_LIBS])
+fi
 dnl dnl#check eyeoperator1/4
 dnl AM_CONDITIONAL([ENABLE_EYEOPERATOR],[false])
 dnl if test "x$enable_schemas_eyeoperator" != xno; then
@@ -1017,6 +1047,7 @@ AC_CONFIG_FILES([services/Makefile \
 dnl # generate schemas Makefiles
 AC_CONFIG_FILES([schemas/Makefile \
     schemas/calibrador/Makefile \
+    schemas/extrinsics/Makefile \
     schemas/followball/Makefile \
     schemas/hsvtuner/Makefile \
     schemas/image_viewer/Makefile \

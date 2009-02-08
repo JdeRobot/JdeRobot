@@ -21,12 +21,14 @@
  *
  */
 
-extern void followball_startup(char *configfile);
+extern void followball_init(char *configfile);
+extern void followball_terminate();
+
 extern void followball_stop();
-extern void followball_suspend();
-extern void followball_resume(int father, int *brothers, arbitration fn);
-extern void followball_guiresume();
-extern void followball_guisuspend();
+extern void followball_run(int father, int *brothers, arbitration fn);
+
+extern void followball_show();
+extern void followball_hide();
 
 extern int followball_id; /* schema identifier */
 extern int followball_cycle; /* ms */

@@ -18,12 +18,15 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void image_viewer_startup(char *configfile);
-extern void image_viewer_suspend();
-extern void image_viewer_resume(int father, int *brothers, arbitration fn);
-extern void image_viewer_guiresume();
-extern void image_viewer_guisuspend();
+extern void image_viewer_init(char *configfile);
+extern void image_viewer_terminate();
+
 extern void image_viewer_stop();
+extern void image_viewer_run(int father, int *brothers, arbitration fn);
+
+extern void image_viewer_show();
+extern void image_viewer_hide();
+
 
 extern int image_viewer_id; /* schema identifier */
 extern int image_viewer_cycle; /* ms */

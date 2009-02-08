@@ -154,7 +154,7 @@ int evi_setup=0;
 /** evi driver to show fps in jdec shell.*/
 int display_fps=0;
 /** evi driver variable to detect if pthreads must end its execution.*/
-int evi_close_command=0;
+int evi_terminate_command=0;
 
 /* Ref counter*/
 /** PTmotors ref counter*/
@@ -191,8 +191,8 @@ void evi_clean_up() {
 }
 
 /** evi driver function to stop and clean evi devices.*/
-void evi_close(){
-  evi_close_command=1;
+void evi_terminate(){
+  evi_terminate_command=1;
   evi_clean_up();
   printf("driver evi off\n");
 }
@@ -202,7 +202,7 @@ void Zencoders_iteration() {
    speedcounter(Zencoders_schema_id);
    if(ZoomPosInqCamera(cam,&zoomPoll) != 1) {
       fprintf(stderr, "evi driver: Transmission interrupted\n");
-      evi_close();
+      evi_terminate();
    }
 //    printf("estoy en %f\n", zoomPoll);
 
@@ -232,14 +232,14 @@ void *ZencodersThread(void *not_used) {
          }
       }
       pthread_mutex_unlock(&mymutex_Zencoders);
-   } while(evi_close_command==0);
+   } while(evi_terminate_command==0);
 
    pthread_exit(0);
 }
 
-/** Zencoders suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int Zencoders_suspend() {
+/** Zencoders stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int Zencoders_stop() {
    pthread_mutex_lock(&refmutex);
    if (Zencoders_refs > 1) {
       Zencoders_refs--;
@@ -252,7 +252,7 @@ int Zencoders_suspend() {
          pthread_mutex_lock(&mymutex_Zencoders);
          state_Zencoders=slept;
          put_state(Zencoders_schema_id,slept);
-         printf("Zencoders schema suspend\n");
+         printf("Zencoders schema stop\n");
          pthread_mutex_unlock(&mymutex_Zencoders);
       }
    }
@@ -260,12 +260,12 @@ int Zencoders_suspend() {
 }
 
 
-/** Zencoders resume function following jdec platform API schemas.
+/** Zencoders run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int Zencoders_resume(int father, int *brothers, arbitration fn) {
+int Zencoders_run(int father, int *brothers, arbitration fn) {
    pthread_mutex_lock(&refmutex);
    if (Zencoders_refs > 0){
       Zencoders_refs++;
@@ -281,7 +281,7 @@ int Zencoders_resume(int father, int *brothers, arbitration fn) {
          all[Zencoders_schema_id].fps = 0.;
          all[Zencoders_schema_id].k =0;
          put_state(Zencoders_schema_id,winner);
-         printf("Zencoders schema resume\n");
+         printf("Zencoders schema run\n");
          pthread_cond_signal(&condition_Zencoders);
          pthread_mutex_unlock(&mymutex_Zencoders);
       }
@@ -312,16 +312,16 @@ void Zmotors_iteration() {
          e = ZoomCamera(cam, EVILIB_DIRECT, zoomSpeed, zoomPos, EVILIB_NO_WAIT_COMP);
          if (e != 1) {
             fprintf(stderr, "evi driver: Transmission interrupted\n");
-            evi_close();
+            evi_terminate();
          }
          lastZoomPos = zoomPos;
       }
    }
 }
 
-/** Zmotors suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int Zmotors_suspend()
+/** Zmotors stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int Zmotors_stop()
 {
    pthread_mutex_lock(&refmutex);
    if (Zmotors_refs > 1) {
@@ -335,7 +335,7 @@ int Zmotors_suspend()
          pthread_mutex_lock(&mymutex_Zmotors);
          state_Zmotors=slept;
          put_state(Zmotors_schema_id,slept);
-         printf("Zmotors schema suspend\n");
+         printf("Zmotors schema stop\n");
          pthread_mutex_unlock(&mymutex_Zmotors);
       }
    }
@@ -343,12 +343,12 @@ int Zmotors_suspend()
 }
 
 
-/** Zmotors resume function following jdec platform API schemas.
+/** Zmotors run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int Zmotors_resume(int father, int *brothers, arbitration fn)
+int Zmotors_run(int father, int *brothers, arbitration fn)
 {
    pthread_mutex_lock(&refmutex);
    if (Zmotors_refs > 0){
@@ -365,7 +365,7 @@ int Zmotors_resume(int father, int *brothers, arbitration fn)
          all[Zmotors_schema_id].fps = 0.;
          all[Zmotors_schema_id].k =0;
          put_state(Zmotors_schema_id,winner);
-         printf("Zmotors schema resume\n");
+         printf("Zmotors schema run\n");
          pthread_cond_signal(&condition_Zmotors);
          pthread_mutex_unlock(&mymutex_Zmotors);
       }
@@ -401,7 +401,7 @@ void *ZmotorsThread(void *not_used) {
             usleep(Zmotors_cycle*1000);
          }
       }
-   } while(evi_close_command==0);
+   } while(evi_terminate_command==0);
 
    pthread_exit(0);
 }
@@ -416,7 +416,7 @@ void PTencoders_iteration() {
       incoherente = 0;
       if(Pan_TiltPosInqCamera(cam, &currentLongitude, &currentLatitude) != 1) {
          fprintf(stderr, "evi driver: Transmission interrupted\n");
-         evi_close();
+         evi_terminate();
       }
       /* A veces, las consultas por la posición del cuello devuelven valores no
       coherentes que hemos de ignorar y reiterar la consulta hasta que obtengamos
@@ -458,15 +458,15 @@ void *PTencodersThread(void *not_used) {
          }
       }
       pthread_mutex_unlock(&mymutex_PTencoders);
-   } while(evi_close_command==0);
+   } while(evi_terminate_command==0);
 
    pthread_exit(0);
 }
 
 
-/** PTencoders suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int PTencoders_suspend() {
+/** PTencoders stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int PTencoders_stop() {
    pthread_mutex_lock(&refmutex);
    if (PTencoders_refs > 1) {
       PTencoders_refs--;
@@ -479,7 +479,7 @@ int PTencoders_suspend() {
          pthread_mutex_lock(&mymutex_PTencoders);
          state_PTencoders=slept;
          put_state(PTencoders_schema_id,slept);
-         printf("PTencoders schema suspend\n");
+         printf("PTencoders schema stop\n");
          pthread_mutex_unlock(&mymutex_PTencoders);
       }
    }
@@ -487,12 +487,12 @@ int PTencoders_suspend() {
 }
 
 
-/** PTencoders resume function following jdec platform API schemas.
+/** PTencoders run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int PTencoders_resume(int father, int *brothers, arbitration fn) {
+int PTencoders_run(int father, int *brothers, arbitration fn) {
    pthread_mutex_lock(&refmutex);
    if (PTencoders_refs > 0){
       PTencoders_refs++;
@@ -508,7 +508,7 @@ int PTencoders_resume(int father, int *brothers, arbitration fn) {
          all[PTencoders_schema_id].fps = 0.;
          all[PTencoders_schema_id].k =0;
          put_state(PTencoders_schema_id,winner);
-         printf("PTencoders schema resume\n");
+         printf("PTencoders schema run\n");
          pthread_cond_signal(&condition_PTencoders);
          pthread_mutex_unlock(&mymutex_PTencoders);
       }
@@ -586,7 +586,7 @@ void PTmotors_iteration() {
       
       if(Pan_TiltPosInqCamera(cam, &currentLongitude, &currentLatitude) != 1) {
          fprintf(stderr, "evi driver: Transmission interrupted\n");
-         evi_close();
+         evi_terminate();
       }
       /* A veces, las consultas por la posición del cuello devuelven valores no
       coherentes que hemos de ignorar y reiterar la consulta hasta que obtengamos
@@ -623,7 +623,7 @@ void PTmotors_iteration() {
                                     EVILIB_NO_WAIT_COMP);
             if (e != 1) {
                fprintf(stderr, "evi driver: Transmission interrupted\n");
-               evi_close();
+               evi_terminate();
             }
          }
          lastPanPos = panPos;
@@ -633,9 +633,9 @@ void PTmotors_iteration() {
    }
 }
 
-/** PTmotors suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int PTmotors_suspend()
+/** PTmotors stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int PTmotors_stop()
 {
    pthread_mutex_lock(&refmutex);
    if (PTmotors_refs > 1) {
@@ -649,7 +649,7 @@ int PTmotors_suspend()
          pthread_mutex_lock(&mymutex_PTmotors);
          state_PTmotors=slept;
          put_state(PTmotors_schema_id,slept);
-         printf("PTmotors schema suspend\n");
+         printf("PTmotors schema stop\n");
          pthread_mutex_unlock(&mymutex_PTmotors);
       }
    }
@@ -657,12 +657,12 @@ int PTmotors_suspend()
 }
 
 
-/** PTmotors resume function following jdec platform API schemas.
+/** PTmotors run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int PTmotors_resume(int father, int *brothers, arbitration fn)
+int PTmotors_run(int father, int *brothers, arbitration fn)
 {
    pthread_mutex_lock(&refmutex);
    if (PTmotors_refs > 0){
@@ -681,7 +681,7 @@ int PTmotors_resume(int father, int *brothers, arbitration fn)
          all[PTmotors_schema_id].fps = 0.;
          all[PTmotors_schema_id].k =0;
          put_state(PTmotors_schema_id,winner);
-         printf("PTmotors schema resume\n");
+         printf("PTmotors schema run\n");
          pthread_cond_signal(&condition_PTmotors);
          pthread_mutex_unlock(&mymutex_PTmotors);
       }
@@ -717,7 +717,7 @@ void *PTmotorsThread(void *not_used) {
             usleep(PTmotors_cycle*1000);
          }
       }
-   } while(evi_close_command==0);
+   } while(evi_terminate_command==0);
 
    pthread_exit(0);
 }
@@ -861,7 +861,7 @@ int evi_parseconf(char *configfile){
   return 0;   
 }
 
-void evi_init(){
+void evi_deviceinit(){
    int n;
 
    cam = NewCamera();
@@ -898,7 +898,7 @@ void evi_init(){
 
 /** evi driver startup function following jdec platform API for drivers.
  *  @param configfile path and name to the config file of this driver.*/
-void evi_startup(char *configfile) {
+void evi_init(char *configfile) {
 
    /* we call the function to parse the config file */
    if(evi_parseconf(configfile) == -1){
@@ -907,7 +907,7 @@ void evi_startup(char *configfile) {
    }
    /* evi initialitation */
    if(evi_setup==0)
-      evi_init();
+      evi_deviceinit();
 
    if(activate_PTencoders) {     
       printf("PTencoders driver started up\n");
@@ -918,22 +918,22 @@ void evi_startup(char *configfile) {
 
       all[num_schemas].id = (int *) &PTencoders_schema_id;
       strcpy(all[num_schemas].name,"PTencoders");
-      all[num_schemas].resume = (resumeFn) PTencoders_resume;
-      all[num_schemas].suspend = (suspendFn) PTencoders_suspend;
+      all[num_schemas].run = (runFn) PTencoders_run;
+      all[num_schemas].stop = (stopFn) PTencoders_stop;
       printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k =0;
       all[num_schemas].state=slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport("ptencoders", "id", &PTencoders_schema_id);
       myexport("ptencoders", "pan_angle", &longitudePoll);
       myexport("ptencoders", "tilt_angle", &latitudePoll);
       myexport("ptencoders", "clock", &PTencoders_clock);
-      myexport("ptencoders", "resume", (void *)&PTencoders_resume);
-      myexport("ptencoders", "suspend", (void *)&PTencoders_suspend);
+      myexport("ptencoders", "run", (void *)&PTencoders_run);
+      myexport("ptencoders", "stop", (void *)&PTencoders_stop);
    }
 
    if (activate_PTmotors) {
@@ -945,14 +945,14 @@ void evi_startup(char *configfile) {
 
       all[num_schemas].id = (int *) &PTmotors_schema_id;
       strcpy(all[num_schemas].name,"PTmotors");
-      all[num_schemas].resume = (resumeFn) PTmotors_resume;
-      all[num_schemas].suspend = (suspendFn) PTmotors_suspend;
+      all[num_schemas].run = (runFn) PTmotors_run;
+      all[num_schemas].stop = (stopFn) PTmotors_stop;
       printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k =0;
       all[num_schemas].state=slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport("ptmotors", "id", &PTmotors_schema_id);
@@ -961,8 +961,8 @@ void evi_startup(char *configfile) {
       myexport("ptmotors", "longitude_speed", &longitude_speed);
       myexport("ptmotors", "latitude_speed", &latitude_speed);
       myexport("ptmotors", "cycle", &PTmotors_cycle);
-      myexport("ptmotors", "resume", (void *)&PTmotors_resume);
-      myexport("ptmotors", "suspend", (void *)&PTmotors_suspend);
+      myexport("ptmotors", "run", (void *)&PTmotors_run);
+      myexport("ptmotors", "stop", (void *)&PTmotors_stop);
       myexport("ptmotors", "max_longitude", &max_longitude);
       myexport("ptmotors", "max_latitude", &max_latitude);
       myexport("ptmotors", "min_longitude", &min_longitude);
@@ -980,21 +980,21 @@ void evi_startup(char *configfile) {
 
       all[num_schemas].id = (int *) &Zencoders_schema_id;
       strcpy(all[num_schemas].name,"Zencoders");
-      all[num_schemas].resume = (resumeFn) Zencoders_resume;
-      all[num_schemas].suspend = (suspendFn) Zencoders_suspend;
+      all[num_schemas].run = (runFn) Zencoders_run;
+      all[num_schemas].stop = (stopFn) Zencoders_stop;
       printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k =0;
       all[num_schemas].state=slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport("zencoders", "id", &Zencoders_schema_id);
       myexport("zencoders", "zoom_position", &zoomPoll);
       myexport("zencoders", "clock", &Zencoders_clock);
-      myexport("zencoders", "resume", (void *)&Zencoders_resume);
-      myexport("zencoders", "suspend", (void *)&Zencoders_suspend);
+      myexport("zencoders", "run", (void *)&Zencoders_run);
+      myexport("zencoders", "stop", (void *)&Zencoders_stop);
    }
 
    if (activate_Zmotors) {
@@ -1006,22 +1006,22 @@ void evi_startup(char *configfile) {
 
       all[num_schemas].id = (int *) &Zmotors_schema_id;
       strcpy(all[num_schemas].name,"Zmotors");
-      all[num_schemas].resume = (resumeFn) Zmotors_resume;
-      all[num_schemas].suspend = (suspendFn) Zmotors_suspend;
+      all[num_schemas].run = (runFn) Zmotors_run;
+      all[num_schemas].stop = (stopFn) Zmotors_stop;
       printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
       all[num_schemas].fps = 0.;
       all[num_schemas].k =0;
       all[num_schemas].state=slept;
-      all[num_schemas].close = NULL;
+      all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
       myexport("zmotors", "id", &Zmotors_schema_id);
       myexport("zmotors", "zoom", &zoom);
       myexport("zmotors", "zoom_speed", &zoom_speed);
       myexport("zmotors", "cycle", &Zmotors_cycle);
-      myexport("zmotors", "resume", (void *)&Zmotors_resume);
-      myexport("zmotors", "suspend", (void *)&Zmotors_suspend);
+      myexport("zmotors", "run", (void *)&Zmotors_run);
+      myexport("zmotors", "stop", (void *)&Zmotors_stop);
       myexport("zmotors", "max_zoom", &max_zoom);
       myexport("zmotors", "min_zoom", &min_zoom);
       myexport("zmotors", "max_zoom_speed", &max_zoom_speed);

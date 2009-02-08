@@ -18,12 +18,14 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void opengldemo_startup(char *configfile);
+extern void opengldemo_init(char *configfile);
+extern void opengldemo_terminate();
+
 extern void opengldemo_stop();
-extern void opengldemo_suspend();
-extern void opengldemo_resume(int father, int *brothers, arbitration fn);
-extern void opengldemo_guiresume();
-extern void opengldemo_guisuspend();
+extern void opengldemo_run(int father, int *brothers, arbitration fn);
+
+extern void opengldemo_show();
+extern void opengldemo_hide();
 
 
 extern int opengldemo_id; /* schema identifier */

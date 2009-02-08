@@ -99,10 +99,10 @@ int device_network_id[MAXDEVICE];
 /*Import section*/
 /**Imported variables from sensors schemas*/
 void *variables[MAXDEVICE];
-/** Sensor schemas resume functon*/
-resumeFn resume[MAXDEVICE];
-/** Sensor schemas suspend functon*/
-suspendFn suspend[MAXDEVICE];
+/** Sensor schemas run functon*/
+runFn run[MAXDEVICE];
+/** Sensor schemas stop functon*/
+stopFn stop[MAXDEVICE];
 
 /** Mutex to wait until the client socket id is stored at client structure*/
 pthread_mutex_t socketmutex;
@@ -112,9 +112,8 @@ pthread_mutex_t socketmutex;
 pthread_t listen_pid;
 
 
-/** Close function following the jdec driver api*/
-void networkserver_close(){
-
+/** Terminate function following the jdec driver api*/
+void networkserver_terminate(){
    printf("driver networkserver off\n");
 }
 
@@ -339,7 +338,7 @@ int networkserver_parseconf(char *configfile){
 }
 
 /** Initialization function*/
-void init(){
+void deviceinit(){
    int i;
    for (i=0;i<MAXDEVICE; i++){
       /*Do myimport's*/
@@ -347,134 +346,134 @@ void init(){
          switch (i){
             case COLORA_DEVICE:
                variables[i]=myimport ("colorA", "colorA");
-               resume[i]=(resumeFn) myimport ("colorA", "resume");
-               suspend[i]=(suspendFn) myimport ("colorA", "suspend");
+               run[i]=(runFn) myimport ("colorA", "run");
+               stop[i]=(stopFn) myimport ("colorA", "stop");
                if (!variables[i]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'colorA', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             case COLORB_DEVICE:
                variables[i]=myimport ("colorB", "colorB");
-               resume[i]=(resumeFn) myimport ("colorB", "resume");
-               suspend[i]=(suspendFn) myimport ("colorB", "suspend");
+               run[i]=(runFn) myimport ("colorB", "run");
+               stop[i]=(stopFn) myimport ("colorB", "stop");
                if (!variables[i]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'colorB', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             case COLORC_DEVICE:
                variables[i]=myimport ("colorC", "colorC");
-               resume[i]=(resumeFn) myimport ("colorC", "resume");
-               suspend[i]=(suspendFn) myimport ("colorC", "suspend");
+               run[i]=(runFn) myimport ("colorC", "run");
+               stop[i]=(stopFn) myimport ("colorC", "stop");
                if (!variables[i]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'colorC', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             case COLORD_DEVICE:
                variables[i]=myimport ("colorD", "colorD");
-               resume[i]=(resumeFn) myimport ("colorD", "resume");
-               suspend[i]=(suspendFn) myimport ("colorD", "suspend");
+               run[i]=(runFn) myimport ("colorD", "run");
+               stop[i]=(stopFn) myimport ("colorD", "stop");
                if (!variables[i]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'colorD', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             case VARCOLORA_DEVICE:
                variables[i]=myimport ("varcolorA", "varcolorA");
-               resume[i]=(resumeFn) myimport ("varcolorA", "resume");
-               suspend[i]=(suspendFn) myimport ("varcolorA", "suspend");
+               run[i]=(runFn) myimport ("varcolorA", "run");
+               stop[i]=(stopFn) myimport ("varcolorA", "stop");
                if (!variables[i]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'varcolorA', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             case VARCOLORB_DEVICE:
                variables[i]=myimport ("varcolorB", "varcolorB");
-               resume[i]=(resumeFn) myimport ("varcolorB", "resume");
-               suspend[i]=(suspendFn) myimport ("varcolorB", "suspend");
+               run[i]=(runFn) myimport ("varcolorB", "run");
+               stop[i]=(stopFn) myimport ("varcolorB", "stop");
                if (!variables[i]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'varcolorB', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             case VARCOLORC_DEVICE:
                variables[i]=myimport ("varcolorC", "varcolorC");
-               resume[i]=(resumeFn) myimport ("varcolorC", "resume");
-               suspend[i]=(suspendFn) myimport ("varcolorC", "suspend");
+               run[i]=(runFn) myimport ("varcolorC", "run");
+               stop[i]=(stopFn) myimport ("varcolorC", "stop");
                if (!variables[i]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'varcolorC', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             case VARCOLORD_DEVICE:
                variables[i]=myimport ("varcolorD", "varcolorD");
-               resume[i]=(resumeFn) myimport ("varcolorD", "resume");
-               suspend[i]=(suspendFn) myimport ("varcolorD", "suspend");
+               run[i]=(runFn) myimport ("varcolorD", "run");
+               stop[i]=(stopFn) myimport ("varcolorD", "stop");
                if (!variables[i]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'varcolorD', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             case LASER_DEVICE:
                variables[i]=myimport ("laser", "laser");
-               resume[i]=(resumeFn) myimport("laser", "resume");
-               suspend[i]=(suspendFn) myimport("laser", "suspend");
+               run[i]=(runFn) myimport("laser", "run");
+               stop[i]=(stopFn) myimport("laser", "stop");
                if (!variables[i]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'laser', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             case ENCODERS_DEVICE:
                variables[i]=myimport ("encoders", "jde_robot");
-               resume[i]=(resumeFn) myimport("encoders", "resume");
-               suspend[i]=(suspendFn) myimport("encoders", "suspend");
+               run[i]=(runFn) myimport("encoders", "run");
+               stop[i]=(stopFn) myimport("encoders", "stop");
                if (!variables[i]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'encoders', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             case SONARS_DEVICE:
                variables[i]=myimport ("sonars", "us");
-               resume[i]=(resumeFn) myimport("sonars", "resume");
-               suspend[i]=(suspendFn) myimport("sonars", "suspend");
+               run[i]=(runFn) myimport("sonars", "run");
+               stop[i]=(stopFn) myimport("sonars", "stop");
                if (!variables[i]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'sonars', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             case MOTORS_DEVICE:
@@ -483,14 +482,14 @@ void init(){
                variables[i]=motors;
                motors[0]=(float *)myimport ("motors", "v");
                motors[1]=(float *)myimport ("motors", "w");
-               resume[i]=(resumeFn) myimport("motors", "resume");
-               suspend[i]=(suspendFn) myimport("motors", "suspend");
+               run[i]=(runFn) myimport("motors", "run");
+               stop[i]=(stopFn) myimport("motors", "stop");
                if (!motors[0] || !motors[1]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'motors', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             }
@@ -500,14 +499,14 @@ void init(){
                variables[i]=pantilt;
                pantilt[0]=myimport ("ptencoders", "pan_angle");
                pantilt[1]=myimport ("ptencoders", "tilt_angle");
-               resume[i]=(resumeFn) myimport("ptencoders", "resume");
-               suspend[i]=(suspendFn) myimport("ptencoders", "suspend");
+               run[i]=(runFn) myimport("ptencoders", "run");
+               stop[i]=(stopFn) myimport("ptencoders", "stop");
                if (!pantilt[0] || !pantilt[1]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'pantilt_encoders', they'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             }
@@ -519,8 +518,8 @@ void init(){
                pantilt_motors[1]=myimport ("ptmotors", "latitude");
                pantilt_motors[2]=myimport ("ptmotors", "longitude_speed");
                pantilt_motors[3]=myimport ("ptmotors", "latitude_speed");
-               resume[i]=(resumeFn) myimport("ptmotors", "resume");
-               suspend[i]=(suspendFn) myimport("ptmotors", "suspend");
+               run[i]=(runFn) myimport("ptmotors", "run");
+               stop[i]=(stopFn) myimport("ptmotors", "stop");
                if (!pantilt_motors[0] || !pantilt_motors[1] ||
                     !pantilt_motors[2] || !pantilt_motors[3])
                {
@@ -528,21 +527,21 @@ void init(){
                   fprintf (stderr, "I can't fetch 'pantilt_motors', they'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             }
             case ZOOM_ENCODERS_DEVICE:
             {
                variables[i]=myimport("zencoders", "zoom_position");
-               resume[i]=(resumeFn) myimport("zencoders", "resume");
-               suspend[i]=(suspendFn) myimport("zencoders", "suspend");
+               run[i]=(runFn) myimport("zencoders", "run");
+               stop[i]=(stopFn) myimport("zencoders", "stop");
                if (!variables[i]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'zencoders', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             }
@@ -552,14 +551,14 @@ void init(){
                variables[i]=zoom_motors;
                zoom_motors[0]=myimport("zmotors", "zoom");
                zoom_motors[1]=myimport("zmotors", "zoom_speed");
-               resume[i]=(resumeFn) myimport("zmotors", "resume");
-               suspend[i]=(suspendFn) myimport("zmotors", "suspend");
+               run[i]=(runFn) myimport("zmotors", "run");
+               stop[i]=(stopFn) myimport("zmotors", "stop");
                if (!zoom_motors[0] || !zoom_motors[1]){
                   serve_device[i]=0;
                   fprintf (stderr, "I can't fetch 'zmotors', it'll not be served\n");
                }
                else{
-                  resume[i](-1, NULL, NULL);
+                  run[i](-1, NULL, NULL);
                }
                break;
             }
@@ -1177,10 +1176,10 @@ void *listen_thread() {
 }
 
 /**
- * The startup function following the drivers jde api.
+ * The init function following the drivers jde api.
  * @param configfile path and name to the config file of this driver.
  */
-void networkserver_startup(char *configfile)
+void networkserver_init(char *configfile)
 {
    int i;
 
@@ -1197,8 +1196,8 @@ void networkserver_startup(char *configfile)
       exit(-1);
    }
 
-   /*To import variables and resume schemas that export them*/
-   init();
+   /*To import variables and run schemas that export them*/
+   deviceinit();
    pthread_create(&listen_pid,NULL,listen_thread,(void*)NULL);
    printf("networkserver driver started up\n");
 }

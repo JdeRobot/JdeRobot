@@ -103,12 +103,12 @@ deletedisplay mydelete_displaycallback;
 
 /*imported variables */
 char **mycolorA;
-resumeFn colorAresume;
-suspendFn colorAsuspend;
+runFn colorArun;
+stopFn colorAstop;
 
 char **mycolorB;
-resumeFn colorBresume;
-suspendFn colorBsuspend;
+runFn colorBrun;
+stopFn colorBstop;
 
 
 /**  Variables para manejar el display */
@@ -1304,7 +1304,7 @@ void resolver_sistema_de_ecuaciones(Tpoint2D* pnts_elegidos,
 				    ){
 
   /** 
-      Sistema de ecuaciones lineales. Se le alojara memoria en la funciona startup
+      Sistema de ecuaciones lineales. Se le alojara memoria en la funcion init
 
   */
   int **sistema_lineal_ecuaciones;/*[NUMEC][12]*/
@@ -1711,17 +1711,17 @@ int freeobj_imagen_de_entrada_2_handle(FL_OBJECT* obj, int event,
 }
 
 
-void calibrador_suspend()
+void calibrador_stop()
 {
-  /* printf("calibrador: cojo-suspend\n");*/
+  /* printf("calibrador: cojo-stop\n");*/
   pthread_mutex_lock(&(all[calibrador_id].mymutex));
   put_state(calibrador_id,slept);
   printf("calibrador: off\n");
   pthread_mutex_unlock(&(all[calibrador_id].mymutex));
-  /*  printf("calibrador: suelto-suspend\n");*/
+  /*  printf("calibrador: suelto-stop\n");*/
 }
 
-void calibrador_resume(int father, int *brothers, arbitration fn)
+void calibrador_run(int father, int *brothers, arbitration fn)
 {
   int i;
 
@@ -1735,7 +1735,7 @@ void calibrador_resume(int father, int *brothers, arbitration fn)
   
   pthread_mutex_lock(&(all[calibrador_id].mymutex));
   
-  /* this schema resumes its execution with no children at all */
+  /* this schema runs its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[calibrador_id].children[i]=FALSE;
   all[calibrador_id].father=father;
   if (brothers!=NULL)
@@ -1757,17 +1757,17 @@ void calibrador_resume(int father, int *brothers, arbitration fn)
 
   /* Importamos colorA and launch the colorA child schema */
   mycolorA=myimport ("colorA", "colorA");
-  colorAresume=myimport("colorA", "resume");
-  colorAsuspend=myimport("colorA", "suspend");  
-  if (colorAresume!=NULL)
-    colorAresume(calibrador_id, NULL, NULL);
+  colorArun=myimport("colorA", "run");
+  colorAstop=myimport("colorA", "stop");  
+  if (colorArun!=NULL)
+    colorArun(calibrador_id, NULL, NULL);
 
   /* Importamos colorB and launch the colorB child schema */
   mycolorB=myimport ("colorB", "colorB");
-  colorBresume=myimport("colorB", "resume");
-  colorBsuspend=myimport("colorB", "suspend");  
-  if (colorBresume!=NULL)
-    colorBresume(calibrador_id, NULL, NULL);
+  colorBrun=myimport("colorB", "run");
+  colorBstop=myimport("colorB", "stop");  
+  if (colorBrun!=NULL)
+    colorBrun(calibrador_id, NULL, NULL);
 
   mycolorB = mycolorA;
 
@@ -1837,7 +1837,7 @@ void *calibrador_thread(void *not_used)
     }
 }
 
-void calibrador_startup(char *configfile)
+void calibrador_init(char *configfile)
 {
   int argc=1;
   char **argv;
@@ -1858,8 +1858,8 @@ void calibrador_startup(char *configfile)
   printf("calibrador schema started up\n");
   
   myexport("calibrador","calibrador_cycle",&calibrador_cycle);
-  myexport("calibrador","calibrador_resume",(void *)calibrador_resume);
-  myexport("calibrador","calibrador_suspend",(void *)calibrador_suspend);
+  myexport("calibrador","calibrador_run",(void *)calibrador_run);
+  myexport("calibrador","calibrador_stop",(void *)calibrador_stop);
 
   if (myregister_buttonscallback==NULL){
     if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
@@ -2502,7 +2502,7 @@ void calibrador_guidisplay()
   }  
 }
 
-void calibrador_guisuspend(void)
+void calibrador_hide(void)
 {
   delete_buttonscallback(calibrador_guibuttons);
   delete_displaycallback(calibrador_guidisplay);
@@ -2564,7 +2564,7 @@ void button_press_event(FL_OBJECT *ob, Window win, int win_width,
   
 }
 
-void calibrador_guiresume(void)
+void calibrador_show(void)
 {
   static int k=0;
   float r;
@@ -2600,4 +2600,9 @@ void calibrador_guiresume(void)
   fl_show_form(fd_calibradorgui->calibradorgui,FL_PLACE_POSITION,
 	       FL_FULLBORDER,"calibrador");
   
+}
+
+void calibrador_terminate()
+{
+  printf("calibrador terminated\n");
 }

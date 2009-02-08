@@ -62,10 +62,10 @@ enum guistates {off,on,pending_off,pending_on};
 typedef void (*intcallback)(int i);
 /** Arbitration function's type definition*/
 typedef void (*arbitration)(void);
-/** Schema's resume funcion's type definition*/
-typedef void (*resumeFn)(int father, int *brothers, arbitration fn);
-/** Schema's suspend funcion's type definition*/
-typedef void (*suspendFn)(void);
+/** Schema's run funcion's type definition*/
+typedef void (*runFn)(int father, int *brothers, arbitration fn);
+/** Schema's stop funcion's type definition*/
+typedef void (*stopFn)(void);
 
 /**
  * Null arbitrarion function
@@ -147,39 +147,39 @@ typedef struct {
   long int k;
 
   /**
-   * Pointer to the schema's startup function
+   * Pointer to the schema's init function
    * @param configfile Path and name to the config file of this schema.
    * @return void
    */
-  void (*startup)(char *configfile);
+  void (*init)(char *configfile);
   /**
-   * Pointer to the schema's close function
+   * Pointer to the schema's terminate function
    * @return void
    */
-  void (*close)(void);
+  void (*terminate)(void);
   /**
    * Pointer to the schema's suspend function
    * @return void
    */
-  void (*suspend)(void);
+  void (*stop)(void);
   /**
-   * Pointer to the schema's resume function
-   * @param father The father's schema identifier (the one who resumes it)
+   * Pointer to the schema's run function
+   * @param father The father's schema identifier (the one who runs it)
    * @param brothers An array whith the schema's brothers
    * @param fn The arbitration function to decide wich of the brothers must run
    * @return void
    */
-  void (*resume)(int father, int *brothers, arbitration fn);
+  void (*run)(int father, int *brothers, arbitration fn);
   /**
-   * Pointer to the schema's guiresume function, used to show it's gui
+   * Pointer to the schema's show function, used to show its gui
    * @return void
    */
-  void (*guiresume)(void);
+  void (*show)(void);
   /**
-   * Pointer to the schema's guisuspend function, used to hide it's gui
+   * Pointer to the schema's hide function, used to hide its gui
    * @return void
    */
-  void (*guisuspend)(void);
+  void (*hide)(void);
 
   /** A mutex to protect critical regions that affect de schema*/
   pthread_mutex_t mymutex;
@@ -195,7 +195,7 @@ extern JDESchema all[MAX_SCHEMAS];
 extern int num_schemas;
 
 
-/** Jde driver type definition*/
+/** Jde type definition for drivers and services */
 typedef struct {
    /** Dynamic library handler for the driver module*/
    void *handle;
@@ -205,16 +205,16 @@ typedef struct {
    int id;
    
    /**
-    * Pointer to the driver's startup function
+    * Pointer to the driver's init function
     * @param configfile Path and name to the config file of this driver.
     * @return void
     */
-   void (*startup)(char *configfile);
+   void (*init)(char *configfile);
    /**
-    * Pointer to the schema's close function
+    * Pointer to the driver's terminate function
     * @return void
     */
-   void (*close)(void);
+   void (*terminate)(void);
 }JDEDriver;
 
 #ifdef __cplusplus

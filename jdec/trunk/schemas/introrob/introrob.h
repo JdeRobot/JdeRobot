@@ -19,12 +19,14 @@
  */
 #include "pioneer.h"
 
-extern void introrob_startup(char *configfile);
+extern void introrob_init(char *configfile);
+extern void introrob_terminate();
+
 extern void introrob_stop();
-extern void introrob_suspend();
-extern void introrob_resume(int father, int *brothers, arbitration fn);
-extern void introrob_guiresume();
-extern void introrob_guisuspend();
+extern void introrob_run(int father, int *brothers, arbitration fn);
+
+extern void introrob_show();
+extern void introrob_hide();
 
 #define MOUSELEFT 1
 #define MOUSEMIDDLE 2

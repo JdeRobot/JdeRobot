@@ -91,8 +91,8 @@ XImage *image;
 
 /*Imported variables*/
 char **mycolorA=NULL;
-resumeFn mycolorAresume;
-suspendFn mycolorAsuspend;
+runFn mycolorArun;
+stopFn mycolorAstop;
 
 int recordergui_setupDisplay(void)
       /* Inicializa las ventanas, la paleta de colores y memoria compartida para visualizacion*/
@@ -149,7 +149,7 @@ int recordergui_setupDisplay(void)
    return 1;
 }
 
-void recorder_stop(){
+void recorder_terminate(){
  if (fd_recordergui!=NULL)
     {
       if (all[recorder_id].guistate==on) 
@@ -211,7 +211,7 @@ void recorder_iteration(){
 }
 
 
-void recorder_suspend(){
+void recorder_stop(){
   pthread_mutex_lock(&(all[recorder_id].mymutex));
   put_state(recorder_id,slept);
   /*  printf("recorder: off\n");*/
@@ -219,7 +219,7 @@ void recorder_suspend(){
 }
 
 
-void recorder_resume(int father, int *brothers, arbitration fn)
+void recorder_run(int father, int *brothers, arbitration fn)
 {
   int i;
 
@@ -232,7 +232,7 @@ void recorder_resume(int father, int *brothers, arbitration fn)
     }
 
   pthread_mutex_lock(&(all[recorder_id].mymutex));
-  /* this schema resumes its execution with no children at all */
+  /* this schema runs its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[recorder_id].children[i]=FALSE;
   all[recorder_id].father=father;
   if (brothers!=NULL)
@@ -308,7 +308,7 @@ void *recorder_thread(void *not_used)
     }
 }
 
-void recorder_init(){
+void recorder_guiinit(){
    if (myregister_buttonscallback==NULL){
       if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
          printf ("I can't fetch register_buttonscallback from graphics_xforms\n");
@@ -338,15 +338,15 @@ void recorder_init(){
    }
 }
 
-void recorder_startup(char *configfile)
+void recorder_init(char *configfile)
 {
   int i;
   pthread_mutex_lock(&(all[recorder_id].mymutex));
   printf("recorder schema started up\n");
   myexport("recorder","id",&recorder_id);
   myexport("recorder","cycle",&recorder_cycle);
-  myexport("recorder","resume",(void *)recorder_resume);
-  myexport("recorder","suspend",(void *)recorder_suspend);
+  myexport("recorder","run",(void *)recorder_run);
+  myexport("recorder","stop",(void *)recorder_stop);
   put_state(recorder_id,slept);
   for (i=0; i<SIFNTSC_COLUMNS*SIFNTSC_ROWS; i++){
      show_img[i*4+3]=UCHAR_MAX;
@@ -366,7 +366,7 @@ void recorder_startup(char *configfile)
   }
 
   pthread_create(&(all[recorder_id].mythread),NULL,recorder_thread,NULL);
-  recorder_init();
+  recorder_guiinit();
   pthread_mutex_unlock(&(all[recorder_id].mymutex));
 }
 
@@ -422,14 +422,14 @@ void recorder_guibuttons(void *obj1){
          strcpy(input_schema, fl_get_input(fd_recordergui->input_schema));
          strcpy(input_image, fl_get_input(fd_recordergui->input_image));
          mycolorA=(char **) myimport (input_schema, input_image);
-         mycolorAresume=(resumeFn)myimport(input_schema, "resume");
-         mycolorAsuspend=(suspendFn)myimport(input_schema,"suspend");
+         mycolorArun=(runFn)myimport(input_schema, "run");
+         mycolorAstop=(stopFn)myimport(input_schema,"stop");
          if (mycolorA == NULL) {
             fl_set_object_label(fd_recordergui->status,"Can't fetch the input");
          }
          else {
             fl_set_object_label(fd_recordergui->status,"Fetched");
-            mycolorAresume(recorder_id,NULL,NULL);
+            mycolorArun(recorder_id,NULL,NULL);
          }
       }
       fl_set_button(fd_recordergui->fetch_input, RELEASED);
@@ -491,26 +491,26 @@ void recorder_guidisplay(){
 	}
 }
 
-void recorder_guisuspend_aux(void)
+void recorder_hide_aux(void)
 {
    mydelete_buttonscallback(recorder_guibuttons);
    mydelete_displaycallback(recorder_guidisplay);
    fl_hide_form(fd_recordergui->recordergui);
 }
 
-void recorder_guisuspend(void){
+void recorder_hide(void){
    static callback fn=NULL;
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
-         fn ((gui_function)recorder_guisuspend_aux);
+         fn ((gui_function)recorder_hide_aux);
       }
    }
    else{
-      fn ((gui_function)recorder_guisuspend_aux);
+      fn ((gui_function)recorder_hide_aux);
    }
 }
 
-void recorder_guiresume_aux(void)
+void recorder_show_aux(void)
 {
    static int k=0;
 
@@ -538,14 +538,14 @@ void recorder_guiresume_aux(void)
    myregister_displaycallback(recorder_guidisplay);
 }
 
-void recorder_guiresume(void){
+void recorder_show(void){
    static callback fn=NULL;
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
-         fn ((gui_function)recorder_guiresume_aux);
+         fn ((gui_function)recorder_show_aux);
       }
    }
    else{
-      fn ((gui_function)recorder_guiresume_aux);
+      fn ((gui_function)recorder_show_aux);
    }
 }

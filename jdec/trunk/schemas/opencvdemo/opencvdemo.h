@@ -18,12 +18,14 @@
  *  Authors : Eduardo Perdices García <edupergar@gmail.com>
  */
 
-extern void opencvdemo_startup(char *configfile);
-extern void opencvdemo_suspend();
-extern void opencvdemo_resume(int father, int *brothers, arbitration fn);
-extern void opencvdemo_guiresume();
-extern void opencvdemo_guisuspend();
+extern void opencvdemo_init(char *configfile);
+extern void opencvdemo_terminate();
+
 extern void opencvdemo_stop();
+extern void opencvdemo_run(int father, int *brothers, arbitration fn);
+
+extern void opencvdemo_show();
+extern void opencvdemo_hide();
 
 extern int opencvdemo_id; /* schema identifier */
 extern int opencvdemo_cycle; /* ms */

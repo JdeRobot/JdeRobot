@@ -42,8 +42,8 @@ int x10_controller_cycle=30; /* ms */
 
 /* Imported symbols*/
 t_iface *x10=NULL;
-resumeFn x10_resume=NULL;
-suspendFn x10_suspend=NULL;
+runFn x10_run=NULL;
+stopFn x10_stop=NULL;
 
 int init=0;
 
@@ -59,7 +59,7 @@ deletedisplay mydelete_displaycallback;
 /*Callbacks*/
 gboolean on_delete_window (GtkWidget *widget, GdkEvent *event, gpointer user_data){
    gdk_threads_leave();
-   x10_controller_guisuspend();
+   x10_controller_hide();
    gdk_threads_enter();
    return TRUE;
 }
@@ -153,10 +153,10 @@ void x10_controller_iteration(){
 /*Importar símbolos*/
 void x10_controller_imports(){
    x10=(t_iface *)myimport ("x10","x10");
-   x10_resume=(resumeFn)myimport ("x10","resume");
-   x10_suspend=(suspendFn)myimport ("x10","suspend");
+   x10_run=(runFn)myimport ("x10","run");
+   x10_stop=(stopFn)myimport ("x10","stop");
 
-   if (!x10 || !x10_resume || !x10_suspend){
+   if (!x10 || !x10_run || !x10_stop){
       fprintf(stderr, "x10_controller ERROR: I can't import symbols from x10 driver\n");
       jdeshutdown(-1);
    }
@@ -167,12 +167,12 @@ void x10_controller_exports(){
 
    myexport("x10_controller", "id", &x10_controller_id);
    myexport("x10_controller","cycle",&x10_controller_cycle);
-   myexport("x10_controller","resume",(void *)x10_controller_resume);
-   myexport("x10_controller","suspend",(void *)x10_controller_suspend);
+   myexport("x10_controller","run",(void *)x10_controller_run);
+   myexport("x10_controller","stop",(void *)x10_controller_stop);
 }
 
 /*Las inicializaciones van en esta parte*/
-void x10_controller_init(){
+void x10_controller_guiinit(){
    if (myregister_displaycallback==NULL){
       if ((myregister_displaycallback=
            (registerdisplay)myimport ("graphics_gtk",
@@ -191,26 +191,21 @@ void x10_controller_init(){
    }
 }
 
-/*Al suspender el esquema*/
-void x10_controller_end(){
+void x10_controller_terminate(){
 }
 
-void x10_controller_stop(){
-}
-
-void x10_controller_suspend()
+void x10_controller_stop()
 {
   pthread_mutex_lock(&(all[x10_controller_id].mymutex));
   put_state(x10_controller_id,slept);
   printf("x10_controller: off\n");
   pthread_mutex_unlock(&(all[x10_controller_id].mymutex));
-  x10_controller_end();
-  x10_suspend();
+  x10_stop();
   init=0;
 }
 
 
-void x10_controller_resume(int father, int *brothers, arbitration fn)
+void x10_controller_run(int father, int *brothers, arbitration fn)
 {
   int i;
 
@@ -223,7 +218,7 @@ void x10_controller_resume(int father, int *brothers, arbitration fn)
     }
 
   pthread_mutex_lock(&(all[x10_controller_id].mymutex));
-  /* this schema resumes its execution with no children at all */
+  /* this schema runs its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[x10_controller_id].children[i]=FALSE;
   all[x10_controller_id].father=father;
   if (brothers!=NULL)
@@ -238,7 +233,7 @@ void x10_controller_resume(int father, int *brothers, arbitration fn)
   pthread_cond_signal(&(all[x10_controller_id].condition));
   pthread_mutex_unlock(&(all[x10_controller_id].mymutex));
   x10_controller_imports();
-  x10_resume(x10_controller_id, NULL, NULL);
+  x10_run(x10_controller_id, NULL, NULL);
 }
 
 void *x10_controller_thread(void *not_used)
@@ -297,7 +292,7 @@ void *x10_controller_thread(void *not_used)
    }
 }
 
-void x10_controller_startup(char *configfile)
+void x10_controller_init(char *configfile)
 {
   pthread_mutex_lock(&(all[x10_controller_id].mymutex));
   printf("x10_controller schema started up\n");
@@ -305,7 +300,7 @@ void x10_controller_startup(char *configfile)
   put_state(x10_controller_id,slept);
   pthread_create(&(all[x10_controller_id].mythread),NULL,x10_controller_thread,NULL);
   pthread_mutex_unlock(&(all[x10_controller_id].mymutex));
-  x10_controller_init();
+  x10_controller_guiinit();
 }
 
 void x10_controller_guidisplay(){
@@ -336,7 +331,7 @@ void x10_controller_guidisplay(){
    gdk_threads_leave();
 }
 
-void x10_controller_guisuspend(void){
+void x10_controller_hide(void){
    mydelete_displaycallback(x10_controller_guidisplay);
    if (win!=NULL){
       gdk_threads_enter();
@@ -346,7 +341,7 @@ void x10_controller_guisuspend(void){
    all[x10_controller_id].guistate=pending_off;
 }
 
-void x10_controller_guiresume(void){
+void x10_controller_show(void){
    static int cargado=0;
    static pthread_mutex_t x10_controller_gui_mutex;
 

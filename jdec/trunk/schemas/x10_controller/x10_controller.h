@@ -18,12 +18,15 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void x10_controller_startup(char *configfile);
-extern void x10_controller_suspend();
-extern void x10_controller_resume(int father, int *brothers, arbitration fn);
-extern void x10_controller_guiresume();
-extern void x10_controller_guisuspend();
+extern void x10_controller_init(char *configfile);
+extern void x10_controller_terminate();
+
 extern void x10_controller_stop();
+extern void x10_controller_run(int father, int *brothers, arbitration fn);
+
+extern void x10_controller_show();
+extern void x10_controller_hide();
+
 
 extern int x10_controller_id; /* schema identifier */
 extern int x10_controller_cycle; /* ms */

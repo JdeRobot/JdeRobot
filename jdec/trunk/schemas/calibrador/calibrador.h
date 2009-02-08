@@ -18,11 +18,14 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void calibrador_startup(char *configfile);
-extern void calibrador_suspend();
-extern void calibrador_resume(int father, int *brothers, arbitration fn);
-extern void calibrador_guiresume();
-extern void calibrador_guisuspend();
+extern void calibrador_init(char *configfile);
+extern void calibrador_terminate();
+
+extern void calibrador_stop();
+extern void calibrador_run(int father, int *brothers, arbitration fn);
+
+extern void calibrador_show();
+extern void calibrador_hide();
 
 extern int calibrador_id; /* schema identifier */
 extern int calibrador_cycle; /* ms */

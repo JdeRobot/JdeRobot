@@ -70,13 +70,13 @@ void myschema_imports(){
 void myschema_exports(){
 
    myexport("myschema","cycle",&myschema_cycle);
-   myexport("myschema","resume",(void *)myschema_resume);
-   myexport("myschema","suspend",(void *)myschema_suspend);
+   myexport("myschema","run",(void *)myschema_run);
+   myexport("myschema","stop",(void *)myschema_stop);
    myexport("myschema", "valor", &valor);
 }
 
 /*Las inicializaciones van en esta parte*/
-void myschema_init(){
+void myschema_guiinit(){
    if (myregister_buttonscallback==NULL){
       if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
          printf ("I can't fetch register_buttonscallback from graphics_xforms\n");
@@ -97,34 +97,29 @@ void myschema_init(){
    }
 }
 
-/*Al suspender el esquema*/
-void myschema_fin(){
-}
-
-void myschema_stop(){
+void myschema_terminate(){
  if (fd_myschemagui!=NULL)
     {
       if (all[myschema_id].guistate==on) 
 	fl_hide_form(fd_myschemagui->myschemagui);
       fl_free_form(fd_myschemagui->myschemagui);
     }
-  printf ("myschema close\n");
+  printf ("myschema terminated\n");
 }
 
 
-void myschema_suspend()
+void myschema_stop()
 {
-  /* printf("myschema: cojo-suspend\n");*/
+  /* printf("myschema: cojo-stop\n");*/
   pthread_mutex_lock(&(all[myschema_id].mymutex));
   put_state(myschema_id,slept);
   printf("myschema: off\n");
   pthread_mutex_unlock(&(all[myschema_id].mymutex));
-  /*  printf("myschema: suelto-suspend\n");*/
-  myschema_fin();
+  /*  printf("myschema: suelto-stop\n");*/
 }
 
 
-void myschema_resume(int father, int *brothers, arbitration fn)
+void myschema_run(int father, int *brothers, arbitration fn)
 {
   int i;
 
@@ -137,7 +132,7 @@ void myschema_resume(int father, int *brothers, arbitration fn)
     }
 
   pthread_mutex_lock(&(all[myschema_id].mymutex));
-  /* this schema resumes its execution with no children at all */
+  /* this schema runs its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[myschema_id].children[i]=FALSE;
   all[myschema_id].father=father;
   if (brothers!=NULL)
@@ -211,7 +206,7 @@ void *myschema_thread(void *not_used)
    }
 }
 
-void myschema_startup(char *configfile)
+void myschema_init(char *configfile)
 {
   pthread_mutex_lock(&(all[myschema_id].mymutex));
   printf("myschema schema started up\n");
@@ -219,7 +214,7 @@ void myschema_startup(char *configfile)
   put_state(myschema_id,slept);
   pthread_create(&(all[myschema_id].mythread),NULL,myschema_thread,NULL);
   pthread_mutex_unlock(&(all[myschema_id].mymutex));
-  myschema_init();
+  myschema_guiinit();
 }
 
 void myschema_guibuttons(void *obj){
@@ -234,20 +229,20 @@ void myschema_guidisplay(){
 }
 
 
-void myschema_guisuspend_aux(void){
+void myschema_hide_aux(void){
   mydelete_buttonscallback(myschema_guibuttons);
   mydelete_displaycallback(myschema_guidisplay);
   fl_hide_form(fd_myschemagui->myschemagui);
 }
 
-void myschema_guisuspend(){
+void myschema_hide(){
    callback fn;
    if ((fn=(callback)myimport ("graphics_xforms", "gui_callback"))!=NULL){
-      fn ((gui_function)myschema_guisuspend_aux);
+      fn ((gui_function)myschema_hide_aux);
    }
 }
 
-void myschema_guiresume_aux(void){
+void myschema_show_aux(void){
   static int k=0;
 
   if (k==0) /* not initialized */
@@ -261,9 +256,9 @@ void myschema_guiresume_aux(void){
   fl_show_form(fd_myschemagui->myschemagui,FL_PLACE_POSITION,FL_FULLBORDER,"myschema");
 }
 
-void myschema_guiresume(){
+void myschema_show(){
    callback fn;
    if ((fn=(callback)myimport ("graphics_xforms", "gui_callback"))!=NULL){
-      fn ((gui_function)myschema_guiresume_aux);
+      fn ((gui_function)myschema_show_aux);
    }
 }

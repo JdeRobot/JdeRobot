@@ -160,12 +160,12 @@ char *varcolorC_image;
 char *varcolorD_image; 
 
 
-/** colorA resume function following jdec platform API schemas.
+/** colorA run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int mycolorA_resume(int father, int *brothers, arbitration fn){
+int mycolorA_run(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
    if (color_refs[colorA]>0){
       color_refs[colorA]++;
@@ -177,7 +177,7 @@ int mycolorA_resume(int father, int *brothers, arbitration fn){
       if((color_requested[colorA]==1)&&(color_active[colorA]==0))
 	{
 	  color_active[colorA]=1;
-	  printf("colorA schema resume (video4linux driver)\n");
+	  printf("colorA schema run (video4linux driver)\n");
 	  pthread_mutex_lock(&(all[color_schema_id[colorA]].mymutex));
 	  all[color_schema_id[colorA]].father = father;
 	  all[color_schema_id[colorA]].fps = 0.;
@@ -190,9 +190,9 @@ int mycolorA_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** colorA suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int mycolorA_suspend(){
+/** colorA stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int mycolorA_stop(){
 
    pthread_mutex_lock(&refmutex);
    if (color_refs[colorA]>1){
@@ -204,7 +204,7 @@ int mycolorA_suspend(){
       pthread_mutex_unlock(&refmutex);
       if((color_requested[colorA]==1)&&(color_active[colorA])){
          color_active[colorA]=0;
-         printf("colorA schema suspend (video4linux driver)\n");
+         printf("colorA schema stop (video4linux driver)\n");
          pthread_mutex_lock(&(all[color_schema_id[colorA]].mymutex));
          put_state(color_schema_id[colorA],slept);
          pthread_mutex_unlock(&(all[color_schema_id[colorA]].mymutex));
@@ -214,12 +214,12 @@ int mycolorA_suspend(){
 }
 
 
-/** colorB resume function following jdec platform API schemas.
+/** colorB run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int mycolorB_resume(int father, int *brothers, arbitration fn){
+int mycolorB_run(int father, int *brothers, arbitration fn){
 
    pthread_mutex_lock(&refmutex);
    if (color_refs[colorB]>0){
@@ -231,7 +231,7 @@ int mycolorB_resume(int father, int *brothers, arbitration fn){
       pthread_mutex_unlock(&refmutex);
       if((color_requested[colorB]==1)&&(color_active[colorB]==0)){
          color_active[colorB]=1;
-         printf("colorB schema resume (video4linux driver)\n");
+         printf("colorB schema run (video4linux driver)\n");
 	 pthread_mutex_lock(&(all[color_schema_id[colorB]].mymutex)); 
 	 all[color_schema_id[colorB]].father = father;
          all[color_schema_id[colorB]].fps = 0.;
@@ -244,9 +244,9 @@ int mycolorB_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** colorB suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int mycolorB_suspend(){
+/** colorB stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int mycolorB_stop(){
 
    pthread_mutex_lock(&refmutex);
    if (color_refs[colorB]>1){
@@ -258,7 +258,7 @@ int mycolorB_suspend(){
       pthread_mutex_unlock(&refmutex);
       if((color_requested[colorB]==1)&&(color_active[colorB])){
          color_active[colorB]=0;
-         printf("colorB schema suspend (video4linux driver)\n");
+         printf("colorB schema stop (video4linux driver)\n");
          pthread_mutex_lock(&(all[color_schema_id[colorB]].mymutex));
          put_state(color_schema_id[colorB],slept);
          pthread_mutex_unlock(&(all[color_schema_id[colorB]].mymutex));
@@ -267,12 +267,12 @@ int mycolorB_suspend(){
    return 0;
 }
 
-/** colorC resume function following jdec platform API schemas.
+/** colorC run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int mycolorC_resume(int father, int *brothers, arbitration fn){
+int mycolorC_run(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
    if (color_refs[colorC]>0){
       color_refs[colorC]++;
@@ -283,7 +283,7 @@ int mycolorC_resume(int father, int *brothers, arbitration fn){
       pthread_mutex_unlock(&refmutex);
       if((color_requested[colorC]==1)&&(color_active[colorC]==0)){
          color_active[colorC]=1;
-         printf("colorC schema resume (video4linux driver)\n");
+         printf("colorC schema run (video4linux driver)\n");
          pthread_mutex_lock(&(all[color_schema_id[colorC]].mymutex));
          all[color_schema_id[colorC]].father = father;
          all[color_schema_id[colorC]].fps = 0.;
@@ -296,9 +296,9 @@ int mycolorC_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** colorC suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int mycolorC_suspend(){
+/** colorC stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int mycolorC_stop(){
    pthread_mutex_lock(&refmutex);
    if (color_refs[colorC]>1){
       color_refs[colorC]--;
@@ -309,7 +309,7 @@ int mycolorC_suspend(){
       pthread_mutex_unlock(&refmutex);
       if((color_requested[colorC]==1)&&(color_active[colorC])){
          color_active[colorC]=0;
-         printf("colorC schema suspend (video4linux driver)\n");
+         printf("colorC schema stop (video4linux driver)\n");
          pthread_mutex_lock(&(all[color_schema_id[colorC]].mymutex));
          put_state(color_schema_id[colorC],slept);
          pthread_mutex_unlock(&(all[color_schema_id[colorC]].mymutex));
@@ -318,12 +318,12 @@ int mycolorC_suspend(){
    return 0;
 }
 
-/** colorD resume function following jdec platform API schemas.
+/** colorD run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int mycolorD_resume(int father, int *brothers, arbitration fn){
+int mycolorD_run(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
    if (color_refs[colorD]>0){
       color_refs[colorD]++;
@@ -334,7 +334,7 @@ int mycolorD_resume(int father, int *brothers, arbitration fn){
       pthread_mutex_unlock(&refmutex);
       if((color_requested[colorD]==1)&&(color_active[colorD]==0)){
          color_active[colorD]=1;
-         printf("colorD schema resume (video4linux driver)\n");
+         printf("colorD schema run (video4linux driver)\n");
 	 pthread_mutex_lock(&(all[color_schema_id[colorD]].mymutex));
 	 all[color_schema_id[colorD]].father = father;
          all[color_schema_id[colorD]].fps = 0.;
@@ -347,9 +347,9 @@ int mycolorD_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** colorD suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int mycolorD_suspend(){
+/** colorD stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int mycolorD_stop(){
    pthread_mutex_lock(&refmutex);
    if (color_refs[colorD]>1){
       color_refs[colorD]--;
@@ -360,7 +360,7 @@ int mycolorD_suspend(){
       pthread_mutex_unlock(&refmutex);
       if((color_requested[colorD]==1)&&(color_active[colorD])){
          color_active[colorD]=0;
-         printf("colorD schema suspend (video4linux driver)\n");
+         printf("colorD schema stop (video4linux driver)\n");
          pthread_mutex_lock(&(all[color_schema_id[colorD]].mymutex));
          put_state(color_schema_id[colorD],slept);
          pthread_mutex_unlock(&(all[color_schema_id[colorD]].mymutex));
@@ -369,12 +369,12 @@ int mycolorD_suspend(){
    return 0;
 }
 
-/** varcolorA resume function following jdec platform API schemas.
+/** varcolorA run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int myvarcolorA_resume(int father, int *brothers, arbitration fn){
+int myvarcolorA_run(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
    if (color_refs[varcolorA]>0){
       color_refs[varcolorA]++;
@@ -386,7 +386,7 @@ int myvarcolorA_resume(int father, int *brothers, arbitration fn){
       if((color_requested[varcolorA]==1)&&(color_active[varcolorA]==0))
 	{
 	  color_active[varcolorA]=1;
-	  printf("varcolorA schema resume (video4linux driver)\n");
+	  printf("varcolorA schema run (video4linux driver)\n");
 	  pthread_mutex_lock(&(all[color_schema_id[varcolorA]].mymutex));
 	  all[color_schema_id[varcolorA]].father = father;
 	  all[color_schema_id[varcolorA]].fps = 0.;
@@ -399,9 +399,9 @@ int myvarcolorA_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** varcolorA suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int myvarcolorA_suspend(){
+/** varcolorA stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int myvarcolorA_stop(){
 
    pthread_mutex_lock(&refmutex);
    if (color_refs[varcolorA]>1){
@@ -413,7 +413,7 @@ int myvarcolorA_suspend(){
       pthread_mutex_unlock(&refmutex);
       if((color_requested[varcolorA]==1)&&(color_active[varcolorA])){
          color_active[varcolorA]=0;
-         printf("varcolorA schema suspend (video4linux driver)\n");
+         printf("varcolorA schema stop (video4linux driver)\n");
          pthread_mutex_lock(&(all[color_schema_id[varcolorA]].mymutex));
          put_state(color_schema_id[varcolorA],slept);
          pthread_mutex_unlock(&(all[color_schema_id[varcolorA]].mymutex));
@@ -422,12 +422,12 @@ int myvarcolorA_suspend(){
    return 0;
 }
 
-/** varcolorB resume function following jdec platform API schemas.
+/** varcolorB run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int myvarcolorB_resume(int father, int *brothers, arbitration fn){
+int myvarcolorB_run(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
    if (color_refs[varcolorB]>0){
       color_refs[varcolorB]++;
@@ -439,7 +439,7 @@ int myvarcolorB_resume(int father, int *brothers, arbitration fn){
       if((color_requested[varcolorB]==1)&&(color_active[varcolorB]==0))
 	{
 	  color_active[varcolorB]=1;
-	  printf("varcolorB schema resume (video4linux driver)\n");
+	  printf("varcolorB schema run (video4linux driver)\n");
 	  pthread_mutex_lock(&(all[color_schema_id[varcolorB]].mymutex));
 	  all[color_schema_id[varcolorB]].father = father;
 	  all[color_schema_id[varcolorB]].fps = 0.;
@@ -452,9 +452,9 @@ int myvarcolorB_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** varcolorB suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int myvarcolorB_suspend(){
+/** varcolorB stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int myvarcolorB_stop(){
 
    pthread_mutex_lock(&refmutex);
    if (color_refs[varcolorB]>1){
@@ -466,7 +466,7 @@ int myvarcolorB_suspend(){
       pthread_mutex_unlock(&refmutex);
       if((color_requested[varcolorB]==1)&&(color_active[varcolorB])){
          color_active[varcolorB]=0;
-         printf("varcolorB schema suspend (video4linux driver)\n");
+         printf("varcolorB schema stop (video4linux driver)\n");
          pthread_mutex_lock(&(all[color_schema_id[varcolorB]].mymutex));
          put_state(color_schema_id[varcolorB],slept);
          pthread_mutex_unlock(&(all[color_schema_id[varcolorB]].mymutex));
@@ -476,12 +476,12 @@ int myvarcolorB_suspend(){
 }
 
 
-/** varcolorC resume function following jdec platform API schemas.
+/** varcolorC run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int myvarcolorC_resume(int father, int *brothers, arbitration fn){
+int myvarcolorC_run(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
    if (color_refs[varcolorC]>0){
       color_refs[varcolorC]++;
@@ -493,7 +493,7 @@ int myvarcolorC_resume(int father, int *brothers, arbitration fn){
       if((color_requested[varcolorC]==1)&&(color_active[varcolorC]==0))
 	{
 	  color_active[varcolorC]=1;
-	  printf("varcolorC schema resume (video4linux driver)\n");
+	  printf("varcolorC schema run (video4linux driver)\n");
 	  pthread_mutex_lock(&(all[color_schema_id[varcolorC]].mymutex));
 	  all[color_schema_id[varcolorC]].father = father;
 	  all[color_schema_id[varcolorC]].fps = 0.;
@@ -506,9 +506,9 @@ int myvarcolorC_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** varcolorC suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int myvarcolorC_suspend(){
+/** varcolorC stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int myvarcolorC_stop(){
 
    pthread_mutex_lock(&refmutex);
    if (color_refs[varcolorC]>1){
@@ -520,7 +520,7 @@ int myvarcolorC_suspend(){
       pthread_mutex_unlock(&refmutex);
       if((color_requested[varcolorC]==1)&&(color_active[varcolorC])){
          color_active[varcolorC]=0;
-         printf("varcolorC schema suspend (video4linux driver)\n");
+         printf("varcolorC schema stop (video4linux driver)\n");
          pthread_mutex_lock(&(all[color_schema_id[varcolorC]].mymutex));
          put_state(color_schema_id[varcolorC],slept);
          pthread_mutex_unlock(&(all[color_schema_id[varcolorC]].mymutex));
@@ -529,12 +529,12 @@ int myvarcolorC_suspend(){
    return 0;
 }
 
-/** varcolorD resume function following jdec platform API schemas.
+/** varcolorD run function following jdec platform API schemas.
  *  @param father Father id for this schema.
  *  @param brothers Brothers for this schema.
  *  @param arbitration function for this schema.
  *  @return integer resuming result.*/
-int myvarcolorD_resume(int father, int *brothers, arbitration fn){
+int myvarcolorD_run(int father, int *brothers, arbitration fn){
    pthread_mutex_lock(&refmutex);
    if (color_refs[varcolorD]>0){
       color_refs[varcolorD]++;
@@ -546,7 +546,7 @@ int myvarcolorD_resume(int father, int *brothers, arbitration fn){
       if((color_requested[varcolorD]==1)&&(color_active[varcolorD]==0))
 	{
 	  color_active[varcolorD]=1;
-	  printf("varcolorD schema resume (video4linux driver)\n");
+	  printf("varcolorD schema run (video4linux driver)\n");
 	  pthread_mutex_lock(&(all[color_schema_id[varcolorD]].mymutex));
 	  all[color_schema_id[varcolorD]].father = father;
 	  all[color_schema_id[varcolorD]].fps = 0.;
@@ -559,9 +559,9 @@ int myvarcolorD_resume(int father, int *brothers, arbitration fn){
    return 0;
 }
 
-/** varcolorD suspend function following jdec platform API schemas.
- *  @return integer suspending result.*/
-int myvarcolorD_suspend(){
+/** varcolorD stop function following jdec platform API schemas.
+ *  @return integer stopping result.*/
+int myvarcolorD_stop(){
 
    pthread_mutex_lock(&refmutex);
    if (color_refs[varcolorD]>1){
@@ -573,7 +573,7 @@ int myvarcolorD_suspend(){
       pthread_mutex_unlock(&refmutex);
       if((color_requested[varcolorD]==1)&&(color_active[varcolorD])){
          color_active[varcolorD]=0;
-         printf("varcolorD schema suspend (video4linux driver)\n");
+         printf("varcolorD schema stop (video4linux driver)\n");
          pthread_mutex_lock(&(all[color_schema_id[varcolorD]].mymutex));
          put_state(color_schema_id[varcolorD],slept);
          pthread_mutex_unlock(&(all[color_schema_id[varcolorD]].mymutex));
@@ -1115,7 +1115,7 @@ int video4linux_parseconf(char *configfile){
 
 /** video4linux driver init function. It will start all video4linux required devices and setting them the default configuration.
  *  @return 0 if initialitation was successful or -1 if something went wrong.*/
-int video4linux_init(){
+int video4linux_deviceinit(){
 
   int i,k,n;
 
@@ -1243,14 +1243,14 @@ int video4linux_init(){
   if(color_requested[colorA]){
     all[num_schemas].id = (int *) &(color_schema_id[colorA]);
     strcpy(all[num_schemas].name,"colorA");
-    all[num_schemas].resume = (resumeFn) mycolorA_resume;
-    all[num_schemas].suspend = (suspendFn) mycolorA_suspend;
+    all[num_schemas].run = (runFn) mycolorA_run;
+    all[num_schemas].stop = (stopFn) mycolorA_stop;
     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
     (*(all[num_schemas].id)) = num_schemas;
     all[num_schemas].fps = 0.;
     all[num_schemas].k =0;
     all[num_schemas].state=slept;
-    all[num_schemas].close = NULL;
+    all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
 
     colorA_image=(char *)malloc(win[color_v4l[colorA]].width*win[color_v4l[colorA]].height*3);    
@@ -1259,8 +1259,8 @@ int video4linux_init(){
     myexport("colorA","clock", &(color_clock[colorA]));
     myexport("colorA","width",&win[color_v4l[colorA]].width);
     myexport("colorA","height",&win[color_v4l[colorA]].height);
-    myexport("colorA","resume",(void *)mycolorA_resume);
-    myexport("colorA","suspend",(void *)mycolorA_suspend);
+    myexport("colorA","run",(void *)mycolorA_run);
+    myexport("colorA","stop",(void *)mycolorA_stop);
 
     if (color_v4l[colorA]==0)
       pthread_create(&(all[num_schemas].mythread),NULL,video4linux_thread0,NULL); 
@@ -1277,14 +1277,14 @@ int video4linux_init(){
   if(color_requested[colorB]){
     all[num_schemas].id = (int *) &(color_schema_id[colorB]);
     strcpy(all[num_schemas].name,"colorB");
-    all[num_schemas].resume = (resumeFn) mycolorB_resume;
-    all[num_schemas].suspend = (suspendFn) mycolorB_suspend;
+    all[num_schemas].run = (runFn) mycolorB_run;
+    all[num_schemas].stop = (stopFn) mycolorB_stop;
     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
     (*(all[num_schemas].id)) = num_schemas;
     all[num_schemas].fps = 0.;
     all[num_schemas].k =0;
     all[num_schemas].state=slept;
-    all[num_schemas].close = NULL;
+    all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
 
     colorB_image=(char *)malloc(win[color_v4l[colorB]].width*win[color_v4l[colorB]].height*3);    
@@ -1293,8 +1293,8 @@ int video4linux_init(){
     myexport("colorB","clock", &(color_clock[colorB]));
     myexport("colorB","width",&win[color_v4l[colorB]].width);
     myexport("colorB","height",&win[color_v4l[colorB]].height);
-    myexport("colorB","resume",(void *)mycolorB_resume);
-    myexport("colorB","suspend",(void *)mycolorB_suspend);
+    myexport("colorB","run",(void *)mycolorB_run);
+    myexport("colorB","stop",(void *)mycolorB_stop);
 
     if (color_v4l[colorB]==0)
       pthread_create(&(all[num_schemas].mythread),NULL,video4linux_thread0,NULL); 
@@ -1311,14 +1311,14 @@ int video4linux_init(){
   if(color_requested[colorC]){
     all[num_schemas].id = (int *) &(color_schema_id[colorC]);
     strcpy(all[num_schemas].name,"colorC");
-    all[num_schemas].resume = (resumeFn) mycolorC_resume;
-    all[num_schemas].suspend = (suspendFn) mycolorC_suspend;
+    all[num_schemas].run = (runFn) mycolorC_run;
+    all[num_schemas].stop = (stopFn) mycolorC_stop;
     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
     (*(all[num_schemas].id)) = num_schemas;
     all[num_schemas].fps = 0.;
     all[num_schemas].k =0;
     all[num_schemas].state=slept;
-    all[num_schemas].close = NULL;
+    all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
 
     colorC_image=(char *)malloc(win[color_v4l[colorC]].width*win[color_v4l[colorC]].height*3);
@@ -1327,8 +1327,8 @@ int video4linux_init(){
     myexport("colorC","clock", &(color_clock[colorC]));
     myexport("colorC","width",&win[color_v4l[colorC]].width);
     myexport("colorC","height",&win[color_v4l[colorC]].height);
-    myexport("colorC","resume",(void *)mycolorC_resume);
-    myexport("colorC","suspend",(void *)mycolorC_suspend);
+    myexport("colorC","run",(void *)mycolorC_run);
+    myexport("colorC","stop",(void *)mycolorC_stop);
     
     if (color_v4l[colorC]==0)
       pthread_create(&(all[num_schemas].mythread),NULL,video4linux_thread0,NULL); 
@@ -1345,14 +1345,14 @@ int video4linux_init(){
   if(color_requested[colorD]){
     all[num_schemas].id = (int *) &(color_schema_id[colorD]);
     strcpy(all[num_schemas].name,"colorD");
-    all[num_schemas].resume = (resumeFn) mycolorD_resume;
-    all[num_schemas].suspend = (suspendFn) mycolorD_suspend;
+    all[num_schemas].run = (runFn) mycolorD_run;
+    all[num_schemas].stop = (stopFn) mycolorD_stop;
     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
     (*(all[num_schemas].id)) = num_schemas;
     all[num_schemas].fps = 0.;
     all[num_schemas].k =0;
     all[num_schemas].state=slept;
-    all[num_schemas].close = NULL;
+    all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
 
     colorD_image=(char *)malloc(win[color_v4l[colorD]].width*win[color_v4l[colorD]].height*3);
@@ -1361,8 +1361,8 @@ int video4linux_init(){
     myexport("colorD","clock", &(color_clock[colorD]));
     myexport("colorD","width",&win[color_v4l[colorD]].width);
     myexport("colorD","height",&win[color_v4l[colorD]].height);
-    myexport("colorD","resume",(void *)mycolorD_resume);
-    myexport("colorD","suspend",(void *)mycolorD_suspend);
+    myexport("colorD","run",(void *)mycolorD_run);
+    myexport("colorD","stop",(void *)mycolorD_stop);
 
     if (color_v4l[colorD]==0)
       pthread_create(&(all[num_schemas].mythread),NULL,video4linux_thread0,NULL); 
@@ -1379,14 +1379,14 @@ int video4linux_init(){
   if(color_requested[varcolorA]){
     all[num_schemas].id = (int *) &(color_schema_id[varcolorA]);
     strcpy(all[num_schemas].name,"varcolorA");
-    all[num_schemas].resume = (resumeFn) myvarcolorA_resume;
-    all[num_schemas].suspend = (suspendFn) myvarcolorA_suspend;
+    all[num_schemas].run = (runFn) myvarcolorA_run;
+    all[num_schemas].stop = (stopFn) myvarcolorA_stop;
     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
     (*(all[num_schemas].id)) = num_schemas;
     all[num_schemas].fps = 0.;
     all[num_schemas].k =0;
     all[num_schemas].state=slept;
-    all[num_schemas].close = NULL;
+    all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
 
     varcolorA_image=(char *)malloc(win[color_v4l[varcolorA]].width*win[color_v4l[varcolorA]].height*3);    
@@ -1395,8 +1395,8 @@ int video4linux_init(){
     myexport("varcolorA","clock", &(color_clock[varcolorA]));
     myexport("varcolorA","width",&win[color_v4l[varcolorA]].width);
     myexport("varcolorA","height",&win[color_v4l[varcolorA]].height);
-    myexport("varcolorA","resume",(void *)myvarcolorA_resume);
-    myexport("varcolorA","suspend",(void *)myvarcolorA_suspend);
+    myexport("varcolorA","run",(void *)myvarcolorA_run);
+    myexport("varcolorA","stop",(void *)myvarcolorA_stop);
 
     if (color_v4l[varcolorA]==0)
       pthread_create(&(all[num_schemas].mythread),NULL,video4linux_thread0,NULL); 
@@ -1413,14 +1413,14 @@ int video4linux_init(){
   if(color_requested[varcolorB]){
     all[num_schemas].id = (int *) &(color_schema_id[varcolorB]);
     strcpy(all[num_schemas].name,"varcolorB");
-    all[num_schemas].resume = (resumeFn) myvarcolorB_resume;
-    all[num_schemas].suspend = (suspendFn) myvarcolorB_suspend;
+    all[num_schemas].run = (runFn) myvarcolorB_run;
+    all[num_schemas].stop = (stopFn) myvarcolorB_stop;
     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
     (*(all[num_schemas].id)) = num_schemas;
     all[num_schemas].fps = 0.;
     all[num_schemas].k =0;
     all[num_schemas].state=slept;
-    all[num_schemas].close = NULL;
+    all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
     
     varcolorB_image=(char *)malloc(win[color_v4l[varcolorB]].width*win[color_v4l[varcolorB]].height*3);    
@@ -1429,8 +1429,8 @@ int video4linux_init(){
     myexport("varcolorB","clock", &(color_clock[varcolorB]));
     myexport("varcolorB","width",&win[color_v4l[varcolorB]].width);
     myexport("varcolorB","height",&win[color_v4l[varcolorB]].height);
-    myexport("varcolorB","resume",(void *)myvarcolorB_resume);
-    myexport("varcolorB","suspend",(void *)myvarcolorB_suspend);
+    myexport("varcolorB","run",(void *)myvarcolorB_run);
+    myexport("varcolorB","stop",(void *)myvarcolorB_stop);
     
     if (color_v4l[varcolorB]==0)
       pthread_create(&(all[num_schemas].mythread),NULL,video4linux_thread0,NULL); 
@@ -1447,14 +1447,14 @@ int video4linux_init(){
   if(color_requested[varcolorC]){
     all[num_schemas].id = (int *) &(color_schema_id[varcolorC]);
     strcpy(all[num_schemas].name,"varcolorC");
-    all[num_schemas].resume = (resumeFn) myvarcolorC_resume;
-    all[num_schemas].suspend = (suspendFn) myvarcolorC_suspend;
+    all[num_schemas].run = (runFn) myvarcolorC_run;
+    all[num_schemas].stop = (stopFn) myvarcolorC_stop;
     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
     (*(all[num_schemas].id)) = num_schemas;
     all[num_schemas].fps = 0.;
     all[num_schemas].k =0;
     all[num_schemas].state=slept;
-    all[num_schemas].close = NULL;
+    all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
 
     varcolorC_image=(char *)malloc(win[color_v4l[varcolorC]].width*win[color_v4l[varcolorC]].height*3);    
@@ -1463,8 +1463,8 @@ int video4linux_init(){
     myexport("varcolorC","clock", &(color_clock[varcolorC]));
     myexport("varcolorC","width",&win[color_v4l[varcolorC]].width);
     myexport("varcolorC","height",&win[color_v4l[varcolorC]].height);
-    myexport("varcolorC","resume",(void *)myvarcolorC_resume);
-    myexport("varcolorC","suspend",(void *)myvarcolorC_suspend);
+    myexport("varcolorC","run",(void *)myvarcolorC_run);
+    myexport("varcolorC","stop",(void *)myvarcolorC_stop);
 
     if (color_v4l[varcolorC]==0)
       pthread_create(&(all[num_schemas].mythread),NULL,video4linux_thread0,NULL); 
@@ -1481,14 +1481,14 @@ int video4linux_init(){
   if(color_requested[varcolorD]){
     all[num_schemas].id = (int *) &(color_schema_id[varcolorD]);
     strcpy(all[num_schemas].name,"varcolorD");
-    all[num_schemas].resume = (resumeFn) myvarcolorD_resume;
-    all[num_schemas].suspend = (suspendFn) myvarcolorD_suspend;
+    all[num_schemas].run = (runFn) myvarcolorD_run;
+    all[num_schemas].stop = (stopFn) myvarcolorD_stop;
     printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
     (*(all[num_schemas].id)) = num_schemas;
     all[num_schemas].fps = 0.;
     all[num_schemas].k =0;
     all[num_schemas].state=slept;
-    all[num_schemas].close = NULL;
+    all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
 
     varcolorD_image=(char *)malloc(win[color_v4l[varcolorD]].width*win[color_v4l[varcolorD]].height*3);    
@@ -1497,8 +1497,8 @@ int video4linux_init(){
     myexport("varcolorD","clock", &(color_clock[varcolorD]));
     myexport("varcolorD","width",&win[color_v4l[varcolorD]].width);
     myexport("varcolorD","height",&win[color_v4l[varcolorD]].height);
-    myexport("varcolorD","resume",(void *)myvarcolorD_resume);
-    myexport("varcolorD","suspend",(void *)myvarcolorD_suspend);
+    myexport("varcolorD","run",(void *)myvarcolorD_run);
+    myexport("varcolorD","stop",(void *)myvarcolorD_stop);
 
     if (color_v4l[varcolorD]==0)
       pthread_create(&(all[num_schemas].mythread),NULL,video4linux_thread0,NULL); 
@@ -1517,7 +1517,7 @@ int video4linux_init(){
 
 
 /** Function will end execution of the driver, closing file descriptors and stopping devices.*/
-void video4linux_close(){
+void video4linux_terminate(){
   int i;
 
   finish_flag=1;
@@ -1529,7 +1529,7 @@ void video4linux_close(){
 
 /** video4linux driver startup function following jdec platform API for drivers.
  *  @param configfile path and name to the config file of this driver.*/
-void video4linux_startup(char *configfile)
+void video4linux_init(char *configfile)
 {
   int i;
 
@@ -1549,8 +1549,8 @@ void video4linux_startup(char *configfile)
     exit(-1);
   }
 
-  /* video4linux driver init */
-  if(video4linux_init()!=0){
+  /* video4linux driver device init */
+  if(video4linux_deviceinit()!=0){
     printf("video4linux: cannot initiate driver. cameras not ready or not supported.\n");
     exit(-1);
   }

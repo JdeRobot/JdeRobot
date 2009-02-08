@@ -315,12 +315,12 @@ void opengl_viewer_imports(){
 /*Exportar símbolos*/
 void opengl_viewer_exports(){
    myexport("opengl_viewer","cycle",&opengl_viewer_cycle);
-   myexport("opengl_viewer","resume",(void *)opengl_viewer_resume);
-   myexport("opengl_viewer","suspend",(void *)opengl_viewer_suspend);
+   myexport("opengl_viewer","run",(void *)opengl_viewer_run);
+   myexport("opengl_viewer","stop",(void *)opengl_viewer_stop);
 }
 
 /*Las inicializaciones van en esta parte*/
-void opengl_viewer_init(){
+void opengl_viewer_guiinit(){
    if (myregister_displaycallback==NULL){
       if ((myregister_displaycallback=(registerdisplay)myimport ("graphics_gtk", "register_displaycallback"))==NULL){
          printf ("I can't fetch register_displaycallback from graphics_gtk\n");
@@ -340,24 +340,20 @@ void opengl_viewer_init(){
    pthread_mutex_init(&gl_mutex, PTHREAD_MUTEX_TIMED_NP);
 }
 
-/*Al suspender el esquema*/
-void opengl_viewer_end(){
+
+void opengl_viewer_terminate(){
 }
 
-void opengl_viewer_stop(){
-}
-
-void opengl_viewer_suspend()
+void opengl_viewer_stop()
 {
   pthread_mutex_lock(&(all[opengl_viewer_id].mymutex));
   put_state(opengl_viewer_id,slept);
   printf("opengl_viewer: off\n");
   pthread_mutex_unlock(&(all[opengl_viewer_id].mymutex));
-  opengl_viewer_end();
 }
 
 
-void opengl_viewer_resume(int father, int *brothers, arbitration fn)
+void opengl_viewer_run(int father, int *brothers, arbitration fn)
 {
   int i;
 
@@ -370,7 +366,7 @@ void opengl_viewer_resume(int father, int *brothers, arbitration fn)
     }
 
   pthread_mutex_lock(&(all[opengl_viewer_id].mymutex));
-  /* this schema resumes its execution with no children at all */
+  /* this schema runs its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[opengl_viewer_id].children[i]=FALSE;
   all[opengl_viewer_id].father=father;
   if (brothers!=NULL)
@@ -443,7 +439,7 @@ void *opengl_viewer_thread(void *not_used)
    }
 }
 
-void opengl_viewer_startup(char *configfile)
+void opengl_viewer_init(char *configfile)
 {
   pthread_mutex_lock(&(all[opengl_viewer_id].mymutex));
   printf("opengl_viewer schema started up\n");
@@ -451,14 +447,14 @@ void opengl_viewer_startup(char *configfile)
   put_state(opengl_viewer_id,slept);
   pthread_create(&(all[opengl_viewer_id].mythread),NULL,opengl_viewer_thread,NULL);
   pthread_mutex_unlock(&(all[opengl_viewer_id].mymutex));
-  opengl_viewer_init();
+  opengl_viewer_guiinit();
 }
 
 void opengl_viewer_guidisplay(){
 }
 
 
-void opengl_viewer_guisuspend(void){
+void opengl_viewer_hide(void){
    if (win!=NULL){
       gdk_threads_enter();
       gtk_widget_hide(win);
@@ -467,7 +463,7 @@ void opengl_viewer_guisuspend(void){
    mydelete_displaycallback(opengl_viewer_guidisplay);
 }
 
-void opengl_viewer_guiresume(void){
+void opengl_viewer_show(void){
    static int cargado=0;
    static pthread_mutex_t opengl_viewer_gui_mutex;
 

@@ -9,5 +9,16 @@
 #define PUSHED 1
 #define RELEASED 0
 
+extern void extrinsics_init(char *configfile);
+extern void extrinsics_terminate();
+
+extern void extrinsics_stop();
+extern void extrinsics_run(int father, int *brothers, arbitration fn);
+
+extern void extrinsics_show();
+extern void extrinsics_hide();
+
+extern int extrinsics_id; /* schema identifier */
+extern int extrinsics_cycle; /* ms */
 
 

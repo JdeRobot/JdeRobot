@@ -344,9 +344,9 @@ static void graphics_xforms_iteration()
 }
 
 /** graphics_xforms driver function finalize.*/
-void graphics_xforms_close(){
+void graphics_xforms_terminate(){
   /*  pthread_kill (graphics_xforms_id, 15);*/
-   printf("driver graphics_xforms off\n");
+   printf("service graphics_xforms off\n");
 }
 
 /** graphics_xforms driver internal thread.
@@ -370,9 +370,9 @@ void *graphics_xforms_thread(void *id){
    }
 }
 
-/** graphics_xforms driver startup function following jdec platform API for drivers.
+/** graphics_xforms driver init function following jdec platform API for drivers.
  *  @param configfile path and name to the config file of this driver.*/
-void graphics_xforms_startup(char *configfile)
+void graphics_xforms_init(char *configfile)
 {
    int myargc=1;
    char **myargv;

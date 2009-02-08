@@ -18,12 +18,15 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void opengl_viewer_startup(char *configfile);
-extern void opengl_viewer_suspend();
-extern void opengl_viewer_resume(int father, int *brothers, arbitration fn);
-extern void opengl_viewer_guiresume();
-extern void opengl_viewer_guisuspend();
-extern void esquema_stop();
+extern void opengl_viewer_init(char *configfile);
+extern void opengl_viewer_terminate();
+
+extern void opengl_viewer_stop();
+extern void opengl_viewer_run(int father, int *brothers, arbitration fn);
+
+extern void opengl_viewer_show();
+extern void opengl_viewer_hide();
+
 
 extern int opengl_viewer_id; /* schema identifier */
 extern int opengl_viewer_cycle; /* ms */

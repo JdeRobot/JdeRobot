@@ -126,8 +126,8 @@ int delete_displaycallback(guidisplay f)
 /** \brief graphics_gtk driver function to finish driver execution.
  * This function kills driver threads
  */
-void graphics_gtk_close(){
-   printf("driver graphics_gtk off\n");
+void graphics_gtk_terminate(){
+   printf("service graphics_gtk off\n");
 }
 
 /**
@@ -202,13 +202,13 @@ GladeXML* load_glade (char * file_name){
 }
 
 /**
- * @brief graphics_gtk driver startup function following jdec platform API for drivers.
+ * @brief graphics_gtk driver init function following jdec platform API for drivers.
  *
  * It initializates the driver and exports the requiered functions.
  * 
  *  @param configfile path and name to the config file of this driver.
  */
-void graphics_gtk_startup(char *configfile)
+void graphics_gtk_init(char *configfile)
 {
    FILE *c_file=NULL;
    int find=0;

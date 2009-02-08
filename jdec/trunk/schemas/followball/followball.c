@@ -99,12 +99,12 @@ float *min_pan=NULL;
 float *max_tilt=NULL;
 float *min_tilt=NULL;
 
-resumeFn ptmotorsresume, ptencodersresume;
-suspendFn ptmotorssuspend, ptencoderssuspend;
+runFn ptmotorsrun, ptencodersrun;
+stopFn ptmotorsstop, ptencodersstop;
 
 char** mycolorA;
-resumeFn colorAresume;
-suspendFn colorAsuspend;
+runFn colorArun;
+stopFn colorAstop;
 
 /* Para los botones */
 #define PUSHED 1
@@ -873,7 +873,7 @@ void followball_iteration()
 }
 
 
-void followball_suspend()
+void followball_stop()
 {
   pthread_mutex_lock(&(all[followball_id].mymutex));
   put_state(followball_id,slept);
@@ -881,9 +881,9 @@ void followball_suspend()
   *mylongitude_speed = 0.0;
   *mylatitude_speed = 0.0;
   
-  //ptmotorssuspend();
-  //ptencoderssuspend();
-  //colorAsuspend();
+  //ptmotorsstop();
+  //ptencodersstop();
+  //colorAstop();
 	 
 
   RGB2HSV_destroyTable();
@@ -893,7 +893,7 @@ void followball_suspend()
 }
 
 
-void followball_resume(int father, int *brothers, arbitration fn)
+void followball_run(int father, int *brothers, arbitration fn)
 {
   int i;
 
@@ -907,7 +907,7 @@ void followball_resume(int father, int *brothers, arbitration fn)
   }
 
   pthread_mutex_lock(&(all[followball_id].mymutex));
-  /* this schema resumes its execution with no children at all */
+  /* this schema runs its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[followball_id].children[i]=FALSE;
   all[followball_id].father=father;
   if (brothers!=NULL)
@@ -923,11 +923,11 @@ void followball_resume(int father, int *brothers, arbitration fn)
   mylatitude=myimport ("ptmotors", "latitude");
   mylongitude_speed=myimport("ptmotors", "longitude_speed");
   mylatitude_speed=myimport("ptmotors","latitude_speed");
-//  ptmotorsresume=myimport("ptmotors","resume");
-//  ptmotorssuspend=myimport("ptmotors","suspend");
+//  ptmotorsrun=myimport("ptmotors","run");
+//  ptmotorsstop=myimport("ptmotors","stop");
   
-  //if (ptmotorsresume!=NULL)
-  //   ptmotorsresume(followball_id, NULL, NULL);
+  //if (ptmotorsrun!=NULL)
+  //   ptmotorsrun(followball_id, NULL, NULL);
   
   max_pan=myimport("ptmotors", "max_longitude");
   max_tilt=myimport("ptmotors", "max_latitude");
@@ -939,21 +939,21 @@ void followball_resume(int father, int *brothers, arbitration fn)
   mypan_angle=myimport("ptencoders", "pan_angle");
   mytilt_angle=myimport("ptencoders", "tilt_angle");
   
-  //ptencodersresume=myimport("ptencoders", "resume");
-  //ptencoderssuspend=myimport("ptencoders", "suspend");
-  //if (ptencodersresume!=NULL)
-  //    ptencodersresume(followball_id, NULL, NULL);
+  //ptencodersrun=myimport("ptencoders", "run");
+  //ptencodersstop=myimport("ptencoders", "stop");
+  //if (ptencodersrun!=NULL)
+  //    ptencodersrun(followball_id, NULL, NULL);
  
 
 
   
   /* Importamos colorA */
   mycolorA=myimport ("colorA", "colorA");
-  colorAresume=myimport("colorA", "resume");
-  colorAsuspend=myimport("colorA", "suspend");
+  colorArun=myimport("colorA", "run");
+  colorAstop=myimport("colorA", "stop");
   
-  if (colorAresume!=NULL)
-	colorAresume(followball_id, NULL, NULL);
+  if (colorArun!=NULL)
+	colorArun(followball_id, NULL, NULL);
            
   
   followball_callforarbitration=fn;
@@ -1021,7 +1021,7 @@ void *followball_thread(void *not_used)
   }
 }
 
-void followball_init(){
+void followball_guiinit(){
    if ((mydisplay= (Display *)myimport("graphics_xforms", "display"))==NULL){
       fprintf (stderr, "oplfow: I can't fetch display from graphics_xforms\n");
       jdeshutdown(1);
@@ -1051,7 +1051,7 @@ void followball_init(){
    }
 }
 
-void followball_stop()
+void followball_terminate()
 {
   if (fd_followballgui!=NULL)
     {
@@ -1059,12 +1059,12 @@ void followball_stop()
 	fl_hide_form(fd_followballgui->followballgui); 
       fl_free_form(fd_followballgui->followballgui);
     }
-  printf ("followball close\n");
+  printf ("followball terminate\n");
 }
 
-void followball_startup(char *configfile)
+void followball_init(char *configfile)
 {
-  printf("followball_startup\n"); 
+  printf("followball_init\n"); 
   draw_hsimap(disco_buf, SMAX);
   i_min=120.0; i_max=255.0;
   h_min=277.5; h_max=252.5;
@@ -1077,7 +1077,7 @@ void followball_startup(char *configfile)
 
   put_state(followball_id,slept);
 
-  followball_init();
+  followball_guiinit();
   
   pthread_create(&(all[followball_id].mythread),NULL,followball_thread,NULL);
   pthread_mutex_unlock(&(all[followball_id].mymutex));
@@ -1234,27 +1234,27 @@ void followball_guidisplay()
 }
 
 
-void followball_guisuspend_aux(void)
+void followball_hide_aux(void)
 {
   mydelete_buttonscallback(followball_guibuttons);
   mydelete_displaycallback(followball_guidisplay);
   fl_hide_form(fd_followballgui->followballgui);
 }
 
-void followball_guisuspend(void){
+void followball_hide(void){
    static callback fn=NULL;
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
-         fn ((gui_function)followball_guisuspend_aux);
+         fn ((gui_function)followball_hide_aux);
       }
    }
    else{
-      fn ((gui_function)followball_guisuspend_aux);
+      fn ((gui_function)followball_hide_aux);
    }
 }
 
 
-void followball_guiresume_aux(void)
+void followball_show_aux(void)
 {
   static int k=0;
 
@@ -1304,15 +1304,15 @@ void followball_guiresume_aux(void)
   fl_set_slider_value(fd_followballgui->Smax,s_max);
 }
 
-void followball_guiresume(void){
+void followball_show(void){
    static callback fn=NULL;
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
-         fn ((gui_function)followball_guiresume_aux);
+         fn ((gui_function)followball_show_aux);
       }
    }
    else{
-      fn ((gui_function)followball_guiresume_aux);
+      fn ((gui_function)followball_show_aux);
    }
 }
 

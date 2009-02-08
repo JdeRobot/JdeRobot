@@ -48,8 +48,8 @@ deletedisplay mydelete_displaycallback;
 
 /* imported images */
 char **myColorA;
-resumeFn mycolorAresume;
-suspendFn mycolorAsuspend;
+runFn mycolorArun;
+stopFn mycolorAstop;
 
 
 Display *mydisplay;
@@ -568,30 +568,30 @@ int load_worldline(FILE *myfile)
 }
 
 
-/*Al suspender el esquema*/
-void extrinsics_stop(){
+/*Al terminar/cerrar el esquema*/
+void extrinsics_terminate(){
  if (fd_extrinsicsgui!=NULL)
     {
       if (all[extrinsics_id].guistate==on) 
 	fl_hide_form(fd_extrinsicsgui->extrinsicsgui);
       fl_free_form(fd_extrinsicsgui->extrinsicsgui);
     }
-  printf ("extrinsics close\n");
+  printf ("extrinsics terminate\n");
 }
 
 
-void extrinsics_suspend()
+void extrinsics_stop()
 {
-  /* printf("extrinsics: cojo-suspend\n");*/
+  /* printf("extrinsics: cojo-stop\n");*/
   pthread_mutex_lock(&(all[extrinsics_id].mymutex));
   put_state(extrinsics_id,slept);
   printf("extrinsics: off\n");
   pthread_mutex_unlock(&(all[extrinsics_id].mymutex));
-  /*  printf("extrinsics: suelto-suspend\n");*/
+  /*  printf("extrinsics: suelto-stop\n");*/
 }
 
 
-void extrinsics_resume(int father, int *brothers, arbitration fn)
+void extrinsics_run(int father, int *brothers, arbitration fn)
 {
   int i;
 
@@ -604,7 +604,7 @@ void extrinsics_resume(int father, int *brothers, arbitration fn)
     }
 
   pthread_mutex_lock(&(all[extrinsics_id].mymutex));
-  /* this schema resumes its execution with no children at all */
+  /* this schema runs its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[extrinsics_id].children[i]=FALSE;
   all[extrinsics_id].father=father;
   if (brothers!=NULL)
@@ -622,8 +622,8 @@ void extrinsics_resume(int father, int *brothers, arbitration fn)
   /*Importar símbolos from images */
   myColorA=(char **)myimport("colorA","colorA");
   if (myColorA==NULL) printf("extrinsics: Warning colorA symbol not resolved\n");
-  mycolorAresume=(resumeFn)myimport("colorA","resume");
-  mycolorAsuspend=(suspendFn)myimport("colorA","suspend");
+  mycolorArun=(runFn)myimport("colorA","run");
+  mycolorAstop=(stopFn)myimport("colorA","stop");
 }
 
 void *extrinsics_thread(void *not_used)
@@ -683,7 +683,7 @@ void *extrinsics_thread(void *not_used)
 }
 
 
-void extrinsics_startup(char *configfile)
+void extrinsics_init(char *configfile)
 {
   int i=0;
   FILE *myconfig;
@@ -693,8 +693,8 @@ void extrinsics_startup(char *configfile)
 
   /*Exportar símbolos*/ 
   myexport("extrinsics","cycle",&extrinsics_cycle);
-  myexport("extrinsics","resume",(void *)extrinsics_resume);
-  myexport("extrinsics","suspend",(void *)extrinsics_suspend);
+  myexport("extrinsics","run",(void *)extrinsics_run);
+  myexport("extrinsics","stop",(void *)extrinsics_stop);
 
   put_state(extrinsics_id,slept);
   pthread_create(&(all[extrinsics_id].mythread),NULL,extrinsics_thread,NULL);
@@ -1249,7 +1249,7 @@ void extrinsics_guidisplay(){
 
 
 
-void extrinsics_guiresume_aux(void)
+void extrinsics_show_aux(void)
 {
   static int k=0;
   int vmode,i;
@@ -1398,44 +1398,44 @@ void extrinsics_guiresume_aux(void)
 
   set_sliders_position();
 
-  /* calling resume functions for colors */
-  if(mycolorAresume!=NULL){
-    mycolorAresume(extrinsics_id,NULL,NULL);
+  /* calling run functions for colors */
+  if(mycolorArun!=NULL){
+    mycolorArun(extrinsics_id,NULL,NULL);
   }
 }
 
-void extrinsics_guiresume(){
+void extrinsics_show(){
    static callback fn=NULL;
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
-         fn ((gui_function)extrinsics_guiresume_aux);
+         fn ((gui_function)extrinsics_show_aux);
       }
    }
    else{
-      fn ((gui_function)extrinsics_guiresume_aux);
+      fn ((gui_function)extrinsics_show_aux);
    }
 }
 
-void extrinsics_guisuspend_aux(void){
+void extrinsics_hide_aux(void){
   mydelete_buttonscallback(extrinsics_guibuttons);
   mydelete_displaycallback(extrinsics_guidisplay);
   fl_hide_form(fd_extrinsicsgui->extrinsicsgui);
 
-  /* calling resume functions for colors */
-  if(mycolorAsuspend!=NULL){
-    mycolorAsuspend();
+  /* calling stop functions for colors */
+  if(mycolorAstop!=NULL){
+    mycolorAstop();
   }
 }
 
-void extrinsics_guisuspend(){
+void extrinsics_hide(){
    static callback fn=NULL;
    if (fn==NULL){
       if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
-         fn ((gui_function)extrinsics_guisuspend_aux);
+         fn ((gui_function)extrinsics_hide_aux);
       }
    }
    else{
-      fn ((gui_function)extrinsics_guisuspend_aux);
+      fn ((gui_function)extrinsics_hide_aux);
    }
 }
 

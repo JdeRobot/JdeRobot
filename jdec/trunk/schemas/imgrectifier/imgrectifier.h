@@ -18,12 +18,14 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-extern void imgrectifier_startup(char *configfile);
+extern void imgrectifier_init(char *configfile);
+extern void imgrectifier_terminate();
+
 extern void imgrectifier_stop();
-extern void imgrectifier_suspend();
-extern void imgrectifier_resume(int father, int *brothers, arbitration fn);
-extern void imgrectifier_guiresume();
-extern void imgrectifier_guisuspend();
+extern void imgrectifier_run(int father, int *brothers, arbitration fn);
+
+extern void imgrectifier_show();
+extern void imgrectifier_hide();
 
 extern int imgrectifier_id; /* schema identifier */
 extern int imgrectifier_cycle; /* ms */
