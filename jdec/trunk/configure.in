@@ -318,6 +318,12 @@ AC_CHECK_LIB([m],[floor],
     AC_MSG_ERROR([m library not found]))
 
 
+dnl # check readline
+AC_CHECK_HEADERS([readline/readline.h readline/history.h])
+AC_CHECK_LIB([readline],[readline],
+    [],
+    AC_MSG_ERROR([readline library not found]))
+
 dnl ########################################
 dnl #
 dnl # external software check

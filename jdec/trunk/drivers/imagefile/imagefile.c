@@ -608,7 +608,6 @@ int imagefile_parseconf(char *configfile){
 
   int end_parse=0; int end_section=0; int driver_config_parsed=0;
   FILE *myfile;
-  const int limit = 256;
 
   if ((myfile=fopen(configfile,"r"))==NULL){
     printf("imagefile: cannot find config file\n");
@@ -617,7 +616,7 @@ int imagefile_parseconf(char *configfile){
 
   do{
     
-    char word[256],word2[256],buffer_file[256];
+    char word[MAX_BUFFER],word2[MAX_BUFFER],buffer_file[MAX_BUFFER];
     int i=0; int j=0;
 
     buffer_file[0]=fgetc(myfile);
@@ -644,7 +643,7 @@ int imagefile_parseconf(char *configfile){
       while(buffer_file[i]!='\n') buffer_file[++i]=fgetc(myfile);
       buffer_file[++i]='\0';
 
-      if (i >= limit-1) { 
+      if (i >= MAX_BUFFER-1) { 
 	printf("%s...\n", buffer_file); 
 	printf ("Line too long in config file!\n"); 
 	exit(-1);
