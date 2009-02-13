@@ -958,9 +958,11 @@ fi
 dnl # schema wiioperator
 AM_CONDITIONAL([ENABLE_WIIOPERATOR],[false])
 if test "x$enable_schemas_wiioperator" != xno; then
-    AC_MSG_NOTICE([**** Checking schema wiioperator:])
-    ENABLED_SCHEMAS="$ENABLED_SCHEMAS wiioperator"
-    AM_CONDITIONAL([ENABLE_WIIOPERATOR],[true])
+    AC_MSG_NOTICE([**** Checking schema wiioperator:])	
+     PKG_CHECK_MODULES([WIIOPERATOR],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS wiioperator"
+	    AM_CONDITIONAL([ENABLE_WIIOPERATOR],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-wiioperator was given, but there was errors: $WIIOPERATOR_PKG_ERRORS])])
 fi
 
 dnl # schema x10_controller
