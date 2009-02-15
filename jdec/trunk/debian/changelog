@@ -1,3 +1,14 @@
+jde (4.3.0-rc2) unstable; urgency=low
+
+  * The wiioperator has been updated and tested (jmplaza and eperdes)
+  * Renaming of schema API (jmplaza)
+  * New jde shell (dlobato)
+  * New camera model in progeo (jmplaza and salons)
+  * New examples of convolution matrix at the opencvdemo configuration file (jmplaza)
+  * Fix Bugs: #213 #212 #211 (jmplaza)
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 15 Feb 2009 17:02:14 +0000
+
 jde (4.3.0-rc1) unstable; urgency=low
 
   * Change licence header to GPL v3.0
