@@ -34,12 +34,15 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/ip.h>
-#include "jde.h"
+#include <jde.h>
 #include "jdemessages.h"
 
       /* constants for devices */

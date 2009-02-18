@@ -33,13 +33,20 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <math.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <string.h>
 #include <pthread.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include "jde.h"
-#include "jdemessages.h"
+#include <jde.h>
+#include <jdemessages.h>
 
 /** networkclient driver oneimage socket read mode.*/
 #define ONEIMAGE 0

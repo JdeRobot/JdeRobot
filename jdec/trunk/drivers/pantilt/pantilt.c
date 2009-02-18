@@ -31,9 +31,13 @@
  */
 
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <string.h>
 #include <pthread.h>
-#include "jde.h"
+#include <jde.h>
+#include <unistd.h>
 #include <termios.h>
 #include <math.h> 
 

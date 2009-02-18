@@ -32,13 +32,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
-#include "jde.h"
+#include <jde.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
 
 #include <stdarg.h>
-
-#include <sys/types.h>
 #include <sys/wait.h>
 
 #include "x10.h"

@@ -20,6 +20,9 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <errno.h>
 #include <string.h>
 #include <pthread.h>
 #include <jde.h>
@@ -32,10 +35,11 @@
 #define _LINUX_TIME_H 1
 /** Using linux device headers.*/
 #define _DEVICE_H_ 1
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
-#include <sys/types.h>
 
 #include <asm/types.h>
 

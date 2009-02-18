@@ -19,7 +19,8 @@
  *  Authors : Eduardo Perdices García <edupergar@gmail.com>
  */
 
-#include "jde.h"
+#include <jde.h>
+#include <stdlib.h>
 #include "wiioperator.h"
 #include <graphics_gtk.h>
 #include <glade/glade.h>

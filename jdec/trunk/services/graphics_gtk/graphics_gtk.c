@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
-#include "jde.h"
+#include <jde.h>
 #include <graphics_gtk.h>
 #include <unistd.h>
 #include <errno.h>

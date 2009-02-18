@@ -41,7 +41,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <libdc1394/dc1394_control.h>
-#include "jde.h"
+#include <jde.h>
 
 /** Max number of cameras detected by firewire driver.*/
 #define MAXCAM 8

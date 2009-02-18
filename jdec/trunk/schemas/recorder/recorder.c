@@ -19,12 +19,15 @@
  *            Javier Martín Ramos <jmartinramos@gmail.com>
  */
 
-#include "jde.h"
+#include <jde.h>
 #include <forms.h>
-#include "graphics_xforms.h"
+#include <graphics_xforms.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include "recordergui.h"
 #include "recorder.h"
 #include <string.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>

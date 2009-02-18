@@ -33,7 +33,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
-#include "jde.h"
+#include <jde.h>
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>

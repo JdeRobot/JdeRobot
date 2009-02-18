@@ -32,7 +32,7 @@
 #include <string.h>
 #include <pthread.h>
 #include "camera.h"
-#include "jde.h"
+#include <jde.h>
 #include "evi.h"
 #include <math.h>
 

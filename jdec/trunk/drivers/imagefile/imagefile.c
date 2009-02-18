@@ -39,7 +39,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "jde.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <jde.h>
 /** Max number of images that can be loaded.*/
 #define MAXIMAGES 8
 /** Max char size for a string buffer.*/
