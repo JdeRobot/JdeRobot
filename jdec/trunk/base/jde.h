@@ -22,17 +22,9 @@
 #ifndef __JDE_H__
 #define __JDE_H__
 
-#include <unistd.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/time.h>
-#include <sys/types.h>
-#include <errno.h>
-#include <stdio.h>
-#include <fcntl.h>
+#include <time.h>
 #include <pthread.h>
-#include <math.h>
 
 /** Conversion from deg to rad*/
 #define DEGTORAD     (3.14159264 / 180.0)
@@ -109,6 +101,12 @@ extern void *myimport(char *schema, char *name);
  * @return void
  */
 extern void jdeshutdown(int sig);
+
+/**
+ * Get the pointer to global configfile
+ * @return pointer to global configfile
+ */
+extern char* get_configfile();
 
 
 /** when the human activates some schema from the gui */

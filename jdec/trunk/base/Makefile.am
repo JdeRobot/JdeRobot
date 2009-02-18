@@ -1,13 +1,20 @@
+lib_LTLIBRARIES = libjde.la
 bin_PROGRAMS = jde
 
 AM_CPPFLAGS = -D CONFIGDIR=\"$(confdir)\" @CPPFLAGS@
 
-jde_SOURCES = jde.c
+# See http://www.gnu.org/software/libtool/manual/libtool.html#Versioning
+# for versioning policy.
+libjde_la_SOURCES = jde.c
+#libjde_la_LDFLAGS = $(JDE_LIBS) -rdynamic -version-info 0:0:0
+libjde_la_LDFLAGS = $(JDE_LIBS) -version-info 0:0:0
+jde_SOURCES = jdeshell.c
 nodist_jde_SOURCES = jde.conf
-jde_LDFLAGS = -rdynamic -lreadline
+jde_LDFLAGS = $(JDESHELL_LIBS)
+jde_LDADD = libjde.la
 dist_conf_DATA = jde.conf
 
-include_HEADERS = jde.h
+include_HEADERS = jde.h jde_private.h
 
 edit = sed \
 	-e 's|@driverdir[@]|$(driverdir)|g' \

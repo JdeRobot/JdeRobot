@@ -21,7 +21,6 @@ AM_INIT_AUTOMAKE
 dnl#config pkg-config
 PKG_PROG_PKG_CONFIG
 
-dnl#init libtool
 AC_PROG_LIBTOOL
 AC_SUBST([LIBTOOL_DEPS])
 
@@ -305,12 +304,6 @@ dnl #
 dnl # core headers and libraries check
 dnl #
 dnl ########################################
-dnl # check dl
-AC_CHECK_HEADERS([dlfcn.h])
-AC_CHECK_LIB([dl],[dlopen],
-    [LIBS="$LIBS -ldl"],
-    AC_MSG_ERROR([dl library not found]))
-
 dnl # check ptheads
 AC_CHECK_HEADERS([pthread.h],[],AC_MSG_ERROR([pthread.h not found]))
 AC_CHECK_LIB([pthread],[pthread_create],
@@ -320,15 +313,8 @@ AC_CHECK_LIB([pthread],[pthread_create],
 dnl # check m
 AC_CHECK_HEADERS([math.h])
 AC_CHECK_LIB([m],[floor],
-    [LIBS="$LIBS -lm"],
-    AC_MSG_ERROR([m library not found]))
-
-
-dnl # check readline
-AC_CHECK_HEADERS([readline/readline.h readline/history.h])
-AC_CHECK_LIB([readline],[readline],
     [],
-    AC_MSG_ERROR([readline library not found]))
+    AC_MSG_ERROR([m library not found]))
 
 dnl ########################################
 dnl #
@@ -362,6 +348,23 @@ if test "x$with_gazebo" != xno; then
 fi
 AC_SUBST([GAZEBO_PREFIX])
 
+
+dnl ########################################
+dnl #
+dnl # jde headers and libraries checks
+dnl #
+dnl ########################################
+AC_CHECK_HEADERS([dlfcn.h])
+AC_CHECK_LIB([dl],[dlopen],
+    [JDE_LIBS="-ldl $JDE_LIBS"],
+    AC_MSG_ERROR([dl library not found]))
+AC_SUBST([JDE_LIBS])
+
+AC_CHECK_HEADERS([readline/readline.h readline/history.h])
+AC_CHECK_LIB([readline],[readline],
+    [JDESHELL_LIBS="-lreadline $JDESHELL_LIBS"],
+    AC_MSG_ERROR([readline library not found]))
+AC_SUBST([JDESHELL_LIBS])
 
 dnl ########################################
 dnl #
