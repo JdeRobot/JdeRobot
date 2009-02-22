@@ -17,16 +17,19 @@
  *  Authors : Eduardo Perdices García <edupergar@gmail.com>
  */
 
-#include "jde.h"
-#include "opencvdemo.h"
-#include <graphics_gtk.h>
-#include <colorspaces.h>
-#include <cv.h>
-
 #include <glade/glade.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <math.h>
+#include <unistd.h>
+#include <cv.h>
+
+#include "jde.h"
+#include "opencvdemo.h"
+#include <graphics_gtk.h>
+#include <colorspaces.h>
+#include <interfaces/varcolor.h>
+
 
 #define PI 3.141592654
 #define SQUARE(a) (a)*(a)
@@ -36,9 +39,7 @@ int opencvdemo_brothers[MAX_SCHEMAS];
 arbitration opencvdemo_callforarbitration;
 
 /*Imported variables*/
-int* width;
-int* height;
-char** color;
+Varcolor *myAA;
 runFn color_run;
 stopFn color_stop;
 int image_ok=0;
@@ -182,15 +183,15 @@ void on_active_convol_toggled (GtkCheckMenuItem *menu_item, gpointer user_data){
 /* Load images */
 void load_image() {
 	pthread_mutex_lock(&main_mutex);
-	image=(char *)malloc(width[0]*height[0]*3);
-	image_aux=(char *)malloc(width[0]*height[0]*3);
+	image=(char *)malloc((*myAA).width*(*myAA).height*3);
+	image_aux=(char *)malloc((*myAA).width*(*myAA).height*3);
 	{
 		GdkPixbuf *imgBuff;
 		GtkImage *img=(GtkImage *)glade_xml_get_widget(xml, "image");
 		imgBuff = gdk_pixbuf_new_from_data((unsigned char *)image,
                                              GDK_COLORSPACE_RGB,0,8,
-                                             width[0],height[0],
-                                             width[0]*3,NULL,NULL);
+                                             (*myAA).width,(*myAA).height,
+                                             (*myAA).width*3,NULL,NULL);
 		gtk_image_clear(img);
 		gtk_image_set_from_pixbuf(img, imgBuff);
 		gtk_widget_queue_draw(GTK_WIDGET(img));
@@ -199,8 +200,8 @@ void load_image() {
 		GtkImage *img_aux=(GtkImage *)glade_xml_get_widget(xml, "image_aux");
 		imgBuff_aux = gdk_pixbuf_new_from_data((unsigned char *)image_aux,
                                              GDK_COLORSPACE_RGB,0,8,
-                                             width[0],height[0],
-                                             width[0]*3,NULL,NULL);
+                                             (*myAA).width,(*myAA).height,
+                                             (*myAA).width*3,NULL,NULL);
 		gtk_image_clear(img_aux);
 		gtk_image_set_from_pixbuf(img_aux, imgBuff_aux);
 		gtk_widget_queue_draw(GTK_WIDGET(img_aux));
@@ -246,7 +247,7 @@ void colorFilter() {
 	double r,g,b;
 	int i;
 
-	for (i=0;i<width[0]*height[0]; i++){
+	for (i=0;i<(*myAA).width*(*myAA).height; i++){
 			r = (float)(unsigned int)(unsigned char) image[i*3];
 			g = (float)(unsigned int)(unsigned char) image[i*3+1];
 			b = (float)(unsigned int)(unsigned char) image[i*3+2];
@@ -272,9 +273,9 @@ void grayScale() {
 	CvMat* vector2;
 	CvMat vector3;
 
-	cvInitMatHeader(&vector1, width[0],height[0], CV_8UC3, image, CV_AUTOSTEP);
-	vector2 = cvCreateMat( width[0],height[0], CV_8UC1);
-	cvInitMatHeader(&vector3, width[0],height[0], CV_8UC3, image_aux, CV_AUTOSTEP);
+	cvInitMatHeader(&vector1, (*myAA).width,(*myAA).height, CV_8UC3, image, CV_AUTOSTEP);
+	vector2 = cvCreateMat( (*myAA).width,(*myAA).height, CV_8UC1);
+	cvInitMatHeader(&vector3, (*myAA).width,(*myAA).height, CV_8UC3, image_aux, CV_AUTOSTEP);
 
 	cvCvtColor(&vector1, vector2, CV_RGB2GRAY);
 	cvCvtColor(vector2, &vector3, CV_GRAY2RGB);
@@ -289,10 +290,10 @@ void cannyFilter() {
 	IplImage *edge; 
 	IplImage *cedge; 
 
-	src = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
-	cedge = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
-	gray = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 1);
-	edge = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 1);
+	src = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 3);
+	cedge = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 3);
+	gray = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 1);
+	edge = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 1);
 
 	memcpy(src->imageData, image, src->width*src->height*src->nChannels);  
 
@@ -316,10 +317,10 @@ void sobelFilter() {
 	IplImage *edge; 
 	IplImage *cedge; 
 
-	src = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
-	cedge = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
-	gray = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 1);
-	edge = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 1);
+	src = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 3);
+	cedge = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 3);
+	gray = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 1);
+	edge = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 1);
 
 	memcpy(src->imageData, image, src->width*src->height*src->nChannels); 
 
@@ -342,7 +343,7 @@ void opticalFlow() {
 
 	if(opflow_first) {
 		if(previous==NULL)
-			previous = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
+			previous = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 3);
 
 		memcpy(previous->imageData, image, previous->width*previous->height*previous->nChannels);
 		memcpy(image_aux, previous->imageData, previous->width*previous->height*previous->nChannels);
@@ -350,18 +351,18 @@ void opticalFlow() {
 		return;
 	}
 
-	src = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
+	src = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 3);
 	memcpy(src->imageData, image, src->width*src->height*src->nChannels);
 
 	/* Images with feature points */
-	img1 = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 1);
-	img2 = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 1);
+	img1 = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 1);
+	img2 = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 1);
 
 	/*Temp images for algorithms*/
-	aux1 = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_32F, 1);
-	aux2 = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_32F, 1);
-	aux3 = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 1);
-	aux4 = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 1);
+	aux1 = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_32F, 1);
+	aux2 = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_32F, 1);
+	aux3 = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 1);
+	aux4 = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 1);
 
 	cvConvertImage(previous, img1);
 	cvConvertImage(src, img2);
@@ -440,12 +441,12 @@ void pyramid() {
 	IplImage *dst;
 	int i,w,w2,tmp;
 
-	src = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
-	div2 = cvCreateImage(cvSize(width[0]/2,height[0]/2), IPL_DEPTH_8U, 3);
-	div4 = cvCreateImage(cvSize(width[0]/4,height[0]/4), IPL_DEPTH_8U, 3);
-	div8 = cvCreateImage(cvSize(width[0]/8,height[0]/8), IPL_DEPTH_8U, 3);
-	div16 = cvCreateImage(cvSize(width[0]/16,height[0]/16), IPL_DEPTH_8U, 3);
-	dst = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
+	src = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 3);
+	div2 = cvCreateImage(cvSize((*myAA).width/2,(*myAA).height/2), IPL_DEPTH_8U, 3);
+	div4 = cvCreateImage(cvSize((*myAA).width/4,(*myAA).height/4), IPL_DEPTH_8U, 3);
+	div8 = cvCreateImage(cvSize((*myAA).width/8,(*myAA).height/8), IPL_DEPTH_8U, 3);
+	div16 = cvCreateImage(cvSize((*myAA).width/16,(*myAA).height/16), IPL_DEPTH_8U, 3);
+	dst = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 3);
 
 	memcpy(src->imageData, image, src->width*src->height*src->nChannels);
 
@@ -457,22 +458,22 @@ void pyramid() {
 
 	/*Copy pyramids to dst*/
  	cvZero(dst);
-	w = width[0]*3;
-	for(i=0; i<height[0]/2; i++) {
+	w = (*myAA).width*3;
+	for(i=0; i<(*myAA).height/2; i++) {
 		w2 = div2->width*div2->nChannels;
 		memcpy((dst->imageData)+w*i, (div2->imageData)+w2*i, w2);
-		if(i<height[0]/4) {
-			tmp = (width[0]/2)*3;
+		if(i<(*myAA).height/4) {
+			tmp = ((*myAA).width/2)*3;
 			w2 = div4->width*div4->nChannels;
 			memcpy((dst->imageData)+w*i+tmp, (div4->imageData)+w2*i, w2);
 		}
-		if(i<height[0]/8) {
-			tmp = (width[0]/2 + width[0]/4)*3;
+		if(i<(*myAA).height/8) {
+			tmp = ((*myAA).width/2 + (*myAA).width/4)*3;
 			w2 = div8->width*div8->nChannels;
 			memcpy((dst->imageData)+w*i+tmp, (div8->imageData)+w2*i, w2);
 		}
-		if(i<height[0]/16) {
-			tmp = (width[0]/2 + width[0]/4 + width[0]/8)*3;
+		if(i<(*myAA).height/16) {
+			tmp = ((*myAA).width/2 + (*myAA).width/4 + (*myAA).width/8)*3;
 			w2 = div16->width*div16->nChannels;
 			memcpy((dst->imageData)+w*i+tmp, (div16->imageData)+w2*i, w2);
 		}
@@ -501,9 +502,9 @@ void convolution() {
 	int i, h, w;
 	int elems = sizekernel*sizekernel;
 
-	src = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
-	tmp = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
-	dst = cvCreateImage(cvSize(width[0],height[0]), IPL_DEPTH_8U, 3);
+	src = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 3);
+	tmp = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 3);
+	dst = cvCreateImage(cvSize((*myAA).width,(*myAA).height), IPL_DEPTH_8U, 3);
 	mask = cvCreateMat(sizekernel, sizekernel, CV_32FC1);
 
 	/* Save mask in CvMat format*/
@@ -540,16 +541,16 @@ void opencvdemo_iteration(){
 	pthread_mutex_lock(&main_mutex);
 
 	if(image_ok && image!=NULL) {
-		for (i=0;i<width[0]*height[0]; i++){
-			image[i*3]=(*color)[i*3+2];
-			image[i*3+1]=(*color)[i*3+1];
-			image[i*3+2]=(*color)[i*3];
-
-			if(radio_original) {
-				image_aux[i*3]=image[i*3];
-				image_aux[i*3+1]=image[i*3+1];
-				image_aux[i*3+2]=image[i*3+2];
-			}
+	  for (i=0;i<((*myAA).width*(*myAA).height); i++){
+		  image[i*3]=((*myAA).img)[i*3+2];
+		  image[i*3+1]=((*myAA).img)[i*3+1];
+		  image[i*3+2]=((*myAA).img)[i*3];
+		  
+		  if(radio_original) {
+		    image_aux[i*3]=image[i*3];
+		    image_aux[i*3+1]=image[i*3+1];
+		    image_aux[i*3+2]=image[i*3+2];
+		  }
 		}
 		if(radio_color) 
 			colorFilter();
@@ -571,17 +572,14 @@ void opencvdemo_iteration(){
 
 
 void opencvdemo_imports(){
-	width=myimport("varcolorA","width");
-	height=myimport("varcolorA","height");
-	color=myimport("varcolorA","varcolorA");
+	myAA=(Varcolor *)myimport("varcolorA","varcolorA");
 	color_run=(runFn)myimport("varcolorA","run");
 	color_stop=(stopFn)myimport("varcolorA","stop");
-
-	image_ok=!(width==NULL || height==NULL || color==NULL || color_run==NULL || color_stop==NULL);
-   if (!image_ok){
-      printf ("Can't load image\n");
-		jdeshutdown(1);
-   }
+	image_ok=!(myAA==NULL || color_run==NULL || color_stop==NULL);
+	if (!image_ok){
+	  printf ("Can't load image\n");
+	  jdeshutdown(1);
+	}
 }
 
 void opencvdemo_exports(){

@@ -42,7 +42,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <jde.h>
+#include <interfaces/varcolor.h>
+
 /** Max number of images that can be loaded.*/
 #define MAXIMAGES 8
 /** Max char size for a string buffer.*/
@@ -106,26 +109,8 @@ char *colorD=NULL; /* sifntsc image itself */
 /** 'colorD' schema clock*/
 unsigned long int colorD_clock;
 
-/** 'varcolorA' schema image data*/
-char *varcolorA=NULL; /* image itself */
-/** 'varcolorA' schema clock*/
-unsigned long int varcolorA_clock;
 
-/** 'varcolorB' schema image data*/
-char *varcolorB=NULL; /* image itself */
-/** 'varcolorB' schema clock*/
-unsigned long int varcolorB_clock;
-
-/** 'varcolorC' schema image data*/
-char *varcolorC=NULL; /* image itself */
-/** 'varcolorC' schema clock*/
-unsigned long int varcolorC_clock;
-
-/** 'varcolorD' schema image data*/
-char *varcolorD=NULL; /* image itself */
-/** 'varcolorD' schema clock*/
-unsigned long int varcolorD_clock;
-
+Varcolor myA,myB,myC,myD;
 
 /*Contadores de referencias*/
 /** colorA ref counter*/
@@ -196,7 +181,13 @@ void load_image(int source)
 			  else /* (sscanf(buff,"%d %d",&c,&r)==2)*/
 			    {
 			      if (autosize[source]) /* autosize */
-				{ width[source]=c;  height[source]=r;}
+				{ width[source]=c;  height[source]=r;
+				  if (source==4) {myA.width=c; myA.height=r;}
+				  if (source==5) {myB.width=c; myB.height=r;}
+				  if (source==6) {myC.width=c; myC.height=r;}
+				  if (source==7) {myD.width=c; myD.height=r;}
+				}
+
 			      else if ((c!=width[source])||(r!=height[source]))
 				{
 				  fprintf(stderr,"imagefile: image size mismatch in %s. Image size in that file is %d*%d, but the configured size is %dx%d.\nCheck the configuration of the imagefile driver and remember that colorA, colorB, colorC and colorD are defined as 320x240\n",name_color[source],c,r,width[source],height[source]);
@@ -225,20 +216,20 @@ void load_image(int source)
 		  dest=colorD;
 		}
 	      else if (source==4) 
-		{ if (varcolorA==NULL) varcolorA=(char *)malloc(width[source]*height[source]*3);
-		  dest=varcolorA;
+		{ if (myA.img==NULL) myA.img=(char *)malloc(myA.width*myA.height*3);
+		  dest=myA.img;
 		}
 	      else if (source==5) 
-		{ if (varcolorB==NULL) varcolorB=(char *)malloc(width[source]*height[source]*3);
-		  dest=varcolorB;
+		{ if (myB.img==NULL) myB.img=(char *)malloc(myB.width*myB.height*3);
+		  dest=myB.img;
 		}
 	      else if (source==6) 
-		{ if (varcolorC==NULL) varcolorC=(char *)malloc(width[source]*height[source]*3);
-		  dest=varcolorC;
+		{ if (myC.img==NULL) myC.img=(char *)malloc(myC.width*myC.height*3);
+		  dest=myC.img;
 		}
 	      else if (source==7) 
-		{ if (varcolorD==NULL) varcolorD=(char *)malloc(width[source]*height[source]*3);
-		  dest=varcolorD;
+		{ if (myD.img==NULL) myD.img=(char *)malloc(myD.width*myD.height*3);
+		  dest=myD.img;
 		}
 
 	      for(i=0;i<width[source]*height[source];i++)
@@ -446,7 +437,7 @@ int myvarcolorA_run(int father, int *brothers, arbitration fn)
       pthread_mutex_unlock(&refmutex);
       printf("varcolorA schema run (imagefile driver)\n");
       load_image(4);
-      varcolorA_clock++;
+      myA.clock++;
       all[varcolorA_schema_id].father = father;
       all[varcolorA_schema_id].fps = 0.;
       all[varcolorA_schema_id].k =0;
@@ -490,7 +481,7 @@ int myvarcolorB_run(int father, int *brothers, arbitration fn)
       pthread_mutex_unlock(&refmutex);
       printf("varcolorB schema run (imagefile driver)\n");
       load_image(5);
-      varcolorB_clock++;
+      myB.clock++;
       all[varcolorB_schema_id].father = father;
       all[varcolorB_schema_id].fps = 0.;
       all[varcolorB_schema_id].k =0;
@@ -534,7 +525,7 @@ int myvarcolorC_run(int father, int *brothers, arbitration fn)
       pthread_mutex_unlock(&refmutex);
       printf("varcolorC schema run (imagefile driver)\n");
       load_image(6);
-      varcolorC_clock++;
+      myC.clock++;
       all[varcolorC_schema_id].father = father;
       all[varcolorC_schema_id].fps = 0.;
       all[varcolorC_schema_id].k =0;
@@ -578,7 +569,7 @@ int myvarcolorD_run(int father, int *brothers, arbitration fn)
       pthread_mutex_unlock(&refmutex);
       printf("varcolorD schema run (imagefile driver)\n");
       load_image(7);
-      varcolorD_clock++;
+      myD.clock++;
       all[varcolorD_schema_id].father = father;
       all[varcolorD_schema_id].fps = 0.;
       all[varcolorD_schema_id].k =0;
@@ -738,28 +729,28 @@ int imagefile_parseconf(char *configfile){
                          serve_color[4]=1;
                          strcpy(name_color[4],word5);
 			 if (parsedwords==5) 
-			   {width[4] = atoi(word6); height[4] = atoi(word7);}
+			   {myA.width = atoi(word6); myA.height = atoi(word7);}
 			 else autosize[4]=1; /* autosize */ 
                       }
 		      else if(strcmp(word4,"varcolorB")==0){
                          serve_color[5]=1;
                          strcpy(name_color[5],word5);
                          if (parsedwords==5) 
-			   {width[5] = atoi(word6); height[5] = atoi(word7);}
+			   {myB.width = atoi(word6); myB.height = atoi(word7);}
 			 else autosize[5]=1; /* autosize */ 
                       }
 		      else if(strcmp(word4,"varcolorC")==0){
                          serve_color[6]=1;
                          strcpy(name_color[6],word5);
 			 if (parsedwords==5) 
-			   {width[6] = atoi(word6); height[6] = atoi(word7);}
+			   {myC.width = atoi(word6); myC.height = atoi(word7);}
 			 else autosize[6]=1; /* autosize */ 
                       }
 		      else if(strcmp(word4,"varcolorD")==0){
                          serve_color[7]=1;
                          strcpy(name_color[7],word5);
 			 if (parsedwords==5) 
-			   {width[7] = atoi(word6); height[7] = atoi(word7);}
+			   {myD.width = atoi(word6); myD.height = atoi(word7);}
 			 else autosize[7]=1; /* autosize */ 
                       }
 		    }else{
@@ -895,73 +886,77 @@ void imagefile_init(char *configfile)
 	  }
 	else if (i==4)
 	  {
+	    myA.img = NULL;
+	    myA.clock = 0;
+	    myA.width = 0;
+	    myA.height = 0;
 	    all[num_schemas].id = (int *) &varcolorA_schema_id;
 	    strcpy(all[num_schemas].name,"varcolorA");
 	    all[num_schemas].run = (runFn) myvarcolorA_run;
 	    all[num_schemas].stop = (stopFn) myvarcolorA_stop;
 	    load_image(i); /* for memory allocation */
-	    printf("varcolorA:%s %d*%d",name_color[i],width[i],height[i]);
+	    printf("varcolorA:%s %d*%d",name_color[i],myA.width,myA.height);
 	    if (autosize[i]) printf(" (autosized)\n");
 	    else printf("\n");            
 	    myexport("varcolorA","id",&varcolorA_schema_id);
-            myexport("varcolorA","varcolorA",&varcolorA);
-            myexport("varcolorA","clock", &varcolorA_clock);
-            myexport("varcolorA","width", &width[i]);
-            myexport("varcolorA","height", &height[i]);
+            myexport("varcolorA","varcolorA",&myA);
             myexport("varcolorA","run",(void *)myvarcolorA_run);
             myexport("varcolorA","stop",(void *)myvarcolorA_stop);
 	  }
 	else if (i==5)
 	  {
+	    myB.img = NULL;
+	    myB.clock = 0;
+	    myB.width = 0;
+	    myB.height = 0;
 	    all[num_schemas].id = (int *) &varcolorB_schema_id;
 	    strcpy(all[num_schemas].name,"varcolorB");
 	    all[num_schemas].run = (runFn) myvarcolorB_run;
 	    all[num_schemas].stop = (stopFn) myvarcolorB_stop;
 	    load_image(i); /* for memory allocation */
-	    printf("varcolorB:%s %d*%d",name_color[i],width[i],height[i]);
+	    printf("varcolorB:%s %d*%d",name_color[i],myB.width,myB.height);
             if (autosize[i]) printf(" (autosized)\n");
 	    else printf("\n");  
 	    myexport("varcolorB","id",&varcolorB_schema_id);
-            myexport("varcolorB","varcolorB",&varcolorB);
-            myexport("varcolorB","clock", &varcolorB_clock);
-            myexport("varcolorB","width", &width[i]);
-            myexport("varcolorB","height", &height[i]);
+            myexport("varcolorB","varcolorB",&myB);
             myexport("varcolorB","run",(void *)myvarcolorB_run);
             myexport("varcolorB","stop",(void *)myvarcolorB_stop);
 	  }
 	else if (i==6)
 	  {
+	    myC.img = NULL;
+	    myC.clock = 0;
+	    myC.width = 0;
+	    myC.height = 0;
 	    all[num_schemas].id = (int *) &varcolorC_schema_id;
 	    strcpy(all[num_schemas].name,"varcolorC");
 	    all[num_schemas].run = (runFn) myvarcolorC_run;
 	    all[num_schemas].stop = (stopFn) myvarcolorC_stop;
 	    load_image(i); /* for memory allocation */
-	    printf("varcolorC:%s %d*%d",name_color[i],width[i],height[i]);
+	    printf("varcolorC:%s %d*%d",name_color[i],myC.width,myC.height);
 	    if (autosize[i]) printf(" (autosized)\n");
 	    else printf("\n");  
             myexport("varcolorC","id",&varcolorC_schema_id);
-            myexport("varcolorC","varcolorC",&varcolorC);
-            myexport("varcolorC","clock", &varcolorC_clock);
-            myexport("varcolorC","width", &width[i]);
-            myexport("varcolorC","height", &height[i]);
+            myexport("varcolorC","varcolorC",&myC);
             myexport("varcolorC","run",(void *)myvarcolorC_run);
             myexport("varcolorC","stop",(void *)myvarcolorC_stop);
 	  }
 	else if (i==7)
 	  {
+	    myD.img = NULL;
+	    myD.clock = 0;
+	    myD.width = 0;
+	    myD.height = 0;
 	    all[num_schemas].id = (int *) &varcolorD_schema_id;
 	    strcpy(all[num_schemas].name,"varcolorD");
 	    all[num_schemas].run = (runFn) myvarcolorD_run;
 	    all[num_schemas].stop = (stopFn) myvarcolorD_stop;
 	    load_image(i); /* for memory allocation */
-	    printf("varcolorD:%s %d*%d",name_color[i],width[i],height[i]);
+	    printf("varcolorD:%s %d*%d",name_color[i],myD.width,myD.height);
 	    if (autosize[i]) printf(" (autosized)\n");
 	    else printf("\n");  
             myexport("varcolorD","id",&varcolorD_schema_id);
-            myexport("varcolorD","varcolorD",&varcolorD);
-            myexport("varcolorD","clock", &varcolorD_clock);
-            myexport("varcolorD","width", &width[i]);
-            myexport("varcolorD","height", &height[i]);
+            myexport("varcolorD","varcolorD",&myD);
             myexport("varcolorD","run",(void *)myvarcolorD_run);
             myexport("varcolorD","stop",(void *)myvarcolorD_stop);
 	  }

@@ -26,6 +26,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <jde.h>
+#include <interfaces/varcolor.h>
 
 /* SIF image size */
 #define SIFNTSC_ROWS 240
@@ -101,11 +102,7 @@ char *colorA_image;
 char *colorB_image; 
 char *colorC_image; 
 char *colorD_image; 
-char *varcolorA_image; 
-char *varcolorB_image; 
-char *varcolorC_image; 
-char *varcolorD_image; 
-
+Varcolor myA,myB,myC,myD;
 
 
 
@@ -569,7 +566,7 @@ void *video4linux2_thread0() {
   unsigned char r,g,b,y1,y2,u,v;
   struct v4l2_buffer buf;
 
-  printf("video4linux: thread %d started\n",cam);
+  printf("video4linux2: thread %d started\n",cam);
 
   for(j=0;j<MAXDEST;j++) {
     if ((color_requested[j]) && (color_v4l[j]==cam)) {
@@ -581,10 +578,10 @@ void *video4linux2_thread0() {
   else if (color==colorB) dest=(unsigned char*)colorB_image;
   else if (color==colorC) dest=(unsigned char*)colorC_image;
   else if (color==colorD) dest=(unsigned char*)colorD_image;
-  else if (color==varcolorA) dest=(unsigned char*)varcolorA_image;
-  else if (color==varcolorB) dest=(unsigned char*)varcolorB_image;
-  else if (color==varcolorC) dest=(unsigned char*)varcolorC_image;
-  else if (color==varcolorD) dest=(unsigned char*)varcolorD_image;
+  else if (color==varcolorA) dest=(unsigned char*)myA.img;
+  else if (color==varcolorB) dest=(unsigned char*)myB.img;
+  else if (color==varcolorC) dest=(unsigned char*)myC.img;
+  else if (color==varcolorD) dest=(unsigned char*)myD.img;
 
 	/* inicializacion de parametros dependiendo del formato del video */
 	if (format[cam].fmt.pix.pixelformat == RGB24_FORMAT) {
@@ -603,9 +600,9 @@ void *video4linux2_thread0() {
       pthread_mutex_lock(&(all[color_schema_id[color]].mymutex));
       
       if (all[color_schema_id[color]].state==slept){
-		printf("video4linux: thread %d goes sleep mode\n",cam);
+		printf("video4linux2: thread %d goes sleep mode\n",cam);
 		pthread_cond_wait(&(all[color_schema_id[color]].condition),&(all[color_schema_id[color]].mymutex));
-		printf("video4linux: thread %d woke up\n",cam);
+		printf("video4linux2: thread %d woke up\n",cam);
 		pthread_mutex_unlock(&(all[color_schema_id[color]].mymutex));
 
       } else {      
@@ -672,7 +669,7 @@ void *video4linux2_thread1(){
   unsigned char r,g,b,y1,y2,u,v;
   struct v4l2_buffer buf;
 
-  printf("video4linux: thread %d started\n",cam);
+  printf("video4linux2: thread %d started\n",cam);
 
   for(j=0;j<MAXDEST;j++) {
     if ((color_requested[j]) && (color_v4l[j]==cam)) {
@@ -684,10 +681,10 @@ void *video4linux2_thread1(){
   else if (color==colorB) dest=(unsigned char*)colorB_image;
   else if (color==colorC) dest=(unsigned char*)colorC_image;
   else if (color==colorD) dest=(unsigned char*)colorD_image;
-  else if (color==varcolorA) dest=(unsigned char*)varcolorA_image;
-  else if (color==varcolorB) dest=(unsigned char*)varcolorB_image;
-  else if (color==varcolorC) dest=(unsigned char*)varcolorC_image;
-  else if (color==varcolorD) dest=(unsigned char*)varcolorD_image;
+  else if (color==varcolorA) dest=(unsigned char*)myA.img;
+  else if (color==varcolorB) dest=(unsigned char*)myB.img;
+  else if (color==varcolorC) dest=(unsigned char*)myC.img;
+  else if (color==varcolorD) dest=(unsigned char*)myD.img;
 
 	/* inicializacion de parametros dependiendo del formato del video */
 	if (format[cam].fmt.pix.pixelformat == RGB24_FORMAT) {
@@ -706,9 +703,9 @@ void *video4linux2_thread1(){
       pthread_mutex_lock(&(all[color_schema_id[color]].mymutex));
       
       if (all[color_schema_id[color]].state==slept){
-		printf("video4linux: thread %d goes sleep mode\n",cam);
+		printf("video4linux2: thread %d goes sleep mode\n",cam);
 		pthread_cond_wait(&(all[color_schema_id[color]].condition),&(all[color_schema_id[color]].mymutex));
-		printf("video4linux: thread %d woke up\n",cam);
+		printf("video4linux2: thread %d woke up\n",cam);
 		pthread_mutex_unlock(&(all[color_schema_id[color]].mymutex));
 
       } else {      
@@ -774,7 +771,7 @@ void *video4linux2_thread2(){
   unsigned char r,g,b,y1,y2,u,v;
   struct v4l2_buffer buf;
 
-  printf("video4linux: thread %d started\n",cam);
+  printf("video4linux2: thread %d started\n",cam);
 
   for(j=0;j<MAXDEST;j++) {
     if ((color_requested[j]) && (color_v4l[j]==cam)) {
@@ -786,10 +783,10 @@ void *video4linux2_thread2(){
   else if (color==colorB) dest=(unsigned char*)colorB_image;
   else if (color==colorC) dest=(unsigned char*)colorC_image;
   else if (color==colorD) dest=(unsigned char*)colorD_image;
-  else if (color==varcolorA) dest=(unsigned char*)varcolorA_image;
-  else if (color==varcolorB) dest=(unsigned char*)varcolorB_image;
-  else if (color==varcolorC) dest=(unsigned char*)varcolorC_image;
-  else if (color==varcolorD) dest=(unsigned char*)varcolorD_image;
+  else if (color==varcolorA) dest=(unsigned char*)myA.img;
+  else if (color==varcolorB) dest=(unsigned char*)myB.img;
+  else if (color==varcolorC) dest=(unsigned char*)myC.img;
+  else if (color==varcolorD) dest=(unsigned char*)myD.img;
 
 	/* inicializacion de parametros dependiendo del formato del video */
 	if (format[cam].fmt.pix.pixelformat == RGB24_FORMAT) {
@@ -808,9 +805,9 @@ void *video4linux2_thread2(){
       pthread_mutex_lock(&(all[color_schema_id[color]].mymutex));
       
       if (all[color_schema_id[color]].state==slept){
-		printf("video4linux: thread %d goes sleep mode\n",cam);
+		printf("video4linux2: thread %d goes sleep mode\n",cam);
 		pthread_cond_wait(&(all[color_schema_id[color]].condition),&(all[color_schema_id[color]].mymutex));
-		printf("video4linux: thread %d woke up\n",cam);
+		printf("video4linux2: thread %d woke up\n",cam);
 		pthread_mutex_unlock(&(all[color_schema_id[color]].mymutex));
 
       } else {      
@@ -876,7 +873,7 @@ void *video4linux2_thread3(){
   unsigned char r,g,b,y1,y2,u,v;
   struct v4l2_buffer buf;
 
-  printf("video4linux: thread %d started\n",cam);
+  printf("video4linux2: thread %d started\n",cam);
 
   for(j=0;j<MAXDEST;j++) {
     if ((color_requested[j]) && (color_v4l[j]==cam)) {
@@ -888,10 +885,10 @@ void *video4linux2_thread3(){
   else if (color==colorB) dest=(unsigned char*)colorB_image;
   else if (color==colorC) dest=(unsigned char*)colorC_image;
   else if (color==colorD) dest=(unsigned char*)colorD_image;
-  else if (color==varcolorA) dest=(unsigned char*)varcolorA_image;
-  else if (color==varcolorB) dest=(unsigned char*)varcolorB_image;
-  else if (color==varcolorC) dest=(unsigned char*)varcolorC_image;
-  else if (color==varcolorD) dest=(unsigned char*)varcolorD_image;
+  else if (color==varcolorA) dest=(unsigned char*)myA.img;
+  else if (color==varcolorB) dest=(unsigned char*)myB.img;
+  else if (color==varcolorC) dest=(unsigned char*)myC.img;
+  else if (color==varcolorD) dest=(unsigned char*)myD.img;
 
 	/* inicializacion de parametros dependiendo del formato del video */
 	if (format[cam].fmt.pix.pixelformat == RGB24_FORMAT) {
@@ -910,9 +907,9 @@ void *video4linux2_thread3(){
       pthread_mutex_lock(&(all[color_schema_id[color]].mymutex));
       
       if (all[color_schema_id[color]].state==slept){
-		printf("video4linux: thread %d goes sleep mode\n",cam);
+		printf("video4linux2: thread %d goes sleep mode\n",cam);
 		pthread_cond_wait(&(all[color_schema_id[color]].condition),&(all[color_schema_id[color]].mymutex));
-		printf("video4linux: thread %d woke up\n",cam);
+		printf("video4linux2: thread %d woke up\n",cam);
 		pthread_mutex_unlock(&(all[color_schema_id[color]].mymutex));
 
       } else {      
@@ -1541,12 +1538,12 @@ int video4linux2_deviceinit(){
     all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
 
-    varcolorA_image=(char *)malloc(v4l_width[color_v4l[varcolorA]]*v4l_height[color_v4l[varcolorA]]*3);    
+    myA.img=(char *)malloc(v4l_width[color_v4l[varcolorA]]*v4l_height[color_v4l[varcolorA]]*3);    
+    myA.width=v4l_width[color_v4l[varcolorA]];
+    myA.height=v4l_height[color_v4l[varcolorA]];
+    myA.clock=color_clock[varcolorA];
+    myexport("varcolorA","varcolorA",&myA);
     myexport("varcolorA","id",&(color_schema_id[varcolorA]));
-    myexport("varcolorA","varcolorA",&varcolorA_image);
-    myexport("varcolorA","clock", &(color_clock[varcolorA]));
-    myexport("varcolorA","width",&v4l_width[color_v4l[varcolorA]]);
-    myexport("varcolorA","height",&v4l_height[color_v4l[varcolorA]]);
     myexport("varcolorA","run",(void *)myvarcolorA_run);
     myexport("varcolorA","stop",(void *)myvarcolorA_stop);
 
@@ -1575,12 +1572,12 @@ int video4linux2_deviceinit(){
     all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
     
-    varcolorB_image=(char *)malloc(v4l_width[color_v4l[varcolorB]]*v4l_height[color_v4l[varcolorB]]*3);    
+    myB.img=(char *)malloc(v4l_width[color_v4l[varcolorB]]*v4l_height[color_v4l[varcolorB]]*3);    
+    myB.width=v4l_width[color_v4l[varcolorB]];
+    myB.height=v4l_height[color_v4l[varcolorB]];
+    myB.clock=color_clock[varcolorB];
+    myexport("varcolorB","varcolorB",&myB);
     myexport("varcolorB","id",&(color_schema_id[varcolorB]));
-    myexport("varcolorB","varcolorB",&varcolorB_image);
-    myexport("varcolorB","clock", &(color_clock[varcolorB]));
-    myexport("varcolorB","width",&v4l_width[color_v4l[varcolorB]]);
-    myexport("varcolorB","height",&v4l_height[color_v4l[varcolorB]]);
     myexport("varcolorB","run",(void *)myvarcolorB_run);
     myexport("varcolorB","stop",(void *)myvarcolorB_stop);
     
@@ -1609,12 +1606,12 @@ int video4linux2_deviceinit(){
     all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
 
-    varcolorC_image=(char *)malloc(v4l_width[color_v4l[varcolorC]]*v4l_height[color_v4l[varcolorC]]*3);    
+    myC.img=(char *)malloc(v4l_width[color_v4l[varcolorC]]*v4l_height[color_v4l[varcolorC]]*3);    
+    myC.width=v4l_width[color_v4l[varcolorC]];
+    myC.height=v4l_height[color_v4l[varcolorC]];
+    myC.clock=color_clock[varcolorC];
+    myexport("varcolorC","varcolorC",&myC);
     myexport("varcolorC","id",&(color_schema_id[varcolorC]));
-    myexport("varcolorC","varcolorC",&varcolorC_image);
-    myexport("varcolorC","clock", &(color_clock[varcolorC]));
-    myexport("varcolorC","width",&v4l_width[color_v4l[varcolorC]]);
-    myexport("varcolorC","height",&v4l_height[color_v4l[varcolorC]]);
     myexport("varcolorC","run",(void *)myvarcolorC_run);
     myexport("varcolorC","stop",(void *)myvarcolorC_stop);
 
@@ -1643,12 +1640,12 @@ int video4linux2_deviceinit(){
     all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
 
-    varcolorD_image=(char *)malloc(v4l_width[color_v4l[varcolorD]]*v4l_height[color_v4l[varcolorD]]*3);    
+    myD.img=(char *)malloc(v4l_width[color_v4l[varcolorD]]*v4l_height[color_v4l[varcolorD]]*3);    
+    myD.width=v4l_width[color_v4l[varcolorD]];
+    myD.height=v4l_height[color_v4l[varcolorD]];
+    myD.clock=color_clock[varcolorD];
+    myexport("varcolorD","varcolorD",&myD);
     myexport("varcolorD","id",&(color_schema_id[varcolorD]));
-    myexport("varcolorD","varcolorD",&varcolorD_image);
-    myexport("varcolorD","clock", &(color_clock[varcolorD]));
-    myexport("varcolorD","width",&v4l_width[color_v4l[varcolorD]]);
-    myexport("varcolorD","height",&v4l_height[color_v4l[varcolorD]]);
     myexport("varcolorD","run",(void *)myvarcolorD_run);
     myexport("varcolorD","stop",(void *)myvarcolorD_stop);
 

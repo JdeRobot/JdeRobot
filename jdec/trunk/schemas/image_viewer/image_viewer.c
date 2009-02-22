@@ -18,6 +18,10 @@
  *  Authors : José Antonio Santos Cadenas <santoscadenas@gmail.com>
  */
 
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 #include "jde.h"
 #include "image_viewer.h"
 #include "graphics_gtk.h"
@@ -25,6 +29,7 @@
 #include <glade/glade.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include <interfaces/varcolor.h>
 
 int image_viewer_id=0;
 int image_viewer_brothers[MAX_SCHEMAS];
@@ -32,6 +37,11 @@ arbitration image_viewer_callforarbitration;
 
 #define MAX_COLOR 8
 /*Imported variables*/
+Varcolor *myAA;
+Varcolor *myBB;
+Varcolor *myCC;
+Varcolor *myDD;
+
 int* width[MAX_COLOR];
 int* height[MAX_COLOR];
 char** mycolor[MAX_COLOR];
@@ -67,6 +77,7 @@ void cambiar_imagen(int i){
       }
       image_selected=i;
       myrun[image_selected](image_viewer_id,NULL,NULL);
+
       image=(char *)malloc(width[image_selected][0]*height[image_selected][0]*3);
       {
          GdkPixbuf *imgBuff;
@@ -143,42 +154,46 @@ void on_img_sel_changed(GtkComboBoxEntry *img_sel, gpointer user_data){
    }
    else if (strcmp(valor,"varcolorA")==0){
       if (image_selected!=4){
-         width[4]=myimport("varcolorA","width");
-         height[4]=myimport("varcolorA","height");
-         mycolor[4]=myimport("varcolorA","varcolorA");
-         myrun[4]=(runFn)myimport("varcolorA","run");
-         mystop[4]=(stopFn)myimport("varcolorA","stop");
-         cambiar_imagen(4);
+	myAA=(Varcolor *)myimport("varcolorA","varcolorA");
+	width[4]=&((*myAA).width);
+	height[4]=&((*myAA).height);
+	mycolor[4]=&((*myAA).img);
+	myrun[4]=(runFn)myimport("varcolorA","run");
+	mystop[4]=(stopFn)myimport("varcolorA","stop");
+	cambiar_imagen(4);
       }
    }
    else if (strcmp(valor,"varcolorB")==0){
       if (image_selected!=5){
-         width[5]=myimport("varcolorB","width");
-         height[5]=myimport("varcolorB","height");
-         mycolor[5]=myimport("varcolorB","varcolorB");
-         myrun[5]=(runFn)myimport("varcolorB","run");
-         mystop[5]=(stopFn)myimport("varcolorB","stop");
-         cambiar_imagen(5);
+	myBB=(Varcolor *)myimport("varcolorB","varcolorB");
+	width[5]=&((*myBB).width);
+	height[5]=&((*myBB).height);
+	mycolor[5]=&((*myBB).img);
+	myrun[5]=(runFn)myimport("varcolorB","run");
+	mystop[5]=(stopFn)myimport("varcolorB","stop");
+	cambiar_imagen(5);
       }
    }
    else if (strcmp(valor,"varcolorC")==0){
       if (image_selected!=6){
-         width[6]=myimport("varcolorC","width");
-         height[6]=myimport("varcolorC","height");
-         mycolor[6]=myimport("varcolorC","varcolorC");
-         myrun[6]=(runFn)myimport("varcolorC","run");
-         mystop[6]=(stopFn)myimport("varcolorC","stop");
-         cambiar_imagen(6);
+	myCC=(Varcolor *)myimport("varcolorC","varcolorC");
+	width[6]=&((*myCC).width);
+	height[6]=&((*myCC).height);
+	mycolor[6]=&((*myCC).img);
+	myrun[6]=(runFn)myimport("varcolorC","run");
+	mystop[6]=(stopFn)myimport("varcolorC","stop");
+	cambiar_imagen(6);
       }
    }
    else if (strcmp(valor,"varcolorD")==0){
       if (image_selected!=7){
-         width[7]=myimport("varcolorD","width");
-         height[7]=myimport("varcolorD","height");
-         mycolor[7]=myimport("varcolorD","varcolorD");
-         myrun[7]=(runFn)myimport("varcolorD","run");
-         mystop[7]=(stopFn)myimport("varcolorD","stop");
-         cambiar_imagen(7);
+	myDD=(Varcolor *)myimport("varcolorD","varcolorD");
+	width[7]=&((*myDD).width);
+	height[7]=&((*myDD).height);
+	mycolor[7]=&((*myDD).img);
+	myrun[7]=(runFn)myimport("varcolorD","run");
+	mystop[7]=(stopFn)myimport("varcolorD","stop");
+	cambiar_imagen(7);
       }
    }
 }

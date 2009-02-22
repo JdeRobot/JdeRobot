@@ -26,7 +26,7 @@
 #include <glade/glade.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include <wiimote.h>
+#include <interfaces/wiimote.h>
 
 /* MOTORS CONSTANTS */
 #define V_MAX 1600

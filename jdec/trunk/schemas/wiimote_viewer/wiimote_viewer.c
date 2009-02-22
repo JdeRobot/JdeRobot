@@ -26,7 +26,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
-#include <wiimote.h>
+#include <interfaces/wiimote.h>
 
 int wiimote_viewer_id=0;
 int wiimote_viewer_brothers[MAX_SCHEMAS];

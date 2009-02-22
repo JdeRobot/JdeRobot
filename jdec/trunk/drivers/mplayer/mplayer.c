@@ -24,7 +24,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <fcntl.h>
-#include <jde.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
@@ -33,6 +33,8 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
+#include <jde.h>
+#include <interfaces/varcolor.h>
 
 /** Diferent kinds of input*/
 enum
@@ -156,25 +158,7 @@ char *colorD; /* sifntsc image itself */
 /** 'colorD' schema clock*/
 unsigned long int imageD_clock;
 
-/** 'varcolorA' schema image data*/
-char *varcolorA; /* sifntsc image itself */
-/** 'varcolorA' schema clock*/
-unsigned long int varimageA_clock;
-
-/** 'varcolorB' schema image data*/
-char *varcolorB; /* sifntsc image itself */
-/** 'varcolorB' schema clock*/
-unsigned long int varimageB_clock;
-
-/** 'varcolorC' schema image data*/
-char *varcolorC; /* sifntsc image itself */
-/** 'varcolorC' schema clock*/
-unsigned long int varimageC_clock;
-
-/** 'varcolorD' schema image data*/
-char *varcolorD; /* sifntsc image itself */
-/** 'varcolorD' schema clock*/
-unsigned long int varimageD_clock;
+Varcolor myA,myB,myC,myD;
 
 char *driver;
 
@@ -400,7 +384,7 @@ int myvarcolorA_run(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[4]);
-         /*printf("varcolorA schema run (mplayer driver)\n");*/
+         printf("varcolorA schema run (mplayer driver)\n");
          all[varcolorA_schema_id].father = father;
          all[varcolorA_schema_id].fps = 0.;
          all[varcolorA_schema_id].k =0;
@@ -444,7 +428,7 @@ int myvarcolorB_run(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[5]);
-         /*printf("varcolorB schema run (mplayer driver)\n");*/
+         printf("varcolorB schema run (mplayer driver)\n");
          all[varcolorB_schema_id].father = father;
          all[varcolorB_schema_id].fps = 0.;
          all[varcolorB_schema_id].k =0;
@@ -465,7 +449,7 @@ int myvarcolorB_stop(){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[5]);
       put_state(varcolorB_schema_id,slept);
-      /*printf("varcolorB schema stop (mplayer driver)\n");*/
+      printf("varcolorB schema stop (mplayer driver)\n");
    }
    else
       pthread_mutex_unlock(&refmutex);
@@ -488,7 +472,7 @@ int myvarcolorC_run(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[6]);
-         /*printf("varcolorC schema run (mplayer driver)\n");*/
+         printf("varcolorC schema run (mplayer driver)\n");
          all[varcolorC_schema_id].father = father;
          all[varcolorC_schema_id].fps = 0.;
          all[varcolorC_schema_id].k =0;
@@ -509,7 +493,7 @@ int myvarcolorC_stop(){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[6]);
       put_state(varcolorC_schema_id,slept);
-      /*printf("varcolorC schema stop (mplayer driver)\n");*/
+      printf("varcolorC schema stop (mplayer driver)\n");
    }
    else
       pthread_mutex_unlock(&refmutex);
@@ -532,7 +516,7 @@ int myvarcolorD_run(int father, int *brothers, arbitration fn){
       {
          pthread_mutex_unlock(&refmutex);
          pthread_mutex_unlock(&color_mutex[7]);
-         /*printf("varcolorD schema run (mplayer driver)\n");*/
+         printf("varcolorD schema run (mplayer driver)\n");
          all[varcolorD_schema_id].father = father;
          all[varcolorD_schema_id].fps = 0.;
          all[varcolorD_schema_id].k =0;
@@ -553,7 +537,7 @@ int myvarcolorD_stop(){
       pthread_mutex_unlock(&refmutex);
       pthread_mutex_lock(&color_mutex[7]);
       put_state(varcolorD_schema_id,slept);
-      /*printf("varcolorD schema stop (mplayer driver)\n");*/
+      printf("varcolorD schema stop (mplayer driver)\n");
    }
    else
       pthread_mutex_unlock(&refmutex);
@@ -713,39 +697,39 @@ void *mplayer_thread(void *id){
             imageA_clock=lastimage;
             break;
          case 1:
-            memcpy(colorB, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+            memcpy(colorB, buff, width[i]*height[i]*3);
             speedcounter(colorB_schema_id);
             imageB_clock=lastimage;
             break;
          case 2:
-            memcpy(colorC, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+            memcpy(colorC, buff,width[i]*height[i]*3);
             speedcounter(colorC_schema_id);
             imageC_clock=lastimage;
             break;
          case 3:
-            memcpy(colorD, buff, SIFNTSC_COLUMNS*SIFNTSC_ROWS*3);
+            memcpy(colorD, buff, width[i]*height[i]*3);
             speedcounter(colorD_schema_id);
             imageD_clock=lastimage;
             break;
          case 4:
-            memcpy(varcolorA, buff, width[i]*height[i]*3);
+            memcpy(myA.img, buff, width[i]*height[i]*3);
             speedcounter(varcolorA_schema_id);
-            varimageA_clock=lastimage;
+            myA.clock=lastimage;
             break;
          case 5:
-            memcpy(varcolorB, buff, width[i]*height[i]*3);
+            memcpy(myB.img, buff, width[i]*height[i]*3);
             speedcounter(varcolorB_schema_id);
-            varimageB_clock=lastimage;
+            myB.clock=lastimage;
             break;
          case 6:
-            memcpy(varcolorC, buff, width[i]*height[i]*3);
+            memcpy(myC.img, buff, width[i]*height[i]*3);
             speedcounter(varcolorC_schema_id);
-            varimageC_clock=lastimage;
+            myC.clock=lastimage;
             break;
          case 7:
-            memcpy(varcolorD, buff, width[i]*height[i]*3);
+            memcpy(myC.img, buff, width[i]*height[i]*3);
             speedcounter(varcolorD_schema_id);
-            varimageD_clock=lastimage;
+            myD.clock=lastimage;
             break;
          default:
             fprintf(stderr, "mplayer_thread: Unknown option %d.\n", i);
@@ -1030,26 +1014,34 @@ int mplayer_parseconf(char *configfile){
                                  if(strcmp(word4,"varcolorA")==0){
                                     serve_color[4]=1;
                                     strcpy (video_files[4],word5);
-                                    width[4] = atoi(word6);
-                                    height[4] = atoi(word7);
+				    myA.width=atoi(word6);
+				    myA.height=atoi(word7);
+                                    width[4] = myA.width;
+                                    height[4] = myA.height;
                                     input_type[4]=VIDEO;
                                  }else if(strcmp(word4,"varcolorB")==0){
                                     serve_color[5]=1;
                                     strcpy (video_files[5],word5);
-                                    width[5] = atoi(word6);
-                                    height[5] = atoi(word7);
+                                    myB.width=atoi(word6);
+				    myB.height=atoi(word7);
+                                    width[5] = myB.width;
+                                    height[5] = myB.height;
                                     input_type[5]=VIDEO;
 				 }else if(strcmp(word4,"varcolorC")==0){
                                     serve_color[6]=1;
                                     strcpy (video_files[6],word5);
-                                    width[6] = atoi(word6);
-                                    height[6] = atoi(word7);
+                                    myC.width=atoi(word6);
+				    myC.height=atoi(word7);
+                                    width[6] = myC.width;
+                                    height[6] = myC.height;
                                     input_type[6]=VIDEO;
 				 }else if(strcmp(word4,"varcolorD")==0){
                                     serve_color[7]=1;
                                     strcpy (video_files[7],word5);
-                                    width[7] = atoi(word6);
-                                    height[7] = atoi(word7);
+                                    myD.width=atoi(word6);
+				    myD.height=atoi(word7);
+                                    width[7] = myD.width;
+                                    height[7] = myD.height;
                                     input_type[7]=VIDEO;
 				 }
 			      }
@@ -1058,8 +1050,10 @@ int mplayer_parseconf(char *configfile){
                                  if(strcmp(word4,"varcolorA")==0){
                                     serve_color[4]=1;
                                     strcpy (video_files[4],word5);
-                                    width[4] = atoi(word6);
-                                    height[4] = atoi(word7);
+                                    myA.width=atoi(word6);
+				    myA.height=atoi(word7);
+				    width[4] =myA.width; 
+				    height[4] = myA.height;
                                     input_type[4]=VIDEO;
                                     if(strcmp(word8,"repeat_on")==0)
                                        repeat[4] = 1;
@@ -1069,8 +1063,10 @@ int mplayer_parseconf(char *configfile){
                                  }else if(strcmp(word4,"varcolorB")==0){
                                     serve_color[5]=1;
                                     strcpy (video_files[5],word5);
-                                    width[5] = atoi(word6);
-                                    height[5] = atoi(word7);
+                                    myB.width=atoi(word6);
+				    myB.height=atoi(word7);
+				    width[5] =myB.width; 
+				    height[5] = myB.height;
                                     input_type[5]=VIDEO;
                                     if(strcmp(word8,"repeat_on")==0)
                                        repeat[5] = 1;
@@ -1080,8 +1076,10 @@ int mplayer_parseconf(char *configfile){
                                  }else if(strcmp(word4,"varcolorC")==0){
                                     serve_color[6]=1;
                                     strcpy (video_files[6],word5);
-                                    width[6] = atoi(word6);
-                                    height[6] = atoi(word7);
+                                    myC.width=atoi(word6);
+				    myC.height=atoi(word7);
+				    width[6] =myC.width; 
+				    height[6] = myC.height;
                                     input_type[6]=VIDEO;
                                     if(strcmp(word8,"repeat_on")==0)
                                        repeat[6] = 1;
@@ -1091,8 +1089,10 @@ int mplayer_parseconf(char *configfile){
                                  }else if(strcmp(word4,"varcolorD")==0){
                                     serve_color[7]=1;
                                     strcpy (video_files[7],word5);
-                                    width[7] = atoi(word6);
-                                    height[7] = atoi(word7);
+                                    myD.width=atoi(word6);
+				    myD.height=atoi(word7);
+				    width[7] =myD.width; 
+				    height[7] = myD.height;
                                     input_type[7]=VIDEO;
                                     if(strcmp(word8,"repeat_on")==0)
                                        repeat[7] = 1;
@@ -1113,8 +1113,10 @@ int mplayer_parseconf(char *configfile){
                                  if(strcmp(word4,"varcolorA")==0){
                                     serve_color[4]=1;
                                     strcpy (devices[4],word6);
-                                    width[4] = atoi(word7);
-                                    height[4] = atoi(word8);
+                                    myA.width=atoi(word7);
+				    myA.height=atoi(word8);
+				    width[4] = myA.width;
+                                    height[4] = myA.height;
                                     if (strcmp(word9,"cam")==0){
                                        input_type[4]=V4LCAM;
                                     }
@@ -1131,8 +1133,10 @@ int mplayer_parseconf(char *configfile){
                                  else if(strcmp(word4,"varcolorB")==0){
                                     serve_color[5]=1;
                                     strcpy (devices[5],word6);
-                                    width[5] = atoi(word7);
-                                    height[5] = atoi(word8);
+                                    myB.width=atoi(word7);
+				    myB.height=atoi(word8);
+				    width[5] = myB.width;
+                                    height[5] = myB.height;
                                     if (strcmp(word9,"cam")==0){
                                        input_type[5]=V4LCAM;
                                     }
@@ -1149,8 +1153,10 @@ int mplayer_parseconf(char *configfile){
                                  else if(strcmp(word4,"varcolorC")==0){
                                     serve_color[6]=1;
                                     strcpy (devices[6],word6);
-                                    width[6] = atoi(word7);
-                                    height[6] = atoi(word8);
+                                    myC.width=atoi(word7);
+				    myC.height=atoi(word8);
+				    width[6] = myC.width;
+                                    height[6] = myC.height;
                                     if (strcmp(word9,"cam")==0){
                                        input_type[6]=V4LCAM;
                                     }
@@ -1167,9 +1173,11 @@ int mplayer_parseconf(char *configfile){
                                  else if(strcmp(word4,"varcolorD")==0){
                                     serve_color[7]=1;
                                     strcpy (devices[7],word6);
-                                    width[7] = atoi(word7);
-                                    height[7] = atoi(word8);
-                                    if (strcmp(word9,"cam")==0){
+                                    myD.width=atoi(word7);
+				    myD.height=atoi(word8);
+				    width[7] = myD.width;
+                                    height[7] = myD.height;
+				    if (strcmp(word9,"cam")==0){
                                        input_type[7]=V4LCAM;
                                     }
                                     else if (strcmp(word9,"tv")==0){
@@ -1331,24 +1339,25 @@ void mplayer_init(char *configfile)
          colorD = (char *) malloc(width[3]*height[3]*3);
          pthread_create(&mplayer_th[3],NULL,mplayer_thread,(void*)&args[3]);
       }
-     if (serve_color[4]){
+      if (serve_color[4]){
+	printf("lectura: %d x %d \n",myA.width,myA.height);
         args[4]=4;
-        varcolorA = (char *) malloc(width[4]*height[4]*3);
+        myA.img = (char *) malloc(myA.width*myA.height*3);
         pthread_create(&mplayer_th[4],NULL,mplayer_thread,(void*)&args[4]);
       }
       if (serve_color[5]){
          args[5]=5;
-         varcolorB = (char *) malloc(width[5]*height[5]*3);
+         myB.img = (char *) malloc(myB.width*myB.height*3);
          pthread_create(&mplayer_th[5],NULL,mplayer_thread,(void*)&args[5]);
       }
       if (serve_color[6]){
          args[6]=6;
-         varcolorC = (char *) malloc(width[6]*height[6]*3);
+         myC.img = (char *) malloc(myC.width*myC.height*3);
          pthread_create(&mplayer_th[6],NULL,mplayer_thread,(void*)&args[6]);
       }
       if (serve_color[7]){
          args[7]=7;
-         varcolorD = (char *) malloc(width[7]*height[7]*3);
+         myD.img = (char *) malloc(myD.width*myD.height*3);
          pthread_create(&mplayer_th[7],NULL,mplayer_thread,(void*)&args[7]);
       }
 
@@ -1474,12 +1483,9 @@ void mplayer_init(char *configfile)
          all[num_schemas].handle = NULL;
          num_schemas++;
          myexport("varcolorA","id",&varcolorA_schema_id);
-         myexport("varcolorA","varcolorA",&varcolorA);
-         myexport("varcolorA","clock", &varimageA_clock);
+         myexport("varcolorA","varcolorA",&myA);
          myexport("varcolorA","run",(void *)myvarcolorA_run);
          myexport("varcolorA","stop",(void *)myvarcolorA_stop);
-         myexport("varcolorA","width",&width[4]);
-         myexport("varcolorA","height",&height[4]);
 	 myvarcolorA_run(SHELLHUMAN,NULL,NULL);
    }
 
@@ -1497,14 +1503,11 @@ void mplayer_init(char *configfile)
          all[num_schemas].state=slept;
          all[num_schemas].terminate = NULL;
          all[num_schemas].handle = NULL;
-         num_schemas++;
+	 num_schemas++;
          myexport("varcolorB","id",&varcolorB_schema_id);
-         myexport("varcolorB","varcolorB",&varcolorB);
-         myexport("varcolorB","clock", &varimageB_clock);
+         myexport("varcolorB","varcolorB",&myB);
          myexport("varcolorB","run",(void *)myvarcolorB_run);
          myexport("varcolorB","stop",(void *)myvarcolorB_stop);
-         myexport("varcolorB","width",&width[5]);
-         myexport("varcolorB","height",&height[5]);
 	 myvarcolorB_run(SHELLHUMAN,NULL,NULL);
    }
 
@@ -1522,14 +1525,11 @@ void mplayer_init(char *configfile)
          all[num_schemas].state=slept;
          all[num_schemas].terminate = NULL;
          all[num_schemas].handle = NULL;
-         num_schemas++;
+	 num_schemas++;
          myexport("varcolorC","id",&varcolorC_schema_id);
-         myexport("varcolorC","varcolorC",&varcolorC);
-         myexport("varcolorC","clock", &varimageC_clock);
+         myexport("varcolorC","varcolorC",&myC);
          myexport("varcolorC","run",(void *)myvarcolorC_run);
          myexport("varcolorC","stop",(void *)myvarcolorC_stop);
-         myexport("varcolorC","width",&width[6]);
-         myexport("varcolorC","height",&height[6]);
 	 myvarcolorC_run(SHELLHUMAN,NULL,NULL);
    }
 
@@ -1547,14 +1547,11 @@ void mplayer_init(char *configfile)
          all[num_schemas].state=slept;
          all[num_schemas].terminate = NULL;
          all[num_schemas].handle = NULL;
-         num_schemas++;
+	 num_schemas++;
          myexport("varcolorD","id",&varcolorD_schema_id);
-         myexport("varcolorD","varcolorD",&varcolorD);
-         myexport("varcolorD","clock", &varimageD_clock);
+         myexport("varcolorD","varcolorD",&myD);
          myexport("varcolorD","run",(void *)myvarcolorD_run);
          myexport("varcolorD","stop",(void *)myvarcolorD_stop);
-         myexport("varcolorD","width",&width[7]);
-         myexport("varcolorD","height",&height[7]);
 	 myvarcolorD_run(SHELLHUMAN,NULL,NULL);
    }
 
