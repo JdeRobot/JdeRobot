@@ -19,7 +19,7 @@
  *
  */
 
-#define thisrelease "jdec 4.3-svn"
+#define thisrelease "jderobot 4.3-svn"
 
 #include <jde.h>
 #include <jde_private.h>

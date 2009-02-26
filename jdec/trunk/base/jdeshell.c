@@ -30,7 +30,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-const char * thisrelease = "jdec 4.3-$Revision:$";
+const char * thisrelease = "jderobot 4.3-$Revision$";
 
 typedef struct {
   const char *name;		/* User printable name of the function. */
@@ -72,6 +72,7 @@ int com_hide(char *);
 int com_init(char *);
 int com_terminate(char *);
 int com_zoom(char *);
+int com_license(char *);
 
 COMMAND bcommands[] = {
   { "help", com_help, "Display this help text" },
@@ -89,6 +90,7 @@ COMMAND bcommands[] = {
   { "show", com_show, "Show schema gui" },
   { "hide", com_hide, "Hide schema gui" },
   { "zoom", com_zoom, "Change to schema mode" },
+  { "show_license", com_license, "Show JDE license" },
   { "?", com_help, "Synonym for 'help'" },
   { "exit", com_exit, "Quit using jdeC" },
   { "quit", com_exit, "Synonym for 'exit'" },
@@ -147,7 +149,13 @@ int main(int argc, char** argv) {
   /*unsetenv("LANG");*/
   setenv("LC_ALL","POSIX",1);
 
-  printf("%s\n",thisrelease);
+  printf ("\n");
+  printf (" <jderobot> Copyright (C) 1997-2008 JDE Developers Team \n");
+  printf ("   This is free software, and you are welcome to redistribute it \n");
+  printf ("   under certain conditions; type `show_license' for details. \n\n");
+
+  
+  printf("%s\n\n",thisrelease);
 
   n=1;
   while(argv[n]!=NULL) {
@@ -475,6 +483,39 @@ com_view (char *arg){
   sprintf (syscom, "more %s", arg);
 #endif
   return (system (syscom));
+}
+
+/**
+ * Print out JDE license
+ * @param arg arguments.Command or null
+ * @return 0
+ */
+
+int
+com_license (char *arg)
+{
+
+	
+	char license[] = "\n  Copyright (C) 1997-2008 JDE Developers Team \n\n" \
+  "This program is free software: you can redistribute it and/or modify \n" \
+  "it under the terms of the GNU General Public License as published by \n" \
+  "the Free Software Foundation, either version 3 of the License, or \n" \
+  "(at your option) any later version. \n" \
+  "\n" \
+  "This program is distributed in the hope that it will be useful, \n" \
+  "but WITHOUT ANY WARRANTY; without even the implied warranty of \n" \
+  "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the \n" \
+  "GNU General Public License for more details. \n" \
+  "\n" \
+  "You should have received a copy of the GNU General Public License \n" \
+  "along with this program.  If not, see http://www.gnu.org/licenses/. \n" \
+  "\n" \
+  "You can download the source code in http://jde.gsyc.es/Downloads\n\n";
+
+  fprintf(stdout, license);
+
+	return (0);
+
 }
 
 /**
