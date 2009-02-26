@@ -204,17 +204,17 @@ void wiioperator_iteration(){
 			/*Pantilt*/
 			if(acc_ok) {
 				if (acc[CWIID_Y] < Y_MIN) {
-					if((*latitude - LAT_STEP) > *min_latitude)
+					if((*latitude - LAT_STEP) > ((*min_latitude) - SECURITY_MARGIN*2))
 						*latitude = *latitude - LAT_STEP;
 				} else if(acc[CWIID_Y] > Y_MAX) {
-					if((*latitude + LAT_STEP) < *max_latitude)
+					if((*latitude + LAT_STEP) < ((*max_latitude) - SECURITY_MARGIN*2))
 						*latitude = *latitude + LAT_STEP;
 				}
 				if (acc[CWIID_X] < X_MIN) {
-					if((*longitude - LON_STEP) > *min_longitude)
+					if((*longitude - LON_STEP) > ((*min_longitude) - SECURITY_MARGIN*2))
 						*longitude = *longitude - LON_STEP;
 				}else if(acc[CWIID_X] > X_MAX) {
-					if((*longitude + LON_STEP) < *max_longitude)
+					if((*longitude + LON_STEP) < ((*max_longitude) - SECURITY_MARGIN*2))
 						*longitude = *longitude + LON_STEP;
 				}
 			}
@@ -233,14 +233,8 @@ void wiioperator_iteration(){
 					if(((*pan) - LON_STEP) > ((*min_longitude) + SECURITY_MARGIN*10))
 						(*longitude) = (*longitude) - LON_STEP;
 				} else if (*buttons & CWIID_BTN_RIGHT) {
-					float a = (*pan) + LON_STEP;
-					float b = (*max_longitude) - SECURITY_MARGIN*10;
-					printf("pan %f, max %f, long %f\n", *pan, *max_longitude, *longitude);
-					printf("a es %f, b es %f\n", a, b);
-					if(a < b) {
-						printf("entramos\n");
+					if (((*pan) + LON_STEP) < ((*max_longitude) - SECURITY_MARGIN*10));
 						(*longitude) = (*longitude) + LON_STEP;
-					}
 				}
 			}
 
