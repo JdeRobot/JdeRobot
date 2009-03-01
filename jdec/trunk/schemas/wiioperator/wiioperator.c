@@ -36,6 +36,7 @@
 #define V_STEP 10.0
 #define W_STEP 1.0
 #define SECURITY_MARGIN 10
+#define SECURITY_MARGIN_ACC 3
 
 /* PANTILT CONSTANTS */
 #define LAT_STEP 5.0
@@ -204,14 +205,14 @@ void wiioperator_iteration(){
 			/*Pantilt*/
 			if(acc_ok) {
 				if (acc[CWIID_Y] < Y_MIN) {
-					if((*latitude - LAT_STEP) > ((*min_latitude) - SECURITY_MARGIN*2))
+					if((*latitude - LAT_STEP) > ((*min_latitude) + SECURITY_MARGIN_ACC))
 						*latitude = *latitude - LAT_STEP;
 				} else if(acc[CWIID_Y] > Y_MAX) {
-					if((*latitude + LAT_STEP) < ((*max_latitude) - SECURITY_MARGIN*2))
+					if((*latitude + LAT_STEP) < ((*max_latitude) - SECURITY_MARGIN_ACC))
 						*latitude = *latitude + LAT_STEP;
 				}
 				if (acc[CWIID_X] < X_MIN) {
-					if((*longitude - LON_STEP) > ((*min_longitude) - SECURITY_MARGIN*2))
+					if((*longitude - LON_STEP) > ((*min_longitude) + SECURITY_MARGIN*2))
 						*longitude = *longitude - LON_STEP;
 				}else if(acc[CWIID_X] > X_MAX) {
 					if((*longitude + LON_STEP) < ((*max_longitude) - SECURITY_MARGIN*2))
@@ -230,10 +231,10 @@ void wiioperator_iteration(){
 						(*latitude) = (*latitude) - LAT_STEP;
 				}
 				if (*buttons & CWIID_BTN_LEFT) {
-					if(((*pan) - LON_STEP) > ((*min_longitude) + SECURITY_MARGIN*10))
+					if(((*pan) - LON_STEP) > ((*min_longitude) + SECURITY_MARGIN*2))
 						(*longitude) = (*longitude) - LON_STEP;
 				} else if (*buttons & CWIID_BTN_RIGHT) {
-					if (((*pan) + LON_STEP) < ((*max_longitude) - SECURITY_MARGIN*10));
+					if (((*pan) + LON_STEP) < ((*max_longitude) - SECURITY_MARGIN*2));
 						(*longitude) = (*longitude) + LON_STEP;
 				}
 			}
@@ -353,6 +354,11 @@ void wiioperator_exports(){
    myexport("wiioperator","cycle",&wiioperator_cycle);
    myexport("wiioperator","run",(void *)wiioperator_run);
    myexport("wiioperator","stop",(void *)wiioperator_stop);
+}
+
+void wiioperator_stop()
+{
+ 
 }
 
 void wiioperator_guiinit(){
