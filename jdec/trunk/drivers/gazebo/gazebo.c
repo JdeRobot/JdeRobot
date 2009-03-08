@@ -46,13 +46,6 @@ GZ_SONAR_MAX_RANGES
 /* SIF image size */
 #define SIFNTSC_ROWS 240
 #define SIFNTSC_COLUMNS 320
-/* directed perception pantilt limits */
-#define MAX_PAN_ANGLE 159.13 /* degrees */
-#define MIN_PAN_ANGLE -159.13 /* degrees */
-#define MAX_TILT_ANGLE 30. /* degrees */
-#define MIN_TILT_ANGLE -46. /* degrees */
-#define MAX_SPEED_PANTILT 205.89
-
 
 
 /** The driver's command thread cycle*/
@@ -125,18 +118,18 @@ int gazebo_laser_run (int father, int *brothers, arbitration fn);
 int gazebo_laser_stop ();
 int gazebo_sonars_run (int father, int *brothers, arbitration fn);
 int gazebo_sonars_stop ();
-int gazebo_ptz_cmd_run (int father, int *brothers, arbitration fn);
-int gazebo_ptz_cmd_stop ();
-int gazebo_ptz_enc_run (int father, int *brothers, arbitration fn);
-int gazebo_ptz_enc_stop ();
+int gazebo_ptmotors_run (int father, int *brothers, arbitration fn);
+int gazebo_ptmotors_stop ();
+int gazebo_ptencoders_run (int father, int *brothers, arbitration fn);
+int gazebo_ptencoders_stop ();
 
 /* Operation functions declaration. 
  * They do the data transfer job */
 void gazebo_laser_callback ();
 void gazebo_camera_callback (int camnum);
 void gazebo_stereo_callback (int camnum);
-void gazebo_ptz_cmd_callback ();
-void gazebo_ptz_enc_callback ();
+void gazebo_ptmotors_callback ();
+void gazebo_ptencoders_callback ();
 void gazebo_sonars_callback ();
 void gazebo_encoders_callback ();
 void gazebo_motors_callback ();
@@ -164,8 +157,8 @@ int serve_laser = 0,
   serve_sonars = 0,
   serve_motors = 0,
   serve_stereo = 0,
-  serve_ptz_cmd = 0,
-  serve_ptz_enc = 0,
+  serve_ptmotors = 0,
+  serve_ptencoders = 0,
   serve_color[MAXCAM],
   laser_active = 0,
   encoders_active = 0,
@@ -173,8 +166,8 @@ int serve_laser = 0,
   motors_active = 0,
   camera_active = 0,
   stereo_active = 0,
-  ptz_cmd_active = 0,
-  ptz_enc_active = 0,
+  ptmotors_active = 0,
+  ptencoders_active = 0,
   color_active[MAXCAM];
 
 int 
@@ -185,8 +178,8 @@ laser_schema_id,
   camera_schema_id[4],
   stereor_schema_id,
   stereol_schema_id,
-  ptz_cmd_schema_id,
-  ptz_enc_schema_id;
+  ptmotors_schema_id,
+  ptencoders_schema_id;
 
 
 /*Variables a exportar*/
@@ -202,8 +195,22 @@ int jde_laser[NUM_LASER];
 float pan_angle, tilt_angle;  /* degs */
 float longitude; /* degs, pan angle */
 float latitude; /* degs, tilt angle */
+/** 'ptmotors' schema latitude and longitude speed control*/
 float longitude_speed;
-float l_speed;
+float latitude_speed;
+
+/** gazebo pantilt max pan, degrees.*/
+float max_pan = 54;
+/** gazebo pantilt min pan, degrees.*/
+float min_pan = -54;
+/** gazebo pantilt max tilt, degrees.*/
+float max_tilt = 44;
+/** gazebo pantilt min tilt, degrees.*/
+float min_tilt = -44;
+/** Max longitude speed, degrees/sec. It is irrelevant as gazebo implements pantilt speed internally, so this parameters has no effect */
+float max_longitude_speed = 20;
+/** Max latitude speed, degrees/sec. It is irrelevant as gazebo implements pantilt speed internally, so this parameters has no effect */
+float max_latitude_speed = 20;
 /*Fin variables a exportar*/
 
 int
@@ -237,7 +244,7 @@ gazebo_deviceinit ()
 	}
     }
 
-  if (serve_ptz_enc || serve_ptz_cmd)
+  if (serve_ptencoders || serve_ptmotors)
    {
 	ptz = gz_ptz_alloc();
       if (gz_ptz_open (ptz, client, ptz_name) != 0)
@@ -278,8 +285,8 @@ gazebo_init (char *configfile)
       serve_motors = 1;
     }
   if (ptz_name[0]){
-    serve_ptz_enc=1; //Si hay nombre de ptz con gazebo sirve las dos cosas
-    serve_ptz_cmd=1;
+    serve_ptencoders=1; //Si hay nombre de ptz con gazebo sirve las dos cosas
+    serve_ptmotors=1;
   }
   
   
@@ -353,11 +360,11 @@ gazebo_init (char *configfile)
       all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
-      myexport ("motors", "id", &motors_schema_id);
-      myexport ("motors", "v", &v);
-      myexport ("motors", "w", &w);
-      myexport ("motors", "run", (void *) &gazebo_motors_run);
-      myexport ("motors", "stop", (void *) &gazebo_motors_stop);
+      myexport("motors", "id", &motors_schema_id);
+      myexport("motors", "v", &v);
+      myexport("motors", "w", &w);
+      myexport("motors", "run", (void *) &gazebo_motors_run);
+      myexport("motors", "stop", (void *) &gazebo_motors_stop);
       v=0; w=0;
     }
   
@@ -382,12 +389,12 @@ gazebo_init (char *configfile)
       myexport ("laser", "stop", (void *) &gazebo_laser_stop);
     }
 
-  if (serve_ptz_cmd)
+  if (serve_ptmotors)
     {
-      all[num_schemas].id = (int *) &ptz_cmd_schema_id;
-      strcpy (all[num_schemas].name, "ptz_cmd");
-      all[num_schemas].run = (runFn) gazebo_ptz_cmd_run;
-      all[num_schemas].stop = (stopFn) gazebo_ptz_cmd_stop;
+      all[num_schemas].id = (int *) &ptmotors_schema_id;
+      strcpy (all[num_schemas].name, "ptmotors");
+      all[num_schemas].run = (runFn) gazebo_ptmotors_run;
+      all[num_schemas].stop = (stopFn) gazebo_ptmotors_stop;
       printf ("%s schema loaded (id %d)\n", all[num_schemas].name,
 	      num_schemas);
       (*(all[num_schemas].id)) = num_schemas;
@@ -397,21 +404,27 @@ gazebo_init (char *configfile)
       all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
-      myexport("ptz", "id", &ptz_cmd_schema_id);
+      myexport("ptmotors", "id", &ptmotors_schema_id);
       myexport("ptmotors", "longitude",&longitude);
       myexport("ptmotors", "latitude",&latitude);
       myexport("ptmotors", "longitude_speed",&longitude_speed);
-      myexport("ptmotors","latitude_speed",&l_speed);
-      myexport("ptmotors","run",(void *)&gazebo_ptz_cmd_run);
-      myexport("ptmotors", "stop",(void *)&gazebo_ptz_cmd_stop);
+      myexport("ptmotors", "latitude_speed",&latitude_speed);
+      myexport("ptmotors", "max_longitude", &max_pan);
+      myexport("ptmotors", "min_longitude", &min_pan);
+      myexport("ptmotors", "max_latitude", &max_tilt);
+      myexport("ptmotors", "min_latitude", &min_tilt);
+      myexport("ptmotors", "max_longitude_speed", &max_longitude_speed);
+      myexport("ptmotors", "max_latitude_speed", &max_latitude_speed);
+      myexport("ptmotors","run",(void *)&gazebo_ptmotors_run);
+      myexport("ptmotors", "stop",(void *)&gazebo_ptmotors_stop);
     }
   
-  if (serve_ptz_enc)
+  if (serve_ptencoders)
     {
-      all[num_schemas].id = (int *) &ptz_enc_schema_id;
-      strcpy (all[num_schemas].name, "ptz_enc");
-      all[num_schemas].run = (runFn) gazebo_ptz_enc_run;
-      all[num_schemas].stop = (stopFn) gazebo_ptz_enc_stop;
+      all[num_schemas].id = (int *) &ptencoders_schema_id;
+      strcpy (all[num_schemas].name, "ptencoders");
+      all[num_schemas].run = (runFn) gazebo_ptencoders_run;
+      all[num_schemas].stop = (stopFn) gazebo_ptencoders_stop;
       printf ("%s schema loaded (id %d)\n", all[num_schemas].name,
 	      num_schemas);
       
@@ -422,11 +435,11 @@ gazebo_init (char *configfile)
       all[num_schemas].terminate = NULL;
       all[num_schemas].handle = NULL;
       num_schemas++;
-      myexport ("ptz", "id", &ptz_enc_schema_id);
-      myexport ("ptz", "pan_angle", &pan_angle);
-      myexport ("ptz", "tilt_angle", &tilt_angle);
-      myexport("ptencoders","run",(void *)&gazebo_ptz_enc_run);
-      myexport("ptencoders","stop",(void *)&gazebo_ptz_enc_stop);
+      myexport ("ptencoders", "id", &ptencoders_schema_id);
+      myexport ("ptencoders", "pan_angle", &pan_angle);
+      myexport ("ptencoders", "tilt_angle", &tilt_angle);
+      myexport("ptencoders","run",(void *)&gazebo_ptencoders_run);
+      myexport("ptencoders","stop",(void *)&gazebo_ptencoders_stop);
       }
   
   if (serve_sonars)
@@ -597,68 +610,68 @@ gazebo_terminate ()
 
 
 int
-gazebo_ptz_cmd_run (int father, int *brothers, arbitration fn)
+gazebo_ptmotors_run (int father, int *brothers, arbitration fn)
 {
   
-  if ((serve_ptz_cmd) && (ptz_cmd_active == 0))
+  if ((serve_ptmotors) && (ptmotors_active == 0))
     {
-      ptz_cmd_active = 1;
+      ptmotors_active = 1;
+      /*
       gz_ptz_lock(ptz,1);
       ptz->data->cmd_pan=0.0;
       ptz->data->cmd_tilt=0.0;
       gz_ptz_unlock(ptz);
       pan_angle=0.0;
       tilt_angle=0.0;
-      
       longitude=0.0;
       latitude=0.0;
-      
-      put_state (ptz_cmd_schema_id, winner);
+      */
+      put_state (ptmotors_schema_id, winner);
       printf ("gazebo: ptz command  run\n");
       
-      all[ptz_cmd_schema_id].father = father;
-      all[ptz_cmd_schema_id].fps = 0.;
-      all[ptz_cmd_schema_id].k = 0;
+      all[ptmotors_schema_id].father = father;
+      all[ptmotors_schema_id].fps = 0.;
+      all[ptmotors_schema_id].k = 0;
     }
   return 0;
 }
 
 int
-gazebo_ptz_cmd_stop ()
+gazebo_ptmotors_stop ()
 {
-  if ((serve_ptz_cmd) && (ptz_cmd_active))
+  if ((serve_ptmotors) && (ptmotors_active))
     {
-      ptz_cmd_active = 0;
+      ptmotors_active = 0;
       printf ("gazebo: ptz command stop\n");
-      put_state (ptz_cmd_schema_id, slept);
+      put_state (ptmotors_schema_id, slept);
     }
   return 0;
 }
 
 int
-gazebo_ptz_enc_run (int father, int *brothers, arbitration fn)
+gazebo_ptencoders_run (int father, int *brothers, arbitration fn)
 {
   
-  if ((serve_ptz_enc) && (ptz_enc_active == 0))
+  if ((serve_ptencoders) && (ptencoders_active == 0))
     {
-      ptz_enc_active = 1;
-      put_state (ptz_enc_schema_id, winner);
+      ptencoders_active = 1;
+      put_state (ptencoders_schema_id, winner);
       
-      all[ptz_enc_schema_id].father = father;
-      all[ptz_enc_schema_id].fps = 0.;
-      all[ptz_enc_schema_id].k = 0;
+      all[ptencoders_schema_id].father = father;
+      all[ptencoders_schema_id].fps = 0.;
+      all[ptencoders_schema_id].k = 0;
     }
   return 0;
 }
 
 int
-gazebo_ptz_enc_stop ()
+gazebo_ptencoders_stop ()
 {
-  if ((serve_ptz_enc) && (ptz_enc_active))
+  if ((serve_ptencoders) && (ptencoders_active))
     {
-      ptz_enc_active = 0;
+      ptencoders_active = 0;
       printf ("gazebo: ptz encoders stop\n");
-      put_state (ptz_enc_schema_id, slept);
+      put_state (ptencoders_schema_id, slept);
     }
   return 0;
 }
@@ -1175,11 +1188,11 @@ gazebo_thread (void *not_used)
 	  if (laser_active)
 	    gazebo_laser_callback ();
 
-	  if (ptz_cmd_active)
-		gazebo_ptz_cmd_callback();
+	  if (ptmotors_active)
+		gazebo_ptmotors_callback();
 
-	  if (ptz_enc_active)
-		gazebo_ptz_enc_callback();
+	  if (ptencoders_active)
+		gazebo_ptencoders_callback();
 
 	  if (colorA_name.tipo == 1 && color_active[0])
 	    gazebo_camera_callback (0);
@@ -1323,30 +1336,43 @@ gazebo_stereo_callback (int camnum)
 }
 
 void
-gazebo_ptz_cmd_callback(){
-  	speedcounter (ptz_cmd_schema_id);
+gazebo_ptmotors_callback(){
+  	speedcounter (ptmotors_schema_id);
 
 	if(ptz){
 		gz_ptz_lock(ptz,1);
-		ptz->data->cmd_pan=longitude * DEGTORAD;
-		ptz->data->cmd_tilt=latitude * DEGTORAD;
+		/* enforce the position limits */
+		/* ignores the pan speed and tilt speed values */
+		if (longitude > max_pan)
+		  longitude = max_pan;
+		else if (longitude < min_pan)
+		  longitude = min_pan;
+
+		if (latitude > max_tilt)
+		  latitude = max_tilt;
+		else if (latitude < min_tilt)
+		  latitude = min_tilt;
+		
+		/* pan in gazebo's pantilt is the opposite to pan in directed perception pantilt unit.  */
+		/* tilt in gazebo's pantilt is the opposite to pan in directed perception pantilt unit.  */
+		ptz->data->cmd_pan=-longitude * DEGTORAD;
+		ptz->data->cmd_tilt=-latitude * DEGTORAD;
 		gz_ptz_unlock(ptz);
+		/*	printf( "Pan Tilt motors TO gazebo: \n longitude: %f latitude:%f\n",longitude,latitude);*/
 		}
 	}
 
 void
-gazebo_ptz_enc_callback(){
-  	speedcounter (ptz_enc_schema_id);
+gazebo_ptencoders_callback(){
+  	speedcounter (ptencoders_schema_id);
 
 	if(ptz){
 		gz_ptz_lock(ptz,1);
-		pan_angle=ptz->data->pan * RADTODEG;
-		tilt_angle=ptz->data->tilt * RADTODEG;
-		/*
-		printf( "Pan Tilt encoder from teleoperator "
-			"pan_angle: %f:tilt_angle:%f\n",
-			pan_angle,tilt_angle);
-		*/
+		/* pan in gazebo's pantilt is the opposite to pan in directed perception pantilt unit.  */
+		/* tilt in gazebo's pantilt is the opposite to pan in directed perception pantilt unit.  */
+		pan_angle= -1 * ptz->data->pan * RADTODEG;
+		tilt_angle= -1 * ptz->data->tilt * RADTODEG;
+		/*		printf( "Pan Tilt encoders from gazebo: \n pan_angle: %f:tilt_angle:%f\n",pan_angle,tilt_angle);*/
 		gz_ptz_unlock(ptz);
 		}
 	}

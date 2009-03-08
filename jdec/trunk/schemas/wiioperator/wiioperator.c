@@ -21,7 +21,7 @@
 
 #include <jde.h>
 #include <stdlib.h>
-#include "wiioperator.h"
+#include <wiioperator.h>
 #include <graphics_gtk.h>
 #include <glade/glade.h>
 #include <gtk/gtk.h>

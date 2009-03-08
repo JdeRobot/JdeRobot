@@ -20,20 +20,18 @@
 
 #define DEBUG 1
 
-#include "jde.h"
-#include "forms.h"
-#include "graphics_xforms.h"
-#include "teleoperatorgui.h"
-#include "pioneer.h"
+#include <jde.h>
+#include <forms.h>
+#include <glcanvas.h>
+#include <graphics_xforms.h>
+#include <teleoperatorgui.h>
+#include <pioneer.h>
+#include <pioneeropengl.h>
 
 #define v3f glVertex3f
 #include <GL/gl.h>              
 #include <GL/glx.h>
 #include <GL/glu.h>
-
-#include <forms.h>
-#include <glcanvas.h>
-#include "pioneeropengl.h"
 
 int finish_flag=0;
 
@@ -44,7 +42,7 @@ int finish_flag=0;
 #define MOUSEWHEELDOWN 5
 
 #define DISPLAY_ROBOT 0x01UL
-#define DISPLAY_PANTILTENCODERS 0x20UL
+#define DISPLAY_PANTILTENCODERS 0x02UL
 #define DISPLAY_SONARS 0x04UL
 #define DISPLAY_LASER 0x08UL
 #define DISPLAY_COLORIMAGEA 0x10UL
@@ -118,14 +116,14 @@ float *myw=NULL;
 runFn motorsrun;
 stopFn motorsstop;
 
-float *mypan_angle=NULL, *mytilt_angle=NULL;  /* degs */
+float *pan_angle=NULL, *tilt_angle=NULL;  /* degs */
 float *mylongitude=NULL; /* degs, pan angle */
-float *mylongitude_max=NULL, *mylongitude_min=NULL;
+float *longitude_max=NULL, *longitude_min=NULL;
 float *mylatitude=NULL; /* degs, tilt angle */
-float *mylatitude_max=NULL, *mylatitude_min=NULL;
-float *mylongitude_speed=NULL;
-float *mylongitude_speed_max=NULL;
-float *mylatitude_speed=NULL;
+float *latitude_max=NULL, *latitude_min=NULL;
+float *longitude_speed=NULL;
+float *longitude_speed_max=NULL;
+float *latitude_speed=NULL;
 runFn ptmotorsrun, ptencodersrun;
 stopFn ptmotorsstop, ptencodersstop;
 
@@ -167,7 +165,6 @@ void teleoperator_iteration()
   if ((display_state & BASE_TELEOPERATOR)!=0)
     {
       /* ROTACION=ejeX: Ajusta a un % de joystick_maxRotVel. OJO no funcion lineal del desplazamiento visual, sino con el al cuadrado, para aplanarla en el origen y evitar cabeceos, conseguir suavidad en la teleoperacion */
-      
       delta = (joystick_x-0.5)*2; /* entre +-1 */
       deltapos = fabs(delta); /* Para que no moleste el signo de delta en el factor de la funcion de control */
 
@@ -185,13 +182,12 @@ void teleoperator_iteration()
   if ((display_state & PANTILT_TELEOPERATOR)!=0)      
     {
       /* pt_joystick_x and pt_joystick_y fall in [0,1], the default limits from Xforms */  
-      *mylatitude=MIN_TILT_ANGLE+pt_joystick_y*(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
-      *mylongitude=MAX_PAN_ANGLE-pt_joystick_x*(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
+      *mylatitude=pt_joystick_y*((*latitude_max)-(*latitude_min))+(*latitude_min);
+      *mylongitude=pt_joystick_x*((*longitude_max)-(*longitude_min))+(*longitude_min);
       
       speed_coef = fl_get_slider_value(fd_teleoperatorgui->ptspeed);
-      *mylongitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
-      *mylatitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
-      /*printf("teleoperator: longitude speed %.2f, latitude speed %.2f\n",longitude_speed,latitude_speed);*/
+      *longitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
+      *latitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
     }
 
    if ((display_state & ZOOM_TELEOPERATOR)!=0){
@@ -826,7 +822,6 @@ void teleoperator_guibuttons(void *obj1){
          else
             joystick_y=0.5-0.5*fl_get_positioner_yvalue(fd_teleoperatorgui->joystick);
          joystick_x=fl_get_positioner_xvalue(fd_teleoperatorgui->joystick);
-         fl_redraw_object(fd_teleoperatorgui->joystick);
       }
    }
    else if (obj == fd_teleoperatorgui->back) {
@@ -835,7 +830,6 @@ void teleoperator_guibuttons(void *obj1){
       else
          joystick_y=0.5-0.5*fl_get_positioner_yvalue(fd_teleoperatorgui->joystick);
       joystick_x=fl_get_positioner_xvalue(fd_teleoperatorgui->joystick);
-      fl_redraw_object(fd_teleoperatorgui->joystick);
    }
    else if (obj == fd_teleoperatorgui->stop){
       fl_set_positioner_xvalue(fd_teleoperatorgui->joystick,0.5);
@@ -845,47 +839,39 @@ void teleoperator_guibuttons(void *obj1){
    }
    else if (obj == fd_teleoperatorgui->pantilt_joystick){
       if ((display_state & PANTILT_TELEOPERATOR)!=0){
-         pt_joystick_y=fl_get_positioner_yvalue(fd_teleoperatorgui->pantilt_joystick);
-         pt_joystick_x=fl_get_positioner_xvalue(fd_teleoperatorgui->pantilt_joystick);
-         /*  fl_redraw_object(fd_teleoperatorgui->pantilt_joystick);*/
+	pt_joystick_y=fl_get_positioner_yvalue(fd_teleoperatorgui->pantilt_joystick);
+	pt_joystick_x=fl_get_positioner_xvalue(fd_teleoperatorgui->pantilt_joystick);
       }
-   }
-   else if (obj == fd_teleoperatorgui->zoom){
-      if ((display_state & ZOOM_TELEOPERATOR)!=0)
-         pt_joystick_z = fl_get_slider_value(obj);
-         printf ("Actualiza pt_joystick_z=%.3f\n", pt_joystick_z);
    }
    else if (obj == fd_teleoperatorgui->pantilt_origin){
-      if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05)
-         pt_joystick_x= 1.-(0.-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
-      if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05)
-         pt_joystick_y= (0.-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
-      pt_joystick_z=0;
+     if ((display_state & PANTILT_TELEOPERATOR)!=0){
+       if (((*longitude_max) - (*longitude_min)) > 0.05)
+	 pt_joystick_x= (0.-(*longitude_min))/((*longitude_max)-(*longitude_min));
+       if (((*latitude_max) - (*latitude_min)) > 0.05)
+	 pt_joystick_y= (0.-(*latitude_min))/((*latitude_max)-(*latitude_min));
+     }
    }
    else if (obj == fd_teleoperatorgui->pantilt_stop) {
-      /* current pantilt position as initial command, to avoid any movement */
-      if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05){
-         if (mypan_angle!=NULL)
-            pt_joystick_x= 1.-(*mypan_angle-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
-         else
-            pt_joystick_x= 1.-(0-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
-      }
-      if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05){
-         if (mytilt_angle!=NULL)
-            pt_joystick_y= (*mytilt_angle-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
-         else
-            pt_joystick_y= (0-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
-      }
-      pt_joystick_z=0.;
+     if ((display_state & PANTILT_TELEOPERATOR)!=0){
+       /* current pantilt position as initial command, to avoid any movement */
+       if (((*longitude_max) - (*longitude_min)) > 0.05)
+	 pt_joystick_x= ((*pan_angle)-(*longitude_min))/((*longitude_max)-(*longitude_min));
+       if (((*latitude_max) - (*latitude_min)) > 0.05)
+	 pt_joystick_y= ((*tilt_angle)-(*latitude_min))/((*latitude_max)-(*latitude_min));
+     }
    }
    else if (obj == fd_teleoperatorgui->ptspeed){
       speed_coef = fl_get_slider_value(fd_teleoperatorgui->ptspeed);
-      if (mylongitude_speed!=NULL)
-         *mylongitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
-      if (mylatitude_speed!=NULL)
-         *mylatitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
+      if (longitude_speed!=NULL)
+         *longitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
+      if (latitude_speed!=NULL)
+         *latitude_speed=(1.-speed_coef)*MAX_SPEED_PANTILT;
       if (myzoom_speed && myzoom_speed_max)
          *myzoom_speed=(1.-speed_coef)*(*myzoom_speed_max);
+   }
+   else if (obj == fd_teleoperatorgui->zoom){
+     if ((display_state & ZOOM_TELEOPERATOR)!=0)
+       pt_joystick_z = fl_get_slider_value(obj);
    }
    else if (obj == fd_teleoperatorgui->sonars){
       if (fl_get_button(fd_teleoperatorgui->sonars)==PUSHED){
@@ -980,11 +966,27 @@ void teleoperator_guibuttons(void *obj1){
    else if (obj == fd_teleoperatorgui->PTmotors){
       if (fl_get_button(fd_teleoperatorgui->PTmotors)==PUSHED){
          mylongitude=myimport("ptmotors", "longitude");
+	 longitude_max=myimport("ptmotors", "max_longitude");
+	 longitude_min=myimport("ptmotors", "min_longitude");
          mylatitude=myimport ("ptmotors", "latitude");
-         mylongitude_speed=myimport("ptmotors", "longitude_speed");
-         mylatitude_speed=myimport("ptmotors","latitude_speed");
+	 latitude_max=myimport ("ptmotors", "max_latitude");
+	 latitude_min=myimport ("ptmotors", "min_latitude");
+         longitude_speed=myimport("ptmotors", "longitude_speed");
+         latitude_speed=myimport("ptmotors","latitude_speed");
+	 if((mylongitude==NULL)||(mylatitude==NULL)||
+	    (longitude_max==NULL)||(longitude_min==NULL)||
+	    (latitude_max==NULL)||(latitude_min==NULL)||
+	    (longitude_speed==NULL)||(latitude_speed==NULL))
+	   printf("Teleoperator can't import all relevant PTmotors symbols\n");
          ptmotorsrun=(runFn)myimport("ptmotors","run");
          ptmotorsstop=(stopFn)myimport("ptmotors","stop");
+
+	 /* initial value to pt_positioner in the GUI */
+	 if (((*longitude_max) - (*longitude_min)) > 0.05)
+	   pt_joystick_x= (0.-(*longitude_min))/((*longitude_max)-(*longitude_min));
+	 if (((*latitude_max) - (*latitude_min)) > 0.05)
+	   pt_joystick_y= (0.-(*latitude_min))/((*latitude_max)-(*latitude_min));
+
          if (ptmotorsrun!=NULL){
             display_state = display_state | PANTILT_TELEOPERATOR;
             ptmotorsrun(teleoperator_id, NULL, NULL);
@@ -996,19 +998,20 @@ void teleoperator_guibuttons(void *obj1){
       }
       else {
          /*safety stop when disabling the teleoperator */
-         /* current pantilt position as initial command, to avoid any movement */
-         if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05){
-            if (mypan_angle!=NULL)
-               pt_joystick_x= 1.-(*mypan_angle-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
+         /* current pantilt position as initial command, to avoid any movement *
+         if (((*longitude_max) - (*longitude_min)) > 0.05){
+            if (pan_angle!=NULL)
+               pt_joystick_x= 1.-(*pan_angle-(*longitude_min))/((*longitude_max)-(*longitude_min));
             else
-               pt_joystick_x= 1.-(0-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
+               pt_joystick_x= 1.-(0-(*longitude_min))/((*longitude_max)-(*longitude_min));
          }
-         if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05){
-            if (mytilt_angle!=NULL)
-               pt_joystick_y= (*mytilt_angle-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
+         if (((*latitude_max) - (*latitude_min)) > 0.05){
+            if (tilt_angle!=NULL)
+               pt_joystick_y= (*tilt_angle-(*latitude_min))/((*latitude_max)-(*latitude_min));
             else
-               pt_joystick_y= (0-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
+               pt_joystick_y= (0-(*latitude_min))/((*latitude_max)-(*latitude_min));
          }
+	 */
          if (ptmotorsstop!=NULL){
             ptmotorsstop();
          }
@@ -1017,8 +1020,8 @@ void teleoperator_guibuttons(void *obj1){
    }
    else if (obj == fd_teleoperatorgui->PTencoders){
       if (fl_get_button(fd_teleoperatorgui->PTencoders)==PUSHED){
-         mypan_angle=myimport("ptencoders", "pan_angle");
-         mytilt_angle=myimport("ptencoders", "tilt_angle");
+         pan_angle=myimport("ptencoders", "pan_angle");
+         tilt_angle=myimport("ptencoders", "tilt_angle");
          ptencodersrun=(runFn)myimport("ptencoders", "run");
          ptencodersstop=(stopFn)(stopFn)myimport("ptencoders", "stop");
          if (ptencodersrun!=NULL){
@@ -1169,30 +1172,7 @@ void teleoperator_guibuttons(void *obj1){
          if (colorDstop!=NULL)
             colorDstop();
       }
-    }
-  
-  /* modifies pantilt positioner to follow pantilt angles. 
-     It tracks the pantilt movement. It should be at
-     display_poll, but there it causes a weird display behavior. */
-    if (mypan_angle!=NULL){
-       if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05)
-          dpan= 1.-(*mypan_angle-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
-    }
-    else{
-       if ((MAX_PAN_ANGLE - MIN_PAN_ANGLE) > 0.05)
-          dpan= 1.-(0-MIN_PAN_ANGLE)/(MAX_PAN_ANGLE-MIN_PAN_ANGLE);
-    }
-    if (mytilt_angle!=NULL){
-       if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05)
-          dtilt= (*mytilt_angle-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
-    }
-    else{
-       if ((MAX_TILT_ANGLE - MIN_TILT_ANGLE) > 0.05)
-          dtilt= (0-MIN_TILT_ANGLE)/(MAX_TILT_ANGLE-MIN_TILT_ANGLE);
-    }
-  fl_set_positioner_xvalue(fd_teleoperatorgui->pantilt_joystick,dpan);
-  fl_set_positioner_yvalue(fd_teleoperatorgui->pantilt_joystick,dtilt);
-  /*fl_redraw_object(fd_teleoperatorgui->pantilt_joystick);*/
+    } 
 }
 
 void teleoperator_guidisplay()    
@@ -1202,7 +1182,37 @@ void teleoperator_guidisplay()
   float r,lati,longi,dx,dy,dz;
   float matColors[4];
   float  Xp_sensor, Yp_sensor;
+  float dpan=0.5,dtilt=0.5;
 
+  if (((display_state&DISPLAY_PANTILTENCODERS)!=0)&&
+      ((display_state&PANTILT_TELEOPERATOR)!=0))
+    {  
+      if (pan_angle!=NULL){
+	if (((*longitude_max) - (*longitude_min)) > 0.05)
+	  dpan= (*pan_angle-(*longitude_min))/((*longitude_max)-(*longitude_min));
+      }
+      else{
+	if (((*longitude_max) - (*longitude_min)) > 0.05)
+	  dpan= (0-(*longitude_min))/((*longitude_max)-(*longitude_min));
+      }
+      fl_set_positioner_xvalue(fd_teleoperatorgui->pantilt_joystick,dpan);
+      if (tilt_angle!=NULL){
+	if (((*latitude_max) - (*latitude_min)) > 0.05)
+	  dtilt= (*tilt_angle-(*latitude_min))/((*latitude_max)-(*latitude_min));
+      }
+      else{
+	if (((*latitude_max) - (*latitude_min)) > 0.05)
+	  dtilt= (0-(*latitude_min))/((*latitude_max)-(*latitude_min));
+      }
+      fl_set_positioner_yvalue(fd_teleoperatorgui->pantilt_joystick,dtilt);
+      
+      if (latitude_speed!=NULL)
+	fl_set_slider_value(fd_teleoperatorgui->ptspeed,(double)(1.-(*latitude_speed)/MAX_SPEED_PANTILT));
+    }
+
+  fl_redraw_object(fd_teleoperatorgui->joystick);
+  fl_redraw_object(fd_teleoperatorgui->pantilt_joystick);
+  fl_redraw_object(fd_teleoperatorgui->latlong);
 
   fl_activate_glcanvas(fd_teleoperatorgui->canvas);
   /* Set the OpenGL state machine to the right context for this display */
@@ -1727,8 +1737,6 @@ void teleoperator_show_aux(void)
   fl_set_positioner_yvalue(fd_teleoperatorgui->joystick,0.);
   joystick_x=0.5;
   joystick_y=0.5;
-  if (mylatitude_speed!=NULL)
-     fl_set_slider_value(fd_teleoperatorgui->ptspeed,(double)(1.-(*mylatitude_speed)/MAX_SPEED_PANTILT));
 
   if (myregister_buttonscallback!=NULL){
      myregister_buttonscallback(teleoperator_guibuttons);
