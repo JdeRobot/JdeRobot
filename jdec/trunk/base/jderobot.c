@@ -225,10 +225,10 @@ int jdeinit(const char* cf){
 
   /* read the configuration file: load drivers and schemas */
   if (cf == 0 || *cf == 0) {/*no configfile give,try default ones*/ 
-    if (parse_configfile("./jde.conf")){
-      fprintf(stderr,"Configuration from ./jde.conf\n");
+    if (parse_configfile("./jderobot.conf")){
+      fprintf(stderr,"Configuration from ./jderobot.conf\n");
     }else{
-      sprintf(s,"%s%s",CONFIGDIR,"/jde.conf");
+      sprintf(s,"%s%s",CONFIGDIR,"/jderobot.conf");
       if (parse_configfile(s)){
 	fprintf(stderr,"Configuration from %s\n",s);
       }else{

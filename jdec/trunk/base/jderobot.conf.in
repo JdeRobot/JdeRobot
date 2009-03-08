@@ -1,5 +1,5 @@
 ### PATH WHERE THE MODULES CAN BE FOUND
-path .:/usr/lib:/usr/local/lib:/usr/lib/jde-robot/drivers:/usr/lib/jde-robot/schemas:/usr/lib/jde-robot/services:/usr/share/jdec/glade:@driverdir@:@schemadir@:@servicedir@:@gladedir@
+path .:/usr/lib:/usr/local/lib:/usr/lib/jderobot/drivers:/usr/lib/jderobot/schemas:/usr/lib/jderobot/services:/usr/share/jdec/glade:@driverdir@:@schemadir@:@servicedir@:@gladedir@
 
 ### DRIVER CONFIGURATION 
 
@@ -9,10 +9,10 @@ path .:/usr/lib:/usr/local/lib:/usr/lib/jde-robot/drivers:/usr/lib/jde-robot/sch
 #end_driver
 
 driver imagefile
-provides colorA /usr/local/share/jde-robot/casaleft.pnm
-#provides colorB /usr/local/share/jde-robot/atardecer.ppm
-#provides colorC /usr/local/share/jde-robot/atardecer.ppm
-#provides colorD /usr/local/share/jde-robot/casaright.pnm
+provides colorA /usr/local/share/jderobot/casaleft.pnm
+#provides colorB /usr/local/share/jderobot/atardecer.ppm
+#provides colorC /usr/local/share/jderobot/atardecer.ppm
+#provides colorD /usr/local/share/jderobot/casaright.pnm
 end_driver
 
 #driver mplayer

@@ -1,18 +1,18 @@
 lib_LTLIBRARIES = libjde.la
-bin_PROGRAMS = jde
+bin_PROGRAMS = jderobot
 
 AM_CPPFLAGS = -D CONFIGDIR=\"$(confdir)\" @CPPFLAGS@
 
 # See http://www.gnu.org/software/libtool/manual/libtool.html#Versioning
 # for versioning policy.
-libjde_la_SOURCES = jde.c
+libjde_la_SOURCES = jderobot.c
 #libjde_la_LDFLAGS = $(JDE_LIBS) -rdynamic -version-info 0:0:0
 libjde_la_LDFLAGS = $(JDE_LIBS) -version-info 0:0:0
-jde_SOURCES = jdeshell.c
-nodist_jde_SOURCES = jde.conf
-jde_LDFLAGS = $(JDESHELL_LIBS)
-jde_LDADD = libjde.la
-dist_conf_DATA = jde.conf
+jderobot_SOURCES = jdeshell.c
+nodist_jderobot_SOURCES = jderobot.conf
+jderobot_LDFLAGS = $(JDESHELL_LIBS)
+jderobot_LDADD = libjde.la
+dist_conf_DATA = jderobot.conf
 
 include_HEADERS = jde.h jde_private.h
 
@@ -22,13 +22,13 @@ edit = sed \
 	-e 's|@servicedir[@]|$(servicedir)|g' \
 	-e 's|@gladedir[@]|$(gladedir)|g'
 
-jde.conf: Makefile
+jderobot.conf: Makefile
 	rm -f $@ $@.tmp
 	$(edit) '$@.in' >$@.tmp
 	mv $@.tmp $@
 
-jde.conf: jde.conf.in
+jderobot.conf: jderobot.conf.in
 
-BUILTSOURCES = jde.conf
-CLEANFILES = jde.conf
+BUILTSOURCES = jderobot.conf
+CLEANFILES = jderobot.conf
 MAINTAINERCLEANFILES = Makefile.in Makefile

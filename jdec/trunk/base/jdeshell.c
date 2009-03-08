@@ -510,7 +510,7 @@ com_license (char *arg)
   "You should have received a copy of the GNU General Public License \n" \
   "along with this program.  If not, see http://www.gnu.org/licenses/. \n" \
   "\n" \
-  "You can download the source code in http://jde.gsyc.es/Downloads\n\n";
+  "You can download the source code in http://jde.gsyc.es/index.php/Downloads\n\n";
 
   fprintf(stdout, license);
 

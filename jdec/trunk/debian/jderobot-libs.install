@@ -1,4 +1,4 @@
-debian/tmp/usr/lib/jde-robot/*.so*		/usr/lib/jde-robot/
-debian/tmp/usr/lib/jde-robot/*.la		/usr/lib/jde-robot/
-debian/tmp/usr/include/jde-robot/*.h		/usr/include/jde-robot/ 
+debian/tmp/usr/lib/jderobot/*.so*		/usr/lib/jderobot/
+debian/tmp/usr/lib/jderobot/*.la		/usr/lib/jderobot/
+debian/tmp/usr/include/jderobot/*.h		/usr/include/jderobot/ 
 

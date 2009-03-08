@@ -1,1 +1,1 @@
-debian/tmp/usr/lib/jde-robot/drivers/*.so	/usr/lib/jde-robot/drivers
+debian/tmp/usr/lib/jderobot/drivers/*.so	/usr/lib/jderobot/drivers
