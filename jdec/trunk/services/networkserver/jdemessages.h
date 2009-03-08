@@ -118,6 +118,8 @@ typedef enum {
    NETWORKSERVER_y8bpp_sifntsc_image,
    NETWORKSERVER_rgb24bpp_sifntsc_image_query,
    NETWORKSERVER_rgb24bpp_sifntsc_image,
+   NETWORKSERVER_rgb24bpp_image_query,
+   NETWORKSERVER_rgb24bpp_image,
 
    NETWORKSERVER_zoom_encoders,
    NETWORKSERVER_zoom_limits_query,

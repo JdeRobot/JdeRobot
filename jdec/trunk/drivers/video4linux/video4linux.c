@@ -37,6 +37,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <jde.h>
+#include <interfaces/varcolor.h>
 
 /* SIF image size */
 #define SIFNTSC_ROWS 240
@@ -159,11 +160,7 @@ char *colorA_image;
 char *colorB_image; 
 char *colorC_image; 
 char *colorD_image; 
-char *varcolorA_image; 
-char *varcolorB_image; 
-char *varcolorC_image; 
-char *varcolorD_image; 
-
+Varcolor myA,myB,myC,myD;
 
 /** colorA run function following jdec platform API schemas.
  *  @param father Father id for this schema.
@@ -612,10 +609,10 @@ void *video4linux_thread0(){
   else if (color==colorB) dest=(unsigned char*)colorB_image;
   else if (color==colorC) dest=(unsigned char*)colorC_image;
   else if (color==colorD) dest=(unsigned char*)colorD_image;
-  else if (color==varcolorA) dest=(unsigned char*)varcolorA_image;
-  else if (color==varcolorB) dest=(unsigned char*)varcolorB_image;
-  else if (color==varcolorC) dest=(unsigned char*)varcolorC_image;
-  else if (color==varcolorD) dest=(unsigned char*)varcolorD_image;
+  else if (color==varcolorA) dest=(unsigned char*)myA.img;
+  else if (color==varcolorB) dest=(unsigned char*)myB.img;
+  else if (color==varcolorC) dest=(unsigned char*)myC.img;
+  else if (color==varcolorD) dest=(unsigned char*)myD.img;
 
   cols = win[cam].width;
   rows = win[cam].height;
@@ -697,10 +694,10 @@ void *video4linux_thread1(){
   else if (color==colorB) dest=(unsigned char*)colorB_image;
   else if (color==colorC) dest=(unsigned char*)colorC_image;
   else if (color==colorD) dest=(unsigned char*)colorD_image;
-  else if (color==varcolorA) dest=(unsigned char*)varcolorA_image;
-  else if (color==varcolorB) dest=(unsigned char*)varcolorB_image;
-  else if (color==varcolorC) dest=(unsigned char*)varcolorC_image;
-  else if (color==varcolorD) dest=(unsigned char*)varcolorD_image;
+  else if (color==varcolorA) dest=(unsigned char*)myA.img;
+  else if (color==varcolorB) dest=(unsigned char*)myB.img;
+  else if (color==varcolorC) dest=(unsigned char*)myC.img;
+  else if (color==varcolorD) dest=(unsigned char*)myD.img;
   
   cols = win[cam].width;
   rows = win[cam].height;
@@ -782,10 +779,10 @@ void *video4linux_thread2(){
   else if (color==colorB) dest=(unsigned char*)colorB_image;
   else if (color==colorC) dest=(unsigned char*)colorC_image;
   else if (color==colorD) dest=(unsigned char*)colorD_image;
-  else if (color==varcolorA) dest=(unsigned char*)varcolorA_image;
-  else if (color==varcolorB) dest=(unsigned char*)varcolorB_image;
-  else if (color==varcolorC) dest=(unsigned char*)varcolorC_image;
-  else if (color==varcolorD) dest=(unsigned char*)varcolorD_image;
+  else if (color==varcolorA) dest=(unsigned char*)myA.img;
+  else if (color==varcolorB) dest=(unsigned char*)myB.img;
+  else if (color==varcolorC) dest=(unsigned char*)myC.img;
+  else if (color==varcolorD) dest=(unsigned char*)myD.img;
 
   cols = win[cam].width;
   rows = win[cam].height;
@@ -867,10 +864,10 @@ void *video4linux_thread3(){
   else if (color==colorB) dest=(unsigned char*)colorB_image;
   else if (color==colorC) dest=(unsigned char*)colorC_image;
   else if (color==colorD) dest=(unsigned char*)colorD_image;
-  else if (color==varcolorA) dest=(unsigned char*)varcolorA_image;
-  else if (color==varcolorB) dest=(unsigned char*)varcolorB_image;
-  else if (color==varcolorC) dest=(unsigned char*)varcolorC_image;
-  else if (color==varcolorD) dest=(unsigned char*)varcolorD_image;
+  else if (color==varcolorA) dest=(unsigned char*)myA.img;
+  else if (color==varcolorB) dest=(unsigned char*)myB.img;
+  else if (color==varcolorC) dest=(unsigned char*)myC.img;
+  else if (color==varcolorD) dest=(unsigned char*)myD.img;
 
   cols = win[cam].width;
   rows = win[cam].height;
@@ -1394,12 +1391,12 @@ int video4linux_deviceinit(){
     all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
 
-    varcolorA_image=(char *)malloc(win[color_v4l[varcolorA]].width*win[color_v4l[varcolorA]].height*3);    
+    myA.img=(char *)malloc(win[color_v4l[varcolorA]].width*win[color_v4l[varcolorA]].height*3);  
+    myA.width=win[color_v4l[varcolorA]].width;
+    myA.height=win[color_v4l[varcolorA]].height;
+    myA.clock=color_clock[varcolorA];
     myexport("varcolorA","id",&(color_schema_id[varcolorA]));
-    myexport("varcolorA","varcolorA",&varcolorA_image);
-    myexport("varcolorA","clock", &(color_clock[varcolorA]));
-    myexport("varcolorA","width",&win[color_v4l[varcolorA]].width);
-    myexport("varcolorA","height",&win[color_v4l[varcolorA]].height);
+    myexport("varcolorA","varcolorA",&myA);
     myexport("varcolorA","run",(void *)myvarcolorA_run);
     myexport("varcolorA","stop",(void *)myvarcolorA_stop);
 
@@ -1428,12 +1425,12 @@ int video4linux_deviceinit(){
     all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
     
-    varcolorB_image=(char *)malloc(win[color_v4l[varcolorB]].width*win[color_v4l[varcolorB]].height*3);    
+    myB.img=(char *)malloc(win[color_v4l[varcolorB]].width*win[color_v4l[varcolorB]].height*3);
+    myB.width=win[color_v4l[varcolorB]].width;
+    myB.height=win[color_v4l[varcolorB]].height;    
+    myB.clock=color_clock[varcolorB];
     myexport("varcolorB","id",&(color_schema_id[varcolorB]));
-    myexport("varcolorB","varcolorB",&varcolorB_image);
-    myexport("varcolorB","clock", &(color_clock[varcolorB]));
-    myexport("varcolorB","width",&win[color_v4l[varcolorB]].width);
-    myexport("varcolorB","height",&win[color_v4l[varcolorB]].height);
+    myexport("varcolorB","varcolorB",&myB);
     myexport("varcolorB","run",(void *)myvarcolorB_run);
     myexport("varcolorB","stop",(void *)myvarcolorB_stop);
     
@@ -1462,12 +1459,12 @@ int video4linux_deviceinit(){
     all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
 
-    varcolorC_image=(char *)malloc(win[color_v4l[varcolorC]].width*win[color_v4l[varcolorC]].height*3);    
+    myC.img=(char *)malloc(win[color_v4l[varcolorC]].width*win[color_v4l[varcolorC]].height*3);    
+    myC.width=win[color_v4l[varcolorC]].width;
+    myC.height=win[color_v4l[varcolorC]].height;
+    myC.clock=color_clock[varcolorC];
     myexport("varcolorC","id",&(color_schema_id[varcolorC]));
-    myexport("varcolorC","varcolorC",&varcolorC_image);
-    myexport("varcolorC","clock", &(color_clock[varcolorC]));
-    myexport("varcolorC","width",&win[color_v4l[varcolorC]].width);
-    myexport("varcolorC","height",&win[color_v4l[varcolorC]].height);
+    myexport("varcolorC","varcolorC",&myC);
     myexport("varcolorC","run",(void *)myvarcolorC_run);
     myexport("varcolorC","stop",(void *)myvarcolorC_stop);
 
@@ -1496,12 +1493,12 @@ int video4linux_deviceinit(){
     all[num_schemas].terminate = NULL;
     all[num_schemas].handle = NULL;
 
-    varcolorD_image=(char *)malloc(win[color_v4l[varcolorD]].width*win[color_v4l[varcolorD]].height*3);    
+    myD.img=(char *)malloc(win[color_v4l[varcolorD]].width*win[color_v4l[varcolorD]].height*3);    
+    myD.width=win[color_v4l[varcolorD]].width;
+    myD.height=win[color_v4l[varcolorD]].height;
+    myD.clock=color_clock[varcolorD];
     myexport("varcolorD","id",&(color_schema_id[varcolorD]));
-    myexport("varcolorD","varcolorD",&varcolorD_image);
-    myexport("varcolorD","clock", &(color_clock[varcolorD]));
-    myexport("varcolorD","width",&win[color_v4l[varcolorD]].width);
-    myexport("varcolorD","height",&win[color_v4l[varcolorD]].height);
+    myexport("varcolorD","varcolorD",&myD);
     myexport("varcolorD","run",(void *)myvarcolorD_run);
     myexport("varcolorD","stop",(void *)myvarcolorD_stop);
 

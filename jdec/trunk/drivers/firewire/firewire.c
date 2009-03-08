@@ -42,6 +42,7 @@
 #include <pthread.h>
 #include <libdc1394/dc1394_control.h>
 #include <jde.h>
+#include <interfaces/varcolor.h>
 
 /** Max number of cameras detected by firewire driver.*/
 #define MAXCAM 8
@@ -183,26 +184,7 @@ char *colorD; /* sifntsc image itself */
 /** 'colorD' schema clock*/
 unsigned long int imageD_clock;
 
-/** 'varcolorA' schema image data*/
-char *varcolorA; /* sifntsc image itself */
-/** 'varcolorA' schema clock*/
-unsigned long int varimageA_clock;
-
-/** 'varcolorB' schema image data*/
-char *varcolorB; /* sifntsc image itself */
-/** 'varcolorB' schema clock*/
-unsigned long int varimageB_clock;
-
-/** 'varcolorC' schema image data*/
-char *varcolorC; /* sifntsc image itself */
-/** 'varcolorC' schema clock*/
-unsigned long int varimageC_clock;
-
-/** 'varcolorD' schema image data*/
-char *varcolorD; /* sifntsc image itself */
-/** 'varcolorD' schema clock*/
-unsigned long int varimageD_clock;
-
+Varcolor myA,myB,myC,myD;
 
 /*Contadores de referencias*/
 /** colorA ref counter*/
@@ -873,41 +855,41 @@ void *firewire_thread(void *id)
       }
 
       if((color_active[4])&&(capturedvarA==TRUE)){
-         uyvy2rgb((unsigned char*)cameras[number_color[4]].capture_buffer,(unsigned char*)varcolorA,width[4]*height[4]);
+         uyvy2rgb((unsigned char*)cameras[number_color[4]].capture_buffer,(unsigned char*)myA.img,width[4]*height[4]);
          if(dc1394_dma_done_with_buffer(&cameras[number_color[4]])==DC1394_FAILURE) perror("firewire_thread");
          else {
             speedcounter(varcolorA_schema_id);
-            varimageA_clock=lastimage;
+            myA.clock=lastimage;
          }
          capturedvarA=FALSE;
       }
 
       if((color_active[5])&&(capturedvarB==TRUE)){
-         uyvy2rgb((unsigned char*)cameras[number_color[5]].capture_buffer,(unsigned char*)varcolorB,width[5]*height[5]);
+         uyvy2rgb((unsigned char*)cameras[number_color[5]].capture_buffer,(unsigned char*)myB.img,width[5]*height[5]);
          if(dc1394_dma_done_with_buffer(&cameras[number_color[5]])==DC1394_FAILURE) perror("firewire_thread");
          else {
             speedcounter(varcolorB_schema_id);
-            varimageB_clock=lastimage;
+            myB.clock=lastimage;
          }
          capturedvarB=FALSE;
       }
 
       if((color_active[6])&&(capturedvarC==TRUE)){
-         uyvy2rgb((unsigned char*)cameras[number_color[6]].capture_buffer,(unsigned char*)varcolorC,width[6]*height[6]);
+         uyvy2rgb((unsigned char*)cameras[number_color[6]].capture_buffer,(unsigned char*)myC.img,width[6]*height[6]);
          if(dc1394_dma_done_with_buffer(&cameras[number_color[6]])==DC1394_FAILURE) perror("firewire_thread");
          else {
             speedcounter(varcolorC_schema_id);
-            varimageC_clock=lastimage;
+            myC.clock=lastimage;
          }
          capturedvarC=FALSE;
       }
 
       if((color_active[7])&&(capturedvarD==TRUE)){
-         uyvy2rgb((unsigned char*)cameras[number_color[7]].capture_buffer,(unsigned char*)varcolorD,width[7]*height[7]);
+         uyvy2rgb((unsigned char*)cameras[number_color[7]].capture_buffer,(unsigned char*)myD.img,width[7]*height[7]);
          if(dc1394_dma_done_with_buffer(&cameras[number_color[7]])==DC1394_FAILURE) perror("firewire_thread");
          else {
             speedcounter(varcolorD_schema_id);
-            varimageD_clock=lastimage;
+            myD.clock=lastimage;
          }
          capturedvarD=FALSE;
       }
@@ -1572,15 +1554,15 @@ void firewire_init(char *configfile)
         all[num_schemas].terminate = NULL;
         all[num_schemas].handle = NULL;
         num_schemas++;
+	
+	myA.img=(char *)malloc (width[4]*height[4]*3);
+	myA.width=width[4];
+	myA.height=height[4];
+	myA.clock=0;
+        myexport("varcolorA","varcolorA",&myA);
         myexport("varcolorA","id",&varcolorA_schema_id);
-        myexport("varcolorA","varcolorA",&varcolorA);
-        myexport("varcolorA","clock", &varimageA_clock);
         myexport("varcolorA","run",(void *)myvarcolorA_run);
         myexport("varcolorA","stop",(void *)myvarcolorA_stop);
-        myexport("varcolorA","width",&width[4]);
-        myexport("varcolorA","height",&height[4]);
-        
-        varcolorA=(char *)malloc (width[4]*height[4]*3);
      }else{
         serve_color[4]=0;
         printf("cannot find firewire camera for varcolorA\n");
@@ -1606,15 +1588,15 @@ void firewire_init(char *configfile)
         all[num_schemas].terminate = NULL;
         all[num_schemas].handle = NULL;
         num_schemas++;
+
+        myB.img=(char *)malloc (width[5]*height[5]*3);
+	myB.width=width[5];
+	myB.height=height[5];
+	myB.clock=0;
+        myexport("varcolorB","varcolorB",&myB);
         myexport("varcolorB","id",&varcolorB_schema_id);
-        myexport("varcolorB","varcolorB",&varcolorB);
-        myexport("varcolorB","clock", &varimageB_clock);
         myexport("varcolorB","run",(void *)myvarcolorB_run);
         myexport("varcolorB","stop",(void *)myvarcolorB_stop);
-        myexport("varcolorB","width",&width[5]);
-        myexport("varcolorB","height",&height[5]);
-
-        varcolorB=(char *)malloc (width[5]*height[5]*3);
      }else{
         serve_color[5]=0;
         printf("cannot find firewire camera for varcolorB\n");
@@ -1641,15 +1623,15 @@ void firewire_init(char *configfile)
         all[num_schemas].terminate = NULL;
         all[num_schemas].handle = NULL;
         num_schemas++;
+
+	myC.img=(char *)malloc (width[6]*height[6]*3);
+	myC.width=width[6];
+	myC.height=height[6];
+	myC.clock=0;
+        myexport("varcolorC","varcolorC",&myC);
         myexport("varcolorC","id",&varcolorC_schema_id);
-        myexport("varcolorC","varcolorC",&varcolorC);
-        myexport("varcolorC","clock", &varimageC_clock);
         myexport("varcolorC","run",(void *)myvarcolorC_run);
         myexport("varcolorC","stop",(void *)myvarcolorC_stop);
-        myexport("varcolorC","width",&width[6]);
-        myexport("varcolorC","height",&height[6]);
-
-        varcolorC=(char *)malloc (width[6]*height[6]*3);
      }else{
         serve_color[6]=0;
         printf("cannot find firewire camera for varcolorC\n");
@@ -1676,15 +1658,15 @@ void firewire_init(char *configfile)
         all[num_schemas].terminate = NULL;
         all[num_schemas].handle = NULL;
         num_schemas++;
+
+	myD.img=(char *)malloc (width[7]*height[7]*3);
+	myD.width=width[7];
+	myD.height=height[7];
+	myD.clock=0;
+        myexport("varcolorD","varcolorD",&myD);
         myexport("varcolorD","id",&varcolorD_schema_id);
-        myexport("varcolorD","varcolorD",&varcolorD);
-        myexport("varcolorD","clock", &varimageD_clock);
         myexport("varcolorD","run",(void *)myvarcolorD_run);
         myexport("varcolorD","stop",(void *)myvarcolorD_stop);
-        myexport("varcolorD","width",&width[7]);
-        myexport("varcolorD","height",&height[7]);
-
-        varcolorD=(char *)malloc (width[7]*height[7]*3);
      }else{
         serve_color[7]=0;
         printf("cannot find firewire camera for varcolorD\n");

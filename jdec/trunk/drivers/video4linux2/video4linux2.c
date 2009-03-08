@@ -609,6 +609,11 @@ void *video4linux2_thread0() {
 		pthread_mutex_unlock(&(all[color_schema_id[color]].mymutex));
 	
 		speedcounter(color_schema_id[color]);
+		color_clock[color]++;
+		if (color==varcolorA) myA.clock++;
+		else if (color==varcolorB) myB.clock++;
+		else if (color==varcolorC) myC.clock++;
+		else if (color==varcolorD) myD.clock++;
 
 		/* Desencolar el buffer lleno */
 		memset(&buf, 0, sizeof(&buf));
@@ -712,6 +717,11 @@ void *video4linux2_thread1(){
 		pthread_mutex_unlock(&(all[color_schema_id[color]].mymutex));
 	
 		speedcounter(color_schema_id[color]);
+		color_clock[color]++;
+		if (color==varcolorA) myA.clock++;
+		else if (color==varcolorB) myB.clock++;
+		else if (color==varcolorC) myC.clock++;
+		else if (color==varcolorD) myD.clock++;
 
 		/* Desencolar el buffer lleno */
 		memset(&buf, 0, sizeof(&buf));
@@ -814,6 +824,11 @@ void *video4linux2_thread2(){
 		pthread_mutex_unlock(&(all[color_schema_id[color]].mymutex));
 	
 		speedcounter(color_schema_id[color]);
+		color_clock[color]++;
+		if (color==varcolorA) myA.clock++;
+		else if (color==varcolorB) myB.clock++;
+		else if (color==varcolorC) myC.clock++;
+		else if (color==varcolorD) myD.clock++;
 
 		/* Desencolar el buffer lleno */
 		memset(&buf, 0, sizeof(&buf));
@@ -916,6 +931,11 @@ void *video4linux2_thread3(){
 		pthread_mutex_unlock(&(all[color_schema_id[color]].mymutex));
 	
 		speedcounter(color_schema_id[color]);
+		color_clock[color]++;
+		if (color==varcolorA) myA.clock++;
+		else if (color==varcolorB) myB.clock++;
+		else if (color==varcolorC) myC.clock++;
+		else if (color==varcolorD) myD.clock++;
 
 		/* Desencolar el buffer lleno */
 		memset(&buf, 0, sizeof(&buf));
@@ -1171,7 +1191,7 @@ int video4linux2_deviceinit(){
   v4l2_std_id std_id;
   enum v4l2_buf_type type;
 
-
+   
   /* recorremos todos los posibles dispositivos */
   for(n=0;n<MAXCAM;n++){
 
@@ -1700,6 +1720,7 @@ void video4linux2_init(char *configfile)
       color_requested[i]=0; 
       color_active[i]=0;
       color_v4l[i]=0;
+      color_clock[i]=0;
     }
   
   /* we call the function to parse the config file */

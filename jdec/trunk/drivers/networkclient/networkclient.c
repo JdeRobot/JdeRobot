@@ -1,4 +1,3 @@
-
 /*
  *
  *  Copyright (C) 1997-2008 JDE Developers Team
@@ -46,6 +45,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <jde.h>
+#include <interfaces/varcolor.h>
 #include <jdemessages.h>
 
 /** networkclient driver oneimage socket read mode.*/
@@ -246,25 +246,7 @@ char *colorD=NULL; /* sifntsc image itself */
 /** 'colorD' schema clock*/
 unsigned long int imageD_clock;
 
-/** 'varcolorA' schema image data*/
-char *varcolorA=NULL; /* sifntsc image itself */
-/** 'varcolorA' schema clock*/
-unsigned long int varimageA_clock;
-
-/** 'varcolorB' schema image data*/
-char *varcolorB=NULL; /* sifntsc image itself */
-/** 'varcolorB' schema clock*/
-unsigned long int varimageB_clock;
-
-/** 'varcolorC' schema image data*/
-char *varcolorC=NULL; /* sifntsc image itself */
-/** 'varcolorC' schema clock*/
-unsigned long int varimageC_clock;
-
-/** 'varcolorD' schema image data*/
-char *varcolorD=NULL; /* sifntsc image itself */
-/** 'varcolorD' schema clock*/
-unsigned long int varimageD_clock;
+Varcolor myA,myB,myC,myD;
 
 /** width of each served video**/
 int width[MAXCAM];
@@ -2002,9 +1984,10 @@ void *networkclient_colorA_thread(void *not_used){
          pthread_mutex_unlock(&mymutex[COLORA_DEVICE]);
          /*Write petition*/
          fprintf(buffer_colorA,"%d %d\n",
-                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 NETWORKSERVER_rgb24bpp_image_query,
                  device_network_id[COLORA_DEVICE]);
          fflush(buffer_colorA);
+
          /*Read message*/
          {
             int i2,i3,i4,i5,type;
@@ -2017,7 +2000,7 @@ void *networkclient_colorA_thread(void *not_used){
                          buffer_lectura);
                }
                else{
-                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                  if (type == NETWORKSERVER_rgb24bpp_image) {
                      int total=0;
                      int actual=0;
                      /*Read image*/
@@ -2086,7 +2069,7 @@ void *networkclient_colorB_thread(void *not_used){
          pthread_mutex_unlock(&mymutex[COLORB_DEVICE]);
          /*Write petition*/
          fprintf(buffer_colorB,"%d %d\n",
-                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 NETWORKSERVER_rgb24bpp_image_query,
                  device_network_id[COLORB_DEVICE]);
          fflush(buffer_colorB);
          /*Read message*/
@@ -2101,7 +2084,7 @@ void *networkclient_colorB_thread(void *not_used){
                          buffer_lectura);
                }
                else{
-                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                  if (type == NETWORKSERVER_rgb24bpp_image) {
                      int total=0;
                      int actual=0;
                      /*Read image*/
@@ -2170,7 +2153,7 @@ void *networkclient_colorC_thread(void *not_used){
          pthread_mutex_unlock(&mymutex[COLORC_DEVICE]);
          /*Write petition*/
          fprintf(buffer_colorC,"%d %d\n",
-                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 NETWORKSERVER_rgb24bpp_image_query,
                  device_network_id[COLORC_DEVICE]);
          fflush(buffer_colorC);
          /*Read message*/
@@ -2185,7 +2168,7 @@ void *networkclient_colorC_thread(void *not_used){
                          buffer_lectura);
                }
                else{
-                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                  if (type == NETWORKSERVER_rgb24bpp_image) {
                      int total=0;
                      int actual=0;
                      /*Read image*/
@@ -2254,7 +2237,7 @@ void *networkclient_colorD_thread(void *not_used){
          pthread_mutex_unlock(&mymutex[COLORD_DEVICE]);
          /*Write petition*/
          fprintf(buffer_colorD,"%d %d\n",
-                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 NETWORKSERVER_rgb24bpp_image_query,
                  device_network_id[COLORD_DEVICE]);
          fflush(buffer_colorD);
          /*Read message*/
@@ -2269,7 +2252,7 @@ void *networkclient_colorD_thread(void *not_used){
                          buffer_lectura);
                }
                else{
-                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                  if (type == NETWORKSERVER_rgb24bpp_image) {
                      int total=0;
                      int actual=0;
                      /*Read image*/
@@ -2338,7 +2321,7 @@ void *networkclient_varcolorA_thread(void *not_used){
          pthread_mutex_unlock(&mymutex[VARCOLORA_DEVICE]);
          /*Write petition*/
          fprintf(buffer_varcolorA,"%d %d\n",
-                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 NETWORKSERVER_rgb24bpp_image_query,
                  device_network_id[VARCOLORA_DEVICE]);
          fflush(buffer_varcolorA);
          /*Read message*/
@@ -2353,7 +2336,7 @@ void *networkclient_varcolorA_thread(void *not_used){
                          buffer_lectura);
                }
                else{
-                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                  if (type == NETWORKSERVER_rgb24bpp_image) {
                      int total=0;
                      int actual=0;
                      /*Read image*/
@@ -2380,10 +2363,10 @@ void *networkclient_varcolorA_thread(void *not_used){
                         jdeshutdown(1);
                      }
                      else{
-                        memcpy (varcolorA, mmbuf, width[4]*height[4]*i5);
+                        memcpy(myA.img, mmbuf, width[4]*height[4]*i5);
                         free(mmbuf);
                         speedcounter(varcolorA_schema_id);
-                        imageB_clock=network_clock;
+                        myA.clock=network_clock;
                      }
                   }
                }
@@ -2422,7 +2405,7 @@ void *networkclient_varcolorB_thread(void *not_used){
          pthread_mutex_unlock(&mymutex[VARCOLORB_DEVICE]);
          /*Write petition*/
          fprintf(buffer_varcolorB,"%d %d\n",
-                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 NETWORKSERVER_rgb24bpp_image_query,
                  device_network_id[VARCOLORB_DEVICE]);
          fflush(buffer_varcolorB);
          /*Read message*/
@@ -2437,7 +2420,7 @@ void *networkclient_varcolorB_thread(void *not_used){
                          buffer_lectura);
                }
                else{
-                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                  if (type == NETWORKSERVER_rgb24bpp_image) {
                      int total=0;
                      int actual=0;
                      /*Read image*/
@@ -2464,10 +2447,10 @@ void *networkclient_varcolorB_thread(void *not_used){
                         jdeshutdown(1);
                      }
                      else{
-                        memcpy (varcolorB, mmbuf, width[5]*height[5]*i5);
+                        memcpy(myB.img, mmbuf, width[5]*height[5]*i5);
                         free(mmbuf);
                         speedcounter(varcolorB_schema_id);
-                        imageB_clock=network_clock;
+                        myB.clock=network_clock;
                      }
                   }
                }
@@ -2506,7 +2489,7 @@ void *networkclient_varcolorC_thread(void *not_used){
          pthread_mutex_unlock(&mymutex[VARCOLORC_DEVICE]);
          /*Write petition*/
          fprintf(buffer_varcolorC,"%d %d\n",
-                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 NETWORKSERVER_rgb24bpp_image_query,
                  device_network_id[VARCOLORC_DEVICE]);
          fflush(buffer_varcolorC);
          /*Read message*/
@@ -2521,7 +2504,7 @@ void *networkclient_varcolorC_thread(void *not_used){
                          buffer_lectura);
                }
                else{
-                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                  if (type == NETWORKSERVER_rgb24bpp_image) {
                      int total=0;
                      int actual=0;
                      /*Read image*/
@@ -2548,10 +2531,10 @@ void *networkclient_varcolorC_thread(void *not_used){
                         jdeshutdown(1);
                      }
                      else{
-                        memcpy (varcolorC, mmbuf, width[6]*height[6]*i5);
+                        memcpy(myC.img, mmbuf, width[6]*height[6]*i5);
                         free(mmbuf);
                         speedcounter(varcolorC_schema_id);
-                        imageB_clock=network_clock;
+                        myC.clock=network_clock;
                      }
                   }
                }
@@ -2590,7 +2573,7 @@ void *networkclient_varcolorD_thread(void *not_used){
          pthread_mutex_unlock(&mymutex[VARCOLORD_DEVICE]);
          /*Write petition*/
          fprintf(buffer_varcolorD,"%d %d\n",
-                 NETWORKSERVER_rgb24bpp_sifntsc_image_query,
+                 NETWORKSERVER_rgb24bpp_image_query,
                  device_network_id[VARCOLORD_DEVICE]);
          fflush(buffer_varcolorD);
          /*Read message*/
@@ -2605,7 +2588,7 @@ void *networkclient_varcolorD_thread(void *not_used){
                          buffer_lectura);
                }
                else{
-                  if (type == NETWORKSERVER_rgb24bpp_sifntsc_image) {
+                  if (type == NETWORKSERVER_rgb24bpp_image) {
                      int total=0;
                      int actual=0;
                      /*Read image*/
@@ -2632,10 +2615,10 @@ void *networkclient_varcolorD_thread(void *not_used){
                         jdeshutdown(1);
                      }
                      else{
-                        memcpy (varcolorD, mmbuf, width[7]*height[7]*i5);
+                        memcpy(myD.img, mmbuf, width[7]*height[7]*i5);
                         free(mmbuf);
                         speedcounter(varcolorD_schema_id);
-                        imageB_clock=network_clock;
+                        myD.clock=network_clock;
                      }
                   }
                }
@@ -3240,12 +3223,12 @@ void networkclient_init(char *configfile)
      all[num_schemas].terminate = NULL;
      all[num_schemas].handle = NULL;
      num_schemas++;
-     varcolorA=malloc(sizeof(char)*width[4]*height[4]*3);
+     myA.img=malloc(sizeof(char)*width[4]*height[4]*3);
+     myA.width=width[4];
+     myA.height=height[4];
+     myA.clock=0;
      myexport("varcolorA", "id", &varcolorA_schema_id);
-     myexport("varcolorA", "varcolorA", &varcolorA);
-     myexport("varcolorA", "width", &(width[4]));
-     myexport("varcolorA", "height", &(height[4]));
-     myexport("varcolorA","clock", &varimageA_clock);
+     myexport("varcolorA", "varcolorA", &myA);
      myexport("varcolorA","run",(void *) &networkclient_varcolorA_run);
      myexport("varcolorA","stop",(void *) &networkclient_varcolorA_stop);
   }
@@ -3262,12 +3245,12 @@ void networkclient_init(char *configfile)
      all[num_schemas].terminate = NULL;
      all[num_schemas].handle = NULL;
      num_schemas++;
-     varcolorB=malloc(sizeof(char)*width[5]*height[5]*3);
+     myB.img=malloc(sizeof(char)*width[5]*height[5]*3);
+     myB.width=width[5];
+     myB.height=height[5];
+     myB.clock=0;
      myexport("varcolorB", "id", &varcolorB_schema_id);
-     myexport("varcolorB", "varcolorB", &varcolorB);
-     myexport("varcolorB", "width", &(width[5]));
-     myexport("varcolorB", "height", &(height[5]));
-     myexport("varcolorB","clock", &varimageB_clock);
+     myexport("varcolorB", "varcolorB", &myB);
      myexport("varcolorB","run",(void *) &networkclient_varcolorB_run);
      myexport("varcolorB","stop",(void *) &networkclient_varcolorB_stop);
   }
@@ -3284,12 +3267,12 @@ void networkclient_init(char *configfile)
      all[num_schemas].terminate = NULL;
      all[num_schemas].handle = NULL;
      num_schemas++;
-     varcolorC=malloc(sizeof(char)*width[6]*height[6]*3);
+     myC.img=malloc(sizeof(char)*width[6]*height[6]*3);
+     myC.width=width[6];
+     myC.height=height[6];
+     myC.clock=0;
      myexport("varcolorC", "id", &varcolorC_schema_id);
-     myexport("varcolorC", "varcolorC", &varcolorC);
-     myexport("varcolorC", "width", &(width[6]));
-     myexport("varcolorC", "height", &(height[6]));
-     myexport("varcolorC","clock", &varimageC_clock);
+     myexport("varcolorC", "varcolorC", &myC);
      myexport("varcolorC","run",(void *) &networkclient_varcolorC_run);
      myexport("varcolorC","stop",(void *) &networkclient_varcolorC_stop);
   }
@@ -3306,12 +3289,12 @@ void networkclient_init(char *configfile)
      all[num_schemas].terminate = NULL;
      all[num_schemas].handle = NULL;
      num_schemas++;
-     varcolorD=malloc(sizeof(char)*width[7]*height[7]*3);
+     myD.img=malloc(sizeof(char)*width[7]*height[7]*3);
+     myD.width=width[7];
+     myD.height=height[7];
+     myD.clock=0;
      myexport("varcolorD", "id", &varcolorD_schema_id);
-     myexport("varcolorD", "varcolorD", &varcolorD);
-     myexport("varcolorD", "width", &(width[7]));
-     myexport("varcolorD", "height", &(height[7]));
-     myexport("varcolorD","clock", &varimageD_clock);
+     myexport("varcolorD", "varcolorD", &myD);
      myexport("varcolorD","run",(void *) &networkclient_varcolorD_run);
      myexport("varcolorD","stop",(void *) &networkclient_varcolorD_stop);
   }
