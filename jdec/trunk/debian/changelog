@@ -1,3 +1,12 @@
+jderobot (4.3.0-rc3) unstable; urgency=low
+
+  * fix bug #215 (dario)
+  * fix bug #216 (jmplaza)
+  * add license to jderobot console (rocapal)
+  * Change jde to jderobot in binary and conf file.
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 08 Mar 2009 21:59:55 +0000
+
 jde (4.3.0-rc2) unstable; urgency=low
 
   * The wiioperator has been updated and tested (jmplaza and eperdes)
