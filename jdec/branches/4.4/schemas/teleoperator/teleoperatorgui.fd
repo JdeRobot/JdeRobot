@@ -1,0 +1,836 @@
+Magic: 13000
+
+Internal Form Definition File
+    (do not change)
+
+Number of forms: 1
+Unit of measure: FL_COORD_PIXEL
+
+=============== FORM ===============
+Name: teleoperatorgui
+Width: 880
+Height: 500
+Number of Objects: 45
+
+--------------------
+class: FL_BOX
+type: FRAME_BOX
+box: 0 0 880 500
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLUE
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: NORMAL_BUTTON
+box: 10 370 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_DARKCYAN FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_NORMAL_SIZE
+lcol: FL_CYAN
+label: HIDE
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: hide
+callback: 
+argument: 
+
+--------------------
+class: FL_BEGIN_GROUP
+type: 0
+box: 0 10 10 0
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: basejoystick
+callback: 
+argument: 
+
+--------------------
+class: FL_POSITIONER
+type: NORMAL_POSITIONER
+box: 280 400 110 50
+boxtype: FL_DOWN_BOX
+colors: FL_DARKER_COL1 FL_DARKTOMATO
+alignment: FL_ALIGN_TOP
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: joystick
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 340 460 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_DARKER_COL1 FL_DARKGOLD
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: back
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: back
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: MENU_BUTTON
+box: 280 460 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_DARKER_COL1 FL_DARKGOLD
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: stop
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: stop
+callback: 
+argument: 
+
+--------------------
+class: FL_END_GROUP
+type: 0
+box: 0 0 0 0
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_TEXT
+type: NORMAL_TEXT
+box: 280 370 110 20
+boxtype: FL_FLAT_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_LEFT|FL_ALIGN_INSIDE
+style: FL_BOLD_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: Base Joystick
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_FRAME
+type: ENGRAVED_FRAME
+box: 553 5 322 242
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_COL1
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: sample image
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: sampleimage
+callback: 
+argument: 
+
+--------------------
+class: FL_FREE
+type: NORMAL_FREE
+box: 555 250 160 120
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: ventanaA
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: ventanaA
+callback: 
+argument: 
+   handler: freeobj_ventanaAA_handle
+
+--------------------
+class: FL_FREE
+type: NORMAL_FREE
+box: 715 250 160 120
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: ventanaB
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: ventanaB
+callback: 
+argument: 
+   handler: freeobj_ventanaBB_handle
+
+--------------------
+class: FL_FREE
+type: NORMAL_FREE
+box: 555 370 160 120
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: ventanaC
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: ventanaC
+callback: 
+argument: 
+   handler: freeobj_ventanaCC_handle
+
+--------------------
+class: FL_FREE
+type: NORMAL_FREE
+box: 715 370 160 120
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: ventanaD
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: ventanaD
+callback: 
+argument: 
+   handler: freeobj_ventanaDD_handle
+
+--------------------
+class: FL_GLCANVAS
+type: NORMAL_CANVAS
+box: 5 5 544 306
+boxtype: FL_FRAME_BOX
+colors: FL_NoColor FL_BLACK
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: canvas
+callback: 
+argument: 
+
+--------------------
+class: FL_SLIDER
+type: VERT_SLIDER
+box: 70 370 10 110
+boxtype: FL_FRAME_BOX
+colors: FL_LIGHTER_COL1 FL_DARKTOMATO
+alignment: FL_ALIGN_BOTTOM
+style: FL_NORMAL_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: X
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: posX
+callback: 
+argument: 
+	slsize: 0,00
+
+--------------------
+class: FL_SLIDER
+type: VERT_SLIDER
+box: 80 370 10 110
+boxtype: FL_FRAME_BOX
+colors: FL_LIGHTER_COL1 FL_DARKTOMATO
+alignment: FL_ALIGN_BOTTOM
+style: FL_NORMAL_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Y
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: posY
+callback: 
+argument: 
+	slsize: 0,00
+
+--------------------
+class: FL_SLIDER
+type: VERT_SLIDER
+box: 90 370 10 110
+boxtype: FL_FRAME_BOX
+colors: FL_LIGHTER_COL1 FL_DARKTOMATO
+alignment: FL_ALIGN_BOTTOM
+style: FL_NORMAL_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: Z
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: posZ
+callback: 
+argument: 
+	slsize: 0,00
+
+--------------------
+class: FL_SLIDER
+type: VERT_SLIDER
+box: 100 370 10 110
+boxtype: FL_FRAME_BOX
+colors: FL_LIGHTER_COL1 FL_DARKTOMATO
+alignment: FL_ALIGN_BOTTOM
+style: FL_NORMAL_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: R
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: posR
+callback: 
+argument: 
+	slsize: 0,00
+
+--------------------
+class: FL_BUTTON
+type: MENU_BUTTON
+box: 10 460 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_DARKER_COL1 FL_DARKGOLD
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: origin
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: posOrigin
+callback: 
+argument: 
+
+--------------------
+class: FL_POSITIONER
+type: NORMAL_POSITIONER
+box: 120 370 150 90
+boxtype: FL_DOWN_BOX
+colors: FL_DARKER_COL1 FL_DARKTOMATO
+alignment: FL_ALIGN_TOP
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: latlong
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 170 460 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_DARKER_COL1 FL_BOTTOM_BCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLUE
+label: foaAbs
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: selectfoa
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 220 460 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_DARKER_COL1 FL_BOTTOM_BCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: camPos
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: selectposition
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 120 460 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_DARKER_COL1 FL_BOTTOM_BCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLUE
+label: foaRel
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: selectfoaRel
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 10 410 50 30
+boxtype: FL_FRAME_BOX
+colors: FL_DARKER_COL1 FL_BOTTOM_BCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLUE
+label: track\n robot
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: track_robot
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 10 440 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_DARKER_COL1 FL_BOTTOM_BCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLUE
+label: toggle
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: toggle
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 10 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: laser
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: laser
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 60 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: sonars
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: sonars
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 110 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: encod
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: encoders
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 160 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: motors
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: motors
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 220 320 60 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: PTencod
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: PTencoders
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 280 320 60 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: PTmotors
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: PTmotors
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 350 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: colorA
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: colorA
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 400 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: colorB
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: colorB
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 450 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: colorC
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: colorC
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 500 320 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: colorD
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: colorD
+callback: 
+argument: 
+
+--------------------
+class: FL_BEGIN_GROUP
+type: 0
+box: 0 10 10 0
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: pantiltjoystick
+callback: 
+argument: 
+
+--------------------
+class: FL_POSITIONER
+type: NORMAL_POSITIONER
+box: 420 400 110 50
+boxtype: FL_DOWN_BOX
+colors: FL_DARKER_COL1 FL_DARKTOMATO
+alignment: FL_ALIGN_TOP
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: pantilt_joystick
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: MENU_BUTTON
+box: 480 460 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_DARKER_COL1 FL_DARKGOLD
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: origin
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: pantilt_origin
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: MENU_BUTTON
+box: 420 460 50 20
+boxtype: FL_FRAME_BOX
+colors: FL_DARKER_COL1 FL_DARKGOLD
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: stop
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: pantilt_stop
+callback: 
+argument: 
+
+--------------------
+class: FL_SLIDER
+type: VERT_SLIDER
+box: 400 400 10 70
+boxtype: FL_FRAME_BOX
+colors: FL_LIGHTER_COL1 FL_DARKTOMATO
+alignment: FL_ALIGN_BOTTOM
+style: FL_NORMAL_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: speed
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: ptspeed
+callback: 
+argument: 
+	slsize: 0,00
+
+--------------------
+class: FL_END_GROUP
+type: 0
+box: 0 0 0 0
+boxtype: FL_NO_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_BLACK
+label: 
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_TEXT
+type: NORMAL_TEXT
+box: 410 370 120 20
+boxtype: FL_FLAT_BOX
+colors: FL_COL1 FL_MCOL
+alignment: FL_ALIGN_LEFT|FL_ALIGN_INSIDE
+style: FL_BOLD_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: Pantilt Joystick
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: 
+callback: 
+argument: 
+
+--------------------
+class: FL_SLIDER
+type: VERT_SLIDER
+box: 540 370 10 110
+boxtype: FL_FRAME_BOX
+colors: FL_LIGHTER_COL1 FL_DARKTOMATO
+alignment: FL_ALIGN_BOTTOM
+style: FL_NORMAL_STYLE
+size: FL_TINY_SIZE
+lcol: FL_DARKTOMATO
+label: zoom
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: zoom
+callback: 
+argument: 
+	slsize: 0,00
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 220 340 60 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: Zencod
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: Zencod
+callback: 
+argument: 
+
+--------------------
+class: FL_BUTTON
+type: PUSH_BUTTON
+box: 280 340 60 20
+boxtype: FL_FRAME_BOX
+colors: FL_COL1 FL_INACTIVE
+alignment: FL_ALIGN_CENTER
+style: FL_NORMAL_STYLE
+size: FL_DEFAULT_SIZE
+lcol: FL_DARKTOMATO
+label: Zmotors
+shortcut: 
+resize: FL_RESIZE_ALL
+gravity: FL_NoGravity FL_NoGravity
+name: Zmotors
+callback: 
+argument: 
+
+==============================
+create_the_forms
