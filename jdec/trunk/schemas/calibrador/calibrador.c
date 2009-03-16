@@ -21,28 +21,27 @@
 
 /** El formato de color que se recibe es BGRA */
 
-#include "jde.h"
-#include "forms.h"
-#include "graphics_xforms.h"
+#include <jde.h>
+#include <forms.h>
+#include <graphics_xforms.h>
 
-#include "glib.h"
+#include <glib.h>
 #include "calibradorgui.h"
 #include "TAD.h"
-#include "clasificator.h"
-#include "colorspaces.h"
-#include "progeo.h"
+#include <clasificator.h>
+#include <colorspaces.h>
+#include <progeo.h>
 #include <assert.h>
 
 /** Vamos a usar GSL para operaciones matriciales*/
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_multifit.h>
-#include "forms.h"
 
 /** OpenGL */
 #include <GL/gl.h>              
 #include <GL/glx.h>
 #include <GL/glu.h>
-#include <GL/freeglut_std.h>
+#include <GL/glut.h>
 #include <forms.h>
 #include <glcanvas.h>
 
