@@ -38,7 +38,6 @@ extern struct HSV * LUT_RGB2HSV [64][64][64];
 
 extern int isInitTableHSV;
 
-extern pthread_mutex_t mutex;
  
 /// \brief Init the RGB2HSV
 void RGB2HSV_init();
