@@ -17,6 +17,7 @@ dist_conf_DATA = jderobot.conf
 include_HEADERS = jde.h jde_private.h
 
 edit = sed \
+	-e 's|@pkgdatadir[@]|$(pkgdatadir)|g' \
 	-e 's|@driverdir[@]|$(driverdir)|g' \
 	-e 's|@schemadir[@]|$(schemadir)|g' \
 	-e 's|@servicedir[@]|$(servicedir)|g' \
