@@ -153,7 +153,7 @@ int new_fifo (t_fifo *fifo){
    /*The initializate the straucture.*/
    fifo->init=NULL;
    fifo->end=NULL;
-   pthread_mutex_init(&(fifo->fifo_mutex),PTHREAD_MUTEX_TIMED_NP);
+   pthread_mutex_init(&(fifo->fifo_mutex),PTHREAD_MUTEX_DEFAULT);
    return 0;
 }
 

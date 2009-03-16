@@ -221,7 +221,7 @@ void *cronos_thread(void *not_used)
 int jdeinit(const char* cf){
   char s[MAX_BUFFER];
 
-  pthread_mutex_init(&shuttingdown_mutex, PTHREAD_MUTEX_TIMED_NP);
+  pthread_mutex_init(&shuttingdown_mutex,PTHREAD_MUTEX_DEFAULT);
 
   /* read the configuration file: load drivers and schemas */
   if (cf == 0 || *cf == 0) {/*no configfile give,try default ones*/ 
@@ -398,7 +398,7 @@ JDESchema* jde_loadschema(char *name)
   s->k =0;
   s->state=slept;
   s->guistate=off;
-  pthread_mutex_init(&s->mymutex,PTHREAD_MUTEX_TIMED_NP);
+  pthread_mutex_init(&s->mymutex,PTHREAD_MUTEX_DEFAULT);
   pthread_cond_init(&s->condition,NULL);
   /* the thread is created on schema's init execution. This only is the load of the schema */
   

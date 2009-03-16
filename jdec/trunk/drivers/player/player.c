@@ -1005,7 +1005,7 @@ int player_parseconf(char *configfile){
  *  @param configfile path and name to the config file of this driver.*/
 int player_init(char *configfile){
 
-  pthread_mutex_init(&mymutex,PTHREAD_MUTEX_TIMED_NP);
+  pthread_mutex_init(&mymutex,PTHREAD_MUTEX_DEFAULT);
   /* we call the function to parse the config file */
   if(player_parseconf(configfile)==-1){
     printf("player: cannot initiate driver. configfile parsing error.\n");

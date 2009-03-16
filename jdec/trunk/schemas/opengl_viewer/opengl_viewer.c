@@ -337,7 +337,7 @@ void opengl_viewer_guiinit(){
    if (load_object("./esqueleto2.obj", &obj)!=0){
       jdeshutdown(1);
    }
-   pthread_mutex_init(&gl_mutex, PTHREAD_MUTEX_TIMED_NP);
+   pthread_mutex_init(&gl_mutex, PTHREAD_MUTEX_DEFAULT);
 }
 
 
