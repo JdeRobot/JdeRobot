@@ -326,7 +326,7 @@ AC_ARG_VAR([PLAYER_CPPFLAGS],[C processor flags for player])
 AC_ARG_VAR([PLAYER_LIBS],[linker flags for player])
 if test "x$with_player" != xno; then
     PLAYER_PREFIX=$with_player
-    PLAYER_INCLUDE=`find $PLAYER_PREFIX -name "player-*"`
+    PLAYER_INCLUDE=`find $PLAYER_PREFIX/include -name "player-*"`
     PLAYER_VERSION=`basename $PLAYER_INCLUDE`
     PLAYER_CFLAGS="$PLAYER_CFLAGS -I$PLAYER_INCLUDE"
     PLAYER_CPPFLAGS="$PLAYER_CPPFLAGS -I$PLAYER_INCLUDE"
@@ -503,9 +503,17 @@ fi
 
 AM_CONDITIONAL([ENABLE_VIDEO4LINUX],[false])
 if test "x$enable_drivers_video4linux" != xno; then
+    ERRORS=""
     AC_MSG_NOTICE([**** Checking driver video4linux:])
-    ENABLED_DRIVERS="$ENABLED_DRIVERS video4linux"
-    AM_CONDITIONAL([ENABLE_VIDEO4LINUX],[true])
+    AC_CHECK_HEADERS([linux/videodev.h linux/videodev2.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-drivers-video4linux was given, but there was errors: $ERRORS])
+    else
+	ENABLED_DRIVERS="$ENABLED_DRIVERS video4linux"
+	AM_CONDITIONAL([ENABLE_VIDEO4LINUX],[true])
+    fi
 fi
 
 AM_CONDITIONAL([ENABLE_WIIMOTE],[false])
@@ -624,7 +632,7 @@ if test "x$enable_schemas_calibrador" != xno; then
 	    AM_CONDITIONAL([ENABLE_CALIBRADOR],[true])],
 	[AC_MSG_FAILURE([--enable-schemas-calibrador was given, but there was errors: $CALIBRADOR_PKG_ERRORS])])
     ERRORS=""
-    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h glcanvas.h GL/gl.h GL/glx.h GL/glu.h GL/freeglut_std.h],
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h glcanvas.h GL/gl.h GL/glx.h GL/glu.h GL/glut.h],
 	[],
 	[ERRORS="$ERRORS, $ac_header not found"])
     AC_CHECK_LIB([forms],[main],

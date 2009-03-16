@@ -27,14 +27,17 @@
 #include <signal.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+
+typedef int rl_cmdfunc_t (char *);
 
 const char * thisrelease = "jderobot 4.3-$Revision$";
 
 typedef struct {
   const char *name;		/* User printable name of the function. */
-  rl_icpfunc_t *func;		/* Function to call to do the job. */
+  rl_cmdfunc_t *func;		/* Function to call to do the job. */
   const char *doc;		/* Documentation for this function.*/
 } COMMAND;
 
@@ -94,7 +97,7 @@ COMMAND bcommands[] = {
   { "?", com_help, "Synonym for 'help'" },
   { "exit", com_exit, "Quit using jdeC" },
   { "quit", com_exit, "Synonym for 'exit'" },
-  { (const char *)NULL, (rl_icpfunc_t *)NULL, (const char *)NULL }
+  { (const char *)NULL, (rl_cmdfunc_t *)NULL, (const char *)NULL }
 };
 
 COMMAND scommands[] = {
@@ -115,7 +118,7 @@ COMMAND scommands[] = {
   { "guisuspend", com_hide, "Synonym for 'hide'" },
   { "?", com_help, "Synonym for 'help'" },
   { "exit", com_exit, "Exit schema mode" },
-  { (const char *)NULL, (rl_icpfunc_t *)NULL, (const char *)NULL }
+  { (const char *)NULL, (rl_cmdfunc_t *)NULL, (const char *)NULL }
 };
 
 /*format strings used for prompts*/
@@ -276,14 +279,14 @@ char *
 stripwhite (char *string){
   register char *s, *t;
 
-  for (s = string; whitespace (*s); s++)
+  for (s = string; isspace (*s); s++)
     ;
     
   if (*s == 0)
     return (s);
 
   t = s + strlen (s) - 1;
-  while (t > s && whitespace (*t))
+  while (t > s && isspace (*t))
     t--;
   *++t = '\0';
 
@@ -354,7 +357,7 @@ command_completion (const char *text,int start, int end){
 	generator_state = SCHEMAS;
     }
   }
-  matches = rl_completion_matches (text, command_generator);
+  matches = completion_matches (text, command_generator);
 
   return (matches);
 }
