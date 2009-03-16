@@ -9,10 +9,10 @@ path .:/usr/lib:/usr/local/lib:/usr/lib/jderobot/drivers:/usr/lib/jderobot/schem
 #end_driver
 
 driver imagefile
-provides colorA /usr/local/share/jderobot/casaleft.pnm
-#provides colorB /usr/local/share/jderobot/atardecer.ppm
-#provides colorC /usr/local/share/jderobot/atardecer.ppm
-#provides colorD /usr/local/share/jderobot/casaright.pnm
+provides colorA @pkgdatadir@/casaleft.pnm
+#provides colorB @pkgdatadir@/atardecer.ppm
+#provides colorC @pkgdatadir@/atardecer.ppm
+#provides colorD @pkgdatadir@/casaright.pnm
 end_driver
 
 #driver mplayer
