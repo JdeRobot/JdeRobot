@@ -517,7 +517,7 @@ void imgrectifier_init(char *configfile)
   put_state(imgrectifier_id,slept);
 
   /* == inicializamos las variables globales y el display== */
-  pthread_mutex_init(&colorchange_mutex,PTHREAD_MUTEX_DEFAULT);
+  pthread_mutex_init(&colorchange_mutex,NULL);
 
   reset();
 
