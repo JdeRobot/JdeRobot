@@ -375,7 +375,7 @@ JDESchema* jde_loadschema(char *name)
     fprintf(stderr,"WARNING: Unresolved symbol %s in %s schema\n",n,name);
   
   dlerror();
-  strcpy(n,name); strcat(n,"_stop");
+  strcpy(n,name); strcat(n,"_terminate");
   s->terminate = (void (*)(void)) dlsym(s->handle,n);
   if ((error=dlerror()) != NULL)
     fprintf(stderr,"WARNING: Unresolved symbol %s in %s schema\n",n,name);

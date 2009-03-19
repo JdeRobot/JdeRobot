@@ -614,15 +614,15 @@ void player_terminate(){
                                  &player_encoders_callback,&(player_position));
    }
    if (serve_sonars==1){
-      playerc_client_addcallback(player_client,&(player_sonar->info),
+      playerc_client_delcallback(player_client,&(player_sonar->info),
                                  &player_sonar_callback,&(player_sonar->scan));
    }
    if (serve_laser==1){
-      playerc_client_addcallback(player_client,&(player_laser->info),
+      playerc_client_delcallback(player_client,&(player_laser->info),
                                  &player_laser_callback,&(player_laser->scan));
    }
    if (serve_bumpers==1){
-      playerc_client_addcallback(player_client,&(player_bumpers->info),
+      playerc_client_delcallback(player_client,&(player_bumpers->info),
                                  &player_bumper_callback,
                                  &(player_bumpers->bumpers));
    }
