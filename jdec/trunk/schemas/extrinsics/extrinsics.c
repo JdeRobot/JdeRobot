@@ -20,12 +20,14 @@
  */
 
 #include <math.h>
-#include "jde.h"
-#include "forms.h"
-#include "graphics_xforms.h"
-#include "progeo.h"
-#include "extrinsicsgui.h"
-#include "extrinsics.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <forms.h>
+#include <jde.h>
+#include <graphics_xforms.h>
+#include <progeo.h>
+#include <extrinsicsgui.h>
+#include <extrinsics.h>
 
 
 int extrinsics_cycle=100; /* ms */
