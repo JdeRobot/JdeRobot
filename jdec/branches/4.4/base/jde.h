@@ -41,6 +41,7 @@
 
 /** Maximum buffer size (for strings)*/
 #define MAX_BUFFER 512
+#define MAX_NAME 128
 
 #ifdef __cplusplus
  extern "C" {
@@ -122,7 +123,7 @@ typedef struct {
    /** Dynamic library handler for the schema module*/
   void *handle;
   /** Schema's name*/
-  char name[100];
+  char name[MAX_NAME];
   /** Schema's identifier*/
   int *id; /* schema identifier */
   /** Schema's state
@@ -205,7 +206,7 @@ typedef struct {
    /** Dynamic library handler for the driver module*/
    void *handle;
    /** Driver's name*/
-   char name[100];
+   char name[MAX_NAME];
    /** Driver's identifier*/
    int id;
    

@@ -8,7 +8,7 @@ _jde_la_CFLAGS = -I$(top_srcdir)/base $(SWIG_PYTHON_CPPFLAGS)
 dist_swig_DATA = jde.py schema.py
 BUILT_SOURCES = jde_wrap.c
 CLEANFILES = jde_wrap.c jde.py
-jde_wrap.c: jde.i
-	$(SWIG) $(SWIG_PYTHON_OPT) jde.i
+%_wrap.c: %.i
+	$(SWIG) $(SWIG_PYTHON_OPT) $<
 
 MAINTAINERCLEANFILES = Makefile.in Makefile

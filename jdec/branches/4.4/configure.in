@@ -1041,6 +1041,9 @@ dnl ########################################
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([base/Makefile \
     base/swig/Makefile])
+dnl # generate interfaces Makefiles
+AC_CONFIG_FILES([interfaces/Makefile \
+    interfaces/swig/Makefile])
 dnl # generate utils Makefiles
 AC_CONFIG_FILES([libs/Makefile \
     libs/colorspaces/Makefile \

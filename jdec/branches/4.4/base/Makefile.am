@@ -31,6 +31,7 @@ jderobot.conf: Makefile
 
 jderobot.conf: jderobot.conf.in
 
+SUBDIRS = . swig
 BUILTSOURCES = jderobot.conf
 CLEANFILES = jderobot.conf
 MAINTAINERCLEANFILES = Makefile.in Makefile
