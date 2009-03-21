@@ -1,5 +1,5 @@
 ### PATH WHERE THE MODULES CAN BE FOUND
-path .:/usr/lib:/usr/local/lib:/usr/lib/jderobot/drivers:/usr/lib/jderobot/schemas:/usr/lib/jderobot/services:/usr/share/jdec/glade:@driverdir@:@schemadir@:@servicedir@:@gladedir@
+path .:/usr/lib:/usr/local/lib:/usr/lib/jderobot/drivers:/usr/lib/jderobot/schemas:/usr/lib/jderobot/services:/usr/share/jderobot/glade:@driverdir@:@schemadir@:@servicedir@:@gladedir@
 
 ### DRIVER CONFIGURATION 
 
@@ -101,15 +101,9 @@ load_driver imagefile
 
 ### SCHEMA LOAD --------------------
 load mastergui
-#load myperceptive
-#load myschema
-#load hsvtuner
+load hsvtuner
 load opengldemo
-#load papito
 #load introrob
-#load teleoperator
-#load opflow
-#load esquema_prueba2
 
 ### INITIAL ACTIVATION------------
 #resume sonars

@@ -1,3 +1,11 @@
+jderobot (4.3.0-rc4) unstable; urgency=low
+
+  * fix bug #196 #197 (rocapal)
+  * Update config file with killers schemas
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sat, 21 Mar 2009 13:07:06 +0100
+
+
 jderobot (4.3.0-rc3) unstable; urgency=low
 
   * fix bug #215 (dario)
