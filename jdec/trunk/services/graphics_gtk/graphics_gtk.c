@@ -63,8 +63,11 @@ static char path[PATH_SIZE];
  * This callbacks are used to refresh the schema's display
  */
 guidisplay displaycallbacks[MAX_SCHEMAS];
-/** The number of subscribed display callbacks*/
+/* The number of subscribed buttons callbacks*/
+
 int num_displaycallbacks=0;
+
+
 /**
  * @brief This fuction is used to subscribe a display callback.
  *
@@ -144,15 +147,18 @@ void *graphics_gtk_thread(void *arg){
  * The thread iteration. It refresh the displays of every subscribed schemas
  * @see register_displaycallback, delete_displaycallback
  */
-void graphics_gtk_iteration(){
+gboolean graphics_gtk_iteration(gpointer user_data){
    int i;
 
    /* display iteration */
    for(i=0;i<num_displaycallbacks;i++)
    {
+
       if (displaycallbacks[i]!=NULL)
          (displaycallbacks[i])();
    }
+
+   return FALSE;
 }
 
 /** graphics_gtk driver internal thread.*/
@@ -160,10 +166,14 @@ void *graphics_gtk_thread2(void *arg){
    struct timeval a,b;
    long diff, next;
 
+
+   g_idle_add_full (G_PRIORITY_HIGH, (GSourceFunc)  graphics_gtk_iteration,
+ 		    NULL, NULL);
+
    for(;;)
    {
       gettimeofday(&a,NULL);
-      graphics_gtk_iteration();
+
       gettimeofday(&b,NULL);
       diff = (b.tv_sec-a.tv_sec)*1000000+b.tv_usec-a.tv_usec;
       next = graphics_gtk_cycle*1000-diff-10000;
