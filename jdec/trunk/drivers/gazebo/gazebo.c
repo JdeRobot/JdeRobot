@@ -35,8 +35,7 @@
 #include <interfaces/varcolor.h>
 
 /*
-In gazebo.h:
- 
+In gazebo.h: 
 GZ_LASER_MAX_RANGES
 GZ_SONAR_MAX_RANGES
 */
@@ -89,9 +88,9 @@ char ptz_name[MAX_MODEL_ID]="";
 gc_name color_name[MAXCAM]; 
 
 /* Variables put to 0.0 and no change during the execution */
-float correcting_x = 0.;
-float correcting_y = 0.;
-float correcting_theta = 0.;
+float correcting_x = 0.; /* mm */
+float correcting_y = 0.; /* mm */
+float correcting_theta = 0.; /* deg */
 
 /* Gazebo Server and client */
 int server_id = 0;
@@ -1578,23 +1577,17 @@ gazebo_encoders_callback ()
 
   gz_position_lock (position, 1);
   robotx =
-    (position->data->pos[0]) * 1000 * (float) cos (DEGTORAD *
-						   correcting_theta) -
-    (position->data->pos[1]) * 1000 * (float) sin (DEGTORAD *
-						   correcting_theta) +
-    							correcting_x;
+    (position->data->pos[0]) * 1000 * (float) cos (DEGTORAD * correcting_theta) -
+    (position->data->pos[1]) * 1000 * (float) sin (DEGTORAD * correcting_theta) +
+    correcting_x;
   roboty =
-    (position->data->pos[1]) * 1000 * (float) cos (DEGTORAD *
-						   correcting_theta) +
-    (position->data->pos[0]) * 1000 * (float) sin (DEGTORAD *
-						   correcting_theta) +
-    							correcting_y;
-
+    (position->data->pos[1]) * 1000 * (float) cos (DEGTORAD * correcting_theta) +
+    (position->data->pos[0]) * 1000 * (float) sin (DEGTORAD * correcting_theta) +
+    correcting_y;
   robottheta = (position->data->rot[2] * RADTODEG) + correcting_theta;
 
-  if (robottheta <= 0)
-    robottheta = robottheta + 360;
-
+  if (robottheta <= 0) robottheta = robottheta + 360;
+  else if (robottheta > 360) robottheta = robottheta - 360;
   gz_position_unlock (position);
 
   jde_robot[0] = robotx;
@@ -1631,10 +1624,11 @@ int
 gazebo_parseconf (char *configfile)
 {
   FILE *conf = fopen (configfile, "r");
-  char cpLinea[160];
+  char cpLinea[MAX_BUFFER],word3[MAX_BUFFER],word4[MAX_BUFFER],word5[MAX_BUFFER];
   char *pLine1, *pLine2;
   int ItIsAGazeboLine = 0, i, colors;
   char *camera_token[] = { "colorA", "colorB", "colorC", "colorD", "varcolorA", "varcolorB", "varcolorC", "varcolorD" };
+
 
   if (!conf)
     return (-1);
@@ -1783,6 +1777,24 @@ gazebo_parseconf (char *configfile)
 	  serve_ptmotors=1;
 	  strncpy (ptz_name, pLine2, MAX_MODEL_ID);
 	}
+
+      pLine2 = strstr(cpLinea, "initial_position ");
+      if(pLine2) { //Tomo el surtidor de initial_position
+	pLine2 += 17;
+	for (i = 0; isspace(pLine2[0]); pLine2++); //salto blancos
+	printf("XXX El nombre para initial_position :%s:\n",pLine2);
+	if(sscanf(pLine2,"%s %s %s",word3,word4,word5)>2){
+	  correcting_x=(float)atof(word3);
+	  correcting_y=(float)atof(word4);
+	  correcting_theta=(float)atof(word5);
+	  printf("gazebo: correcting x=%.1f(mm)  y=%.1f(mm)  theta=%.1f(deg).\n",
+		 correcting_x,correcting_y,correcting_theta);
+	  printf("gazebo: make sure this is the initial position in the world file provided to Gazebo simulator.\n");
+	}else
+	  printf("gazebo: wrong initial_position line in the configuration file\n");
+	pLine1 = strstr(pLine2, "\n");
+	pLine1[0] = (char) 0;
+      }
     }
   
   fclose (conf);
