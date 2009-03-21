@@ -1248,8 +1248,36 @@ void extrinsics_guidisplay(){
   XPutImage(mydisplay,extrinsics_win,extrinsics_gc,virtual_extrinsics_imagen,0,0,fd_extrinsicsgui->virtual_freeobject->x, fd_extrinsicsgui->virtual_freeobject->y,  SIFNTSC_COLUMNS, SIFNTSC_ROWS);
 }
 
+void extrinsics_hide_aux(void){
+  all[extrinsics_id].guistate=off;
+  mydelete_buttonscallback(extrinsics_guibuttons);
+  mydelete_displaycallback(extrinsics_guidisplay);
+  fl_hide_form(fd_extrinsicsgui->extrinsicsgui);
 
+  /* calling stop functions for colors */
+  if(mycolorAstop!=NULL){
+    mycolorAstop();
+  }
+}
 
+void extrinsics_hide(){
+   static callback fn=NULL;
+
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
+         fn ((gui_function)extrinsics_hide_aux);
+      }
+   }
+   else{
+      fn ((gui_function)extrinsics_hide_aux);
+   }
+}
+
+int myclose_form(FL_FORM *form, void *an_argument)
+{
+  extrinsics_hide();
+  return FL_IGNORE;
+}
 
 void extrinsics_show_aux(void)
 {
@@ -1257,12 +1285,15 @@ void extrinsics_show_aux(void)
   int vmode,i;
   static XGCValues gc_values;
 
+  all[extrinsics_id].guistate=on;
   if (k==0){ /* not initialized */
      k++;
      fd_extrinsicsgui = create_form_extrinsicsgui();
      fl_set_form_position(fd_extrinsicsgui->extrinsicsgui,400,50);
      fl_show_form(fd_extrinsicsgui->extrinsicsgui,FL_PLACE_POSITION,
 		  FL_FULLBORDER,"extrinsics");
+     fl_set_form_atclose(fd_extrinsicsgui->extrinsicsgui,myclose_form,0);
+     
      extrinsics_win = FL_ObjWin(fd_extrinsicsgui->color_freeobject);
 
      /* Inicializa las ventanas, la paleta de colores y memoria compartida para visualizacion*/
@@ -1362,6 +1393,8 @@ void extrinsics_show_aux(void)
   else{
     fl_show_form(fd_extrinsicsgui->extrinsicsgui,FL_PLACE_POSITION,
 		 FL_FULLBORDER,"extrinsics");
+    extrinsics_win = FL_ObjWin(fd_extrinsicsgui->color_freeobject);
+  /* the window (extrinsics_win) changes every time the form is hided and showed again. They need to be updated before displaying anything again */
   }
 
   myregister_displaycallback(extrinsics_guidisplay);
@@ -1415,29 +1448,6 @@ void extrinsics_show(){
    }
    else{
       fn ((gui_function)extrinsics_show_aux);
-   }
-}
-
-void extrinsics_hide_aux(void){
-  mydelete_buttonscallback(extrinsics_guibuttons);
-  mydelete_displaycallback(extrinsics_guidisplay);
-  fl_hide_form(fd_extrinsicsgui->extrinsicsgui);
-
-  /* calling stop functions for colors */
-  if(mycolorAstop!=NULL){
-    mycolorAstop();
-  }
-}
-
-void extrinsics_hide(){
-   static callback fn=NULL;
-   if (fn==NULL){
-      if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
-         fn ((gui_function)extrinsics_hide_aux);
-      }
-   }
-   else{
-      fn ((gui_function)extrinsics_hide_aux);
    }
 }
 

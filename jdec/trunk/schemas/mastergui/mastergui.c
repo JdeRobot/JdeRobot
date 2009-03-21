@@ -696,7 +696,7 @@ static void startTreeView() {
    /* --- Column #5 --- */
    col = gtk_tree_view_column_new();
    renderer = gtk_cell_renderer_text_new();
-   gtk_tree_view_column_set_title(col, "Cycle time (milliseconds)");
+   gtk_tree_view_column_set_title(col, "Iterations/sec");
    gtk_tree_view_column_set_resizable(col, TRUE);
    gtk_tree_view_column_set_max_width(col, 5);
    gtk_tree_view_column_pack_start(col, renderer, TRUE);

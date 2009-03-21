@@ -1,5 +1,6 @@
 jderobot (4.3.0-rc4) unstable; urgency=low
-  
+
+  * Fix Bug #236 (jmplaza)  
   * New Hough transform at opencvdemo (eperdes)
   * New initial robot position in gazebo driver (jmplaza and Jose M.Dominguez)
   * fix bug #196 #197 (rocapal)	

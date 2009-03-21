@@ -23,7 +23,7 @@
 #define _COLOR_SPACES_H
 
 #define NAME     "colorspaces"
-#define VERSION  "1.3.0"
+#define COLORSPACES_VERSION  "1.3.0"
 
 /// *** RGB to HSI  *** ///
 

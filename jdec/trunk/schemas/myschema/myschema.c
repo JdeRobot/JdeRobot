@@ -18,11 +18,11 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-#include "jde.h"
-#include "forms.h"
-#include "graphics_xforms.h"
-#include "myschemagui.h"
-#include "myschema.h"
+#include <jde.h>
+#include <forms.h>
+#include <graphics_xforms.h>
+#include <myschemagui.h>
+#include <myschema.h>
 
 /*Gui callbacks*/
 registerbuttons myregister_buttonscallback;
@@ -230,6 +230,8 @@ void myschema_guidisplay(){
 
 
 void myschema_hide_aux(void){
+
+  all[myschema_id].guistate=off;
   mydelete_buttonscallback(myschema_guibuttons);
   mydelete_displaycallback(myschema_guidisplay);
   fl_hide_form(fd_myschemagui->myschemagui);
@@ -242,14 +244,23 @@ void myschema_hide(){
    }
 }
 
+int myclose_form(FL_FORM *form, void *an_argument)
+{
+  myschema_hide();
+  return FL_IGNORE;
+}
+
+
 void myschema_show_aux(void){
   static int k=0;
 
+  all[myschema_id].guistate=on;
   if (k==0) /* not initialized */
     {
       k++;
       fd_myschemagui = create_form_myschemagui();
       fl_set_form_position(fd_myschemagui->myschemagui,400,50);
+      fl_set_form_atclose(fd_myschemagui->myschemagui,myclose_form,0);
     }
   myregister_buttonscallback(myschema_guibuttons);
   myregister_displaycallback(myschema_guidisplay);

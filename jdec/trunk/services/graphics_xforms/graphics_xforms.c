@@ -415,7 +415,7 @@ void graphics_xforms_init(char *configfile)
 	   myregister_displaycallback=(registerdisplay)myimport ("graphics_gtk", "register_displaycallback");
 	   mydelete_displaycallback=(deletedisplay)myimport ("graphics_gtk", "delete_displaycallback");
 	   if (myregister_displaycallback==NULL || mydelete_displaycallback==NULL){
-		   printf ("I can't fetch GTK functions from graphics_xforms, please first loads graphics_gtk driver\n");
+		   printf ("I can't fetch GTK functions from graphics_xforms, please first load graphics_gtk driver\n");
 		   jdeshutdown(1);
 	   }
    }

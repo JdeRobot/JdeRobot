@@ -18,14 +18,16 @@
  *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
  */
 
-#include "jde.h"
+#include <stdlib.h>
 #include <forms.h>
-#include "graphics_xforms.h"
-#include "pioneer.h"
-#include "introrob.h"
-#include "introrobgui.h"
-#include "navegacion.h"
-
+#include <math.h>
+#include <unistd.h>
+#include <jde.h>
+#include <graphics_xforms.h>
+#include <pioneer.h>
+#include <introrob.h>
+#include <introrobgui.h>
+#include <navegacion.h>
 
 int introrob_id=0; 
 int introrob_brothers[MAX_SCHEMAS];
@@ -106,7 +108,7 @@ float introrob_rango=(float)RANGO_INICIAL; /* Rango de visualizacion en milimetr
 
 static int vmode;
 static XImage *imagenA;
-static char *imagenA_buf;
+static unsigned char *imagenA_buf;
 static long int tabla[256]; 
 /* tabla con la traduccion de niveles de gris a numero de pixel en Pseudocolor-8bpp. Cada numero de pixel apunta al valor adecuado del ColorMap, con el color adecuado instalado */
 
@@ -489,7 +491,7 @@ void introrob_guidisplay()
   Tvoxel aa,bb;
   static XPoint targetgraf;
   XPoint a,b;
-  int i,c,row,j,k;
+  int i,c,row,j;
 
   fl_redraw_object(fd_introrobgui->joystick);
   /*fl_redraw_object(fd_introrobgui->escala);*/
@@ -868,6 +870,7 @@ int introrob_button_released_on_micanvas(FL_OBJECT *ob, Window win, int win_widt
 void introrob_hide_aux(void)
 {
   v_teleop=0; w_teleop=0; 
+  all[introrob_id].guistate=off;
   /* to make a safety stop when the robot is being teleoperated from GUI */
   mydelete_buttonscallback(introrob_guibuttons);
   mydelete_displaycallback(introrob_guidisplay);
@@ -887,6 +890,13 @@ void introrob_hide(){
    }
 }
 
+int myclose_form(FL_FORM *form, void *an_argument)
+{
+  introrob_hide();
+  return FL_IGNORE;
+}
+
+
 void introrob_show_aux(void)
 {
   static int k=0;
@@ -896,8 +906,7 @@ void introrob_show_aux(void)
   int pixelNum, numCols;
   int allocated_colors=0, non_allocated_colors=0;
 
-   
-
+  all[introrob_id].guistate=on;
   if (k==0) /* not initialized */
     {
       k++;
@@ -909,11 +918,11 @@ void introrob_show_aux(void)
       introrob_odometrico[3]= cos(0.);
       introrob_odometrico[4]= sin(0.);
 
-      
-
       fd_introrobgui = create_form_introrobgui();
       fl_set_form_position(fd_introrobgui->introrobgui,400,50);
       fl_show_form(fd_introrobgui->introrobgui,FL_PLACE_POSITION,FL_FULLBORDER,"introrob");
+      fl_set_form_atclose(fd_introrobgui->introrobgui,myclose_form,0);
+
       introrob_canvas_win= FL_ObjWin(fd_introrobgui->micanvas);
       gc_values.graphics_exposures = False;
       introrobgui_gc = XCreateGC(mydisplay, introrob_canvas_win, GCGraphicsExposures, &gc_values);  
@@ -931,18 +940,18 @@ void introrob_show_aux(void)
       vmode= fl_get_vclass();
       if ((vmode==TrueColor)&&(fl_state[vmode].depth==16)) 
 	{printf("introrob: truecolor 16 bpp\n");
-	  imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2);    
-	  imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),win_attributes.depth, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+	  imagenA_buf = (unsigned char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*2);    
+	  imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),win_attributes.depth, ZPixmap,0,(char *)imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
 	}
       else if ((vmode==TrueColor)&&(fl_state[vmode].depth==24)) 
 	{ printf("introrob: truecolor 24 bpp\n");
-	  imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
-	  imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+	  imagenA_buf = (unsigned char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
+	  imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),24, ZPixmap,0,(char *)imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
 	}
       else if ((vmode==TrueColor)&&(fl_state[vmode].depth==32)) 
 	{ printf("introrob: truecolor 24 bpp\n");
-	  imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
-	  imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+	  imagenA_buf = (unsigned char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS*4); 
+	  imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),32, ZPixmap,0,(char *)imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
 	}
       else if ((vmode==PseudoColor)&&(fl_state[vmode].depth==8)) 
 	{
@@ -962,8 +971,8 @@ void introrob_show_aux(void)
 	  printf("introrob: depth= %d\n", fl_state[vmode].depth); 
 	  printf("introrob: colormap got %d colors, %d non_allocated colors\n",allocated_colors,non_allocated_colors);
 	  
-	  imagenA_buf = (char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS);    
-	  imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
+	  imagenA_buf = (unsigned char *) malloc(SIFNTSC_COLUMNS*SIFNTSC_ROWS);    
+	  imagenA = XCreateImage(mydisplay,DefaultVisual(mydisplay,*myscreen),8, ZPixmap,0,(char *)imagenA_buf,SIFNTSC_COLUMNS, SIFNTSC_ROWS,8,0);
 	}
       else 
 	{

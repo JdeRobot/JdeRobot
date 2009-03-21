@@ -21,13 +21,16 @@
  *
  */
 
-#include <jde.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <forms.h>
-#include "followballgui.h"
-#include "followball.h"
 #include <math.h>
+#include <jde.h>
+#include <graphics_xforms.h>
 #include <colorspaces.h>
-#include "graphics_xforms.h"
+#include <followballgui.h>
+#include <followball.h>
+
 
 /** Image standard number of rows*/
 #define SIFNTSC_ROWS 240
@@ -1236,6 +1239,7 @@ void followball_guidisplay()
 
 void followball_hide_aux(void)
 {
+  all[followball_id].guistate=off;
   mydelete_buttonscallback(followball_guibuttons);
   mydelete_displaycallback(followball_guidisplay);
   fl_hide_form(fd_followballgui->followballgui);
@@ -1253,17 +1257,24 @@ void followball_hide(void){
    }
 }
 
+int myclose_form(FL_FORM *form, void *an_argument)
+{
+  followball_hide();
+  return FL_IGNORE;
+}
 
 void followball_show_aux(void)
 {
   static int k=0;
 
+  all[followball_id].guistate=on;
   if (k==0)                      /* not initialized */
   {
     k++;
     fd_followballgui = create_form_followballgui();
     fl_set_form_position(fd_followballgui->followballgui,400,50);
     fl_show_form(fd_followballgui->followballgui,FL_PLACE_POSITION,FL_FULLBORDER,FollowballVER);
+    fl_set_form_atclose(fd_followballgui->followballgui,myclose_form,0);
     followball_win= FL_ObjWin(fd_followballgui->oculo_orig);
     followballgui_setupDisplay();
   }

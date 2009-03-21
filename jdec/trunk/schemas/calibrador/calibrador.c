@@ -24,7 +24,7 @@
 #include <jde.h>
 #include <forms.h>
 #include <graphics_xforms.h>
-
+#include <unistd.h>
 #include <glib.h>
 #include "calibradorgui.h"
 #include "TAD.h"
@@ -1744,16 +1744,6 @@ void calibrador_run(int father, int *brothers, arbitration fn)
       while(brothers[i]!=-1) {calibrador_brothers[i]=brothers[i];i++;}
     }
 
-
-  if ((screen=(int *)myimport("graphics_xforms", "screen"))==NULL){
-     fprintf (stderr, "teleoperator: I can't fetch screen from graphics_xforms\n");
-     jdeshutdown(1);
-  }
-  if ((display=(Display *)myimport("graphics_xforms", "display"))==NULL){
-     fprintf (stderr, "teleoperator: I can't fetch display from graphics_xforms\n");
-     jdeshutdown(1);
-  }
-
   /* Importamos colorA and launch the colorA child schema */
   mycolorA=myimport ("colorA", "colorA");
   colorArun=myimport("colorA", "run");
@@ -1859,6 +1849,15 @@ void calibrador_init(char *configfile)
   myexport("calibrador","calibrador_cycle",&calibrador_cycle);
   myexport("calibrador","calibrador_run",(void *)calibrador_run);
   myexport("calibrador","calibrador_stop",(void *)calibrador_stop);
+
+  if ((screen=(int *)myimport("graphics_xforms", "screen"))==NULL){
+     fprintf (stderr, "teleoperator: I can't fetch screen from graphics_xforms\n");
+     jdeshutdown(1);
+  }
+  if ((display=(Display *)myimport("graphics_xforms", "display"))==NULL){
+     fprintf (stderr, "teleoperator: I can't fetch display from graphics_xforms\n");
+     jdeshutdown(1);
+  }
 
   if (myregister_buttonscallback==NULL){
     if ((myregister_buttonscallback=(registerbuttons)myimport ("graphics_xforms", "register_buttonscallback"))==NULL){
@@ -2030,8 +2029,9 @@ void calib_auto_detect_control_points(int capturada,
 
 }
 
-void calibrador_guibuttons(FL_OBJECT *obj)
+void calibrador_guibuttons(void *obj2)
 {
+  FL_OBJECT *obj=(FL_OBJECT *)obj2;
 
   progeo_demo = 0;
 
@@ -2501,12 +2501,34 @@ void calibrador_guidisplay()
   }  
 }
 
-void calibrador_hide(void)
+
+void calibrador_hide_aux(void)
 {
-  delete_buttonscallback(calibrador_guibuttons);
-  delete_displaycallback(calibrador_guidisplay);
+  all[calibrador_id].guistate=off;
+  mydelete_buttonscallback(calibrador_guibuttons);
+  mydelete_displaycallback(calibrador_guidisplay);
   fl_hide_form(fd_calibradorgui->calibradorgui);
 }
+
+void calibrador_hide(void)
+{
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
+         fn ((gui_function)calibrador_hide_aux);
+      }
+   }
+   else{
+      fn ((gui_function)calibrador_hide_aux);
+   }
+}
+
+int myclose_form(FL_FORM *form, void *an_argument)
+{
+  calibrador_hide();
+  return FL_IGNORE;
+}
+
 
 /** Capturamos los eventos del raton sobre el canvas para ofrecer
     al usuario un control intuitivo usando solo el raton, de tal
@@ -2563,16 +2585,18 @@ void button_press_event(FL_OBJECT *ob, Window win, int win_width,
   
 }
 
-void calibrador_show(void)
+void calibrador_show_aux(void)
 {
   static int k=0;
   float r;
-  
+
+  all[calibrador_id].guistate=on;  
   if (k==0) /* not initialized */
     {
       k++;
       fd_calibradorgui = create_form_calibradorgui();
       fl_set_form_position(fd_calibradorgui->calibradorgui,400,50);
+      fl_set_form_atclose(fd_calibradorgui->calibradorgui,myclose_form,0);
       fl_add_canvas_handler(fd_calibradorgui->canvas,Expose,InitOGL,0);
       fl_add_canvas_handler(fd_calibradorgui->canvas,MotionNotify,motion_event,0);
       fl_add_canvas_handler(fd_calibradorgui->canvas,ButtonPress,button_press_event,0);
@@ -2601,7 +2625,29 @@ void calibrador_show(void)
   
 }
 
+void calibrador_show(void)
+{
+   static callback fn=NULL;
+   if (fn==NULL){
+      if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
+         fn ((gui_function)calibrador_show_aux);
+      }
+   }
+   else{
+      fn ((gui_function)calibrador_show_aux);
+   }
+}
+
 void calibrador_terminate()
 {
+  if (fd_calibradorgui!=NULL)
+    {
+      if (all[calibrador_id].guistate==on) 
+	{
+	  fl_hide_form(fd_calibradorgui->calibradorgui);
+	  all[calibrador_id].guistate=off;
+	}
+      fl_free_form(fd_calibradorgui->calibradorgui);
+    }
   printf("calibrador terminated\n");
 }

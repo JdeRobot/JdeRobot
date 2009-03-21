@@ -193,7 +193,7 @@ void RGB2HSV_init()
         }
         pthread_mutex_unlock(&mutex);
 
-	printf("Init %s v%s ... \n",NAME,VERSION);
+	printf("Init %s v%s ... \n",NAME,COLORSPACES_VERSION);
 	pthread_mutex_lock(&mutex);
 	isInitTableHSV = 0;
 	pthread_mutex_unlock(&mutex);

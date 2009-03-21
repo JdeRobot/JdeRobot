@@ -20,9 +20,12 @@
 
 #define DEBUG 1
 
-#include <jde.h>
 #include <forms.h>
+#include <math.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <glcanvas.h>
+#include <jde.h>
 #include <graphics_xforms.h>
 #include <teleoperatorgui.h>
 #include <pioneer.h>
@@ -346,7 +349,11 @@ void *teleoperator_thread(void *not_used)
 	    }
 	}
     }
+  return NULL;
 }
+
+
+void teleoperator_hide();
 
 void teleoperator_terminate()
 {
@@ -593,11 +600,9 @@ int freeobj_ventanaDD_handle(FL_OBJECT *obj, int event, FL_Coord mx, FL_Coord my
 }
 
 
-extern void teleoperator_hide(void);
-
 void teleoperator_guibuttons(void *obj1){
    FL_OBJECT *obj;
-   float dpan=0.5,dtilt=0.5, speed_coef;
+   float speed_coef;
    float r,lati,longi,guix,guiy,guiz;
    float dx,dy,dz;
    obj=(FL_OBJECT *)obj1;
@@ -1662,6 +1667,7 @@ void teleoperator_guidisplay()
 
 void teleoperator_hide_aux(void)
 {
+  all[teleoperator_id].guistate=off;
   if ((display_state & BASE_TELEOPERATOR)!=0)
     {
       (*myv)=0; 
@@ -1685,24 +1691,33 @@ void teleoperator_hide(){
    }
 }
 
+int myclose_form(FL_FORM *form, void *an_argument)
+{
+  teleoperator_hide();
+  return FL_IGNORE;
+}
+
 void teleoperator_show_aux(void)
 {
   static int k=0;
   float r,lati,longi,guix,guiy,guiz;
 
+  all[teleoperator_id].guistate=on;
   if (k==0) /* not initialized */
     {
       k++;
       fd_teleoperatorgui = create_form_teleoperatorgui();
       fl_set_form_position(fd_teleoperatorgui->teleoperatorgui,400,50);
       fl_show_form(fd_teleoperatorgui->teleoperatorgui,FL_PLACE_POSITION,FL_FULLBORDER,"teleoperator");
+      fl_set_form_atclose(fd_teleoperatorgui->teleoperatorgui,myclose_form,0);
       image_displaysetup(); /* Tiene que ir despues de la inicializacion de Forms, pues hace uso de informacion que la libreria rellena en tiempo de ejecucion al iniciarse */
       fl_add_canvas_handler(fd_teleoperatorgui->canvas,Expose,InitOGL,0);
-      
     }
   else 
     {
       fl_show_form(fd_teleoperatorgui->teleoperatorgui,FL_PLACE_POSITION,FL_FULLBORDER,"teleoperator");
+      teleoperatorgui_win= FL_ObjWin(fd_teleoperatorgui->ventanaA);
+      /* the window (teleoperatorgui_win) changes every time the form is hided and showed again. They need to be updated before displaying anything again */
     }
 
   fl_set_slider_bounds(fd_teleoperatorgui->posX,MAXWORLD*10,-MAXWORLD*10);

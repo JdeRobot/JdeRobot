@@ -17,13 +17,14 @@
  *
  *  
  */
-
-#include <jde.h>
+#include <stdlib.h>
 #include <forms.h>
-#include "hsvtunergui.h"
 #include <math.h>
+#include <unistd.h>
+#include <jde.h>
+#include <hsvtunergui.h>
 #include <colorspaces.h>
-#include "graphics_xforms.h"
+#include <graphics_xforms.h>
 
 #define HSVtunerVer "hsvtuner 2.8"
 
@@ -788,6 +789,7 @@ void hsvtuner_guidisplay()
 
 void hsvtuner_hide_aux(void)
 {
+   all[hsvtuner_id].guistate=off;
    mydelete_buttonscallback(hsvtuner_guibuttons);
    mydelete_displaycallback(hsvtuner_guidisplay);
    fl_hide_form(fd_hsvtunergui->hsvtunergui);
@@ -806,16 +808,24 @@ void hsvtuner_hide(void)
    }
 }
 
+int myclose_form(FL_FORM *form, void *an_argument)
+{
+  hsvtuner_hide();
+  return FL_IGNORE;
+}
+
 void hsvtuner_show_aux(void)
 {
   static int k=0;
 
+  all[hsvtuner_id].guistate=on;
   if (k==0) /* not initialized */
     {
       k++;
       fd_hsvtunergui = create_form_hsvtunergui();
       fl_set_form_position(fd_hsvtunergui->hsvtunergui,400,50);
       fl_show_form(fd_hsvtunergui->hsvtunergui,FL_PLACE_POSITION,FL_FULLBORDER,HSVtunerVer);
+      fl_set_form_atclose(fd_hsvtunergui->hsvtunergui,myclose_form,0);
       hsvtuner_win= FL_ObjWin(fd_hsvtunergui->oculo_orig);
       hsvtunergui_setupDisplay();
     }
