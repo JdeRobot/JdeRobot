@@ -33,7 +33,7 @@
 
 typedef int rl_cmdfunc_t (char *);
 
-const char * thisrelease = "jderobot 4.3-$Revision$";
+const char * thisrelease = "jderobot 4.3.0";
 
 typedef struct {
   const char *name;		/* User printable name of the function. */
@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
   setenv("LC_ALL","POSIX",1);
 
   printf ("\n");
-  printf (" <jderobot> Copyright (C) 1997-2008 JDE Developers Team \n");
+  printf (" <jderobot> Copyright (C) 1997-2009 JDE Developers Team \n");
   printf ("   This is free software, and you are welcome to redistribute it \n");
   printf ("   under certain conditions; type `show_license' for details. \n\n");
 
@@ -499,7 +499,7 @@ com_license (char *arg)
 {
 
 	
-	char license[] = "\n  Copyright (C) 1997-2008 JDE Developers Team \n\n" \
+	char license[] = "\n  Copyright (C) 1997-2009 JDE Developers Team \n\n" \
   "This program is free software: you can redistribute it and/or modify \n" \
   "it under the terms of the GNU General Public License as published by \n" \
   "the Free Software Foundation, either version 3 of the License, or \n" \
