@@ -95,7 +95,7 @@ COMMAND bcommands[] = {
   { "zoom", com_zoom, "Change to schema mode" },
   { "show_license", com_license, "Show JDE license" },
   { "?", com_help, "Synonym for 'help'" },
-  { "exit", com_exit, "Quit using jdeC" },
+  { "exit", com_exit, "Quit using jderobot" },
   { "quit", com_exit, "Synonym for 'exit'" },
   { (const char *)NULL, (rl_cmdfunc_t *)NULL, (const char *)NULL }
 };
@@ -122,8 +122,8 @@ COMMAND scommands[] = {
 };
 
 /*format strings used for prompts*/
-const char *bprompt = "jdeC $> ";
-const char *sprompt = "jdeC[%s] $> ";
+const char *bprompt = "jderobot $> ";
+const char *sprompt = "jderobot[%s] $> ";
 
 /* When non-zero, this global means the user is done using this program. */
 int done;
@@ -250,7 +250,7 @@ execute_line (char *line){
   }
 
   /* no command or factory name found*/
-  fprintf (stderr, "%s: No such command for jdeC.\n", word);
+  fprintf (stderr, "%s: No such command for jderobot.\n", word);
   return (-1);
 }
 
