@@ -1,4 +1,3 @@
-
 /*
  *
  *  Copyright (C) 1997-2008 JDE Developers Team
@@ -180,19 +179,19 @@ void load_image(int source)
 			    fprintf(stderr,"imagefile: error parsing %s file\n",name_color[source]);
 			  else /* (sscanf(buff,"%d %d",&c,&r)==2)*/
 			    {
+			      /* At this point width[i] and height[i] have the requested image size in the 
+			         jde configuration file */
 			      if (autosize[source]) /* autosize */
-				{ width[source]=c;  height[source]=r;
-				  if (source==4) {myA.width=c; myA.height=r;}
-				  if (source==5) {myB.width=c; myB.height=r;}
-				  if (source==6) {myC.width=c; myC.height=r;}
-				  if (source==7) {myD.width=c; myD.height=r;}
+				{ width[source]=c;  
+				  height[source]=r;
 				}
-
 			      else if ((c!=width[source])||(r!=height[source]))
 				{
 				  fprintf(stderr,"imagefile: image size mismatch in %s. Image size in that file is %d*%d, but the configured size is %dx%d.\nCheck the configuration of the imagefile driver and remember that colorA, colorB, colorC and colorD are defined as 320x240\n",name_color[source],c,r,width[source],height[source]);
 				  jdeshutdown(-1);
 				}
+
+			      /* At this point width[i] and height[i] have the real image size */
 			    }
 			}
 		    }
@@ -216,19 +215,19 @@ void load_image(int source)
 		  dest=colorD;
 		}
 	      else if (source==4) 
-		{ if (myA.img==NULL) myA.img=(char *)malloc(myA.width*myA.height*3);
+		{ if (myA.img==NULL) myA.img=(char *)malloc(width[source]*height[source]*3);
 		  dest=myA.img;
 		}
 	      else if (source==5) 
-		{ if (myB.img==NULL) myB.img=(char *)malloc(myB.width*myB.height*3);
+		{ if (myB.img==NULL) myB.img=(char *)malloc(width[source]*height[source]*3);
 		  dest=myB.img;
 		}
 	      else if (source==6) 
-		{ if (myC.img==NULL) myC.img=(char *)malloc(myC.width*myC.height*3);
+		{ if (myC.img==NULL) myC.img=(char *)malloc(width[source]*height[source]*3);
 		  dest=myC.img;
 		}
 	      else if (source==7) 
-		{ if (myD.img==NULL) myD.img=(char *)malloc(myD.width*myD.height*3);
+		{ if (myD.img==NULL) myD.img=(char *)malloc(width[source]*height[source]*3);
 		  dest=myD.img;
 		}
 
@@ -729,7 +728,9 @@ int imagefile_parseconf(char *configfile){
                          serve_color[4]=1;
                          strcpy(name_color[4],word5);
 			 if (parsedwords==5) 
-			   {myA.width = atoi(word6); myA.height = atoi(word7);}
+			   {width[4] = atoi(word6); 
+			     height[4] = atoi(word7);
+			   }
 			 else autosize[4]=1; /* autosize */ 
                       }
 		      else if(strcmp(word4,"varcolorB")==0){
@@ -888,13 +889,13 @@ void imagefile_init(char *configfile)
 	  {
 	    myA.img = NULL;
 	    myA.clock = 0;
-	    myA.width = 0;
-	    myA.height = 0;
 	    all[num_schemas].id = (int *) &varcolorA_schema_id;
 	    strcpy(all[num_schemas].name,"varcolorA");
 	    all[num_schemas].run = (runFn) myvarcolorA_run;
 	    all[num_schemas].stop = (stopFn) myvarcolorA_stop;
 	    load_image(i); /* for memory allocation */
+	    myA.width=width[i]; 
+	    myA.height=height[i];
 	    printf("varcolorA:%s %d*%d",name_color[i],myA.width,myA.height);
 	    if (autosize[i]) printf(" (autosized)\n");
 	    else printf("\n");            
@@ -907,13 +908,13 @@ void imagefile_init(char *configfile)
 	  {
 	    myB.img = NULL;
 	    myB.clock = 0;
-	    myB.width = 0;
-	    myB.height = 0;
 	    all[num_schemas].id = (int *) &varcolorB_schema_id;
 	    strcpy(all[num_schemas].name,"varcolorB");
 	    all[num_schemas].run = (runFn) myvarcolorB_run;
 	    all[num_schemas].stop = (stopFn) myvarcolorB_stop;
 	    load_image(i); /* for memory allocation */
+	    myB.width=width[i]; 
+	    myB.height=height[i];
 	    printf("varcolorB:%s %d*%d",name_color[i],myB.width,myB.height);
             if (autosize[i]) printf(" (autosized)\n");
 	    else printf("\n");  
@@ -926,13 +927,13 @@ void imagefile_init(char *configfile)
 	  {
 	    myC.img = NULL;
 	    myC.clock = 0;
-	    myC.width = 0;
-	    myC.height = 0;
 	    all[num_schemas].id = (int *) &varcolorC_schema_id;
 	    strcpy(all[num_schemas].name,"varcolorC");
 	    all[num_schemas].run = (runFn) myvarcolorC_run;
 	    all[num_schemas].stop = (stopFn) myvarcolorC_stop;
 	    load_image(i); /* for memory allocation */
+	    myC.width=width[i]; 
+	    myC.height=height[i];
 	    printf("varcolorC:%s %d*%d",name_color[i],myC.width,myC.height);
 	    if (autosize[i]) printf(" (autosized)\n");
 	    else printf("\n");  
@@ -945,13 +946,13 @@ void imagefile_init(char *configfile)
 	  {
 	    myD.img = NULL;
 	    myD.clock = 0;
-	    myD.width = 0;
-	    myD.height = 0;
 	    all[num_schemas].id = (int *) &varcolorD_schema_id;
 	    strcpy(all[num_schemas].name,"varcolorD");
 	    all[num_schemas].run = (runFn) myvarcolorD_run;
 	    all[num_schemas].stop = (stopFn) myvarcolorD_stop;
 	    load_image(i); /* for memory allocation */
+	    myD.width=width[i]; 
+	    myD.height=height[i];
 	    printf("varcolorD:%s %d*%d",name_color[i],myD.width,myD.height);
 	    if (autosize[i]) printf(" (autosized)\n");
 	    else printf("\n");  
