@@ -1,5 +1,6 @@
 jderobot (4.3.0-rc4) unstable; urgency=low
 
+  * Fix Bug 238 (jmplaza)
   * Fix Bug #237 (jmplaza) 
   * Fix Bug #236 (jmplaza)  
   * New Hough transform at opencvdemo (eperdes)

@@ -227,7 +227,7 @@ void recorder_run(int father, int *brothers, arbitration fn)
   int i;
 
   /* update the father incorporating this schema as one of its children */
-  if (father!=GUIHUMAN) 
+  if (father!=GUIHUMAN && father!=SHELLHUMAN) 
     {
       pthread_mutex_lock(&(all[father].mymutex));
       all[father].children[recorder_id]=TRUE;

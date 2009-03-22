@@ -240,6 +240,14 @@ void teleoperator_run(int father, int *brothers, arbitration fn)
 {
   int i;
  
+  /* update the father incorporating this schema as one of its children */
+  if (father!=GUIHUMAN && father!=SHELLHUMAN)
+    {
+      pthread_mutex_lock(&(all[father].mymutex));
+      all[father].children[teleoperator_id]=TRUE;
+      pthread_mutex_unlock(&(all[father].mymutex));
+    }
+
   pthread_mutex_lock(&(all[teleoperator_id].mymutex));
   /* this schema runs its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[teleoperator_id].children[i]=FALSE;

@@ -902,7 +902,7 @@ void followball_run(int father, int *brothers, arbitration fn)
 
 
   /* update the father incorporating this schema as one of its children */
-  if (father!=GUIHUMAN)
+  if (father!=GUIHUMAN && father!=SHELLHUMAN)
   {
     pthread_mutex_lock(&(all[father].mymutex));
     all[father].children[followball_id]=TRUE;

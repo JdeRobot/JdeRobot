@@ -253,10 +253,18 @@ void introrob_run(int father, int *brothers, arbitration fn)
 {
   int i;
  
+  /* update the father incorporating this schema as one of its children */
+  if (father!=GUIHUMAN && father!=SHELLHUMAN)
+    {
+      pthread_mutex_lock(&(all[father].mymutex));
+      all[father].children[introrob_id]=TRUE;
+      pthread_mutex_unlock(&(all[father].mymutex));
+    }
+
   pthread_mutex_lock(&(all[introrob_id].mymutex));
   /* this schema runs its execution with no children at all */
   for(i=0;i<MAX_SCHEMAS;i++) all[introrob_id].children[i]=FALSE;
- 
+
   all[introrob_id].father=father;
   if (brothers!=NULL)
     {
