@@ -167,12 +167,12 @@ void *graphics_gtk_thread2(void *arg){
    long diff, next;
 
 
-   g_idle_add_full (G_PRIORITY_HIGH, (GSourceFunc)  graphics_gtk_iteration,
- 		    NULL, NULL);
-
    for(;;)
    {
       gettimeofday(&a,NULL);
+
+     g_idle_add_full (G_PRIORITY_HIGH, (GSourceFunc)  graphics_gtk_iteration,
+                      NULL, NULL); 
 
       gettimeofday(&b,NULL);
       diff = (b.tv_sec-a.tv_sec)*1000000+b.tv_usec-a.tv_usec;
