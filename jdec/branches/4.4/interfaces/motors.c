@@ -4,68 +4,92 @@
 #include "motors.h"
 
 
-Motors* new_Motors(const char* interface_name){
-  Motors* m = (Motors*)calloc(1,sizeof(Motors));
-  assert(m!=0);
-  strncpy(m->interface_name,interface_name,MAX_NAME);
-  m->interface_name[MAX_NAME-1] = '\0';
-  return m;
+Motors* new_Motors(const char* father, 
+		   const char* interface_name,
+		   const int owned){
+  Interface* i = new_Interface(father,interface_name,owned);
+  if (owned)
+    i->datap = calloc(1,sizeof(Motors_data));
+  return (Motors*)i;
 }
 
 void delete_Motors(Motors* m){
-  free(m);
+  if (m->owned)
+    free(m->datap);
+  delete_Interface((Interface*)m);
 }
 
 float Motors_v_get(const Motors* m){
-  float* motors_v;
+  float* vp;
 
   assert(m!=0);
-  motors_v=(float *)myimport(m->interface_name,"v");
-  return (motors_v?*motors_v:0.0);
+  if (m->owned)
+    return ((Motors_data*)m->datap)->v;
+  else{
+    vp=(float *)myimport(m->interface_name,"v");
+    return (vp?*vp:0.0);
+  }
 }
 
 float Motors_w_get(const Motors* m){
-  float* motors_w;
+  float* wp;
 
   assert(m!=0);
-  motors_w=(float *)myimport(m->interface_name,"w");
-  return (motors_w?*motors_w:0);
+  if (m->owned)
+    return ((Motors_data*)m->datap)->w;
+  else{
+    wp=(float *)myimport(m->interface_name,"w");
+    return (wp?*wp:0);
+  }
 }
 
 int Motors_cycle_get(const Motors* m){
-  int* motors_cycle;
-    
+  int* cyclep;
+
   assert(m!=0);
-  motors_cycle=(int *)myimport(m->interface_name,"cycle");
-  return (motors_cycle?*motors_cycle:0.0);
+  if (m->owned)
+    return ((Motors_data*)m->datap)->cycle;
+  else{
+    cyclep=(int *)myimport(m->interface_name,"cycle");
+    return (cyclep?*cyclep:0);
+  }
 }
 
-void Motors_v_set(Motors* m, const float v){
-  float* motors_v;
+void Motors_v_set(Motors* m, const float new_v){
+  float* vp;
 
   assert(m!=0);
-  motors_v=(float *)myimport(m->interface_name,"v");
-  if (motors_v)
-    *motors_v = v;
-  m->v = v;
+  if (m->owned)
+    ((Motors_data*)m->datap)->v=new_v;
+  else{  
+    vp=(float *)myimport(m->interface_name,"v");
+    if (vp)
+      *vp = new_v;
+  }
 }
 
-void Motors_w_set(Motors* m, const float w){
-  float* motors_w;
+void Motors_w_set(Motors* m, const float new_w){
+  float* wp;
 
   assert(m!=0);
-  motors_w=(float *)myimport(m->interface_name,"w");
-  if (motors_w)
-    *motors_w = w;
-  m->w = w;
+  if (m->owned)
+    ((Motors_data*)m->datap)->w=new_w;
+  else{
+    wp=(float *)myimport(m->interface_name,"w");
+    if (wp)
+      *wp = new_w;
+  }
 }
 
-void Motors_cycle_set(Motors* m, const int cycle){
-  int* motors_cycle;
+void Motors_cycle_set(Motors* m, const int new_cycle){
+  int* cyclep;
 
   assert(m!=0);
-  motors_cycle=(int *)myimport(m->interface_name,"cycle");
-  if (motors_cycle)
-    *motors_cycle = cycle;
-  m->cycle = cycle;
+  if (m->owned)
+    ((Motors_data*)m->datap)->cycle=new_cycle;
+  else{
+    cyclep=(int *)myimport(m->interface_name,"cycle");
+    if (cyclep)
+      *cyclep = new_cycle;
+  }
 }

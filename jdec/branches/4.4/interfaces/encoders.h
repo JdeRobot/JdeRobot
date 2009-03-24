@@ -1,6 +1,11 @@
 #ifndef ENCODERS_H
 #define ENCODERS_H
 #include <jde.h>
+#include <interface.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct{
   /*perceptions*/
@@ -12,12 +17,17 @@ typedef struct{
   unsigned long int clock;
   /*modulations*/
   int cycle;
-  char interface_name[MAX_NAME];
-} Encoders;
+} Encoders_data;
 
-Encoders* new_Encoders(const char* interface_name);
+typedef Interface Encoders;
+
+/*constructor & destructor*/
+Encoders* new_Encoders(const char* father,
+		       const char* interface_name,
+		       const int owned);
 void delete_Encoders(Encoders* e);
 
+/*get methods*/
 float Encoders_x_get(const Encoders* e);
 float Encoders_y_get(const Encoders* e);
 float Encoders_theta_get(const Encoders* e);
@@ -26,7 +36,16 @@ float Encoders_sin_get(const Encoders* e);
 unsigned long int Encoders_clock_get(const Encoders* e);
 int Encoders_cycle_get(const Encoders* e);
 
-void Encoders_cycle_set(Encoders* e, const int cycle);
+/*set methods*/
+void Encoders_x_set(const Encoders* e, const float new_x);
+void Encoders_y_set(const Encoders* e, const float new_y);
+void Encoders_theta_set(const Encoders* e, const float new_theta);
+void Encoders_cos_set(const Encoders* e, const float new_cos);
+void Encoders_sin_set(const Encoders* e, const float new_sin);
+void Encoders_clock_set(const Encoders* e, const unsigned long int new_clock);
+void Encoders_cycle_set(Encoders* e, const int new_cycle);
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif /*ENCODERS_H*/

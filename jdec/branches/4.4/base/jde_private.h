@@ -42,14 +42,14 @@ extern int parse_configfile(const char* cf);
  * @param name shared object to load without .so
  * @return loaded schema if ok, null otherwise
  */
-extern JDESchema* jde_loadschema(char *name);
+extern JDESchema* jde_loadschema(const char *name);
 
 /**
  * Load the so named as a driver/service
  * @param name shared object to load without .so
  * @return loaded driver/service if ok, null otherwise
  */
-extern JDEDriver* jde_loaddriver(char *name);
+extern JDEDriver* jde_loaddriver(const char *name);
 
 /**
  * Find schema by name

@@ -89,7 +89,7 @@ class JDESchema(object):
 		self.__cond.acquire()
 		print "run(",self.name,"):",father,",",brothers
 		jde.set_state(self.__schema,jde.notready)
-		#run hijos
+		self.run_children()
 		self.__cond.notify()
 		self.__cond.release()
 
@@ -97,6 +97,7 @@ class JDESchema(object):
 		self.mutex.acquire()
 		print "stop(",self.name,")"
 		jde.set_state(self.__schema,jde.slept)
+		self.stop_children()
 		self.mutex.release()
 
 	def show(self):
@@ -107,3 +108,9 @@ class JDESchema(object):
 
 	def iteration(self):
 		print "iteration(",self.name,")"
+
+	def run_children(self):
+		print "running children..."
+
+	def stop_children(self):
+		print "stoping children..."

@@ -48,7 +48,7 @@ typedef struct {
   /** Dynamic library handler for the schema module*/
   void *handle;
   /** Schema's name*/
-  char name[100];
+  char name[MAX_NAME];
   /** Schema's identifier*/
   int *id; /* schema identifier */
   /** Schema's state
@@ -93,7 +93,7 @@ typedef struct {
   /** Dynamic library handler for the driver module*/
   void *handle;
   /** Driver's name*/
-  char name[100];
+  char name[MAX_NAME];
   /** Driver's identifier*/
   int id;
   
@@ -106,9 +106,9 @@ typedef struct {
 
 
 int jdeinit(const char* cf);
-void jdeshutdown(int sig);
-JDESchema* jde_loadschema(char *name);
-JDEDriver* jde_loaddriver(char *name);
+void jdeshutdown(const int sig);
+JDESchema* jde_loadschema(const char *name);
+JDEDriver* jde_loaddriver(const char *name);
 
 char* get_configfile();
 void null_arbitration();
@@ -116,5 +116,5 @@ JDESchema* find_schema (const char *name);
 int get_state(const JDESchema* s);
 void set_state(JDESchema* s,const int newstate);
 void speedcounter2(JDESchema* s);
-int myexport(char *schema, char *name, void *p);
-void *myimport(char *schema, char *name);
+int myexport(const char *schema, const char *name, void *p);
+void *myimport(const char *schema, const char *name);
