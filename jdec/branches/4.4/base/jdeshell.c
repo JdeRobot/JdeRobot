@@ -692,32 +692,24 @@ com_load_schema (char *arg){
   return 0;
 }
 
-int com_load(char *name){
-  char *ppos;
+int com_load(char *arg){
+  char word[MAX_BUFFER], word2[MAX_BUFFER];
+  int words;
+  char *cf;
 
-  fprintf(stderr,"Loading %s...\n",name);
-
-  ppos=strrchr(name,'.');
-  if (strcmp(ppos, ".so") == 0) {
-    if (load_so(name) == 0){
-      fprintf(stderr,"error loading so module %s\n",name);
-      return -1;
-    }
-  } else if (strcmp(ppos, ".py") == 0) {
-    char pymodule[32];
-    int lpymodule = ppos-name;
-
-    strncpy(pymodule,name,lpymodule);
-    pymodule[lpymodule] = '\0';
-    if (load_py(pymodule) == 0){
-      fprintf(stderr,"error loading python module %s\n",name);
-      return -1;
-    }
-  } else {
-    fprintf(stderr,"unknown module type %s\n",name);
+  if (!valid_argument ("load", arg))
+    return -1;
+  
+  words=sscanf(arg,"%s %s",word,word2);
+  if (words == 1){
+    cf = get_configfile();
+  }else if (words==2){
+    cf = word2;
+  }else{
+    fprintf (stderr, "load command accept 1 or 2 args only: load <module_path> [<config file>]");	
     return -1;
   }
-  return 0;
+  return load_module2(word,cf);
 }
 
 /**

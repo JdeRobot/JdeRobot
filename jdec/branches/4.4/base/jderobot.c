@@ -46,14 +46,14 @@ int num_drivers=0;
 
 /** Shared variables' type definition*/
 typedef struct sharedname{
-   /** The exporter schema's name*/
-   char schema[MAX_BUFFER];
-   /** The name of the shared variable or funcion*/
-   char name[MAX_BUFFER];
-   /** Pointer to de shared variable of function casted to (void *)*/
-   void *pointer;
+  /** The exporter schema's name*/
+  char schema[MAX_BUFFER];
+  /** The name of the shared variable or funcion*/
+  char name[MAX_BUFFER];
+  /** Pointer to de shared variable of function casted to (void *)*/
+  void *pointer;
   /**  Pointer to the next node*/
-   struct sharedname *next;
+  struct sharedname *next;
 }Tsharedname;
 
 /** List with the shared variables and functions*/
@@ -110,38 +110,38 @@ int myexport(const char *schema, const char *name, void *p)
   Tsharedname * next;
   Tsharedname * this;
   if (p!=NULL) {
-     if (sharedlist!=NULL){
-        next=sharedlist->next;
-        this=sharedlist;
-        while (this->next!=NULL && (strcmp(schema, this->schema)!=0 ||
-               strcmp(name, this->name)!=0) )
+	if (sharedlist!=NULL){
+	  next=sharedlist->next;
+	  this=sharedlist;
+	  while (this->next!=NULL && (strcmp(schema, this->schema)!=0 ||
+								  strcmp(name, this->name)!=0) )
         {
-           this=this->next;
+		  this=this->next;
         }
-        if (this->next==NULL){
-           /*Store this new symbol*/
-           this->next=(Tsharedname *)malloc (sizeof(Tsharedname));
-           this=this->next;
-           strcpy(this->name,name);
-           strcpy(this->schema,schema);
-           this->pointer=p;
-           this->next=NULL;
-        }
-        else{
-           /*Symbol already stored*/
-           fprintf(stderr,"Warning: Symbol \"%s\" at schema \"%s\" it's alredy stored, my export will be ignored now\n",
-                   name, schema);
-           return 0;
-        }
-     }
-     else{
-        /*Empty list*/
-        sharedlist=(Tsharedname *)malloc (sizeof(Tsharedname));
-        strcpy(sharedlist->name,name);
-        strcpy(sharedlist->schema,schema);
-        sharedlist->pointer=p;
-        sharedlist->next=NULL;
-     }
+	  if (this->next==NULL){
+		/*Store this new symbol*/
+		this->next=(Tsharedname *)malloc (sizeof(Tsharedname));
+		this=this->next;
+		strcpy(this->name,name);
+		strcpy(this->schema,schema);
+		this->pointer=p;
+		this->next=NULL;
+	  }
+	  else{
+		/*Symbol already stored*/
+		fprintf(stderr,"Warning: Symbol \"%s\" at schema \"%s\" it's alredy stored, my export will be ignored now\n",
+				name, schema);
+		return 0;
+	  }
+	}
+	else{
+	  /*Empty list*/
+	  sharedlist=(Tsharedname *)malloc (sizeof(Tsharedname));
+	  strcpy(sharedlist->name,name);
+	  strcpy(sharedlist->schema,schema);
+	  sharedlist->pointer=p;
+	  sharedlist->next=NULL;
+	}
   }
   return 1;
 }
@@ -155,19 +155,19 @@ int myexport(const char *schema, const char *name, void *p)
 void *myimport(const char *schema, const char *name)
      /* returns NULL in case of not finding the requested variable */
 {
-   Tsharedname *this;
+  Tsharedname *this;
 
-   this=sharedlist;
-   while (this!=NULL){
-      if ((strcmp(schema,this->schema)==0) &&
-           (strcmp(name,this->name)==0))
+  this=sharedlist;
+  while (this!=NULL){
+	if ((strcmp(schema,this->schema)==0) &&
+		(strcmp(name,this->name)==0))
       {
-         return this->pointer;
+		return this->pointer;
       }
-      this=this->next;
-   }
-   /*This statment will execute only if the symbos it's not at the list*/
-   return NULL;
+	this=this->next;
+  }
+  /*This statment will execute only if the symbos it's not at the list*/
+  return NULL;
 }
 
 /**
@@ -198,7 +198,7 @@ void *cronos_thread(void *not_used)
   gettimeofday(&tnow,NULL);
   tlast = tnow;
 
- /* frame rate computing */   
+  /* frame rate computing */   
   for(;;)
     {
       /* printf("cronos iteration\n"); */
@@ -206,10 +206,10 @@ void *cronos_thread(void *not_used)
       diff = (tnow.tv_sec-tlast.tv_sec)*1000000+tnow.tv_usec-tlast.tv_usec;
       
       for(i=0;i<num_schemas;i++)
-	{
-	  (all[i].fps)=(float)(all[i].k)*(float)1000000./(float)diff;
-	  (all[i].k)=0;
-	}
+		{
+		  (all[i].fps)=(float)(all[i].k)*(float)1000000./(float)diff;
+		  (all[i].k)=0;
+		}
       tlast=tnow;
       /* discounts 10ms taken by calling usleep itself */
       usleep(cronos_cycle*1000-10000);
@@ -230,10 +230,10 @@ int jdeinit(const char* cf){
     }else{
       sprintf(s,"%s%s",CONFIGDIR,"/jderobot.conf");
       if (parse_configfile(s)){
-	fprintf(stderr,"Configuration from %s\n",s);
+		fprintf(stderr,"Configuration from %s\n",s);
       }else{
-	fprintf(stderr,"Can not find any config file\n");
-	return 0;
+		fprintf(stderr,"Can not find any config file\n");
+		return 0;
       }
     }
   }else{
@@ -265,32 +265,32 @@ void jdeshutdown(const int sig)
 
   pthread_mutex_lock(&shuttingdown_mutex);
   if (shuttingdown==0){
-     shutdown=1;
-     shuttingdown++;
+	shutdown=1;
+	shuttingdown++;
   }
   else{
-     shutdown=0;
-     fprintf(stderr, "Jde is already shutting down\n");
+	shutdown=0;
+	fprintf(stderr, "Jde is already shutting down\n");
   }
   pthread_mutex_unlock(&shuttingdown_mutex);
 
   if (shutdown==1){
-     /* unload all the schemas loaded as plugins */
+	/* unload all the schemas loaded as plugins */
     for(i=num_schemas-1;i>=0;i--)
-     {
+	  {
         if (all[i].terminate!=NULL) all[i].terminate();
         if (all[i].handle!=NULL) dlclose(all[i].handle);
-     }
+	  }
 
-     /* unload all the drivers loaded as plugins */
-     for(i=num_drivers-1;i>=0;i--)
-     {
+	/* unload all the drivers loaded as plugins */
+	for(i=num_drivers-1;i>=0;i--)
+	  {
         if (mydrivers[i].terminate!=NULL) mydrivers[i].terminate();
         if (mydrivers[i].handle!=NULL) dlclose(mydrivers[i].handle);
-     }
+	  }
 
-     fprintf(stderr,"Bye\n");
-     exit(sig);
+	fprintf(stderr,"Bye\n");
+	exit(sig);
   }
 }
 
@@ -302,25 +302,25 @@ void jdeshutdown(const int sig)
  * @return A pointer to the handler
  */
 void* load_module(const char* module_name){
-   char *path2;
-   char path_cp[MAX_BUFFER];
-   char *directorio;
-   void *handler=NULL;
+  char *path2;
+  char path_cp[MAX_BUFFER];
+  char *directorio;
+  void *handler=NULL;
 
-   strncpy(path_cp, path, MAX_BUFFER);
-   path2=path_cp;
-   while ((directorio=strsep(&path2,":"))!=NULL && handler==NULL){
-      char fichero[512];
-      strncpy(fichero, directorio, 512);
-      strncat(fichero,"/", 512-strlen(fichero));
-      strncat(fichero, module_name, 512-strlen(fichero));
-      /* printf ("trying >%s<\n",fichero);*/
-      handler = dlopen(fichero, RTLD_LAZY);
-      /* if (handler ==NULL)
-	 fprintf(stderr,"I can't load: %s\n",dlerror());
-      */
-   }
-   return handler;
+  strncpy(path_cp, path, MAX_BUFFER);
+  path2=path_cp;
+  while ((directorio=strsep(&path2,":"))!=NULL && handler==NULL){
+	char fichero[512];
+	strncpy(fichero, directorio, 512);
+	strncat(fichero,"/", 512-strlen(fichero));
+	strncat(fichero, module_name, 512-strlen(fichero));
+	/* printf ("trying >%s<\n",fichero);*/
+	handler = dlopen(fichero, RTLD_LAZY);
+	/* if (handler ==NULL)
+	   fprintf(stderr,"I can't load: %s\n",dlerror());
+	*/
+  }
+  return handler;
 }
 
 /**
@@ -485,8 +485,8 @@ int jde_readline(FILE *myfile)
 
   /* Captura la linea y luego leeremos de la linea con sscanf, comprobando en la linea que el ultimo caracter es \n. No lo podemos hacer directamente con fscanf porque esta funcion no distingue espacio en blanco de \n */
   while((buffer_file[i]!='\n') && 
-	  (buffer_file[i] != (char)255) &&  
-	  (i<MAX_BUFFER-1) ) {
+		(buffer_file[i] != (char)255) &&  
+		(i<MAX_BUFFER-1) ) {
     buffer_file[++i]=fgetc(myfile);
   }
 
@@ -505,92 +505,92 @@ int jde_readline(FILE *myfile)
       words=sscanf(&buffer_file[j],"%s %s",word,word2);
       
       if (words==1){
-	cf = configfile;
+		cf = configfile;
       }
       else if (words==2){
-	cf = word2;
+		cf = word2;
       }
       else 
-	fprintf(stderr,"Bad line in configuration file %s, ignoring it. Load_schema only accepts one or two parameters: schema_name [schemaconfigfile]\n Offending line: '%s'\n", configfile, buffer_file);
+		fprintf(stderr,"Bad line in configuration file %s, ignoring it. Load_schema only accepts one or two parameters: schema_name [schemaconfigfile]\n Offending line: '%s'\n", configfile, buffer_file);
       
       s = jde_loadschema(word);
       if (s == 0){
-	fprintf(stderr,"Schema loading failed\n");
-	exit(1);
+		fprintf(stderr,"Schema loading failed\n");
+		exit(1);
       }
       s ->init(cf);
     }
     
     else if (strcmp(word,"schema")==0)
       {
-	if(schema_configuration_section==0) schema_configuration_section=1; 
-	else{
-	  fprintf(stderr,"Error in configuration file %s. Schema's configuration section without 'end_schema' line\n", configfile);
-	  exit(-1);
-	}
+		if(schema_configuration_section==0) schema_configuration_section=1; 
+		else{
+		  fprintf(stderr,"Error in configuration file %s. Schema's configuration section without 'end_schema' line\n", configfile);
+		  exit(-1);
+		}
       }
     else if(strcmp(word,"end_schema")==0)
       schema_configuration_section=0;
 
     else if ((strcmp(word,"resume")==0) ||
-	     (strcmp(word,"run")==0)||
-	     (strcmp(word,"on")==0))
+			 (strcmp(word,"run")==0)||
+			 (strcmp(word,"on")==0))
       {
-	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
-	sscanf(&buffer_file[j],"%s",word);
-	r=(runFn)myimport(word,"run");
-	if (r!=NULL) r(SHELLHUMAN,NULL,NULL);
-	}
+		while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
+		sscanf(&buffer_file[j],"%s",word);
+		r=(runFn)myimport(word,"run");
+		if (r!=NULL) r(SHELLHUMAN,NULL,NULL);
+	  }
 
     else if ((strcmp(word,"guiresume")==0)||
-              (strcmp(word,"guion")==0)||
-              (strcmp(word,"show")==0))
+			 (strcmp(word,"guion")==0)||
+			 (strcmp(word,"show")==0))
       {
-	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
-	sscanf(&buffer_file[j],"%s",word);
-	for(k=0;k<num_schemas;k++)
-	  {
-	    if (strcmp(all[k].name,word)==0) {
-	      if (all[k].show!=NULL)
-		all[k].show();
-	      all[k].guistate=on;
-	      break;
-	    }
-	  }
-	if (k==num_schemas) 
-	  fprintf(stderr,"Error in configuration file %s. Have you already loaded the schema before the offending line:' %s'\n", configfile, buffer_file);
+		while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
+		sscanf(&buffer_file[j],"%s",word);
+		for(k=0;k<num_schemas;k++)
+		  {
+			if (strcmp(all[k].name,word)==0) {
+			  if (all[k].show!=NULL)
+				all[k].show();
+			  all[k].guistate=on;
+			  break;
+			}
+		  }
+		if (k==num_schemas) 
+		  fprintf(stderr,"Error in configuration file %s. Have you already loaded the schema before the offending line:' %s'\n", configfile, buffer_file);
       }
 
 
     else if ((strcmp(word,"load_driver")==0) ||
-	     (strcmp(word,"load_service")==0))
+			 (strcmp(word,"load_service")==0))
       {
-	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
-	words=sscanf(&buffer_file[j],"%s %s",word,word2);
+		while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
+		words=sscanf(&buffer_file[j],"%s %s",word,word2);
 
-	if (words==1){
-	  cf = configfile;
-	}
-	else if (words==2){
-	  cf = word2;
-	}
-	else 
-	  fprintf(stderr,"Bad line in configuration file %s, ignoring it. Load_driver/service only accepts one or two parameters: driver_name [driverconfigfile]\n Offending line: '%s'\n", configfile, buffer_file);
-	d = jde_loaddriver(word);
-	if (d == 0){
-	  fprintf(stderr,"Driver/Service loading failed\n");
-	  exit(1);
-	}
-	d->init(cf);
+		if (words==1){
+		  cf = configfile;
+		}
+		else if (words==2){
+		  cf = word2;
+		}
+		else 
+		  fprintf(stderr,"Bad line in configuration file %s, ignoring it. Load_driver/service only accepts one or two parameters: driver_name [driverconfigfile]\n Offending line: '%s'\n", configfile, buffer_file);
+		d = jde_loaddriver(word);
+		if (d == 0){
+		  fprintf(stderr,"Driver/Service loading failed\n");
+		  exit(1);
+		}
+		d->init(cf);
       }
 
     else if (strcmp(word,"driver")==0)
       {
-	if(driver_configuration_section==0) driver_configuration_section=1;
-	else{
-	  fprintf(stderr,"Error in configuration file %s. Driver's configuration section without 'end_driver' line\n", configfile);
-	  exit(-1);
-	}
+		if(driver_configuration_section==0) driver_configuration_section=1;
+		else{
+		  fprintf(stderr,"Error in configuration file %s. Driver's configuration section without 'end_driver' line\n", configfile);
+		  exit(-1);
+		}
       }
     else if (strcmp(word,"end_driver")==0)
       driver_configuration_section=0;
@@ -598,30 +598,49 @@ int jde_readline(FILE *myfile)
 
     else if (strcmp(word,"service")==0)
       {
-	if(service_configuration_section==0) service_configuration_section=1;
-	else{
-	  fprintf(stderr,"Error in configuration file %s. Service's configuration section without 'end_service' line\n", configfile);
-	  exit(-1);
-	}
+		if(service_configuration_section==0) service_configuration_section=1;
+		else{
+		  fprintf(stderr,"Error in configuration file %s. Service's configuration section without 'end_service' line\n", configfile);
+		  exit(-1);
+		}
       }
     else if (strcmp(word,"end_service")==0)
       service_configuration_section=0;
     
 
     else if(strcmp (word,"path")==0){
-       /*Loads the path*/
-       while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')
-              &&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t'))
-          j++;
-       sscanf(&buffer_file[j],"%s",word);
-       strncpy(path, word, MAX_BUFFER);
-    }    
+	  /*Loads the path*/
+	  while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')
+			&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t'))
+		j++;
+	  sscanf(&buffer_file[j],"%s",word);
+	  strncpy(path, word, MAX_BUFFER);
+    }
+
+    else if (strcmp(word,"aload")==0)
+      {
+		while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
+		words=sscanf(&buffer_file[j],"%s %s",word,word2);
+
+		if (words==1){
+		  cf = configfile;
+		}
+		else if (words==2){
+		  cf = word2;
+		}
+		else 
+		  fprintf(stderr,"Bad line in configuration file %s, ignoring it. Load_driver/service only accepts one or two parameters: driver_name [driverconfigfile]\n Offending line: '%s'\n", configfile, buffer_file);
+		if (!load_module2(word,cf)){
+		  fprintf(stderr,"Module loading failed\n");
+		  exit(1);
+		}
+      }
     
     else{
       if ((driver_configuration_section==0) &&
-	  (service_configuration_section==0) &&
-	  (schema_configuration_section==0))
-	fprintf(stderr,"I don't know what to do with: %s\n",buffer_file);
+		  (service_configuration_section==0) &&
+		  (schema_configuration_section==0))
+		fprintf(stderr,"I don't know what to do with: %s\n",buffer_file);
     }
     return 0;
   }
@@ -676,11 +695,11 @@ void set_state (JDESchema* s,const int newstate){
     /* only some changes are relevant. For instance change of one 
        motor schema from active to ready is not, because it happens every iteration */
     if ((newstate==winner) || 
-	(newstate==slept) || 
-	(newstate==forced)|| 
-	(newstate==notready)|| 
-	(newstate==ready)|| 
-	(newstate==active));
+		(newstate==slept) || 
+		(newstate==forced)|| 
+		(newstate==notready)|| 
+		(newstate==ready)|| 
+		(newstate==active));
   }
 }
 
