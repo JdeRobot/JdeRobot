@@ -106,15 +106,14 @@ gboolean on_delete_window (GtkWidget *widget, GdkEvent *event, gpointer user_dat
 
 void on_active_image_toggled (GtkCheckMenuItem *menu_item, gpointer user_data){
    if (image_ok){
-      if (gtk_check_menu_item_get_active(menu_item)){
-		color_run(opencvdemo_id,NULL,NULL);
-		load_image();
-         show_image=1;
-      }
-      else{
-		free_image();
-		color_stop();
-         show_image=0;
+		if (gtk_check_menu_item_get_active(menu_item)){
+			color_run(opencvdemo_id,NULL,NULL);
+			load_image();
+			show_image=1;
+		}
+		else{
+			color_stop();
+			show_image=0;
       }
    }
    gtk_window_resize (GTK_WINDOW(win),1,1);
@@ -212,29 +211,31 @@ void on_active_houghp_toggled (GtkCheckMenuItem *menu_item, gpointer user_data){
 /* Load images */
 void load_image() {
 	pthread_mutex_lock(&main_mutex);
-	image=(char *)malloc((*myAA).width*(*myAA).height*3);
-	image_aux=(char *)malloc((*myAA).width*(*myAA).height*3);
-	{
-		GdkPixbuf *imgBuff;
-		GtkImage *img=(GtkImage *)glade_xml_get_widget(xml, "image");
-		imgBuff = gdk_pixbuf_new_from_data((unsigned char *)image,
-                                             GDK_COLORSPACE_RGB,0,8,
-                                             (*myAA).width,(*myAA).height,
-                                             (*myAA).width*3,NULL,NULL);
-		gtk_image_clear(img);
-		gtk_image_set_from_pixbuf(img, imgBuff);
-		gtk_widget_queue_draw(GTK_WIDGET(img));
+	if(image==NULL && image_aux==NULL) {	
+		image=(char *)malloc((*myAA).width*(*myAA).height*3);
+		image_aux=(char *)malloc((*myAA).width*(*myAA).height*3);
+		{
+			GdkPixbuf *imgBuff;
+			GtkImage *img=(GtkImage *)glade_xml_get_widget(xml, "image");
+			imgBuff = gdk_pixbuf_new_from_data((unsigned char *)image,
+		                                         GDK_COLORSPACE_RGB,0,8,
+		                                         (*myAA).width,(*myAA).height,
+		                                         (*myAA).width*3,NULL,NULL);
+			gtk_image_clear(img);
+			gtk_image_set_from_pixbuf(img, imgBuff);
+			gtk_widget_queue_draw(GTK_WIDGET(img));
 
-		GdkPixbuf *imgBuff_aux;
-		GtkImage *img_aux=(GtkImage *)glade_xml_get_widget(xml, "image_aux");
-		imgBuff_aux = gdk_pixbuf_new_from_data((unsigned char *)image_aux,
-                                             GDK_COLORSPACE_RGB,0,8,
-                                             (*myAA).width,(*myAA).height,
-                                             (*myAA).width*3,NULL,NULL);
-		gtk_image_clear(img_aux);
-		gtk_image_set_from_pixbuf(img_aux, imgBuff_aux);
-		gtk_widget_queue_draw(GTK_WIDGET(img_aux));
+			GdkPixbuf *imgBuff_aux;
+			GtkImage *img_aux=(GtkImage *)glade_xml_get_widget(xml, "image_aux");
+			imgBuff_aux = gdk_pixbuf_new_from_data((unsigned char *)image_aux,
+		                                         GDK_COLORSPACE_RGB,0,8,
+		                                         (*myAA).width,(*myAA).height,
+		                                         (*myAA).width*3,NULL,NULL);
+			gtk_image_clear(img_aux);
+			gtk_image_set_from_pixbuf(img_aux, imgBuff_aux);
+			gtk_widget_queue_draw(GTK_WIDGET(img_aux));
 
+		}
 	}
 	pthread_mutex_unlock(&main_mutex);
 }
@@ -738,6 +739,7 @@ void opencvdemo_guiinit(){
 }
 
 void opencvdemo_terminate(){
+	free_image();
 }
 
 void opencvdemo_stop()
