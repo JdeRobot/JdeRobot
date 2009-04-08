@@ -1,3 +1,5 @@
+  * Fix Bug #244 (salons)
+
 jderobot (4.3.0-rc5) unstable; urgency=low
 
   * Fix Bug #242 (eperdes)	

@@ -239,7 +239,7 @@ void myschema_hide_aux(void){
 
 void myschema_hide(){
    callback fn;
-   if ((fn=(callback)myimport ("graphics_xforms", "gui_callback"))!=NULL){
+   if ((fn=(callback)myimport ("graphics_xforms", "suspend_callback"))!=NULL){
       fn ((gui_function)myschema_hide_aux);
    }
 }
@@ -269,7 +269,7 @@ void myschema_show_aux(void){
 
 void myschema_show(){
    callback fn;
-   if ((fn=(callback)myimport ("graphics_xforms", "gui_callback"))!=NULL){
+   if ((fn=(callback)myimport ("graphics_xforms", "resume_callback"))!=NULL){
       fn ((gui_function)myschema_show_aux);
    }
 }
