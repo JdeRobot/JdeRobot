@@ -9,7 +9,7 @@ Homepage: http://jde.gsyc.es
 Package: jderobot
 Section: net
 Architecture: i386
-Depends: ${shlibs:Depends}, ${misc:Depends}, player, jderobot-schemas, jderobot-drivers, jderobot-services, jderobot-libs, jderobot-doc, libreadline5
+Depends: ${shlibs:Depends}, ${misc:Depends}, robot-player, jderobot-schemas, jderobot-drivers, jderobot-services, jderobot-libs, jderobot-doc, libreadline5
 Recommends: 
 Suggests: 
 Description: jde is a software development suite for robotics applications.
@@ -21,7 +21,7 @@ Description: jde is a software development suite for robotics applications.
 Package: jderobot-schemas
 Section: net
 Architecture: i386
-Depends: ${shlibs:Depends}, jderobot, jderobot-libs, jderobot-drivers, jderobot-services, player, libcv1, libcvaux1
+Depends: ${shlibs:Depends}, jderobot, jderobot-libs, jderobot-drivers, jderobot-services, robot-player, libcv1, libcvaux1, libforms1, libformsgl1
 Recommends: 
 Suggests: jderobot-doc
 Description: jde is a software development suite for robotics applications (schemas)
@@ -33,7 +33,7 @@ Description: jde is a software development suite for robotics applications (sche
 Package: jderobot-drivers
 Section: net
 Architecture: i386
-Depends: ${shlibs:Depends}, jderobot, jderobot-schemas, jderobot-libs, jderobot-services, player, stage, gazebo, ode
+Depends: ${shlibs:Depends}, jderobot, jderobot-schemas, jderobot-libs, jderobot-services, robot-player, stage, gazebo
 Recommends: 
 Suggests: jderobot-doc
 Description: jde is a software development suite for robotics applications (drivers)

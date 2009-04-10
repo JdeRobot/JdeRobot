@@ -1,8 +1,21 @@
+jderobot (4.3.0-rc7) unstable; urgency=low
+
+  * Add libforms1, libformsgl1 dependencies in jderobot-schemas 
   * Fix Bug #244 (salons)
+  * Add dependency to robot-player
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Fri, 10 Apr 2009 15:36:27 +0000
+
+jderobot (4.3.0-rc6) unstable; urgency=low
+
+  * Change control dependencies: delete ode dependency
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Thu, 02 Apr 2009 22:45:13 +0000
+
 
 jderobot (4.3.0-rc5) unstable; urgency=low
 
-  * Fix Bug #242 (eperdes)	
+  * Fix Bug #242 (eperdes)
   * Fix Bug #241 (jmplaza & rocapal)
 
  -- Roberto Calvo <rocapal@gsyc.es>  Mon, 23 Mar 2009 22:54:57 +0100
