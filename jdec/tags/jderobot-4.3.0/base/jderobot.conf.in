@@ -1,0 +1,116 @@
+### PATH WHERE THE MODULES CAN BE FOUND
+path .:/usr/lib:/usr/local/lib:/usr/lib/jderobot/drivers:/usr/lib/jderobot/schemas:/usr/lib/jderobot/services:/usr/share/jderobot/glade:@driverdir@:@schemadir@:@servicedir@:@gladedir@
+
+### DRIVER CONFIGURATION 
+
+#driver firewire
+#provides varcolorA 0 640 480 autofocus_on
+#provides colorB 1 autofocus_on
+#end_driver
+
+driver imagefile
+provides colorA @pkgdatadir@/casaleft.pnm
+#provides colorB @pkgdatadir@/atardecer.ppm
+#provides colorC @pkgdatadir@/atardecer.ppm
+#provides colorD @pkgdatadir@/casaright.pnm
+end_driver
+
+#driver mplayer
+#provides colorB /home/langostino/coches/coches1.mpeg repeat_on
+#provides colorB /home/langostino/Desktop/jaleo_escritorio/videos_varios/subjetiva1.avi repeat_on
+#provides colorA <filename> repeat_on
+#provides colorA v4l /dev/video0 cam
+#provides colorA pfc-siguepersonapt2.avi repeat_on
+#end_driver
+
+#driver video4linux
+#provides colorA /dev/video0
+#end_driver
+
+#driver player
+#hostname localhost port 6665
+##initial position X(mm) Y(mm) Theta(deg)
+#initial_position -6500 -6500 45
+#provides laser 180 1 
+#provides sonars
+#provides encoders
+#provides motors
+#provides bumpers
+#end_driver
+
+#driver gazebo
+#provides laser laser2
+#provides motors robot2
+#provides encoders robot2
+#provides sonars robot2
+#provides colorA camera1
+#provides pantilt camera1
+#end_driver
+
+#driver pantilt
+#serial /dev/ttyUSB0  
+## replace with the serial port used by the pantilt unit
+#provides pantiltencoders
+#provides pantiltmotors
+#end_driver
+
+#driver networkclient
+##images section
+#provides colorA localhost 3001 0
+#provides colorB localhost 3001 1
+#provides colorC localhost 3002 0
+#provides colorD localhost 3002 1
+##pantilt section
+#provides pantiltencoders localhost 3001
+#provides pantiltmotors localhost 3001
+##robot section
+##initial position X(mm) Y(mm) Theta(deg)
+#initial_position -6500 -6500 45
+#provides laser localhost 3001
+#provides sonars localhost 3001
+#provides encoders localhost 3001
+#provides motors localhost 3001
+#end_driver
+
+#networkserver driver must be always the last driver to be loaded
+#driver networkserver
+#socket 3001
+##images section
+#serves colorA 0
+#serves colorB 1
+#serves colorC 2
+#serves colorD 3
+##pantilt section
+#serves pantiltencoders
+#serves pantiltmotors
+##robot section
+#serves laser
+#serves sonars
+#serves encoders
+#serves motors
+#end_driver
+
+### SCHEMA CONFIGURATION 
+
+### DRIVER LOAD FOR SENSOR SOURCES AND MOTOR DEVICES -----------------------
+
+load_driver graphics_gtk
+load_driver graphics_xforms
+load_driver imagefile
+#load_driver mplayer
+
+### SCHEMA LOAD --------------------
+load mastergui
+load hsvtuner
+load opengldemo
+#load introrob
+
+### INITIAL ACTIVATION------------
+#resume sonars
+#resume introrob
+resume mastergui
+#resume colorA
+#resume hsvtuner
+
+### INITIAL GUI ACTIVATION ----------
+
