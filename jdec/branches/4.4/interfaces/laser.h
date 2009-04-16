@@ -24,8 +24,12 @@ typedef Interface Laser;
 /*constructor & destructor*/
 Laser* new_Laser(const char* father,
 		 const char* interface_name,
-		 const int owned);
+		 JDESchema* owner);
 void delete_Laser(Laser* l);
+
+/*interface methods*/
+void Laser_run(Laser* l);
+void Laser_stop(Laser* l);
 
 /*get methods*/
 int* Laser_laser_get(const Laser* l);

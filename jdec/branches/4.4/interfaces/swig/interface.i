@@ -11,7 +11,7 @@ typedef struct{
   %extend{
     Interface(const char* father,
 	      const char* interface_name,
-	      const int owned=0);
+	      JDESchema* owner = 0);
     void run();
     void stop();
   }

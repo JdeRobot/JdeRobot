@@ -19,8 +19,12 @@ typedef Interface Motors;
 /*constructor & destructor*/
 Motors* new_Motors(const char* father,
 		   const char* interface_name,
-		   const int owned);
+		   JDESchema* owner);
 void delete_Motors(Motors* m);
+
+/*interface methods*/
+void Motors_run(Motors* m);
+void Motors_stop(Motors* m);
 
 /*get methods*/
 float Motors_v_get(const Motors* m);

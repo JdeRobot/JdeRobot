@@ -685,25 +685,26 @@ JDESchema *find_schema (const char *name){
   return 0;
 }
 
-int get_state(const JDESchema* s){
-  return s->state;
-}
 
-void set_state (JDESchema* s,const int newstate){
-  if (s){
-    s->state=newstate;
-    /* only some changes are relevant. For instance change of one 
-       motor schema from active to ready is not, because it happens every iteration */
-    if ((newstate==winner) || 
-		(newstate==slept) || 
-		(newstate==forced)|| 
-		(newstate==notready)|| 
-		(newstate==ready)|| 
-		(newstate==active));
-  }
-}
+/* int get_state(const JDESchema* s){ */
+/*   return s->state; */
+/* } */
 
-void speedcounter2(JDESchema* s){
-  if (s)
-    s->k++;
-}
+/* void set_state (JDESchema* s,const int newstate){ */
+/*   if (s){ */
+/*     s->state=newstate; */
+/*     /\* only some changes are relevant. For instance change of one  */
+/*        motor schema from active to ready is not, because it happens every iteration *\/ */
+/*     if ((newstate==winner) ||  */
+/* 		(newstate==slept) ||  */
+/* 		(newstate==forced)||  */
+/* 		(newstate==notready)||  */
+/* 		(newstate==ready)||  */
+/* 		(newstate==active)); */
+/*   } */
+/* } */
+
+/* void speedcounter2(JDESchema* s){ */
+/*   if (s) */
+/*     s->k++; */
+/* } */

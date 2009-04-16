@@ -4,9 +4,6 @@
 
 %{
 #include <laser.h>
-Interface* Laser_cast(Laser* l){
-  return (Interface*)l;
-}
 %}
 
 %import "interface.i"
@@ -18,8 +15,9 @@ typedef struct{
   %extend{
     Laser(const char* father,
 	  const char* interface_name = "laser",
-	  const int owned = 0);
-    Interface* cast();
+	  JDESchema* owner = 0);
+    void run();
+    void stop();
     /*perceptions*/
     int laser[MAX_LASER];
     int number;

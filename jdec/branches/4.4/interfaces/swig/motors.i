@@ -2,9 +2,6 @@
 
 %{
 #include <motors.h>
-Interface* Motors_cast(Motors* e){
-  return (Interface*)e;
-}
 %}
 
 %import "interface.i"
@@ -13,8 +10,9 @@ typedef struct{
   %extend{
     Motors(const char* father,
 	   const char* interface_name = "motors",
-	   const int owned = 0);
-    Interface* cast();
+	   JDESchema* owner = 0);
+    void run();
+    void stop();
     /*modulations*/
     float v; /* mm/s */
     float w; /* deg/s */

@@ -7,13 +7,10 @@
 extern "C" {
 #endif
 
+enum robot_enum {ROBOT_X,ROBOT_Y,ROBOT_THETA,ROBOT_COS,ROBOT_SIN,ROBOT_NELEM};
 typedef struct{
   /*perceptions*/
-  float x;
-  float y;
-  float theta;
-  float cos;
-  float sin;
+  float robot[ROBOT_NELEM];
   unsigned long int clock;
   /*modulations*/
   int cycle;
@@ -24,10 +21,15 @@ typedef Interface Encoders;
 /*constructor & destructor*/
 Encoders* new_Encoders(const char* father,
 		       const char* interface_name,
-		       const int owned);
+		       JDESchema* owner);
 void delete_Encoders(Encoders* e);
 
+/*interface methods*/
+void Encoders_run(Encoders* e);
+void Encoders_stop(Encoders* e);
+
 /*get methods*/
+float* Encoders_robot_get(const Encoders* e);
 float Encoders_x_get(const Encoders* e);
 float Encoders_y_get(const Encoders* e);
 float Encoders_theta_get(const Encoders* e);
@@ -37,6 +39,7 @@ unsigned long int Encoders_clock_get(const Encoders* e);
 int Encoders_cycle_get(const Encoders* e);
 
 /*set methods*/
+void Encoders_robot_set(const Encoders* e, const float* new_robot);
 void Encoders_x_set(const Encoders* e, const float new_x);
 void Encoders_y_set(const Encoders* e, const float new_y);
 void Encoders_theta_set(const Encoders* e, const float new_theta);

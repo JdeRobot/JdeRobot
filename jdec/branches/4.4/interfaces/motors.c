@@ -6,24 +6,36 @@
 
 Motors* new_Motors(const char* father, 
 		   const char* interface_name,
-		   const int owned){
-  Interface* i = new_Interface(father,interface_name,owned);
-  if (owned)
+		   JDESchema* owner){
+  Interface* i = new_Interface(father,interface_name,owner);
+  if (owner != 0){
     i->datap = calloc(1,sizeof(Motors_data));
+    myexport(i->interface_name,"v",&((Motors_data*)i->datap)->v);
+    myexport(i->interface_name,"w",&((Motors_data*)i->datap)->w);
+    myexport(i->interface_name,"cycle",&((Motors_data*)i->datap)->cycle);
+  }
   return (Motors*)i;
 }
 
 void delete_Motors(Motors* m){
-  if (m->owned)
-    free(m->datap);
+  if (m->owner != 0)
+    free(m->datap);//FIXME: controlar refs
   delete_Interface((Interface*)m);
+}
+
+void Motors_run(Motors* m){
+  Interface_run(m);
+}
+
+void Motors_stop(Motors* m){
+  Interface_stop(m);
 }
 
 float Motors_v_get(const Motors* m){
   float* vp;
 
   assert(m!=0);
-  if (m->owned)
+  if (m->owner != 0)
     return ((Motors_data*)m->datap)->v;
   else{
     vp=(float *)myimport(m->interface_name,"v");
@@ -35,7 +47,7 @@ float Motors_w_get(const Motors* m){
   float* wp;
 
   assert(m!=0);
-  if (m->owned)
+  if (m->owner != 0)
     return ((Motors_data*)m->datap)->w;
   else{
     wp=(float *)myimport(m->interface_name,"w");
@@ -47,7 +59,7 @@ int Motors_cycle_get(const Motors* m){
   int* cyclep;
 
   assert(m!=0);
-  if (m->owned)
+  if (m->owner != 0)
     return ((Motors_data*)m->datap)->cycle;
   else{
     cyclep=(int *)myimport(m->interface_name,"cycle");
@@ -59,7 +71,7 @@ void Motors_v_set(Motors* m, const float new_v){
   float* vp;
 
   assert(m!=0);
-  if (m->owned)
+  if (m->owner != 0)
     ((Motors_data*)m->datap)->v=new_v;
   else{  
     vp=(float *)myimport(m->interface_name,"v");
@@ -72,7 +84,7 @@ void Motors_w_set(Motors* m, const float new_w){
   float* wp;
 
   assert(m!=0);
-  if (m->owned)
+  if (m->owner != 0)
     ((Motors_data*)m->datap)->w=new_w;
   else{
     wp=(float *)myimport(m->interface_name,"w");
@@ -85,7 +97,7 @@ void Motors_cycle_set(Motors* m, const int new_cycle){
   int* cyclep;
 
   assert(m!=0);
-  if (m->owned)
+  if (m->owner != 0)
     ((Motors_data*)m->datap)->cycle=new_cycle;
   else{
     cyclep=(int *)myimport(m->interface_name,"cycle");

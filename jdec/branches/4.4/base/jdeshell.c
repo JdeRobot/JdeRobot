@@ -126,6 +126,9 @@ COMMAND scommands[] = {
 const char *bprompt = "jdeC $> ";
 const char *sprompt = "jdeC[%s] $> ";
 
+/*history file*/
+const char *histfile_name = ".jderobot";
+
 /* When non-zero, this global means the user is done using this program. */
 int done;
 SHELLSTATE shstate;
@@ -141,7 +144,8 @@ int main(int argc, char** argv) {
   char *line, *s;/* shell buffers*/
   int n=1; /* argument number in the console for the configuration file parameter */
   char configfile[MAX_BUFFER] = {'\0'};
- 
+  char histfile_path[MAX_BUFFER];
+
   signal(SIGTERM, &jdeshutdown); /* kill interrupt handler */
   signal(SIGINT, &jdeshutdown); /* control-C interrupt handler */
   signal(SIGABRT, &jdeshutdown); /* failed assert handler */
@@ -160,6 +164,14 @@ int main(int argc, char** argv) {
 
   
   printf("%s\n\n",thisrelease);
+
+  /*histfile path*/
+  strncpy(histfile_path,getenv("HOME"),MAX_BUFFER-1);
+  histfile_path[MAX_BUFFER-1] = '\0';
+  strncat(histfile_path,"/",MAX_BUFFER-1);
+  histfile_path[MAX_BUFFER-1] = '\0';
+  strncat(histfile_path,histfile_name,MAX_BUFFER-1);
+  histfile_path[MAX_BUFFER-1] = '\0';
 
   n=1;
   while(argv[n]!=NULL) {
@@ -192,6 +204,7 @@ int main(int argc, char** argv) {
   /* read commands from keyboard */
   fprintf(stdout,"Starting shell...\n");
   initialize_readline ();	/* Bind our completer. */
+  read_history(histfile_path);
 
   /*initialize shstate*/
   shstate.state = BASE;
@@ -220,6 +233,7 @@ int main(int argc, char** argv) {
       free (line);
     }
   }
+  write_history(histfile_path);
   jdeshutdown(0);
   pthread_exit(0); 
   /* If we don't need this thread anymore, 

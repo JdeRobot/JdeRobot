@@ -58,27 +58,27 @@ extern JDEDriver* jde_loaddriver(const char *name);
  */
 extern JDESchema* find_schema (const char *name);
 
-/**
- * Get schema state
- * @param s schema
- * @return schema state
- */
-extern int get_state(const JDESchema* s);
+/* /\** */
+/*  * Get schema state */
+/*  * @param s schema */
+/*  * @return schema state */
+/*  *\/ */
+/* extern int get_state(const JDESchema* s); */
 
-/**
- * Set schema state
- * @param s schema to be set
- * @param newstate Schema's new states
- * @return void
- */
-extern void set_state (JDESchema* s,const int newstate);
+/* /\** */
+/*  * Set schema state */
+/*  * @param s schema to be set */
+/*  * @param newstate Schema's new states */
+/*  * @return void */
+/*  *\/ */
+/* extern void set_state (JDESchema* s,const int newstate); */
 
-/**
- * This functions must be called at every schema's iteration, it increments the
- * schema's iteration counter to calculate schema's ips.
- * @param s Schema
- * @return void
- */
-extern void speedcounter2(JDESchema* s);
+/* /\** */
+/*  * This functions must be called at every schema's iteration, it increments the */
+/*  * schema's iteration counter to calculate schema's ips. */
+/*  * @param s Schema */
+/*  * @return void */
+/*  *\/ */
+/* extern void speedcounter2(JDESchema* s); */
 
 #endif /*__JDE_PRIVATE_H__*/
