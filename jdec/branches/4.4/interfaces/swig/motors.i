@@ -8,9 +8,9 @@
 
 typedef struct{
   %extend{
-    Motors(const char* father,
+    Motors(JDESchema* const owner,
 	   const char* interface_name = "motors",
-	   JDESchema* owner = 0);
+	   const int implemented = 0);
     void run();
     void stop();
     /*modulations*/

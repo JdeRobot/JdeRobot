@@ -3,11 +3,11 @@
 #include <string.h>
 #include "encoders.h"
 
-Encoders* new_Encoders(const char* father,
+Encoders* new_Encoders(JDESchema* const owner,
 		       const char* interface_name,
-		       JDESchema* owner){
-  Interface* i = new_Interface(father,interface_name,owner);
-  if (owner != 0){
+		       const int implemented){
+  Interface* i = new_Interface(owner,interface_name,implemented);
+  if (implemented){
     i->datap = calloc(1,sizeof(Encoders_data));
     myexport(i->interface_name,"jde_robot",((Encoders_data*)i->datap)->robot);
     myexport(i->interface_name,"clock",&((Encoders_data*)i->datap)->clock);
@@ -22,11 +22,11 @@ void delete_Encoders(Encoders* e){
   delete_Interface((Interface*)e);
 }
 
-void Encoders_run(Encoders* e){
+void Encoders_run(const Encoders* e){
   Interface_run(e);
 }
 
-void Encoders_stop(Encoders* e){
+void Encoders_stop(const Encoders* e){
   Interface_stop(e);
 }
 
@@ -34,7 +34,7 @@ float* Encoders_robot_get(const Encoders* e){
   float* robot;
 
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     robot=((Encoders_data*)e->datap)->robot;
   else
     robot=(float *)myimport(e->interface_name,"jde_robot");
@@ -46,7 +46,7 @@ float Encoders_x_get(const Encoders* e){
   float* robot;
 
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     robot=((Encoders_data*)e->datap)->robot;
   else
     robot=(float *)myimport(e->interface_name,"jde_robot");
@@ -59,7 +59,7 @@ float Encoders_y_get(const Encoders* e){
   float* robot;
 
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     robot=((Encoders_data*)e->datap)->robot;
   else
     robot=(float *)myimport(e->interface_name,"jde_robot");
@@ -70,7 +70,7 @@ float Encoders_theta_get(const Encoders* e){
   float* robot;
 
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     robot=((Encoders_data*)e->datap)->robot;
   else
     robot=(float *)myimport(e->interface_name,"jde_robot");
@@ -81,7 +81,7 @@ float Encoders_cos_get(const Encoders* e){
   float* robot;
 
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     robot=((Encoders_data*)e->datap)->robot;
   else
     robot=(float *)myimport(e->interface_name,"jde_robot");
@@ -92,7 +92,7 @@ float Encoders_sin_get(const Encoders* e){
   float* robot;
 
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     robot=((Encoders_data*)e->datap)->robot;
   else
     robot=(float *)myimport(e->interface_name,"jde_robot");
@@ -103,7 +103,7 @@ unsigned long int Encoders_clock_get(const Encoders* e){
   unsigned long int* clock;
 
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     return ((Encoders_data*)e->datap)->clock;
   else{
     clock=(unsigned long int *)myimport(e->interface_name,"clock");
@@ -115,7 +115,7 @@ int Encoders_cycle_get(const Encoders* e){
   int* cycle;
    
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     return ((Encoders_data*)e->datap)->cycle;
   else{
     cycle=(int *)myimport(e->interface_name,"cycle");
@@ -123,53 +123,53 @@ int Encoders_cycle_get(const Encoders* e){
   }
 }
 
-void Encoders_robot_set(const Encoders* e, const float* new_robot){
+void Encoders_robot_set(Encoders* const e, const float* new_robot){
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     memmove(((Encoders_data*)e->datap)->robot,new_robot,sizeof(float)*ROBOT_NELEM);
 }
 
-void Encoders_x_set(const Encoders* e, const float new_x){
+void Encoders_x_set(Encoders* const e, const float new_x){
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     ((Encoders_data*)e->datap)->robot[ROBOT_X] = new_x;
 }
 
-void Encoders_y_set(const Encoders* e, const float new_y){
+void Encoders_y_set(Encoders* const e, const float new_y){
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     ((Encoders_data*)e->datap)->robot[ROBOT_Y] = new_y;
 }
 
-void Encoders_theta_set(const Encoders* e, const float new_theta){
+void Encoders_theta_set(Encoders* const e, const float new_theta){
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     ((Encoders_data*)e->datap)->robot[ROBOT_THETA] = new_theta;
 }
 
-void Encoders_cos_set(const Encoders* e, const float new_cos){
+void Encoders_cos_set(Encoders* const e, const float new_cos){
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     ((Encoders_data*)e->datap)->robot[ROBOT_COS] = new_cos;
 }
 
-void Encoders_sin_set(const Encoders* e, const float new_sin){
+void Encoders_sin_set(Encoders* const e, const float new_sin){
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     ((Encoders_data*)e->datap)->robot[ROBOT_SIN] = new_sin;
 }
 
-void Encoders_clock_set(const Encoders* e, const unsigned long int new_clock){
+void Encoders_clock_set(Encoders* const e, const unsigned long int new_clock){
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     ((Encoders_data*)e->datap)->clock = new_clock;
 }
 
-void Encoders_cycle_set(Encoders* e, const int new_cycle){
+void Encoders_cycle_set(Encoders* const e, const int new_cycle){
   int* cycle;
    
   assert(e!=0);
-  if (e->owner != 0)
+  if (e->implemented)
     ((Encoders_data*)e->datap)->cycle = new_cycle;
   else{
     cycle=(int *)myimport(e->interface_name,"cycle");

@@ -9,9 +9,9 @@ typedef struct{
   int father_id;
   char interface_name[MAX_NAME];
   %extend{
-    Interface(const char* father,
+    Interface(JDESchema* const owner,
 	      const char* interface_name,
-	      JDESchema* owner = 0);
+	      const int implemented = 0);	
     void run();
     void stop();
   }

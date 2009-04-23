@@ -22,14 +22,14 @@ typedef struct{
 typedef Interface Laser;
 
 /*constructor & destructor*/
-Laser* new_Laser(const char* father,
+Laser* new_Laser(JDESchema* const owner,
 		 const char* interface_name,
-		 JDESchema* owner);
-void delete_Laser(Laser* l);
+		 const int implemented);
+void delete_Laser(Laser* const l);
 
 /*interface methods*/
-void Laser_run(Laser* l);
-void Laser_stop(Laser* l);
+void Laser_run(const Laser* l);
+void Laser_stop(const Laser* l);
 
 /*get methods*/
 int* Laser_laser_get(const Laser* l);
@@ -39,11 +39,11 @@ unsigned long int Laser_clock_get(const Laser* l);
 int Laser_cycle_get(const Laser* l);
 
 /*set methods*/
-void Laser_laser_set(const Laser* l, const int* new_laser);
-void Laser_number_set(const Laser* l, const int new_number);
-void Laser_resolution_set(const Laser* l, const int new_resolution);
-void Laser_clock_set(const Laser* l, const unsigned long int new_clock);
-void Laser_cycle_set(Laser* l, const int new_cycle);
+void Laser_laser_set(Laser* const l, const int* new_laser);
+void Laser_number_set(Laser* const l, const int new_number);
+void Laser_resolution_set(Laser* const l, const int new_resolution);
+void Laser_clock_set(Laser* const l, const unsigned long int new_clock);
+void Laser_cycle_set(Laser* const l, const int new_cycle);
 
 #ifdef __cplusplus
 }

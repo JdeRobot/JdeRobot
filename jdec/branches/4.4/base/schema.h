@@ -21,6 +21,7 @@ void JDESchema_show(JDESchema* const s);
 void JDESchema_hide(JDESchema* const s);
 int JDESchema_get_state(JDESchema* const s);
 void JDESchema_set_state(JDESchema* const s, int newstate);
+//void JDESchema_wait_statechange(JDESchema* const s);
 void JDESchema_speedcounter(JDESchema* const s);
 
 void JDEDriver_init(JDEDriver* const d, char *configfile);

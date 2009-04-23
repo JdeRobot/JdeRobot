@@ -1,4 +1,7 @@
 %module encoders
+%include "carrays.i"
+%array_class(float,floatArray);
+
 
 %{
 #include <encoders.h>
@@ -10,9 +13,9 @@ enum robot_enum {ROBOT_X,ROBOT_Y,ROBOT_THETA,ROBOT_COS,ROBOT_SIN,ROBOT_NELEM};
 typedef struct{
   char interface_name[MAX_NAME];
   %extend{
-    Encoders(const char* father,
+    Encoders(JDESchema* const owner,
 	     const char* interface_name = "encoders",
-	     JDESchema* owner = 0);
+	     const int implemented = 0);
     void run();
     void stop();
     /*perceptions*/

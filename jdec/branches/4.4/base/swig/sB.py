@@ -8,8 +8,8 @@ import time
 class sB(pyschema.PyJDESchema):
     def __init__(self,name):
         super(sB,self).__init__(name)
-        self.erobot = encoders.Encoders(self.name)
-        self.ecalc = encoders.Encoders(self.name,"encoders-calc",self)
+        self.erobot = encoders.Encoders(self)
+        self.ecalc = encoders.Encoders(self,"encoders-calc",1)
         	
     def iteration(self):
         self.ecalc.x = self.erobot.x/100

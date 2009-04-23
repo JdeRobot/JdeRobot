@@ -13,9 +13,9 @@
 typedef struct{
   char interface_name[MAX_NAME];
   %extend{
-    Laser(const char* father,
+    Laser(JDESchema* const owner,
 	  const char* interface_name = "laser",
-	  JDESchema* owner = 0);
+	  const int implemented = 0);
     void run();
     void stop();
     /*perceptions*/

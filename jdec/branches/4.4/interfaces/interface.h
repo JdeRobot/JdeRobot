@@ -9,21 +9,19 @@ extern "C" {
 typedef struct{
   int father_id;
   char interface_name[MAX_NAME];
-  //int owned;
-  int refs;
   JDESchema* owner;
+  int implemented;
   void* datap;
 } Interface;
 
 /*constructor & destructor*/
-Interface* new_Interface(const char* father,
+Interface* new_Interface(JDESchema* const owner,
 			 const char* interface_name,
-			 JDESchema* owner);
-			 //const int owned);
-void delete_Interface(Interface* i);
+			 const int implemented);
+void delete_Interface(Interface* const i);
 
-void Interface_run(Interface* i);
-void Interface_stop(Interface* i);
+void Interface_run(const Interface* i);
+void Interface_stop(const Interface* i);
 
 #ifdef __cplusplus
 }
