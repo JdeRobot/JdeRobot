@@ -41,6 +41,7 @@
 
 /** Maximum buffer size (for strings)*/
 #define MAX_BUFFER 512
+#define MAX_NAME 128
 
 #ifdef __cplusplus
  extern "C" {
@@ -70,14 +71,14 @@ extern void null_arbitration();
  * @param numschema Schema's index in the schema's array
  * @return void
  */
-extern void put_state(int numschema,int newstate);
+extern void put_state(const int numschema, const int newstate);
 /**
  * This functions must be called at every schema's iteration, it increments the
  * schema's iteration counter to calculate schema's ips.
  * @param numschema Schema's identifier
  * @return void
  */
-extern void speedcounter(int numschema);
+extern void speedcounter(const int numschema);
 /**
  * It is used to share variables and functions between diferent schemas and
  * drivers (remember that they are in diferent names' spaces)
@@ -86,21 +87,21 @@ extern void speedcounter(int numschema);
  * @param p Pointer to the variable or function casted to (void *)
  * @return 1 if the variables was correctly exported, othewise 0
  */
-extern int myexport(char *schema, char *name, void *p);
+extern int myexport(const char *schema, const char *name, void *p);
 /**
  * Get the pointer to a variable shared with myexport
  * @param schema String containing the exporter schema's name
  * @param name String containing the exported variable's names
  * @return The pointer to the variable casted to (void *)
  */
-extern void *myimport(char *schema, char *name);
+extern void *myimport(const char *schema, const char *name);
 /**
  * This function must be used instead of exit() to terminate de program
  * correctly
  * @param sig The same as the status argument at exit function
  * @return void
  */
-extern void jdeshutdown(int sig);
+extern void jdeshutdown(const int sig);
 
 /**
  * Get the pointer to global configfile
@@ -122,7 +123,7 @@ typedef struct {
    /** Dynamic library handler for the schema module*/
   void *handle;
   /** Schema's name*/
-  char name[100];
+  char name[MAX_NAME];
   /** Schema's identifier*/
   int *id; /* schema identifier */
   /** Schema's state
@@ -198,7 +199,7 @@ typedef struct {
    /** Dynamic library handler for the driver module*/
    void *handle;
    /** Driver's name*/
-   char name[100];
+   char name[MAX_NAME];
    /** Driver's identifier*/
    int id;
    

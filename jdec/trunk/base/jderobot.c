@@ -72,7 +72,7 @@ char path[MAX_BUFFER];
  * @param numschema Schema's index in the schema's array
  * @return void
  */
-void put_state(int numschema, int newstate)
+void put_state(const int numschema, const int newstate)
 {
   all[numschema].state=newstate;
   /* only some changes are relevant. For instance change of one motor schema from active to ready is not, because it happens every iteration */
@@ -90,7 +90,7 @@ void put_state(int numschema, int newstate)
  * @param numschema Schema's identifier
  * @return void
  */
-void speedcounter(int numschema)
+void speedcounter(const int numschema)
 {
   if ((numschema>=0)&&(numschema<num_schemas))
     all[numschema].k++;
@@ -104,7 +104,7 @@ void speedcounter(int numschema)
  * @param p Pointer to the variable or function casted to (void *)
  * @return 1 if the variables was correctly exported, othewise 0
  */
-int myexport(char *schema, char *name, void *p)
+int myexport(const char *schema, const char *name, void *p)
      /* publishes the variable, to make it available to other schemas */
 {
   Tsharedname * next;
@@ -152,7 +152,7 @@ int myexport(char *schema, char *name, void *p)
  * @param name String containing the exported variable's names
  * @return The pointer to the variable casted to (void *)
  */
-void *myimport(char *schema, char *name)
+void *myimport(const char *schema, const char *name)
      /* returns NULL in case of not finding the requested variable */
 {
    Tsharedname *this;
@@ -257,7 +257,7 @@ int jdeinit(const char* cf){
  * @param sig The same as the status argument at exit function
  * @return void
  */
-void jdeshutdown(int sig)
+void jdeshutdown(const int sig)
 {
   static int shuttingdown=0;
   int shutdown=0;
@@ -301,7 +301,7 @@ void jdeshutdown(int sig)
  * @param module_name String containing the name of the module
  * @return A pointer to the handler
  */
-void* load_module(char* module_name){
+void* load_module(const char* module_name){
    char *path2;
    char path_cp[MAX_BUFFER];
    char *directorio;
@@ -328,7 +328,7 @@ void* load_module(char* module_name){
  * @param name The schema's name
  * @return pointer to the loaded schema or null
  */
-JDESchema* jde_loadschema(char *name)
+JDESchema* jde_loadschema(const char *name)
 {
   char n[MAX_BUFFER];
   char *error;
@@ -412,7 +412,7 @@ JDESchema* jde_loadschema(char *name)
  * @param name The drivers's name
  * @return pointer to the loaded driver or null
  */
-JDEDriver* jde_loaddriver(char *name)
+JDEDriver* jde_loaddriver(const char *name)
 {
   char n[MAX_BUFFER];
   char *error;

@@ -15,7 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
- *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  Authors : Josï¿½ Marï¿½a Caï¿½as Plaza <jmplaza@gsyc.escet.urjc.es>
  *            David Lobato Bravo <dav.lobato@gmail.com>
  *
  */
@@ -42,20 +42,20 @@ extern int parse_configfile(const char* cf);
  * @param name shared object to load without .so
  * @return loaded schema if ok, null otherwise
  */
-extern JDESchema* jde_loadschema(char *name);
+extern JDESchema* jde_loadschema(const char *name);
 
 /**
  * Load the so named as a driver/service
  * @param name shared object to load without .so
  * @return loaded driver/service if ok, null otherwise
  */
-extern JDEDriver* jde_loaddriver(char *name);
+extern JDEDriver* jde_loaddriver(const char *name);
 
 /**
  * Find schema by name
  * @param name schema to be searched
  * @return schema object or null if can't be founded it
  */
-extern JDESchema *find_schema (const char *name);
+extern JDESchema* find_schema (const char *name);
 
 #endif /*__JDE_PRIVATE_H__*/
