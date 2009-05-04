@@ -31,6 +31,7 @@ includedir='${prefix}/include/jderobot'
 AC_SUBST([driverdir],['${libdir}/drivers'])
 AC_SUBST([schemadir],['${libdir}/schemas'])
 AC_SUBST([servicedir],['${libdir}/services'])
+AC_SUBST([swigdir],['${libdir}/swig'])
 AC_SUBST([confdir],['${pkgdatadir}/conf'])
 AC_SUBST([gladedir],['${pkgdatadir}/glade'])
 
@@ -281,6 +282,7 @@ AC_ARG_VAR([LATEX],[tex compiler command])
 AC_ARG_VAR([PDFLATEX],[pdf generator command])
 AC_ARG_VAR([DVIPS],[dvi to ps conversion command])
 AC_ARG_VAR([BIBTEX],[latex bibliography generator command])
+AC_ARG_VAR([SWIG],[command use to build swig files])
 
 
 dnl ########################################
@@ -315,6 +317,11 @@ AC_CHECK_HEADERS([math.h])
 AC_CHECK_LIB([m],[floor],
     [],
     AC_MSG_ERROR([m library not found]))
+
+AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
+AC_PYTHON_DEVEL
+AC_PROG_SWIG
+SWIG_PYTHON
 
 dnl ########################################
 dnl #
@@ -365,6 +372,14 @@ AC_CHECK_LIB([readline],[readline],
     [JDESHELL_LIBS="-lreadline $JDESHELL_LIBS"],
     AC_MSG_ERROR([readline library not found]))
 AC_SUBST([JDESHELL_LIBS])
+
+AC_PATH_PROG([SWIG],[swig],[no])
+if test "x$SWIG" = xno; then
+    AC_MSG_FAILURE([swig command not found])
+fi
+
+AM_CONDITIONAL([ENABLE_PYTHON],[false])
+
 
 dnl ########################################
 dnl #
@@ -1031,7 +1046,11 @@ dnl # Generate output, main and core makefiles
 dnl #
 dnl ########################################
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([base/Makefile])
+AC_CONFIG_FILES([base/Makefile \
+    base/swig/Makefile])
+dnl # generate interfaces Makefiles
+AC_CONFIG_FILES([interfaces/Makefile \
+    interfaces/swig/Makefile])
 dnl # generate utils Makefiles
 AC_CONFIG_FILES([libs/Makefile \
     libs/colorspaces/Makefile \
