@@ -5,7 +5,7 @@ AM_CPPFLAGS = -D CONFIGDIR=\"$(confdir)\" @CPPFLAGS@
 
 # See http://www.gnu.org/software/libtool/manual/libtool.html#Versioning
 # for versioning policy.
-libjde_la_SOURCES = jderobot.c
+libjde_la_SOURCES = jderobot.c schema.c
 #libjde_la_LDFLAGS = $(JDE_LIBS) -rdynamic -version-info 0:0:0
 libjde_la_LDFLAGS = $(JDE_LIBS) -version-info 0:0:0
 jderobot_SOURCES = jdeshell.c
@@ -14,7 +14,7 @@ jderobot_LDFLAGS = $(JDESHELL_LIBS)
 jderobot_LDADD = libjde.la
 dist_conf_DATA = jderobot.conf
 
-include_HEADERS = jde.h jde_private.h
+include_HEADERS = jde.h jde_private.h schema.h
 
 edit = sed \
 	-e 's|@pkgdatadir[@]|$(pkgdatadir)|g' \
@@ -30,6 +30,7 @@ jderobot.conf: Makefile
 
 jderobot.conf: jderobot.conf.in
 
+SUBDIRS = . swig
 BUILTSOURCES = jderobot.conf
 CLEANFILES = jderobot.conf
 MAINTAINERCLEANFILES = Makefile.in Makefile
