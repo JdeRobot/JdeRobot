@@ -5,8 +5,14 @@
 #include "alproxy.h"
 #include "alvisionimage.h"
 #include <pthread.h>
+#include "almotionproxy.h"
 
-#define PI 3.1415926
+const float PI=3.1415926;
+const float MAXY=60;
+const float MAXP=44;
+const float MAXVY=100;
+const float MAXV=100;
+const float CHANGE_RANGE=1;
 
 class Camera{
 
@@ -42,21 +48,23 @@ class Camera{
 		int getHeight();		
 };
 
-class Head{
-
+class motion{
 	private:
-
 		std::string IP;
 		int PORT;
-		AL::ALProxy * headProxy;
-		float lastValue;
+		AL::ALMotionProxy * motionProxy;
+		std::string name;
+		float lastp;
+		float lasty;
+		int mysteps;
 
 	public:
 
-		Head();
+		motion();
 		int init();
 		void terminate();
-		void moveTo(float angle);
+		int walk(float v, float w);
+		int head(float y, float p,float *posy, float *posp,float vy, float vp, unsigned long int* clock);
 };
 
 
@@ -70,11 +78,15 @@ extern "C" void getImageCamera(Camera* c, unsigned char * data);
 extern "C" int getWidthCamera(Camera* c);
 extern "C" int getHeightCamera(Camera* c);
 
-/*Head functions in C*/
-extern "C" Head* newHead();
-extern "C" int initHead(Head* h);
-extern "C" void terminateHead(Head* h);
-extern "C" void deleteHead(Head* h);
-extern "C" void moveToHead(Head* h, float angle);
+/*Motion functions in C*/
+
+extern "C" motion* newmotion();
+extern "C" int initmotion(motion* m);
+extern "C" void terminatemotion(motion* m);
+extern "C" int walkmotion(motion* m, float v, float w);
+extern "C" int headmotion(motion* m, float y, float p, float *posy, float *posp, float vy, float vp,unsigned long int* clock);
+extern "C" void deletemotion(motion* m);
+extern "C" int get_motionclock(motion* m);
+
 
 #endif

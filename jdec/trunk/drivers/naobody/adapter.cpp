@@ -2,6 +2,7 @@
 #include "alproxy.h"
 #include "alvisionimage.h"
 
+
 /*#############################################################################################
 										Camera
 ################################################################################################*/
@@ -189,82 +190,139 @@
 
 
 /*#############################################################################################
-										Head
+										Motion
 ################################################################################################*/
 
-	/*Funciones de la clase head en C++*/
-	Head::Head() {
+	motion::motion() {
 		this->IP = "127.0.0.1";
 		this->PORT = 9559;
-		this->lastValue = 1000;
+		this->lasty=0;
+		this->lastp=0;
 	}
 
-	int Head::init() {
-		try {
-			/*Get proxy*/
-			this->headProxy = new AL::ALProxy("ALMotion", IP, PORT);
-			//this->headProxy->callVoid("gotoAngleWithSpeed","HeadYaw",1, 50, 0);
-		} catch(AL::ALError& e) {
-			std::cerr << "Excepción al conectar con naoqi: "<<e.toString()<< std::endl;
-			return -1;
+
+	int motion::init() {
+
+			try {
+				this->motionProxy = new AL::ALMotionProxy(IP, PORT);
+				//this->motionProxy = new AL::ALProxy("ALMotion", IP, PORT);
+			} catch(AL::ALError& e) {
+				std::cerr << "NaoBody: exception connecting to NaoQi: "<<e.toString()<< std::endl;
+				return -1;
+			}
+			this->mysteps=0;
+	
+			return 0;	
+	}
+
+
+	void motion::terminate() {
+	
+	}
+
+
+	int motion::walk(float v, float w) {
+		float myv;
+		int steps;
+
+		myv=-0.83*v+100;
+	
+		if ((w!=0)||(v!=0)){
+				if ((v>0)&&(v<MAXV)){
+					steps=this->motionProxy->getRemainingFootStepCount();
+					if (steps!=this->mysteps){
+						mysteps=steps;
+						if (mysteps < 2){
+							printf("aqui\n");
+							if (w==0){
+									this->motionProxy->post.walkStraight(0.08,myv);
+							}
+							else{
+								this->motionProxy->post.walkArc(w,0.08, myv);
+							}
+						}
+					}
+					else if (steps==0){
+						printf("empezamos\n");
+						if (w==0){
+									this->motionProxy->post.walkStraight(0.08,myv);
+							}
+							else{
+								this->motionProxy->post.walkArc(w,0.08, myv);
+							}
+					}
+				}
+			/*else{
+				printf("---%d\n",this->motionProxy->getRemainingFootStepCount());
+			}*/
+		}
+		return 0;
+	}
+
+
+	int motion::head(float y, float p, float *posy, float *posp, float vy, float vp, unsigned long int* clock){
+		float ay;
+		float ap;
+		int clock_aux;
+		float y_aux_real;
+		float p_aux_real;
+
+	
+		ay=this->motionProxy->getAngle("HeadYaw") * 180 /PI;
+		ap=this->motionProxy->getAngle ("HeadPitch")* 180 /PI;
+		
+		y_aux_real=truncf(ay*10);
+		p_aux_real=truncf(ap*10);
+		if ((y_aux_real!=truncf(y*10))&&(y>(-MAXY))&&(y<=MAXY)&&(vy<=MAXV)){
+			this->motionProxy->post.gotoAngleWithSpeed ("HeadYaw",-y*PI/180, vy, 0);
+			//this->motionProxy->post.gotoAngleWithSpeed ("HeadYaw",-y*PI/180, 10, 0);
+		}
+		if ((p_aux_real!=truncf(p*10))&&(p>(-MAXY))&&(y<=MAXY)&&(vp<=MAXV)){
+			this->motionProxy->post.gotoAngleWithSpeed ("HeadPitch",-p*PI/180, vp, 0);
+			//this->motionProxy->post.gotoAngleWithSpeed ("HeadPitch",-p*PI/180, 10, 0);
+		}
+		if ((y_aux_real>this->lasty+CHANGE_RANGE)||(y_aux_real<this->lasty-CHANGE_RANGE)||(p_aux_real>this->lastp+CHANGE_RANGE)||(p_aux_real<this->lastp-CHANGE_RANGE)){
+			*posy=-ay;
+			*posp=-ap;
+			clock_aux=*clock;
+			clock_aux++;
+			*clock=clock_aux;
+			this->lasty=truncf(ay*10);
+			this->lastp=truncf(ap*10);
 		}
 	
 		return 0;
-	}	
-
-	void Head::terminate() {
-		/*Void*/
 	}
 
-	void Head::moveTo(float angle) {
-		float value;
 
-		/*No actualizamos si ya tenia ese valor*/
-		if(angle == this->lastValue)
-			return;
-
-		this->lastValue = angle;
-		
-		value = angle*PI/180.0;
-		/*Check limits*/
-		if(value > 1.0) 
-			value = 1.0;
-		if(value < -1.0)
-			value = -1.0;
-
-		try {
-			this->headProxy->callVoid("gotoAngleWithSpeed","HeadYaw",value, 50, 0);		////#########Velocidad puede ser 100
-		} catch(AL::ALError& e) {
-			std::cerr << "Excepción al mover la cabeza: "<<e.toString()<< std::endl;
-			return;
-		}
-	}
-
-	/*Funciones exportadas en C*/
-	Head* newHead() {
-		Head * h = new Head();
-		if(initHead(h) < 0) {
-			delete h;
+	motion* newmotion() {
+		motion *m = new motion();
+		if(initmotion(m) < 0) {
+			delete m;
 			return NULL;
 		}			
-		return h;
+		return m;
 	}
 
-	int initHead(Head* h) {
-		return h->init();
+	int initmotion(motion* m) {
+
+		return m->init();
 	}
 
-	void terminateHead(Head* h) {
-		h->terminate();
-	}	
-
-	void deleteHead(Head* h) {
-		terminateHead(h);
-		delete h;
+	void terminatemotion(motion* m) {
+		m->terminate();
 	}
 
-	void moveToHead(Head* h, float angle) {
-		h->moveTo(angle);
-	}	
+	int walkmotion(motion* m, float v, float w){
+		return m->walk(v,w); 
+	}
 
-	
+	int headmotion(motion* m, float y, float p, float *posy, float *posp, float vy, float vp, unsigned long int* clock){
+		return m->head(y,p,posy,posp,vy,vp,clock); 
+	}
+
+	void deletemotion(motion* m) {
+		terminatemotion(m);
+		delete m;
+	}
+
