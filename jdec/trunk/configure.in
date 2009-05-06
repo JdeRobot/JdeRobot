@@ -1085,6 +1085,7 @@ AC_CONFIG_FILES([schemas/Makefile \
     schemas/image_viewer/Makefile \
     schemas/imgrectifier/Makefile \
     schemas/introrob/Makefile \
+    schemas/introrob2/Makefile \
     schemas/mastergui/Makefile \
     schemas/myschema/Makefile \
     schemas/opencvdemo/Makefile \

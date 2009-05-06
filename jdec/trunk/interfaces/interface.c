@@ -31,18 +31,27 @@ void delete_Interface(Interface* i){
 
 void Interface_run(const Interface* i){
   runFn irun;
+  int id;
   
-  assert(i!=0 && i->implemented==0);/*if implemented run not allowed to avoid loops*/
+  assert(i!=0 && i->implemented==0);/*if implemented run not allowed
+				      to avoid loops*/
+  id = *(int*)myimport(i->interface_name,"id");
   irun = (runFn)myimport(i->interface_name,"run");
-  if (irun)
+  if (irun){
     irun(*(i->owner->id),NULL,NULL);
+    i->owner->children[id] = 1;
+  }
 }
 
 void Interface_stop(const Interface* i){
   stopFn istop;
+  int id;
 
   assert(i!=0 && i->implemented==0);/*if implemented run not allowed to avoid loops*/
+  id = *(int*)myimport(i->interface_name,"id");
   istop = (stopFn)myimport(i->interface_name,"stop");
-  if (istop)
+  if (istop){
     istop();
+    i->owner->children[id] = 0;
+  }
 }

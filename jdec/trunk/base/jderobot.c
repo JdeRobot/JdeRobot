@@ -21,8 +21,9 @@
 
 #define thisrelease "jderobot 4.3-svn"
 
-#include <jde.h>
-#include <jde_private.h>
+#include "jde.h"
+#include "jde_private.h"
+#include "loader.h"
 #include "dlfcn.h"
 #include <string.h>
 #include <stdlib.h>
@@ -616,6 +617,24 @@ int jde_readline(FILE *myfile)
        sscanf(&buffer_file[j],"%s",word);
        strncpy(path, word, MAX_BUFFER);
     }    
+    else if (strcmp(word,"aload")==0)
+      {
+	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
+	words=sscanf(&buffer_file[j],"%s %s",word,word2);
+	
+	if (words==1){
+	  cf = configfile;
+	}
+	else if (words==2){
+	  cf = word2;
+	}
+	else 
+	  fprintf(stderr,"Bad line in configuration file %s, ignoring it. Load_driver/service only accepts one or two parameters: driver_name [driverconfigfile]\n Offending line: '%s'\n", configfile, buffer_file);
+	if (!load_module2(word,cf)){
+	  fprintf(stderr,"Module loading failed\n");
+	  exit(1);
+	}
+      }
     
     else{
       if ((driver_configuration_section==0) &&
@@ -647,6 +666,13 @@ int parse_configfile(const char* cf) {
 
 char * get_configfile(){
   return configfile;
+}
+
+JDESchema* get_schema(const int id){
+  if (id < num_schemas)
+    return &all[id];
+  else
+    return 0;
 }
 
 JDESchema *find_schema (const char *name){

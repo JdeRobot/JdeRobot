@@ -188,6 +188,13 @@ typedef struct {
   pthread_t mythread;
 }JDESchema;
 
+/**
+ * Get a schema using the id number
+ * @param id schema id
+ * @return pointer to schema or null
+ */
+extern JDESchema* get_schema(const int id);
+
 /** Array with all the loaded schemas*/
 extern JDESchema all[MAX_SCHEMAS];
 /** Number of loaded schemas*/
