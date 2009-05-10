@@ -173,6 +173,12 @@ AC_ARG_ENABLE([schemas-hsvtuner],
     [],
     [enable_schemas_hsvtuner=yes])
 
+AC_ARG_ENABLE([schemas-colortuner],
+    [AS_HELP_STRING([--disable-schemas-colortuner],
+	    [disable colortuner schema compilation])],
+    [],
+    [enable_schemas_colortuner=yes])
+
 AC_ARG_ENABLE([schemas-image_viewer],
     [AS_HELP_STRING([--disable-schemas-image_viewer],
 	    [disable image_viewer schema compilation])],
@@ -776,6 +782,18 @@ if test "x$enable_schemas_hsvtuner" != xno; then
     AC_SUBST([HSVTUNER_LIBS])
 fi
 
+
+dnl # schema colortuner
+AM_CONDITIONAL([ENABLE_COLORTUNER],[false])
+if test "x$enable_schemas_colortuner" != xno; then
+    AC_MSG_NOTICE([**** Checking schema colortuner:])
+    PKG_CHECK_MODULES([COLORTUNER],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS colortuner"
+	    AM_CONDITIONAL([ENABLE_COLORTUNER],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-colortuner was given, but there was errors: $COLORTUNER_PKG_ERRORS])])
+fi
+
+
 dnl # schema image_viewer
 AM_CONDITIONAL([ENABLE_IMAGE_VIEWER],[false])
 if test "x$enable_schemas_image_viewer" != xno; then
@@ -1082,6 +1100,7 @@ AC_CONFIG_FILES([schemas/Makefile \
     schemas/extrinsics/Makefile \
     schemas/followball/Makefile \
     schemas/hsvtuner/Makefile \
+    schemas/colortuner/Makefile \
     schemas/image_viewer/Makefile \
     schemas/imgrectifier/Makefile \
     schemas/introrob/Makefile \

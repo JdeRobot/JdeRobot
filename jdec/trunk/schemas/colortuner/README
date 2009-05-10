@@ -1,0 +1,53 @@
+colortuner
+Grupo de Robotica 
+http://www.robotica-urjc.es
+
+This is a schema to load in jderobot, this schema is based in OpenCV library for image processing. 
+
+Colortuner is an application to configure tailored color filters in HSV, RGB, or Y'UV color spaces.
+It is use to obtain optimal values of tint and saturation, as well as lighting, in that kind of filters.
+
+Colortuner has a very simple way to work. We have got two displays, in the first one it shows the original image, as the camera capture it, in the other, it shows the filtered image.
+
+Build a filter is an easy task with it clever display, every single color space have the next possiblities:
+
+	- Moving the scrolled bars, up and down to set the maximun and minimun values, for example of RED, GREEN and BLUE, to apply the filter.
+	- From an example pixel of the camera image, just click on a colored area of the image, and HSV, RGB or Y'UV values will configure 			automatically.
+
+Finally, for HSV and Y'UV color spaces, colortuner includes an interfaz representing both color spaces:
+
+	- Clicking on the vertex of the area, we could modify the color filter.
+	- In those representations, they are display the different color tint detected by a white pixel. the "threshold scrolled bar" brings the 			possibility to determine how many pixels of the same color are neceassary to do the representation on the color space frame.
+
+
+
+jde.c is a software development suite for robotics applications,
+written in C language. It provides a programming environment where the
+robot control program is made up of a collection of several concurrent
+asynchronous threads named schemas. It is based on JDE cognitive
+architecture for autonomous robots. The underlying theoretical
+foundations can be found in the related publications.
+
+For further information, go to docs/manual:
+
+http://jde.gsyc.es/index.php/Main_Page
+
+
+COMPILE:
+
+To compile the "colortuner" you need to satisfy the following dependences:
+
+* Kernel headers.
+* libraw1394-13-dev and libdc1394-13-dev, for firewire support. 
+* Player/Stage packages for Player/Stage support (only simulator available right now).
+* XForms (libforms-bin libforms-dev libforms1 libformsgl1 libx11-dev x11proto-core-dev libformsgl-dev), for GUI support. 
+* OpenGL headers and glu headers (libgl1-mesa libgl1-mesa-dev, libglu1-mesa-dev mesa-common-dev glutg3-dev), for opengl support (necessary in visualization)
+* jde 4.3 or later.
+
+Then just type in the current colortuner folder: 
+
+$ make
+
+That will generate 'colortuner.so'.
+
+
