@@ -257,6 +257,12 @@ AC_ARG_ENABLE([schemas-x10_controller],
     [],
     [enable_schemas_x10_controller=yes])
 
+AC_ARG_ENABLE([schemas-naooperator],
+    [AS_HELP_STRING([--disable-schemas-naooperator],
+	    [disable naooperator schema compilation])],
+    [],
+    [enable_schemas_naooperator=yes])
+
 
 AC_ARG_ENABLE([docs],
     [AS_HELP_STRING([--disable-docs],
@@ -1019,6 +1025,17 @@ if test "x$enable_schemas_x10_controller" != xno; then
 	[AC_MSG_FAILURE([--enable-schemas-x10_controller was given, but there was errors: $X10_CONTROLLER_PKG_ERRORS])])
 fi
 
+dnl # schema naooperator
+AM_CONDITIONAL([ENABLE_NAOOPERATOR],[false])
+if test "x$enable_schemas_naooperator" != xno; then
+    AC_MSG_NOTICE([**** Checking schema naooperator:])
+    PKG_CHECK_MODULES([NAOOPERATOR],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS naooperator"
+	    AM_CONDITIONAL([ENABLE_NAOOPERATOR],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-naooperator was given, but there was errors: $NAOOPERATOR_PKG_ERRORS])])
+fi
+
+
 dnl ########################################
 dnl #
 dnl # doc checks
@@ -1114,7 +1131,8 @@ AC_CONFIG_FILES([schemas/Makefile \
     schemas/teleoperator/Makefile \
     schemas/wiimote_viewer/Makefile \
     schemas/wiioperator/Makefile \
-    schemas/x10_controller/Makefile])
+    schemas/x10_controller/Makefile \
+    schemas/naooperator/Makefile ]) 
 dnl # generate docs Makefiles
 AC_CONFIG_FILES([docs/Makefile])
 
