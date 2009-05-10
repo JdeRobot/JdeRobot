@@ -55,7 +55,12 @@ char IP[20];
 int PORT;
 
 /** int variable to detect when a image was captured.*/
-unsigned long int lastimage=0;
+unsigned long int lastimage_a=0;
+unsigned long int lastimage_b=0;
+unsigned long int lastimage_c=0;
+unsigned long int lastimage_d=0;
+unsigned long int lastimage_e=0;
+unsigned long int lastimage_f=0;
 
 char driver_name[256]="naobody";
 
@@ -63,27 +68,34 @@ char driver_name[256]="naobody";
 int width;
 int height;
 int fps;
-int serve_color;
-int color_active;
+int serve_color_a;
+int serve_color_b;
+int serve_color_c;
+int serve_color_d;
+int serve_color_e;
+int serve_color_f;
+
 int number_color;
 int varcolorA_schema_id;
+int varcolorB_schema_id;
+int varcolorC_schema_id;
+int varcolorD_schema_id;
+int varcolorE_schema_id;
+int varcolorF_schema_id;
 
 /*Motion parameters*/
 /*pantiltencoers*/
 int serve_pantiltencoders;
-int pantiltencoders_active;
 
 /*pantiltmotors*/
 int serve_pantiltmotors;
-int pantiltmotors_active;
 
 int serve_motion;
-int motion_active;
 int motion_schema_id;
 int pantiltencoders_schema_id;
 int pantiltmotors_schema_id;
 
-/*API variables servidas*/
+/*API motion variables servidas*/
 float vnao;
 float wnao;
 float pnao;
@@ -100,10 +112,57 @@ float min_longitude;
 float min_latitude;
 float max_y_speed;
 float max_p_speed;
+int walk_type;
 
-/*API variables servidas*/
+
+/*API camara variables servidas*/
 Varcolor myA;
+Varcolor myB;
+Varcolor myC;
+Varcolor myD;
+Varcolor myE;
+Varcolor myF;
 //float headVal;
+
+
+
+/*variables para comprobar los schemas virtuales que esta activos*/
+int camera_active_a;
+int camera_active_b;
+int camera_active_c;
+int camera_active_d;
+int camera_active_e;
+int camera_active_f;
+int ptmotors_active;
+int ptencoders_active;
+int motion_active;
+
+
+
+void naobody_should_restart(){
+	if (state==slept)
+	{
+		/* naobody thread goes winner */
+		pthread_mutex_lock(&mymutex);
+		state=winner;
+		pthread_mutex_unlock(&mymutex);
+		pthread_cond_signal(&condition);
+    }
+}
+
+void naobody_should_stop(){
+	if (!((camera_active_a)||(ptencoders_active)||(ptmotors_active)||(camera_active_b)||(camera_active_c)||(camera_active_d)||(camera_active_e)||(camera_active_f)))
+	{
+		/* naobody thread goes sleep */
+		pthread_mutex_lock(&mymutex);
+		state=slept;
+		pthread_mutex_unlock(&mymutex);
+		pthread_cond_signal(&condition);
+	}	
+}
+
+
+
 
 /** varcolorA run function following jdec platform API schemas.
  *  @param father Father id for this schema.
@@ -111,18 +170,14 @@ Varcolor myA;
  *  @param fn arbitration function for this schema.
  *  @return integer resuming result.*/
 int myvarcolorA_run(int father, int *brothers, arbitration fn){		
-	if((serve_color==1)&&(color_active==0)){
-		color_active=1;
+	if((serve_color_a==1)&&(camera_active_a==0)){
 		printf("varcolorA schema run (naobody driver)\n");
 		all[varcolorA_schema_id].father = father;
 		all[varcolorA_schema_id].fps = 0.0;
 		all[varcolorA_schema_id].k =0;
 		put_state(varcolorA_schema_id,winner);
-		/* naobody thread goes winner */
-		pthread_mutex_lock(&mymutex);
-		state=winner;
-		pthread_cond_signal(&condition);
-		pthread_mutex_unlock(&mymutex);
+		camera_active_a=1;
+		naobody_should_restart();
 	}
 	return 0;
 }
@@ -130,31 +185,160 @@ int myvarcolorA_run(int father, int *brothers, arbitration fn){
 /** varcolorA stop function following jdec platform API schemas.		
  *  @return integer stopping result.*/
 int myvarcolorA_stop(){
-	if((serve_color==1)&&(color_active==1)){
-		color_active=0;
+	if((serve_color_a==1)&&(camera_active_a==1)){
 		printf("varcolorA schema stop (naobody driver)\n");
 		put_state(varcolorA_schema_id,slept);
 		/* naobody thread goes sleep */
-		pthread_mutex_lock(&mymutex);
-		state=slept;
-		pthread_mutex_unlock(&mymutex);
+		camera_active_a=0;
+		naobody_should_stop();
 	}
 	return 0;
 }
 
+
+/*varcolorB*/
+
+int myvarcolorB_run(int father, int *brothers, arbitration fn){		
+	if((serve_color_b==1)&&(camera_active_b==0)){
+		printf("varcolorB schema run (naobody driver)\n");
+		all[varcolorB_schema_id].father = father;
+		all[varcolorB_schema_id].fps = 0.0;
+		all[varcolorB_schema_id].k =0;
+		put_state(varcolorB_schema_id,winner);
+		camera_active_b=1;
+		naobody_should_restart();
+	}
+	return 0;
+}
+
+
+int myvarcolorB_stop(){
+	if((serve_color_b==1)&&(camera_active_b==1)){
+		printf("varcolorB schema stop (naobody driver)\n");
+		put_state(varcolorB_schema_id,slept);
+		/* naobody thread goes sleep */
+		camera_active_b=0;
+		naobody_should_stop();
+	}
+	return 0;
+}
+
+/*varcolorC*/
+int myvarcolorC_run(int father, int *brothers, arbitration fn){		
+	if((serve_color_c==1)&&(camera_active_c==0)){
+		printf("varcolorC schema run (naobody driver)\n");
+		all[varcolorC_schema_id].father = father;
+		all[varcolorC_schema_id].fps = 0.0;
+		all[varcolorC_schema_id].k =0;
+		put_state(varcolorC_schema_id,winner);
+		camera_active_c=1;
+		naobody_should_restart();
+	}
+	return 0;
+}
+
+
+int myvarcolorC_stop(){
+	if((serve_color_c==1)&&(camera_active_c==1)){
+		printf("varcolorC schema stop (naobody driver)\n");
+		put_state(varcolorC_schema_id,slept);
+		/* naobody thread goes sleep */
+		camera_active_c=0;
+		naobody_should_stop();
+	}
+	return 0;
+}
+
+/*varcolorD*/
+int myvarcolorD_run(int father, int *brothers, arbitration fn){		
+	if((serve_color_d==1)&&(camera_active_d==0)){
+		printf("varcolorD schema run (naobody driver)\n");
+		all[varcolorD_schema_id].father = father;
+		all[varcolorD_schema_id].fps = 0.0;
+		all[varcolorD_schema_id].k =0;
+		put_state(varcolorD_schema_id,winner);
+		camera_active_d=1;
+		naobody_should_restart();
+	}
+	return 0;
+}
+
+
+int myvarcolorD_stop(){
+	if((serve_color_d==1)&&(camera_active_d==1)){
+		printf("varcolorD schema stop (naobody driver)\n");
+		put_state(varcolorD_schema_id,slept);
+		/* naobody thread goes sleep */
+		camera_active_d=0;
+		naobody_should_stop();
+	}
+	return 0;
+}
+
+/*varcolorE*/
+int myvarcolorE_run(int father, int *brothers, arbitration fn){		
+	if((serve_color_e==1)&&(camera_active_e==0)){
+		printf("varcolorE schema run (naobody driver)\n");
+		all[varcolorE_schema_id].father = father;
+		all[varcolorE_schema_id].fps = 0.0;
+		all[varcolorE_schema_id].k =0;
+		put_state(varcolorE_schema_id,winner);
+		camera_active_e=1;
+		naobody_should_restart();
+	}
+	return 0;
+}
+
+
+int myvarcolorE_stop(){
+	if((serve_color_e==1)&&(camera_active_e==1)){
+		printf("varcolorE schema stop (naobody driver)\n");
+		put_state(varcolorE_schema_id,slept);
+		/* naobody thread goes sleep */
+		camera_active_e=0;
+		naobody_should_stop();
+	}
+	return 0;
+}
+
+
+/*varcolorF*/
+int myvarcolorF_run(int father, int *brothers, arbitration fn){		
+	if((serve_color_f==1)&&(camera_active_f==0)){
+		printf("varcolorF schema run (naobody driver)\n");
+		all[varcolorF_schema_id].father = father;
+		all[varcolorF_schema_id].fps = 0.0;
+		all[varcolorF_schema_id].k =0;
+		put_state(varcolorF_schema_id,winner);
+		camera_active_f=1;
+		naobody_should_restart();
+	}
+	return 0;
+}
+
+
+int myvarcolorF_stop(){
+	if((serve_color_f==1)&&(camera_active_f==1)){
+		printf("varcolorF schema stop (naobody driver)\n");
+		put_state(varcolorF_schema_id,slept);
+		/* naobody thread goes sleep */
+		camera_active_f=0;
+		naobody_should_stop();
+	}
+	return 0;
+}
+
+
 int motion_run(int father, int *brothers, arbitration fn){	
 		if((serve_motion==1)&&(motion_active==0)){
-			motion_active=1;
 			printf("MotionMotors schema run (naobody driver)\n");
 			all[motion_schema_id].father = father;
 			all[motion_schema_id].fps = 0.0;
 			all[motion_schema_id].k =0;
 			put_state(motion_schema_id,winner);
 			/* naoqi thread goes winner */
-			pthread_mutex_lock(&mymutex);
-			state=winner;
-			pthread_cond_signal(&condition);
-			pthread_mutex_unlock(&mymutex);
+			motion_active=1;
+			naobody_should_restart();
 		}
 	return 0;
 }
@@ -162,75 +346,62 @@ int motion_run(int father, int *brothers, arbitration fn){
 
 int motion_stop(){
 	if((serve_motion==1)&&(motion_active==1)){
-		motion_active=0;
 		printf("MotionMotors schema stop (naobody driver)\n");
 		put_state(motion_schema_id,slept);
-		/* naoqi thread goes sleep */
-		pthread_mutex_lock(&mymutex);
-		state=slept;
-		pthread_mutex_unlock(&mymutex);
+		motion_active=0;
+		naobody_should_stop();
 	}
 	return 0;
 }
 
 
-int pantiltencoders_run(int father, int *brothers, arbitration fn){		
-		if((serve_pantiltencoders==1)&&(pantiltencoders_active==0)){
-			pantiltencoders_active=1;
+int pantiltencoders_run(int father, int *brothers, arbitration fn){	
+		if((serve_pantiltencoders==1)&&(ptencoders_active==0)){
 			printf("pantiltencoders schema run (naobody driver)\n");
 			all[pantiltencoders_schema_id].father = father;
 			all[pantiltencoders_schema_id].fps = 0.0;
 			all[pantiltencoders_schema_id].k =0;
 			put_state(pantiltencoders_schema_id,winner);
 			/* naoqi thread goes winner */
-			pthread_mutex_lock(&mymutex);
-			state=winner;
-			pthread_cond_signal(&condition);
-			pthread_mutex_unlock(&mymutex);
+			ptencoders_active=1;
+			naobody_should_restart();
 		}
 	return 0;
 }
 
 int pantiltencoders_stop(){
-	if((serve_pantiltencoders==1)&&(pantiltencoders_active==1)){
-		pantiltencoders_active=0;
+	if((serve_pantiltencoders==1)&&(ptencoders_active==1)){
 		printf("pantiltencoders schema stop (naobody driver)\n");
 		put_state(pantiltencoders_schema_id,slept);
 		/* naoqi thread goes sleep */
-		pthread_mutex_lock(&mymutex);
-		state=slept;
-		pthread_mutex_unlock(&mymutex);
+		ptencoders_active=0;
+		naobody_should_stop();
 	}
 	return 0;
 }
 
 
 int pantiltmotors_run(int father, int *brothers, arbitration fn){		
-		if((serve_pantiltmotors==1)&&(pantiltmotors_active==0)){
-			pantiltmotors_active=1;
+		if((serve_pantiltmotors==1)&&(ptmotors_active==0)){
 			printf("pantiltmotors schema run (naobody driver)\n");
 			all[pantiltmotors_schema_id].father = father;
 			all[pantiltmotors_schema_id].fps = 0.0;
 			all[pantiltmotors_schema_id].k =0;
 			put_state(pantiltmotors_schema_id,winner);
 			/* naoqi thread goes winner */
-			pthread_mutex_lock(&mymutex);
-			state=winner;
-			pthread_cond_signal(&condition);
-			pthread_mutex_unlock(&mymutex);
+			ptmotors_active=1;
+			naobody_should_restart();
 		}
 	return 0;
 }
 
 int pantiltmotors_stop(){
-	if((serve_pantiltmotors==1)&&(pantiltmotors_active==1)){
-		pantiltmotors_active=0;
+	if((serve_pantiltmotors==1)&&(ptmotors_active==1)){
+		ptmotors_active=0;
 		printf("pantiltmotors schema stop (naobody driver)\n");
 		put_state(pantiltmotors_schema_id,slept);
 		/* naoqi thread goes sleep */
-		pthread_mutex_lock(&mymutex);
-		state=slept;
-		pthread_mutex_unlock(&mymutex);
+		naobody_should_stop();
 	}
 	return 0;
 }
@@ -264,27 +435,85 @@ void *naobody_thread(void *id)
 			lastiteration = now;
 
 			/*Get image from camera*/
-			if(color_active) {
+			if(camera_active_a){
 				speedcounter(varcolorA_schema_id);
 				/*Refrescamos la imagen*/
 				updateImageCamera(cam);
-				/*Actualizamos los valores de VarColorA*/
+				/*Actualizamos los valores de myA*/
 				getImageCamera(cam, (unsigned char *)myA.img);
 				myA.width = getWidthCamera(cam);
 				myA.height = getHeightCamera(cam);
-				myA.clock=lastimage;
-				lastimage++;
+				myA.clock=lastimage_a;
+				lastimage_a++;
+			}
+			if (camera_active_b){
+				speedcounter(varcolorB_schema_id);
+				/*Refrescamos la imagen*/
+				updateImageCamera(cam);
+				/*Actualizamos los valores de myB*/
+				getImageCamera(cam, (unsigned char *)myB.img);
+				myB.width = getWidthCamera(cam);
+				myB.height = getHeightCamera(cam);
+				myB.clock=lastimage_b;
+				lastimage_b++;
+			}
+			if (camera_active_c){
+				speedcounter(varcolorC_schema_id);
+				/*Refrescamos la imagen*/
+				updateImageCamera(cam);
+				/*Actualizamos los valores de myB*/
+				getImageCamera(cam, (unsigned char *)myC.img);
+				myC.width = getWidthCamera(cam);
+				myC.height = getHeightCamera(cam);
+				myC.clock=lastimage_c;
+				lastimage_c++;
+			}
+			if(camera_active_d){
+				speedcounter(varcolorD_schema_id);
+				/*Refrescamos la imagen*/
+				updateImageCamera(cam);
+				/*Actualizamos los valores de myD*/
+				getImageCamera(cam, (unsigned char *)myD.img);
+				myD.width = getWidthCamera(cam);
+				myD.height = getHeightCamera(cam);
+				myD.clock=lastimage_d;
+				lastimage_d++;
+			}
+			if(camera_active_e){
+				speedcounter(varcolorE_schema_id);
+				/*Refrescamos la imagen*/
+				updateImageCamera(cam);
+				/*Actualizamos los valores de myE*/
+				getImageCamera(cam, (unsigned char *)myE.img);
+				myE.width = getWidthCamera(cam);
+				myE.height = getHeightCamera(cam);
+				myE.clock=lastimage_e;
+				lastimage_e++;
+			}
+			if(camera_active_f){
+				speedcounter(varcolorA_schema_id);
+				/*Refrescamos la imagen*/
+				updateImageCamera(cam);
+				/*Actualizamos los valores de myF*/
+				getImageCamera(cam, (unsigned char *)myF.img);
+				myF.width = getWidthCamera(cam);
+				myF.height = getHeightCamera(cam);
+				myF.clock=lastimage_f;
+				lastimage_f++;
 			}
 
 			/* Move body*/
 			if(motion_active) {
 				speedcounter(motion_schema_id);
-				walkmotion(m,vnao,wnao);
+				if (walk_type==1)
+					walkprocessmotion(m,vnao,wnao);
+				else 
+					walkchangesmotion(m,vnao,wnao);
 			}
-			if ((pantiltencoders_active)||(pantiltmotors_active)){
-				if (pantiltencoders_active)
+			if ((ptencoders_active)||(ptmotors_active)){
+				if (ptencoders_active)
 					speedcounter(pantiltencoders_schema_id);
-				if (pantiltmotors_active)
+				if (ptmotors_active)
 					speedcounter(pantiltmotors_schema_id);
 				headmotion(m,ynao,pnao,&yreal,&preal,vy,vp,&my_clock);
 			}
@@ -432,13 +661,73 @@ int naobody_parseconf(char *configfile){
 								words=sscanf(buffer_file2,"%s %s %s %s %s",word3,word4,word5,word6,word7);
 								if (words==5){
 									if(strcmp(word4,"varcolorA")==0){
-										serve_color=1;
+										serve_color_a=1;
 										number_color=atoi(word5);
 										width = atoi(word6);
 										height = atoi(word7);
 										/*Puede que haya que comprobar si ya esta en uso cuando haya mas de  ####################*/
 										if (!size_ok(width, height)){
 											fprintf (stderr, "Wrong image size for varcolorA, changed to default size 320X240\n");
+											width = DEFAULT_COLUMNS;
+											height = DEFAULT_ROWS;
+										}
+									}
+									else if(strcmp(word4,"varcolorB")==0){
+										serve_color_b=1;
+										number_color=atoi(word5);
+										width = atoi(word6);
+										height = atoi(word7);
+										/*Puede que haya que comprobar si ya esta en uso cuando haya mas de  ####################*/
+										if (!size_ok(width, height)){
+											fprintf (stderr, "Wrong image size for varcolorB, changed to default size 320X240\n");
+											width = DEFAULT_COLUMNS;
+											height = DEFAULT_ROWS;
+										}
+									}
+									else if(strcmp(word4,"varcolorC")==0){
+										serve_color_c=1;
+										number_color=atoi(word5);
+										width = atoi(word6);
+										height = atoi(word7);
+										/*Puede que haya que comprobar si ya esta en uso cuando haya mas de  ####################*/
+										if (!size_ok(width, height)){
+											fprintf (stderr, "Wrong image size for varcolorC, changed to default size 320X240\n");
+											width = DEFAULT_COLUMNS;
+											height = DEFAULT_ROWS;
+										}
+									}
+									else if(strcmp(word4,"varcolorD")==0){
+										serve_color_d=1;
+										number_color=atoi(word5);
+										width = atoi(word6);
+										height = atoi(word7);
+										/*Puede que haya que comprobar si ya esta en uso cuando haya mas de  ####################*/
+										if (!size_ok(width, height)){
+											fprintf (stderr, "Wrong image size for varcolorD, changed to default size 320X240\n");
+											width = DEFAULT_COLUMNS;
+											height = DEFAULT_ROWS;
+										}
+									}
+									else if(strcmp(word4,"varcolorE")==0){
+										serve_color_e=1;
+										number_color=atoi(word5);
+										width = atoi(word6);
+										height = atoi(word7);
+										/*Puede que haya que comprobar si ya esta en uso cuando haya mas de  ####################*/
+										if (!size_ok(width, height)){
+											fprintf (stderr, "Wrong image size for varcolorE, changed to default size 320X240\n");
+											width = DEFAULT_COLUMNS;
+											height = DEFAULT_ROWS;
+										}
+									}
+									else if(strcmp(word4,"varcolorF")==0){
+										serve_color_f=1;
+										number_color=atoi(word5);
+										width = atoi(word6);
+										height = atoi(word7);
+										/*Puede que haya que comprobar si ya esta en uso cuando haya mas de  ####################*/
+										if (!size_ok(width, height)){
+											fprintf (stderr, "Wrong image size for varcolorF, changed to default size 320X240\n");
 											width = DEFAULT_COLUMNS;
 											height = DEFAULT_ROWS;
 										}
@@ -484,8 +773,8 @@ int naobody_parseconf(char *configfile){
   
 	/* checking if a driver section was read */
 	if(driver_config_parsed==1){
-		if(serve_color==0 /*&& serve_head==0*/)
-			printf("naobody: warning! neither color nor head motor provided.\n");
+		if((serve_color_a==0)&&(serve_color_b==0)&&(serve_color_c==0)&&(serve_color_d==0)&&(serve_color_e==0)&&(serve_color_f==0))
+			printf("naobody: warning! color not provided.\n");
 		return 0;
 	} else 
 		return -1;
@@ -493,7 +782,7 @@ int naobody_parseconf(char *configfile){
 
 void naobody_terminate(){
 	naobody_terminate_command=1;
-	if(serve_color) {
+	if ((serve_color_a)||(serve_color_b)||(serve_color_c)||(serve_color_d)||(serve_color_e)||(serve_color_f)) {
 		deleteCamera(cam);
 	}
 	if((serve_motion)||(serve_pantiltencoders)||serve_pantiltmotors) {
@@ -507,7 +796,7 @@ void naobody_terminate(){
  *  @return 0 if initialitation was successful or -1 if something went wrong.*/
 int naobody_deviceinit(){
 
-	if(serve_color) {
+	if ((serve_color_a)||(serve_color_b)||(serve_color_c)||(serve_color_d)||(serve_color_e)||(serve_color_f)) {
 		/*Intentamos obtener la camara*/
 		cam = newCamera(width, height, fps);
 		if (cam == NULL) {
@@ -534,15 +823,31 @@ int naobody_deviceinit(){
  *  @param configfile path and name to the config file of this driver.*/
 void naobody_init(char *configfile)
 {
-	serve_color=0;
+	serve_color_a=0;
+	camera_active_a=0;
+	serve_color_b=0;
+	camera_active_b=0;
+	serve_color_c=0;
+	camera_active_c=0;
+	serve_color_d=0;
+	camera_active_d=0;
+	serve_color_e=0;
+	camera_active_e=0;
+	serve_color_f=0;
+	camera_active_f=0;
 	number_color=-1;
-	color_active=0;
 	serve_motion=0;
 	motion_active=0;
 	serve_pantiltencoders=0;
-	pantiltencoders_active=0;
+	ptencoders_active=0;
 	serve_pantiltmotors=0;
-	pantiltmotors_active=0;
+	ptmotors_active=0;
+
+
+	vnao = 0.0;
+	wnao= 0.0;
+	walk_type=1;
+
 
 	width = DEFAULT_COLUMNS;
 	height = DEFAULT_ROWS;
@@ -574,17 +879,10 @@ void naobody_init(char *configfile)
 		exit(-1);
 	}		
 
-	pthread_mutex_lock(&mymutex);
-	state=slept;
-    if (serve_color || (serve_motion)||(serve_pantiltencoders)||(serve_pantiltmotors)){
-		args=0;
-		/*Call to function thread*/
-		pthread_create(&naobody_th,NULL,naobody_thread,(void*)&args);
-	} 
-	pthread_mutex_unlock(&mymutex);
+
 
 	/*creates new schema for varcolorA*/
-	if(serve_color==1){
+	if (serve_color_a){
 		all[num_schemas].id = (int *) &varcolorA_schema_id;
 		strcpy(all[num_schemas].name,"varcolorA");
 		all[num_schemas].run = (runFn) myvarcolorA_run;
@@ -597,16 +895,126 @@ void naobody_init(char *configfile)
 		all[num_schemas].terminate = NULL;
 		all[num_schemas].handle = NULL;
 		num_schemas++;
-
 		myA.width=width;
 		myA.height=height;
 		myA.img=(char*)malloc(myA.width*myA.height*3*sizeof(char));
 		myA.clock=0;
-		myexport("varcolorA","varcolorA",&myA);
-		myexport("varcolorA","id",&varcolorA_schema_id);
-		myexport("varcolorA","run",(void *)myvarcolorA_run);
-		myexport("varcolorA","stop",(void *)myvarcolorA_stop);
+		myexport((char*)"varcolorA",(char*)"varcolorA",&myA);
+		myexport((char*)"varcolorA",(char*)"id",&varcolorA_schema_id);
+		myexport((char*)"varcolorA",(char*)"run",(void *)myvarcolorA_run);
+		myexport((char*)"varcolorA",(char*)"stop",(void *)myvarcolorA_stop);
 	}
+	if (serve_color_b){
+		all[num_schemas].id = (int *) &varcolorB_schema_id;
+		strcpy(all[num_schemas].name,"varcolorB");
+		all[num_schemas].run = (runFn) myvarcolorB_run;
+		all[num_schemas].stop = (stopFn) myvarcolorB_stop;
+		printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+		(*(all[num_schemas].id)) = num_schemas;
+		all[num_schemas].fps = 0.;
+		all[num_schemas].k =0;
+		all[num_schemas].state=slept;
+		all[num_schemas].terminate = NULL;
+		all[num_schemas].handle = NULL;
+		num_schemas++;
+		myB.width=width;
+		myB.height=height;
+		myB.img=(char*)malloc(myB.width*myB.height*3*sizeof(char));
+		myB.clock=0;
+		myexport((char*)"varcolorB",(char*)"varcolorB",&myB);
+		myexport((char*)"varcolorB",(char*)"id",&varcolorB_schema_id);
+		myexport((char*)"varcolorB",(char*)"run",(void *)myvarcolorB_run);
+		myexport((char*)"varcolorB",(char*)"stop",(void *)myvarcolorB_stop);
+	}
+	if (serve_color_c){
+		all[num_schemas].id = (int *) &varcolorC_schema_id;
+		strcpy(all[num_schemas].name,"varcolorC");
+		all[num_schemas].run = (runFn) myvarcolorC_run;
+		all[num_schemas].stop = (stopFn) myvarcolorC_stop;
+		printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+		(*(all[num_schemas].id)) = num_schemas;
+		all[num_schemas].fps = 0.;
+		all[num_schemas].k =0;
+		all[num_schemas].state=slept;
+		all[num_schemas].terminate = NULL;
+		all[num_schemas].handle = NULL;
+		num_schemas++;
+		myC.width=width;
+		myC.height=height;
+		myC.img=(char*)malloc(myC.width*myC.height*3*sizeof(char));
+		myC.clock=0;
+		myexport((char*)"varcolorC",(char*)"varcolorC",&myC);
+		myexport((char*)"varcolorC",(char*)"id",&varcolorC_schema_id);
+		myexport((char*)"varcolorC",(char*)"run",(void *)myvarcolorC_run);
+		myexport((char*)"varcolorC",(char*)"stop",(void *)myvarcolorC_stop);
+	}
+	if (serve_color_d){
+		all[num_schemas].id = (int *) &varcolorD_schema_id;
+		strcpy(all[num_schemas].name,"varcolorD");
+		all[num_schemas].run = (runFn) myvarcolorD_run;
+		all[num_schemas].stop = (stopFn) myvarcolorD_stop;
+		printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+		(*(all[num_schemas].id)) = num_schemas;
+		all[num_schemas].fps = 0.;
+		all[num_schemas].k =0;
+		all[num_schemas].state=slept;
+		all[num_schemas].terminate = NULL;
+		all[num_schemas].handle = NULL;
+		num_schemas++;
+		myD.width=width;
+		myD.height=height;
+		myD.img=(char*)malloc(myD.width*myD.height*3*sizeof(char));
+		myD.clock=0;
+		myexport((char*)"varcolorD",(char*)"varcolorD",&myD);
+		myexport((char*)"varcolorD",(char*)"id",&varcolorD_schema_id);
+		myexport((char*)"varcolorD",(char*)"run",(void *)myvarcolorD_run);
+		myexport((char*)"varcolorD",(char*)"stop",(void *)myvarcolorD_stop);
+	}
+	if (serve_color_e){
+		all[num_schemas].id = (int *) &varcolorE_schema_id;
+		strcpy(all[num_schemas].name,"varcolorE");
+		all[num_schemas].run = (runFn) myvarcolorE_run;
+		all[num_schemas].stop = (stopFn) myvarcolorE_stop;
+		printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+		(*(all[num_schemas].id)) = num_schemas;
+		all[num_schemas].fps = 0.;
+		all[num_schemas].k =0;
+		all[num_schemas].state=slept;
+		all[num_schemas].terminate = NULL;
+		all[num_schemas].handle = NULL;
+		num_schemas++;
+		myE.width=width;
+		myE.height=height;
+		myE.img=(char*)malloc(myE.width*myE.height*3*sizeof(char));
+		myE.clock=0;
+		myexport((char*)"varcolorE",(char*)"varcolorE",&myE);
+		myexport((char*)"varcolorE",(char*)"id",&varcolorE_schema_id);
+		myexport((char*)"varcolorE",(char*)"run",(void *)myvarcolorE_run);
+		myexport((char*)"varcolorE",(char*)"stop",(void *)myvarcolorE_stop);
+	}
+	if (serve_color_f){
+		all[num_schemas].id = (int *) &varcolorF_schema_id;
+		strcpy(all[num_schemas].name,"varcolorF");
+		all[num_schemas].run = (runFn) myvarcolorF_run;
+		all[num_schemas].stop = (stopFn) myvarcolorF_stop;
+		printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
+		(*(all[num_schemas].id)) = num_schemas;
+		all[num_schemas].fps = 0.;
+		all[num_schemas].k =0;
+		all[num_schemas].state=slept;
+		all[num_schemas].terminate = NULL;
+		all[num_schemas].handle = NULL;
+		num_schemas++;
+		myF.width=width;
+		myF.height=height;
+		myF.img=(char*)malloc(myF.width*myF.height*3*sizeof(char));
+		myF.clock=0;
+		myexport((char*)"varcolorF",(char*)"varcolorF",&myF);
+		myexport((char*)"varcolorF",(char*)"id",&varcolorF_schema_id);
+		myexport((char*)"varcolorF",(char*)"run",(void *)myvarcolorF_run);
+		myexport((char*)"varcolorF",(char*)"stop",(void *)myvarcolorF_stop);
+	}
+
 
 	/*Creates a new schema for motion*/
 	if(serve_motion==1) {
@@ -622,13 +1030,12 @@ void naobody_init(char *configfile)
 		all[num_schemas].terminate = NULL;
 		all[num_schemas].handle = NULL;
 		num_schemas++;
-		vnao = 0.0;
-		wnao= 0.0;
-		myexport("MotionMotors","v",&vnao);
-		myexport("MotionMotors","w",&wnao);
-		myexport("MotionMotors","id",&motion_schema_id);
-		myexport("MotionMotors","run",(void *)motion_run);
-		myexport("MotionMotors","stop",(void *)motion_stop);
+		myexport((char*)"MotionMotors",(char*)"v",&vnao);
+		myexport((char*)"MotionMotors",(char*)"w",&wnao);
+		myexport((char*)"MotionMotors",(char*)"type",&walk_type);
+		myexport((char*)"MotionMotors",(char*)"id",&motion_schema_id);
+		myexport((char*)"MotionMotors",(char*)"run",(void *)motion_run);
+		myexport((char*)"MotionMotors",(char*)"stop",(void *)motion_stop);
 	}
 	if (serve_pantiltencoders==1){
 		all[num_schemas].id = (int *) &pantiltencoders_schema_id;
@@ -643,12 +1050,12 @@ void naobody_init(char *configfile)
 		all[num_schemas].terminate = NULL;
 		all[num_schemas].handle = NULL;
 		num_schemas++;
-		myexport("ptencoders","pan_angle",&yreal);
-		myexport("ptencoders","tilt_angle",&preal);
-		myexport("ptencoders","clock",&my_clock);
-		myexport("ptencoders","id",&pantiltencoders_schema_id);
-		myexport("ptencoders","run",(void *)pantiltencoders_run);
-		myexport("ptencoders","stop",(void *)pantiltencoders_stop);
+		myexport((char*)"ptencoders",(char*)"pan_angle",&yreal);
+		myexport((char*)"ptencoders",(char*)"tilt_angle",&preal);
+		myexport((char*)"ptencoders",(char*)"clock",&my_clock);
+		myexport((char*)"ptencoders",(char*)"id",&pantiltencoders_schema_id);
+		myexport((char*)"ptencoders",(char*)"run",(void *)pantiltencoders_run);
+		myexport((char*)"ptencoders",(char*)"stop",(void *)pantiltencoders_stop);
 	}
 	if (serve_pantiltmotors==1){
 		all[num_schemas].id = (int *) &pantiltmotors_schema_id;
@@ -663,21 +1070,33 @@ void naobody_init(char *configfile)
 		all[num_schemas].terminate = NULL;
 		all[num_schemas].handle = NULL;
 		num_schemas++;
-		myexport("ptmotors","cycle",&cycle);
-		myexport("ptmotors","longitude",&ynao);
-		myexport("ptmotors","latitude",&pnao);
-		myexport("ptmotors","max_longitude",&max_longitude);
-		myexport("ptmotors","max_latitude",&max_latitude);
-		myexport("ptmotors","min_longitude",&min_longitude);
-		myexport("ptmotors","min_latitude",&min_latitude);
-		myexport("ptmotors","longitude_speed",&vy);
-		myexport("ptmotors","latitude_speed",&vp);
-		myexport("ptmotors","max_longitud_speed",&max_y_speed);
-		myexport("ptmotors","max_latitud_speed",&max_p_speed);
-		myexport("ptmotors","id",&pantiltmotors_schema_id);
-		myexport("ptmotors","run",(void *)pantiltmotors_run);
-		myexport("ptmotors","stop",(void *)pantiltmotors_stop);
-	}
-  
+		myexport((char*)"ptmotors",(char*)"cycle",&cycle);
+		myexport((char*)"ptmotors",(char*)"longitude",&ynao);
+		myexport((char*)"ptmotors",(char*)"latitude",&pnao);
+		myexport((char*)"ptmotors",(char*)"max_longitude",&max_longitude);
+		myexport((char*)"ptmotors",(char*)"max_latitude",&max_latitude);
+		myexport((char*)"ptmotors",(char*)"min_longitude",&min_longitude);
+		myexport((char*)"ptmotors",(char*)"min_latitude",&min_latitude);
+		myexport((char*)"ptmotors",(char*)"longitude_speed",&vy);
+		myexport((char*)"ptmotors",(char*)"latitude_speed",&vp);
+		myexport((char*)"ptmotors",(char*)"max_longitud_speed",&max_y_speed);
+		myexport((char*)"ptmotors",(char*)"max_latitud_speed",&max_p_speed);
+		myexport((char*)"ptmotors",(char*)"id",&pantiltmotors_schema_id);
+		myexport((char*)"ptmotors",(char*)"run",(void *)pantiltmotors_run);
+		myexport((char*)"ptmotors",(char*)"stop",(void *)pantiltmotors_stop);
+	}  
+
+	pthread_mutex_lock(&mymutex);
+    if ((serve_color_a==0)||(serve_color_b==0)||(serve_color_c==0)||(serve_color_d==0)||(serve_color_e==0)||(serve_color_f==0) || (serve_motion)||(serve_pantiltencoders)||(serve_pantiltmotors)){
+		args=0;
+		/*Call to function thread*/
+		state = slept;
+		pthread_create(&naobody_th,NULL,naobody_thread,(void*)&args);
+	} 
+	pthread_mutex_unlock(&mymutex);
+
+
+
 	printf("naobody driver started up\n");
+
 }

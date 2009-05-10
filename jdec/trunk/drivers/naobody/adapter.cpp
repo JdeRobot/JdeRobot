@@ -1,3 +1,24 @@
+/*
+ *  Copyright (C) 1997-2009 JDE Developers Team
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see http://www.gnu.org/licenses/.
+ *
+ *  Authors : 	Eduardo Perdices <edupergar@gmail.com>
+ *				Francisco Rivas <fm.rivas@alumnos.urjc.es>
+ */
+
+
 #include "adapter.h"
 #include "alproxy.h"
 #include "alvisionimage.h"
@@ -221,45 +242,133 @@
 	}
 
 
-	int motion::walk(float v, float w) {
+	int motion::walk_stop_to_process(float v, float w) {
 		float myv;
+		float myw;
 		int steps;
+		float radius;
+
+		w=-w;
 
 		myv=-0.83*v+100;
+
+		myv=-0.83*v+100;
+		if (w<0){
+			w=-w;
+			myw= (MYMAXR-MYMINR)*((w-MYMINW)/(MYMAXW-MYMINW))+MYMINR;
+			myw=-myw;
+			radius=-myw;
+		}
+		else{
+			myw= (MYMAXR-MYMINR)*((w-MYMINW)/(MYMAXW-MYMINW))+MYMINR;
+			radius=myw;
+		}
 	
 		if ((w!=0)||(v!=0)){
-				if ((v>0)&&(v<MAXV)){
-					steps=this->motionProxy->getRemainingFootStepCount();
-					if (steps!=this->mysteps){
-						mysteps=steps;
-						if (mysteps < 2){
-							printf("aqui\n");
-							if (w==0){
-									this->motionProxy->post.walkStraight(0.08,myv);
+			steps=this->motionProxy->getRemainingFootStepCount();
+			if (steps!=this->mysteps){
+				mysteps=steps;
+				if (mysteps < 2){
+					if (w==0){
+						if ((v>0)&&(v<=MAXV)){
+							this->motionProxy->post.walkStraight(DISTANCE_A,myv);
+						}
+					}
+					else{
+						if (v==0){
+							if (w<0){
+								this->motionProxy->post.walkArc(DISTANCE_A/myw,radius, -w);
 							}
 							else{
-								this->motionProxy->post.walkArc(w,0.08, myv);
+								this->motionProxy->post.walkArc(DISTANCE_A/myw,radius, w);
+							}
+						}
+						else{
+							if ((v>0)&&(v<=MAXV)){
+								this->motionProxy->post.walkArc(DISTANCE_A/myw,radius, myv);
 							}
 						}
 					}
-					else if (steps==0){
-						printf("empezamos\n");
-						if (w==0){
-									this->motionProxy->post.walkStraight(0.08,myv);
-							}
-							else{
-								this->motionProxy->post.walkArc(w,0.08, myv);
-							}
+				}
+			}
+			else if (steps==0){
+				if (w==0){
+					this->motionProxy->post.walkStraight(DISTANCE_A,myv);
+				}
+				else{
+					if (v==0){
+						if (w<0){
+							this->motionProxy->post.walkArc(DISTANCE_A/myw,radius, -w);
+						}
+						else{
+							this->motionProxy->post.walkArc(DISTANCE_A/myw,radius, w);
+						}
+					}
+					else{
+						this->motionProxy->post.walkArc(DISTANCE_A/myw,radius, myv);
 					}
 				}
-			/*else{
-				printf("---%d\n",this->motionProxy->getRemainingFootStepCount());
-			}*/
+			}
+		}
+		else{
+			this->motionProxy->post.clearFootsteps();
 		}
 		return 0;
 	}
 
 
+	int motion::walk_stop_if_changes(float v, float w) {
+		float myv;
+		float myw;
+		float radius;
+		
+	
+		myv=-0.83*v+100;
+		if (w<0){
+			w=-w;
+			myw= (MYMAXR-MYMINR)*((w-MYMINW)/(MYMAXW-MYMINW))+MYMINR;
+			myw=-myw;
+			radius=-myw;
+		}
+		else{
+			myw= (MYMAXR-MYMINR)*((w-MYMINW)/(MYMAXW-MYMINW))+MYMINR;
+			radius=myw;
+	
+		}
+		if ((this->lastv!=v)||(this->lastw!=w)){
+			this->motionProxy->post.clearFootsteps();
+			this->lastv=v;
+			this->lastw=w;
+			if ((w!=0)||(v!=0)){
+				if (w==0){
+					if (v==0)
+						this->motionProxy->post.walkStraight(10,50);
+					else
+						this->motionProxy->post.walkStraight(10,myv);
+				}
+				else{
+					this->motionProxy->post.walkArc(10/myw,radius, myv);
+				}
+			}
+			else{
+				this->motionProxy->post.clearFootsteps();
+			}
+		}
+		else if ((!this->motionProxy->walkIsActive())&&((v!=0)||(w!=0))){
+			if (w==0){
+					if (v==0)
+						this->motionProxy->post.walkStraight(10,50);
+					else
+						this->motionProxy->post.walkStraight(10,myv);
+				}
+				else{
+					this->motionProxy->post.walkArc(10/myw,radius, myv);
+				}
+		}
+		return 0;
+	}
+	
+	
 	int motion::head(float y, float p, float *posy, float *posp, float vy, float vp, unsigned long int* clock){
 		float ay;
 		float ap;
@@ -313,8 +422,12 @@
 		m->terminate();
 	}
 
-	int walkmotion(motion* m, float v, float w){
-		return m->walk(v,w); 
+	int walkprocessmotion(motion* m, float v, float w){
+		return m->walk_stop_to_process(v,w); 
+	}
+
+	int walkchangesmotion(motion* m, float v, float w){
+		return m->walk_stop_if_changes(v,w); 
 	}
 
 	int headmotion(motion* m, float y, float p, float *posy, float *posp, float vy, float vp, unsigned long int* clock){
