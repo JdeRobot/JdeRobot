@@ -331,7 +331,7 @@ int myvarcolorF_stop(){
 
 int motion_run(int father, int *brothers, arbitration fn){	
 		if((serve_motion==1)&&(motion_active==0)){
-			printf("MotionMotors schema run (naobody driver)\n");
+			printf("motors schema run (naobody driver)\n");
 			all[motion_schema_id].father = father;
 			all[motion_schema_id].fps = 0.0;
 			all[motion_schema_id].k =0;
@@ -346,7 +346,7 @@ int motion_run(int father, int *brothers, arbitration fn){
 
 int motion_stop(){
 	if((serve_motion==1)&&(motion_active==1)){
-		printf("MotionMotors schema stop (naobody driver)\n");
+		printf("motors schema stop (naobody driver)\n");
 		put_state(motion_schema_id,slept);
 		motion_active=0;
 		naobody_should_stop();
@@ -435,17 +435,7 @@ void *naobody_thread(void *id)
 			lastiteration = now;
 
 			/*Get image from camera*/
-			if(camera_active_a){
-				speedcounter(varcolorA_schema_id);
-				/*Refrescamos la imagen*/
-				updateImageCamera(cam);
-				/*Actualizamos los valores de myA*/
-				getImageCamera(cam, (unsigned char *)myA.img);
-				myA.width = getWidthCamera(cam);
-				myA.height = getHeightCamera(cam);
-				myA.clock=lastimage_a;
-				lastimage_a++;
-			}
+			
 			if (camera_active_b){
 				speedcounter(varcolorB_schema_id);
 				/*Refrescamos la imagen*/
@@ -491,7 +481,7 @@ void *naobody_thread(void *id)
 				lastimage_e++;
 			}
 			if(camera_active_f){
-				speedcounter(varcolorA_schema_id);
+				speedcounter(varcolorF_schema_id);
 				/*Refrescamos la imagen*/
 				updateImageCamera(cam);
 				/*Actualizamos los valores de myF*/
@@ -500,6 +490,17 @@ void *naobody_thread(void *id)
 				myF.height = getHeightCamera(cam);
 				myF.clock=lastimage_f;
 				lastimage_f++;
+			}
+			if(camera_active_a){
+				speedcounter(varcolorA_schema_id);
+				/*Refrescamos la imagen*/
+				updateImageCamera(cam);
+				/*Actualizamos los valores de myA*/
+				getImageCamera(cam, (unsigned char *)myA.img);
+				myA.width = getWidthCamera(cam);
+				myA.height = getHeightCamera(cam);
+				myA.clock=lastimage_a;
+				lastimage_a++;
 			}
 
 			/* Move body*/
@@ -734,7 +735,7 @@ int naobody_parseconf(char *configfile){
 									} else
 										printf("naobody: provides line incorrect\n");
 								} else 	if (words==2){
-									if(strcmp(word4,"body")==0){
+									if(strcmp(word4,"motors")==0){
 										serve_motion=1;
 									}
 									else if (strcmp(word4,"ptencoders")==0){
@@ -1019,7 +1020,7 @@ void naobody_init(char *configfile)
 	/*Creates a new schema for motion*/
 	if(serve_motion==1) {
 		all[num_schemas].id = (int *) &motion_schema_id;
-		strcpy(all[num_schemas].name,"MotionMotors");
+		strcpy(all[num_schemas].name,"motors");
 		all[num_schemas].run = (runFn) motion_run;
 		all[num_schemas].stop = (stopFn) motion_stop;
 		printf("%s schema loaded (id %d)\n",all[num_schemas].name,num_schemas);
@@ -1030,12 +1031,12 @@ void naobody_init(char *configfile)
 		all[num_schemas].terminate = NULL;
 		all[num_schemas].handle = NULL;
 		num_schemas++;
-		myexport((char*)"MotionMotors",(char*)"v",&vnao);
-		myexport((char*)"MotionMotors",(char*)"w",&wnao);
-		myexport((char*)"MotionMotors",(char*)"type",&walk_type);
-		myexport((char*)"MotionMotors",(char*)"id",&motion_schema_id);
-		myexport((char*)"MotionMotors",(char*)"run",(void *)motion_run);
-		myexport((char*)"MotionMotors",(char*)"stop",(void *)motion_stop);
+		myexport((char*)"motors",(char*)"v",&vnao);
+		myexport((char*)"motors",(char*)"w",&wnao);
+		myexport((char*)"motors",(char*)"type",&walk_type);
+		myexport((char*)"motors",(char*)"id",&motion_schema_id);
+		myexport((char*)"motors",(char*)"run",(void *)motion_run);
+		myexport((char*)"motors",(char*)"stop",(void *)motion_stop);
 	}
 	if (serve_pantiltencoders==1){
 		all[num_schemas].id = (int *) &pantiltencoders_schema_id;
