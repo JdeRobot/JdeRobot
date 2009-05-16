@@ -15,14 +15,16 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : Pablo Miangolarra Tejada <p.miangolabra@alumnos.urjc.es>
+ *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>	
+ *  	      Pablo Miangolarra Tejada <p.miangolabra@alumnos.urjc.es>
  */
 
-#include "jde.h"
+#include <jde.h>
 #include "colortuner.h"
 #include <graphics_gtk.h>
 #include <colorspaces.h>
 #include <interfaces/varcolor.h>
+
 
 #include <glade/glade.h>
 #include <gtk/gtk.h>
@@ -243,6 +245,19 @@ int lineinimage(char *img, int xa, int ya, int xb, int yb, int thiscolor){
    int lastx,lasty,thisx,thisy,lastcount;
    int threshold_line=1;
    int Xmax,Xmin,Ymax,Ymin;
+
+   if (xa > SMAX-1){
+	xa = SMAX-1;
+   }
+   if (xb > SMAX-1){
+	xb = SMAX-1;
+   }
+   if (ya > SMAX-1){
+	ya = SMAX-1;
+   }
+   if (yb > SMAX-1){
+	yb = SMAX-1;
+   }
 
    Xmin=0; Xmax=SMAX-1; Ymin=0; Ymax=SMAX-1;
    /* In this image always graf coordinates x=horizontal, y=vertical, starting at the top left corner of the image. They can't reach 240 or 320, their are not valid values for the pixels.  */
@@ -642,17 +657,72 @@ void  on_active_yub_toggled (GtkCheckMenuItem *menu_item, gpointer user_data){
 	}
 }
 
-//************************************************************************************
-//	Functions for YUV and HSV maps interaction
+//***********************************************************************************
+//
+//			Functions for YUV and HSV maps interaction
 //
 //***********************************************************************************
 
 void on_hsv_image_space_button_press_event (GtkWidget *event_box,GdkEventButton *event, gpointer data)
 {
 
-	   int coordx = event->x;
-	   int coordy = event->y;
+	int coordx = event->x;
+	int coordy = event->y;
 
+	if (event->button == 3){
+		/*printf("Right mouse button clicked\n");*/
+	      x_pulsada=coordx;y_pulsada=coordy;
+	      x_pulsada=x_pulsada-centro_x;
+	      y_pulsada=centro_y-y_pulsada;
+
+	      if (x_pulsada==0){	
+		 if (y_pulsada<0){	
+		    hmax=3.1416/2.;
+		 }else{
+		    hmax=3.*3.1416/2.;
+		 }
+	      }else{
+		 if (y_pulsada==0){
+		    if (x_pulsada<0){
+		       hmax=3.1416;
+		    }else{
+		       hmax=0.;
+		    }
+		 }else{
+		    if (x_pulsada>0){
+		       hmax=atan((float)(y_pulsada)/(float)x_pulsada);
+		       if(y_pulsada<0){
+			  hmax=hmax+2*3.1416;
+		       }
+		    }else{
+		       hmax=atan((float)y_pulsada/(float)x_pulsada)+3.1416;
+		    }
+		 }
+	      }
+	      hmax=hmax+.2;
+	      hmin=hmax-.4;
+	      if (hmax>(2.*3.1416)){
+		 hmax=hmax-(2.*3.1416);
+	      }
+	      if (hmin<0){
+		 hmin=hmin+(2.*3.1416);
+	      }
+	      smax=(float)sqrt((x_pulsada*x_pulsada)+(y_pulsada*y_pulsada))/radio_hsi_map;
+	      smax=smax+.1;
+	      smin=smax-.2;
+	      if (smax>1.){
+		 smax=1.;
+	      }
+	      if (smin<0.){
+		 smin=0.;
+	      }
+	      /*Change sliders values*/
+
+		gtk_range_set_value(glade_xml_get_widget(xml, "hmax"),hmax);
+		gtk_range_set_value(glade_xml_get_widget(xml, "hmin"),hmin);
+		gtk_range_set_value(glade_xml_get_widget(xml, "smax"),smax);
+		gtk_range_set_value(glade_xml_get_widget(xml, "smin"),smin);
+	}
 	   xquesito1=cos(hmax)*smax*radio_hsi_map+centro_x;
 	   yquesito1=centro_y-sin(hmax)*smax*radio_hsi_map;
 	
@@ -665,6 +735,7 @@ void on_hsv_image_space_button_press_event (GtkWidget *event_box,GdkEventButton 
 	   xquesito4=cos(hmin)*smin*radio_hsi_map+centro_x;
 	   yquesito4=centro_y-sin(hmin)*smin*radio_hsi_map;
 	     
+	if (event->button == 1){
 	      if (((coordx)<=xquesito1+5) && ((coordx)>=xquesito1-5)){
 		 if (((coordy)<=yquesito1+5) && ((coordy)>=yquesito1-5)){
 		    x_pulsada=coordx;y_pulsada=coordy;
@@ -702,6 +773,7 @@ void on_hsv_image_space_button_press_event (GtkWidget *event_box,GdkEventButton 
 		    gtk_range_set_value(glade_xml_get_widget(xml, "smin"),smin);
 		 }
 	      }
+	}
 }
 
 void on_hsv_image_space_motion_notify_event (GtkWidget *event_box,GdkEventButton *event, gpointer data)
@@ -846,6 +918,44 @@ void on_yuv_image_space_button_press_event (GtkWidget *event_box,GdkEventButton 
 	int coordx = event->x;
 	int coordy = event->y ;
 	float u1,u2,v1,v2;
+	float U,V;
+
+
+	if (event->button == 3){
+		/*printf("Right mouse button clicked\n");*/
+	        x_pulsada=coordx;
+	        y_pulsada=coordy;
+
+	        x_pulsada = SMAX - x_pulsada;
+		y_pulsada = SMAX - y_pulsada; 
+
+	      	U =  0.436 - ((x_pulsada*0.436*2.0)/SMAX);
+		V = ((y_pulsada*0.615*2.0)/SMAX) - 0.615;
+
+	        umax=U+0.1;
+		umin=U-0.1;
+		 if (umax>0.436){
+		    umax=0.436;
+		 }
+		 if (umin<-0.436){
+		    umin=-0.436;
+		 }
+
+		 vmax2=V+0.1;
+		 vmin2=V-0.1;
+		 if (vmax2>0.615){
+		    vmax2=0.615;
+		 }
+		 if (vmin2<-0.615){
+		    vmin2=-0.615;
+		 }
+	      	/*Change sliders values*/
+
+		gtk_range_set_value(glade_xml_get_widget(xml, "umax"),umax);
+		gtk_range_set_value(glade_xml_get_widget(xml, "umin"),umin);
+		gtk_range_set_value(glade_xml_get_widget(xml, "vmax2"),vmax2);
+		gtk_range_set_value(glade_xml_get_widget(xml, "vmin2"),vmin2);
+	}
 
 	if ((coordx < SMAX)&&(coordy <SMAX)){
 		
@@ -862,7 +972,8 @@ void on_yuv_image_space_button_press_event (GtkWidget *event_box,GdkEventButton 
 		ysquare3=(v2*SMAX)/(0.615*2);
 		xsquare4=(u2*SMAX)/(0.436*2);
 		ysquare4=(v2*SMAX)/(0.615*2);
-		     
+		 
+		if (event->button == 1){    
 		      if (((coordx)<=xsquare1+5) && ((coordx)>=xsquare1-5)){
 			 if (((coordy)<=ysquare1+5) && ((coordy)>=ysquare1-5)){
 			    x_pulsada=coordx;y_pulsada=coordy;
@@ -887,6 +998,7 @@ void on_yuv_image_space_button_press_event (GtkWidget *event_box,GdkEventButton 
 			    pulsada=4;
 			 }
 		      }
+		}
 	}
 }
 
@@ -1190,25 +1302,6 @@ void load_hsv_space(void){
 
 }
 
-/*Check HSV values*/
-int valuesOKHSV(double H, double S, double V) {
-
-	if(!((S <= smax) && (S >= smin) && (V <= vmax) && (V >= vmin)))
-		return 0;
-
-	H = H*PI/180.0;
-
-	if(hmin < hmax) {
-		if((H <= hmax) && (H >= hmin))
-			return 1;
-	} else {
-		if(((H >= 0.0) && (H <= hmax)) || ((H <= 2*PI) && (H >= hmin))) 
-			return 1;
-	}
-
-	return 0;
-}
-
 void HSV() {
 
 	struct HSV* myHSV;
@@ -1236,7 +1329,12 @@ void HSV() {
 		S = myHSV->S;
 		V = myHSV->V;
 
-		if(valuesOKHSV(myHSV->H, myHSV->S, myHSV->V)) {
+		H=H*DEGTORAD;
+
+		if(((V<=vmax)&&(V>=vmin)&& (S >= smin) && (S <= smax) && 
+	 		(((H >= hmin) && (H <= hmax) 	&& (hmin <= hmax))||
+	  		((H >= hmin) && (H <= 2*PI) 	&& (hmin > hmax)) ||
+	  		((H <= hmax) && (H >= 0.) 	&& (hmin > hmax))))) {
 		/*Pixel get trought: Original color*/
 			image_aux[i*3] = image[i*3];
 			image_aux[i*3+1] = image[i*3+1];
@@ -1247,8 +1345,6 @@ void HSV() {
 			image_aux[i*3+1] = (unsigned char) (myHSV->V*100/255);
 			image_aux[i*3+2] = (unsigned char) (myHSV->V*100/255);
 		}
-
-		H=H*DEGTORAD;
 
 		/*Save values in HSV mask*/
 		x = S*cos(-H-(3.1416/2.)); /* El rojo (H=0)está a la derecha */
@@ -1273,14 +1369,6 @@ void HSV() {
 	}
 }
 
-/*Check RGB values*/
-int valuesOKRGB(double R, double G, double B) {
-
-	if(!((G <= gmax) && (G >= gmin) && (B <= bmax) && (B >= bmin)&&(R<= rmax) && (R >= rmin)))
-		return 0;
-	return 1;
-}
-
 void RGB() {
 
 	double r,g,b;
@@ -1292,7 +1380,7 @@ void RGB() {
 		g = (float)(unsigned int)(unsigned char) image[i*3+1];
 		b = (float)(unsigned int)(unsigned char) image[i*3+2];
 
-		if(valuesOKRGB(r,g,b)) {
+		if((g <= gmax) && (g >= gmin) && (b <= bmax) && (b >= bmin)&&(r<= rmax) && (r >= rmin)) {
 		/*Pixel get trought: Original color*/
 			image_aux[i*3] = image[i*3];
 			image_aux[i*3+1] = image[i*3+1];
@@ -1330,26 +1418,11 @@ void load_yuv_space(void){
 	}
 }
 
-
-/*Check YUV values*/
-int valuesOKYUV(double Y, double U, double V) {
-
-	if(!((U <= umax) && (U >= umin) && (V <= vmax2) && (V >= vmin2)))
-		return 0;
-
-	if(ymin < ymax) {
-		if((Y <= ymax) && (Y >= ymin))
-			return 1;
-	}
-
-	return 0;
-}
-
 void YUV() {
 	
 	struct YUV* myYUV;
-	double r,g,b,x,y,U,V;
-	int i,X,Y;
+	double r,g,b,x,y,Y,U,V;
+	int i,valuex,valuey;
 
 	if (yuvspace_loaded == 0){
 		load_yuv_space();
@@ -1368,10 +1441,11 @@ void YUV() {
 			
 		myYUV = (struct YUV*) RGB2YUV_getYUV((int)r,(int)g,(int)b);
 
+		Y = myYUV->Y;
 		U = myYUV->U;
 		V = myYUV->V;
 
-		if(valuesOKYUV(myYUV->Y, myYUV->U, myYUV->V)) {
+		if(((U <= umax) && (U >= umin) && (V <= vmax2) && (V >= vmin2)&& (Y <= ymax) && (Y >= ymin))) {
 		/*Pixel get trought: Original color*/
 			image_aux[i*3] = image[i*3];
 			image_aux[i*3+1] = image[i*3+1];
@@ -1388,10 +1462,10 @@ void YUV() {
 		x = ((U + 0.436)*SMAX) / (0.436*2);
 		y = ((0.615 - V)*SMAX) / (0.615*2);
 
-		X = (int)(float)x;
-		Y = (int)(float)y;	
+		valuex = (int)(float)x;
+		valuey = (int)(float)y;	
 
-		masc_yuv[Y*SMAX + X]++;
+		masc_yuv[valuey*SMAX + valuex]++;
 	}
 	memcpy(image_yuv_space, square_buf, SMAX*SMAX*3);
 	for (i=0;i<SMAX*SMAX; i++){
@@ -1842,4 +1916,5 @@ void colortuner_show(void){
    myregister_displaycallback(colortuner_guidisplay);
    all[colortuner_id].guistate=pending_on;
 }
+
 
