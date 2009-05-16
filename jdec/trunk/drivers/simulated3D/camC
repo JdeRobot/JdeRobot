@@ -1,0 +1,21 @@
+#position
+positionX 50.000000
+positionY 4471.000000
+positionZ 2955.000000
+positionH 1.000000
+
+#extrinsics, orientation
+FOApositionX 2432.399902
+FOApositionY 2918.000000
+FOApositionZ 1300.000000
+FOApositionH 1.000000
+roll 3.107262
+
+#intrinsics 
+fx 405.399994
+fy 405.399994
+skew 0.000000
+u0 142.600006
+v0 150.399994
+columns 320
+rows 240

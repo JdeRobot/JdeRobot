@@ -1,0 +1,24 @@
+JDEDIR = /usr/local
+INC-DIR = -I../.. -I../../base -I../../libs/progeo -I../../drivers/graphics_xforms -I../../libs/pioneer -I. -I/usr/include -I/usr/X11R6/include -I/usr/local/include -I/usr/include/X11 -I$(JDEDIR)/include/jderobot  -I/usr/X11R6/include/X11
+LIB-DIR = -L. -L../../libs/progeo -L/usr/lib -L -L/usr/local/lib -L/usr/X11R6/lib -L/usr/local/lib -L/usr/X11R6/lib -L$(JDEDIR)/lib/jderobot
+GCC = gcc
+CFLAGS = -g -pedantic -Wall $(INC-DIR)
+LIBS = -lm -lX11 -lforms -lprogeo
+
+simulated3D: simulated3D.o xformsutils.o
+	$(GCC) -shared -Bsymbolic -Wl,-soname,simulated3D.so $(LIB-DIR) -o simulated3D.so simulated3D.o xformsutils.o $(LIBS)
+
+simulated3D.o: simulated3D.c 
+	$(GCC) $(CFLAGS) -fPIC -c simulated3D.c
+
+xformsutils.o: xformsutils.c
+	$(GCC) $(CFLAGS) $(INC-DIR) -c xformsutils.c
+
+clean:
+	rm -f *.o simulated3D.so
+
+install:
+	cp simulated3D.so $(JDEDIR)/share/jderobot/
+
+release:
+	tar -zcvf newrelease.tgz *c makefile
