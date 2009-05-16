@@ -28,7 +28,6 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <graphics_gtk.h>
-/*#include <colorspaces.h>*/
 #include <glade/glade-xml.h> 
 #include <interfaces/varcolor.h>
 #include <string.h>
@@ -66,7 +65,6 @@ float *min_latitude=NULL;
 float *longitude_speed=NULL;
 float *latitude_speed=NULL;
 unsigned long int *my_clock;
-float *walk_type;
 
 
 /*my local values */
@@ -76,7 +74,8 @@ float latitude;
 
 int naobody_image_runs=0; /* image provided and where is it */
 int naobody_runs=0; /* body provided*/
-int naohead_runs=0; /* head provided*/
+int ptencoders_run=0;
+int ptmotors_run=0;
 int image_source=0; /* where is the image provided*/
 
 
@@ -117,7 +116,7 @@ int radio_changes=0;
 void load_image() {
 	pthread_mutex_lock(&main_mutex);
 	if (naobody_image_runs!=2){
-		printf("NaoOperator: error, NaoBody driver must be running and providing images\n");
+		printf("NaoOperator: error, not image provided\n");
 		pthread_mutex_unlock(&main_mutex);
 		return;
 	}
@@ -147,7 +146,7 @@ void naooperator_iteration()
 					
 		}
 	}
-	if (naohead_runs){
+	if (ptmotors_run==2){
 		*mylongitude=longitude;
 		*mylatitude=latitude;
 	}
@@ -206,8 +205,8 @@ naooperator_stop_schema(int a){
 			}
 		}
 		else if (a==6){
-			if (strcmp(all[j].name,"MotionMotors")==0){
-				printf("NaoOperator: MotionMotors is stopped\n");
+			if (strcmp(all[j].name,"motors")==0){
+				printf("NaoOperator: motors is stopped\n");
 				naobody_runs=1;
 				break;
 			}
@@ -215,14 +214,14 @@ naooperator_stop_schema(int a){
 		else if (a==7){
 			if (strcmp(all[j].name,"ptencoders")==0){
 				printf("NaoOperator: ptencoders is stopped\n");
-				naohead_runs=1;
+				ptencoders_run=1;
 				break;
 			}
 		}
 		else if (a==8){
 			if (strcmp(all[j].name,"ptmotors")==0){
 				printf("NaoOperator: ptmotors is stopped\n");
-				naohead_runs=1;
+				ptmotors_run=1;
 				break;
 			}
 		}
@@ -274,8 +273,8 @@ naooperator_run_schema(int a){
 			}
 		}
 		else if (a==6){
-			if (strcmp(all[j].name,"MotionMotors")==0){
-				printf("NaoOperator: MotionMotors is loaded\n");
+			if (strcmp(all[j].name,"motors")==0){
+				printf("NaoOperator: motors is loaded\n");
 				break;
 			}
 		}
@@ -342,16 +341,23 @@ naooperator_imports(int a){
 			if (naobody_runs==1){
 				if (naooperator_run_schema(6)){
 					naobody_runs=2;
-					v=(float *)myimport("MotionMotors","v");
-					w=(float *)myimport("MotionMotors","w");
-					walk_type=(float*)myimport("MotionMotors","type");
+					v=(float *)myimport("motors","v");
+					w=(float *)myimport("motors","w");
 				}
 			}
 			break;
 		case 3:
-			if (naohead_runs==1){
-				if ((naooperator_run_schema(7))&&(naooperator_run_schema(8))){
-					naohead_runs=2;
+			if (ptencoders_run==1){
+				if (naooperator_run_schema(7)){
+					ptencoders_run=2;
+					my_pan_angle=(float *)myimport("ptencoders","pan_angle");
+					my_tilt_angle=(float *)myimport("ptencoders","tilt_angle");
+					my_clock=(unsigned long int *)myimport("ptencoders","clock");
+				}
+			}
+			if (ptmotors_run==1){
+				if (naooperator_run_schema(8)){
+					ptmotors_run=2;
 					mylongitude=(int *)myimport("ptmotors","longitude");
 					mylatitude=(float *)myimport("ptmotors","latitude");
 					max_longitude=(float *)myimport("ptmotors","max_longitude");
@@ -360,10 +366,11 @@ naooperator_imports(int a){
 					min_latitude=(float *)myimport("ptmotors","min_latitude");
 					latitude_speed=(float *)myimport("ptmotors","latitude_speed");
 					longitude_speed=(float *)myimport("ptmotors","longitude_speed");
-					my_pan_angle=(float *)myimport("ptencoders","pan_angle");
-					my_tilt_angle=(float *)myimport("ptencoders","tilt_angle");
-					my_clock=(unsigned long int *)myimport("ptencoders","clock");
 				}
+				else{
+					printf("NaoBody: could not load ptmotors\n");
+				}
+				
 			}
 			break;
 	}
@@ -372,7 +379,8 @@ naooperator_imports(int a){
 
 void naooperator_run(int father, int *brothers, arbitration fn)
 {
-	int i;
+	int i;	
+
  
 	pthread_mutex_lock(&(all[naooperator_id].mymutex));
 	/* this schema resumes its execution with no children at all */
@@ -390,8 +398,10 @@ void naooperator_run(int father, int *brothers, arbitration fn)
 	printf("NaoOperator: on\n");
 	pthread_cond_signal(&(all[naooperator_id].condition));
 	pthread_mutex_unlock(&(all[naooperator_id].mymutex));
-	naooperator_imports(2); 
-	naooperator_imports(3);
+	if (naobody_runs)
+		naooperator_imports(2); 
+	if ((ptmotors_run)||(ptencoders_run))
+		naooperator_imports(3);
 	
 } 
 
@@ -446,8 +456,10 @@ void naooperator_stop()
 	naooperator_stop_schema(image_source);
 	if (naobody_runs)
 		naooperator_stop_schema(6);
-	if (naohead_runs){
+	if (ptencoders_run){
 		naooperator_stop_schema(7);
+	}
+	if (ptmotors_run){
 		naooperator_stop_schema(8);
 	}
   pthread_mutex_lock(&(all[naooperator_id].mymutex));
@@ -512,14 +524,14 @@ int naooperator_parseconf(char *configfile){
       
 			/* first word of the line */
 			if (sscanf(buffer_file,"%s",word)==1){
-				if (strcmp(word,"driver")==0) {
+				if (strcmp(word,"schema")==0) {
 					while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) 
 						j++;
 					sscanf(&buffer_file[j],"%s",word2);
 	  
 					
 					/* checking if this section matchs naobody */
-					if (strcmp(word2,"naobody")==0){
+					if (strcmp(word2,"naooperator")==0){
 						/* the sections match */
 						do{
                      			char buffer_file2[256],word3[256],word4[256];
@@ -558,7 +570,7 @@ int naooperator_parseconf(char *configfile){
 		
 								/* first word of the line */
 								if (sscanf(buffer_file2,"%s",word3)==1){
-									if (strcmp(word3,"end_driver")==0) {
+									if (strcmp(word3,"end_schema")==0) {
 										while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&&(buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) 
 											z++;
 										driver_config_parsed=1;
@@ -574,18 +586,21 @@ int naooperator_parseconf(char *configfile){
 										//end_parse=1;
 
 									}
-									else if(strcmp(word3,"provides")==0){
+									else if(strcmp(word3,"uses")==0){
 										
 										int words;
 										while((buffer_file2[z]!='\n')&&(buffer_file2[z]!=' ')&& (buffer_file2[z]!='\0')&&(buffer_file2[z]!='\t')) 
 											z++;
 										words=sscanf(buffer_file2,"%s %s %s %s %s",word3,word4,word5,word6,word7);
 										if (words){
-											if(strcmp(word4,"body")==0){
+											if(strcmp(word4,"motors")==0){
 												naobody_runs=1;
 											}
 											else if(strcmp(word4,"ptencoders")==0){
-												naohead_runs=1;
+												ptencoders_run=1;
+											}
+											else if(strcmp(word4,"ptmotors")==0){
+												ptmotors_run=1;
 											}
 											else if(strcmp(word4,"varcolorA")==0){
 												image_source=1;
@@ -619,11 +634,13 @@ int naooperator_parseconf(char *configfile){
 	/* checking if a driver section was read */
 	if(driver_config_parsed==1){
 		if(naobody_runs==0)
-			printf("NaoOperator: WARNING! not body motion provided from NaoBody.\n");
-		if(naohead_runs==0)
-			printf("NaoOperator: WARNING! not Head motion provided from NaoBody.\n");
+			printf("NaoOperator: WARNING! not body motion provided\n");
+		if(ptmotors_run==0)
+			printf("NaoOperator: WARNING! not Head motion provided.\n");
+		if(ptmotors_run==0)
+			printf("NaoOperator: WARNING! not Head encoders provided.\n");
 		if(naobody_image_runs==0)
-			printf("NaoOperator: WARNING! not Imagen provided from NaoBody.\n");
+			printf("NaoOperator: WARNING! not Imagen provided.\n");
 		return 0;
 	} else 
 		return -1;
@@ -676,6 +693,8 @@ void naooperator_guidisplay(){
 	GdkColormap *colormap;
 	GdkColor color_white,color_black;
 	float posy,posx;
+	char buff[50];
+	GtkWidget *entry;
 
 	pthread_mutex_lock(&main_mutex);
 	if (naobody_image_runs==2){
@@ -683,22 +702,25 @@ void naooperator_guidisplay(){
 		gtk_widget_queue_draw(GTK_WIDGET(img));
 	}
 	gdk_threads_enter();
-	if (naohead_runs){
-			char buff[50];
-			GtkWidget *entry;
+	if (ptencoders_run==2){
 			entry= glade_xml_get_widget(xml, "entry_realy");
 			sprintf(buff,"%f",*my_pan_angle);
 			gtk_entry_set_text(entry,buff);
 			entry= glade_xml_get_widget(xml, "entry_realp");
 			sprintf(buff,"%f",*my_tilt_angle);
 			gtk_entry_set_text(entry,buff);
-			entry= glade_xml_get_widget(xml, "entry_clock");
-			sprintf(buff,"%ld",*my_clock);
-			gtk_entry_set_text(entry,buff);
+			if (my_clock!=NULL){
+				entry= glade_xml_get_widget(xml, "entry_clock");
+				sprintf(buff,"%ld",*my_clock);
+				gtk_entry_set_text(entry,buff);
+			}
+	}
+
+
+
+	if (ptmotors_run==2){	
 			*longitude_speed=gtk_range_get_value(glade_xml_get_widget(xml, "hscale_longitude_speed"));
 			*latitude_speed=gtk_range_get_value(glade_xml_get_widget(xml, "hscale_latitude_speed"));
-			
-			
 			if (update_positioner==1){
 				colormap = gdk_colormap_get_system ();
 				gdk_color_black (colormap, & color_black);
@@ -724,7 +746,20 @@ void naooperator_guidisplay(){
 				gdk_draw_line(canvas_teleoperator->window,gc,0,posy,canvas_teleoperator->allocation.width,posy);
 				gdk_draw_line(canvas_teleoperator->window,gc,posx,0,posx,canvas_teleoperator->allocation.height);
 			}
-
+			
+			if (update_positioner){
+				entry= glade_xml_get_widget(xml, "entry_p");
+				sprintf(buff,"%f",latitude);
+				gtk_entry_set_text(entry,buff);
+				entry= glade_xml_get_widget(xml, "entry_y");
+				sprintf(buff,"%f",longitude);
+				gtk_entry_set_text(entry,buff);
+				update_positioner=0;
+			}
+	}
+			
+			
+	if (naobody_runs==2){
 			if (update_positioner_body==1){
 				colormap = gdk_colormap_get_system ();
 				gdk_color_black (colormap, & color_black);
@@ -735,7 +770,6 @@ void naooperator_guidisplay(){
 				gdk_gc_set_foreground (gc_body, & color_black);
 				gdk_draw_line(canvas_body->window,gc_body,0,pt_joystick_y_body,canvas_body->allocation.width,pt_joystick_y_body);
 				gdk_draw_line(canvas_body->window,gc_body,pt_joystick_x_body,0,pt_joystick_x_body,canvas_body->allocation.height);
-				printf("ancho: %f, alto: %f\n",(float)canvas_body->allocation.width,(float)canvas_body->allocation.height);
 			}
 			else if (update_positioner_body==2){
 				posy=canvas_body->allocation.width-(*v)-1;
@@ -751,16 +785,6 @@ void naooperator_guidisplay(){
 				gdk_draw_line(canvas_body->window,gc_body,0,posy,canvas_body->allocation.width,posy);
 				gdk_draw_line(canvas_body->window,gc_body,posx,0,posx,canvas_body->allocation.height);
 			}
-			
-			if (update_positioner){
-				entry= glade_xml_get_widget(xml, "entry_p");
-				sprintf(buff,"%f",latitude);
-				gtk_entry_set_text(entry,buff);
-				entry= glade_xml_get_widget(xml, "entry_y");
-				sprintf(buff,"%f",longitude);
-				gtk_entry_set_text(entry,buff);
-				update_positioner=0;
-			}
 			if (update_positioner_body){
 				entry= glade_xml_get_widget(xml, "entry_v");
 				sprintf(buff,"%f",*v);
@@ -772,6 +796,7 @@ void naooperator_guidisplay(){
 				gtk_range_set_value(glade_xml_get_widget(xml, "vscale_v"),*v);
 				gtk_range_set_value(glade_xml_get_widget(xml, "hscale_w"),*w);
 			}
+			
 		}
 	gdk_threads_leave();
    	pthread_mutex_unlock(&main_mutex);
@@ -1060,29 +1085,6 @@ on_vscale_v_change_value(GtkCheckMenuItem *menu_item, gpointer user_data){
 }
 
 
-void
-on_radiobutton_process_toggled (GtkCheckMenuItem *menu_item, gpointer user_data){
-	if (radio_process){
-		radio_process=0;
-	}
-	else{
-		radio_process=1;
-		*walk_type=1;
-		
-	}
-}
-
-void
-on_radiobutton_changes_toggled (GtkCheckMenuItem *menu_item, gpointer user_data){
-	if (radio_changes){
-		radio_changes=0;
-	}
-	else{
-		radio_changes=1;
-		*walk_type=2;
-		
-	}
-}
 
 void
 on_button_origin_clicked (GtkCheckMenuItem *menu_item, gpointer user_data){
@@ -1098,7 +1100,7 @@ on_button_origin_clicked (GtkCheckMenuItem *menu_item, gpointer user_data){
 
 void 
 naooperator_show()
-{
+{	
 	
 	static pthread_mutex_t naooperator_gui_mutex;
 	pthread_mutex_lock(&naooperator_gui_mutex);
@@ -1153,45 +1155,51 @@ naooperator_show()
 		g_signal_connect(GTK_WIDGET(glade_xml_get_widget(xml, "button_go_body")),"clicked", G_CALLBACK(on_button_go_body_clicked), NULL);
 		g_signal_connect(GTK_WIDGET(glade_xml_get_widget(xml, "button_go_head")),"clicked", G_CALLBACK(on_button_go_head_clicked), NULL);
 		g_signal_connect(G_OBJECT (canvas_teleoperator), "button_press_event",G_CALLBACK (button_press_event_teleoperator), NULL);
-		g_signal_connect(G_OBJECT (canvas_teleoperator), "expose_event", G_CALLBACK (expose_event_teleoperator), NULL);
 		g_signal_connect(G_OBJECT (canvas_body), "button_press_event",G_CALLBACK (button_press_event_body), NULL);
-		g_signal_connect(G_OBJECT (canvas_body), "expose_event", G_CALLBACK (expose_event_body), NULL);
 		g_signal_connect(GTK_WIDGET(glade_xml_get_widget(xml, "hscale_w")),"change_value", G_CALLBACK(on_hscale_w_change_value), NULL);
 		g_signal_connect(GTK_WIDGET(glade_xml_get_widget(xml, "vscale_v")),"change_value", G_CALLBACK(on_vscale_v_change_value), NULL);
-		g_signal_connect(GTK_WIDGET(glade_xml_get_widget(xml, "radiobutton_process")),"toggled", G_CALLBACK(on_radiobutton_process_toggled), NULL);
-		g_signal_connect(GTK_WIDGET(glade_xml_get_widget(xml, "radiobutton_changes")),"toggled", G_CALLBACK(on_radiobutton_changes_toggled), NULL);
 		g_signal_connect(GTK_WIDGET(glade_xml_get_widget(xml, "button_origin")),"clicked", G_CALLBACK(on_button_origin_clicked), NULL);
 
 
 	//	gtk_widget_hide(glade_xml_get_widget(xml, "hbox_image"));
 		if (!naobody_runs)
-			gtk_widget_hide(glade_xml_get_widget(xml, "vbox_body"));
-		if (!naohead_runs)
-			gtk_widget_hide(glade_xml_get_widget(xml, "vbox_head"));
+			gtk_widget_hide(glade_xml_get_widget(xml, "hbox_body"));
+		if (!ptmotors_run)
+			gtk_widget_hide(glade_xml_get_widget(xml, "hbox_motors"));
+		if (!ptencoders_run){
+			gtk_widget_hide(glade_xml_get_widget(xml, "table_encoders"));
+		}
 
 
 
-		gtk_range_set_value(glade_xml_get_widget(xml, "hscale_longitude_speed"),*longitude_speed);
-		gtk_range_set_value(glade_xml_get_widget(xml, "hscale_latitude_speed"),*latitude_speed);
-		gtk_range_set_value(glade_xml_get_widget(xml, "hscale_w"),*w);
-		gtk_range_set_value(glade_xml_get_widget(xml, "vscale_v"),*v);
+		
+		
 
 
 		char buff[50];
 		GtkWidget *entry;
-		entry= glade_xml_get_widget(xml, "entry_v");
-		sprintf(buff,"%f",*v);
-		gtk_entry_set_text(entry,buff);
-		entry= glade_xml_get_widget(xml, "entry_w");
-		sprintf(buff,"%f",*w);
-		gtk_entry_set_text(entry,buff);
-		entry= glade_xml_get_widget(xml, "entry_p");
-		sprintf(buff,"%f",*mylatitude);
-		gtk_entry_set_text(entry,buff);
-		entry= glade_xml_get_widget(xml, "entry_y");
-		sprintf(buff,"%f",*mylongitude);
-		gtk_entry_set_text(entry,buff);
-
+		if (naobody_runs==2){
+			gtk_range_set_value(glade_xml_get_widget(xml, "hscale_w"),*w);
+			gtk_range_set_value(glade_xml_get_widget(xml, "vscale_v"),*v);
+			g_signal_connect(G_OBJECT (canvas_body), "expose_event", G_CALLBACK (expose_event_body), NULL);
+			entry= glade_xml_get_widget(xml, "entry_v");
+			sprintf(buff,"%f",*v);
+			gtk_entry_set_text(entry,buff);
+			entry= glade_xml_get_widget(xml, "entry_w");
+			sprintf(buff,"%f",*w);
+			gtk_entry_set_text(entry,buff);
+		}
+		if (ptmotors_run==2){
+			gtk_range_set_value(glade_xml_get_widget(xml, "hscale_longitude_speed"),*longitude_speed);
+			gtk_range_set_value(glade_xml_get_widget(xml, "hscale_latitude_speed"),*latitude_speed);
+			g_signal_connect(G_OBJECT (canvas_teleoperator), "expose_event", G_CALLBACK (expose_event_teleoperator), NULL);
+			entry= glade_xml_get_widget(xml, "entry_p");
+			sprintf(buff,"%f",*mylatitude);
+			gtk_entry_set_text(entry,buff);
+			entry= glade_xml_get_widget(xml, "entry_y");
+			sprintf(buff,"%f",*mylongitude);
+			gtk_entry_set_text(entry,buff);
+		}
 
 
 		gdk_threads_leave();

@@ -435,9 +435,12 @@ if test "x$enable_drivers_gazebo" != xno; then
     LIBS="$LIBS $GAZEBO_LIBS"
     AC_MSG_NOTICE([**** Checking driver gazebo:])
     ERRORS=""
-    AC_CHECK_HEADERS([gazebo.h],
+    AC_CHECK_HEADERS([gazebo.h math.h],
 	[],
-	[ERRORS="$ac_header not found"])
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([m],[floor],
+	[GAZEBO_LIBS="$GAZEBO_LIBS -lm"],
+    	[ERRORS="$ERRORS, m library not found. Use --with-gazebo flag"])
     AC_CHECK_LIB([gazebo],[main],
 	[GAZEBO_LIBS="$GAZEBO_LIBS -lgazebo"],
 	[ERRORS="$ERRORS, libgazebo not found. Use --with-gazebo flag"])
