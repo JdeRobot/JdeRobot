@@ -1,3 +1,4 @@
+  * Fix Bug #155 (salons)
   * New naooperator schema (frivas)
   * New colortuner schema (pmiangolarra)
   * Fix yuv at libcolorspaces #246 (pmiangolarra)

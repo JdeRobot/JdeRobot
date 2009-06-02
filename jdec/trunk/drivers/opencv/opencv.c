@@ -30,8 +30,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
-#include <cv.h>
-#include <highgui.h>
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
 #include "jde.h"
 #include <interfaces/varcolor.h>
 
@@ -653,16 +653,16 @@ void *opencv_thread(void *id)
 			 break;
 		case IMAGE_FILE:
 			 frame_aux=cvLoadImage(cameras[i].name,1);
-			 if(different_size(cameras[i],frame_aux->width,frame_aux->height)){
-				if(i>3){
-				/* varcolor */
-					frame = cvCreateImage(cvSize(cameras[i].frame_width, cameras[i].frame_height), IPL_DEPTH_8U, 3);
+		         if(frame_aux!=NULL){
+				 frame = cvCreateImage(cvSize(cameras[i].frame_width, cameras[i].frame_height), IPL_DEPTH_8U, 3);
+				 if(different_size(cameras[i],frame_aux->width,frame_aux->height)){
 					cvResize(frame_aux,frame,CV_INTER_LINEAR);
-				}
-				else frame=NULL;
+				 }
+				 else
+					cvCopy(frame_aux,frame,NULL);
 			 }
 			 else
-				frame=frame_aux;
+				 frame=NULL;
 			 break;
   }
 
@@ -958,7 +958,6 @@ int opencv_parseconf(char *configfile){
 				    if (cameras[0].frame_width == -1){	
 					  cameras[0].frame_width=width[0];
                                           cameras[0].frame_height=height[0];
-					  printf("parseconf w=%d h=%d\n",cameras[0].frame_width,cameras[0].frame_height);
                                     }
                                     else{
                                           serve_color[0]=0;
