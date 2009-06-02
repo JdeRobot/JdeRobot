@@ -1,7 +1,3 @@
-cameraINfile A camA
-cameraINfile B camB
-cameraINfile C camC
-cameraINfile D camD
 #units:milimeters
 #robotics lab
 worldline 0.000000 0.000000 3000.000000 1.000000 0.000000 4589.000000 3000.000000 1.000000
