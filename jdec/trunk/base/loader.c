@@ -65,9 +65,13 @@ void* python_module_thread(void* args){
   res = PyRun_File(py_file, mod_args->path,
 		   Py_file_input,
 		   main_dict_copy, main_dict_copy);
-  
+  if (!res){
+    fprintf(stderr,"Error running python module %s:\n",mod_args->path);
+    if (PyErr_Occurred())
+      PyErr_Print();
+  }else
+    Py_DECREF(res);
   Py_DECREF(main_dict_copy);
-  Py_DECREF(res);
   PyGILState_Release(gstate);
   fclose(py_file);
   free(mod_args);
