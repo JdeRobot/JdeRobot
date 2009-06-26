@@ -11,9 +11,9 @@ typedef struct{
   %extend{
     JDEInterface(const char* interface_name,
 		 JDESchema* const supplier);
-    addref(JDEInterfacePrx* const referral);
-    delref(JDEInterfacePrx* const referral);
-    refcount();
+    void addref(JDEInterfacePrx* const referral);
+    void delref(JDEInterfacePrx* const referral);
+    unsigned int refcount();
   }
 } JDEInterface;
 
@@ -24,7 +24,7 @@ typedef struct{
     JDEInterfacePrx(const char* interface_name,
 		    JDESchema* const user,
 		    JDEInterface* const refers_to);
-    run();
-    stop();
+    void run();
+    void stop();
   }
 } JDEInterfacePrx;
