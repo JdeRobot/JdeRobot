@@ -7,11 +7,24 @@
 
 typedef struct{
   char interface_name[MAX_NAME];
+  JDESchema* supplier;
   %extend{
-    Interface(JDESchema* const owner,
-	      const char* interface_name,
-	      const int implemented = 0);	
-    void run();
-    void stop();
+    JDEInterface(const char* interface_name,
+		 JDESchema* const supplier);
+    addref(JDEInterfacePrx* const referral);
+    delref(JDEInterfacePrx* const referral);
+    refcount();
   }
-} Interface;
+} JDEInterface;
+
+typedef struct{
+  JDEInterface* refers_to;
+  JDESchema* user;
+  %extend{
+    JDEInterfacePrx(const char* interface_name,
+		    JDESchema* const user,
+		    JDEInterface* const refers_to);
+    run();
+    stop();
+  }
+} JDEInterfacePrx;

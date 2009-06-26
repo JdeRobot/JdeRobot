@@ -25,10 +25,12 @@
 /**
  * Init jde loading configuration file (given or default one).
  * This function must be used before to use jde.
+ * @param argc argument count
+ * @param argv argument array
  * @param cf if not null used as path for config file.
  * @return 1 if jde initialization success
  */
-extern int jdeinit(const char* cf);
+extern int jdeinit(int argc, char** argv, const char* cf);
 
 /**
  * Parse a config file

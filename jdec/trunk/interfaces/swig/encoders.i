@@ -11,13 +11,23 @@
 
 enum robot_enum {ROBOT_X,ROBOT_Y,ROBOT_THETA,ROBOT_COS,ROBOT_SIN,ROBOT_NELEM};
 typedef struct{
-  char interface_name[MAX_NAME];
+  /*perceptions*/
+  float robot[ROBOT_NELEM];
+  unsigned long int clock;
+  JDEInterface* super;
   %extend{
-    Encoders(JDESchema* const owner,
-	     const char* interface_name = "encoders",
-	     const int implemented = 0);
-    void run();
-    void stop();
+    Encoders(const char* interface_name,
+	     JDESchema* const supplier);
+  }
+}Encoders;
+
+typedef struct{
+  Encoders* refers_to;
+  JDEInterfacePrx* super;
+  %extend{
+    EncodersPrx(const char* interface_name,
+		JDESchema* const user,
+		Encoders* const refers_to=0);
     /*perceptions*/
     float robot[ROBOT_NELEM];
     float x;
@@ -26,7 +36,5 @@ typedef struct{
     float cos;
     float sin;
     unsigned long int clock;
-    /*modulations*/
-    int cycle;
   }
-}Encoders;
+}EncodersPrx;

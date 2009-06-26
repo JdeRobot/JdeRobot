@@ -11,19 +11,29 @@
 %constant int MAX_LASER = 720;
 
 typedef struct{
-  char interface_name[MAX_NAME];
+  /*perceptions*/
+  int laser[MAX_LASER];
+  int number;
+  int resolution;
+  unsigned long int clock;
+  JDEInterface* super;
   %extend{
-    Laser(JDESchema* const owner,
-	  const char* interface_name = "laser",
-	  const int implemented = 0);
-    void run();
-    void stop();
+    Laser(const char* interface_name,
+	  JDESchema* const supplier);
+  }
+}Laser;
+
+typedef struct{
+  Laser* refers_to;
+  JDEInterfacePrx* super;
+  %extend{
+    LaserPrx(const char* interface_name,
+	     JDESchema* const user,
+	     Laser* const refers_to=0);
     /*perceptions*/
     int laser[MAX_LASER];
     int number;
     int resolution;
     unsigned long int clock;
-    /*modulations*/
-    int cycle;
   }
-}Laser;
+}LaserPrx;

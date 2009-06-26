@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
     n++;
   }
   
-  if (jdeinit(configfile) == 0){
+  if (jdeinit(argc,argv,configfile) == 0){
     fprintf(stdout,"Initialization failed...\n");
     jdeshutdown(-1);
   }

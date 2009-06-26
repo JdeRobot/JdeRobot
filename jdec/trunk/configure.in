@@ -319,7 +319,7 @@ dnl ########################################
 dnl # set compiler flags
 CFLAGS="-g -O2 -pedantic -Wall"
 dnl # check gcc
-AC_PROG_CC
+AC_PROG_CC_C99
 
 CXXFLAGS="-g -O2 -pedantic -Wall"
 AC_PROG_CXX
@@ -417,8 +417,8 @@ dnl #
 dnl ########################################
 AC_MSG_NOTICE([*** Checking drivers:])
 DRIVER_CFLAGS=''
-DRIVER_LIBS=''
-DRIVER_LDFLAGS='-Bsymbolic'
+DRIVER_LIBS='$(top_srcdir)/base/libjde.la'
+DRIVER_LDFLAGS=''
 AC_ARG_VAR([DRIVER_CFLAGS],[C compiler flags used with drivers])
 AC_ARG_VAR([DRIVER_LIBS],[libraries to pass to the linker used with drivers])
 AC_ARG_VAR([DRIVER_LDFLAGS],[linker flags used with drivers])
@@ -665,8 +665,8 @@ dnl #
 dnl ########################################
 AC_MSG_NOTICE([*** Checking services:])
 SERVICE_CFLAGS=''
-SERVICE_LIBS=''
-SERVICE_LDFLAGS='-Bsymbolic'
+SERVICE_LIBS='$(top_srcdir)/base/libjde.la'
+SERVICE_LDFLAGS=''
 AC_ARG_VAR([SERVICE_CFLAGS],[C compiler flags used with services])
 AC_ARG_VAR([SERVICE_LIBS],[libraries to pass to the linker used with services])
 AC_ARG_VAR([SERVICE_LDFLAGS],[linker flags used with services])
@@ -728,8 +728,8 @@ dnl #
 dnl ########################################
 AC_MSG_NOTICE([*** Checking schemas:])
 SCHEMA_CFLAGS=''
-SCHEMA_LIBS=''
-SCHEMA_LDFLAGS='-Bsymbolic'
+SCHEMA_LIBS='$(top_srcdir)/base/libjde.la'
+SCHEMA_LDFLAGS=''
 AC_ARG_VAR([SCHEMA_CFLAGS],[C compiler flags used with schemas])
 AC_ARG_VAR([SCHEMA_LIBS],[libraries to pass to the linker used with schemas])
 AC_ARG_VAR([SCHEMA_LDFLAGS],[linker flags used with schemas])
@@ -1175,7 +1175,8 @@ AC_CONFIG_FILES([libs/Makefile \
     libs/colorspaces/Makefile \
     libs/fuzzylib/Makefile \
     libs/pioneer/Makefile \
-    libs/progeo/Makefile])
+    libs/progeo/Makefile \
+    libs/simclist/Makefile])
 dnl # generate driver Makefiles
 AC_CONFIG_FILES([drivers/Makefile \
     drivers/evi/Makefile \

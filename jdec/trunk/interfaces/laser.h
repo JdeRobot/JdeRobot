@@ -9,41 +9,39 @@ extern "C" {
 
 #define MAX_LASER 720
 
-typedef struct{
-  /*perceptions*/
-  int laser[MAX_LASER];
-  int number;
-  int resolution;
-  unsigned long int clock;
-  /*modulations*/
-  int cycle;
-} Laser_data;
+INTERFACEDEF(Laser,
+	     /*perceptions*/
+	     int laser[MAX_LASER];
+	     int number;
+	     int resolution;
+	     unsigned long int clock;
+	     /*modulations*/
+	     int cycle;)
 
-typedef Interface Laser;
+IFPROXYDEF(Laser,LaserPrx)
 
-/*constructor & destructor*/
-Laser* new_Laser(JDESchema* const owner,
-		 const char* interface_name,
-		 const int implemented);
-void delete_Laser(Laser* const l);
+/*constructors & destructors*/
+Laser* new_Laser(const char* interface_name,
+		 JDESchema* const supplier);
+void delete_Laser(Laser* const this);
 
-/*interface methods*/
-void Laser_run(const Laser* l);
-void Laser_stop(const Laser* l);
+LaserPrx* new_LaserPrx(const char* interface_name,
+		       JDESchema* const user,
+		       Laser* const refers_to);
+void delete_LaserPrx(LaserPrx* const this);
+
 
 /*get methods*/
-int* Laser_laser_get(const Laser* l);
-int Laser_number_get(const Laser* l);
-int Laser_resolution_get(const Laser* l);
-unsigned long int Laser_clock_get(const Laser* l);
-int Laser_cycle_get(const Laser* l);
+int* LaserPrx_laser_get(const LaserPrx* this);
+int LaserPrx_number_get(const LaserPrx* this);
+int LaserPrx_resolution_get(const LaserPrx* this);
+unsigned long int LaserPrx_clock_get(const LaserPrx* this);
 
 /*set methods*/
-void Laser_laser_set(Laser* const l, const int* new_laser);
-void Laser_number_set(Laser* const l, const int new_number);
-void Laser_resolution_set(Laser* const l, const int new_resolution);
-void Laser_clock_set(Laser* const l, const unsigned long int new_clock);
-void Laser_cycle_set(Laser* const l, const int new_cycle);
+void LaserPrx_laser_set(LaserPrx* const this, const int* new_laser);
+void LaserPrx_number_set(LaserPrx* const this, const int new_number);
+void LaserPrx_resolution_set(LaserPrx* const this, const int new_resolution);
+void LaserPrx_clock_set(LaserPrx* const this, const unsigned long int new_clock);
 
 #ifdef __cplusplus
 }

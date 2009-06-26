@@ -7,34 +7,37 @@
 extern "C" {
 #endif
 
-typedef struct{
-  /*modulations*/
-  float v; /* mm/s */
-  float w; /* deg/s */
-  int cycle;
-} Motors_data;
+INTERFACEDEF(Motors,
+	     /*modulations*/
+	     float v; /* mm/s */
+	     float w; /* deg/s */
+	     int cycle;)
 
-typedef Interface Motors;
+IFPROXYDEF(Motors,MotorsPrx)
 
-/*constructor & destructor*/
-Motors* new_Motors(JDESchema* const owner,
-		   const char* interface_name,
-		   const int implemented);
-void delete_Motors(Motors* const m);
+/*constructors & destructors*/
+Motors* new_Motors(const char* interface_name,
+		       JDESchema* const supplier);
+void delete_Motors(Motors* const this);
 
-/*interface methods*/
-void Motors_run(const Motors* m);
-void Motors_stop(const Motors* m);
+MotorsPrx* new_MotorsPrx(const char* interface_name,
+			     JDESchema* const user,
+			     Motors* const refers_to);
+void delete_MotorsPrx(MotorsPrx* const this);
+
+/* /\*interface methods*\/ */
+/* void MotorsPrx_run(const MotorsPrx* this); */
+/* void MotorsPrx_stop(const MotorsPrx* this); */
 
 /*get methods*/
-float Motors_v_get(const Motors* m);
-float Motors_w_get(const Motors* m);
-int Motors_cycle_get(const Motors* m);
+float MotorsPrx_v_get(const MotorsPrx* this);
+float MotorsPrx_w_get(const MotorsPrx* this);
+/* int MotorsPrx_cycle_get(const MotorsPrx* this); */
 
 /*set methods*/
-void Motors_v_set(Motors* const m, const float new_v);
-void Motors_w_set(Motors* const m, const float new_w);
-void Motors_cycle_set(Motors* const m, const int new_cycle);
+void MotorsPrx_v_set(MotorsPrx* const this, const float new_v);
+void MotorsPrx_w_set(MotorsPrx* const this, const float new_w);
+/* void MotorsPrx_cycle_set(MotorsPrx* const this, const int new_cycle); */
 
 #ifdef __cplusplus
 }

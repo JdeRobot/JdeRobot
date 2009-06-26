@@ -7,15 +7,26 @@
 %import "interface.i"
 
 typedef struct{
+  /*modulations*/
+  float v; /* mm/s */
+  float w; /* deg/s */
+  JDEInterface* super;
   %extend{
-    Motors(JDESchema* const owner,
-	   const char* interface_name = "motors",
-	   const int implemented = 0);
-    void run();
-    void stop();
+    Motors(const char* interface_name,
+	   JDESchema* const supplier);
+  }
+} Motors;
+
+typedef struct{
+  Motors* refers_to;
+  JDEInterfacePrx* super;
+  %extend{
+    MotorsPrx(const char* interface_name,
+	      JDESchema* const user,
+	      Motors* const refers_to=0);
     /*modulations*/
     float v; /* mm/s */
     float w; /* deg/s */
-    int cycle;
   }
-} Motors;
+} MotorsPrx;
+

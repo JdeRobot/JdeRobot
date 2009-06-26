@@ -58,9 +58,9 @@ char **mycolorA=NULL;
 runFn colorArun;
 stopFn colorAstop;
 
-Encoders* myencoders;
-Laser* mylaser;
-Motors* mymotors;
+EncodersPrx* myencoders;
+LaserPrx* mylaser;
+MotorsPrx* mymotors;
 
 float v;
 float w;
@@ -195,7 +195,7 @@ void introrob_iteration()
   JDESchema_speedcounter(introrob_schema);
   /* printf("introrob iteration %d\n",d++);*/
 
-  myencoders_robot = Encoders_robot_get(myencoders);
+  myencoders_robot = EncodersPrx_robot_get(myencoders);
   if (myencoders_robot!=NULL){
     for (i=0;i<5; i++)
       robot[i]= myencoders_robot[i];
@@ -209,7 +209,7 @@ void introrob_iteration()
     }
   }
 
-  mylaser_laser = Laser_laser_get(mylaser);
+  mylaser_laser = LaserPrx_laser_get(mylaser);
   if (mylaser_laser!=NULL){
     for (i=0; i<NUM_LASER; i++)
       laser[i]= mylaser_laser[i];
@@ -225,8 +225,8 @@ void introrob_iteration()
   /*Mover los valores de la variables de trabajo a las variables actuadoras
     del robot que han sido importadas*/
   if (mymotors!=NULL){
-    Motors_v_set(mymotors,v);
-    Motors_w_set(mymotors,w);
+    MotorsPrx_v_set(mymotors,v);
+    MotorsPrx_w_set(mymotors,w);
   }
 }
 
@@ -242,13 +242,13 @@ void introrob_stop()
     mycolorA = NULL;
   }
   if (mylaser!=NULL)
-    Laser_stop(mylaser);
+    JDEInterfacePrx_stop(SUPER(mylaser));
     
   if (myencoders!=NULL)
-    Encoders_stop(myencoders);
+    JDEInterfacePrx_stop(SUPER(myencoders));
 
   if (mymotors!=NULL)
-    Motors_stop(mymotors);
+    JDEInterfacePrx_stop(SUPER(mymotors));
   
   printf("introrob: off\n");
   pthread_mutex_unlock(&(introrob_schema->mymutex));
@@ -292,21 +292,21 @@ void introrob_run(int father, int *brothers, arbitration fn)
   else introrob_display_state = introrob_display_state | DISPLAY_COLORA;  
 
   if (mylaser==NULL){
-    if ((mylaser = new_Laser(introrob_schema,"laser",0))==NULL)
+    if ((mylaser = new_LaserPrx("laser",introrob_schema,0))==NULL)
       printf("No laser source found. Check your jde configuration file. I go on anyway\n");
     else 
       introrob_display_state = introrob_display_state | DISPLAY_LASER;
   }
 
   if (myencoders==NULL){
-    if ((myencoders = new_Encoders(introrob_schema,"encoders",0))==NULL)
+    if ((myencoders = new_EncodersPrx("encoders",introrob_schema,0))==NULL)
       printf("No encoders source found. Check your jde configuration file. I go on anyway\n");
     else 
       introrob_display_state = introrob_display_state | DISPLAY_ROBOT;
   }
 
   if (mymotors==NULL){
-    if ((mymotors = new_Motors(introrob_schema,"motors",0))==NULL)
+    if ((mymotors = new_MotorsPrx("motors",introrob_schema,0))==NULL)
       printf("No motors found. Check your jde configuration file. I go on anyway\n");
     else
       introrob_display_state = introrob_display_state | DISPLAY_MOTORS;
@@ -347,13 +347,13 @@ void *introrob_thread(void *not_used)
 		colorArun(introrob_id,NULL,NULL);
 	      }
 	      if (mylaser!=NULL)
-		Laser_run(mylaser);
+		JDEInterfacePrx_run(SUPER(mylaser));
 	      
 	      if (myencoders!=NULL)
-		Encoders_run(myencoders);
+		JDEInterfacePrx_run(SUPER(myencoders));
 		
 	      if (mymotors!=NULL)
-		Motors_run(mymotors);
+		JDEInterfacePrx_run(SUPER(mymotors));
 	    }	  
 	  else if (JDESchema_get_state(introrob_schema)==winner);
 
@@ -396,11 +396,11 @@ void introrob_terminate()
       }
     }
   introrob_stop();
-  delete_Encoders(myencoders);
+  delete_EncodersPrx(myencoders);
   myencoders = NULL;
-  delete_Motors(mymotors);
+  delete_MotorsPrx(mymotors);
   mymotors = NULL;
-  delete_Laser(mylaser);
+  delete_LaserPrx(mylaser);
   mylaser = NULL;
   printf ("introrob terminated\n");
 }
@@ -528,7 +528,7 @@ void introrob_guidisplay()
 
   fl_winset(introrob_canvas_win); 
   
-  myencoders_robot = Encoders_robot_get(myencoders);
+  myencoders_robot = EncodersPrx_robot_get(myencoders);
   if ((introrob_trackrobot==TRUE)&&
       ((fabs(myencoders_robot[ROBOT_X]+introrob_odometrico[0])>(introrob_rango/4.))||
        (fabs(myencoders_robot[ROBOT_Y]+introrob_odometrico[1])>(introrob_rango/4.))))
@@ -578,7 +578,7 @@ void introrob_guidisplay()
  
   if ((introrob_display_state&DISPLAY_LASER)!=0){
     /* check to avoid the segmentation fault in case GUI is activated before the schema imports mylaser */
-    mylaser_laser = Laser_laser_get(mylaser);
+    mylaser_laser = LaserPrx_laser_get(mylaser);
     if (mylaser_laser!=NULL){
       for(i=0;i<NUM_LASER;i++)
 	{
@@ -779,7 +779,7 @@ int introrob_mouse_motion_on_micanvas(FL_OBJECT *ob, Window win, int win_width, 
   float diff_x,diff_y,diff_w;
   unsigned int keymap;
   float sqrt_value,acos_value;
-  float *myencoders_robot = Encoders_robot_get(myencoders);
+  float *myencoders_robot = EncodersPrx_robot_get(myencoders);
 
   if(introrob_canvas_mouse_button_pressed==1){
 
