@@ -22,6 +22,7 @@
 
 #include <jde.h>
 #include <jde_private.h>
+#include <loader.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <signal.h>
@@ -64,6 +65,7 @@ int com_list(char *);
 int com_dir(char *);
 int com_load_driver(char *);
 int com_load_schema(char *);
+int com_aload(char*);
 int com_ps(char *);
 int com_pwd(char *);
 int com_exit(char *);
@@ -87,6 +89,7 @@ COMMAND bcommands[] = {
   { "load_driver", com_load_driver, "Load driver" },
   { "load_service", com_load_driver, "Load service" },
   { "load_schema", com_load_schema, "Load schema" },
+  { "aload", com_aload, "Load a module" },
   { "ps", com_ps, "Print schemas states" },
   { "run", com_run, "Run schema" },
   { "stop", com_stop, "Stop schema" },
@@ -369,6 +372,8 @@ command_completion (const char *text,int start, int end){
 	  (strcmp (cmd,"hide") == 0) ||
 	  (strcmp (cmd,"zoom") == 0) )
 	generator_state = SCHEMAS;
+      else
+	generator_state = 0;/*reset state*/
     }
   }
   matches = completion_matches (text, command_generator);
@@ -700,6 +705,37 @@ com_load_schema (char *arg){
     return -1;
   }
   s ->init(cf);
+  return 0;
+}
+
+/**
+ * Load a module
+ * @param arg arguments. File to be loaded
+ * @return -1 on error, 0 otherwise
+ */
+int
+com_aload (char *arg){
+  char word[MAX_BUFFER], word2[MAX_BUFFER];
+  int words;
+  char *cf;
+
+  if (!valid_argument ("aload", arg))
+    return -1;
+  
+  words=sscanf(arg,"%s %s",word,word2);
+  if (words == 1){
+    cf = get_configfile();
+  }else if (words==2){
+    cf = word2;
+  }else{
+    fprintf (stderr, "aload command accept 1 or 2 args only: aload <module> [<config file>]");	
+    return -1;
+  }
+
+  if (!load_module2(word,cf)){
+    fprintf(stderr,"Module loading failed\n");
+    return -1;
+  }
   return 0;
 }
 
