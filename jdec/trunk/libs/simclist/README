@@ -1,0 +1,34 @@
+version:    1.4.3
+website:    http://mij.oltrelinux.com/devel/simclist/
+contact:    mij <mij@bitchx.it>
+license:    BSD revised (see http://www.opensource.org/licenses/bsd-license.php)
+
+
+>> USE / INSTALL
+
+Because of its BSD license, if you use simclist you can simply embed its whole
+source code into your application.
+Otherwise, simclist can be installed as a shared library. For installing
+SimCList as a shared library:
+
+1. enter the package root directory
+2. let cmake (http://cmake.org) produce the Makefile you need (mind the trailing dot)
+        $ cmake .
+3. compile
+        $ make
+
+
+>> CONTENT
+
+- simclist.{c,h}        library sources
+- examples/*            examples on using the API
+- perftest/*            sources for performance tests
+
+
+>> API DOCUMENTATION
+
+Use doxygen to build SimCList's doc. A Doxyfile configuration for doxygen is
+already available in the package.
+This will build HTML documentation, in the English language, in doc/:
+    $ doxygen
+
