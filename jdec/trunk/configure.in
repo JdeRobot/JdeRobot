@@ -1167,9 +1167,6 @@ dnl ########################################
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([base/Makefile \
     base/swig/Makefile])
-dnl # generate interfaces Makefiles
-AC_CONFIG_FILES([interfaces/Makefile \
-    interfaces/swig/Makefile])
 dnl # generate utils Makefiles
 AC_CONFIG_FILES([libs/Makefile \
     libs/colorspaces/Makefile \
@@ -1177,6 +1174,9 @@ AC_CONFIG_FILES([libs/Makefile \
     libs/pioneer/Makefile \
     libs/progeo/Makefile \
     libs/simclist/Makefile])
+dnl # generate interfaces Makefiles
+AC_CONFIG_FILES([interfaces/Makefile \
+    interfaces/swig/Makefile])
 dnl # generate driver Makefiles
 AC_CONFIG_FILES([drivers/Makefile \
     drivers/evi/Makefile \

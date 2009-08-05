@@ -1,9 +1,10 @@
 lib_LTLIBRARIES = libinterfaces.la
-bin_PROGRAMS = test1
+#bin_PROGRAMS = test1
+bin_PROGRAMS = 
 
 # See http://www.gnu.org/software/libtool/manual/libtool.html#Versioning
 # for versioning policy.
-libinterfaces_la_SOURCES = interface.c encoders.c motors.c laser.c varcolor.c
+libinterfaces_la_SOURCES = interface.c encoders.c motors.c laser.c
 libinterfaces_la_LDFLAGS = $(INTERFACES_LIBS) $(PYTHON_LDFLAGS) $(PYTHON_EXTRA_LDFLAGS) \
     $(PYTHON_EXTRA_LIBS) -rdynamic -version-info 0:0:0
 libinterfaces_la_LIBADD = $(top_srcdir)/base/libjde.la $(top_srcdir)/libs/simclist/libsimclist.la
