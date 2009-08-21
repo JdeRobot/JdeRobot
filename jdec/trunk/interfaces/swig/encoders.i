@@ -30,11 +30,6 @@ typedef struct{
 		Encoders* const refers_to=0);
     /*perceptions*/
     float robot[ROBOT_NELEM];
-    float x;
-    float y;
-    float theta;
-    float cos;
-    float sin;
     unsigned long int clock;
   }
 }EncodersPrx;

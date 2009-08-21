@@ -15,10 +15,10 @@ Motors* new_Motors(const char* interface_name,
   return m;
 }
 
-void delete_Motors(Motors* const this){
-  if (this==0)
+void delete_Motors(Motors* const self){
+  if (self==0)
     return;
-  free(this);
+  free(self);
 }
 
 MotorsPrx* new_MotorsPrx(const char* interface_name,
@@ -46,65 +46,68 @@ MotorsPrx* new_MotorsPrx(const char* interface_name,
 
 }
 
-void delete_MotorsPrx(MotorsPrx* const this){
-  if (this==0)
+void delete_MotorsPrx(MotorsPrx* const self){
+  if (self==0)
     return;
   
-  if (PRX_REFERS_TO(this)){
-    if (JDEInterface_refcount(PRX_REFERS_TO(SUPER(this)))==1){/*last reference*/
+  if (PRX_REFERS_TO(self)){
+    if (JDEInterface_refcount(PRX_REFERS_TO(SUPER(self)))==1){/*last reference*/
       /*FIXME: delete exported symbols*/
-      delete_Motors(PRX_REFERS_TO(this));
-      PRX_REFERS_TO(SUPER(this)) = 0;/*JDEInterface has been destroyed*/
+      delete_Motors(PRX_REFERS_TO(self));
+      PRX_REFERS_TO(SUPER(self)) = 0;/*JDEInterface has been destroyed*/
     }
   }
-  delete_JDEInterfacePrx(SUPER(this));
-  free(this);
+  delete_JDEInterfacePrx(SUPER(self));
+  free(self);
 }
 
-float MotorsPrx_v_get(const MotorsPrx* this){
+float MotorsPrx_v_get(const MotorsPrx* self){
   float* vp = 0;
 
-  assert(this!=0);
-  if (PRX_REFERS_TO(this))
-    vp=&(PRX_REFERS_TO(this)->v);
+  assert(self!=0);
+  if (PRX_REFERS_TO(self))
+    vp=&(PRX_REFERS_TO(self)->v);
   else
-    vp=(float *)myimport(INTEFACE_NAME_PRX(this),"v");
+    vp=(float *)myimport(INTERFACEPRX_NAME(self),"v");
     
   return (vp?*vp:0.0);
 }
 
-float MotorsPrx_w_get(const MotorsPrx* this){
+float MotorsPrx_w_get(const MotorsPrx* self){
   float* wp = 0;
 
-  assert(this!=0);
-  if (PRX_REFERS_TO(this))
-    wp=&(PRX_REFERS_TO(this)->w);
+  assert(self!=0);
+  if (PRX_REFERS_TO(self))
+    wp=&(PRX_REFERS_TO(self)->w);
   else
-    wp=(float *)myimport(INTEFACE_NAME_PRX(this),"w");
+    wp=(float *)myimport(INTERFACEPRX_NAME(self),"w");
     
   return (wp?*wp:0.0);
 }
 
-void MotorsPrx_v_set(MotorsPrx* const this, const float new_v){
+void MotorsPrx_v_set(MotorsPrx* const self, float new_v){
   float* vp = 0;
 
-  assert(this!=0);
-  if (PRX_REFERS_TO(this))
-    vp=&(PRX_REFERS_TO(this)->v);
+  assert(self!=0);
+  if (PRX_REFERS_TO(self))
+    vp=&(PRX_REFERS_TO(self)->v);
   else  
-    vp=(float *)myimport(INTEFACE_NAME_PRX(this),"v");
+    vp=(float *)myimport(INTERFACEPRX_NAME(self),"v");
   if (vp)
     *vp = new_v;
 }
 
-void MotorsPrx_w_set(MotorsPrx* const this, const float new_w){
+void MotorsPrx_w_set(MotorsPrx* const self, float new_w){
   float* wp;
 
-  assert(this!=0);
-  if (PRX_REFERS_TO(this))
-    wp=&(PRX_REFERS_TO(this)->w);
+  assert(self!=0);
+  if (PRX_REFERS_TO(self))
+    wp=&(PRX_REFERS_TO(self)->w);
   else  
-    wp=(float *)myimport(INTEFACE_NAME_PRX(this),"w");
+    wp=(float *)myimport(INTERFACEPRX_NAME(self),"w");
   if (wp)
     *wp = new_w;
 }
+
+
+INTERFACEPRX_ATTR_DEFINITION(Motors,cycle,int,VARIABLE,)

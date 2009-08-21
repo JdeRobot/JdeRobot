@@ -15,10 +15,10 @@ Laser* new_Laser(const char* interface_name,
   return l;
 }
 
-void delete_Laser(Laser* const this){
-  if (this==0)
+void delete_Laser(Laser* const self){
+  if (self==0)
     return;
-  free(this);
+  free(self);
 }
 
 LaserPrx* new_LaserPrx(const char* interface_name,
@@ -48,91 +48,91 @@ LaserPrx* new_LaserPrx(const char* interface_name,
 
 }
 
-void delete_LaserPrx(LaserPrx* const this){
-  if (this==0)
+void delete_LaserPrx(LaserPrx* const self){
+  if (self==0)
     return;
   
-  if (PRX_REFERS_TO(this)){
-    if (JDEInterface_refcount(PRX_REFERS_TO(SUPER(this)))==1){/*last reference*/
+  if (PRX_REFERS_TO(self)){
+    if (JDEInterface_refcount(PRX_REFERS_TO(SUPER(self)))==1){/*last reference*/
       /*FIXME: delete exported symbols*/
-      delete_Laser(PRX_REFERS_TO(this));
-      PRX_REFERS_TO(SUPER(this)) = 0;/*JDEInterface has been destroyed*/
+      delete_Laser(PRX_REFERS_TO(self));
+      PRX_REFERS_TO(SUPER(self)) = 0;/*JDEInterface has been destroyed*/
     }
   }
-  delete_JDEInterfacePrx(SUPER(this));
-  free(this);
+  delete_JDEInterfacePrx(SUPER(self));
+  free(self);
 }
 
-int* LaserPrx_laser_get(const LaserPrx* this){
+int* LaserPrx_laser_get(const LaserPrx* self){
   int* laserp = 0;
 
-  assert(this!=0);
-  if (PRX_REFERS_TO(this))
-    laserp=PRX_REFERS_TO(this)->laser;
+  assert(self!=0);
+  if (PRX_REFERS_TO(self))
+    laserp=PRX_REFERS_TO(self)->laser;
   else/*backwards compatibility*/
-    laserp=(int *)myimport(PRX_REFERS_TO(SUPER(this))->interface_name,"laser");
+    laserp=(int *)myimport(PRX_REFERS_TO(SUPER(self))->interface_name,"laser");
     
   return laserp;
 }
 
 
-int LaserPrx_number_get(const LaserPrx* this){
+int LaserPrx_number_get(const LaserPrx* self){
   int* numberp = 0;
 
-  assert(this!=0);
-  if (PRX_REFERS_TO(this))
-    numberp=&(PRX_REFERS_TO(this)->number);
+  assert(self!=0);
+  if (PRX_REFERS_TO(self))
+    numberp=&(PRX_REFERS_TO(self)->number);
   else/*backwards compatibility*/
-    numberp=(int *)myimport(PRX_REFERS_TO(SUPER(this))->interface_name,"number");
+    numberp=(int *)myimport(PRX_REFERS_TO(SUPER(self))->interface_name,"number");
       
   return (numberp?*numberp:0);
 }
 
-int LaserPrx_resolution_get(const LaserPrx* this){
+int LaserPrx_resolution_get(const LaserPrx* self){
   int* resolutionp = 0;
 
-  assert(this!=0);
-  if (PRX_REFERS_TO(this))
-    resolutionp=&(PRX_REFERS_TO(this)->resolution);
+  assert(self!=0);
+  if (PRX_REFERS_TO(self))
+    resolutionp=&(PRX_REFERS_TO(self)->resolution);
   else/*backwards compatibility*/
-    resolutionp=(int *)myimport(PRX_REFERS_TO(SUPER(this))->interface_name,"resolution");
+    resolutionp=(int *)myimport(PRX_REFERS_TO(SUPER(self))->interface_name,"resolution");
       
   return (resolutionp?*resolutionp:0);
 }
 
-unsigned long int LaserPrx_clock_get(const LaserPrx* this){
+unsigned long int LaserPrx_clock_get(const LaserPrx* self){
   unsigned long int* clockp;
 
-  assert(this!=0);
-  if (PRX_REFERS_TO(this))
-    clockp=&(PRX_REFERS_TO(this)->clock);
+  assert(self!=0);
+  if (PRX_REFERS_TO(self))
+    clockp=&(PRX_REFERS_TO(self)->clock);
   else/*backwards compatibility*/
-    clockp=(unsigned long int *)myimport(PRX_REFERS_TO(SUPER(this))->interface_name,"clock");
+    clockp=(unsigned long int *)myimport(PRX_REFERS_TO(SUPER(self))->interface_name,"clock");
       
   return (clockp?*clockp:0);
 } 
 
-void LaserPrx_laser_set(LaserPrx* const this, const int* new_laser){
-  assert(this!=0);
-  if (PRX_REFERS_TO(this))
-    memmove(PRX_REFERS_TO(this)->laser,new_laser,sizeof(int)*MAX_LASER);
+void LaserPrx_laser_set(LaserPrx* const self, int* new_laser){
+  assert(self!=0);
+  if (PRX_REFERS_TO(self))
+    memmove(PRX_REFERS_TO(self)->laser,new_laser,sizeof(int)*MAX_LASER);
 }
 
-void LaserPrx_number_set(LaserPrx* const this, const int new_number){
-  assert(this!=0);
-  if (PRX_REFERS_TO(this))
-    PRX_REFERS_TO(this)->number = new_number;
+void LaserPrx_number_set(LaserPrx* const self, int new_number){
+  assert(self!=0);
+  if (PRX_REFERS_TO(self))
+    PRX_REFERS_TO(self)->number = new_number;
 }
 
-void LaserPrx_resolution_set(LaserPrx* const this, const int new_resolution){
-  assert(this!=0);
-  if (PRX_REFERS_TO(this))
-    PRX_REFERS_TO(this)->resolution = new_resolution;
+void LaserPrx_resolution_set(LaserPrx* const self, int new_resolution){
+  assert(self!=0);
+  if (PRX_REFERS_TO(self))
+    PRX_REFERS_TO(self)->resolution = new_resolution;
 }
 
-void LaserPrx_clock_set(LaserPrx* const this, const unsigned long int new_clock){
-  assert(this!=0);
-  if (PRX_REFERS_TO(this))
-    PRX_REFERS_TO(this)->clock = new_clock;
+void LaserPrx_clock_set(LaserPrx* const self, unsigned long int new_clock){
+  assert(self!=0);
+  if (PRX_REFERS_TO(self))
+    PRX_REFERS_TO(self)->clock = new_clock;
 }
 

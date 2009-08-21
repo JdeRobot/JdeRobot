@@ -1,8 +1,9 @@
 #include "interface.h"
+#include <jde.h>
+#include <schema.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <jde_private.h>
 #include <pthread.h>
 #include <simclist.h>
 
@@ -22,11 +23,10 @@ JDEInterface* new_JDEInterface(const char* interface_name,
 			       JDESchema* const supplier){
   JDEInterface* i;
   
-  assert(supplier!=0);
+  assert(interface_name!=0 && supplier!=0);
   i = (JDEInterface*)calloc(1,sizeof(JDEInterface));/*all set to 0*/
   assert(i!=0);
-  strncpy(i->interface_name,interface_name,MAX_NAME);
-  i->interface_name[MAX_NAME-1] = '\0';
+  i->interface_name= strdup(interface_name);
   i->supplier = supplier;
   i->priv = (JDEInterface_p*)calloc(1,sizeof(JDEInterface_p));
   assert(i->priv!=0);
@@ -53,8 +53,8 @@ JDEInterfacePrx* new_JDEInterfacePrx(const char* interface_name,
       int *supplier_id;
       
       supplier_id = (int*)myimport(interface_name,"id");
-      assert(supplier_id!=0);/*if id not registered we can't guess who
-			       is the supplier for this interface*/
+      assert(supplier_id!=0);/*FIXME:show error: no interface found in
+			       the system*/
       supplier = get_schema(*supplier_id);
       iprx->refers_to = new_JDEInterface(interface_name,supplier);
     }
@@ -74,71 +74,71 @@ JDEInterfacePrx* new_JDEInterfacePrx(const char* interface_name,
   return iprx;
 }
 
-void delete_JDEInterface(JDEInterface* const this){
-  if (this==0)
+void delete_JDEInterface(JDEInterface* const self){
+  if (self==0)
     return;
-  list_destroy(&(this->priv->referral_list));
-  free(this->priv);
-  free(this);
+  list_destroy(&(self->priv->referral_list));
+  free(self->priv);
+  free(self->interface_name);
+  free(self);
 }
   
-void delete_JDEInterfacePrx(JDEInterfacePrx* const this){
-  if (this==0)
+void delete_JDEInterfacePrx(JDEInterfacePrx* const self){
+  if (self==0)
     return;
-  if (this->refers_to){
-    if (JDEInterface_refcount(this->refers_to)==1)/*last reference*/
+  if (self->refers_to){
+    if (JDEInterface_refcount(self->refers_to)==1)/*last reference*/
       /*FIXME: delete exported symbols*/
-      delete_JDEInterface(this->refers_to);
+      delete_JDEInterface(self->refers_to);
     else
-      JDEInterface_delref(this->refers_to,this);
+      JDEInterface_delref(self->refers_to,self);
   }
-  free(this);
+  free(self);
 }
 
-void JDEInterface_addref(JDEInterface* const this,
+void JDEInterface_addref(JDEInterface* const self,
 			 JDEInterfacePrx* const referral){
-  assert(this!=0 && referral!=0);
-  pthread_mutex_lock(&(this->priv->mutex));
-  list_append(&(this->priv->referral_list),referral);
-  pthread_mutex_unlock(&(this->priv->mutex));
+  assert(self!=0 && referral!=0);
+  pthread_mutex_lock(&(self->priv->mutex));
+  list_append(&(self->priv->referral_list),referral);
+  pthread_mutex_unlock(&(self->priv->mutex));
 }
 
-void JDEInterface_delref(JDEInterface* const this,
+void JDEInterface_delref(JDEInterface* const self,
 			 JDEInterfacePrx* const referral){
   unsigned int pos;
 
-  assert(this!=0 && referral!=0);
-  pthread_mutex_lock(&(this->priv->mutex));
-  pos = list_locate(&(this->priv->referral_list),referral);
+  assert(self!=0 && referral!=0);
+  pthread_mutex_lock(&(self->priv->mutex));
+  pos = list_locate(&(self->priv->referral_list),referral);
   if (pos>0)
-    list_delete_at(&(this->priv->referral_list),pos);
-  pthread_mutex_unlock(&(this->priv->mutex));
+    list_delete_at(&(self->priv->referral_list),pos);
+  pthread_mutex_unlock(&(self->priv->mutex));
 }
 
-unsigned int JDEInterface_refcount(JDEInterface* const this){
+unsigned int JDEInterface_refcount(JDEInterface* const self){
   unsigned int s;
-  assert(this!=0);
-  pthread_mutex_lock(&(this->priv->mutex));
-  s = list_size(&(this->priv->referral_list));
-  pthread_mutex_unlock(&(this->priv->mutex));
+  assert(self!=0);
+  pthread_mutex_lock(&(self->priv->mutex));
+  s = list_size(&(self->priv->referral_list));
+  pthread_mutex_unlock(&(self->priv->mutex));
   return s;
 }
 
-void JDEInterfacePrx_run(const JDEInterfacePrx* this){
-  runFn irun;
-  int id;
+void JDEInterfacePrx_run(const JDEInterfacePrx* self){
+  JDESchema *s;
   
-  assert(this!=0);
-  assert(PRX_REFERS_TO(this)->supplier != this->user);/*avoid loops*/
-  PRX_REFERS_TO(this)->supplier->run(*(this->user->id),NULL,NULL);
-  this->user->children[*(PRX_REFERS_TO(this)->supplier->id)] = 1;
+  assert(self!=0);
+  s = PRX_REFERS_TO(self)->supplier;/*schema implementing interface*/
+  assert(s != self->user);/*avoid loops*/
+  JDESchema_run(s,self->user);
 }
 
-void JDEInterfacePrx_stop(const JDEInterfacePrx* this){
-  int id;
+void JDEInterfacePrx_stop(const JDEInterfacePrx* self){
+  JDESchema *s;
 
-  assert(this!=0);
-  assert(PRX_REFERS_TO(this)->supplier != this->user);/*avoid loops*/
-  PRX_REFERS_TO(this)->supplier->stop();
-  this->user->children[*(PRX_REFERS_TO(this)->supplier->id)] = 0;
+  assert(self!=0);
+  s = PRX_REFERS_TO(self)->supplier;/*schema implementing interface*/
+  assert(s != self->user);/*avoid loops*/
+  JDESchema_stop(s);
 }
