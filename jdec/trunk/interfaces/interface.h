@@ -47,7 +47,7 @@ typedef struct JDEInterfacePrx{
  *
  * @param interface_name the name the interface will be known in the
  * system
- * @paran supplier the schema suplying (implementing) this interface
+ * @param supplier the schema suplying (implementing) this interface
  * @return the new allocated interface
  *
  */
@@ -249,50 +249,56 @@ void JDEInterfacePrx_stop(const JDEInterfacePrx *self);
 /** 
  * Declares all the stuff around an interface. It should be included
  * in the interface header. It will declare the next things:
- *    -struct declaration for interface and proxy with all the
- *     attributes listed in attrs. They will be named like 'ifacename' and 'ifacename'Prx
- *    -constructors/destructors for interface and proxy. They will be
+ * <ul>
+ *    <li>struct declaration for interface and proxy with all the
+ *     attributes listed in attrs. They will be named like <i>ifacename</i> and <i>ifacenamePrx</i>
+ *    <li>constructors/destructors for interface and proxy. They will be
  *     named new_/delete_ followed by the struct name.
- *    -get/set accesors for the attributes through the proxy.
- *    .
+ *    <li>get/set accesors for the attributes through the proxy.
+ * </ul>
  * The interface attributes (attrs argument) are supplied like a macro which will
  * expand to all the needed code. This macro have to be like that:
- *     #define iface_attrs(ATTR,I)		\
+ * <pre>
+ *     \#define iface_attrs(ATTR,I)		\
  *        ATTR(I,attr1,int,VARIABLE,0)		\
  *        ATTR(I,attr2,int,ARRAY,10)
+ * </pre>
  * where each ATTR line represent an interface atribute. ATTR and I
  * are macros that will be supplied on each step, if you don't want to
  * explore the internals just do it like in the example and forget
  * them. If you want to know more see X-macros. Given a ATTR declaration like this:
- * ATTR(I,attrname,attrtype,attralloc,attrarg)
- *    -attrname: attribute name
- *    -attrtype: attribute type. Any C type is allowed, even pointers.
- *    -attralloc: attribute allocation. It could be VARIABLE for
+ * <i>ATTR(I,attrname,attrtype,attralloc,attrarg)</i>
+ * <ul>
+ *    <li>attrname: attribute name
+ *    <li>attrtype: attribute type. Any C type is allowed, even pointers.
+ *    <li>attralloc: attribute allocation. It could be VARIABLE for
  *     normal attribute. ARRAY for array atributes, set method for
  *     these attributes will copy the whole array. SYNTHETIC for syntetic
  *     atributes which will be got from an expresion, only get method
  *     will be generated in these attributes.
- *    -attrarg: Each kind of attribute use this argument in a
+ *    <li>attrarg: Each kind of attribute use this argument in a
  *     different way. VARIABLE doesn't use it. ARRAY use it to supply the
  *     array size. SYNTHETIC use it to supply the expresion. Inside the
  *     expresion is possible to refer any interface attribute using
- *     'iface->' and the attribute name. So, if we have an attribute X and
+ *     <i>iface-></i> and the attribute name. So, if we have an attribute X and
  *     we want to declare a synthetic attribute SQUARE, we just supply the
- *     expresion 'iface->X*iface->X'.
- *    .
+ *     expresion <i>iface->X * iface->X</i>.
+ * </ul>
  * Once defined the macro with the attributes we just have to call
  * INTERFACE_DECLARATION(name,attrs) that will generate all the code
  * for you.
  * A full example with all the generated declarations will be like
  * that:
- * 
- * #define A_attrs(ATTR,I)			\
+ * <pre>
+ * \#define A_attrs(ATTR,I)			\
  *    ATTR(I,x,int,VARIABLE,0)			\
  *    ATTR(I,v,float,ARRAY,8)			\
  *    ATTR(I,square,int,SYNTHETIC,iface->x*iface->x)
  * INTERFACE_DECLARATION(A,A_attrs)
- *
+ * </pre>
+ * 
  * The generated declarations will be:
+ * <pre>
  *   typedef struct A{
  *     int x;
  *     float v[8];
@@ -316,7 +322,7 @@ void JDEInterfacePrx_stop(const JDEInterfacePrx *self);
  *   void APrx_v_set (APrx * const self, float *new_v);
  *
  *   int APrx_square_get (const APrx * self);
- *
+ * </pre>
  * 
  * @param ifacename is the name for this interface
  * @param attrs atribute macro list
