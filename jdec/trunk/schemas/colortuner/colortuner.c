@@ -25,6 +25,8 @@
 #include <colorspaces.h>
 #include <interfaces/varcolor.h>
 
+#include <sys/time.h>
+#include <time.h>
 
 #include <glade/glade.h>
 #include <gtk/gtk.h>

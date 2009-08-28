@@ -31,7 +31,8 @@
 #include <glade/glade-xml.h> 
 #include <interfaces/varcolor.h>
 #include <string.h>
-
+#include <sys/time.h>
+#include <time.h>
 
 
 

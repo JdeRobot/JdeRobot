@@ -33,7 +33,7 @@
 #include "introrob2gui.h"
 #include "navegacion.h"
 
-int introrob_id=0; 
+//int introrob_id=0; 
 int introrob_brothers[MAX_SCHEMAS];
 arbitration introrob_callforarbitration;
 int introrob_cycle=100; /* ms */
@@ -265,7 +265,7 @@ void introrob_run(int father, int *brothers, arbitration fn)
     {
       father_schema = get_schema(father);
       pthread_mutex_lock(&(father_schema->mymutex));
-      father_schema->children[introrob_id]=TRUE;
+      father_schema->children[*(introrob_schema->id)]=TRUE;
       pthread_mutex_unlock(&(father_schema->mymutex));
     }
 
@@ -292,21 +292,21 @@ void introrob_run(int father, int *brothers, arbitration fn)
   else introrob_display_state = introrob_display_state | DISPLAY_COLORA;  
 
   if (mylaser==NULL){
-    if ((mylaser = new_LaserPrx("laser",introrob_schema,0))==NULL)
+    if ((mylaser = new_LaserPrx("laser",introrob_schema))==NULL)
       printf("No laser source found. Check your jde configuration file. I go on anyway\n");
     else 
       introrob_display_state = introrob_display_state | DISPLAY_LASER;
   }
 
   if (myencoders==NULL){
-    if ((myencoders = new_EncodersPrx("encoders",introrob_schema,0))==NULL)
+    if ((myencoders = new_EncodersPrx("encoders",introrob_schema))==NULL)
       printf("No encoders source found. Check your jde configuration file. I go on anyway\n");
     else 
       introrob_display_state = introrob_display_state | DISPLAY_ROBOT;
   }
 
   if (mymotors==NULL){
-    if ((mymotors = new_MotorsPrx("motors",introrob_schema,0))==NULL)
+    if ((mymotors = new_MotorsPrx("motors",introrob_schema))==NULL)
       printf("No motors found. Check your jde configuration file. I go on anyway\n");
     else
       introrob_display_state = introrob_display_state | DISPLAY_MOTORS;
@@ -344,7 +344,7 @@ void *introrob_thread(void *not_used)
 	      /* start the winner state from controlled motor values */ 
 	      if (mycolorA!=NULL){
 		introrob_schema->children[(*(int *)myimport("colorA","id"))]=TRUE;
-		colorArun(introrob_id,NULL,NULL);
+		colorArun(*(introrob_schema->id),NULL,NULL);
 	      }
 	      if (mylaser!=NULL)
 		JDEInterfacePrx_run(SUPER(mylaser));
@@ -408,7 +408,7 @@ void introrob_terminate()
 void introrob_init(char *configfile)
 {
   pthread_mutex_lock(&(introrob_schema->mymutex));
-  myexport("introrob","id",&introrob_id);
+  myexport("introrob","id",introrob_schema->id);
   myexport("introrob","run",(void *) &introrob_run);
   myexport("introrob","stop",(void *) &introrob_stop);
   printf("introrob schema started up\n");
@@ -1061,7 +1061,7 @@ void introrob_show(){
   }
 }
 
-__attribute__((constructor)) void constructor(){
+JDESchema* createSchema(){
   introrob_schema = new_JDESchema("introrob2",
 				  introrob_init,
 				  introrob_terminate,
@@ -1069,5 +1069,5 @@ __attribute__((constructor)) void constructor(){
 				  introrob_run,
 				  introrob_show,
 				  introrob_hide);
-  JDESchema_init(introrob_schema,0);
+  return introrob_schema;
 }

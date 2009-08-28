@@ -49,3 +49,6 @@ extern float w;
 extern float robot[5];
 extern float laser[NUM_LASER];
 extern char imagenRGB[SIFNTSC_COLUMNS*SIFNTSC_ROWS*3];
+
+
+extern JDESchema* createSchema();
