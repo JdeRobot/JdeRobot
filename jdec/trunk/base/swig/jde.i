@@ -2,7 +2,6 @@
 
 %{
 #include <jde.h>
-#include <jde_private.h>
 %}
 
 
@@ -12,6 +11,5 @@ JDESchema* jde_loadschema(const char *name);
 JDEDriver* jde_loaddriver(const char *name);
 
 char* get_configfile();
-void null_arbitration();
 JDESchema* find_schema (const char *name);
-void *myimport(const char *schema, const char *name);
+/*void *myimport(const char *schema, const char *name);*/

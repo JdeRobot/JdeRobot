@@ -43,10 +43,21 @@ jde_new_JDESchema.restype = ctypes.c_void_p
 
 class PyJDESchema(schema.JDESchema):
 	def __init__(self,name):
-		rc = ctypes.c_void_p(jde_new_JDESchema(name,init_CBT(self.init),
-						       terminate_CBT(self.terminate),
-						       stop_CBT(self.stop),run_CBT(self.run),
-						       show_CBT(self.show),hide_CBT(self.hide)))
+		#WARNING!! Keep references to callbacks to avoid 
+		#garbage collector destroys them
+		self.init_cb = init_CBT(self.init)
+		self.terminate_cb = terminate_CBT(self.terminate)
+		self.stop_cb = stop_CBT(self.stop)
+		self.run_cb = run_CBT(self.run)
+		self.show_cb = show_CBT(self.show)
+		self.hide_cb = hide_CBT(self.hide)
+		rc = ctypes.c_void_p(jde_new_JDESchema(name,
+						       self.init_cb,
+						       self.terminate_cb,
+						       self.stop_cb,
+						       self.run_cb,
+						       self.show_cb,
+						       self.hide_cb))
 		if rc.value == None:
 			raise NewJDESchemaException(name),"Can't load schema %s" % name
 		#swig object initialization

@@ -22,7 +22,7 @@
 #define thisrelease "jderobot 4.3-svn"
 
 #include "jde.h"
-#include "jde_private.h"
+//#include "jde_private.h"
 #include "loader.h"
 #include "dlfcn.h"
 #include <string.h>
@@ -30,6 +30,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdio.h>
+
+#include <sys/time.h>
+#include <time.h>
+
 
 /** Concurrency control when shutting down*/
 pthread_mutex_t shuttingdown_mutex;
@@ -218,7 +222,6 @@ void *cronos_thread(void *not_used)
 
 }
 
-/* Doc in jde_private.h */
 int jdeinit(int argc, char** argv, const char* cf){
   char s[MAX_BUFFER];
 
@@ -618,27 +621,7 @@ int jde_readline(FILE *myfile)
           j++;
        sscanf(&buffer_file[j],"%s",word);
        strncpy(path, word, MAX_BUFFER);
-    }    
-    else if (strcmp(word,"aload")==0)
-      {
-	while((buffer_file[j]!='\n')&&(buffer_file[j]!=' ')&&(buffer_file[j]!='\0')&&(buffer_file[j]!='\t')) j++;
-	words=sscanf(&buffer_file[j],"%s %s",word,word2);
-	
-	if (words==1){
-	  cf = configfile;
-	}
-	else if (words==2){
-	  cf = word2;
-	}
-	else 
-	  fprintf(stderr,"Bad line in configuration file %s, ignoring it. Load_driver/service only accepts one or two parameters: driver_name [driverconfigfile]\n Offending line: '%s'\n", configfile, buffer_file);
-	if (!load_module2(word,cf)){
-	  fprintf(stderr,"Module loading failed\n");
-	  exit(1);
-	}
-      }
-    
-    else{
+    }else{
       if ((driver_configuration_section==0) &&
 	  (service_configuration_section==0) &&
 	  (schema_configuration_section==0))

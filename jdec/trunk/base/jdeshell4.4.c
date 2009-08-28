@@ -21,6 +21,7 @@
  */
 
 #include <jde.h>
+#include <hierarchy.h>
 #include <loader.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -33,7 +34,7 @@
 
 typedef int rl_cmdfunc_t (char *);
 
-const char * thisrelease = "jderobot 4.3.0";
+const char * thisrelease = "jderobot 4.4.0";
 
 typedef struct {
   const char *name;		/* User printable name of the function. */
@@ -135,6 +136,15 @@ int done;
 SHELLSTATE shstate;
 enum GENERATOR_ST generator_state;
 
+JDEHierarchy* myhierarchy = 0;
+
+
+void signal_handler(int sig){
+  if (myhierarchy != 0)
+    delete_JDEHierarchy(myhierarchy);
+  exit(sig);
+}
+
 /**
  * Jde main function
  * @param argc Number of arguments
@@ -147,9 +157,9 @@ int main(int argc, char** argv) {
   char configfile[MAX_BUFFER] = {'\0'};
   char histfile_path[MAX_BUFFER];
 
-  signal(SIGTERM, &jdeshutdown); /* kill interrupt handler */
-  signal(SIGINT, &jdeshutdown); /* control-C interrupt handler */
-  signal(SIGABRT, &jdeshutdown); /* failed assert handler */
+  signal(SIGTERM, &signal_handler); /* kill interrupt handler */
+  signal(SIGINT, &signal_handler); /* control-C interrupt handler */
+  signal(SIGABRT, &signal_handler); /* failed assert handler */
   signal(SIGPIPE, SIG_IGN);
   
   /* Pablo Barrera: Por alguna raz�n libforms hace que fprintf("%f") ponga 
@@ -195,9 +205,11 @@ int main(int argc, char** argv) {
     n++;
   }
   
-  if (jdeinit(argc,argv,configfile) == 0){
+  myhierarchy = new_JDEHierarchy(argc,argv,configfile);
+  
+  if (myhierarchy==0){
     fprintf(stdout,"Initialization failed...\n");
-    jdeshutdown(-1);
+    exit(-1);
   }
 
   /* read commands from keyboard */
@@ -233,7 +245,7 @@ int main(int argc, char** argv) {
     }
   }
   write_history(histfile_path);
-  jdeshutdown(0);
+  delete_JDEHierarchy(myhierarchy);
   pthread_exit(0); 
   /* If we don't need this thread anymore, 
      but want the others to keep running */
@@ -259,13 +271,12 @@ execute_line (char *line){
     return ((*(command->func)) (line));
 
   /*search in loaded schemas*/
-  if ((s=find_schema(word)) != 0){/*cmd is a schema name->run it*/
-    if (s->run != NULL)
-      s->run(SHELLHUMAN,NULL,NULL);
+  if ((s=JDEHierarchy_find_schema(myhierarchy,word)) != 0){/*cmd is a schema name->run it*/
+    JDESchema_run(s,0);
     return 0;
   }
 
-  /* no command or factory name found*/
+  /* no command or schema name found*/
   fprintf (stderr, "%s: No such command for jderobot.\n", word);
   return (-1);
 }
@@ -391,6 +402,7 @@ char *
 command_generator (const char *text,int state){
   static int list_index, len;
   static int schema_index;
+  static int schema_list_index,schema_list_size;
   const char *name;
   char str[256];
 
@@ -400,6 +412,10 @@ command_generator (const char *text,int state){
   if (!state) {
       list_index = 0;
       schema_index = 0;
+      schema_list_index = 0;
+      pthread_mutex_lock(&(myhierarchy->mutex));
+      schema_list_size = list_size(&(myhierarchy->schema_list));
+      pthread_mutex_unlock(&(myhierarchy->mutex));
       len = strlen (text);
   }
 
@@ -415,14 +431,30 @@ command_generator (const char *text,int state){
 
   /*search on schema names*/
   if (generator_state & SCHEMAS) {
+    while( schema_list_index < schema_list_size ){
+      pthread_mutex_lock(&(myhierarchy->mutex));
+      JDESchema *s = list_get_at(&(myhierarchy->schema_list),
+				 schema_list_index);
+      pthread_mutex_unlock(&(myhierarchy->mutex));
+      schema_list_index++;
+      if (s!=0){
+	sprintf(str,"%s",s->name);
+	if (strncmp (str, text, len) == 0)
+	  return (strdup(str));
+      }
+    }
+
+    /*search in old hierarchy 'all'*/
     while( schema_index < num_schemas) {
       sprintf(str,"%s",all[schema_index].name);
       schema_index++;
       if (strncmp (str, text, len) == 0)
 	return (strdup(str));
     }
+
   }
 
+  
   /* If no names matched, then return NULL. */
   return ((char *)NULL);
 }
@@ -480,11 +512,20 @@ com_dir (char *arg){
  */
 int
 com_list (char *ignore){
-  int i;
+/*   int i; */
 
-  for(i=0;i<num_schemas;i++)
-    printf("%s\n",all[i].name);
+/*   for(i=0;i<num_schemas;i++) */
+/*     printf("%s\n",all[i].name); */
 
+  pthread_mutex_lock(&(myhierarchy->mutex));
+  list_iterator_start(&(myhierarchy->schema_list));
+  while(list_iterator_hasnext(&(myhierarchy->schema_list))){
+    JDESchema *s = 
+      (JDESchema*)list_iterator_next(&(myhierarchy->schema_list));
+    printf("%s\n",s->name);
+  }
+  list_iterator_stop(&(myhierarchy->schema_list));
+  pthread_mutex_unlock(&(myhierarchy->mutex));
   return 0;
 }
 
@@ -670,7 +711,7 @@ com_load_driver (char *arg){
     fprintf(stderr,"Driver/Service loading failed\n");
     return -1;
   }
-  d->init(cf);
+  JDEDriver_init(d,cf);
   return 0;
 }
 
@@ -704,7 +745,8 @@ com_load_schema (char *arg){
     fprintf(stderr,"Schema loading failed\n");
     return -1;
   }
-  s ->init(cf);
+  JDEHierarchy_add_schema(myhierarchy,s);
+  JDESchema_init(s,cf);
   return 0;
 }
 
@@ -734,11 +776,12 @@ com_load_schema2 (char *arg){
   }
 
   s = load_schema(word,cf);
-  if (s == 0){
-    fprintf(stderr,"Schema loading failed\n");
+  if (s==0){
+    fprintf(stderr,"Module loading failed\n");
     return -1;
   }
-  s ->init(cf);
+  JDEHierarchy_add_schema(myhierarchy,s);
+  JDESchema_init(s,cf);
   return 0;
 }
 
@@ -749,36 +792,48 @@ com_load_schema2 (char *arg){
  */
 int
 com_ps (char *ignored){
-  int i,j,k;
-  
-  for(i=0;i<num_schemas;i++){
-    if ((all[i].state==winner) ||
-	(all[i].state==notready) ||
-	(all[i].state==ready)) {
-      fprintf(stdout,"%s: %.0f ips, ",all[i].name,all[i].fps);
-      if (all[i].state==winner) {
-	fprintf(stdout,"winner ( ");
-	k=0;
-	for (j=0;j<num_schemas;j++)
-	  if (all[i].children[j]==TRUE) {
-	    if (k==0) {
-	      fprintf(stdout,"\b");k++;
-	    }
-	    fprintf(stdout,"%s ",all[j].name);
-	  }
-	fprintf(stdout,"\b)");
-      }
-      else if (all[i].state==slept)
-	fprintf(stdout,"slept");
-      else if (all[i].state==notready)
-	fprintf(stdout,"notready");
-      else if (all[i].state==ready)
-	fprintf(stdout,"ready");
-      else if (all[i].state==forced)
-	fprintf(stdout,"forced");
-      fprintf(stdout,"\n");
-    }
+  /* int i,j,k; */
+
+
+  /* for(i=0;i<num_schemas;i++){ */
+/*     if ((all[i].state==winner) || */
+/* 	(all[i].state==notready) || */
+/* 	(all[i].state==ready)) { */
+/*       fprintf(stdout,"%s: %.0f ips, ",all[i].name,all[i].fps); */
+/*       if (all[i].state==winner) { */
+/* 	fprintf(stdout,"winner ( "); */
+/* 	k=0; */
+/* 	for (j=0;j<num_schemas;j++) */
+/* 	  if (all[i].children[j]==TRUE) { */
+/* 	    if (k==0) { */
+/* 	      fprintf(stdout,"\b");k++; */
+/* 	    } */
+/* 	    fprintf(stdout,"%s ",all[j].name); */
+/* 	  } */
+/* 	fprintf(stdout,"\b)"); */
+/*       } */
+/*       else if (all[i].state==slept) */
+/* 	fprintf(stdout,"slept"); */
+/*       else if (all[i].state==notready) */
+/* 	fprintf(stdout,"notready"); */
+/*       else if (all[i].state==ready) */
+/* 	fprintf(stdout,"ready"); */
+/*       else if (all[i].state==forced) */
+/* 	fprintf(stdout,"forced"); */
+/*       fprintf(stdout,"\n"); */
+/*     } */
+/*   } */
+
+  pthread_mutex_lock(&(myhierarchy->mutex));
+  list_iterator_start(&(myhierarchy->schema_list));
+  while(list_iterator_hasnext(&(myhierarchy->schema_list))){
+    JDESchema *s = 
+      (JDESchema*)list_iterator_next(&(myhierarchy->schema_list));
+    int state = JDESchema_get_state(s);
+    fprintf(stdout,"%s: %.0f ips, %s\n",s->name,s->fps,states_str[state]);
   }
+  list_iterator_stop(&(myhierarchy->schema_list));
+  pthread_mutex_unlock(&(myhierarchy->mutex));
   return 0;
 }
 
@@ -794,7 +849,7 @@ com_run (char *arg){
   if (shstate.state == BASE){
     if (!valid_argument ("run", arg))
       return -1;
-    if ((s=find_schema(arg)) == 0){
+    if ((s=JDEHierarchy_find_schema(myhierarchy,arg)) == 0){
       fprintf (stderr,"%s: unknown schema\n",arg);
       return -1;
     }
@@ -803,9 +858,7 @@ com_run (char *arg){
   }else
     return -1;
 
-  if (s->run != NULL)
-    s->run(SHELLHUMAN,NULL,NULL);
-
+  JDESchema_run(s,0);
   return 0;
 }
 
@@ -821,7 +874,7 @@ com_stop (char *arg){
   if (shstate.state == BASE){
     if (!valid_argument ("stop", arg))
       return -1;
-    if ((s=find_schema(arg)) == 0){
+    if ((s=JDEHierarchy_find_schema(myhierarchy,arg)) == 0){
       fprintf (stderr,"%s: unknown schema\n",arg);
       return -1;
     }
@@ -829,10 +882,7 @@ com_stop (char *arg){
     s = (JDESchema*)shstate.pdata;
   }else
     return -1;
-
-  if (s->stop != NULL)
-    s->stop();
-
+  JDESchema_stop(s);
   return 0;
 }
 
@@ -848,7 +898,7 @@ com_show (char *arg){
   if (shstate.state == BASE){
     if (!valid_argument ("show", arg))
       return -1;
-    if ((s=find_schema(arg)) == 0){
+    if ((s=JDEHierarchy_find_schema(myhierarchy,arg)) == 0){
       fprintf (stderr,"%s: unknown schema\n",arg);
       return -1;
     }
@@ -857,10 +907,7 @@ com_show (char *arg){
   }else
     return -1;
   
-  if (s->show != NULL) {
-    s->show();
-    s->guistate=on;
-  }
+  JDESchema_show(s);
   return 0;
 }
 
@@ -876,7 +923,7 @@ com_hide (char *arg){
   if (shstate.state == BASE){
     if (!valid_argument ("hide", arg))
       return -1;
-    if ((s=find_schema(arg)) == 0){
+    if ((s=JDEHierarchy_find_schema(myhierarchy,arg)) == 0){
       fprintf (stderr,"%s: unknown schema\n",arg);
       return -1;
     }
@@ -885,10 +932,7 @@ com_hide (char *arg){
   }else
     return -1;
 
-  if (s->hide!=NULL) {
-    s->hide();
-    s->guistate=on;
-  }
+  JDESchema_hide(s);
   return 0;
 }
 
@@ -901,13 +945,10 @@ int
 com_init (char *arg){
   JDESchema *s = (JDESchema*)shstate.pdata;
 
-  if (s->init != NULL) {
-    if (arg==0 || *arg == '\0')/*no args, use global configfile*/
-      s->init(get_configfile());
-    else
-      s->init(arg);
-  }
-
+  if (arg==0 || *arg == '\0')/*no args, use global configfile*/
+    JDESchema_init(s,get_configfile());
+  else
+    JDESchema_init(s,arg);
   return 0;
 }
 
@@ -920,9 +961,7 @@ int
 com_terminate (char *ignored){
   JDESchema *s = (JDESchema*)shstate.pdata;
   
-  if (s->terminate != NULL)
-    s->terminate();
-
+  JDESchema_terminate(s);
   return 0;
 }
 
@@ -936,7 +975,7 @@ int com_zoom(char *arg){
 
   if (!valid_argument ("zoom", arg))
     return -1;
-  if ((s=find_schema(arg)) == 0){
+  if ((s=JDEHierarchy_find_schema(myhierarchy,arg)) == 0){
     fprintf (stderr,"%s: unknown schema\n",arg);
     return -1;
   }

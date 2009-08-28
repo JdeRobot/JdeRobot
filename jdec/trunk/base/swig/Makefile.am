@@ -1,4 +1,4 @@
-swig_LTLIBRARIES = _jde.la _schema.la
+swig_LTLIBRARIES = _jde.la _schema.la _interface.la
 
 _jde_la_SOURCES = jde.i
 nodist__jde_la_SOURCES = jde_wrap.c
@@ -12,10 +12,16 @@ _schema_la_LDFLAGS = -module -avoid-version
 _schema_la_LIBADD = $(top_srcdir)/base/libjde.la
 _schema_la_CFLAGS = -I$(top_srcdir)/base $(SWIG_PYTHON_CPPFLAGS)
 
+_interface_la_SOURCES = interface.i
+nodist__interface_la_SOURCES = interface_wrap.c
+_interface_la_LDFLAGS = -module -avoid-version
+_interface_la_LIBADD = $(top_srcdir)/base/libjde.la
+_interface_la_CFLAGS = -I$(top_srcdir)/base $(SWIG_PYTHON_CPPFLAGS)
 
-dist_swig_DATA = jde.py schema.py pyschema.py
-BUILT_SOURCES = jde_wrap.c schema_wrap.c
-CLEANFILES = $(BUILT_SOURCES) jde.py schema.py
+
+dist_swig_DATA = jde.py schema.py pyschema.py interface.py
+BUILT_SOURCES = jde_wrap.c schema_wrap.c interface_wrap.c
+CLEANFILES = $(BUILT_SOURCES) jde.py schema.py interface.py
 %_wrap.c: %.i
 	$(SWIG) $(SWIG_PYTHON_OPT) $<
 

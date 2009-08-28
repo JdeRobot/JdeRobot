@@ -21,10 +21,7 @@
 
 #ifndef __JDE_H__
 #define __JDE_H__
-
-#include <sys/time.h>
-#include <time.h>
-#include <pthread.h>
+#include <schema.h>
 
 /** Conversion from deg to rad*/
 #define DEGTORAD     (3.14159264 / 180.0)
@@ -41,24 +38,12 @@
 
 /** Maximum buffer size (for strings)*/
 #define MAX_BUFFER 512
-#define MAX_NAME 128
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
-/** Possible schema's states*/
-enum states {slept,active,notready,ready,forced,winner};
-/** Possible schema's gui states*/
-enum guistates {off,on,pending_off,pending_on};
-/** Callback function's type definition*/
-typedef void (*intcallback)(int i);
-/** Arbitration function's type definition*/
-typedef void (*arbitration)(void);
-/** Schema's run funcion's type definition*/
-typedef void (*runFn)(int father, int *brothers, arbitration fn);
-/** Schema's stop funcion's type definition*/
-typedef void (*stopFn)(void);
+
 
 /**
  * Null arbitrarion function
@@ -71,14 +56,15 @@ extern void null_arbitration();
  * @param numschema Schema's index in the schema's array
  * @return void
  */
-extern void put_state(const int numschema, const int newstate);
+extern void put_state(const int numschema, const int newstate) __attribute__((deprecated));
 /**
  * This functions must be called at every schema's iteration, it increments the
  * schema's iteration counter to calculate schema's ips.
  * @param numschema Schema's identifier
  * @return void
  */
-extern void speedcounter(const int numschema);
+extern void speedcounter(const int numschema) __attribute__((deprecated));
+
 /**
  * It is used to share variables and functions between diferent schemas and
  * drivers (remember that they are in diferent names' spaces)
@@ -95,6 +81,18 @@ extern int myexport(const char *schema, const char *name, void *p);
  * @return The pointer to the variable casted to (void *)
  */
 extern void *myimport(const char *schema, const char *name);
+
+/**
+ * Init jde loading configuration file (given or default one).
+ * This function must be used before to use jde.
+ * @param argc argument count
+ * @param argv argument array
+ * @param cf if not null used as path for config file.
+ * @return 1 if jde initialization success
+ */
+extern int jdeinit(int argc, char** argv, const char* cf);
+
+
 /**
  * This function must be used instead of exit() to terminate de program
  * correctly
@@ -109,119 +107,35 @@ extern void jdeshutdown(const int sig);
  */
 extern char* get_configfile();
 
-
-/** when the human activates some schema from the gui */
-#define GUIHUMAN -1 
-
-/** when the human activates some schema from the shell */
-#define SHELLHUMAN -2 
-
-/** Maximum number of schemas*/
-#define MAX_SCHEMAS 20
-/** Jde schema type definition*/
-typedef struct {
-   /** Dynamic library handler for the schema module*/
-  void *handle;
-  /** Schema's name*/
-  char name[MAX_NAME];
-  /** Schema's identifier*/
-  int *id; /* schema identifier */
-  /** Schema's state
-   * @see states
-   */
-  int state;
-  /** Schema's gui state
-   * @see guistates
-   */
-  int guistate;
-  /** Indicates the schema's identifier of the father*/
-  int father;
-  /** The children of this schema must be set at 1 in this array*/
-  int children[MAX_SCHEMAS];
-  /** Contains the ips of the schema*/
-  float fps;
-  /** It is used to calculate the fps value, it must be incremented at each
-   * schema iteration
-   * @see speedcounter*/
-  long int k;
-
-  /**
-   * Pointer to the schema's init function
-   * @param configfile Path and name to the config file of this schema.
-   * @return void
-   */
-  void (*init)(char *configfile);
-  /**
-   * Pointer to the schema's terminate function
-   * @return void
-   */
-  void (*terminate)(void);
-  /**
-   * Pointer to the schema's suspend function
-   * @return void
-   */
-  void (*stop)(void);
-  /**
-   * Pointer to the schema's run function
-   * @param father The father's schema identifier (the one who runs it)
-   * @param brothers An array whith the schema's brothers
-   * @param fn The arbitration function to decide wich of the brothers must run
-   * @return void
-   */
-  void (*run)(int father, int *brothers, arbitration fn);
-  /**
-   * Pointer to the schema's show function, used to show its gui
-   * @return void
-   */
-  void (*show)(void);
-  /**
-   * Pointer to the schema's hide function, used to hide its gui
-   * @return void
-   */
-  void (*hide)(void);
-
-  /** A mutex to protect critical regions that affect de schema*/
-  pthread_mutex_t mymutex;
-  /** A condition to wait until de conditions are the correct to run*/
-  pthread_cond_t condition;
-  /** Schema's thread identifier*/
-  pthread_t mythread;
-}JDESchema;
+/**
+ * Load the so named as a schema
+ * @param name shared object to load without .so
+ * @return loaded schema if ok, null otherwise
+ */
+extern JDESchema* jde_loadschema(const char *name);
 
 /**
- * Get a schema using the id number
- * @param id schema id
- * @return pointer to schema or null
+ * Load the so named as a driver/service
+ * @param name shared object to load without .so
+ * @return loaded driver/service if ok, null otherwise
  */
-extern JDESchema* get_schema(const int id);
-
-/** Array with all the loaded schemas*/
-extern JDESchema all[MAX_SCHEMAS];
-/** Number of loaded schemas*/
-extern int num_schemas;
+extern JDEDriver* jde_loaddriver(const char *name);
 
 
-/** Jde type definition for drivers and services */
-typedef struct {
-   /** Dynamic library handler for the driver module*/
-   void *handle;
-   /** Driver's name*/
-   char name[MAX_NAME];
-   /** Driver's identifier*/
-   int id;
-   
-   /**
-    * Pointer to the driver's init function
-    * @param configfile Path and name to the config file of this driver.
-    * @return void
-    */
-   void (*init)(char *configfile);
-   /**
-    * Pointer to the driver's terminate function
-    * @return void
-    */
-   void (*terminate)(void);
-}JDEDriver;
+/**
+ * Find schema by name
+ * @param name schema to be searched
+ * @return schema object or null if can't be founded it
+ */
+extern JDESchema* find_schema (const char *name);
+
+/**
+ * Parse a config file
+ * @param cf config file to parse
+ * @return 1 if parsing ok
+ */
+extern int parse_configfile(const char* cf);
+
 
 #ifdef __cplusplus
  }
