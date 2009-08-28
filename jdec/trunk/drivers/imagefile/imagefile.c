@@ -901,6 +901,7 @@ void imagefile_init(char *configfile)
 	    else printf("\n");            
 	    myexport("varcolorA","id",&varcolorA_schema_id);
             myexport("varcolorA","varcolorA",&myA);
+	    myexport("varcolorA","Varcolor",&myA);
             myexport("varcolorA","run",(void *)myvarcolorA_run);
             myexport("varcolorA","stop",(void *)myvarcolorA_stop);
 	  }
@@ -920,6 +921,7 @@ void imagefile_init(char *configfile)
 	    else printf("\n");  
 	    myexport("varcolorB","id",&varcolorB_schema_id);
             myexport("varcolorB","varcolorB",&myB);
+	    myexport("varcolorB","Varcolor",&myA);
             myexport("varcolorB","run",(void *)myvarcolorB_run);
             myexport("varcolorB","stop",(void *)myvarcolorB_stop);
 	  }
@@ -939,6 +941,7 @@ void imagefile_init(char *configfile)
 	    else printf("\n");  
             myexport("varcolorC","id",&varcolorC_schema_id);
             myexport("varcolorC","varcolorC",&myC);
+	    myexport("varcolorC","Varcolor",&myA);
             myexport("varcolorC","run",(void *)myvarcolorC_run);
             myexport("varcolorC","stop",(void *)myvarcolorC_stop);
 	  }
@@ -958,6 +961,7 @@ void imagefile_init(char *configfile)
 	    else printf("\n");  
             myexport("varcolorD","id",&varcolorD_schema_id);
             myexport("varcolorD","varcolorD",&myD);
+	    myexport("varcolorD","Varcolor",&myA);
             myexport("varcolorD","run",(void *)myvarcolorD_run);
             myexport("varcolorD","stop",(void *)myvarcolorD_stop);
 	  }
