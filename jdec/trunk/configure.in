@@ -1222,5 +1222,7 @@ AC_CONFIG_FILES([schemas/Makefile \
     schemas/naooperator/Makefile ]) 
 dnl # generate docs Makefiles
 AC_CONFIG_FILES([docs/Makefile])
+dnl # generate examples Makefiles
+AC_CONFIG_FILES([examples/Makefile])
 
 AC_OUTPUT
