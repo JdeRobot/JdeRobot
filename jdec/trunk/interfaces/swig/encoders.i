@@ -26,8 +26,7 @@ typedef struct{
   JDEInterfacePrx* super;
   %extend{
     EncodersPrx(const char* interface_name,
-		JDESchema* const user,
-		Encoders* const refers_to=0);
+		JDESchema* const user);
     /*perceptions*/
     float robot[ROBOT_NELEM];
     unsigned long int clock;

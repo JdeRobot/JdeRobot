@@ -7,59 +7,77 @@ Laser* new_Laser(const char* interface_name,
 		 JDESchema* const supplier){
   Laser* l;
   
-  assert(supplier!=0);
+  assert(supplier!=0 && supplier->hierarchy!=0);
   l = (Laser*)calloc(1,sizeof(Laser));
   assert(l!=0);
   SUPER(l) = new_JDEInterface(interface_name,supplier);
   assert(SUPER(l) != 0);
+  /*interface export*/
+  if (JDEHierarchy_myexport(supplier->hierarchy,interface_name,"Laser",l) == 0){
+    delete_JDEInterface(SUPER(l));
+    free(l);
+    return 0;
+  }
+  /*backwards compatibility exports*/
+  myexport(interface_name,"laser",l->laser);
+  myexport(interface_name,"clock",&(l->clock));
+  myexport(interface_name,"number",&(l->number));
+  myexport(interface_name,"resolution",&(l->resolution));
   return l;
 }
 
 void delete_Laser(Laser* const self){
   if (self==0)
     return;
-  free(self);
+  delete_JDEInterface(SUPER(self));
+  free(self);/*FIXME: un-export symbols. references?*/
 }
 
+/*for old interfaces proxy->refers_to == 0*/
 LaserPrx* new_LaserPrx(const char* interface_name,
-		       JDESchema* const user,
-		       Laser* const refers_to){
+		       JDESchema* const user){
   LaserPrx* lprx;
 
-  assert(user!=0);
+  assert(user!=0 && user->hierarchy!=0);
   lprx = (LaserPrx*)calloc(1,sizeof(LaserPrx));
   assert(lprx!=0);
-  if (refers_to == 0){
-    PRX_REFERS_TO(lprx) = (Laser*)myimport(interface_name,"Laser");
-    SUPER(lprx) = new_JDEInterfacePrx(interface_name,user,0);
-  }else{
-    PRX_REFERS_TO(lprx) = refers_to;
-    SUPER(lprx) = new_JDEInterfacePrx(interface_name,
-				      user,
-				      SUPER(refers_to));
-    myexport(interface_name,"Laser",refers_to);
-    /*backwards compatibility*/
-    myexport(interface_name,"laser",refers_to->laser);
-    myexport(interface_name,"clock",&(refers_to->clock));
-    myexport(interface_name,"number",&(refers_to->number));
-    myexport(interface_name,"resolution",&(refers_to->resolution));
-  }
-  return lprx;
+  
+  PRX_REFERS_TO(lprx) = (Laser*)JDEHierarchy_myimport(user->hierarchy,interface_name,"Laser");
+  if (PRX_REFERS_TO(lprx) == 0){/*we are connecting with an old
+				   encoders interface*/
+    int *idp;
+    JDESchema *supplier;
 
+    idp = (int*)myimport(interface_name,"id");/*we have to get the
+						supplier*/
+    if (idp != 0){
+      JDEInterface *i;
+
+      supplier = get_schema(*idp);
+      assert(supplier!=0);
+      i = new_JDEInterface(interface_name,supplier);/*pointer stored with myimport*/
+      assert(i!=0);
+    }else{/*no interface found with this name*/
+      free(lprx);
+      return 0;
+    }
+  }
+  SUPER(lprx) = new_JDEInterfacePrx(interface_name,user);
+  assert(SUPER(lprx)!=0);
+  return lprx;
 }
 
+
 void delete_LaserPrx(LaserPrx* const self){
+  JDEInterface *l = 0;
+
   if (self==0)
     return;
   
-  if (PRX_REFERS_TO(self)){
-    if (JDEInterface_refcount(PRX_REFERS_TO(SUPER(self)))==1){/*last reference*/
-      /*FIXME: delete exported symbols*/
-      delete_Laser(PRX_REFERS_TO(self));
-      PRX_REFERS_TO(SUPER(self)) = 0;/*JDEInterface has been destroyed*/
-    }
-  }
+  if (PRX_REFERS_TO(self)==0)/*free interface allocated for backwards compatibility*/
+    l = PRX_REFERS_TO(SUPER(self));
   delete_JDEInterfacePrx(SUPER(self));
+  delete_JDEInterface(l);
   free(self);
 }
 
@@ -70,8 +88,8 @@ int* LaserPrx_laser_get(const LaserPrx* self){
   if (PRX_REFERS_TO(self))
     laserp=PRX_REFERS_TO(self)->laser;
   else/*backwards compatibility*/
-    laserp=(int *)myimport(PRX_REFERS_TO(SUPER(self))->interface_name,"laser");
-    
+    laserp=(int *)myimport(INTERFACEPRX_NAME(self),"laser");
+  assert(laserp!=0);
   return laserp;
 }
 
@@ -83,9 +101,9 @@ int LaserPrx_number_get(const LaserPrx* self){
   if (PRX_REFERS_TO(self))
     numberp=&(PRX_REFERS_TO(self)->number);
   else/*backwards compatibility*/
-    numberp=(int *)myimport(PRX_REFERS_TO(SUPER(self))->interface_name,"number");
-      
-  return (numberp?*numberp:0);
+    numberp=(int *)myimport(INTERFACEPRX_NAME(self),"number");
+  assert(numberp!=0);
+  return *numberp;
 }
 
 int LaserPrx_resolution_get(const LaserPrx* self){
@@ -95,9 +113,9 @@ int LaserPrx_resolution_get(const LaserPrx* self){
   if (PRX_REFERS_TO(self))
     resolutionp=&(PRX_REFERS_TO(self)->resolution);
   else/*backwards compatibility*/
-    resolutionp=(int *)myimport(PRX_REFERS_TO(SUPER(self))->interface_name,"resolution");
-      
-  return (resolutionp?*resolutionp:0);
+    resolutionp=(int *)myimport(INTERFACEPRX_NAME(self),"resolution");
+  assert(resolutionp!=0);
+  return *resolutionp;
 }
 
 unsigned long int LaserPrx_clock_get(const LaserPrx* self){
@@ -107,32 +125,52 @@ unsigned long int LaserPrx_clock_get(const LaserPrx* self){
   if (PRX_REFERS_TO(self))
     clockp=&(PRX_REFERS_TO(self)->clock);
   else/*backwards compatibility*/
-    clockp=(unsigned long int *)myimport(PRX_REFERS_TO(SUPER(self))->interface_name,"clock");
-      
-  return (clockp?*clockp:0);
+    clockp=(unsigned long int *)myimport(INTERFACEPRX_NAME(self),"clock");
+  assert(clockp!=0);
+  return *clockp;
 } 
 
 void LaserPrx_laser_set(LaserPrx* const self, int* new_laser){
+  int *laser;
+
   assert(self!=0);
-  if (PRX_REFERS_TO(self))
-    memmove(PRX_REFERS_TO(self)->laser,new_laser,sizeof(int)*MAX_LASER);
+  laser = LaserPrx_laser_get(self);
+  memmove(laser,new_laser,sizeof(int)*MAX_LASER);
 }
 
 void LaserPrx_number_set(LaserPrx* const self, int new_number){
+  int* numberp = 0;
+
   assert(self!=0);
   if (PRX_REFERS_TO(self))
-    PRX_REFERS_TO(self)->number = new_number;
+    numberp=&(PRX_REFERS_TO(self)->number);
+  else/*backwards compatibility*/
+    numberp=(int *)myimport(INTERFACEPRX_NAME(self),"number");
+  assert(numberp!=0);
+  *numberp = new_number;
 }
 
 void LaserPrx_resolution_set(LaserPrx* const self, int new_resolution){
+  int* resolutionp = 0;
+
   assert(self!=0);
   if (PRX_REFERS_TO(self))
-    PRX_REFERS_TO(self)->resolution = new_resolution;
+    resolutionp=&(PRX_REFERS_TO(self)->resolution);
+  else/*backwards compatibility*/
+    resolutionp=(int *)myimport(INTERFACEPRX_NAME(self),"resolution");
+  assert(resolutionp!=0);
+  *resolutionp = new_resolution;
 }
 
 void LaserPrx_clock_set(LaserPrx* const self, unsigned long int new_clock){
+  unsigned long int* clockp;
+
   assert(self!=0);
   if (PRX_REFERS_TO(self))
-    PRX_REFERS_TO(self)->clock = new_clock;
+    clockp=&(PRX_REFERS_TO(self)->clock);
+  else/*backwards compatibility*/
+    clockp=(unsigned long int *)myimport(INTERFACEPRX_NAME(self),"clock");
+  assert(clockp!=0);
+  *clockp = new_clock;
 }
 

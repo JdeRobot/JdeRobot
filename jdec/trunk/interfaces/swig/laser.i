@@ -28,8 +28,7 @@ typedef struct{
   JDEInterfacePrx* super;
   %extend{
     LaserPrx(const char* interface_name,
-	     JDESchema* const user,
-	     Laser* const refers_to=0);
+	     JDESchema* const user);
     /*perceptions*/
     int laser[MAX_LASER];
     int number;

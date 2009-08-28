@@ -22,8 +22,7 @@ typedef struct{
   JDEInterfacePrx* super;
   %extend{
     MotorsPrx(const char* interface_name,
-	      JDESchema* const user,
-	      Motors* const refers_to=0);
+	      JDESchema* const user);
     /*modulations*/
     float v; /* mm/s */
     float w; /* deg/s */

@@ -7,57 +7,73 @@ Motors* new_Motors(const char* interface_name,
 		   JDESchema* const supplier){
   Motors* m;
   
-  assert(supplier!=0);
+  assert(supplier!=0 && supplier->hierarchy!=0);
   m = (Motors*)calloc(1,sizeof(Motors));
   assert(m!=0);
   SUPER(m) = new_JDEInterface(interface_name,supplier);
   assert(SUPER(m) != 0);
+  /*interface export*/
+  if (JDEHierarchy_myexport(supplier->hierarchy,interface_name,"Motors",m) == 0){
+    delete_JDEInterface(SUPER(m));
+    free(m);
+    return 0;
+  }
+  /*backwards compatibility exports*/
+  myexport(interface_name,"v",&(m->v));
+  myexport(interface_name,"w",&(m->w));
   return m;
 }
 
 void delete_Motors(Motors* const self){
   if (self==0)
     return;
-  free(self);
+  delete_JDEInterface(SUPER(self));
+  free(self);/*FIXME: un-export symbols. references?*/
 }
 
+/*for old interfaces proxy->refers_to == 0*/
 MotorsPrx* new_MotorsPrx(const char* interface_name,
-			 JDESchema* const user,
-			 Motors* const refers_to){
+			 JDESchema* const user){
   MotorsPrx* mprx;
 
-  assert(user!=0);
+  assert(user!=0 && user->hierarchy!=0);
   mprx = (MotorsPrx*)calloc(1,sizeof(MotorsPrx));
   assert(mprx!=0);
-  if (refers_to == 0){
-    PRX_REFERS_TO(mprx) = (Motors*)myimport(interface_name,"Motors");
-    SUPER(mprx) = new_JDEInterfacePrx(interface_name,user,0);
-  }else{
-    PRX_REFERS_TO(mprx) = refers_to;
-    SUPER(mprx) = new_JDEInterfacePrx(interface_name,
-				      user,
-				      SUPER(refers_to));
-    myexport(interface_name,"Motors",refers_to);
-    /*backwards compatibility*/
-    myexport(interface_name,"v",&(refers_to->v));
-    myexport(interface_name,"w",&(refers_to->w));
-  }
-  return mprx;
+  PRX_REFERS_TO(mprx) = (Motors*)JDEHierarchy_myimport(user->hierarchy,interface_name,"Motors");
+  if (PRX_REFERS_TO(mprx) == 0){ /*we are connecting with an old
+				   encoders interface*/
+    int *idp;
+    JDESchema *supplier;
 
+    idp = (int*)myimport(interface_name,"id");/*we have to get the
+						supplier*/
+    if (idp != 0){
+      JDEInterface *i;
+
+      supplier = get_schema(*idp);
+      assert(supplier!=0);
+      i = new_JDEInterface(interface_name,supplier);/*pointer stored with myimport*/
+      assert(i!=0);
+    }else{/*no interface found with this name*/
+      free(mprx);
+      return 0;
+    }
+  }
+  SUPER(mprx) = new_JDEInterfacePrx(interface_name,user);
+  assert(SUPER(mprx)!=0);
+  return mprx;
 }
 
 void delete_MotorsPrx(MotorsPrx* const self){
+  JDEInterface *m = 0;
+
   if (self==0)
     return;
   
-  if (PRX_REFERS_TO(self)){
-    if (JDEInterface_refcount(PRX_REFERS_TO(SUPER(self)))==1){/*last reference*/
-      /*FIXME: delete exported symbols*/
-      delete_Motors(PRX_REFERS_TO(self));
-      PRX_REFERS_TO(SUPER(self)) = 0;/*JDEInterface has been destroyed*/
-    }
-  }
+  if (PRX_REFERS_TO(self)==0)/*free interface allocated for backwards compatibility*/
+    m = PRX_REFERS_TO(SUPER(self));
   delete_JDEInterfacePrx(SUPER(self));
+  delete_JDEInterface(m);
   free(self);
 }
 
@@ -69,8 +85,8 @@ float MotorsPrx_v_get(const MotorsPrx* self){
     vp=&(PRX_REFERS_TO(self)->v);
   else
     vp=(float *)myimport(INTERFACEPRX_NAME(self),"v");
-    
-  return (vp?*vp:0.0);
+  assert(vp!=0);
+  return *vp;
 }
 
 float MotorsPrx_w_get(const MotorsPrx* self){
@@ -81,8 +97,8 @@ float MotorsPrx_w_get(const MotorsPrx* self){
     wp=&(PRX_REFERS_TO(self)->w);
   else
     wp=(float *)myimport(INTERFACEPRX_NAME(self),"w");
-    
-  return (wp?*wp:0.0);
+  assert(wp!=0);
+  return *wp;
 }
 
 void MotorsPrx_v_set(MotorsPrx* const self, float new_v){
@@ -93,8 +109,8 @@ void MotorsPrx_v_set(MotorsPrx* const self, float new_v){
     vp=&(PRX_REFERS_TO(self)->v);
   else  
     vp=(float *)myimport(INTERFACEPRX_NAME(self),"v");
-  if (vp)
-    *vp = new_v;
+  assert(vp!=0);
+  *vp = new_v;
 }
 
 void MotorsPrx_w_set(MotorsPrx* const self, float new_w){
@@ -105,9 +121,9 @@ void MotorsPrx_w_set(MotorsPrx* const self, float new_w){
     wp=&(PRX_REFERS_TO(self)->w);
   else  
     wp=(float *)myimport(INTERFACEPRX_NAME(self),"w");
-  if (wp)
-    *wp = new_w;
+  assert(wp!=0);
+  *wp = new_w;
 }
 
-
+/*no backwards compatible*/
 INTERFACEPRX_ATTR_DEFINITION(Motors,cycle,int,VARIABLE,)

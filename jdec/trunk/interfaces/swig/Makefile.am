@@ -1,11 +1,4 @@
-#swig_LTLIBRARIES = _interface.la _motors.la _encoders.la _laser.la _varcolor.la
-swig_LTLIBRARIES = _interface.la _motors.la _encoders.la _laser.la
-
-_interface_la_SOURCES = interface.i
-nodist__interface_la_SOURCES = interface_wrap.c
-_interface_la_LDFLAGS = -module -avoid-version
-_interface_la_LIBADD = $(top_srcdir)/interfaces/libinterfaces.la
-_interface_la_CFLAGS = -I$(top_srcdir)/base -I$(top_srcdir)/interfaces $(SWIG_PYTHON_CPPFLAGS)
+swig_LTLIBRARIES = _motors.la _encoders.la _laser.la
 
 _motors_la_SOURCES = motors.i
 nodist__motors_la_SOURCES = motors_wrap.c
@@ -33,11 +26,11 @@ _laser_la_CFLAGS = -I$(top_srcdir)/base -I$(top_srcdir)/interfaces $(SWIG_PYTHON
 
 
 #dist_swig_DATA = interface.py motors.py encoders.py laser.py varcolor.py
-dist_swig_DATA = interface.py motors.py encoders.py laser.py 
+dist_swig_DATA =  motors.py encoders.py laser.py 
 #BUILT_SOURCES = interface_wrap.c motors_wrap.c encoders_wrap.c laser_wrap.c varcolor_wrap.c
-BUILT_SOURCES = interface_wrap.c motors_wrap.c encoders_wrap.c laser_wrap.c
+BUILT_SOURCES = motors_wrap.c encoders_wrap.c laser_wrap.c
 CLEANFILES = $(dist_swig_DATA) $(BUILT_SOURCES)
 %_wrap.c: %.i
-	$(SWIG) $(SWIG_PYTHON_OPT) $<
+	$(SWIG) $(SWIG_PYTHON_OPT) -I$(top_srcdir)/base/swig $<
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
