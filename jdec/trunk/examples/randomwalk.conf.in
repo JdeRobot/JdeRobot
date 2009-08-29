@@ -8,7 +8,7 @@ hostname localhost port 6665
 initial_position -6500 -6500 45
 provides laser 180 1 
 #provides sonars
-#provides encoders
+provides encoders
 provides motors
 #provides bumpers
 end_driver
