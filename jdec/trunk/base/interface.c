@@ -9,7 +9,7 @@
 #include <simclist.h>
 
 struct JDEInterface_p{
-  list_t referral_list;
+  unsigned int refcount;
   pthread_mutex_t mutex;
   pthread_cond_t cond;
   /*void* datap;*/
@@ -19,8 +19,17 @@ struct JDEInterfacePrx_p{
   pthread_mutex_t mutex;
 };
 
-void JDEInterface_myexport(JDEInterface * const self){
-  
+
+/*not protected functions. Monitor implementation*/
+void JDEInterface_refcount_inc_i(JDEInterface* const self){
+  assert(self!=0);
+  self->priv->refcount++;
+}
+
+void JDEInterface_refcount_dec_i(JDEInterface* const self){
+  assert(self!=0);
+  assert(self->priv->refcount > 0);
+  self->priv->refcount--;
 }
 
 
@@ -36,7 +45,7 @@ JDEInterface* new_JDEInterface(const char* interface_name,
   i->supplier = supplier;
   i->priv = (JDEInterface_p*)calloc(1,sizeof(JDEInterface_p));
   assert(i->priv!=0);
-  list_init(&(i->priv->referral_list));
+  i->priv->refcount = 1;
   pthread_mutex_init(&(i->priv->mutex),NULL);
   pthread_cond_init(&(i->priv->cond),NULL);
   if (supplier->hierarchy==0)/*old schema*/
@@ -45,7 +54,6 @@ JDEInterface* new_JDEInterface(const char* interface_name,
     rc = JDEHierarchy_myexport(supplier->hierarchy,
 			       interface_name,"JDEInterface",i);
   if (rc == 0){/*can't export symbol*/
-    list_destroy(&(i->priv->referral_list));
     free(i->priv);
     free(i->interface_name);
     free(i);
@@ -58,7 +66,6 @@ JDEInterface* new_JDEInterface(const char* interface_name,
 
 JDEInterfacePrx* new_JDEInterfacePrx(const char* interface_name,
 				     JDESchema* const user){
-  //JDEInterface* const refers_to){
   JDEInterfacePrx* iprx;
   JDEInterface *refers_to;
   
@@ -74,7 +81,7 @@ JDEInterfacePrx* new_JDEInterfacePrx(const char* interface_name,
   iprx->priv = (JDEInterfacePrx_p*)calloc(1,sizeof(JDEInterfacePrx_p));
   assert(iprx->priv!=0);
   pthread_mutex_init(&(iprx->priv->mutex),NULL);
-  JDEInterface_addref(iprx->refers_to,iprx);
+  JDEInterface_refcount_inc(iprx->refers_to);
   JDESchema_interfaceprx_add(user,iprx);
   return iprx;
 }
@@ -82,56 +89,47 @@ JDEInterfacePrx* new_JDEInterfacePrx(const char* interface_name,
 void delete_JDEInterface(JDEInterface* const self){
   if (self==0)
     return;
-  /*FIXME: delete exported symbols. existing references?? maybe it is
-    better to delete on last reference??*/
-  /*JDEInterface_unmyexport(self);*/
-  JDESchema_interface_del(self->supplier,self);
-  list_destroy(&(self->priv->referral_list));
-  free(self->priv);
-  free(self->interface_name);
-  free(self);
+  
+  pthread_mutex_lock(&(self->priv->mutex));
+  if (self->priv->refcount == 0){
+    JDESchema_interface_del(self->supplier,self);
+    /*FIXME: delete exported symbols to assure any othe prx will have
+      a reference to this Interface.*/
+    pthread_mutex_unlock(&(self->priv->mutex));
+    free(self->priv);
+    free(self->interface_name);
+    free(self);
+  }else
+    pthread_mutex_unlock(&(self->priv->mutex));
 }
   
 void delete_JDEInterfacePrx(JDEInterfacePrx* const self){
   if (self==0)
     return;
-/*   if (self->refers_to){ */
-/*     if (JDEInterface_refcount(self->refers_to)==1)/\*last reference*\/ */
-/*       /\*FIXME: delete exported symbols*\/ */
-/*       delete_JDEInterface(self->refers_to); */
-/*     else */
-  JDEInterface_delref(self->refers_to,self);
+  
   JDESchema_interfaceprx_del(self->user,self);
+  assert(self->refers_to);
+  JDEInterface_refcount_dec(self->refers_to);
   free(self);
 }
 
-void JDEInterface_addref(JDEInterface* const self,
-			 JDEInterfacePrx* const referral){
-  assert(self!=0 && referral!=0);
-  pthread_mutex_lock(&(self->priv->mutex));
-  list_append(&(self->priv->referral_list),referral);
-  pthread_mutex_unlock(&(self->priv->mutex));
-}
 
-void JDEInterface_delref(JDEInterface* const self,
-			 JDEInterfacePrx* const referral){
-  unsigned int pos;
-
-  assert(self!=0 && referral!=0);
-  pthread_mutex_lock(&(self->priv->mutex));
-  pos = list_locate(&(self->priv->referral_list),referral);
-  if (pos>0)
-    list_delete_at(&(self->priv->referral_list),pos);
-  pthread_mutex_unlock(&(self->priv->mutex));
-}
-
-unsigned int JDEInterface_refcount(JDEInterface* const self){
-  unsigned int s;
+void JDEInterface_refcount_inc(JDEInterface* const self){
   assert(self!=0);
   pthread_mutex_lock(&(self->priv->mutex));
-  s = list_size(&(self->priv->referral_list));
+  JDEInterface_refcount_inc_i(self);
   pthread_mutex_unlock(&(self->priv->mutex));
-  return s;
+}
+
+void JDEInterface_refcount_dec(JDEInterface* const self){
+  assert(self!=0);
+  pthread_mutex_lock(&(self->priv->mutex));
+  JDEInterface_refcount_dec_i(self);
+  if (self->priv->refcount == 0){
+    pthread_mutex_unlock(&(self->priv->mutex));
+    delete_JDEInterface(self);
+  }else
+    pthread_mutex_unlock(&(self->priv->mutex));
 }
 
 void JDEInterfacePrx_run(const JDEInterfacePrx* self){

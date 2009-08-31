@@ -3,6 +3,7 @@
 #include <string.h>
 #include "encoders.h"
 
+
 Encoders* new_Encoders(const char* interface_name,
 		       JDESchema* const supplier){
   Encoders* e;
@@ -68,27 +69,22 @@ EncodersPrx* new_EncodersPrx(const char* interface_name,
 }
 
 void delete_EncodersPrx(EncodersPrx* const self){
-  JDEInterface *e = 0;
   if (self==0)
     return;
   
-  if (PRX_REFERS_TO(self)==0)/*free interface allocated for backwards compatibility*/
-    e = PRX_REFERS_TO(SUPER(self));
   delete_JDEInterfacePrx(SUPER(self));
-  delete_JDEInterface(e);
   free(self);
 }
 
 float* EncodersPrx_robot_get(const EncodersPrx* self){
-  float* robot = 0;
-
   assert(self!=0);
   if (PRX_REFERS_TO(self))
-    robot=PRX_REFERS_TO(self)->robot;
-  else/*backwards compatibility*/
-    robot=(float *)myimport(INTERFACEPRX_NAME(self),"jde_robot");
-  assert(robot!=0);
-  return robot;
+    return Encoders_robot_get(self->refers_to);
+  else{/*backwards compatibility*/
+    float *robot=(float *)myimport(INTERFACEPRX_NAME(self),"jde_robot");
+    assert(robot!=0);
+    return robot;
+  }
 }
 
 float EncodersPrx_x_get(const EncodersPrx* self){
@@ -112,16 +108,15 @@ float EncodersPrx_sin_get(const EncodersPrx* self){
 }
 
 unsigned long int EncodersPrx_clock_get(const EncodersPrx* self){
-  unsigned long int* clockp = 0;
-
   assert(self!=0);
   if (PRX_REFERS_TO(self))
-    clockp=&(PRX_REFERS_TO(self)->clock);
-  else/*backwards compatibility*/
-    clockp=(unsigned long int *)myimport(INTERFACEPRX_NAME(self),"clock");
-  assert(clockp!=0);
-  return *clockp;
-} 
+    return Encoders_clock_get(self->refers_to);
+  else{/*backwards compatibility*/
+    unsigned long int *clockp=(unsigned long int *)myimport(INTERFACEPRX_NAME(self),"clock");
+    assert(clockp!=0);
+    return *clockp;
+  }
+}
 
 void EncodersPrx_robot_set(EncodersPrx* const self, float* new_robot){
   float *robot;
@@ -132,14 +127,15 @@ void EncodersPrx_robot_set(EncodersPrx* const self, float* new_robot){
 }
 
 void EncodersPrx_clock_set(EncodersPrx* const self, unsigned long int new_clock){
-  unsigned long int* clockp = 0;
-
   assert(self!=0);
   if (PRX_REFERS_TO(self))
-    clockp=&(PRX_REFERS_TO(self)->clock);
-  else/*backwards compatibility*/
-    clockp=(unsigned long int *)myimport(INTERFACEPRX_NAME(self),"clock");
-  assert(clockp!=0);
-  *clockp = new_clock;
+    Encoders_clock_set(self->refers_to,new_clock);
+  else{/*backwards compatibility*/
+    unsigned long int *clockp=(unsigned long int *)myimport(INTERFACEPRX_NAME(self),"clock");
+    assert(clockp!=0);
+    *clockp = new_clock;
+  }
 }
 
+/*Macro to define all the attr get/set functions*/
+Encoders_attr(INTERFACE_ATTR_DEFINITION,Encoders)

@@ -69,15 +69,10 @@ LaserPrx* new_LaserPrx(const char* interface_name,
 
 
 void delete_LaserPrx(LaserPrx* const self){
-  JDEInterface *l = 0;
-
   if (self==0)
     return;
   
-  if (PRX_REFERS_TO(self)==0)/*free interface allocated for backwards compatibility*/
-    l = PRX_REFERS_TO(SUPER(self));
   delete_JDEInterfacePrx(SUPER(self));
-  delete_JDEInterface(l);
   free(self);
 }
 
@@ -174,3 +169,5 @@ void LaserPrx_clock_set(LaserPrx* const self, unsigned long int new_clock){
   *clockp = new_clock;
 }
 
+/*Macro to define all the attr get/set functions*/
+Laser_attr(INTERFACE_ATTR_DEFINITION,Laser)

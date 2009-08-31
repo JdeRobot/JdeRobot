@@ -93,32 +93,28 @@ JDEInterfacePrx* new_JDEInterfacePrx(const char *interface_name,
 void delete_JDEInterfacePrx(JDEInterfacePrx *const self);
 
 /**
- * Add a reference to an interface instance
+ * Increment reference count to this interface instance
  *
  * @param self interface instance with the new reference
- * @param referral proxy instance referring to this interface
  * @return void
  */
-void JDEInterface_addref(JDEInterface *const self,
-			 JDEInterfacePrx *const referral);
+void JDEInterface_refcount_inc(JDEInterface *const self);
 
 /**
- * Delete a reference to an interface instance
+ * Decrement reference count to this interface instance
  *
  * @param self interface instance to delete the reference
- * @param referral proxy instance referring to this interface
  * @return void
  */
-void JDEInterface_delref(JDEInterface *const self,
-			 JDEInterfacePrx *const referral);
+void JDEInterface_refcount_dec(JDEInterface *const self);
 
 /**
- *  Reference count an interface instance has
+ *  Get reference count
  *
  * @param self interface instance
  * @return the reference count
  */
-unsigned int JDEInterface_refcount(JDEInterface *const self);
+// unsigned int JDEInterface_refcount_get(JDEInterface *const self);
 
 
 /**
@@ -174,15 +170,59 @@ void JDEInterfacePrx_stop(const JDEInterfacePrx *self);
   ATTR_X(INTERFACE_ATTR_STRUCT_ ## attralloc,ifacename,attrname,attrtype,attrarg)
 
 
+#define INTERFACE_ATTR_DECLARATION_VARIABLE(ifacename,attrname,attrtype,attrarg) \
+  attrtype __CONCAT4(ifacename,_,attrname,_get) (const ifacename *self); \
+  void __CONCAT4(ifacename,_,attrname,_set) ( ifacename *const self, attrtype new_value );
+
+#define INTERFACE_ATTR_DECLARATION_ARRAY(ifacename,attrname,attrtype,attrarg) \
+  const attrtype * __CONCAT4(ifacename,_,attrname,_get) (const ifacename *self); \
+  void __CONCAT4(ifacename,_,attrname,_set) ( ifacename *const self,attrtype * new_value );
+
+#define INTERFACE_ATTR_DECLARATION_SYNTHETIC(ifacename,attrname,attrtype,attrarg) \
+  attrtype __CONCAT4(ifacename,_,attrname,_get) (const ifacename *self);
+
+/** Generates interface declaration for get/set accessor functions*/ 
+#define INTERFACE_ATTR_DECLARATION(ifacename,attrname,attrtype,attralloc,attrarg) \
+  ATTR_X(INTERFACE_ATTR_DECLARATION_ ## attralloc,ifacename,attrname,attrtype,attrarg)
+
+
+#define INTERFACE_ATTR_DEFINITION_VARIABLE(ifacename,attrname,attrtype,attrarg) \
+  attrtype __CONCAT4(ifacename,_,attrname,_get) (const ifacename *self){\
+    assert(self!=0);							\
+    return self->attrname;						\
+  }									\
+  void __CONCAT4(ifacename,_,attrname,_set) ( ifacename *const self,attrtype new_value ){ \
+    assert(self!=0);							\
+    self->attrname = new_value;					\
+  }
+
+#define INTERFACE_ATTR_DEFINITION_ARRAY(ifacename,attrname,attrtype,attrarg) \
+  const attrtype * __CONCAT4(ifacename,_,attrname,_get) (const ifacename * self){\
+    assert(self!=0);							\
+    return self->attrname;						\
+  }									\
+  void __CONCAT4(ifacename,_,attrname,_set) ( ifacename *const self,attrtype * new_value ){ \
+    assert(self!=0);							\
+    memmove(self->attrname, new_value , sizeof(self->attrname) * attrarg ); \
+  }
+
+#define INTERFACE_ATTR_DEFINITION_SYNTHETIC(ifacename,attrname,attrtype,attrarg) \
+  attrtype __CONCAT4(ifacename,_,attrname,_get) (const ifacename *self){\
+    assert(self!=0);							\
+    return attrarg;							\
+  }
+
+/** Generates interface definition for get/set accessor functions*/ 
+#define INTERFACE_ATTR_DEFINITION(ifacename,attrname,attrtype,attralloc,attrarg) \
+  ATTR_X(INTERFACE_ATTR_DEFINITION_ ## attralloc,ifacename,attrname,attrtype,attrarg)
+
 #define INTERFACEPRX_ATTR_DECLARATION_VARIABLE(ifacename,attrname,attrtype,attrarg) \
   attrtype __CONCAT4(ifacename,Prx_,attrname,_get) (const __CONCAT2(ifacename,Prx) *self); \
-  void __CONCAT4(ifacename,Prx_,attrname,_set) ( __CONCAT2(ifacename,Prx) *const self, \
-						 attrtype __CONCAT2(new_,attrname) );
+  void __CONCAT4(ifacename,Prx_,attrname,_set) ( __CONCAT2(ifacename,Prx) *const self,attrtype new_value );
 
 #define INTERFACEPRX_ATTR_DECLARATION_ARRAY(ifacename,attrname,attrtype,attrarg) \
   attrtype * __CONCAT4(ifacename,Prx_,attrname,_get) (const __CONCAT2(ifacename,Prx) *self); \
-  void __CONCAT4(ifacename,Prx_,attrname,_set) ( __CONCAT2(ifacename,Prx) *const self, \
-						 attrtype * __CONCAT2(new_,attrname) );
+  void __CONCAT4(ifacename,Prx_,attrname,_set) ( __CONCAT2(ifacename,Prx) *const self,attrtype * new_value );
 
 #define INTERFACEPRX_ATTR_DECLARATION_SYNTHETIC(ifacename,attrname,attrtype,attrarg) \
   attrtype __CONCAT4(ifacename,Prx_,attrname,_get) (const __CONCAT2(ifacename,Prx) *self);
@@ -194,50 +234,33 @@ void JDEInterfacePrx_stop(const JDEInterfacePrx *self);
 
 #define INTERFACEPRX_ATTR_DEFINITION_VARIABLE(ifacename,attrname,attrtype,attrarg) \
   attrtype __CONCAT4(ifacename,Prx_,attrname,_get) (const __CONCAT2(ifacename,Prx) *self){ \
-    ifacename *iface = 0;						\
-    									\
     assert(self!=0);							\
-    iface = PRX_REFERS_TO(self);					\
-    assert(iface!=0);							\
-    return iface->attrname;						\
+    assert(self->refers_to!=0);						\
+    return __CONCAT4(ifacename,_,attrname,_get) (self->refers_to);	\
   }									\
-  void __CONCAT4(ifacename,Prx_,attrname,_set) ( __CONCAT2(ifacename,Prx) *const self, \
-						 attrtype __CONCAT2(new_,attrname) ){ \
-    ifacename *iface = 0;						\
-    									\
+  void __CONCAT4(ifacename,Prx_,attrname,_set) ( __CONCAT2(ifacename,Prx) *const self,attrtype new_value ){ \
     assert(self!=0);							\
-    iface = PRX_REFERS_TO(self);					\
-    assert(iface!=0);							\
-    iface->attrname = __CONCAT2(new_,attrname);				\
+    assert(self->refers_to!=0);						\
+    __CONCAT4(ifacename,_,attrname,_set) (self->refers_to,new_value);	\
   }
   
 #define INTERFACEPRX_ATTR_DEFINITION_ARRAY(ifacename,attrname,attrtype,attrarg) \
   attrtype * __CONCAT4(ifacename,Prx_,attrname,_get) (const __CONCAT2(ifacename,Prx) *self){ \
-    ifacename *iface = 0;						\
-    									\
     assert(self!=0);							\
-    iface = PRX_REFERS_TO(self);					\
-    assert(iface!=0);							\
-    return iface->attrname;						\
+    assert(self->refers_to!=0);						\
+    return __CONCAT4(ifacename,_,attrname,_get) (self->refers_to);	\
   }									\
-  void __CONCAT4(ifacename,Prx_,attrname,_set) ( __CONCAT2(ifacename,Prx) *const self, \
-						 attrtype * __CONCAT2(new_,attrname) ){ \
-    ifacename *iface = 0;						\
-    									\
+  void __CONCAT4(ifacename,Prx_,attrname,_set) ( __CONCAT2(ifacename,Prx) *const self,attrtype * new_value ){ \
     assert(self!=0);							\
-    iface = PRX_REFERS_TO(self);					\
-    assert(iface!=0);							\
-    memmove(iface->attrname, __CONCAT2(new_,attrname) , sizeof(attrtype) * attrarg ); \
+    assert(self->refers_to!=0);						\
+    __CONCAT4(ifacename,_,attrname,_set) (self->refers_to,new_value);	\
   }
 
 #define INTERFACEPRX_ATTR_DEFINITION_SYNTHETIC(ifacename,attrname,attrtype,attrarg) \
   attrtype __CONCAT4(ifacename,Prx_,attrname,_get) (const __CONCAT2(ifacename,Prx) *self){ \
-    ifacename *iface = 0;						\
-    									\
     assert(self!=0);							\
-    iface = PRX_REFERS_TO(self);					\
-    assert(iface!=0);							\
-    return attrarg;							\
+    assert(self->refers_to!=0);						\
+    return __CONCAT4(ifacename,_,attrname,_get) (self->refers_to);	\
   }
   
 /** 
@@ -282,9 +305,9 @@ void JDEInterfacePrx_stop(const JDEInterfacePrx *self);
  *     different way. VARIABLE doesn't use it. ARRAY use it to supply the
  *     array size. SYNTHETIC use it to supply the expresion. Inside the
  *     expresion is possible to refer any interface attribute using
- *     <i>iface-></i> and the attribute name. So, if we have an attribute X and
+ *     <i>self-></i> and the attribute name. So, if we have an attribute X and
  *     we want to declare a synthetic attribute SQUARE, we just supply the
- *     expresion <i>iface->X * iface->X</i>.
+ *     expresion <i>self->X * self->X</i>.
  * </ul>
  * Once defined the macro with the attributes we just have to call
  * INTERFACE_DECLARATION(name,attrs) that will generate all the code
@@ -346,7 +369,7 @@ void JDEInterfacePrx_stop(const JDEInterfacePrx *self);
   __CONCAT2(ifacename,Prx) * __CONCAT3(new_,ifacename,Prx) (const char *interface_name, \
 							    struct JDESchema *const user); \
   void __CONCAT3(delete_,ifacename,Prx) ( __CONCAT2(ifacename,Prx) *const self); \
-  									\
+  attrs(INTERFACE_ATTR_DECLARATION,ifacename)				\
   attrs(INTERFACEPRX_ATTR_DECLARATION,ifacename)
   
 
@@ -365,7 +388,7 @@ void JDEInterfacePrx_stop(const JDEInterfacePrx *self);
     assert(i!=0);							\
     SUPER(i) = new_JDEInterface(interface_name,supplier);		\
     assert(SUPER(i) != 0);						\
-    if (JDEHierarchy_myexport(supplier->hierarchy,interface_name, #ifacename ,i) == 0){ \
+    if (JDEHierarchy_myexport(supplier->hierarchy,interface_name, __STR(ifacename) ,i) == 0){ \
       delete_JDEInterface(SUPER(i));					\
       free(i);								\
       return 0;								\
@@ -400,6 +423,7 @@ void JDEInterfacePrx_stop(const JDEInterfacePrx *self);
     delete_JDEInterfacePrx(SUPER(self));				\
     free(self);								\
   }									\
+  attrs(INTERFACE_ATTR_DEFINITION,ifacename)				\
   attrs(INTERFACEPRX_ATTR_DEFINITION,ifacename)
 
 

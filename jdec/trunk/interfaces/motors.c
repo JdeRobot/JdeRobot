@@ -65,15 +65,10 @@ MotorsPrx* new_MotorsPrx(const char* interface_name,
 }
 
 void delete_MotorsPrx(MotorsPrx* const self){
-  JDEInterface *m = 0;
-
   if (self==0)
     return;
   
-  if (PRX_REFERS_TO(self)==0)/*free interface allocated for backwards compatibility*/
-    m = PRX_REFERS_TO(SUPER(self));
   delete_JDEInterfacePrx(SUPER(self));
-  delete_JDEInterface(m);
   free(self);
 }
 
@@ -127,3 +122,6 @@ void MotorsPrx_w_set(MotorsPrx* const self, float new_w){
 
 /*no backwards compatible*/
 INTERFACEPRX_ATTR_DEFINITION(Motors,cycle,int,VARIABLE,)
+
+/*Macro to define all the attr get/set functions*/
+Motors_attr(INTERFACE_ATTR_DEFINITION,Motors)

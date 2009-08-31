@@ -317,11 +317,11 @@ dnl # compiler options
 dnl #
 dnl ########################################
 dnl # set compiler flags
-CFLAGS="-g -O2 -pedantic -Wall"
+dnl #CFLAGS="-g -O2 -pedantic -Wall"
 dnl # check gcc
 AC_PROG_CC_C99
 
-CXXFLAGS="-g -O2 -pedantic -Wall"
+dnl#CXXFLAGS="-g -O2 -pedantic -Wall"
 AC_PROG_CXX
 
 dnl # check stdc headers
