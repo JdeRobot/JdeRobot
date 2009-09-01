@@ -7,10 +7,8 @@ extern "C" {
 #endif
 
 #define Motors_attr(ATTR,I)			\
-  ATTR(I,v,float,VARIABLE,0)			\
-  ATTR(I,w,float,VARIABLE,0)			\
-  ATTR(I,cycle,int,VARIABLE,0)
-  
+  ATTR(I,v,float,VARIABLE,0) /* mm/s */		\
+  ATTR(I,w,float,VARIABLE,0) /* deg/s */  
 
 INTERFACE_DECLARATION(Motors,Motors_attr)
 

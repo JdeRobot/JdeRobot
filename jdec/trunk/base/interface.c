@@ -132,20 +132,20 @@ void JDEInterface_refcount_dec(JDEInterface* const self){
     pthread_mutex_unlock(&(self->priv->mutex));
 }
 
-void JDEInterfacePrx_run(const JDEInterfacePrx* self){
+int JDEInterfacePrx_run(const JDEInterfacePrx* self){
   JDESchema *s;
   
   assert(self!=0);
   s = PRX_REFERS_TO(self)->supplier;/*schema implementing interface*/
   assert(s != self->user);/*avoid loops*/
-  JDESchema_run(s,self->user);
+  return JDESchema_run(s,self->user);
 }
 
-void JDEInterfacePrx_stop(const JDEInterfacePrx* self){
+int JDEInterfacePrx_stop(const JDEInterfacePrx* self){
   JDESchema *s;
 
   assert(self!=0);
   s = PRX_REFERS_TO(self)->supplier;/*schema implementing interface*/
   assert(s != self->user);/*avoid loops*/
-  JDESchema_stop(s);
+  return JDESchema_stop(s);
 }

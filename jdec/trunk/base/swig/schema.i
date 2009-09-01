@@ -21,14 +21,14 @@ typedef struct {
   long int k;
 
   %extend{
-    void init(char *configfile);
-    void terminate();
-    void stop();
-    void run(JDESchema* const father);
-    void show();
-    void hide();
+    int init(char *configfile);
+    int terminate();
+    int stop();
+    int run(JDESchema* const father);
+    int show();
+    int hide();
     /*void wait_statechange();*/
-    void speedcounter();
+    int speedcounter();
     int state;
   }
 }JDESchema;

@@ -76,7 +76,17 @@ void delete_EncodersPrx(EncodersPrx* const self){
   free(self);
 }
 
-float* EncodersPrx_robot_get(const EncodersPrx* self){
+
+int EncodersPrx_run (EncodersPrx * const self){
+  return JDEInterfacePrx_run(self->super);
+}
+
+int EncodersPrx_stop (EncodersPrx * const self){
+  return JDEInterfacePrx_stop(self->super);
+}
+
+
+float* EncodersPrx_robot_get(EncodersPrx *const self){
   assert(self!=0);
   if (PRX_REFERS_TO(self))
     return Encoders_robot_get(self->refers_to);
@@ -87,27 +97,27 @@ float* EncodersPrx_robot_get(const EncodersPrx* self){
   }
 }
 
-float EncodersPrx_x_get(const EncodersPrx* self){
+float EncodersPrx_x_get(EncodersPrx *const self){
   return EncodersPrx_robot_get(self)[ROBOT_X];
 }
 
-float EncodersPrx_y_get(const EncodersPrx* self){
+float EncodersPrx_y_get(EncodersPrx *const self){
   return EncodersPrx_robot_get(self)[ROBOT_Y];
 }
 
-float EncodersPrx_theta_get(const EncodersPrx* self){
+float EncodersPrx_theta_get(EncodersPrx *const self){
   return EncodersPrx_robot_get(self)[ROBOT_THETA];
 }
 
-float EncodersPrx_cos_get(const EncodersPrx* self){
+float EncodersPrx_cos_get(EncodersPrx *const self){
   return EncodersPrx_robot_get(self)[ROBOT_COS];
 }
 
-float EncodersPrx_sin_get(const EncodersPrx* self){
+float EncodersPrx_sin_get(EncodersPrx *const self){
   return EncodersPrx_robot_get(self)[ROBOT_SIN];
 }
 
-unsigned long int EncodersPrx_clock_get(const EncodersPrx* self){
+unsigned long int EncodersPrx_clock_get(EncodersPrx *const self){
   assert(self!=0);
   if (PRX_REFERS_TO(self))
     return Encoders_clock_get(self->refers_to);
@@ -119,10 +129,15 @@ unsigned long int EncodersPrx_clock_get(const EncodersPrx* self){
 }
 
 void EncodersPrx_robot_set(EncodersPrx* const self, float* new_robot){
-  float *robot;
+  float *robot=0;
 
   assert(self!=0);
-  robot = EncodersPrx_robot_get(self);
+  if (PRX_REFERS_TO(self))
+    robot=Encoders_robot_get(self->refers_to);
+  else{/*backwards compatibility*/
+    robot=(float *)myimport(INTERFACEPRX_NAME(self),"jde_robot");
+  }
+  assert(robot!=0);
   memmove(robot,new_robot,sizeof(float)*ROBOT_NELEM);
 }
 

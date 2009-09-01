@@ -76,7 +76,16 @@ void delete_LaserPrx(LaserPrx* const self){
   free(self);
 }
 
-int* LaserPrx_laser_get(const LaserPrx* self){
+int LaserPrx_run (LaserPrx * const self){
+  return JDEInterfacePrx_run(self->super);
+}
+
+int LaserPrx_stop (LaserPrx * const self){
+  return JDEInterfacePrx_stop(self->super);
+}
+
+
+int* LaserPrx_laser_get(LaserPrx *const self){
   int* laserp = 0;
 
   assert(self!=0);
@@ -89,7 +98,7 @@ int* LaserPrx_laser_get(const LaserPrx* self){
 }
 
 
-int LaserPrx_number_get(const LaserPrx* self){
+int LaserPrx_number_get(LaserPrx *const self){
   int* numberp = 0;
 
   assert(self!=0);
@@ -101,7 +110,7 @@ int LaserPrx_number_get(const LaserPrx* self){
   return *numberp;
 }
 
-int LaserPrx_resolution_get(const LaserPrx* self){
+int LaserPrx_resolution_get(LaserPrx *const self){
   int* resolutionp = 0;
 
   assert(self!=0);
@@ -113,7 +122,7 @@ int LaserPrx_resolution_get(const LaserPrx* self){
   return *resolutionp;
 }
 
-unsigned long int LaserPrx_clock_get(const LaserPrx* self){
+unsigned long int LaserPrx_clock_get(LaserPrx *const self){
   unsigned long int* clockp;
 
   assert(self!=0);

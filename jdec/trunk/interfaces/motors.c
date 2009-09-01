@@ -72,7 +72,17 @@ void delete_MotorsPrx(MotorsPrx* const self){
   free(self);
 }
 
-float MotorsPrx_v_get(const MotorsPrx* self){
+
+int MotorsPrx_run (MotorsPrx * const self){
+  return JDEInterfacePrx_run(self->super);
+}
+
+int MotorsPrx_stop (MotorsPrx * const self){
+  return JDEInterfacePrx_stop(self->super);
+}
+
+
+float MotorsPrx_v_get(MotorsPrx *const self){
   float* vp = 0;
 
   assert(self!=0);
@@ -84,7 +94,7 @@ float MotorsPrx_v_get(const MotorsPrx* self){
   return *vp;
 }
 
-float MotorsPrx_w_get(const MotorsPrx* self){
+float MotorsPrx_w_get(MotorsPrx *const self){
   float* wp = 0;
 
   assert(self!=0);
@@ -119,9 +129,6 @@ void MotorsPrx_w_set(MotorsPrx* const self, float new_w){
   assert(wp!=0);
   *wp = new_w;
 }
-
-/*no backwards compatible*/
-INTERFACEPRX_ATTR_DEFINITION(Motors,cycle,int,VARIABLE,)
 
 /*Macro to define all the attr get/set functions*/
 Motors_attr(INTERFACE_ATTR_DEFINITION,Motors)

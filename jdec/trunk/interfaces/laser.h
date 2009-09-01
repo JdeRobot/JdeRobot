@@ -12,8 +12,7 @@ extern "C" {
   ATTR(I,laser,int,ARRAY,MAX_LASER)		\
   ATTR(I,number,int,VARIABLE,0)			\
   ATTR(I,resolution,int,VARIABLE,0)		\
-  ATTR(I,clock,unsigned long int,VARIABLE,0)	\
-  ATTR(I,cycle,int,VARIABLE,0)
+  ATTR(I,clock,unsigned long int,VARIABLE,0)	
 
 INTERFACE_DECLARATION(Laser,Laser_attr)
 
