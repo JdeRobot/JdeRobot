@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (C) 1997-2008 JDE Developers Team
+ *  Copyright (C) 1997-2009 JDERobot Developers Team
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,7 +15,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
- *  Authors : Roberto Calvo Palomino <rocapal@gsyc.es>, JosÃ© MarÃ­a CaÃ±as <jmplaza@gsyc.es>, Pablo Miangolarra Tejada <pablo.miangolarra@gmail.com>
+ *  Authors : Roberto Calvo Palomino <rocapal@gsyc.es>
+ *            José María Cañas <jmplaza@gsyc.es>
+ *            Pablo Miangolarra Tejada <pablo.miangolarra@gmail.com>
+ *            David Lobato Bravo <dav.lobato@gmail.com>
  *
  */
 
@@ -24,6 +27,10 @@
 
 #define NAME     "colorspaces"
 #define COLORSPACES_VERSION  "1.4.0"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /// *** RGB to HSI  *** ///
 
@@ -95,4 +102,8 @@ static inline const struct YUV* RGB2YUV_getYUV (int R, int G, int B)  { return L
 void yuv2rgb(double Y, double U, double V, double *r, double *g, double *b);
 
 
+#ifdef __cplusplus
+} /*extern "C"*/
 #endif
+
+#endif /*_COLOR_SPACES_H*/
