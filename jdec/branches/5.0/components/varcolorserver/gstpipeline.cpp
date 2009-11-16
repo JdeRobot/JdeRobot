@@ -1,4 +1,5 @@
 #include "gstpipeline.h"
+#include <formats.h>
 #include <iostream>
 
 namespace gstvideopipeline {
@@ -89,6 +90,7 @@ GSTPipeline::GSTPipeline(const Config &cfg)
   :config_(cfg)
 {
   GstCaps *caps;
+  const Format *pixelFormat;
   
   /* create pipeline, add handler */
   pipeline = gst_pipeline_new ("my_pipeline");
@@ -96,31 +98,73 @@ GSTPipeline::GSTPipeline(const Config &cfg)
   gst_bus_add_watch (bus, GSTPipeline::my_bus_callback, (void*)this);
   gst_object_unref (bus);
 
-  //source = gst_element_make_from_uri(GST_URI_SRC,config_.uri.c_str(),"source");
-  source = gst_element_factory_make("v4l2src","source");
-  //decoder = gst_element_factory_make("decodebin","decoder");
-  //g_signal_connect (decoder, "new-decoded-pad", G_CALLBACK (cb_newpad), (void*)this);
-  
-  //videoscale = gst_element_factory_make("videoscale","videoscale");
-  //videorate = gst_element_factory_make("videorate","videorate");
-  //videocolor = gst_element_factory_make("ffmpegcolorspace","videocolor");
-  sink = gst_element_factory_make("appsink","sink");
+  pixelFormat = searchPixelFormat(config_.format.c_str());
 
-  g_object_set(G_OBJECT(sink),"drop",1,NULL);
-  g_object_set(G_OBJECT(sink),"max-buffers",16,NULL);
- 
-  //gst_bin_add_many(GST_BIN(pipeline),source,decoder,videocolor,videoscale,videorate,sink,NULL);
-  //gst_bin_add_many(GST_BIN(pipeline),source,videorate,videoscale,videocolor,sink,NULL);
-  gst_bin_add_many(GST_BIN(pipeline),source,sink,NULL);
+  if (config_.format.find("RGB") == 0){
+    caps = gst_caps_new_simple ("video/x-raw-rgb",
+				"bpp", G_TYPE_INT,pixelFormat->bitsPerPixel,
+				"depth",G_TYPE_INT,pixelFormat->bitsPerPixel,
+				"red_mask",G_TYPE_INT,pixelFormat->componetsMask[INDEX_RED],
+				"green_mask",G_TYPE_INT,pixelFormat->componetsMask[INDEX_GREEN],
+				"blue_mask",G_TYPE_INT,pixelFormat->componetsMask[INDEX_BLUE],
+				"alpha_mask",G_TYPE_INT,pixelFormat->componetsMask[INDEX_ALPHA],
+				"width", G_TYPE_INT, config_.width,
+				"height", G_TYPE_INT, config_.height,
+				"framerate", GST_TYPE_FRACTION, 
+				config_.framerateN, config_.framerateD,
+				NULL);
+  }else{
+    caps = gst_caps_new_simple ("video/x-raw-yuv",
+				"width", G_TYPE_INT, config_.width,
+				"height", G_TYPE_INT, config_.height,
+				"framerate", GST_TYPE_FRACTION, 
+				config_.framerateN, config_.framerateD,
+				NULL);
+  }
 
-  caps = gst_caps_new_simple ("video/x-raw-yuv",
-                              "width", G_TYPE_INT, config_.width,
-			      "height", G_TYPE_INT, config_.height,
-			      "framerate", GST_TYPE_FRACTION, config_.framerateN, config_.framerateD,
-			      NULL);
-  //gst_element_link(source,videorate);
+  if (config_.uri.find("v4l://") == 0){/*handle v4l source*/
+    std::string dev = config_.uri.substr(6);/*after v4l://*/
+    std::cerr << dev << std::endl;
+    source = gst_element_factory_make("v4l2src","source");
+    g_object_set(G_OBJECT(source),"device",dev.c_str(),NULL);
+    sink = gst_element_factory_make("appsink","sink");
+    g_object_set(G_OBJECT(sink),"drop",1,NULL);
+    g_object_set(G_OBJECT(sink),"max-buffers",16,NULL);
+
+    videocolor = gst_element_factory_make("ffmpegcolorspace","videocolor");
+    gst_bin_add_many(GST_BIN(pipeline),source,videocolor,sink,NULL);
+    gst_element_link(source,videocolor);
+    gst_element_link_filtered(videocolor,sink,caps);
+  }else if(config_.uri.find("videotest://") == 0){/*handle videotest source*/
+    std::string pattern = config_.uri.substr(11);/*after videotest://*/
+    source = gst_element_factory_make("videotest","source");
+    g_object_set(G_OBJECT(source),"pattern",pattern.c_str(),NULL);
+    sink = gst_element_factory_make("appsink","sink");
+
+    g_object_set(G_OBJECT(sink),"drop",1,NULL);
+    g_object_set(G_OBJECT(sink),"max-buffers",16,NULL);
+    gst_bin_add_many(GST_BIN(pipeline),source,sink,NULL);
+    gst_element_link_filtered(source,sink,caps);
+  }else{
+    source = gst_element_make_from_uri(GST_URI_SRC,config_.uri.c_str(),
+				       "source");
+    decoder = gst_element_factory_make("decodebin","decoder");
+    g_signal_connect (decoder, "new-decoded-pad", G_CALLBACK (cb_newpad), (void*)this);
   
-  gst_element_link_filtered(source,sink,caps);
+    videoscale = gst_element_factory_make("videoscale","videoscale");
+    videorate = gst_element_factory_make("videorate","videorate");
+    videocolor = gst_element_factory_make("ffmpegcolorspace","videocolor");
+    sink = gst_element_factory_make("appsink","sink");
+
+    g_object_set(G_OBJECT(sink),"drop",1,NULL);
+    g_object_set(G_OBJECT(sink),"max-buffers",16,NULL);
+    gst_bin_add_many(GST_BIN(pipeline),source,videorate,videoscale,videocolor,sink,NULL);
+  
+    gst_element_link(source,decoder);
+    gst_element_link(videorate,videoscale);
+    gst_element_link(videoscale,videocolor);
+    gst_element_link_filtered(videocolor,sink,caps);
+  }
   
   gst_caps_unref (caps);
   gst_element_set_state (GST_ELEMENT(pipeline), GST_STATE_PLAYING);
@@ -163,7 +207,7 @@ GSTPipeline::cb_newpad (GstElement *decode,
   GSTPipeline *self = static_cast<GSTPipeline*>(data);
 
   /* only link once */
-  videopad = gst_element_get_static_pad (self->videocolor, "sink");
+  videopad = gst_element_get_static_pad (self->videorate, "sink");
   if (GST_PAD_IS_LINKED (videopad)) {
     gst_object_unref (videopad);
     return;

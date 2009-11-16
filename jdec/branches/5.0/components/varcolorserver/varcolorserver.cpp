@@ -1,6 +1,7 @@
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
-#include <jderobot/formats.h>
+#include <formats.h>
+#include <colorspaces.h>
 #include <jderobot/varcolor.h>
 #include "gstpipeline.h"
 
@@ -53,9 +54,9 @@ public:
     return descp;
   }
 
-  virtual jderobot::ImageDataByteSeqPtr getDataAsByteSeq(const Ice::Current&)
+  virtual jderobot::ImageDataPtr getData(const Ice::Current&)
     throw (jderobot::DataNotExistException, jderobot::HardwareFailedException) {
-    jderobot::ImageDataByteSeqPtr datap = new jderobot::ImageDataByteSeq();
+    jderobot::ImageDataPtr datap = new jderobot::ImageData();
 
     GstBuffer* buff = pipeline->pull_buffer();
     if (0 == buff){/*restart pipeline*/
@@ -64,36 +65,8 @@ public:
     }
 
     if (buff){
-      datap->pixelData.resize(buff->size);
-      memcpy( &(datap->pixelData[0]), buff->data, buff->size );
-      gst_buffer_unref(buff);
-    }else
-      throw jderobot::HardwareFailedException("pipeline couldn't be restarted");
-
-
-    IceUtil::Time t = IceUtil::Time::now();
-    datap->timeStamp.seconds = (int)t.toSeconds();
-    datap->timeStamp.useconds = (int)t.toMicroSeconds() - datap->timeStamp.seconds*1000000;
-  
-    datap->description = descp;
-
-    return datap;
-    //IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(20));
-  }
-  
-  virtual jderobot::ImageDataPixelSeqPtr getDataAsPixelSeq(const Ice::Current&)
-    throw (jderobot::DataNotExistException, jderobot::HardwareFailedException) {
-    jderobot::ImageDataPixelSeqPtr datap = new jderobot::ImageDataPixelSeq();
-
-    GstBuffer* buff = pipeline->pull_buffer();
-    if (0 == buff){/*restart pipeline*/
-      loadPipeline();
-      buff = pipeline->pull_buffer();
-    }
-
-    if (buff){
-      datap->pixelData.resize(descp->width*descp->height);
-      memcpy( &(datap->pixelData[0]), buff->data, buff->size );
+      datap->pixelData.resize(descp->width*descp->height*formatDesc->size/sizeof(datap->pixelData[0]));
+      memmove( &(datap->pixelData[0]), buff->data, buff->size );
       gst_buffer_unref(buff);
     }else
       throw jderobot::HardwareFailedException("pipeline couldn't be restarted");
@@ -113,7 +86,7 @@ private:
   Ice::CommunicatorPtr communicator;
   GSTPipelinePtr pipeline;
   jderobot::ImageDescriptionPtr descp;
-  Format *formatDesc;
+  const Format *formatDesc;
 };
 
 

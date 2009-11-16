@@ -28,7 +28,7 @@ public:
   bool isVisible();
 
   //! function that actually displays the image in a window
-  void display( jderobot::ImageDataByteSeqPtr& image );
+  void display( jderobot::ImageDataPtr& image );
 
 private:
   Glib::RefPtr<Gnome::Glade::Xml> refXml;
@@ -46,7 +46,7 @@ private:
   IceUtil::Time currentFrameTime,oldFrameTime;
   double fps;
   int frameCount;
-  guint8 *img_grey;
+  guint8 *img_rgb;
 };
 
 #endif

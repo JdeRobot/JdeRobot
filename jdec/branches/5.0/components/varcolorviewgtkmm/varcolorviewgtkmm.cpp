@@ -27,10 +27,10 @@ int main(int argc, char** argv){
       throw "Invalid proxy";
     
     while(viewer.isVisible()){
-      jderobot::ImageDataByteSeqPtr image;
+      jderobot::ImageDataPtr image;
 
       /*remote procedure call*/
-      image = vprx->getDataAsByteSeq();
+      image = vprx->getData();
 
       viewer.display(image);
     }
