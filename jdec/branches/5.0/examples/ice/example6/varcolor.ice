@@ -2,9 +2,9 @@
 #define VARCOLOR_ICE
 
 
-#include <jderobot/common.ice>
+#include <jdecommon.ice>
 
-module jderobot{  
+module jde{  
 
   //! Static description of the image source.
   class ImageDescription 
@@ -22,7 +22,7 @@ module jderobot{
     string format;
   };
   
-  //! A sequence of integers to pack pixel information
+  //! A sequence of pixels. The pixel will be packed inside a int.
   sequence<int> IntSeq;
 
   //! A single image served as a sequence of bytes
@@ -34,7 +34,7 @@ module jderobot{
     //! ImageDescription of Data, for convienence purposes
     ImageDescription description;
     
-    //! The image data itself. The structure of this int sequence
+    //! The image data itself. The structure of this byte sequence
     //! depends on the image format and compression.
     IntSeq pixelData;
   };
@@ -48,6 +48,7 @@ module jderobot{
     //! Returns the latest data.
     idempotent ImageData getData()
       throws DataNotExistException, HardwareFailedException;
+
   };
 
 }; /*module*/

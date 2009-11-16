@@ -60,6 +60,7 @@ enum FormatComponentIndex {
   INDEX_V = 2
 };
 
+/*FIXME: keep bytes index*/
 typedef struct Format{
   unsigned char size;/*bytes*/
   unsigned char bitsPerPixel;
