@@ -50,6 +50,9 @@ AC_ARG_VAR([PDFLATEX],[pdf generator command])
 AC_ARG_VAR([DVIPS],[dvi to ps conversion command])
 AC_ARG_VAR([BIBTEX],[latex bibliography generator command])
 AC_ARG_VAR([SWIG],[command use to build swig files])
+AC_ARG_VAR([SLICE2CPP],[command use to generate c++ code from slice])
+AC_ARG_VAR([SLICE2JAVA],[command use to generate java code from slice])
+AC_ARG_VAR([SLICE2PYTHON],[command use to generate python code from slice])
 
 
 dnl ########################################
@@ -76,6 +79,34 @@ AC_CHECK_HEADERS([math.h])
 AC_CHECK_LIB([m],[floor],
     [],
     AC_MSG_ERROR([m library not found]))
+
+
+dnl # Ice checks and variables definitions
+AC_LANG_PUSH([C++])
+AC_CHECK_HEADERS([Ice/Ice.h]) 
+AC_CHECK_LIB([Ice],[main])
+AC_LANG_POP([C++])
+
+
+AC_PATH_PROG([SLICE2CPP],[slice2cpp],[no])
+if test "x$SLICE2CPP" = xno; then
+    AC_MSG_FAILURE([could not find slice2cpp needed to build c++ interfaces code])
+fi
+
+AC_PATH_PROG([SLICE2JAVA],[slice2java],[no])
+if test "x$SLICE2JAVA" = xno; then
+    AC_MSG_FAILURE([could not find slice2java needed to build java interfaces code])
+fi
+
+    
+AC_PATH_PROG([SLICE2PYTHON],[slice2py],[no])
+if test "x$SLICE2PYTHON" = xno; then
+    AC_MSG_FAILURE([could not find slice2py needed to build python interfaces code])
+fi
+
+SLICESRC='$(top_srcdir)/interfaces/slice'
+AC_SUBST([SLICESRC])
+
 
 dnl#AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
 dnl#AC_PYTHON_DEVEL
@@ -111,12 +142,22 @@ dnl ########################################
 AC_CONFIG_FILES([Makefile])
 dnl#AC_CONFIG_FILES([base/Makefile \
 dnl#    base/swig/Makefile])
-dnl # generate utils Makefiles
+
+dnl# generate interfaces Makefiles
+AC_CONFIG_FILES([interfaces/Makefile \
+    interfaces/cpp/Makefile \
+    interfaces/cpp/jderobot/Makefile])
+
+dnl # generate libs Makefiles
 AC_CONFIG_FILES([libs/Makefile \
     libs/colorspaces/Makefile \
     libs/fuzzylib/Makefile \
     libs/pioneer/Makefile \
-    libs/progeo/Makefile \
-    libs/simclist/Makefile])
+    libs/progeo/Makefile])
+
+dnl # generate components Makefiles
+AC_CONFIG_FILES([components/Makefile \
+    components/varcolorserver/Makefile \
+    components/varcolorviewgtkmm/Makefile])
 
 AC_OUTPUT

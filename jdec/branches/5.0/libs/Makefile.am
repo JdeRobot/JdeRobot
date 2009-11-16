@@ -1,2 +1,2 @@
-SUBDIRS = colorspaces fuzzylib pioneer progeo simclist
+SUBDIRS = colorspaces fuzzylib pioneer progeo
 MAINTAINERCLEANFILES = Makefile.in Makefile

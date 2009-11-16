@@ -34,7 +34,7 @@ enum PixelFormat {
   PIXEL_FORMAT_RGB_332 = 5, /*8-bit RGB*/
   
   /*Luminance (grayscale)*/
-  PIXEL_FORMAT_Y_8 = 6,/*8-bit Luma*/
+  PIXEL_FORMAT_Y_8 = 6,/*8-bit Luma, grayscale*/
 
   /*YUV*/
   PIXEL_FORMAT_YUV2 = 7,/*16-bit YUV 4:2:2 YUYV*/
@@ -67,12 +67,17 @@ typedef struct Format{
   enum FormatComponents components;
 } Format;
 
+typedef struct FormatEntry{
+  char *format_name;
+  Format format;
+} FormatEntry;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-const Format* getPixelFormatTable(size_t *nEntries);
+const FormatEntry* getPixelFormatTable(size_t *nEntries);
+const Format* searchPixelFormat(const char *format_name);
 
 #ifdef __cplusplus
 } /*extern "C"*/
