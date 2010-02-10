@@ -1,0 +1,50 @@
+Jde Project, web page: http://jde.gsyc.es
+https://trac.jde.gsyc.es/jde
+Grupo de Robotica URJC, http://www.robotica-urjc.es
+
+jde.c is a software development suite for robotics applications,
+written in C language. It provides a programming environment where the
+robot control program is made up of a collection of several concurrent
+asynchronous threads named schemas. It is based on JDE cognitive
+architecture for autonomous robots. The underlying theoretical
+foundations can be found in the related publications.
+
+jde.c simplifies the access to robotic hardware from the control
+program. Getting sensor measurements is as simple as reading a local
+variable, and ordering motor commands as easy as writing an actuator
+variable. The platform updates those sensor variables with fresh
+readings and implements such actuator variables. All of them together
+set a shared variable API for the robot programming. The robotic
+application reads and writes such variables to unfold its behavior.
+They can be connected to real sensors and actuators or simulated ones,
+both locally or remotely using the network. Several drivers have been
+developed to support different physical sensors, actuators and
+simulators. The drivers are used as plugins installed at will
+depending on your configuration. They are included in the official
+release.
+
+On top of such variable API there may be perceptive and actuation
+schemas as building blocks of the robotic application. Perceptive
+schemas make some data processing to provide information about the
+world or the robot. Actuation schemas make decisions in order to reach
+or maintain some goal. They order motor commands or activate new
+schemas, because the schemas can be combined forming hierarchies.
+Several schemas are included in the official release. 
+
+For further information, go to docs/manual, type "make" and get it  
+at jdecmanual.pdf
+
+
+COMPILE:
+
+To compile jde.c you need to satisfy the following dependences:
+
+* Kernel headers.
+* libraw1394-13-dev and libdc1394-13-dev, for firewire support. 
+* Player/Stage packages for Player/Stage support (only simulator available right now).
+* XForms (libforms-bin libforms-dev libforms1 libformsgl1 libx11-dev x11proto-core-dev libformsgl-dev), for GUI support. 
+* OpenGL headers and glu headers (libgl1-mesa libgl1-mesa-dev, libglu1-mesa-dev mesa-common-dev glutg3-dev), for opengl support (necessary in visualization)
+
+Then just type 
+
+$ make

@@ -1,0 +1,147 @@
+dnl #############################################################
+dnl #
+dnl #  For information about autoconf, see:
+dnl #
+dnl #  http://www.gnu.org/software/autoconf/
+dnl #
+dnl #
+dnl #############################################################
+
+
+dnl ########################################
+dnl #
+dnl # Autoconf and automake initialization
+dnl #
+dnl ########################################
+AC_INIT([jderobot],[5.0])
+AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_HEADER([config.h]) 
+dnl#init automake
+AM_INIT_AUTOMAKE
+dnl#config pkg-config
+PKG_PROG_PKG_CONFIG
+
+AC_PROG_LIBTOOL
+AC_SUBST([LIBTOOL_DEPS])
+
+dnl#init dirs
+libdir='${exec_prefix}/lib/jderobot'
+includedir='${prefix}/include/jderobot'
+
+AC_SUBST([driverdir],['${libdir}/drivers'])
+AC_SUBST([schemadir],['${libdir}/schemas'])
+AC_SUBST([servicedir],['${libdir}/services'])
+AC_SUBST([swigdir],['${libdir}/swig'])
+AC_SUBST([confdir],['${pkgdatadir}/conf'])
+
+
+
+dnl ########################################
+dnl #
+dnl # command line options and precious variables
+dnl #
+dnl ########################################
+dnl##### switches to enable/disable features
+
+dnl##### precious variables
+dnl # Allow user to define variables
+AC_ARG_VAR([FDESIGN],[command used to build xforms guis])
+AC_ARG_VAR([DOXYGEN],[command used to generate code documentation])
+AC_ARG_VAR([LATEX],[tex compiler command])
+AC_ARG_VAR([PDFLATEX],[pdf generator command])
+AC_ARG_VAR([DVIPS],[dvi to ps conversion command])
+AC_ARG_VAR([BIBTEX],[latex bibliography generator command])
+AC_ARG_VAR([SWIG],[command use to build swig files])
+AC_ARG_VAR([SLICE2CPP],[command use to generate c++ code from slice])
+AC_ARG_VAR([SLICE2JAVA],[command use to generate java code from slice])
+AC_ARG_VAR([SLICE2PYTHON],[command use to generate python code from slice])
+
+
+dnl ########################################
+dnl #
+dnl # compiler options
+dnl #
+dnl ########################################
+dnl # set compiler flags
+dnl # check gcc
+AC_PROG_CC_C99
+
+AC_PROG_CXX
+
+dnl # check stdc headers
+AC_HEADER_STDC
+
+dnl ########################################
+dnl #
+dnl # core headers and libraries check
+dnl #
+dnl ########################################
+dnl # check m
+AC_CHECK_HEADERS([math.h])
+AC_CHECK_LIB([m],[floor],
+    [],
+    AC_MSG_ERROR([m library not found]))
+
+dnl # Check ICE libraries and tools
+m4_include([m4/ice.m4])
+
+dnl # Libs checks
+dnl # external libs
+m4_include([m4/gearbox.m4])
+m4_include([m4/opencv.m4])
+m4_include([m4/gtkmm.m4])
+m4_include([m4/gstreamer.m4])
+
+dnl # internal libs
+m4_include([m4/jderobotutil.m4])
+m4_include([m4/jderobotice.m4])
+
+dnl # Components checks
+m4_include([m4/component_varcolorserver.m4])
+m4_include([m4/component_varcolorviewgtkmm.m4])
+m4_include([m4/component_recordingserver.m4])
+m4_include([m4/component_opencvdemo.m4])
+m4_include([m4/component_alarmgenerator.m4])
+m4_include([m4/component_motiondetection.m4])
+
+dnl#AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
+dnl#AC_PYTHON_DEVEL
+dnl#AC_PROG_SWIG
+dnl#SWIG_PYTHON
+
+
+
+dnl ########################################
+dnl #
+dnl # Generate output, main and core makefiles
+dnl #
+dnl ########################################
+AC_CONFIG_FILES([Makefile \
+    src/Makefile])
+
+dnl# generate interfaces Makefiles
+AC_CONFIG_FILES([src/interfaces/Makefile \
+    src/interfaces/cpp/Makefile \
+    src/interfaces/cpp/jderobot/Makefile])
+
+dnl # generate libs Makefiles
+AC_CONFIG_FILES([src/libs/Makefile \
+    src/libs/jderobotutil/Makefile \
+    src/libs/jderobotice/Makefile \
+    src/libs/colorspaces/Makefile \
+    src/libs/colorspaces/test/Makefile \
+    src/libs/colorspacesice/Makefile \
+    src/libs/fuzzylib/Makefile \
+    src/libs/pioneer/Makefile \
+    src/libs/progeo/Makefile])
+
+dnl # generate components Makefiles
+AC_CONFIG_FILES([src/components/Makefile \
+    src/components/varcolorserver/Makefile \
+    src/components/varcolorviewgtkmm/Makefile \
+    src/components/opencvdemo/Makefile \
+    src/components/recordingserver/Makefile \
+    src/components/alarmgenerator/Makefile \
+    src/components/motiondetection/Makefile ])
+
+AC_OUTPUT

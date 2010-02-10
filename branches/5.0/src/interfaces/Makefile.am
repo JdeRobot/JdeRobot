@@ -1,0 +1,2 @@
+SUBDIRS = cpp
+MAINTAINERCLEANFILES = Makefile.in Makefile
