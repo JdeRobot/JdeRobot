@@ -45,5 +45,3 @@ if test "x$SLICE2PYTHON" = xno; then
     AC_MSG_FAILURE([could not find slice2py needed to build python interfaces code])
 fi
 
-SLICESRC='$(top_srcdir)/interfaces/slice'
-AC_SUBST([SLICESRC])

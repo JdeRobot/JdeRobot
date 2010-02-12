@@ -1,20 +1,9 @@
 lib_LTLIBRARIES = libJderobotInterfaces.la
 
-SLICECPP_BUILT_CPP = jcm.cpp \
-		common.cpp \
-		containers.cpp \
-		datetime.cpp \
-		exceptions.cpp \
-		varcolor.cpp \
-		recording.cpp
-
-SLICECPP_BUILT_H = jcm.h \
-		common.h \
-		containers.h \
-		datetime.h \
-		exceptions.h \
-		varcolor.h \
-		recording.h
+#could we build this list?
+SLICESOURCES = camera.ice common.ice containers.ice datetime.ice exceptions.ice image.ice jcm.ice recording.ice varcolor.ice
+SLICECPP_BUILT_CPP = $(SLICESOURCES:.ice=.cpp)
+SLICECPP_BUILT_H = $(SLICESOURCES:.ice=.h)
 
 #slice has to build all headers and sources from .ice files
 BUILT_SOURCES = $(SLICECPP_BUILT_CPP) $(SLICECPP_BUILT_H)
@@ -32,23 +21,14 @@ libJderobotInterfaces_la_HEADERS = $(SLICECPP_BUILT_H)
 #Clean all built sources
 CLEANFILES = $(BUILT_SOURCES)
 
-#FIXME: generated with slice2cpp --depend <slice-file>
-vpath %.ice ../../slice/jderobot
-jcm.h: jcm.cpp
-common.h: common.cpp
-containers.h: containers.cpp 
-datetime.h: datetime.cpp
-exceptions.h: exceptions.cpp
-varcolor.h: varcolor.cpp 
-recording.h: recording.cpp
-jcm.cpp: jcm.ice
-common.cpp: common.ice datetime.ice exceptions.ice containers.ice
-containers.cpp: containers.ice
-datetime.cpp: datetime.ice
-exceptions.cpp: exceptions.ice
-varcolor.cpp: varcolor.ice common.ice datetime.ice exceptions.ice containers.ice
-recording.cpp: recording.ice
+-include $(DEPDIR)/$(SLICESOURCES:.ice=.d)
+
+vpath %.ice $(SLICESRCDIR)/jderobot
+.ice.d:
+	@set -e; rm -f $@; \
+	$(SLICE2CPP) --depend -I $(SLICESRCDIR) $< > $@.$$$$; \
+	sed 's/\($*\)\.cpp[ :]*/\1.cpp $@: /g' < $@.$$$$ > $(DEPDIR)/$@; \
+	rm -f $@.$$$$
 
 .ice.cpp:
 	$(SLICE2CPP) -I../../slice $<
-

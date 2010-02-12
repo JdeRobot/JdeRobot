@@ -110,6 +110,10 @@ dnl#AC_PROG_SWIG
 dnl#SWIG_PYTHON
 
 
+dnl # Set variables
+AC_SUBST([SLICESRCDIR],['$(top_srcdir)/src/interfaces/slice'])
+
+
 
 dnl ########################################
 dnl #
