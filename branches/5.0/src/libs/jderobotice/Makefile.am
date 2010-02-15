@@ -10,8 +10,10 @@ libJderobotIce_la_CPPFLAGS = $(GEARBOX_CPPFLAGS) -I$(top_srcdir)/src/libs \
 				-I$(top_srcdir)/src/interfaces/cpp
 libJderobotIce_la_LDFLAGS = $(LIBICE) $(LIBICEUTIL) $(LIBICEGRID) $(GEARBOX_LDFLAGS) \
 				$(LIBGBXUTILACFR) $(LIBGBXICEUTILACFR)
-libJderobotIce_la_HEADERS = jderobotice.h component.h context.h application.h \
+libJderobotIce_la_HEADERS = component.h context.h application.h \
 				exceptions.h catchutils.h
+
+include_HEADERS = jderobotice.h
 
 EXTRA_DIST = Changelog
 MAINTAINERCLEANFILES = Makefile.in Makefile

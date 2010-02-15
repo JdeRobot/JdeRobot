@@ -28,10 +28,7 @@ dnl#init dirs
 libdir='${exec_prefix}/lib/jderobot'
 includedir='${prefix}/include/jderobot'
 
-AC_SUBST([driverdir],['${libdir}/drivers'])
-AC_SUBST([schemadir],['${libdir}/schemas'])
-AC_SUBST([servicedir],['${libdir}/services'])
-AC_SUBST([swigdir],['${libdir}/swig'])
+AC_SUBST([interfacedir],['${includedir}/slice'])
 AC_SUBST([confdir],['${pkgdatadir}/conf'])
 
 
@@ -122,6 +119,8 @@ AC_CONFIG_FILES([Makefile \
 
 dnl# generate interfaces Makefiles
 AC_CONFIG_FILES([src/interfaces/Makefile \
+    src/interfaces/slice/Makefile \
+    src/interfaces/slice/jderobot/Makefile \
     src/interfaces/cpp/Makefile \
     src/interfaces/cpp/jderobot/Makefile])
 

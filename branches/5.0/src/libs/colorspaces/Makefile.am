@@ -9,7 +9,9 @@ libcolorspaces___la_SOURCES = formats++.cpp image++.cpp
 libcolorspaces___la_LIBADD = libcolorspaces.la
 libcolorspaces___la_CPPFLAGS = -I..
 
-libcolorspaces_la_HEADERS = colorspaces.h formats.h color.h image.h imagetest.h formats++.h image++.h
+libcolorspaces_la_HEADERS = formats.h color.h image.h imagetest.h formats++.h image++.h
+
+include_HEADERS = colorspaces.h
 
 EXTRA_DIST = Changelog
 MAINTAINERCLEANFILES = Makefile.in Makefile
