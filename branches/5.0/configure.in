@@ -82,17 +82,14 @@ AC_CHECK_LIB([m],[floor],
     [],
     AC_MSG_ERROR([m library not found]))
 
-dnl # Check ICE libraries and tools
-m4_include([m4/ice.m4])
+dnl # Check libraries and tools
+m4_include([m4/libice.m4])
+m4_include([m4/libgearbox.m4])
+m4_include([m4/libopencv.m4])
+m4_include([m4/libgtkmm.m4])
+m4_include([m4/libgstreamer.m4])
 
-dnl # Libs checks
-dnl # external libs
-m4_include([m4/gearbox.m4])
-m4_include([m4/opencv.m4])
-m4_include([m4/gtkmm.m4])
-m4_include([m4/gstreamer.m4])
-
-dnl # internal libs
+dnl # Check for jderobot libraries dependencies
 m4_include([m4/jderobotutil.m4])
 m4_include([m4/jderobotice.m4])
 
