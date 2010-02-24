@@ -22,38 +22,27 @@
 #ifndef IMAGE_COLORSPACESICE_H
 #define IMAGE_COLORSPACESICE_H
 
-#include <colorspaces/image++.h>
-#include <jderobot/varcolor.h>
+#include <colorspaces/imagecv.h>
+#include <jderobot/image.h>
 #include <tr1/memory>
 
 namespace colorspacesice{
-  
-  /*derive from Shared to use Handle*/
-  class ImageDescription: public colorspaces::ImageDescriptionpp {
+  class Image: public colorspaces::Image {
   public:
-    ImageDescription(const int width,
-		     const int height,
-		     const int size,
-		     const Format *fmt);
-    ImageDescription(const ::ImageDescription& i);
-    ImageDescription(const jderobot::ImageDescriptionPtr& iDesc);
-
-    operator jderobot::ImageDescriptionPtr() const;//cast to jderobot::ImageDescriptionPtr
-  };
-  typedef std::tr1::shared_ptr<ImageDescription> ImageDescriptionPtr;
-
-  class Image: public colorspaces::Imagepp {
-  public:
-    Image(const ::ImageDescription &desc, char *const data = 0);
-    Image(::Image& i);
+    Image(Image& i);
+    /**
+     * Creates a Image from ImageData.
+     */
     Image(const jderobot::ImageDataPtr& img);
 
-    operator jderobot::ImageDataPtr() const;//cast to jderobot::ImageDataPtr.it copies data
+    /**
+     * Gets a ImageData representation for this image.
+     * Image data should be continuous, otherwise returned pointer will be 0.
+     * Data is not copied if this instance was created from a ImageData, the same instance will be returned with timeStamp updated to now
+     */
+    operator jderobot::ImageDataPtr() const;
   private:
-    /*if data come from ImageDataPtr we keep a reference to avoid deallocation while
-     this instance is alreaady using the data. 
-     FIXME: If data is changed reference is not released*/
-    const jderobot::ImageDataPtr imgPtr;
+    mutable jderobot::ImageDataPtr imgImageData;
   };
   typedef std::tr1::shared_ptr<Image> ImagePtr;
 

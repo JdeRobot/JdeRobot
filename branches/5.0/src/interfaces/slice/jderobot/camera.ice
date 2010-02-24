@@ -32,7 +32,6 @@ module jderobot{
    */
   class CameraDescription
   {
-    int id;
     string name;
     string shortDescription;
   };

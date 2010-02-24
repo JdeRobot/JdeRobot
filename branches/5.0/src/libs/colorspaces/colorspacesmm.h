@@ -22,7 +22,6 @@
 #ifndef COLORSPACESPP_COLORSPACES_H
 #define COLORSPACESPP_COLORSPACES_H
 
-#include <colorspaces/formats++.h>
-#include <colorspaces/image++.h>
+#include <colorspaces/imagecv.h>
 
 #endif //COLORSPACESPP_COLORSPACES_H

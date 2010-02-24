@@ -19,18 +19,19 @@
  *
  */
 
-#ifndef FORMATSPP_COLORSPACES_H
-#define FORMATSPP_COLORSPACES_H
+#ifndef UNCOPYABLE_COLORSPACES_H
+#define UNCOPYABLE_COLORSPACES_H
 
-#include <iostream>
-#include <colorspaces/formats.h>
 
-namespace colorspaces {
-} //namespace
+namespace colorspaces{
+  class Uncopyable{
+  public:
+    Uncopyable() {}
+  private:
+    Uncopyable(const Uncopyable&);
+    Uncopyable& operator=(const Uncopyable&);
+  };
+}//namespace
 
-/**
- * Insert a format in a output stream
- */
-std::ostream &operator<<(std::ostream &stream, const Format& fmt);
+#endif //UNCOPYABLE_COLORSPACES_H
 
-#endif /*FORMATSPP_COLORSPACES_H*/

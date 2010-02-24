@@ -1,17 +1,21 @@
-lib_LTLIBRARIES = libcolorspaces.la libcolorspaces++.la
+lib_LTLIBRARIES = libcolorspaces.la 
+if ENABLE_LIBCOLORSPACESMM
+lib_LTLIBRARIES += libcolorspacesmm.la
+endif
 
 libcolorspaces_ladir = $(includedir)/colorspaces
 libcolorspaces_la_SOURCES = rgb2hsv.c rgb2yuv.c formats.c color.c image.c imagetest.c
 libcolorspaces_la_LDFLAGS = -lm
 libcolorspaces_la_CPPFLAGS = -I..
+libcolorspaces_la_HEADERS = formats.h color.h image.h imagetest.h
 
-libcolorspaces___la_SOURCES = formats++.cpp image++.cpp
-libcolorspaces___la_LIBADD = libcolorspaces.la
-libcolorspaces___la_CPPFLAGS = -I..
+libcolorspacesmm_ladir = $(includedir)/colorspaces
+libcolorspacesmm_la_SOURCES = imagecv.cpp
+libcolorspacesmm_la_LDFLAGS = $(LIBCOLORSPACESMM_LDFLAGS)
+libcolorspacesmm_la_CPPFLAGS = -I.. $(LIBCOLORSPACESMM_CPPFLAGS)
+libcolorspacesmm_la_HEADERS = imagecv.h uncopyable.h
 
-libcolorspaces_la_HEADERS = formats.h color.h image.h imagetest.h formats++.h image++.h
-
-include_HEADERS = colorspaces.h
+include_HEADERS = colorspaces.h colorspacesmm.h
 
 EXTRA_DIST = Changelog
 MAINTAINERCLEANFILES = Makefile.in Makefile
