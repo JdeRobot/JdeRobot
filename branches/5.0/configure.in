@@ -138,8 +138,6 @@ AC_CONFIG_FILES([src/libs/Makefile \
 
 dnl # generate components Makefiles
 AC_CONFIG_FILES([src/components/Makefile \
-    src/components/deprecated/varcolorserver/Makefile \
-    src/components/deprecated/varcolorviewgtkmm/Makefile \
     src/components/cameraserver/Makefile \
     src/components/cameraview/Makefile \
     src/components/opencvdemo/Makefile \
