@@ -94,8 +94,6 @@ m4_include([m4/colorspacesmm.m4])
 dnl # Components checks
 m4_include([m4/component_cameraserver.m4])
 m4_include([m4/component_cameraview.m4])
-m4_include([m4/component_varcolorserver.m4])
-m4_include([m4/component_varcolorviewgtkmm.m4])
 m4_include([m4/component_recordingserver.m4])
 m4_include([m4/component_opencvdemo.m4])
 m4_include([m4/component_alarmgenerator.m4])
