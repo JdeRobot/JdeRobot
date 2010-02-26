@@ -4,8 +4,8 @@
 #include <algorithm>
 
 namespace colorspaces {
-  Image::Format::Format(const std::string name, const int id, const int cvType, imageCtor ctor)
-    : name(name), id(id), cvType(cvType),ctor(ctor) {}
+  Image::Format::Format(const std::string name, const int id, const int cvType, imageCtor ctor, imageCvt cvt)
+    : name(name), id(id), cvType(cvType),ctor(ctor),cvt(cvt) {}
 
   std::vector<Image::FormatPtr>& Image::Format::formatTable(){
     static std::vector<FormatPtr> formatTable;
@@ -22,9 +22,9 @@ namespace colorspaces {
     return FormatPtr();
   }
 
-  const Image::FormatPtr  Image::Format::createFormat(const std::string name, const int cvType, imageCtor ctor){
+  const Image::FormatPtr  Image::Format::createFormat(const std::string name, const int cvType, imageCtor ctor, imageCvt cvt){
     int id = formatTable().size();
-    FormatPtr nFmt(new Format(name,id,cvType,ctor));
+    FormatPtr nFmt(new Format(name,id,cvType,ctor,cvt));
     formatTable().push_back(nFmt);
     return nFmt;
   }
@@ -34,13 +34,17 @@ namespace colorspaces {
       return ctor(width,height,data);
     return 0;
   }
-    
+   
+  Image& Image::convert(Image& dst) const throw(NoConversion){
+    return _format->cvt(*this,dst);
+  }
+ 
 
   //static definitions
-  const Image::FormatPtr Image::FORMAT_NONE = Image::Format::createFormat("NONE",0,0);
-  const Image::FormatPtr  ImageRGB888::FORMAT_RGB888 = Image::Format::createFormat("RGB888",CV_8UC3,&ImageRGB888::createInstance);
-  const Image::FormatPtr  ImageYUY2::FORMAT_YUY2 = Image::Format::createFormat("YUY2",CV_8UC2,&ImageYUY2::createInstance);
-  const Image::FormatPtr  ImageGRAY8::FORMAT_GRAY8 = Image::Format::createFormat("GRAY8",CV_8UC1,&ImageGRAY8::createInstance);
+  const Image::FormatPtr Image::FORMAT_NONE = Image::Format::createFormat("NONE",0,0,0);
+  const Image::FormatPtr  ImageRGB888::FORMAT_RGB888 = Image::Format::createFormat("RGB888",CV_8UC3,&ImageRGB888::createInstance,&ImageRGB888::imageCvt);
+  const Image::FormatPtr  ImageYUY2::FORMAT_YUY2 = Image::Format::createFormat("YUY2",CV_8UC2,&ImageYUY2::createInstance,&ImageYUY2::imageCvt);
+  const Image::FormatPtr  ImageGRAY8::FORMAT_GRAY8 = Image::Format::createFormat("GRAY8",CV_8UC1,&ImageGRAY8::createInstance,&ImageGRAY8::imageCvt);
 
   Image::Image(const int width, const int height, const FormatPtr fmt)
     : cv::Mat(height,width,fmt->cvType),width(width),height(height),_format(fmt) {}
@@ -65,15 +69,20 @@ namespace colorspaces {
     i.convert(*this);
   }
 
-  void ImageRGB888::convert(Image& dst) const throw(NoConversion){
+  Image& ImageRGB888::imageCvt(const Image& src, Image& dst) throw(NoConversion){
+    assert(src.format() == FORMAT_RGB888 && "src is not a RGB888 image");
     if (dst.format() == FORMAT_RGB888)
-      dst = *this;
-    else if (dst.format() == ImageYUY2::FORMAT_YUY2)
-      toYUY2(dst);
-    else if (dst.format() == ImageGRAY8::FORMAT_GRAY8)
-      toGRAY8(dst);
-    else
-      throw Image::NoConversion();
+      dst = src;
+    else {
+      const ImageRGB888 srcRgb888(src);//cast src to rgb image
+      if (dst.format() == ImageYUY2::FORMAT_YUY2)
+	srcRgb888.toYUY2(dst);
+      else if (dst.format() == ImageGRAY8::FORMAT_GRAY8)
+	srcRgb888.toGRAY8(dst);
+      else
+	throw Image::NoConversion();
+    }
+    return dst;
   }
 
   void ImageRGB888::toGRAY8(Image& dst) const throw(Image::FormatMismatch){
@@ -120,15 +129,20 @@ namespace colorspaces {
     i.convert(*this);
   }
 
-  void ImageYUY2::convert(Image& dst) const throw(NoConversion){
+  Image& ImageYUY2::imageCvt(const Image& src, Image& dst) throw(NoConversion){
+    assert(src.format() == FORMAT_YUY2 && "src is not a YUY2 image");
     if (dst.format() == FORMAT_YUY2)
-      dst = *this;
-    else if (dst.format() == ImageRGB888::FORMAT_RGB888)
-      toRGB888(dst);
-    else if (dst.format() == ImageGRAY8::FORMAT_GRAY8)
-      toGRAY8(dst);
-    else
-      throw Image::NoConversion();
+      dst = src;
+    else {
+      const ImageYUY2 srcYuy2(src);
+      if (dst.format() == ImageRGB888::FORMAT_RGB888)
+	srcYuy2.toRGB888(dst);
+      else if (dst.format() == ImageGRAY8::FORMAT_GRAY8)
+	srcYuy2.toGRAY8(dst);
+      else
+	throw Image::NoConversion();
+    }
+    return dst;
   }
 
   void ImageYUY2::toGRAY8(Image& dst) const throw(Image::FormatMismatch){
@@ -146,7 +160,7 @@ namespace colorspaces {
       throw Image::FormatMismatch("src and dst images have to have even number of columns");
 
     cv::Mat_<cv::Vec3b> ycrcb(dst.height,dst.width,dst.type());//YUV444 previous conversion
-    cv::Mat_<cv::Vec2b> yuy2(dst);
+    cv::Mat_<cv::Vec2b> yuy2(*this);
 
     for (int i=0; i < height; i++){
       for (int j=0; j < width; j+=2){//two pixels each loop
@@ -179,15 +193,20 @@ namespace colorspaces {
     i.convert(*this);
   }
 
-  void ImageGRAY8::convert(Image& dst) const throw(NoConversion){
+  Image& ImageGRAY8::imageCvt(const Image& src, Image& dst) throw(NoConversion){
+    assert(src.format() == FORMAT_GRAY8 && "src is not a GRAY8 image");
     if (dst.format() == FORMAT_GRAY8)
-      dst = *this;
-    else if (dst.format() == ImageYUY2::FORMAT_YUY2)
-      toYUY2(dst);
-    else if (dst.format() == ImageRGB888::FORMAT_RGB888)
-      toRGB888(dst);
-    else
-      throw Image::NoConversion();
+      dst = src;
+    else {
+      const ImageGRAY8 srcGray8(src);
+      if (dst.format() == ImageYUY2::FORMAT_YUY2)
+	srcGray8.toYUY2(dst);
+      else if (dst.format() == ImageRGB888::FORMAT_RGB888)
+	srcGray8.toRGB888(dst);
+      else
+	throw Image::NoConversion();
+    }
+    return dst;
   }
 
   void ImageGRAY8::toRGB888(Image& dst) const throw(Image::FormatMismatch){

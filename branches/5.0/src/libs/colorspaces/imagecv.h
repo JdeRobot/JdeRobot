@@ -33,30 +33,8 @@ namespace colorspaces {
   /**
    * An image
    */
-  class Image;
-  typedef Image* (*imageCtor)(const int height, const int width, void *const data);
-
   class Image: public  cv::Mat {
   public:
-    class Format;
-    typedef std::tr1::shared_ptr<Format> FormatPtr;
-
-    class Format: public Uncopyable{
-    public:
-      static const FormatPtr createFormat(const std::string name, const int cvType, imageCtor ctor);
-      static const FormatPtr getFormat(const int fmtId);
-      static const FormatPtr searchFormat(const std::string name);
-      Image* createInstance(const int width, const int height, void *const data);
-      int bytesPerPixel() { return CV_ELEM_SIZE(cvType); }
-      std::string name;/**< String that represents this format*/ 
-      int id;/**< Format identification*/
-      int cvType;/**< Opencv data type used for pixel data*/
-      imageCtor ctor;
-    private:
-      Format(const std::string name, const int id, const int cvType, imageCtor ctor);
-      static std::vector<FormatPtr>& formatTable();
-    };
-
     class FormatMismatch: public std::exception{
     public:
       FormatMismatch(const std::string msg)
@@ -76,7 +54,31 @@ namespace colorspaces {
 	return "Can't convert image to requested format";
       }
     };
-      
+
+    typedef Image* (*imageCtor)(const int height, const int width, void *const data);
+    typedef Image& (*imageCvt)(const Image& src, Image& dst);
+    
+    class Format;
+    typedef std::tr1::shared_ptr<Format> FormatPtr;
+
+    class Format: public Uncopyable{
+    public:
+      static const FormatPtr createFormat(const std::string name, const int cvType, imageCtor ctor, imageCvt cvt);
+      static const FormatPtr getFormat(const int fmtId);
+      static const FormatPtr searchFormat(const std::string name);
+      Image* createInstance(const int width, const int height, void *const data);
+      int bytesPerPixel() { return CV_ELEM_SIZE(cvType); }
+      std::string name;/**< String that represents this format*/ 
+      int id;/**< Format identification*/
+      int cvType;/**< Opencv data type used for pixel data*/
+      imageCtor ctor;/**< Contructor*/
+      imageCvt cvt;/**< conversion function*/
+    private:
+      Format(const std::string name, const int id, const int cvType, imageCtor ctor, imageCvt cvt);
+      static std::vector<FormatPtr>& formatTable();
+    };
+
+  
     /**
      * Constructor
      */
@@ -107,7 +109,10 @@ namespace colorspaces {
      */
     const FormatPtr  format() const { return _format; }
 
-    virtual void convert(Image& dst) const throw(NoConversion) = 0;
+    /**
+     * Convert image to dst fmt
+     */
+    Image& convert(Image& dst) const throw(NoConversion);
 
     int width;
     int height;
@@ -138,7 +143,6 @@ namespace colorspaces {
     /**
      * Conversion methods.
      */
-    virtual void convert(Image& dst) const throw(NoConversion);
     void toGRAY8(Image& dst) const throw(FormatMismatch);
     void toYUY2(Image& dst) const throw(FormatMismatch);
     
@@ -146,6 +150,7 @@ namespace colorspaces {
      * Factory method
      */
     static Image* createInstance(const int width, const int height, void *const data);
+    static Image& imageCvt(const Image& src, Image& dst) throw(NoConversion);
     static const FormatPtr FORMAT_RGB888;
   };
   typedef std::tr1::shared_ptr<ImageRGB888> ImageRGB888Ptr;
@@ -175,7 +180,6 @@ namespace colorspaces {
      * Conversion methods.
      * Returns a copy
      */
-    virtual void convert(Image& dst) const throw(NoConversion);
     void toGRAY8(Image& dst) const throw(FormatMismatch);
     void toRGB888(Image& dst) const throw(FormatMismatch);
     
@@ -183,6 +187,7 @@ namespace colorspaces {
      * Factory method
      */
     static Image* createInstance(const int width, const int height, void *const data);
+    static Image& imageCvt(const Image& src, Image& dst) throw(NoConversion);
     static const FormatPtr FORMAT_YUY2;
   };
   typedef std::tr1::shared_ptr<ImageYUY2> ImageYUY2Ptr;
@@ -211,7 +216,6 @@ namespace colorspaces {
      * Conversion methods.
      * Returns a copy
      */
-    virtual void convert(Image& dst) const throw(NoConversion);
     void toRGB888(Image& dst) const throw(FormatMismatch);
     void toYUY2(Image& dst) const throw(FormatMismatch);
 
@@ -219,6 +223,7 @@ namespace colorspaces {
      * Factory method
      */
     static Image* createInstance(const int width, const int height, void *const data);
+    static Image& imageCvt(const Image& src, Image& dst) throw(NoConversion);
     static const FormatPtr FORMAT_GRAY8;
   };
   typedef std::tr1::shared_ptr<ImageGRAY8> ImageGRAY8Ptr;
