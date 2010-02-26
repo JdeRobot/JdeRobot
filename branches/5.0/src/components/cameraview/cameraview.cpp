@@ -49,10 +49,11 @@ int main(int argc, char** argv){
       if (!fmt)
 	throw "Format not supported";
 
-      colorspaces::ImagePtr image(fmt->createInstance(data->description->width,
-						      data->description->height,
-						      &(data->pixelData[0])));
-      viewer.display(*image);
+      colorspaces::Image image(data->description->width,
+			       data->description->height,
+			       fmt,
+			       &(data->pixelData[0]));
+      viewer.display(image);
     }
   }catch (const Ice::Exception& ex) {
     std::cerr << ex << std::endl;

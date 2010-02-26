@@ -36,11 +36,11 @@ namespace cameraserver{
   class CameraI: virtual public jderobot::Camera {
   public:
     CameraI(std::string& propertyPrefix, const jderobotice::Context& context)
-      : replyTask(),
-	prefix(propertyPrefix),context(context),pipeline(),
+      : prefix(propertyPrefix),context(context),pipeline(),
 	imageFmt(),
 	imageDescription(new jderobot::ImageDescription()),
-	cameraDescription(new jderobot::CameraDescription())
+	cameraDescription(new jderobot::CameraDescription()),
+	replyTask()
     {
       
       
