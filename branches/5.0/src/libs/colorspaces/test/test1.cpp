@@ -23,6 +23,10 @@ int main(int argc, char **argv){
   img1.convert(img2);
   std::cerr << img2 << "\n";
 
+  std::cerr << "Clone im1 into img2\n";
+  img2 = img1.clone();
+  std::cerr << img2 << "\n";
+
   std::cerr << "Creating a 640x480 RGB black image\n";
   Image img4(cv::Mat::zeros(480,640,ImageRGB888::FORMAT_RGB888->cvType),ImageRGB888::FORMAT_RGB888);
   std::cerr << img4 << "\n";

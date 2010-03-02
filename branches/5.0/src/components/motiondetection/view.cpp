@@ -1,13 +1,13 @@
 #include "view.h"
 #include "model.h"
-#include <colorspaces/colorspaces++.h>
+#include <colorspaces/colorspacesmm.h>
 #include <gtkmm.h>
 #include <libglademm.h>
 #include <cairomm/context.h>
 #include <string>
 #include <iostream>
 #include <cmath>
-#include <gbxsickacfr/gbxiceutilacfr/timer.h>
+#include <jderobotutil/ipscounter.h>
 
 /*FIXME: check this http://svn.drobilla.net/lad/trunk/eugene/gui/Widget.hpp*/
 
@@ -19,65 +19,64 @@ namespace motiondetection {
   public:
     PImpl(Controller& controller)
       :gtkmain(0,0),refXml(0),mainwindow(0),
-       drawingArea(0), 
+       drawingAreaMain(0),drawingAreaDebug1(0), drawingAreaDebug2(0),
        hscaleMotionThreshold(0),hscaleSecsBtwAlarm(0),
        hscaleOpticalFlowNPoints(0),hscalePixelDifferenceThreshold(0),
        hscalePixelDifferenceXStep(0),hscalePixelDifferenceYStep(0),
        comboboxAlgorithm(0),
-       fpsLabel(0),
+       checkbuttonBackground(0),checkbuttonDifference(0),
        controller(controller),
-       frameCount(0), timer(){
+       selectedAlgorithm(0),drawBackground(true),drawDifference(true),
+       fpsCounter(){
       
-      std::cout << "Loading glade\n";
+      //getting widgets
       refXml = Gnome::Glade::Xml::create(gladepath);
       refXml->get_widget("mainwindow",mainwindow);
-      refXml->get_widget("drawingarea", drawingArea);
+      refXml->get_widget("drawingareaMain", drawingAreaMain);
+      refXml->get_widget("drawingareaDebug1", drawingAreaDebug1);
+      refXml->get_widget("drawingareaDebug2", drawingAreaDebug2);
       refXml->get_widget("hscaleMotionThreshold", hscaleMotionThreshold);
-      hscaleMotionThreshold->set_value((double)controller.getModel()->getMotionThreshold());
-      hscaleMotionThreshold->signal_value_changed().connect(sigc::mem_fun(this,&PImpl::onMotionThresholdChanged));
-      refXml->get_widget("hscaleSecsBtwAlarm", hscaleSecsBtwAlarm);
-      hscaleSecsBtwAlarm->set_value((double)controller.getSecsBtwAlarm());
-      hscaleSecsBtwAlarm->signal_value_changed().connect(sigc::mem_fun(this,&PImpl::onSecsBtwAlarmChanged));
-      refXml->get_widget("comboboxAlgorithm", comboboxAlgorithm);
-      comboboxAlgorithm->set_active(controller.getModel()->getMotionDetectionAlgorithm());
-      comboboxAlgorithm->signal_changed().connect(sigc::mem_fun(this,&PImpl::onMotionDetectionAlgorithmChanged));
-      refXml->get_widget("hscaleOpticalFlowNPoints", hscaleOpticalFlowNPoints);
-      hscaleOpticalFlowNPoints->set_value((double)controller.getModel()->getOpticalFlowNPoints());
-      hscaleOpticalFlowNPoints->signal_value_changed().connect(sigc::mem_fun(this,&PImpl::onOpticalFlowNPointsChanged));
-      refXml->get_widget("hscalePixelDifferenceThreshold", hscalePixelDifferenceThreshold);
-      hscalePixelDifferenceThreshold->set_value(controller.getModel()->getPixelDifferenceThreshold());
-      hscalePixelDifferenceThreshold->signal_value_changed().connect(sigc::mem_fun(this,&PImpl::onPixelDifferenceThresholdChanged));
-      refXml->get_widget("hscalePixelDifferenceXStep", hscalePixelDifferenceXStep);
-      hscalePixelDifferenceXStep->set_value(controller.getModel()->getPixelDifferenceXStep());
-      hscalePixelDifferenceXStep->signal_value_changed().connect(sigc::mem_fun(this,&PImpl::onPixelDifferenceXStepChanged));
-      refXml->get_widget("hscalePixelDifferenceYStep", hscalePixelDifferenceYStep);
-      hscalePixelDifferenceYStep->set_value(controller.getModel()->getPixelDifferenceYStep());
-      hscalePixelDifferenceYStep->signal_value_changed().connect(sigc::mem_fun(this,&PImpl::onPixelDifferenceYStepChanged));
+      refXml->get_widget("hscaleSecsBtwAlarm", hscaleSecsBtwAlarm);      
+      refXml->get_widget("comboboxAlgorithm", comboboxAlgorithm);      
+      refXml->get_widget("hscaleOpticalFlowNPoints", hscaleOpticalFlowNPoints);      
+      refXml->get_widget("hscaleOpticalFlowThreshold", hscaleOpticalFlowThreshold);      
+      refXml->get_widget("hscalePixelDifferenceThreshold", hscalePixelDifferenceThreshold);      
+      refXml->get_widget("hscalePixelDifferenceXStep", hscalePixelDifferenceXStep);      
+      refXml->get_widget("hscalePixelDifferenceYStep", hscalePixelDifferenceYStep);      
       refXml->get_widget("fpsLabel",fpsLabel);
+      refXml->get_widget("checkbuttonBackground",checkbuttonBackground);
+      refXml->get_widget("checkbuttonDifference",checkbuttonDifference);
+
+      //update widget values according with model
+      updateWidgets();
+
+      //connect signals
+      hscaleMotionThreshold->signal_value_changed().connect(sigc::mem_fun(this,&PImpl::onMotionThresholdChanged));
+      hscaleSecsBtwAlarm->signal_value_changed().connect(sigc::mem_fun(this,&PImpl::onSecsBtwAlarmChanged));
+      comboboxAlgorithm->signal_changed().connect(sigc::mem_fun(this,&PImpl::onMotionDetectionAlgorithmChanged));
+      hscaleOpticalFlowNPoints->signal_value_changed().connect(sigc::mem_fun(this,&PImpl::onMotionDetectionAlgorithmChanged));
+      hscaleOpticalFlowThreshold->signal_value_changed().connect(sigc::mem_fun(this,&PImpl::onMotionDetectionAlgorithmChanged));
+      hscalePixelDifferenceThreshold->signal_value_changed().connect(sigc::mem_fun(this,&PImpl::onMotionDetectionAlgorithmChanged));
+      hscalePixelDifferenceXStep->signal_value_changed().connect(sigc::mem_fun(this,&PImpl::onMotionDetectionAlgorithmChanged));
+      hscalePixelDifferenceYStep->signal_value_changed().connect(sigc::mem_fun(this,&PImpl::onMotionDetectionAlgorithmChanged));
     }
 
     ~PImpl(){}
     
-    void drawImage(const colorspaces::ImageppPtr image){
-      frameCount++;
+    void drawImage(const colorspaces::Image& image, Gtk::DrawingArea* drawingArea){
       /*convert to RGB*/
-      imageRGB888 = image->toRGB888();
-      if (imageRGB888.get() == 0)
-	throw gbxutilacfr::Exception(ERROR_INFO, "Can't convert image to RGB888");
-    
-    
+      colorspaces::ImageRGB888 img_rgb888(image);
       Glib::RefPtr<Gdk::Pixbuf> imgBuff = 
-	Gdk::Pixbuf::create_from_data((const guint8*)imageRGB888->imageData,
+	Gdk::Pixbuf::create_from_data((const guint8*)img_rgb888.data,
 				      Gdk::COLORSPACE_RGB,
 				      false,
 				      8,
-				      imageRGB888->description.width,
-				      imageRGB888->description.height,
-				      imageRGB888->description.width*3);
+				      img_rgb888.width,
+				      img_rgb888.height,
+				      img_rgb888.step);
       
       Glib::RefPtr<Gdk::Window> window = drawingArea->get_window();
       const Glib::RefPtr< const Gdk::GC > gc;/*empty*/
-      
       window->draw_pixbuf(gc,
 			  imgBuff,
 			  0,0,/*starting point from imgBuff*/
@@ -85,18 +84,55 @@ namespace motiondetection {
 			  imgBuff->get_width(),
 			  imgBuff->get_height(),
 			  Gdk::RGB_DITHER_NONE, 0, 0);
-      drawingArea->set_size_request(imageRGB888->description.width,
-				    imageRGB888->description.height);
+      drawingArea->set_size_request(img_rgb888.width,
+				    img_rgb888.height);
+    }
+    
+    void drawImages(const Model* model){
+      fpsCounter.inc();
+      //draw main image
+      drawImage(model->getMotionDetectionAlgorithm()->state().currentImage,drawingAreaMain);
+
+      //if debug images selected draw them
+      if (selectedAlgorithm == 1){//opt flow
+	//nothing yet
+	return;
+      }else if (selectedAlgorithm == 2){//pixel diff
+	const PixelDifferenceAlgorithm* alg = dynamic_cast<const PixelDifferenceAlgorithm*>(model->getMotionDetectionAlgorithm().get());
+	assert(alg!=0);
+	if (drawBackground)
+	  drawImage(alg->pixelDifferenceState().background,drawingAreaDebug1);
+	if (drawDifference)
+	  drawImage(alg->pixelDifferenceState().difference,drawingAreaDebug2);
+      }
       mainwindow->resize(1,1);
     }
-  
-    void drawMotionGrid(const Model::MotionGrid2DPtr mGrid){
-      Glib::RefPtr<Gdk::Window> window = drawingArea->get_window();
+
+    void drawMotionItem(const MotionItem2D& item){
+      Glib::RefPtr<Gdk::Window> window = drawingAreaMain->get_window();
       if(window){
 	int width;
 	int height;
 	
-	drawingArea->get_size_request(width,height);
+	drawingAreaMain->get_size_request(width,height);
+	
+	Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
+      
+	if (item.motion > 0){
+	  cr->set_source_rgba(1.0, 0.0, 0.0,1.0);
+	  cr->rectangle(item.area.x, item.area.y, item.area.width, item.area.height);
+	  cr->stroke();
+	}
+      }
+    }
+
+    void drawMotion(const MotionItem2DSeq& motionSeq){
+      Glib::RefPtr<Gdk::Window> window = drawingAreaMain->get_window();
+      if(window){
+	int width;
+	int height;
+	
+	drawingAreaMain->get_size_request(width,height);
 	
 	Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
       
@@ -119,17 +155,12 @@ namespace motiondetection {
 	//cr->clip();
       
       
-	cr->scale(width/mGrid->cols,
-		  height/mGrid->rows);/*scale to grid dimensions*/
-	int i,j,k;
-	for (i=0; i<mGrid->rows; i++){
-	  for (j=0; j<mGrid->cols; j++){
-	    k = i+(j*mGrid->cols);/*grid offset*/
-	    if (mGrid->grid[k].motion > 0){
-	      cr->set_source_rgba(1.0, 0.0, 0.0,0.5);
-	      cr->rectangle(i, j, 1.0, 1.0);
-	      cr->fill();
-	    }
+	MotionItem2DSeq::const_iterator m_it = motionSeq.begin();
+	for (;m_it!=motionSeq.end(); m_it++){
+	  if (m_it->motion > 0){
+	    cr->set_source_rgba(1.0, 0.0, 0.0,1.0);
+	    cr->rectangle(m_it->area.x, m_it->area.y, m_it->area.width, m_it->area.height);
+	    cr->stroke();
 	  }
 	}
 	// Restore context
@@ -138,24 +169,43 @@ namespace motiondetection {
     }
 
     void displayFPS(){
-      double fps,elapsed = timer.elapsedMs();
-      if (elapsed > 1000.0){
-	fps = frameCount*1000.0/elapsed;
-	frameCount=0;
-	timer.restart();
-	// Display the frame rate
-	std::stringstream fpsString;
-	fpsString << "fps = " << int(fps);
-	fpsLabel->set_label(fpsString.str());
+      double fps = fpsCounter.ips();
+      std::stringstream fpsString;
+      fpsString << "fps = " << int(fps);
+      fpsLabel->set_label(fpsString.str());
+    }
+
+    void updateWidgets(){
+      const ModelPtr m = controller.getModel();
+      hscaleMotionThreshold->set_value((double)m->getMotionThreshold());
+      hscaleSecsBtwAlarm->set_value((double)controller.getSecsBtwAlarm());
+      const NullAlgorithm *nAlg;
+      const OpticalFlowAlgorithm *ofAlg;
+      const PixelDifferenceAlgorithm *pdAlg;
+      
+      if ((nAlg = dynamic_cast<const NullAlgorithm*>(controller.getModel()->getMotionDetectionAlgorithm().get()))){
+	comboboxAlgorithm->set_active(0);
+      }else if ((ofAlg = dynamic_cast<const OpticalFlowAlgorithm*>(controller.getModel()->getMotionDetectionAlgorithm().get()))){
+	hscaleOpticalFlowNPoints->set_value(ofAlg->nPoints);
+	hscaleOpticalFlowThreshold->set_value(ofAlg->opticalFlowThreshold);
+	comboboxAlgorithm->set_active(1);
+      }else if ((pdAlg = dynamic_cast<const PixelDifferenceAlgorithm*>(controller.getModel()->getMotionDetectionAlgorithm().get()))){
+	hscalePixelDifferenceThreshold->set_value(pdAlg->pixelDiffThreshold);
+	hscalePixelDifferenceXStep->set_value(pdAlg->winSize.width);
+	hscalePixelDifferenceYStep->set_value(pdAlg->winSize.height);
+	comboboxAlgorithm->set_active(2);
       }
     }
+
+    // void updateAlgorithmWidgets(const OpticalFlowAlgorithmPtr alg){
+
+//     }
+
+//     void updateAlgorithmWidgets(const PixelDifferenceAlgorithmPtr alg){
+//     }
   
     void onMotionThresholdChanged(){
       controller.setMotionThreshold((int)hscaleMotionThreshold->get_value());
-    }
-  
-    void onOpticalFlowNPointsChanged(){
-      controller.setOpticalFlowNPoints((int)hscaleOpticalFlowNPoints->get_value());
     }
   
     void onSecsBtwAlarmChanged(){
@@ -163,35 +213,51 @@ namespace motiondetection {
     }
 
     void onMotionDetectionAlgorithmChanged(){
-      controller.setMotionDetectionAlgorithm((Model::MotionDetectionAlgorithm)comboboxAlgorithm->get_active_row_number());
-    }
+      colorspaces::Image initialImg = controller.getModel()->getMotionDetectionAlgorithm()->state().currentImage;
 
-    void onPixelDifferenceThresholdChanged(){
-      controller.setPixelDifferenceThreshold((int)hscalePixelDifferenceThreshold->get_value());
-    }
-
-    void onPixelDifferenceXStepChanged(){
-      controller.setPixelDifferenceXStep((int)hscalePixelDifferenceXStep->get_value());
-    }
-    
-    void onPixelDifferenceYStepChanged(){
-      controller.setPixelDifferenceYStep((int)hscalePixelDifferenceYStep->get_value());
+      selectedAlgorithm = comboboxAlgorithm->get_active_row_number();
+      if (selectedAlgorithm == 0){//null
+	controller.tracer().info("Instantiating Null");
+	drawingAreaDebug1->hide();
+	drawingAreaDebug2->hide();
+	controller.setMotionDetectionAlgorithm(MotionDetectionAlgorithmPtr(new NullAlgorithm(controller.tracer(),initialImg)));
+      }else if (selectedAlgorithm == 1){//optical flow
+	int nPoints = hscaleOpticalFlowNPoints->get_value();
+	int opticalFlowThreshold = hscaleOpticalFlowThreshold->get_value();
+	std::stringstream ss;
+	ss << "Instantiating Optical Flow with params: nPoints=" << nPoints << ",opticalFlowThreshold=" << opticalFlowThreshold << "\n";
+	controller.tracer().info(ss.str());
+	drawingAreaDebug1->hide();
+	drawingAreaDebug2->hide();
+	controller.setMotionDetectionAlgorithm(MotionDetectionAlgorithmPtr(new OpticalFlowAlgorithm(controller.tracer(),initialImg,nPoints,opticalFlowThreshold)));
+      }else if (selectedAlgorithm == 2){//pixel diff
+	int pixelDiffThreshold = hscalePixelDifferenceThreshold->get_value();
+	cv::Size winSize(hscalePixelDifferenceXStep->get_value(),hscalePixelDifferenceYStep->get_value());
+	std::stringstream ss;
+	ss << "Instantiating Pixel Diff with params: pixelDiffThreshold=" << pixelDiffThreshold
+	   << ",winsize=" << winSize.width << "x" << winSize.height << "\n";
+	controller.tracer().info(ss.str());
+	drawingAreaDebug1->show();
+	drawingAreaDebug2->show();
+	controller.setMotionDetectionAlgorithm(MotionDetectionAlgorithmPtr(new PixelDifferenceAlgorithm(controller.tracer(),initialImg,pixelDiffThreshold,winSize)));
+      }
     }
 
     Gtk::Main gtkmain;
     Glib::RefPtr<Gnome::Glade::Xml> refXml;
     Gtk::Window *mainwindow;
-    Gtk::DrawingArea* drawingArea;
+    Gtk::DrawingArea *drawingAreaMain,*drawingAreaDebug1,*drawingAreaDebug2;
     Gtk::HScale *hscaleMotionThreshold,*hscaleSecsBtwAlarm,
-      *hscaleOpticalFlowNPoints,*hscalePixelDifferenceThreshold,
+      *hscaleOpticalFlowNPoints,*hscaleOpticalFlowThreshold,
+      *hscalePixelDifferenceThreshold,
       *hscalePixelDifferenceXStep,*hscalePixelDifferenceYStep;
     Gtk::ComboBox *comboboxAlgorithm;
     Gtk::Label* fpsLabel;
-    colorspaces::ImageppPtr imageRGB888;
+    Gtk::CheckButton *checkbuttonBackground, *checkbuttonDifference;
     Controller& controller;
-
-    int frameCount;
-    gbxiceutilacfr::Timer timer;
+    int selectedAlgorithm;
+    bool drawBackground,drawDifference;
+    jderobotutil::IpsCounter fpsCounter;
   };
 
   
@@ -209,10 +275,12 @@ namespace motiondetection {
     if (model==0)
       throw gbxutilacfr::Exception(ERROR_INFO, "Can't get model");
 
-    pImpl->drawImage(model->getImage()->toRGB888());
-    const Model::MotionGrid2DPtr mGrid = model->getMotionGrid();
-    if (mGrid)
-      pImpl->drawMotionGrid(mGrid);
+    pImpl->drawImages(model);
+    MotionItem2D m;
+    if (model->isMotionDetected(m))
+      //pImpl->drawMotion(model->getMotionDetected());
+      pImpl->drawMotionItem(m);
+      
     pImpl->displayFPS();
     
     while (pImpl->gtkmain.events_pending())

@@ -1,8 +1,8 @@
 lib_LTLIBRARIES = libJderobotUtil.la
 
 libJderobotUtil_ladir = $(includedir)/jderobotutil
-libJderobotUtil_la_SOURCES = observer.cpp
-libJderobotUtil_la_HEADERS = observer.h
+libJderobotUtil_la_SOURCES = observer.cpp time.cpp
+libJderobotUtil_la_HEADERS = observer.h time.h
 
 include_HEADERS = jderobotutil.h
 

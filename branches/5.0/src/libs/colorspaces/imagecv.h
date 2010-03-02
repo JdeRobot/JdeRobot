@@ -114,14 +114,19 @@ namespace colorspaces {
      */
     Image& convert(Image& dst) const throw(NoConversion);
 
+
+    /**
+     * Clone image returning a new copy
+     */
+    Image clone() const;
+
     int width;
     int height;
-
+    
     static const FormatPtr FORMAT_NONE;
   private:
     FormatPtr _format;
   };
-  typedef std::tr1::shared_ptr<Image> ImagePtr;
 
   class ImageRGB888: public Image {
   public:
@@ -153,7 +158,6 @@ namespace colorspaces {
     static Image& imageCvt(const Image& src, Image& dst) throw(NoConversion);
     static const FormatPtr FORMAT_RGB888;
   };
-  typedef std::tr1::shared_ptr<ImageRGB888> ImageRGB888Ptr;
 
   class ImageYUY2: public  Image {
   public:
@@ -190,8 +194,6 @@ namespace colorspaces {
     static Image& imageCvt(const Image& src, Image& dst) throw(NoConversion);
     static const FormatPtr FORMAT_YUY2;
   };
-  typedef std::tr1::shared_ptr<ImageYUY2> ImageYUY2Ptr;
-
 
   class ImageGRAY8: public  Image {
   public:
@@ -226,7 +228,6 @@ namespace colorspaces {
     static Image& imageCvt(const Image& src, Image& dst) throw(NoConversion);
     static const FormatPtr FORMAT_GRAY8;
   };
-  typedef std::tr1::shared_ptr<ImageGRAY8> ImageGRAY8Ptr;
 
     /* /\** */
 /*      * Creates a synthetic rgb88 image with an horizontal line */

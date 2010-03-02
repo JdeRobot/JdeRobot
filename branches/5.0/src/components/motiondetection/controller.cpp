@@ -14,45 +14,39 @@ namespace motiondetection {
     gbxiceutilacfr::Timer timer;
   };
 
-  Controller::Controller(ModelPtr m)
-    : pImpl(new PImpl()) {
+  Controller::Controller(gbxutilacfr::Tracer& tracer, ModelPtr m, bool createView )
+    : _tracer(tracer), pImpl(new PImpl()) {
     pImpl->model = m;
-    pImpl->view.reset(new View(*this));
-    pImpl->model->addObserver(pImpl->view);
+    if (createView){
+      pImpl->view.reset(new View(*this));
+      pImpl->model->addObserver(pImpl->view);
+    }
   }
 
   Controller::~Controller() {
-    pImpl->model->deleteObserver(pImpl->view);//jderobotutil::ObserverPtr(view));
-    pImpl->view.reset();
+    if (pImpl->view){
+      pImpl->model->deleteObserver(pImpl->view);//jderobotutil::ObserverPtr(view));
+      pImpl->view.reset();
+    }
   }
 
   
   bool Controller::isRunning() const throw(){
-    return pImpl->view->isVisible();
+    if (pImpl->view)
+      return pImpl->view->isVisible();
+    return true;
   }
 
   void Controller::exit() throw(){
     pImpl->running = false;
   }
 
-  void Controller::setImage(const colorspaces::ImageppPtr img) throw(gbxutilacfr::Exception){
+  void Controller::setImage(const colorspaces::Image& img) throw(){
     pImpl->model->setImage(img);
   }
 
-  const colorspaces::ImageppPtr Controller::getImage() const throw(){
-    return pImpl->model->getImage();
-  }
-
-  void Controller::setMotionGridSize(const int rows, const int cols) throw(){
-    pImpl->model->setMotionGridSize(rows,cols);
-  }
-  
-  const Model::MotionGrid2DPtr Controller::getMotionGrid(const int rows, const int cols) const throw(){
-    return pImpl->model->getMotionGrid();
-  }
-
-  bool Controller::isMotionDetected(CvRect *area, Model::MotionGridItem2D *value) const throw(){
-    if (pImpl->model->isMotionDetected(area,value) &&
+  bool Controller::isMotionDetected(MotionItem2D& max) const throw(){
+    if (pImpl->model->isMotionDetected(max) &&
 	(pImpl->timer.elapsedSec() > pImpl->secsBtwAlarms)){
       pImpl->timer.restart();
       return true;
@@ -60,7 +54,7 @@ namespace motiondetection {
     return false;
   }
 
-  void Controller::setMotionDetectionAlgorithm(const Model::MotionDetectionAlgorithm a) throw(){
+  void Controller::setMotionDetectionAlgorithm(const MotionDetectionAlgorithmPtr a) throw(){
     pImpl->model->setMotionDetectionAlgorithm(a);
   }
 
@@ -68,22 +62,6 @@ namespace motiondetection {
     pImpl->model->setMotionThreshold(threshold);
   }
 
-  void Controller::setOpticalFlowNPoints(const int nPoints) throw(){
-    pImpl->model->setOpticalFlowNPoints(nPoints);
-  }
-  
-  void Controller::setPixelDifferenceThreshold(const int threshold) throw(){
-    pImpl->model->setPixelDifferenceThreshold(threshold);
-  }
-
-  void Controller::setPixelDifferenceXStep(const int xStep) throw(){
-    pImpl->model->setPixelDifferenceXStep(xStep);
-  }
-
-  void Controller::setPixelDifferenceYStep(const int xStep) throw(){
-    pImpl->model->setPixelDifferenceYStep(xStep);
-  }
-  
   int Controller::getSecsBtwAlarm() const throw(){
     return pImpl->secsBtwAlarms;
   }

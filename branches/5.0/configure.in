@@ -143,6 +143,7 @@ AC_CONFIG_FILES([src/components/Makefile \
     src/components/opencvdemo/Makefile \
     src/components/recordingserver/Makefile \
     src/components/alarmgenerator/Makefile \
-    src/components/motiondetection/Makefile ])
+    src/components/motiondetection/Makefile \
+    src/components/motiondetection/test/Makefile ])
 
 AC_OUTPUT

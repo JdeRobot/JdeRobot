@@ -38,6 +38,11 @@ namespace colorspaces {
   Image& Image::convert(Image& dst) const throw(NoConversion){
     return _format->cvt(*this,dst);
   }
+
+  Image Image::clone() const{
+    Image copy(cv::Mat::clone(),_format);
+    return copy;
+  }
  
 
   //static definitions
