@@ -34,11 +34,11 @@ namespace jderobotice {
     Re-implementation all three functions is optional.
 
     @verbatim
-    void MyThread::initialise()
+    void MyThread::initialize()
     {
     while ( !isStopping() )
     {
-    // initialise
+    // initialize
     }
     }
 
@@ -90,7 +90,7 @@ namespace jderobotice {
 
     //! Action performed when in Intialising state.
     //! Default imlementation does nothing.
-    virtual void initialise() {};
+    virtual void initialize() {};
     
     //! Action performed when in Working state.
     //! Default imlementation does nothing.
@@ -98,7 +98,7 @@ namespace jderobotice {
 
     //! Action performed when in Finalising state.
     //! Default imlementation does nothing.
-    virtual void finalise() {};
+    virtual void finalize() {};
 
     // this private function is not virtual!
     // it's part of internal implementation.

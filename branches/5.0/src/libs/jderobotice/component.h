@@ -50,14 +50,14 @@ namespace jderobotice
    *
    *   1. Component Constructor
    *
-   *      - In the constructor, none of the jderobotice machinery is initialised.  This
-   *        means that no remote calls can be made (the communicator isn't initialised yet).
+   *      - In the constructor, none of the jderobotice machinery is initialized.  This
+   *        means that no remote calls can be made (the communicator isn't initialized yet).
    *      - Any code that should be executed before any remote calls are made belongs in 
    *        the Component constructor.
    *
    *   2. Component::start()
    *
-   *      - start() is called after all resources in Context are initialised.
+   *      - start() is called after all resources in Context are initialized.
    *      - This is the place to launch threads from and get out.
    *        - Don't do anything that might loop forever in here, otherwise it won't be possible
    *          to bring the component down cleanly. 
@@ -78,7 +78,7 @@ namespace jderobotice
    */
   class Component : private IceUtil::noncopyable
   {
-    // these are declared friends so they can call init(), tag(), finalise()
+    // these are declared friends so they can call init(), tag(), finalize()
     friend class Application;
     friend class Service;
   

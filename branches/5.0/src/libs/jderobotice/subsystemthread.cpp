@@ -109,7 +109,7 @@ SubsystemThread::protectedRun()
 {
   // init: Idle --> Initialising
   status_.initialising( health_.name() );
-  initialise();
+  initialize();
     
   if ( !isStopping() )
     {
@@ -119,13 +119,13 @@ SubsystemThread::protectedRun()
 
       // finished: Working --> Finalising
       status_.finalising( health_.name() );
-      finalise();
+      finalize();
     }
   else 
     {
       // finished: Initialising --> Finalising
       status_.finalising( health_.name() );
-      finalise();
+      finalize();
     }
 
   // finished: Finalising --> Shutdown

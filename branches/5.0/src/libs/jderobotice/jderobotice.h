@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (C) 1997-2009 JDERobot Developers Team
+ *  Copyright (C) 1997-2010 JDERobot Developers Team
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
