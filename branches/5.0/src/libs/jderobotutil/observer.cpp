@@ -37,14 +37,14 @@ namespace jderobotutil {
   }
 
   void Subject::notifyObservers(){
-    notifyObservers(ObserverArgPtr());
+    notifyObservers(0);
   }
 
-  void Subject::notifyObservers(ObserverArgPtr arg){
+  void Subject::notifyObservers(ObserverArg* arg){
     ObserverList::iterator it;
 
     for (it=observers.begin(); it != observers.end(); it++)
-      (*it)->update(shared_from_this(),arg);
+      (*it)->update(this,arg);
   }
 
   void Subject::clearChanged(){

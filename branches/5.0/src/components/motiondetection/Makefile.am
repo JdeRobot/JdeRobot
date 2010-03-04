@@ -23,3 +23,4 @@ motiondetection_LDADD = $(top_srcdir)/src/libs/jderobotice/libJderobotIce.la \
 
 dist_conf_DATA = motiondetection.cfg
 dist_glade_DATA = motiondetection.glade
+MAINTAINERCLEANFILES = Makefile.in Makefile

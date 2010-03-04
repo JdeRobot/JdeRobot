@@ -21,7 +21,6 @@
 
 
 #include "model.h"
-#include <colorspaces/formats.h>
 #include <cmath>
 #include <algorithm>
 #include <tr1/memory>

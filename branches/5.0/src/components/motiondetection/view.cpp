@@ -269,9 +269,9 @@ namespace motiondetection {
   
   View::~View() throw() {}
 
-  void View::update(const jderobotutil::SubjectPtr o, jderobotutil::ObserverArgPtr arg)
+  void View::update(const jderobotutil::Subject* o, jderobotutil::ObserverArg* arg)
     throw(gbxutilacfr::Exception) {
-    const Model* model = dynamic_cast<const Model*>(o.get());/*downcast*/
+    const Model* model = dynamic_cast<const Model*>(o);/*downcast*/
     if (model==0)
       throw gbxutilacfr::Exception(ERROR_INFO, "Can't get model");
 

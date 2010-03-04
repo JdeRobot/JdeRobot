@@ -13,10 +13,8 @@ namespace jderobotutil{
     ObserverArg(void *arg);
     void *arg_;
   };
-  typedef std::tr1::shared_ptr<ObserverArg> ObserverArgPtr;
 
-  class Subject
-    : public std::tr1::enable_shared_from_this<Subject>{
+  class Subject {
   public:
     Subject();
     virtual void addObserver(ObserverPtr o);
@@ -25,7 +23,7 @@ namespace jderobotutil{
     virtual void deleteObservers();
     virtual bool hasChanged() const;
     virtual void notifyObservers();
-    virtual void notifyObservers(ObserverArgPtr arg);
+    virtual void notifyObservers(ObserverArg* arg);
   protected:
     virtual void clearChanged();
     virtual void setChanged();
@@ -34,12 +32,11 @@ namespace jderobotutil{
     ObserverList observers;
     bool changed;
   };
-  typedef std::tr1::shared_ptr<Subject> SubjectPtr;
     
 
   class Observer{
   public:
-    virtual void update(const SubjectPtr o, ObserverArgPtr arg = ObserverArgPtr()) = 0;
+    virtual void update(const Subject* o, ObserverArg* arg = 0) = 0;
   };
 } //namespace
     

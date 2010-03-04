@@ -12,8 +12,8 @@ namespace motiondetection {
   public:
     View(Controller &controller) throw();
     virtual ~View() throw();
-    virtual void update(const jderobotutil::SubjectPtr o,
-			jderobotutil::ObserverArgPtr arg = jderobotutil::ObserverArgPtr())
+    virtual void update(const jderobotutil::Subject* o,
+			jderobotutil::ObserverArg* arg = 0)
       throw(gbxutilacfr::Exception);
     bool isVisible();
   private:
