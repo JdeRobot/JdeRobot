@@ -6,8 +6,9 @@ endif
 cameraserver_SOURCES = cameraserver.cpp gstpipeline.cpp gstpipeline.h
 cameraserver_CPPFLAGS = $(GSTREAMER_CPPFLAGS) $(LIBJDEROBOTICE_CPPFLAGS) \
 				-I$(top_srcdir)/src/libs -I$(top_srcdir)/src/interfaces/cpp
-cameraserver_LDFLAGS = $(GSTREAMER_LIBS)
-cameraserver_LDADD = $(top_srcdir)/src/libs/jderobotice/libJderobotIce.la \
+cameraserver_LDFLAGS = $(GSTREAMER_LDFLAGS)
+cameraserver_LDADD = $(GSTREAMER_LIBS) \
+			$(top_srcdir)/src/libs/jderobotice/libJderobotIce.la \
 			$(top_srcdir)/src/libs/jderobotutil/libJderobotUtil.la \
 			$(top_srcdir)/src/libs/colorspaces/libcolorspacesmm.la \
 			$(top_srcdir)/src/interfaces/cpp/jderobot/libJderobotInterfaces.la

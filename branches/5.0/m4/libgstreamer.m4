@@ -27,7 +27,6 @@ if test "x$with_gstreamer" != xno; then
 	[GSTREAMER],[gstreamer-0.10 gstreamer-app-0.10],
 	[
 	    GSTREAMER_CPPFLAGS=$GSTREAMER_CFLAGS
-	    GSTREAMER_LDFLAGS=$GSTREAMER_LIBS
 	],
 	[
 	    AC_MSG_NOTICE([Errors found checking gstreamer support: $GSTREAMER_PKG_ERRORS. Try setting --with-gstreamer])
