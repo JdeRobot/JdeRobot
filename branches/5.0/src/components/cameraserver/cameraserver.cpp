@@ -74,11 +74,8 @@ namespace cameraserver{
 
       context.tracer().info("Creating pipeline with config: " + pipelineCfg.toString());
       pipeline = new GSTPipeline(context,pipelineCfg);
-      context.tracer().info("Starting pipeline");
-      pipeline->start();
       context.tracer().info("Starting thread for camera: " + cameraDescription->name);
       replyTask = new ReplyTask(this);
-      replyTask->start();//my own thread
     }
 
     virtual ~CameraI(){
@@ -105,7 +102,9 @@ namespace cameraserver{
     class ReplyTask: public gbxiceutilacfr::SafeThread{
     public:
       ReplyTask(CameraI* camera)
-	: gbxiceutilacfr::SafeThread(camera->context.tracer()), mycamera(camera) {}
+	: gbxiceutilacfr::SafeThread(camera->context.tracer()), mycamera(camera) {
+	start();//start thread
+      }
 
       void pushJob(const jderobot::AMD_ImageProvider_getImageDataPtr& cb){
 	IceUtil::Mutex::Lock sync(requestsMutex);
@@ -119,8 +118,8 @@ namespace cameraserver{
 	while(!isStopping()){
 	  GstBuffer* buff = mycamera->pipeline->pull_buffer();
 	  if (!buff){
-	    mycamera->context.tracer().info("Pipeline empty. Stopping thread");
-	    stop();
+	    mycamera->context.tracer().info("Pipeline return empty buffer. Waiting...");
+	    IceUtil::ThreadControl::sleep(IceUtil::Time::seconds(1));
 	  }else{
 	    IceUtil::Time t = IceUtil::Time::now();
 	    reply->timeStamp.seconds = (long)t.toSeconds();

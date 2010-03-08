@@ -156,6 +156,8 @@ namespace cameraserver {
   
     gst_caps_unref (caps);
     gst_caps_unref ( v4l2caps );
+    context.tracer().info("Starting pipeline");
+    start();//my own thread
   }
   
   GSTPipeline::~GSTPipeline(){
