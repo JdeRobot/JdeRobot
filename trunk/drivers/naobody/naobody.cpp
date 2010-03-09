@@ -14,8 +14,9 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/.
  *
- *  Authors : 	Eduardo Perdices <eperdes@gsyc.es>
- *				Francisco Rivas <fm.rivas@alumnos.urjc.es>
+ *  Authors : Jose María Cañas <jmplaza@gsyc.es>
+ *            Eduardo Perdices <eperdes@gsyc.es>
+ *            Francisco Miguel Rivas Montero <fm.rivas@alumnos.urjc.es>	
  */
 
 #include <cstdlib>
