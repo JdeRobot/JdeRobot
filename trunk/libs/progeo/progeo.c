@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (C) 1997-2008 JDE Developers Team
+ *  Copyright (C) 1997-2010 JDE Developers Team
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
  *  Authors : Jose María Cañas Plaza <jmplaza@gsyc.es>
+ *            Eduardo Perdices García <eperdes@gsyc.es>
  *            Antonio Pineda
  */
 
@@ -24,6 +25,7 @@
 #include <stdio.h>
 
 #define PI 3.141592654
+#define BIGNUM 1.0e4
 
 int debug=0;
 
@@ -306,9 +308,22 @@ int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b, TPinHoleCame
     /* both points behind the focal plane: don't display anything */
     mycase=10;
 
-  }else if ((p1.h>0.)&&(p2.h>0.)){
+  }else{
+    if ((p1.h>0.)&&(p2.h<0.)){
+        /* p1 before the focal plane, p2 behind */
+		/*Calculates p2 = p1 + -inf(p2-p1)*/
+		p2.x = p1.x + (-BIGNUM)*(p2.x-p1.x);
+		p2.y = p1.y + (-BIGNUM)*(p2.y-p1.y);
+		p2.h=-p2.h;/* undo the "project" trick to get the right value */
+    }else if ((p1.h<0.)&&(p2.h>0.)){
+        /* p2 before the focal plane, p1 behind */
+		/*Calculates p1 = p2 + -inf(p1-p2)*/
+		p1.x = p2.x + (-BIGNUM)*(p1.x-p2.x);
+		p1.y = p2.y + (-BIGNUM)*(p1.y-p2.y);
+		p1.h=-p1.h;/* undo the "project" trick to get the right value */
+    }  
+
     /* both points before the focal plane */
-    /*printf("los dos puntos proyectan en el plano focal\n");*/
     if ((p1.x>=Xmin) && (p1.x<Xmax+1) && (p1.y>=Ymin) && (p1.y<Ymax+1) &&
 	(p2.x>=Xmin) && (p2.x<Xmax+1) && (p2.y>=Ymin) && (p2.y<Ymax+1)){
       /* both inside the image limits */
@@ -321,6 +336,7 @@ int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b, TPinHoleCame
 	      ((p2.x<Xmin) || (p2.x>=Xmax+1) || (p2.y<Ymin) || (p2.y>=Ymax+1))){
       /* p1 inside, p2 outside */
       gooda.x=p1.x; gooda.y=p1.y; gooda.h=p1.h;
+      goodb.x=p1.x; goodb.y=p1.y; goodb.h=p1.h;
       pa.x=p1.x; pa.y=p1.y; pa.h=p1.h;
       pb.x=p2.x; pb.y=p2.y; pb.h=p2.h;
       mycase=3;
@@ -330,6 +346,7 @@ int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b, TPinHoleCame
       /* p2 inside, p1 outside */
 	
       gooda.x=p2.x; gooda.y=p2.y; gooda.h=p2.h;
+      goodb.x=p2.x; goodb.y=p2.y; goodb.h=p2.h;
       pa.x=p2.x; pa.y=p2.y; pa.h=p2.h;
       pb.x=p1.x; pb.y=p1.y; pb.h=p1.h;
       mycase=4;
@@ -351,13 +368,17 @@ int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b, TPinHoleCame
     if (i3.h!=0.) i3.x=i3.x/i3.h; i3.y=i3.y/i3.h; i3.h=1.;
     
     papb=(pb.x-pa.x)*(pb.x-pa.x)+(pb.y-pa.y)*(pb.y-pa.y);
+
+	float maxdot = -1;
     
     if (i0.h!=0.){ 
       if ((i0.x>=Xmin) && (i0.x<Xmax+1) && (i0.y>=Ymin) && (i0.y<Ymax+1)){
 	if ((((pb.x-pa.x)*(i0.x-pa.x)+(pb.y-pa.y)*(i0.y-pa.y))>=0.) &&
-	    (((pb.x-pa.x)*(i0.x-pa.x)+(pb.y-pa.y)*(i0.y-pa.y))<papb)){
+	    (((pb.x-pa.x)*(i0.x-pa.x)+(pb.y-pa.y)*(i0.y-pa.y))<papb) &&
+		(((pb.x-pa.x)*(i0.x-pa.x)+(pb.y-pa.y)*(i0.y-pa.y))>maxdot)){
 	  if ((mycase==3)||(mycase==4)||(mycase==6)){
 	    goodb.x=i0.x; goodb.y=i0.y; goodb.h=i0.h;
+		maxdot = (pb.x-pa.x)*(i0.x-pa.x)+(pb.y-pa.y)*(i0.y-pa.y);
 
 	  }else if (mycase==5){
 	    gooda.x=i0.x; gooda.y=i0.y; gooda.h=i0.h;
@@ -371,9 +392,11 @@ int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b, TPinHoleCame
     if (i1.h!=0.){ 
       if ((i1.x>=Xmin) && (i1.x<Xmax+1) && (i1.y>=Ymin) && (i1.y<Ymax+1)){
 	if ((((pb.x-pa.x)*(i1.x-pa.x)+(pb.y-pa.y)*(i1.y-pa.y))>=0.)&&
-	    (((pb.x-pa.x)*(i1.x-pa.x)+(pb.y-pa.y)*(i1.y-pa.y))<papb)){
+	    (((pb.x-pa.x)*(i1.x-pa.x)+(pb.y-pa.y)*(i1.y-pa.y))<papb) &&
+		(((pb.x-pa.x)*(i1.x-pa.x)+(pb.y-pa.y)*(i1.y-pa.y))>maxdot)){
 	  if ((mycase==3)||(mycase==4)||(mycase==6)){
 	    goodb.x=i1.x; goodb.y=i1.y; goodb.h=i1.h;
+		maxdot = (pb.x-pa.x)*(i1.x-pa.x)+(pb.y-pa.y)*(i1.y-pa.y); 
 
 	  }else if (mycase==5){
 	    gooda.x=i1.x; gooda.y=i1.y; gooda.h=i1.h;
@@ -387,9 +410,11 @@ int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b, TPinHoleCame
     if (i2.h!=0.){
       if ((i2.x>=Xmin) && (i2.x<Xmax+1) && (i2.y>=Ymin) && (i2.y<Ymax+1)){
 	if ((((pb.x-pa.x)*(i2.x-pa.x)+(pb.y-pa.y)*(i2.y-pa.y))>=0.)&&
-	    (((pb.x-pa.x)*(i2.x-pa.x)+(pb.y-pa.y)*(i2.y-pa.y))<papb)){
+	    (((pb.x-pa.x)*(i2.x-pa.x)+(pb.y-pa.y)*(i2.y-pa.y))<papb) &&
+	    (((pb.x-pa.x)*(i2.x-pa.x)+(pb.y-pa.y)*(i2.y-pa.y))>maxdot)){
 	  if ((mycase==3)||(mycase==4)||(mycase==6)){
 	    goodb.x=i2.x; goodb.y=i2.y; goodb.h=i2.h;
+		maxdot = (pb.x-pa.x)*(i2.x-pa.x)+(pb.y-pa.y)*(i2.y-pa.y);
 
 	  }else if (mycase==5){
 	    gooda.x=i2.x; gooda.y=i2.y; gooda.h=i2.h;
@@ -403,9 +428,11 @@ int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b, TPinHoleCame
     if (i3.h!=0.){ 
       if  ((i3.x>=Xmin) && (i3.x<Xmax+1) && (i3.y>=Ymin) && (i3.y<Ymax+1)){
 	if ((((pb.x-pa.x)*(i3.x-pa.x)+(pb.y-pa.y)*(i3.y-pa.y))>=0.) &&
-	    (((pb.x-pa.x)*(i3.x-pa.x)+(pb.y-pa.y)*(i3.y-pa.y))<papb)){
+	    (((pb.x-pa.x)*(i3.x-pa.x)+(pb.y-pa.y)*(i3.y-pa.y))<papb) &&
+	    (((pb.x-pa.x)*(i3.x-pa.x)+(pb.y-pa.y)*(i3.y-pa.y))>maxdot)){
 	  if ((mycase==3)||(mycase==4)||(mycase==6)){
 	    goodb.x=i3.x; goodb.y=i3.y; goodb.h=i3.h;
+		maxdot = (pb.x-pa.x)*(i3.x-pa.x)+(pb.y-pa.y)*(i3.y-pa.y);
 
 	  }else if (mycase==5){
 	    gooda.x=i3.x; gooda.y=i3.y; gooda.h=i3.h;
@@ -416,111 +443,8 @@ int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b, TPinHoleCame
       }  
     }else; /* i3 at infinite, parallel lines */
 
-  }else if ((p1.h>0.)&&(p2.h<0.)){
-    /* p1 before the focal plane, p2 behind */
-    pa.x=p1.x; pa.y=p1.y; pa.h=p1.h;
-    pb.x=p2.x; pb.y=p2.y; pb.h=-p2.h; /* undo the "project" trick to get the right value */
-    mycase=20;/*printf("p1 proyecta en el plano focal pero p2 no\n");*/
-
-  }else if ((p1.h<0.)&&(p2.h>0.)){
-    /* p2 before the focal plane, p1 behind */
-    pa.x=p2.x; pa.y=p2.y; pa.h=p2.h; 
-    pb.x=p1.x; pb.y=p1.y; pb.h=-p1.h; /* to undo the "project" trick to get the right value */
-    mycase=21;/*printf("p2 proyecta en el plano focal pero p1 no\n");*/
   }
 
-  if ((mycase==20)||(mycase==21)){
-    if ((pa.x>=Xmin) && (pa.x<Xmax+1) && (pa.y>=Ymin) && (pa.y<Ymax+1) &&
-	(pb.x>=Xmin) && (pb.x<Xmax+1) && (pb.y>=Ymin) && (pb.y<Ymax+1)){
-      /* pa and pb inside the image limits */
-      gooda.x=pa.x; gooda.y=pa.y; gooda.h=pa.h;
-      mycase=22;
-      
-    }else if ((pa.x>=Xmin) && (pa.x<Xmax+1) && (pa.y>=Ymin) && (pa.y<Ymax+1) &&
-	      ((pb.x<Xmin) || (pb.x>=Xmax+1) || (pb.y<Ymin) || (pb.y>=Ymax+1))){
-      /* pa inside, pb outside */
-      gooda.x=pa.x; gooda.y=pa.y; gooda.h=pa.h;
-      mycase=23; 
-      
-    }else if ((pb.x>=Xmin) && (pb.x<Xmax+1) && (pb.y>=Ymin) && (pb.y<Ymax+1) &&
-	      ((pa.x<Xmin) || (pa.x>=Xmax+1) || (pa.y<Ymin) || (pa.y>=Ymax+1)))
-      ;
-    /* pa outside, pb inside: don't display anything */
-    else
-      /* both outside */    
-      mycase=25;
-    
-    l.x=pa.y*pb.h-pb.y*pa.h; l.y=pb.x*pa.h-pa.x*pb.h; l.h=pa.x*pb.y-pb.x*pa.y;
-    i0.x=l.y*l0.h-l.h*l0.y; i0.y=l.h*l0.x-l.x*l0.h; i0.h=l.x*l0.y-l.y*l0.x;
-    i1.x=l.y*l1.h-l.h*l1.y; i1.y=l.h*l1.x-l.x*l1.h; i1.h=l.x*l1.y-l.y*l1.x;
-    i2.x=l.y*l2.h-l.h*l2.y; i2.y=l.h*l2.x-l.x*l2.h; i2.h=l.x*l2.y-l.y*l2.x;
-    i3.x=l.y*l3.h-l.h*l3.y; i3.y=l.h*l3.x-l.x*l3.h; i3.h=l.x*l3.y-l.y*l3.x;
-    if (i0.h!=0.) i0.x=i0.x/i0.h; i0.y=i0.y/i0.h; i0.h=1.;
-    if (i1.h!=0.) i1.x=i1.x/i1.h; i1.y=i1.y/i1.h; i1.h=1.;
-    if (i2.h!=0.) i2.x=i2.x/i2.h; i2.y=i2.y/i2.h; i2.h=1.;
-    if (i3.h!=0.) i3.x=i3.x/i3.h; i3.y=i3.y/i3.h; i3.h=1.;
-    
-    if (i0.h!=0.){ 
-      if ((i0.x>=Xmin) && (i0.x<Xmax+1) && (i0.y>=Ymin) && (i0.y<Ymax+1)){
-	if (((pb.x-pa.x)*(i0.x-pa.x)+(pb.y-pa.y)*(i0.y-pa.y))<=0.){
-	  if ((mycase==22)||(mycase==23)||(mycase==26)){
-	    goodb.x=i0.x; goodb.y=i0.y; goodb.h=i0.h;
-	    
-	  }else if (mycase==25){
-	    gooda.x=i0.x; gooda.y=i0.y; gooda.h=i0.h;
-	    goodb.x=i0.x; goodb.y=i0.y; goodb.h=i0.h; 
-	    mycase=26;
-	  }
-	}
-      }   
-    }else; /* i0 at infinite, parallel lines */
-    
-    if (i1.h!=0.){
-      if ((i1.x>=Xmin) && (i1.x<Xmax+1) && (i1.y>=Ymin) && (i1.y<Ymax+1)){
-	if (((pb.x-pa.x)*(i1.x-pa.x)+(pb.y-pa.y)*(i1.y-pa.y))<=0.){
-	  if ((mycase==22)||(mycase==23)||(mycase==26)){
-	    goodb.x=i1.x; goodb.y=i1.y; goodb.h=i1.h;
-	    
-	  }else if (mycase==25){
-	    gooda.x=i1.x; gooda.y=i1.y; gooda.h=i1.h;
-	    goodb.x=i1.x; goodb.y=i1.y; goodb.h=i1.h; 
-	    mycase=26;
-	  }
-	}
-      }
-    }else; /* i1 at infinite, parallel lines */
-    
-    if (i2.h!=0.){
-      if ((i2.x>=Xmin) && (i2.x<Xmax+1) && (i2.y>=Ymin) && (i2.y<Ymax+1)){
-	if (((pb.x-pa.x)*(i2.x-pa.x)+(pb.y-pa.y)*(i2.y-pa.y))<=0.){
-	  if ((mycase==22)||(mycase==23)||(mycase==26)){
-	    goodb.x=i2.x; goodb.y=i2.y; goodb.h=i2.h;
-	    
-	  }else if (mycase==25){
-	    gooda.x=i2.x; gooda.y=i2.y; gooda.h=i2.h;
-	    goodb.x=i2.x; goodb.y=i2.y; goodb.h=i2.h; 
-	    mycase=26;
-	  }
-	}
-      }   
-    }else; /* i2 at infinite, parallel lines */
-    
-    if (i3.h!=0){
-      if  ((i3.x>=Xmin) && (i3.x<Xmax+1) && (i3.y>=Ymin) && (i3.y<Ymax+1)){
-	if (((pb.x-pa.x)*(i3.x-pa.x)+(pb.y-pa.y)*(i3.y-pa.y))<=0.){
-	  if ((mycase==22)||(mycase==23)||(mycase==26)){
-	    goodb.x=i3.x; goodb.y=i3.y; goodb.h=i3.h;
-	    
-	  }else if (mycase==25){
-	    gooda.x=i3.x; gooda.y=i3.y; gooda.h=i3.h;
-	    goodb.x=i3.x; goodb.y=i3.y; goodb.h=i3.h; 
-	    mycase=26;
-	  }
-	}
-      }
-    }else; /* i3 at infinite, parallel lines */
-  }
-  
   if (debug==1){
     printf("p3: x=%.f y=%.f h=%.f\np2: x=%.f, y=%.f h=%.f\n",p1.x,p1.y,p1.h,p2.x,p2.y,p2.h);
     printf("case: %d\n i0: x=%.1f y=%.1f z=%.f dot=%.2f\n i1: x=%.1f y=%.1f z=%.f dot=%.2f\n i2: x=%.1f y=%.1f z=%.f dot=%.2f\n i3: x=%.1f y=%.1f z=%.f dot=%.2f\n",mycase,
