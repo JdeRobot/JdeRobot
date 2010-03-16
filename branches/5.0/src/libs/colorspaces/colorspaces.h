@@ -29,11 +29,6 @@
 #define COLORSPACES_VERSION  "1.4.0"
 
 
-#include <colorspaces/image.h>
-#include <colorspaces/formats.h>
-#include <colorspaces/color.h>
-#include <colorspaces/imagetest.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

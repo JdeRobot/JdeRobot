@@ -3,11 +3,10 @@ if ENABLE_LIBCOLORSPACESMM
 lib_LTLIBRARIES += libcolorspacesmm.la
 endif
 
-libcolorspaces_ladir = $(includedir)/colorspaces
-libcolorspaces_la_SOURCES = rgb2hsv.c rgb2yuv.c formats.c color.c image.c imagetest.c
+#libcolorspaces_ladir = $(includedir)/colorspaces
+libcolorspaces_la_SOURCES = rgb2hsv.c rgb2yuv.c
 libcolorspaces_la_LDFLAGS = -lm
-libcolorspaces_la_CPPFLAGS = -I..
-libcolorspaces_la_HEADERS = formats.h color.h image.h imagetest.h
+libcolorspaces_la_CFLAGS = -I..
 
 libcolorspacesmm_ladir = $(includedir)/colorspaces
 libcolorspacesmm_la_SOURCES = imagecv.cpp
