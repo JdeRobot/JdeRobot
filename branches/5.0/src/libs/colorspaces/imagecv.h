@@ -61,6 +61,9 @@ namespace colorspaces {
     class Format;
     typedef std::tr1::shared_ptr<Format> FormatPtr;
 
+    /**
+     * Define the pixel format of an image
+     */
     class Format: public Uncopyable{
     public:
       static const FormatPtr createFormat(const std::string name, const int cvType, imageCtor ctor, imageCvt cvt);
@@ -128,6 +131,10 @@ namespace colorspaces {
     FormatPtr _format;
   };
 
+
+  /**
+   * A RGB 24 bit image
+   */
   class ImageRGB888: public Image {
   public:
     /**
@@ -159,6 +166,9 @@ namespace colorspaces {
     static const FormatPtr FORMAT_RGB888;
   };
 
+  /**
+   * A YUY2 image
+   */
   class ImageYUY2: public  Image {
   public:
     /**
@@ -195,6 +205,10 @@ namespace colorspaces {
     static const FormatPtr FORMAT_YUY2;
   };
 
+
+  /**
+   * A Gray 8 bit image
+   */
   class ImageGRAY8: public  Image {
   public:
     /**
