@@ -3,8 +3,7 @@ bin_PROGRAMS = randomwalk
 dist_conf_DATA = randomwalk.conf
 
 randomwalk_SOURCES = randomwalk.c
-randomwalk_LDFLAGS = $(JDESHELL_LIBS)
-randomwalk_CFLAGS = -I$(top_srcdir)/base -I$(top_srcdir)/interfaces
+randomwalk_CPPFLAGS = -I$(top_srcdir)/base -I$(top_srcdir)/interfaces
 randomwalk_LDADD = $(top_srcdir)/base/libjde.la $(top_srcdir)/interfaces/libinterfaces.la
 
 edit = sed \

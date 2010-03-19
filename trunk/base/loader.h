@@ -8,19 +8,10 @@ extern "C" {
 struct JDESchema;
 
 /**
- * Initialize python support
- *
- * @param argc number of arguments
- * @param argv array with arguments
- * @return 1 on successful initialization,0 otherwise
- */
-int init_py(int argc, char** argv);
-
-/**
  * Load a schema, python or shared object.
  * 
  * @param schema_path path to the schema. The path has to finish with
- * .py or .so extensions to be recognized as schemas.
+ * .so extension to be recognized as schema.
  * @param cf_path path of the config file for this schema
  * @return 1 on successful loading,0 otherwise.
  */

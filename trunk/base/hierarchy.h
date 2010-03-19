@@ -58,21 +58,6 @@ extern struct JDESchema* JDEHierarchy_find_schema (JDEHierarchy * const self,
 						   const char *name);
 
 /**
- * Get an interface proxy
- * @param self hierarchy
- * @param interface_name interface name
- * @param instance_name instance name for the searched interface. If 0
- * interface_name will be used
- * @param user schema making the request. It could be 0.
- * @return interface proxy if found, 0 otherwise
- */
-extern struct JDEInterfacePrx *
-JDEHierarchy_interfaceprx_get(JDEHierarchy * const self,
-			      const char* interface_name,
-			      const char* instance_name,
-			      JDESchema* const user);
-
-/**
  * Export symbol in this hierarchy
  * @param self hierarchy
  * @param namespace name space to index the symbol

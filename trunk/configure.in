@@ -308,7 +308,7 @@ AC_ARG_VAR([LATEX],[tex compiler command])
 AC_ARG_VAR([PDFLATEX],[pdf generator command])
 AC_ARG_VAR([DVIPS],[dvi to ps conversion command])
 AC_ARG_VAR([BIBTEX],[latex bibliography generator command])
-AC_ARG_VAR([SWIG],[command use to build swig files])
+dnl#AC_ARG_VAR([SWIG],[command use to build swig files])
 
 
 dnl ########################################
@@ -320,7 +320,7 @@ dnl # set compiler flags
 dnl #CFLAGS="-g -O2 -pedantic -Wall"
 dnl # check gcc
 AC_PROG_CC_C99
-
+AM_PROG_CC_C_O
 dnl#CXXFLAGS="-g -O2 -pedantic -Wall"
 AC_PROG_CXX
 
@@ -346,8 +346,8 @@ AC_CHECK_LIB([m],[floor],
 
 AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
 AC_PYTHON_DEVEL
-AC_PROG_SWIG
-SWIG_PYTHON
+dnl#AC_PROG_SWIG
+dnl#SWIG_PYTHON
 
 dnl ########################################
 dnl #
@@ -399,10 +399,10 @@ AC_CHECK_LIB([readline],[readline],
     AC_MSG_ERROR([readline library not found]))
 AC_SUBST([JDESHELL_LIBS])
 
-AC_PATH_PROG([SWIG],[swig],[no])
-if test "x$SWIG" = xno; then
-    AC_MSG_FAILURE([swig command not found])
-fi
+dnl#AC_PATH_PROG([SWIG],[swig],[no])
+dnl#if test "x$SWIG" = xno; then
+dnl#    AC_MSG_FAILURE([swig command not found])
+dnl#fi
 
 AM_CONDITIONAL([ENABLE_PYTHON],[false])
 
@@ -1165,8 +1165,7 @@ dnl # Generate output, main and core makefiles
 dnl #
 dnl ########################################
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([base/Makefile \
-    base/swig/Makefile])
+AC_CONFIG_FILES([base/Makefile])
 dnl # generate utils Makefiles
 AC_CONFIG_FILES([libs/Makefile \
     libs/colorspaces/Makefile \
@@ -1175,8 +1174,7 @@ AC_CONFIG_FILES([libs/Makefile \
     libs/progeo/Makefile \
     libs/simclist/Makefile])
 dnl # generate interfaces Makefiles
-AC_CONFIG_FILES([interfaces/Makefile \
-    interfaces/swig/Makefile])
+AC_CONFIG_FILES([interfaces/Makefile])
 dnl # generate driver Makefiles
 AC_CONFIG_FILES([drivers/Makefile \
     drivers/evi/Makefile \

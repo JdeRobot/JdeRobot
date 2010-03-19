@@ -10,5 +10,4 @@ libinterfaces_la_CFLAGS = $(PYTHON_CPPFLAGS) -I$(top_srcdir)/base -I$(top_srcdir
 
 include_HEADERS = encoders.h motors.h laser.h varcolor.h wiimote.h
 
-SUBDIRS = . swig
 MAINTAINERCLEANFILES = Makefile.in Makefile

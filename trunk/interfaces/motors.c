@@ -10,11 +10,11 @@ Motors* new_Motors(const char* interface_name,
   assert(supplier!=0 && supplier->hierarchy!=0);
   m = (Motors*)calloc(1,sizeof(Motors));
   assert(m!=0);
-  m->super = new_JDEInterface(interface_name,supplier);
-  assert(m->super != 0);
+  SUPER(m) = new_JDEInterface(interface_name,supplier);
+  assert(SUPER(m) != 0);
   /*interface export*/
   if (JDEHierarchy_myexport(supplier->hierarchy,interface_name,"Motors",m) == 0){
-    delete_JDEInterface(m->super);
+    delete_JDEInterface(SUPER(m));
     free(m);
     return 0;
   }
@@ -27,7 +27,7 @@ Motors* new_Motors(const char* interface_name,
 void delete_Motors(Motors* const self){
   if (self==0)
     return;
-  delete_JDEInterface(self->super);
+  delete_JDEInterface(SUPER(self));
   free(self);/*FIXME: un-export symbols. references?*/
 }
 
@@ -39,8 +39,8 @@ MotorsPrx* new_MotorsPrx(const char* interface_name,
   assert(user!=0 && user->hierarchy!=0);
   mprx = (MotorsPrx*)calloc(1,sizeof(MotorsPrx));
   assert(mprx!=0);
-  mprx->refers_to = (Motors*)JDEHierarchy_myimport(user->hierarchy,interface_name,"Motors");
-  if (mprx->refers_to == 0){ /*we are connecting with an old
+  PRX_REFERS_TO(mprx) = (Motors*)JDEHierarchy_myimport(user->hierarchy,interface_name,"Motors");
+  if (PRX_REFERS_TO(mprx) == 0){ /*we are connecting with an old
 				   encoders interface*/
     int *idp;
     JDESchema *supplier;
@@ -59,8 +59,8 @@ MotorsPrx* new_MotorsPrx(const char* interface_name,
       return 0;
     }
   }
-  mprx->super = new_JDEInterfacePrx(interface_name,user);
-  assert(mprx->super!=0);
+  SUPER(mprx) = new_JDEInterfacePrx(interface_name,user);
+  assert(SUPER(mprx)!=0);
   return mprx;
 }
 
@@ -68,7 +68,7 @@ void delete_MotorsPrx(MotorsPrx* const self){
   if (self==0)
     return;
   
-  delete_JDEInterfacePrx(self->super);
+  delete_JDEInterfacePrx(SUPER(self));
   free(self);
 }
 
@@ -86,8 +86,8 @@ float MotorsPrx_v_get(MotorsPrx *const self){
   float* vp = 0;
 
   assert(self!=0);
-  if (self->refers_to)
-    vp=&(self->refers_to->v);
+  if (PRX_REFERS_TO(self))
+    vp=&(PRX_REFERS_TO(self)->v);
   else
     vp=(float *)myimport(INTERFACEPRX_NAME(self),"v");
   assert(vp!=0);
@@ -98,8 +98,8 @@ float MotorsPrx_w_get(MotorsPrx *const self){
   float* wp = 0;
 
   assert(self!=0);
-  if (self->refers_to)
-    wp=&(self->refers_to->w);
+  if (PRX_REFERS_TO(self))
+    wp=&(PRX_REFERS_TO(self)->w);
   else
     wp=(float *)myimport(INTERFACEPRX_NAME(self),"w");
   assert(wp!=0);
@@ -110,8 +110,8 @@ void MotorsPrx_v_set(MotorsPrx* const self, float new_v){
   float* vp = 0;
 
   assert(self!=0);
-  if (self->refers_to)
-    vp=&(self->refers_to->v);
+  if (PRX_REFERS_TO(self))
+    vp=&(PRX_REFERS_TO(self)->v);
   else  
     vp=(float *)myimport(INTERFACEPRX_NAME(self),"v");
   assert(vp!=0);
@@ -122,8 +122,8 @@ void MotorsPrx_w_set(MotorsPrx* const self, float new_w){
   float* wp;
 
   assert(self!=0);
-  if (self->refers_to)
-    wp=&(self->refers_to->w);
+  if (PRX_REFERS_TO(self))
+    wp=&(PRX_REFERS_TO(self)->w);
   else  
     wp=(float *)myimport(INTERFACEPRX_NAME(self),"w");
   assert(wp!=0);

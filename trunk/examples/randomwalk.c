@@ -38,19 +38,19 @@ int main(int argc, char *argv[]){
   /*it will be the user for all the interface prxs*/
   root_schema = JDEHierarchy_root_schema_get(myhierarchy);
   
-  l = new_LaserPrx(myhierarchy,"laser",root_schema);
+  l = new_LaserPrx("laser",root_schema);
   if (l == 0){
     fprintf(stdout,"Can't get laser prx\n");
     exit(-1);
   }
   LaserPrx_run(l);
   
-  m = new_MotorsPrx(myhierarchy,"motors",root_schema);
+  m = new_MotorsPrx("motors",root_schema);
   if (m == 0){
     fprintf(stdout,"Can't get motors prx\n");
     exit(-1);
   }
-  MotorPrx_run(m);
+  MotorsPrx_run(m);
   
   {
     unsigned int left_laser,front_laser,right_laser,i;

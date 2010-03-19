@@ -22,7 +22,6 @@
 #define thisrelease "jderobot 4.3-svn"
 
 #include "jde.h"
-//#include "jde_private.h"
 #include "loader.h"
 #include "dlfcn.h"
 #include <string.h>
@@ -226,8 +225,6 @@ int jdeinit(int argc, char** argv, const char* cf){
   char s[MAX_BUFFER];
 
   pthread_mutex_init(&shuttingdown_mutex,NULL);
-  fprintf(stdout,"Starting python...\n");
-  init_py(argc,argv);
 
   /* read the configuration file: load drivers and schemas */
   if (cf == 0 || *cf == 0) {/*no configfile give,try default ones*/ 

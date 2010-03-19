@@ -15,11 +15,6 @@ jderobot_LDFLAGS = $(JDESHELL_LIBS)
 jderobot_LDADD = libjde.la
 dist_conf_DATA = jderobot.conf
 
-jderobot4_4_SOURCES = jdeshell4.4.c
-jderobot4_4_LDFLAGS = $(JDESHELL_LIBS)
-jderobot4_4_CFLAGS = -I$(top_srcdir)/libs/simclist
-jderobot4_4_LDADD = libjde.la $(top_srcdir)/libs/simclist/libsimclist.la
-
 include_HEADERS = jde.h hierarchy.h loader.h schema.h interface.h
 
 edit = sed \
@@ -36,11 +31,6 @@ jderobot.conf: Makefile
 
 jderobot.conf: jderobot.conf.in
 
-#built always to avoid problems if new swig version installed
-swigpyrun.h:
-	$(SWIG) -python -external-runtime swigpyrun.h
-
-SUBDIRS = . swig
-BUILT_SOURCES = jderobot.conf swigpyrun.h
+BUILT_SOURCES = jderobot.conf
 CLEANFILES = $(BUILT_SOURCES)
 MAINTAINERCLEANFILES = Makefile.in Makefile

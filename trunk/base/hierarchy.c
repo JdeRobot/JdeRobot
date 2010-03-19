@@ -123,9 +123,6 @@ JDEHierarchy* new_JDEHierarchy(int argc, char** argv, const char* cf){
 				       root_schema_show,
 				       root_schema_hide);
   JDEHierarchy_add_schema(h,h->priv->root_schema);
-  
-  fprintf(stdout,"Initializing python environment...\n");
-  init_py(argc,argv);
 
   /*set config file*/
   if (cf == 0 || *cf == 0) {
@@ -438,25 +435,4 @@ void* JDEHierarchy_myimport (JDEHierarchy * const self,
 JDESchema * JDEHierarchy_root_schema_get (JDEHierarchy * const self){
   assert(self!=0);
   return self->priv->root_schema;
-}
-
-struct JDEInterfacePrx *
-JDEHierarchy_interfaceprx_get(JDEHierarchy * const self,
-			      const char* interface_name,
-			      const char* instance_name,
-			      JDESchema* const user){
-  JDEInterface *refers_to = 0;
-  void *i;
-
-  assert(self!=0);
-  assert(interface_name!=0);
-
-  refers_to = (JDEInterface*)JDEHierarchy_myimport(user->hierarchy,
-						   instance_name,"JDEInterface");
-  if (refers_to!=0){
-    assert(strcmp(refers_to->interface_name,interface_name)!=0);/*runtime
-								  type check*/
-    return new_JDEInterfacePrx(refers_to,user);
-  }
-  return 0;
 }
