@@ -17,6 +17,7 @@ void signal_handler(int sig){
 }
 
 int main(int argc, char *argv[]){
+  JDESchema *root_schema;
   LaserPrx *l;
   MotorsPrx *m;
   char *cf = 0;
@@ -34,22 +35,22 @@ int main(int argc, char *argv[]){
     fprintf(stdout,"Initialization failed...\n");
     exit(-1);
   }
-
-  l = new_LaserPrx("laser",
-		    JDEHierarchy_root_schema_get(myhierarchy));
+  /*it will be the user for all the interface prxs*/
+  root_schema = JDEHierarchy_root_schema_get(myhierarchy);
+  
+  l = new_LaserPrx(myhierarchy,"laser",root_schema);
   if (l == 0){
     fprintf(stdout,"Can't get laser prx\n");
     exit(-1);
   }
-  JDEInterfacePrx_run(SUPER(l));
+  LaserPrx_run(l);
   
-  m = new_MotorsPrx("motors",
-		     JDEHierarchy_root_schema_get(myhierarchy));
+  m = new_MotorsPrx(myhierarchy,"motors",root_schema);
   if (m == 0){
     fprintf(stdout,"Can't get motors prx\n");
     exit(-1);
   }
-  JDEInterfacePrx_run(SUPER(m));
+  MotorPrx_run(m);
   
   {
     unsigned int left_laser,front_laser,right_laser,i;

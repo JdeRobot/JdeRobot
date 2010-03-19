@@ -24,6 +24,10 @@ struct JDESchema;
 typedef struct JDEInterface{
   /** Interface name*/
   char *interface_name;
+  /** Instance name*/
+  char *instance_name;
+  /** Interface data*/
+  void *data;
   /** Schema implementing this interface*/
   struct JDESchema *supplier;
   /** Private data*/
@@ -48,12 +52,14 @@ typedef struct JDEInterfacePrx{
  * that supplies (implements) this interface.
  *
  * @param interface_name the name the interface will be known in the
- * system
+ * system. It can be seem like the type
+ * @param instance_name name a specific interface instance has
  * @param supplier the schema suplying (implementing) this interface
  * @return the new allocated interface
  *
  */
 JDEInterface* new_JDEInterface(const char *interface_name,
+			       const char *instance_name,
 			       struct JDESchema *const supplier);
 
 /**
@@ -71,16 +77,15 @@ void delete_JDEInterface(JDEInterface *const self);
 /**
  * JDEInterfacePrx constructor
  *
- * It creates a proxy to access an interface with the given name.
- * Optionally, it is possible to give a pointer to a interface
- * structure to register it.
- * @param interface_name name to the referred interface
+ * It creates a proxy to access an interface.
+ * To get a proxy normally you should use JDEHierarchy_interfaceprx_get().
+ * @param refers_to interface that we will refer to
  * @param user schema using this proxy
  * last proxy is deleted
  * @return proxy instance
  */
-JDEInterfacePrx* new_JDEInterfacePrx(const char *interface_name,
-				     struct JDESchema *const user);
+JDEInterfacePrx* new_JDEInterfacePrx(JDEInterface *const refers_to,
+				     JDESchema* const user);
 
 /**
  * JDEInterfacePrx destructor
@@ -137,14 +142,14 @@ int JDEInterfacePrx_stop(const JDEInterfacePrx *self);
 }
 #endif
 
-/** Cast a interface or interface proxy to JDEInterface or JDEInterfacePrx*/
-#define SUPER(i) ((i)->super)
-/** Returns the reffered interface of given a proxy*/
-#define PRX_REFERS_TO(prx) ((prx)->refers_to)
 /** Returns the name of given interface*/
 #define INTERFACE_NAME(i) ((i)->super->interface_name)
 /** Returns the name of given interface proxy*/
 #define INTERFACEPRX_NAME(prx) ((prx)->super->refers_to->interface_name)
+/** Returns the name of given interface*/
+#define INSTANCE_NAME(i) ((i)->super->instance_name)
+/** Returns the name of given interface proxy*/
+#define INSTANCEPRX_NAME(prx) ((prx)->super->refers_to->instance_name)
 
 
 
@@ -340,14 +345,14 @@ int JDEInterfacePrx_stop(const JDEInterfacePrx *self);
  *     float v[8];
  *     JDEInterface *super;
  *   } A;
- *   A *new_A (const char *interface_name, struct JDESchema *const supplier);
+ *   A *new_A (const char *instance_name, struct JDESchema *const supplier);
  *   void delete_A (A * const self);
  *
  *   typedef struct APrx{
  *     A *refers_to;
  *     JDEInterfacePrx *super;
  *   } APrx;
- *   APrx *new_APrx (const char *interface_name, struct JDESchema *const user);
+ *   APrx *new_APrx (const char *instance_name, struct JDESchema *const user);
  *   void delete_APrx (APrx * const self);
  *
  *   int APrx_x_get (const APrx * self);
@@ -368,7 +373,7 @@ int JDEInterfacePrx_stop(const JDEInterfacePrx *self);
     JDEInterface *super;						\
   } ifacename ;								\
 									\
-  ifacename * __CONCAT2(new_,ifacename) (const char *interface_name,	\
+  ifacename * __CONCAT2(new_,ifacename) (const char *instance_name,	\
 					 struct JDESchema *const supplier);	\
   void __CONCAT2(delete_,ifacename) ( ifacename *const self);		\
 									\
@@ -377,7 +382,8 @@ int JDEInterfacePrx_stop(const JDEInterfacePrx *self);
     JDEInterfacePrx *super;						\
   } __CONCAT2(ifacename,Prx) ;						\
   									\
-  __CONCAT2(ifacename,Prx) * __CONCAT3(new_,ifacename,Prx) (const char *interface_name, \
+  __CONCAT2(ifacename,Prx) * __CONCAT3(new_,ifacename,Prx) (JDEHierarchy * const hierarchy, \
+							    const char *instance_name, \
 							    struct JDESchema *const user); \
   void __CONCAT3(delete_,ifacename,Prx) ( __CONCAT2(ifacename,Prx) *const self); \
   int __CONCAT2(ifacename,Prx_run) ( __CONCAT2(ifacename,Prx) *const self); \
@@ -392,17 +398,17 @@ int JDEInterfacePrx_stop(const JDEInterfacePrx *self);
  * arguments than the related declaration.
  */
 #define INTERFACE_DEFINITION(ifacename,attrs)				\
-  ifacename * __CONCAT2(new_,ifacename) (const char *interface_name,	\
+  ifacename * __CONCAT2(new_,ifacename) (const char *instance_name,	\
 					 struct JDESchema *const supplier){ \
     ifacename * i;							\
     									\
     assert(supplier!=0 && supplier->hierarchy!=0);			\
     i = ( ifacename *)calloc(1,sizeof( *i ));			\
     assert(i!=0);							\
-    SUPER(i) = new_JDEInterface(interface_name,supplier);		\
-    assert(SUPER(i) != 0);						\
-    if (JDEHierarchy_myexport(supplier->hierarchy,interface_name, __STR(ifacename) ,i) == 0){ \
-      delete_JDEInterface(SUPER(i));					\
+    i->super = new_JDEInterface( __STR(ifacename) ,instance_name,supplier); \
+    assert(i->super != 0);						\
+    if (JDEHierarchy_myexport(supplier->hierarchy,instance_name, __STR(ifacename) ,i) == 0){ \
+      delete_JDEInterface(i->super);					\
       free(i);								\
       return 0;								\
     }									\
@@ -411,29 +417,29 @@ int JDEInterfacePrx_stop(const JDEInterfacePrx *self);
   void __CONCAT2(delete_,ifacename) ( ifacename * const self){		\
     if (self==0)							\
       return;								\
-    delete_JDEInterface(SUPER(self));					\
+    delete_JDEInterface(self->super);					\
     free(self);								\
   }									\
 									\
-  __CONCAT2(ifacename,Prx) * __CONCAT3(new_,ifacename,Prx)(const char *interface_name, \
-							   struct JDESchema *const user){ \
-    __CONCAT2(ifacename,Prx) * iprx;					\
-    ifacename * refers_to;						\
-    assert(user!=0 && user->hierarchy!=0);				\
-    refers_to = ( ifacename *) JDEHierarchy_myimport (user->hierarchy,interface_name, __STR(ifacename)); \
-    if (refers_to == 0)							\
-      return 0;								\
-    iprx = ( __CONCAT2(ifacename,Prx) *)calloc(1,sizeof(*prx)); \
-    assert(iprx!=0);							\
-    PRX_REFERS_TO(iprx) = refers_to;					\
-    SUPER(iprx) = new_JDEInterfacePrx(interface_name,user);		\
-    return iprx;							\
+  __CONCAT2(ifacename,Prx) * __CONCAT3(new_,ifacename,Prx)(JDEHierarchy * const hierarchy, \
+							   const char *instance_name, \
+							   JDESchema *const user){ \
+    __CONCAT2(ifacename,Prx) * prx = 0;					\
+    JDEInterfacePrx *iprx;						\
+    iprx = JDEHierarchy_interfaceprx_get(hierarchy,_STR(ifacename),instance_name,user); \
+    if (iprx!=0){							\
+      prx = ( __CONCAT2(ifacename,Prx) *)calloc(1,sizeof(*prx));	\
+      assert(iprx!=0);							\
+      prx->refers_to = ( ifacename *) iprx->refers_to->data;		\
+      prx->super = iprx;						\
+    }									\
+    return prx;								\
   }									\
 									\
   void __CONCAT3(delete_,ifacename,Prx) ( __CONCAT2(ifacename,Prx) *const self){ \
     if (self==0)							\
       return;								\
-    delete_JDEInterfacePrx(SUPER(self));				\
+    delete_JDEInterfacePrx(self->super);				\
     free(self);								\
   }									\
   int __CONCAT2(ifacename,Prx_run) ( __CONCAT2(ifacename,Prx) *const self){ \
