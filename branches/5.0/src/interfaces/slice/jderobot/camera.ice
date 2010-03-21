@@ -34,6 +34,7 @@ module jderobot{
   {
     string name;
     string shortDescription;
+    string streamingUri;
   };
     
   /**
@@ -42,6 +43,11 @@ module jderobot{
   interface Camera extends ImageProvider
   {
     idempotent CameraDescription getCameraDescription();
+    
+    string startCameraStreaming();
+    
+    void stopCameraStreaming();
+    
   };
 
 }; /*module*/

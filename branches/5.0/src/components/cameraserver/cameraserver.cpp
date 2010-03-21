@@ -31,6 +31,7 @@
 #include <list>
 #include <sstream>
 #include "gstpipeline.h"
+#include <stdlib.h>
 
 namespace cameraserver{
   class CameraI: virtual public jderobot::Camera {
@@ -49,8 +50,9 @@ namespace cameraserver{
       //fill cameraDescription
       cameraDescription->name = prop->getProperty(prefix+"Name");
       if (cameraDescription->name.size() == 0)
-	throw jderobotice::ConfigFileException(ERROR_INFO,"Camera name not configured");
+    	  throw jderobotice::ConfigFileException(ERROR_INFO,"Camera name not configured");
       cameraDescription->shortDescription = prop->getProperty(prefix+"ShortDescription");
+      cameraDescription->streamingUri = prop->getProperty(prefix+"StreamingUri");
 
       //fill imageDescription
       imageDescription->width = prop->getPropertyAsIntWithDefault(prefix+"ImageWidth",340);
@@ -71,6 +73,7 @@ namespace cameraserver{
       pipelineCfg.width = imageDescription->width;
       pipelineCfg.height = imageDescription->height;
       pipelineCfg.format = imageFmt;
+
 
       context.tracer().info("Creating pipeline with config: " + pipelineCfg.toString());
       pipeline = new GSTPipeline(context,pipelineCfg);
@@ -97,6 +100,32 @@ namespace cameraserver{
 			       const Ice::Current& c){
       replyTask->pushJob(cb);
     }
+
+    virtual std::string startCameraStreaming(const Ice::Current& c)
+    {
+
+    	std::string commandVLC = "vlc " + pipelineCfg.uri + " -I dummy --sout \"#transcode{vcodec=mp4v,acodec=aac}:rtp{dst=0.0.0.0,port=1234,sdp=" + cameraDescription->streamingUri + "}\" &";
+
+		// system is blocked, the command should be run in background
+    	int ret = system(commandVLC.c_str());
+
+    	if (ret==0)
+    	{
+    		context.tracer().info("Starting Streaming in " + cameraDescription->name + ": (" + cameraDescription->streamingUri + ")");
+    		return cameraDescription->streamingUri;
+    	}
+    	else
+    		return NULL;
+    }
+
+    virtual void stopCameraStreaming(const Ice::Current& c)
+    {
+
+    	context.tracer().info("Stoping Streaming in " + cameraDescription->name);
+    	system ("killall vlc");
+    	return;
+    }
+
 
   private:
     class ReplyTask: public gbxiceutilacfr::SafeThread{
