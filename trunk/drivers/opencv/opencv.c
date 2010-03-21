@@ -22,7 +22,7 @@
  * This 4.3 version includes support for variable images. 
  *
  * @file opencv.c
- * @author Sara Marugán Alonso <s.marugan@alumnos.urjc.es>
+ * @author Sara Marugán Alonso <smarugan@gsyc.es>
  * @version 4.3.0
  * @date 2009-02-13
  */
