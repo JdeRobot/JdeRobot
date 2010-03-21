@@ -1,5 +1,5 @@
 ### PATH WHERE THE MODULES CAN BE FOUND
-path .:/usr/lib:/usr/local/lib:/usr/lib/jderobot/drivers:/usr/lib/jderobot/schemas:/usr/lib/jderobot/services:/usr/share/jderobot/glade:@driverdir@:@schemadir@:@servicedir@:@gladedir@
+path .:@driverdir@:@schemadir@:@servicedir@:@gladedir@
 
 ### DRIVER CONFIGURATION 
 
@@ -25,6 +25,29 @@ end_driver
 
 #driver video4linux
 #provides colorA /dev/video0
+#end_driver
+
+#driver opencv
+#provides varcolorA <image|video|videofile> <path> <width> <height>
+#in the case of varcolorA,B,C,D 'width' and 'height' must be provided,
+#the driver does not offers autosize capability
+#provides colorB <image|video|videofile> <path>
+#in the case of colorA,B,C,D nor 'width' neither 'height' should be provided
+#provides colorC videofile /home/salons/jde-videos/camA.ogg 
+#provides colorD video /dev/video0
+#provides varcolorB image /usr/local/share/jderobot/casaleft.pnm 620 480
+#provides varcolorA video /dev/video1394/0 620 480
+#provides varcolorC videofile /home/sara/jde-videos/bd-videos/camAv.ogg 320 240
+#end_driver
+
+#driver simulated3D
+#provides colorXX <FileWithCamParameters>
+#provides varcolorXX <FileWithCamParameters>
+#worldfile ./robotics-lab
+#provides varcolorA cameraAfile
+#provides varcolorB cameraBfile
+#provides varcolorC cameraCfile
+#provides varcolorD cameraDfile
 #end_driver
 
 #driver player

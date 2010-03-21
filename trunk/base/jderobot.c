@@ -282,14 +282,14 @@ void jdeshutdown(const int sig)
     for(i=num_schemas-1;i>=0;i--)
      {
         if (all[i].terminate!=NULL) all[i].terminate();
-        if (all[i].handle!=NULL) dlclose(all[i].handle);
+        //if (all[i].handle!=NULL) dlclose(all[i].handle);
      }
 
      /* unload all the drivers loaded as plugins */
      for(i=num_drivers-1;i>=0;i--)
      {
         if (mydrivers[i].terminate!=NULL) mydrivers[i].terminate();
-        if (mydrivers[i].handle!=NULL) dlclose(mydrivers[i].handle);
+        //if (mydrivers[i].handle!=NULL) dlclose(mydrivers[i].handle);
      }
 
      fprintf(stderr,"Bye\n");
