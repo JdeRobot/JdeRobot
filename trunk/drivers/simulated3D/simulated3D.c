@@ -21,7 +21,7 @@
  * This 4.3 version includes support for variable images. 
  *
  * @file simulated3D.c
- * @authors: Sara Marugán Alonso <s.marugan@alumnos.urjc.es>
+ * @authors: Sara Marugán Alonso <smarugan@gsyc.es>
  * @authors: José María Cañas Plaza <jmplaza@gsyc.es>
  * @version 4.3
  * @date 2009-05-16
