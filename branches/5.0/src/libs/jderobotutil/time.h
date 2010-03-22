@@ -34,11 +34,11 @@ namespace jderobotutil{
     void inc();
     
     //Get ips count
-    double ips();
+    double ips() const;
   private:
-    double _ips;
-    int counter;
-    struct timeval timer;
+    mutable double _ips;
+    mutable int counter;
+    mutable struct timeval timer;
     static const int countInterval = 1;//secs
   };
 }//

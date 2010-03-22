@@ -31,7 +31,7 @@ namespace jderobotutil{
     counter++;
   }
 
-  double IpsCounter::ips(){
+  double IpsCounter::ips() const{
     struct timeval now;
     gettimeofday(&now,0);
     long elapsedS = now.tv_sec - timer.tv_sec;
