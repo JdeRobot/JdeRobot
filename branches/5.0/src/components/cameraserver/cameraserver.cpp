@@ -67,12 +67,15 @@ namespace cameraserver{
 
       //fill pipeline cfg
       pipelineCfg.name = prop->getProperty(prefix+"Name");
+      pipelineCfg.srcpipeline = prop->getProperty(prefix+"SrcPipeline");
       pipelineCfg.uri = prop->getProperty(prefix+"Uri");
       pipelineCfg.framerateN = prop->getPropertyAsIntWithDefault(prefix+"FramerateN",25);
       pipelineCfg.framerateD = prop->getPropertyAsIntWithDefault(prefix+"FramerateD",1);
       pipelineCfg.width = imageDescription->width;
       pipelineCfg.height = imageDescription->height;
       pipelineCfg.format = imageFmt;
+
+      //pipelineCfg.validate();FIXME: validate cfg before to use it
 
 
       context.tracer().info("Creating pipeline with config: " + pipelineCfg.toString());

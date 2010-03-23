@@ -22,6 +22,8 @@ namespace cameraserver {
   
     //! pipeline name
     std::string name;
+    //!pipeline src description
+    std::string srcpipeline;
     //! video input uri file
     std::string uri;
     //! video output width [pixels]
@@ -49,6 +51,8 @@ namespace cameraserver {
     GSTPipeline(const jderobotice::Context& context, const Config &cfg) throw(jderobotice::ConfigFileException);
     ~GSTPipeline();
 
+    GstElement* build_pipeline(const Config &cfg) throw(jderobotice::ConfigFileException);
+
     void stop();
     virtual void walk();
 
@@ -61,11 +65,16 @@ namespace cameraserver {
 			  GstPad *pad,
 			  gboolean last,
 			  gpointer data);
+
+    static const std::string v4l2UriScheme;
+    static const std::string v4lUriScheme;
+    static const std::string videotestUriScheme;
+
     Config config_;
     jderobotice::Context context;
     GMainLoop *mainloop;
-    GstElement *pipeline,*source,*decoder,*videoscale,*videorate,*videocolor,*filter,*sink,*bin;
-    GstBus *bus;
+    GstElement *pipeline,*source,*decoder,*videoscale,*videorate,*videocolor,*sink;
+    
   };
   typedef IceUtil::Handle<GSTPipeline> GSTPipelinePtr;
 
