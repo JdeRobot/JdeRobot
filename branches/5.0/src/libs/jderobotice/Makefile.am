@@ -10,7 +10,7 @@ libJderobotIce_la_SOURCES = component.cpp context.cpp application.cpp \
 libJderobotIce_la_CPPFLAGS = $(GEARBOX_CPPFLAGS) -I$(top_srcdir)/src/libs \
 				-I$(top_srcdir)/src/interfaces/cpp
 libJderobotIce_la_LDFLAGS =  $(GEARBOX_LDFLAGS)
-libJderobotIce_la_LIBADD = $(LIBICE) $(LIBICEUTIL) $(LIBICEGRID) $(LIBGBXUTILACFR) $(LIBGBXICEUTILACFR)
+libJderobotIce_la_LIBADD = $(LIBICE) $(LIBICEUTIL) $(LIBICEGRID) $(LIBICEBOX) $(LIBICESTORM) $(LIBICESTORMSERVICE) $(LIBGBXUTILACFR) $(LIBGBXICEUTILACFR)
 libJderobotIce_la_HEADERS = component.h context.h application.h \
 				exceptions.h catchutils.h subsystemthread.h interfaceconnect.h
 
