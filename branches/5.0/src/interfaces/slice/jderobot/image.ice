@@ -16,6 +16,7 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
  *  Author : David Lobato Bravo <dav.lobato@gmail.com>
+ *	     Sara Marugán Alonso <smarugan@gsyc.es>
  *
  */
 
@@ -23,8 +24,20 @@
 #define IMAGE_ICE
 
 #include <jderobot/common.ice>
+#include <IceStorm/IceStorm.ice>
 
 module jderobot{  
+
+/*!
+    @ingroup jderobot_interfaces
+    @defgroup jderobot_interface_image Image
+    @brief Represents an image source.
+
+This and several other interfaces -- @ref jderobot_interface_camera, @ref jderobot_interface_pixmap 
+-- are related. They could probably be merged into one or at least refactored.
+
+    @{
+*/
 
   /**
    *  Static description of the image source.
@@ -49,6 +62,15 @@ module jderobot{
 			  depends on the image format and compression. */
   };
 
+
+  //! Interface to the image consumer.
+  interface ImageConsumer
+  {
+    //! Transmits the data to the consumer.
+    void report( ImageData obj );
+  };
+
+
   /** 
    * Interface to the image provider.
    */
@@ -66,6 +88,7 @@ module jderobot{
       throws DataNotExistException, HardwareFailedException;
   };
 
+//!  //@}
 }; //module
 
 #endif //IMAGE_ICE

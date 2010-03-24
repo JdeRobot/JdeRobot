@@ -22,6 +22,15 @@ module jderobot{
   //! Indicates a problem with robot hardware, e.g. sensors and actuators.
   exception HardwareFailedException extends JderobotException {};
 
+  //! Raised when the server is unable to return a topic for subscription.
+  exception NoTopicException extends JderobotException {};
+
+  //! Raised when the server fails to subscribe client for periodic updates.
+  exception SubscriptionFailedException extends JderobotException {};
+
+  //! Raised when the server fails to push initial data to a new subscriber.
+  exception SubscriptionPushFailedException extends JderobotException {};
+
 }; /*module*/
 
 #endif /*EXCEPTIONS_ICE*/
