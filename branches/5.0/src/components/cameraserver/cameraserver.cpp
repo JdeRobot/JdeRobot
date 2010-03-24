@@ -16,14 +16,17 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
  *  Authors : David Lobato Bravo <dav.lobato@gmail.com>
+ *	      Sara Marugán Alonso <smarugan@gsyc.es>
  *
  */
 
 
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
+#include <IceStorm/IceStorm.h>
 #include <gbxsickacfr/gbxiceutilacfr/safethread.h>
 #include <jderobot/camera.h>
+#include <jderobot/image.h>
 #include <colorspaces/colorspacesmm.h>
 #include <jderobotice/component.h>
 #include <jderobotice/application.h>
@@ -41,7 +44,9 @@ namespace cameraserver{
 	imageFmt(),
 	imageDescription(new jderobot::ImageDescription()),
 	cameraDescription(new jderobot::CameraDescription()),
-	replyTask()
+	imageConsumer(),
+	replyTask(),
+	rpc_mode(false)
     {
       
       
@@ -82,6 +87,36 @@ namespace cameraserver{
       pipeline = new GSTPipeline(context,pipelineCfg);
       context.tracer().info("Starting thread for camera: " + cameraDescription->name);
       replyTask = new ReplyTask(this);
+
+
+      // check client/server service mode
+      int rpc = prop->getPropertyAsIntWithDefault("CameraSrv.DefaultMode",0);
+
+      if(rpc!=0){
+	rpc_mode=true;
+      }
+
+      // check publish/subscribe service mode
+      Ice::ObjectPrx obj = context.communicator()->propertyToProxy("CameraSrv.TopicManager");
+
+      if(obj!=0){
+    	      // IceStorm publisher initialization
+	      IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(obj);
+	      IceStorm::TopicPrx topic;
+	      try{
+		topic = topicManager->retrieve(cameraDescription->name);
+	      }
+	      catch(const IceStorm::NoSuchTopic&){
+		topic = topicManager->create(cameraDescription->name);
+	      }
+	      Ice::ObjectPrx pub = topic->getPublisher()->ice_oneway();
+
+	      imageConsumer=jderobot::ImageConsumerPrx::uncheckedCast(pub);
+      }
+      else{
+	      imageConsumer=0;	
+      }
+
     }
 
     virtual ~CameraI(){
@@ -159,15 +194,24 @@ namespace cameraserver{
 	    reply->pixelData.resize(mycamera->imageDescription->size);
 	    memmove( &(reply->pixelData[0]), (char*)buff->data, mycamera->imageDescription->size);//copy data to reply
 	    gst_buffer_unref(buff);//release gstreamer buffer
-	    
-	    {//critical region start
-	      IceUtil::Mutex::Lock sync(requestsMutex);
-	      while(!requests.empty()){
-		jderobot::AMD_ImageProvider_getImageDataPtr cb = requests.front();
-		requests.pop_front();
-		cb->ice_response(reply);
-	      }
-	    }//critical region end
+
+	    // publish
+	    if(mycamera->imageConsumer!=0){
+		mycamera->imageConsumer->report(reply);
+	    }
+
+	    // response to data petition
+	    if(mycamera->rpc_mode){
+	    	{//critical region start
+	      	IceUtil::Mutex::Lock sync(requestsMutex);
+	      	while(!requests.empty()){
+			jderobot::AMD_ImageProvider_getImageDataPtr cb = requests.front();
+			requests.pop_front();
+			cb->ice_response(reply);
+	      	}
+	    	}//critical region end
+	    }
+
 	  }
 	}
       }
@@ -186,6 +230,8 @@ namespace cameraserver{
     jderobot::ImageDescriptionPtr imageDescription;
     jderobot::CameraDescriptionPtr cameraDescription;
     ReplyTaskPtr replyTask;
+    jderobot::ImageConsumerPrx imageConsumer;
+    bool rpc_mode;
   };
 
 
@@ -196,6 +242,23 @@ namespace cameraserver{
 
     virtual void start(){
       Ice::PropertiesPtr prop = context().properties();
+
+      // check default service mode
+      int rpc = prop->getPropertyAsIntWithDefault("CameraSrv.DefaultMode",0);
+
+      if(rpc==0){
+	// check publish/subscribe service mode
+	Ice::ObjectPrx obj = context().communicator()->propertyToProxy("CameraSrv.TopicManager");
+
+	if(obj==0){
+		// no service mode configuration
+		std::cerr << "Error: cameraserver needs server configuration mode\n" << std::endl;
+		fflush(NULL);
+
+		exit(0);
+	}
+      }
+
       int nCameras = prop->getPropertyAsInt(context().tag() + ".NCameras");
       cameras.resize(nCameras);
       for (int i=0; i<nCameras; i++){//build camera objects
