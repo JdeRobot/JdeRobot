@@ -21,68 +21,82 @@
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
 #include <jderobot/recorder.h>
+#include <jderobotice/component.h>
+#include <jderobotice/application.h>
+#include "ffmpegRecorder.h"
+
+namespace RecorderProcess {
+
+	class RecorderI: public jderobot::Recorder
+	{
+		public:
+		  RecorderI(std::string& prefix,
+					const jderobotice::Context& context)
+			:prefix(prefix), context(context)
+		  {
+
+		  }
+
+		  virtual Ice::Int startRecording(const jderobot::RecorderConfigPtr& recConfig,
+										  const Ice::Current& c)
+		  {
+
+			 ffmpegRecorder* myRecorder = new ffmpegRecorder(context);
+			 myRecorder->setConfig(recConfig);
+			 myRecorder->startRecording();
+			 return 0;
+		  }
+
+		private:
+
+		  std::string prefix;
+		  jderobotice::Context context;
+
+	};
 
 
-class RecorderI: public jderobot::Recorder
-{
+	class Component: public jderobotice::Component
+	{
 	public:
-	  RecorderI(std::string& prefix, Ice::CommunicatorPtr& communicator)
-	    :prefix(prefix),communicator(communicator)
-	  {
 
-	  }
+		Component():jderobotice::Component("RecorderApp") {}
 
-	  virtual Ice::Int startRecording(const jderobot::RecorderConfigPtr& recConfig, const Ice::Current& c)
-	  {
-		  return 0;
-	  }
+		virtual void start()
+		{
+
+			Ice::PropertiesPtr prop = context().properties();
+
+			std::string objPrefix(context().tag() + ".Recorder.");
+			std::string recorderName = prop->getProperty(objPrefix + "Name");
+
+			//set the value
+			prop->setProperty(objPrefix + "Name", recorderName);
+
+			context().tracer().info("Creating recorder (" + objPrefix + "Name" +") " + recorderName);
+
+			objRecorder = new RecorderI(objPrefix,context());
+			context().createInterfaceWithString(objRecorder,recorderName);
+
+
+		}
+
+		virtual ~Component()
+		{
+		}
 
 	private:
 
-	  std::string prefix;
-	  Ice::CommunicatorPtr communicator;
+		Ice::ObjectPtr objRecorder;
+	};
 
-};
+} //namespace
 
+int main(int argc, char** argv)
+{
 
-class RecorderApp: public virtual Ice::Application{
-public:
-	RecorderApp() :Ice::Application() {}
+	RecorderProcess::Component component;
 
-  virtual int run(int, char*[]) {
-
-    std::string srvName = "RecorderApp";
-    Ice::CommunicatorPtr comm = communicator();
-    Ice::PropertiesPtr prop = comm->getProperties();
-
-    /*adapter to keep all the objects*/
-    Ice::ObjectAdapterPtr adapter = comm->createObjectAdapter(srvName);
-
-    /*VarColorI object, added with name varcolorA*/
-    std::string objPrefix = srvName + ".Recorder.";
-
-    try{
-      Ice::ObjectPtr object = new RecorderI(objPrefix,comm);
-
-      adapter->add(object,
-		   comm->stringToIdentity(prop->getPropertyWithDefault(objPrefix+"Id",
-								       "recordManager1")));
-
-      adapter->activate();
-      comm->waitForShutdown();
-
-    }catch(jderobot::JderobotException e){
-      std::cerr << "Exception raised: " << e.what << std::endl;
-    }
-    if (interrupted())
-      std::cerr << appName() << ": received signal, shutting down" << std::endl;
-    return 0;
-  }
-};
-
-int main(int argc, char** argv){
-	RecorderApp app;
-
-	app.main(argc,argv);
+	jderobotice::Application app(component);
+	return app.jderobotMain(argc,argv);
 }
 
