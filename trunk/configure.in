@@ -1119,6 +1119,16 @@ if test "x$enable_schemas_naooperator" != xno; then
 	[AC_MSG_FAILURE([--enable-schemas-naooperator was given, but there was errors: $NAOOPERATOR_PKG_ERRORS])])
 fi
 
+dnl # schema domoticdemo
+AM_CONDITIONAL([ENABLE_DOMOTICDEMO],[false])
+if test "x$enable_schemas_domoticdemo" != xno; then
+    AC_MSG_NOTICE([**** Checking schema domoticdemo:])
+    PKG_CHECK_MODULES([DOMOTICDEMO],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0 opencv],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS domoticdemo"
+	    AM_CONDITIONAL([ENABLE_DOMOTICDEMO],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-domoticdemo was given, but there was errors: $DOMOTICDEMO_PKG_ERRORS])])
+fi
+
 
 dnl ########################################
 dnl #
@@ -1217,7 +1227,8 @@ AC_CONFIG_FILES([schemas/Makefile \
     schemas/wiimote_viewer/Makefile \
     schemas/wiioperator/Makefile \
     schemas/x10_controller/Makefile \
-    schemas/naooperator/Makefile ]) 
+    schemas/naooperator/Makefile \
+    schemas/domoticdemo/Makefile ]) 
 dnl # generate docs Makefiles
 AC_CONFIG_FILES([docs/Makefile])
 dnl # generate examples Makefiles

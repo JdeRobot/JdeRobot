@@ -15,7 +15,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- *  Authors : José María Cañas Plaza <jmplaza@gsyc.escet.urjc.es>
+ *  Authors : José Antonio Santos Cadenas <santoscadenas@gmail.com>
+ * 	      Sara Marugán Alonso <smarugan@gsyc.es>
  */
 
 extern void x10_controller_init(char *configfile);

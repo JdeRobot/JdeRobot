@@ -16,13 +16,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors : José Antonio Santos Cadenas <santoscadenas@gmail.com>
+ * 	      Sara Marugán Alonso <smarugan@gsyc.es>
  */
 
-#include "jde.h"
-#include "x10_controller.h"
-#include "graphics_gtk.h"
-#include <x10.h>
-
+#include <jde.h>
+#include <x10_controller.h>
+#include <graphics_gtk.h>
+#include <interfaces/x10.h>
 #include <sys/time.h>
 #include <time.h>
 
@@ -44,7 +44,8 @@ arbitration x10_controller_callforarbitration;
 int x10_controller_cycle=30; /* ms */
 
 /* Imported symbols*/
-t_iface *x10=NULL;
+X10Iface *x10=NULL;
+X10Events *x10_events=NULL;
 runFn x10_run=NULL;
 stopFn x10_stop=NULL;
 
@@ -85,6 +86,7 @@ void on_apply_clicked(GtkButton *button, gpointer user_data){
    char *property;
    char *house, *item, code[5];
    char message[MSG_LEN];
+   int s;
    property=(char *)gtk_combo_box_get_active_text(
              (GtkComboBox *)glade_xml_get_widget(xml, "property"));
    house=(char *)gtk_combo_box_get_active_text(
@@ -93,7 +95,20 @@ void on_apply_clicked(GtkButton *button, gpointer user_data){
              (GtkComboBox *)glade_xml_get_widget(xml, "item_number"));
    snprintf (code, 5, "%s%s", house, item);
 
-   if (strcmp(property,"bright")==0 || strcmp(property,"dim")==0){
+   if(strcmp(property,"get_status")==0){
+      if ((s=x10->get_status(code))==-1){
+         snprintf (message, MSG_LEN, "Error launching %s, %s", property, code);
+      }
+      else{
+         if(s==0){
+         	snprintf (message, MSG_LEN, "Device status is OFF");
+	 }
+	 else{
+         	snprintf (message, MSG_LEN, "Device status is ON");
+         }
+      }
+   }
+   else if (strcmp(property,"bright")==0 || strcmp(property,"dim")==0){
       int level;
       char *s_level;
       s_level=(char *)gtk_combo_box_get_active_text(
@@ -119,6 +134,34 @@ void on_apply_clicked(GtkButton *button, gpointer user_data){
                        context,
                        message);
    n_msg++;
+}
+
+void on_monitor_clicked(GtkToggleButton *button, gpointer user_data){
+   char message[MSG_LEN];
+   int s;
+   unsigned int clock;
+   int n_events=0; 
+
+   if ((s=x10->start_monitor())==-1){
+		snprintf (message, MSG_LEN, "Error launching monitor");
+   }
+   else{
+	   	clock=0;
+		printf("x10_controller: monitor on\n");
+	   	while(n_events<5){ // recoge 5 eventos y para el monitor
+			if(clock!=*(x10_events->clock)){
+				printf("x10_controller: nuevo evento -> %s está ",x10_events->unit);
+				if(*(x10_events->status)==0)
+					printf("off\n");
+				else
+					printf("on\n");
+				clock=*(x10_events->clock);
+				n_events++;
+			}
+	   	}
+	        x10->stop_monitor();
+		printf("x10_controller: monitor off\n");
+   }
 }
 
 
@@ -154,8 +197,12 @@ void x10_controller_iteration(){
 }
 
 /*Importar símbolos*/
-void x10_controller_imports(){
-   x10=(t_iface *)myimport ("x10","x10");
+void x10_controller_imports(){ 
+   x10=(X10Iface *)myimport ("x10","x10Iface");
+   x10_events=(X10Events *)myimport("x10","x10Events");
+   if(x10_events==NULL){
+	fprintf(stderr, "x10_controller ERROR: I can't import symbol x10Events\n");
+   }  
    x10_run=(runFn)myimport ("x10","run");
    x10_stop=(stopFn)myimport ("x10","stop");
 
@@ -373,6 +420,8 @@ void x10_controller_show(void){
                           G_CALLBACK(on_delete_window), NULL);
          g_signal_connect(G_OBJECT(glade_xml_get_widget(xml, "apply")), "clicked",
                           G_CALLBACK(on_apply_clicked), NULL);
+         g_signal_connect(G_OBJECT(glade_xml_get_widget(xml, "monitor")), "clicked",
+                          G_CALLBACK(on_monitor_clicked), NULL);
       }
       
       gtk_widget_hide((GtkWidget *)(glade_xml_get_widget(xml, "level_label")));
