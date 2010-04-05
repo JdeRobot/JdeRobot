@@ -54,11 +54,15 @@ module jderobot
   	
   	interface Recorder
   	{
-		//! Returns: 0 if all was ok
-		//          -1 if was some error
+		//! Returns: ID of recording if all was ok
+		//           -1 in other case
 		
 		["ami"] int startRecording (RecorderConfig recConfig); 
 		
+		//! Returns: 0 if all was ok
+		//           -1 in other case        
+		int stopRecording (int idRecording);
+		 
   	};
 
 }; /* module */

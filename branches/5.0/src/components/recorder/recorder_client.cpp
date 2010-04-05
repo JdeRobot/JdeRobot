@@ -27,13 +27,21 @@
 #include <jderobot/recorder.h>
 #include <stdlib.h>
 
+int mResult;
 
 class AMI_Recorder_startRecordingI : public jderobot::AMI_Recorder_startRecording
 {
 public:
+
+	int getResult()
+	{
+		return mResult;
+	}
+
     virtual void ice_response(const Ice::Int result)
     {
         std::cout << "Received the result (PID): " << result << std::endl;
+        mResult = result;
 
     }
     virtual void ice_exception(const Ice::Exception& ex)
@@ -44,6 +52,8 @@ public:
             std::cerr << "recorder failed: " << e << std::endl;
         }
     }
+
+
 };
 
 
@@ -80,6 +90,12 @@ int main(int argc, char** argv){
 
     // Async call
     recorderPrx->startRecording_async(cb, recConfig);
+
+    sleep(10);
+
+    std::cout << "Send stop Recording " << mResult << std::endl;
+
+    recorderPrx->stopRecording(mResult);
 
     std::cout << "End!" << std::endl;
 

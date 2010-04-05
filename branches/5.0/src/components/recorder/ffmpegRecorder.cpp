@@ -21,6 +21,7 @@
 
 #include "ffmpegRecorder.h"
 #include <unistd.h>
+#include <signal.h>
 
 void *record_function( void *ptr );
 
@@ -49,7 +50,7 @@ int ffmpegRecorder::startRecording()
 
 	resolution = getConfig()->width + "x" + getConfig()->height;
 
-	char *parmList[] = {"ffmpeg","-y","-f","alsa","-r","16000","-f",
+	char *parmList[] = {"ffmpeg","-loglevel","quiet","-y","-f","alsa","-r","16000","-f",
 						(char*) v4lVersion.c_str(),"-s",(char*) resolution.c_str(),
 						"-i",(char*) (getConfig()->v4lDevice).c_str(),
 						"-r",(char*) getConfig()->frameRate.c_str(),
@@ -100,7 +101,8 @@ int ffmpegRecorder::startRecording()
 int ffmpegRecorder::stopRecording()
 {
 
-	return 0;
+	return kill(getId(), SIGKILL );
+
 }
 
 

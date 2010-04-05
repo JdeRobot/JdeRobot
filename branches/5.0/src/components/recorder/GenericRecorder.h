@@ -50,7 +50,7 @@ class GenericRecorder
 		jderobotice::Context getContext(){ return mContext; };
 
 
-		virtual int endRecording() {};
+		virtual int stopRecording() {};
 
 
 

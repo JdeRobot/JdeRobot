@@ -50,21 +50,43 @@ namespace RecorderProcess {
 	    	  myRecorder->setConfig(recConfig);
 	    	  myRecorder->startRecording();
 
+	    	  IceUtil::Mutex::Lock sync(listMutex);
+	    	  recList.push_back(myRecorder);
+
 	    	  // Return de Id of recording (id == pid)
 	    	  return myRecorder->getId();
 
 		  }
 
-		private:
+		  virtual Ice::Int stopRecording (Ice::Int recId, const Ice::Current& c)
+		  {
+			  IceUtil::Mutex::Lock sync(listMutex);
 
-		  // IceUtil::Mutex::Lock sync(requestsMutex);
+			  for (unsigned int i=0; i<recList.size(); i++)
+			  {
+				  if (recList[i]->getId() == recId)
+				  {
+					  recList[i]->stopRecording();
+					  delete (recList[i]);
+					  recList.erase(recList.begin()+i);
+
+					  return 0;
+				  }
+			  }
+
+			  context.tracer().info("Recorder::stopRecording - Warning: the recordId was not found!");
+
+			  return 1;
+		  }
+
+		private:
 
 		  std::string prefix;
 		  jderobotice::Context context;
 
+		  IceUtil::Mutex listMutex;
 		  std::vector<GenericRecorder*> recList;
 
-		  IceUtil::Mutex listMutex;
 	};
 
 
