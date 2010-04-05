@@ -25,6 +25,7 @@
 #include "GenericRecorder.h"
 #include <jderobotice/component.h>
 #include <jderobotice/application.h>
+#include <pthread.h>
 
 class ffmpegRecorder : public GenericRecorder
 {
@@ -33,12 +34,14 @@ class ffmpegRecorder : public GenericRecorder
 		/// \brief Recorder
 		ffmpegRecorder(const jderobotice::Context& context);
 
-		int startRecording();
-
 		int stopRecording();
+
+		int startRecording();
 
 	private:
 
+
+		pthread_t m_thread;
 };
 
 #endif FFMPEG_RECORDER_H

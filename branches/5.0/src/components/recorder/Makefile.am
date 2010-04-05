@@ -16,7 +16,7 @@ recorder_client_SOURCES = recorder_client.cpp
 
 recorder_client_CXXFLAGS = -I$(top_srcdir)/src/interfaces/cpp $(LIBJDEROBOTICE_CPPFLAGS)
 
-recorder_client_LDFLAGS =  $(LIBICE) $(LIBICEUTIL) $(RECORDER_LIBS)
+recorder_client_LDFLAGS =  $(LIBICE) $(LIBICEUTIL) $(RECORDER_LIBS) -pthread
 
 recorder_client_LDADD = $(top_srcdir)/src/interfaces/cpp/jderobot/libJderobotInterfaces.la \
 		 		 $(top_srcdir)/src/libs/jderobotice/libJderobotIce.la 

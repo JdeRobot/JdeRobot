@@ -30,6 +30,18 @@ module jderobot
   	
   	class RecorderConfig
   	{
+  		// V4L version: v4l | v4l2
+  		string v4lVersion;
+  		
+  		// V4L device
+  		string v4lDevice;
+  		
+  		// Height resolution
+  		string height;
+  		
+  		// Width resolution
+  		string width;
+  		
   		// File system path
   		string path;
   		
@@ -45,8 +57,7 @@ module jderobot
 		//! Returns: 0 if all was ok
 		//          -1 if was some error
 		
-		int startRecording (RecorderConfig recConfig);
-		
+		["ami"] int startRecording (RecorderConfig recConfig); 
 		
   	};
 

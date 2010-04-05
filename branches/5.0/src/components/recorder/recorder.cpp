@@ -23,7 +23,11 @@
 #include <jderobot/recorder.h>
 #include <jderobotice/component.h>
 #include <jderobotice/application.h>
+#include <list>
+
 #include "ffmpegRecorder.h"
+
+#include <gbxsickacfr/gbxiceutilacfr/safethread.h>
 
 namespace RecorderProcess {
 
@@ -37,21 +41,30 @@ namespace RecorderProcess {
 
 		  }
 
+
 		  virtual Ice::Int startRecording(const jderobot::RecorderConfigPtr& recConfig,
 										  const Ice::Current& c)
 		  {
 
-			 ffmpegRecorder* myRecorder = new ffmpegRecorder(context);
-			 myRecorder->setConfig(recConfig);
-			 myRecorder->startRecording();
-			 return 0;
+	    	  ffmpegRecorder* myRecorder = new ffmpegRecorder(context);
+	    	  myRecorder->setConfig(recConfig);
+	    	  myRecorder->startRecording();
+
+	    	  // Return de Id of recording (id == pid)
+	    	  return myRecorder->getId();
+
 		  }
 
 		private:
 
+		  // IceUtil::Mutex::Lock sync(requestsMutex);
+
 		  std::string prefix;
 		  jderobotice::Context context;
 
+		  std::vector<GenericRecorder*> recList;
+
+		  IceUtil::Mutex listMutex;
 	};
 
 

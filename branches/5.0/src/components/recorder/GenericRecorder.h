@@ -26,14 +26,19 @@
 #include <jderobot/recorder.h>
 #include <jderobotice/component.h>
 #include <jderobotice/application.h>
-
+#include <IceUtil/Thread.h>
 
 class GenericRecorder
 {
 
 	public:
 		/// \brief Constructor
-		GenericRecorder(const jderobotice::Context& context) : mContext(context),mRecConfig(NULL) {};
+		GenericRecorder(const jderobotice::Context& context) : mContext(context),mRecConfig(NULL), mId() {};
+
+
+		void setId (int id) {mId = id;};
+
+		int getId () { return mId; };
 
 		/// \brief Get the config about the recording
 		jderobot::RecorderConfigPtr getConfig() { return mRecConfig; };
@@ -41,17 +46,22 @@ class GenericRecorder
 		/// \brief Set recording config
 		void setConfig (const jderobot::RecorderConfigPtr& recConfig) { mRecConfig = recConfig; };
 
+
 		jderobotice::Context getContext(){ return mContext; };
 
-		virtual int starRecording() {};
 
 		virtual int endRecording() {};
 
 
+
 	private:
+
+		virtual int starRecording() {};
 
 		jderobot::RecorderConfigPtr mRecConfig;
 		jderobotice::Context mContext;
+
+		int mId;
 };
 
 #endif GENERIC_RECORDER_H

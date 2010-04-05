@@ -27,6 +27,27 @@
 #include <jderobot/recorder.h>
 #include <stdlib.h>
 
+
+class AMI_Recorder_startRecordingI : public jderobot::AMI_Recorder_startRecording
+{
+public:
+    virtual void ice_response(const Ice::Int result)
+    {
+        std::cout << "Received the result (PID): " << result << std::endl;
+
+    }
+    virtual void ice_exception(const Ice::Exception& ex)
+    {
+        try {
+            ex.ice_throw();
+        } catch (const Ice::LocalException& e) {
+            std::cerr << "recorder failed: " << e << std::endl;
+        }
+    }
+};
+
+
+
 int main(int argc, char** argv){
   int status;
   Ice::CommunicatorPtr ic;
@@ -45,12 +66,22 @@ int main(int argc, char** argv){
       throw "Invalid proxy (recorder)";
 
 
+    // Set the recording config
     jderobot::RecorderConfigPtr recConfig = new  jderobot::RecorderConfig();
-    recConfig->path = "/tmp/tmp";
+    recConfig->v4lVersion = "v4l";
+    recConfig->v4lDevice = "/dev/video0";
     recConfig->frameRate = "25.0";
+    recConfig->height = "240";
+    recConfig->width = "320";
+    recConfig->path = "/tmp/video.mpg";
     recConfig->time = 60;
 
-    recorderPrx->startRecording(recConfig);
+    jderobot::AMI_Recorder_startRecordingPtr cb = new AMI_Recorder_startRecordingI;
+
+    // Async call
+    recorderPrx->startRecording_async(cb, recConfig);
+
+    std::cout << "End!" << std::endl;
 
 
   }catch (const Ice::Exception& ex) {
