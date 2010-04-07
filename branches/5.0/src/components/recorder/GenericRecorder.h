@@ -50,13 +50,15 @@ class GenericRecorder
 		jderobotice::Context getContext(){ return mContext; };
 
 
-		virtual int stopRecording() {};
+		int startRecording();
+
+		int stopRecording();
 
 
 
 	private:
 
-		virtual int starRecording() {};
+		virtual int doRecording() {};
 
 		jderobot::RecorderConfigPtr mRecConfig;
 		jderobotice::Context mContext;

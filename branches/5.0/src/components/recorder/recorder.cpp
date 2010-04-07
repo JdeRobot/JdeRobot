@@ -27,8 +27,6 @@
 
 #include "ffmpegRecorder.h"
 
-#include <gbxsickacfr/gbxiceutilacfr/safethread.h>
-
 namespace RecorderProcess {
 
 	class RecorderI: public jderobot::Recorder
@@ -48,8 +46,10 @@ namespace RecorderProcess {
 
 	    	  ffmpegRecorder* myRecorder = new ffmpegRecorder(context);
 	    	  myRecorder->setConfig(recConfig);
+
 	    	  myRecorder->startRecording();
 
+	    	  std::cout << "Insert in list" << std::endl;
 	    	  IceUtil::Mutex::Lock sync(listMutex);
 	    	  recList.push_back(myRecorder);
 
@@ -61,14 +61,24 @@ namespace RecorderProcess {
 		  virtual Ice::Int stopRecording (Ice::Int recId, const Ice::Current& c)
 		  {
 			  IceUtil::Mutex::Lock sync(listMutex);
+			  std::cout << "recList.size()=" << recList.size() << std::endl;
+
 
 			  for (unsigned int i=0; i<recList.size(); i++)
 			  {
+
+				  std::cout << "recList[i]->getId(): " << recList[i]->getId() << " - recId: " << recId << std::endl;
+
 				  if (recList[i]->getId() == recId)
 				  {
+					  std::cout << "Recorder::stopRecording, detele recording objetc ..." << std::endl;
 					  recList[i]->stopRecording();
+					  std::cout << "antes del delete" << std::endl;
 					  delete (recList[i]);
+					  std::cout << "antes del erase" << std::endl;
 					  recList.erase(recList.begin()+i);
+
+					  std::cout << "recList.size()=" << recList.size() << std::endl;
 
 					  return 0;
 				  }

@@ -22,6 +22,8 @@
 #include "ffmpegRecorder.h"
 #include <unistd.h>
 #include <signal.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 
 void *record_function( void *ptr );
 
@@ -30,7 +32,7 @@ ffmpegRecorder::ffmpegRecorder(const jderobotice::Context& context) : GenericRec
 
 }
 
-int ffmpegRecorder::startRecording()
+int ffmpegRecorder::doRecording()
 {
 
 
@@ -57,53 +59,13 @@ int ffmpegRecorder::startRecording()
 						"-f","avi","-vcodec","mpeg4","-vtag","xvid","-sameq","-acodec","libmp3lame","-ab","96k",
 						(char*) (getConfig()->path).c_str(),NULL};
 
-	pid_t pid;
-
-	int descPipe [2];
-	pipe (descPipe);
-	char buffer[100];
-
-	if ( fork()==0 )
-	{
-		/* 0 it's read side */
-		close (descPipe[0]);
-
-		// Obtain the PID
-		int mypid = getpid();
-		std::cout << "PID= " << mypid << std::endl;
-
-		// Send my PID to father
-		write (descPipe[1], &mypid, sizeof(int));
-
-		// Execute command
-		execv("/usr/bin/ffmpeg", parmList);
-		return -1;
-	}
-	else
-	{
-		int pid_child = 0;
-
-		/* 0 it's write side */
-		close (descPipe[1]);
-
-		// Read the PID
-		read (descPipe[0], &pid_child, sizeof(int));
-
-		std::cout << "Soy el padre:" << pid_child << std::endl;
-		setId(pid_child);
-
-		return pid_child;
-	}
+	// Execute command
+	execv("/usr/bin/ffmpeg", parmList);
 
 
 }
 
-int ffmpegRecorder::stopRecording()
-{
 
-	return kill(getId(), SIGKILL );
-
-}
 
 
 
