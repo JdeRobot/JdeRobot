@@ -30,6 +30,9 @@ module jderobot
   	
   	class RecorderConfig
   	{
+  		// Recording id;
+  		int id;
+  		
   		// V4L version: v4l | v4l2
   		string v4lVersion;
   		
@@ -57,7 +60,7 @@ module jderobot
 		//! Returns: ID of recording if all was ok
 		//           -1 in other case
 		
-		["ami"] int startRecording (RecorderConfig recConfig); 
+		["ami"] RecorderConfig startRecording (RecorderConfig recConfig); 
 		
 		//! Returns: 0 if all was ok
 		//           -1 in other case        

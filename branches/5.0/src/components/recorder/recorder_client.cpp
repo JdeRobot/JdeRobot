@@ -38,12 +38,12 @@ public:
 		return mResult;
 	}
 
-    virtual void ice_response(const Ice::Int result)
-    {
-        std::cout << "Received the result (PID): " << result << std::endl;
-        mResult = result;
+	virtual void ice_response(const jderobot::RecorderConfigPtr& recConfig)
+	{
+		  std::cout << "Recording with PID: " << recConfig->id  << " starting correctly!" << std::endl;
+		  mResult = recConfig->id;
+	}
 
-    }
     virtual void ice_exception(const Ice::Exception& ex)
     {
         try {

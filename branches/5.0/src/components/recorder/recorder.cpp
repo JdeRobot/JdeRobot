@@ -40,7 +40,7 @@ namespace RecorderProcess {
 		  }
 
 
-		  virtual Ice::Int startRecording(const jderobot::RecorderConfigPtr& recConfig,
+		  virtual jderobot::RecorderConfigPtr startRecording(const jderobot::RecorderConfigPtr& recConfig,
 										  const Ice::Current& c)
 		  {
 
@@ -54,7 +54,13 @@ namespace RecorderProcess {
 	    	  recList.push_back(myRecorder);
 
 	    	  // Return de Id of recording (id == pid)
-	    	  return myRecorder->getId();
+
+	    	  jderobot::RecorderConfigPtr rec = new jderobot::RecorderConfig();
+
+	    	  rec = recConfig;
+	    	  rec->id = myRecorder->getId();
+
+	    	  return rec;
 
 		  }
 
@@ -72,13 +78,10 @@ namespace RecorderProcess {
 				  if (recList[i]->getId() == recId)
 				  {
 					  std::cout << "Recorder::stopRecording, detele recording objetc ..." << std::endl;
-					  recList[i]->stopRecording();
-					  std::cout << "antes del delete" << std::endl;
-					  delete (recList[i]);
-					  std::cout << "antes del erase" << std::endl;
-					  recList.erase(recList.begin()+i);
 
-					  std::cout << "recList.size()=" << recList.size() << std::endl;
+					  recList[i]->stopRecording();
+					  delete (recList[i]);
+					  recList.erase(recList.begin()+i);
 
 					  return 0;
 				  }
