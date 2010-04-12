@@ -26,6 +26,5 @@ if test "x$enable_component_recordingserver" != xno; then
 	ENABLED_COMPONENTS="$ENABLED_SCHEMASCOMPONENTS recordingserver"
 	AM_CONDITIONAL([ENABLE_COMPONENT_RECORDINGSERVER],[true])
     fi
-    AC_LANG_POP([C++])
     AC_SUBST([RECORDINGSERVER_LIBS])
 fi
