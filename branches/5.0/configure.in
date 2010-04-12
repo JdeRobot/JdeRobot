@@ -100,6 +100,7 @@ m4_include([m4/component_opencvdemo.m4])
 m4_include([m4/component_alarmgenerator.m4])
 m4_include([m4/component_motiondetection.m4])
 m4_include([m4/component_recorder.m4])
+m4_include([m4/component_surveillance.m4])
 
 dnl#AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
 dnl#AC_PYTHON_DEVEL
@@ -146,6 +147,7 @@ AC_CONFIG_FILES([src/components/Makefile \
     src/components/opencvdemo/Makefile \
     src/components/recordingserver/Makefile \
     src/components/recorder/Makefile \
+    src/components/surveillance/Makefile \
     src/components/alarmgenerator/Makefile \
     src/components/motiondetection/Makefile \
     src/components/motiondetection/test/Makefile ])
