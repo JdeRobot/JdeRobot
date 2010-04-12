@@ -24,11 +24,13 @@
 #include <jderobot/recording.h>
 #include "libRecordingLog/RecordingLog.h"
 
+int descPipe [2];
+
 class RecordingI: public jderobot::RecordingManager
 {
 public:
 	  RecordingI(std::string& prefix, Ice::CommunicatorPtr& communicator)
-	    :prefix(prefix),communicator(communicator), recLog(NULL)
+	    :prefix(prefix),communicator(communicator), recLog(NULL), mRecorderPrx(NULL)
 	  {
 
 	  }
@@ -63,7 +65,97 @@ public:
 	  }
 
 
+	  virtual Ice::Int startRecording(const jderobot::RecorderConfigPtr& recConfig, const Ice::Current&)
+	  {
+		  recLog = initRecordingHandler();
+
+		  std::cout << &recConfig << std::endl;
+
+		  jderobot::AMI_Recorder_startRecordingPtr cb = new AMI_Recorder_startRecordingI;
+		  getRecorderProxy()->startRecording_async(cb, recConfig);
+
+		  int pid_rec;
+
+		  // Read the PID
+		  read (descPipe[0], &pid_rec, sizeof(int));
+
+		  std::cout << "Receive PID by pipe: " << pid_rec << std::endl;
+		  recConfig->id = pid_rec;
+
+		  // Log recording
+		  recLog->startRecording(recConfig);
+
+		  IceUtil::Mutex::Lock sync(listMutex);
+		  recList.push_back(recConfig);
+
+		  return pid_rec;
+	  }
+
+	  virtual Ice::Int stopRecording(Ice::Int recId, const Ice::Current&)
+	  {
+		  recLog = initRecordingHandler();
+
+		  std::cout << "Recording with PID: " << recId << " is being stopping!" << std::endl;
+		  if (recId>0)
+		  {
+			  getRecorderProxy()->stopRecording(recId);
+			  recLog->endRecording(recId);
+		  }
+	  }
+
 private:
+
+	  IceUtil::Mutex listMutex;
+	  std::vector<jderobot::RecorderConfigPtr> recList;
+
+	  // Private class to obtain the response of recording
+	  class AMI_Recorder_startRecordingI : public jderobot::AMI_Recorder_startRecording
+	  {
+		  public:
+
+			  virtual void ice_response(const jderobot::RecorderConfigPtr& recConfig)
+			  {
+				  std::cout << "Recording with PID: " << recConfig->id  << " starting correctly!" << std::endl;
+
+				  int rec_id = recConfig->id;
+
+				  std::cout << "Send PID by pipe: " << rec_id << std::endl;
+
+				  write (descPipe[1],&rec_id, sizeof(int));
+
+			  }
+
+			  virtual void ice_exception(const Ice::Exception& ex)
+			  {
+				  try {
+					  ex.ice_throw();
+				  } catch (const Ice::LocalException& e) {
+					  std::cerr << "recorder failed: " << e << std::endl;
+				  }
+			  }
+	  };
+
+
+
+	  // Private method to obtain the proxy to recorder component
+	  jderobot::RecorderPrx getRecorderProxy ()
+	  {
+		  if (mRecorderPrx != NULL)
+			  return mRecorderPrx;
+
+		  // Get Proxy to RecordingManager
+		  Ice::ObjectPrx base = communicator->propertyToProxy("RecordingSrv.Recorder.Proxy");
+		  if (0==base)
+			throw "Could not create proxy (recorder)";
+
+		  /* Cast to RecordingManagerPrx */
+		  mRecorderPrx = jderobot::RecorderPrx::checkedCast(base);
+		  if (0==mRecorderPrx)
+			throw "Invalid proxy (recorder)";
+
+
+		  return mRecorderPrx;
+	  }
 
 	  RecordingLog* initRecordingHandler()
 	  {
@@ -79,6 +171,7 @@ private:
 		  return recLog;
 	  }
 
+	  jderobot::RecorderPrx mRecorderPrx;
 	  RecordingLog* recLog;
 	  std::string prefix;
 	  Ice::CommunicatorPtr communicator;
@@ -90,6 +183,8 @@ public:
 	RecordingSrvApp() :Ice::Application() {}
 
   virtual int run(int, char*[]) {
+
+	pipe (descPipe);
 
     std::string srvName = "RecordingSrv";
     Ice::CommunicatorPtr comm = communicator();

@@ -30,6 +30,7 @@
 #include <mysql++/mysql++.h>
 
 #include <jderobot/recording.h>
+#include <jderobot/recorder.h>
 
 using namespace std;
 
@@ -59,16 +60,13 @@ public:
 				  string pass);
 
 	/// \brief Save in bbdd information when recording begins
-	/// \param name
-	/// \param filenam
 	/// \return Identifier of bbdd (use it when saveEndRecording is called)
-	int startRecording (string name,
-						string filename);
+	int startRecording (const jderobot::RecorderConfigPtr& recConfig);
 
 
 	/// \brief Save in bbdd information when recording stops
 	/// \param id
-	bool endRecording ();
+	bool endRecording (int recordingId);
 
 
 	/// \brief Save in bbdd the information about an event

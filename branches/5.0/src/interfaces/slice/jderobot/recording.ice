@@ -1,3 +1,5 @@
+
+
 /*
  *
  *  Copyright (C) 1997-2010 JDE Developers Team
@@ -24,6 +26,7 @@
 
 
 #include <jderobot/common.ice>
+#include <jderobot/recorder.ice>
 
 module jderobot {
 
@@ -88,7 +91,7 @@ module jderobot {
 		//! Returns the list of recordings
 		idempotent RecordingSequence getRecordings();
 		
-		//! Return the recording event list
+		//! Return the event list of recording
 		EventSequence getEventsOfRecording (int recordingId);
 		
 		//! Set an alarm event
@@ -96,6 +99,13 @@ module jderobot {
 		
 		//! Get event
 		RecordingEvent getEvent (int eventId);
+		
+		//! Start recording
+		int startRecording (RecorderConfig recConfig);
+		
+		//! Returns: 0 if all was ok
+		//           -1 in other case        
+		int stopRecording (int idRecording);
 		
   	};
 

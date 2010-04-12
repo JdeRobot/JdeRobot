@@ -82,14 +82,15 @@ bool RecordingLog::finalize ()
 }
 
 
-int RecordingLog::startRecording (string name,
-									  string filename)
+int RecordingLog::startRecording (const jderobot::RecorderConfigPtr& recConfig)
 {
-
+	std::stringstream sid;
 	mysqlpp::DateTime nowTime = mysqlpp::DateTime::now();
 
-    string s_query = "INSERT INTO " + BBDD_RECORDINGS + " (name,file,start,end) VALUES ";
-	s_query += "('" + name + "','" + filename + "'," + nowTime.str() + ",NULL)" ;
+	sid << recConfig->id;
+
+    string s_query = "INSERT INTO " + BBDD_RECORDINGS + " (id_rec,name,video_file,begin_time,end_time) VALUES ";
+	s_query += "(" + sid.str() + ",'" + "rec" + "','" + recConfig->path + "'," + nowTime.str() + ",NULL)" ;
 
 	cout << s_query << endl;
 
@@ -108,7 +109,7 @@ int RecordingLog::startRecording (string name,
 
 }
 
-bool RecordingLog::endRecording ()
+bool RecordingLog::endRecording (int recordingId)
 {
 
 	string s_id;
@@ -116,11 +117,13 @@ bool RecordingLog::endRecording ()
 
 	mysqlpp::DateTime nowTime = mysqlpp::DateTime::now();
 
-	out << m_recordingId;
+	out << recordingId;
 	s_id = out.str();
 
-	string s_query = " UPDATE " + BBDD_RECORDINGS + " SET end=" + nowTime.str();
-	s_query +=        " WHERE id=" + s_id;
+	string s_query = " UPDATE " + BBDD_RECORDINGS + " SET end_time=" + nowTime.str();
+	s_query +=        " WHERE id_rec=" + s_id;
+
+	std::cout << s_query << std::endl;
 
 	mysqlpp::Query query = m_conn->query (s_query);
 	mysqlpp::SimpleResult res = query.execute();
@@ -129,7 +132,7 @@ bool RecordingLog::endRecording ()
 	if ( !res)
 	{
 		cerr << "Failed to update in table: " << query.error() << endl;
-		return 0;
+		return true;
 	}
 
 	return false;
