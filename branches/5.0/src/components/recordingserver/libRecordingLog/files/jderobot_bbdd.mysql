@@ -30,14 +30,24 @@ CREATE TABLE `recording_events` (
   `producer` int(11) NOT NULL,
   `resource` int(11) NOT NULL,
   `comments` varchar(1000) NOT NULL,
-  `image_file` varchar(1000) NOT NULL,
+  `path_image` varchar(500) NOT NULL,
+  `image` blob NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `recording_id` (`recording_id`,`type`,`producer`,`resource`),
   KEY `type` (`type`),
   CONSTRAINT `recording_events_ibfk_1` FOREIGN KEY (`recording_id`) REFERENCES `recording_recordings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `recording_events_ibfk_2` FOREIGN KEY (`type`) REFERENCES `recording_type_events` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `recording_events`
+--
+
+LOCK TABLES `recording_events` WRITE;
+/*!40000 ALTER TABLE `recording_events` DISABLE KEYS */;
+/*!40000 ALTER TABLE `recording_events` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `recording_recordings`
@@ -48,14 +58,24 @@ DROP TABLE IF EXISTS `recording_recordings`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `recording_recordings` (
   `id` int(11) NOT NULL auto_increment,
+  `id_rec` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
   `video_file` varchar(1000) NOT NULL,
-  `begin_time` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `begin_time` timestamp NOT NULL default '0000-00-00 00:00:00',
   `end_time` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `frame_rate` int(11) NOT NULL,
+  `frame_rate` varchar(5) NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `recording_recordings`
+--
+
+LOCK TABLES `recording_recordings` WRITE;
+/*!40000 ALTER TABLE `recording_recordings` DISABLE KEYS */;
+/*!40000 ALTER TABLE `recording_recordings` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `recording_type_events`
@@ -90,4 +110,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2010-01-02 18:32:35
+-- Dump completed on 2010-04-12 16:15:39
