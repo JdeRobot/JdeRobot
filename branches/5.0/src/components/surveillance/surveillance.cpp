@@ -26,6 +26,9 @@
 #include <IceUtil/IceUtil.h>
 #include <jderobot/recorder.h>
 #include <jderobot/recording.h>
+#include <jderobotice/component.h>
+#include <jderobotice/application.h>
+
 
 
 int main(int argc, char** argv){
@@ -40,29 +43,56 @@ int main(int argc, char** argv){
     if (0==base)
       throw "Could not create proxy (RecordingManager)";
 
-    /*cast to RecordingManagerPrx*/
+    //cast to RecordingManagerPrx
     jderobot::RecordingManagerPrx recManagerPrx = jderobot::RecordingManagerPrx::checkedCast(base);
     if (0==recManagerPrx)
       throw "Invalid proxy (RecordingManager)";
 
+    //Get properties
 
-    // Set the recording config
-    jderobot::RecorderConfigPtr recConfig = new  jderobot::RecorderConfig();
-    recConfig->v4lVersion = "v4l";
-    recConfig->v4lDevice = "/dev/video0";
-    recConfig->frameRate = "12.5";
-    recConfig->height = "240";
-    recConfig->width = "320";
-    recConfig->path = "/tmp/video.mpg";
-    recConfig->time = 60;
+    Ice::PropertiesPtr prop = ic->getProperties();
 
-    int ret = recManagerPrx->startRecording(recConfig);
+    std::string dirRecordings = prop->getProperty("Surveillance.dirRecordings");
+    std::string namePatter = prop->getProperty("Surveillance.namePattern");
 
-    std::cout << "startRecording, ret = " << ret << std::endl;
+    std::string nameRecording = dirRecordings + namePatter;
 
-    sleep(10);
+    char nameFile[nameRecording.length()+1];
 
-    recManagerPrx->stopRecording(ret);
+    for (;;)
+    {
+		strncpy(nameFile,nameRecording.c_str(),nameRecording.length());
+		nameFile[nameRecording.length()]='\0';
+
+		int res = mkstemp(nameFile);
+		if (res==-1)
+		{
+				std::cerr << "Error in mktemp: Don't create fileName!" << std::endl;
+				return -1;
+		}
+
+		// Set the recording config
+		jderobot::RecorderConfigPtr recConfig = new  jderobot::RecorderConfig();
+		recConfig->name = prop->getProperty("Surveillance.name");
+		recConfig->v4lVersion = prop->getProperty("Surveillance.v4lVersion");
+		recConfig->v4lDevice = prop->getProperty("Surveillance.v4lDevice");
+		recConfig->frameRate = prop->getProperty("Surveillance.fps");
+		recConfig->height = prop->getProperty("Surveillance.height");
+		recConfig->width = prop->getProperty("Surveillance.width");
+		recConfig->path = nameFile;
+
+		std::string timeRecording = prop->getProperty("Surveillance.duration");
+
+		recConfig->duration = atoi(timeRecording.c_str())*60;
+
+		int recId = recManagerPrx->startRecording(recConfig);
+
+		std::cout << " [*] New Recording launched, PID = " << recId << " - " + timeRecording << " min." << std::endl;
+
+		sleep( recConfig->duration );
+
+		recManagerPrx->stopRecording(recId);
+    }
 
 
   }catch (const Ice::Exception& ex) {
@@ -75,5 +105,8 @@ int main(int argc, char** argv){
 
   if (ic)
     ic->destroy();
+
   return status;
 }
+
+
