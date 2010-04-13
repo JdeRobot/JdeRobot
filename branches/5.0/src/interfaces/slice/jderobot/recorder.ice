@@ -33,6 +33,12 @@ module jderobot
   		// Recording id;
   		int id;
   		
+  		// Recording name
+  		string name;
+  		
+  		// Recording camera proxy
+  		string cameraProxy;
+  		
   		// V4L version: v4l | v4l2
   		string v4lVersion;
   		
@@ -48,11 +54,17 @@ module jderobot
   		// File system path
   		string path;
   		
+  		//! TimeStamp to begin
+		Time beginTimeStamp;
+		
+		//! TimeStamp to end
+		Time endTimeStamp;
+		
   		//! FrameRate of recording
 		string frameRate;
 		
 		//! Seconds of recording
-		int time;
+		int duration;
   	};
   	
   	interface Recorder

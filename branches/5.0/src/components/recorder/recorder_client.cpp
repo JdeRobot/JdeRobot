@@ -84,7 +84,7 @@ int main(int argc, char** argv){
     recConfig->height = "240";
     recConfig->width = "320";
     recConfig->path = "/tmp/video.mpg";
-    recConfig->time = 60;
+    recConfig->duration = 60;
 
     jderobot::AMI_Recorder_startRecordingPtr cb = new AMI_Recorder_startRecordingI;
 
