@@ -89,10 +89,9 @@ int RecordingLog::startRecording (const jderobot::RecorderConfigPtr& recConfig)
 
 	sid << recConfig->id;
 
-    string s_query = "INSERT INTO " + BBDD_RECORDINGS + " (id_rec,name,video_file,begin_time,end_time) VALUES ";
-	s_query += "(" + sid.str() + ",'" + "rec" + "','" + recConfig->path + "'," + nowTime.str() + ",NULL)" ;
+    string s_query = "INSERT INTO " + BBDD_RECORDINGS + " (id_rec,name,video_file,begin_time,end_time,frame_rate) VALUES ";
+	s_query += "(" + sid.str() + ",'" + recConfig->name + "','" + recConfig->path + "'," + nowTime.str() + ",NULL,'" + recConfig->frameRate + "')" ;
 
-	cout << s_query << endl;
 
 	mysqlpp::Query query = m_conn->query (s_query);
 	mysqlpp::SimpleResult res = query.execute();
@@ -122,8 +121,6 @@ bool RecordingLog::endRecording (int recordingId)
 
 	string s_query = " UPDATE " + BBDD_RECORDINGS + " SET end_time=" + nowTime.str();
 	s_query +=        " WHERE id_rec=" + s_id;
-
-	std::cout << s_query << std::endl;
 
 	mysqlpp::Query query = m_conn->query (s_query);
 	mysqlpp::SimpleResult res = query.execute();

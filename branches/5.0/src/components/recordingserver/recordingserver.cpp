@@ -69,8 +69,6 @@ public:
 	  {
 		  recLog = initRecordingHandler();
 
-		  std::cout << &recConfig << std::endl;
-
 		  jderobot::AMI_Recorder_startRecordingPtr cb = new AMI_Recorder_startRecordingI;
 		  getRecorderProxy()->startRecording_async(cb, recConfig);
 
@@ -79,14 +77,13 @@ public:
 		  // Read the PID
 		  read (descPipe[0], &pid_rec, sizeof(int));
 
-		  std::cout << "Receive PID by pipe: " << pid_rec << std::endl;
 		  recConfig->id = pid_rec;
 
 		  // Log recording
 		  recLog->startRecording(recConfig);
 
-		  IceUtil::Mutex::Lock sync(listMutex);
-		  recList.push_back(recConfig);
+		  //IceUtil::Mutex::Lock sync(listMutex);
+		  //recList.push_back(recConfig);
 
 		  return pid_rec;
 	  }
@@ -95,7 +92,7 @@ public:
 	  {
 		  recLog = initRecordingHandler();
 
-		  std::cout << "Recording with PID: " << recId << " is being stopping!" << std::endl;
+		  std::cout << " [*] Recording with PID: " << recId << " is being stopping!\n" << std::endl;
 		  if (recId>0)
 		  {
 			  getRecorderProxy()->stopRecording(recId);
@@ -115,11 +112,9 @@ private:
 
 			  virtual void ice_response(const jderobot::RecorderConfigPtr& recConfig)
 			  {
-				  std::cout << "Recording with PID: " << recConfig->id  << " starting correctly!" << std::endl;
+				  std::cout << " [*] Recording with PID: " << recConfig->id  << " starting correctly!" << std::endl;
 
 				  int rec_id = recConfig->id;
-
-				  std::cout << "Send PID by pipe: " << rec_id << std::endl;
 
 				  write (descPipe[1],&rec_id, sizeof(int));
 
