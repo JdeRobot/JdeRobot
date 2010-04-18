@@ -107,6 +107,9 @@ module jderobot {
 		//           -1 in other case        
 		int stopRecording (int recordingId);
 		
+		//! Return: url to listen the streaming
+		//			null in other case
+		string startStreaming (int id); 
 		
   	};
 

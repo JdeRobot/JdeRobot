@@ -22,6 +22,7 @@
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
 #include <jderobot/recording.h>
+#include <jderobot/recorder.h>
 #include "libRecordingLog/RecordingLog.h"
 
 int descPipe [2];
@@ -30,7 +31,7 @@ class RecordingI: public jderobot::RecordingManager
 {
 public:
 	  RecordingI(std::string& prefix, Ice::CommunicatorPtr& communicator)
-	    :prefix(prefix),communicator(communicator), recLog(NULL), mRecorderPrx(NULL)
+	    :prefix(prefix),communicator(communicator), recLog(NULL), mRecorderPrx(NULL), mStreamingURI()
 	  {
 
 	  }
@@ -82,9 +83,6 @@ public:
 		  // Log recording
 		  recLog->startRecording(recConfig);
 
-		  //IceUtil::Mutex::Lock sync(listMutex);
-		  //recList.push_back(recConfig);
-
 		  return pid_rec;
 	  }
 
@@ -98,6 +96,32 @@ public:
 			  getRecorderProxy()->stopRecording(recId);
 			  recLog->endRecording(recId);
 		  }
+	  }
+
+	  virtual string startStreaming (Ice::Int id, const Ice::Current&)
+	  {
+
+		  recLog = initRecordingHandler();
+
+		  jderobot::RecorderConfigPtr myRec = recLog->getRecording(id);
+
+		  if (myRec != NULL)
+		  {
+			  // Launch VLC with the video streaming
+			  string vlc_command = "vlc -vvv " + myRec->path +" --play-and-exit -I dummy --sout '#transcode{vcodec=mp4v,acodec=aac}:rtp{dst=0.0.0.0,port=1234,sdp=" + getStreamingURI() +"}' & ";
+
+			  std::cout << vlc_command << std::endl;
+
+			  int ret = system (vlc_command.c_str());
+
+			  if (ret != -1)
+				  return getStreamingURI();
+			  else
+				  return NULL;
+
+		  }
+
+		  return NULL;
 	  }
 
 private:
@@ -130,6 +154,15 @@ private:
 			  }
 	  };
 
+
+	  string getStreamingURI ()
+	  {
+		  if (mStreamingURI.empty())
+			  mStreamingURI = communicator->getProperties()->getProperty("RecordingSrv.StreamingUri");
+
+
+		  return mStreamingURI;
+	  }
 
 
 	  // Private method to obtain the proxy to recorder component
@@ -166,6 +199,7 @@ private:
 		  return recLog;
 	  }
 
+	  string mStreamingURI;
 	  jderobot::RecorderPrx mRecorderPrx;
 	  RecordingLog* recLog;
 	  std::string prefix;

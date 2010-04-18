@@ -75,15 +75,19 @@ public:
 	bool saveRecordingEvent ( const jderobot::RecordingEventPtr& recEvent, int recordingId);
 
 
-
 	/// \brief Get all recordings
 	jderobot::RecordingSequence getAllRecording();
+
+	/// \brief Get Recording
+	jderobot::RecorderConfigPtr getRecording(int recordingId);
 
 	/// \brief Get Events of Recording
 	jderobot::EventSequence getEventsOfRecording (int recordingId);
 
 	/// \brief Get Event
 	jderobot::RecordingEventPtr getEvent (int eventId);
+
+
 
 private:
 

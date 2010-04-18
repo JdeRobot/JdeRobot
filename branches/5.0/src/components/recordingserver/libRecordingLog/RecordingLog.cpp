@@ -208,6 +208,8 @@ jderobot::RecordingSequence RecordingLog::getAllRecording()
 
 	string s_query = "SELECT * FROM " + BBDD_RECORDINGS + ";";
 
+	std::cout << s_query << std::endl;
+
 	mysqlpp::Query query = m_conn->query (s_query);
 	mysqlpp::UseQueryResult res = query.use();
 
@@ -221,17 +223,51 @@ jderobot::RecordingSequence RecordingLog::getAllRecording()
 
 }
 
-long RecordingLog::Date2TimeStamp(std::string date)
+jderobot::RecorderConfigPtr RecordingLog::getRecording(int recordingId)
 {
-	string s_query = "SELECT UNIX_TIMESTAMP('" + date + "');";
+
+	std::stringstream id;
+	id << recordingId;
+
+	string s_query = "SELECT * FROM " + BBDD_RECORDINGS + " WHERE id=" + id.str() + ";";
+
+	std::cout << s_query << std::endl;
 
 	mysqlpp::Query query = m_conn->query (s_query);
 	mysqlpp::UseQueryResult res = query.use();
 
+	if (res)
+			std::cout << "len: " << res.fetch_lengths() << std::endl;
+		else
+			std::cout << "res regulererrrrr" << std::endl;
+
 	if (mysqlpp::Row row = res.fetch_row())
 	{
-		std::cout << row[0] << std::endl;
-		return atol(row[0].c_str());
+		return Row2Recorder(row);
+	}
+
+	return NULL;
+
+}
+
+long RecordingLog::Date2TimeStamp(std::string date)
+{
+	string s_query = "SELECT UNIX_TIMESTAMP('" + date + "')";
+
+	std::cout << s_query << std::endl;
+
+	mysqlpp::Query query = m_conn->query (s_query);
+	mysqlpp::UseQueryResult res = query.use();
+
+	if (res)
+		std::cout << "len: " << res.fetch_lengths() << std::endl;
+	else
+		std::cout << "res regulererrrrr" << std::endl;
+
+	if (mysqlpp::Row row = res.fetch_row())
+	{
+		std::cout << row[1] << std::endl;
+		return atol(row[1].c_str());
 	}
 	return 0;
 }
@@ -265,10 +301,10 @@ jderobot::RecorderConfigPtr RecordingLog::Row2Recorder (mysqlpp::Row row)
 
 	rec->id = static_cast<int>(row["id"]);
 	rec->name = static_cast<std::string>(row["name"]);
-	rec->path = "unknow";
+	rec->path =  static_cast<std::string>(row["video_file"]);
 
-	rec->beginTimeStamp.seconds = Date2TimeStamp( static_cast<std::string> (row["begin_time"]) );
-	rec->endTimeStamp.seconds = Date2TimeStamp( static_cast<std::string> (row["end_time"]));
+	rec->beginTimeStamp.seconds = 0;// Date2TimeStamp( static_cast<std::string> (row["begin_time"]) );
+	rec->endTimeStamp.seconds = 0; //Date2TimeStamp( static_cast<std::string> (row["end_time"]));
 
 	rec->frameRate = static_cast<std::string>(row["frame_rate"]);
 
