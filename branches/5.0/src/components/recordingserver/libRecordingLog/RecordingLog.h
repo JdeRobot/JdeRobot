@@ -89,6 +89,8 @@ private:
 
 	jderobot::RecordingEventPtr Row2RecordingEvent (mysqlpp::Row row, bool addImage);
 
+	jderobot::RecorderConfigPtr Row2Recorder (mysqlpp::Row row);
+
 	long Date2TimeStamp(std::string date);
 
 	mysqlpp::Connection* m_conn;

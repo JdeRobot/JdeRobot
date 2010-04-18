@@ -213,17 +213,7 @@ jderobot::RecordingSequence RecordingLog::getAllRecording()
 
 	while(mysqlpp::Row row = res.fetch_row())
 	{
-		jderobot::RecorderConfigPtr rec = new jderobot::RecorderConfig();
-
-		rec->id = static_cast<int>(row["id"]);
-		rec->name = static_cast<std::string>(row["name"]);
-		rec->path = "unknow";
-
-		rec->beginTimeStamp.seconds = Date2TimeStamp( static_cast<std::string> (row["begin_time"]) );
-		rec->endTimeStamp.seconds = Date2TimeStamp( static_cast<std::string> (row["end_time"]));
-
-		rec->frameRate = static_cast<std::string>(row["frame_rate"]);
-
+		jderobot::RecorderConfigPtr rec = Row2Recorder(row);
 		recList.push_back(rec);
 	}
 
@@ -265,6 +255,24 @@ jderobot::RecordingEventPtr RecordingLog::getEvent (int eventId)
 	mysqlpp::Row row = res.fetch_row();
 
 	return Row2RecordingEvent(row, true);
+
+}
+
+jderobot::RecorderConfigPtr RecordingLog::Row2Recorder (mysqlpp::Row row)
+{
+
+	jderobot::RecorderConfigPtr rec = new jderobot::RecorderConfig();
+
+	rec->id = static_cast<int>(row["id"]);
+	rec->name = static_cast<std::string>(row["name"]);
+	rec->path = "unknow";
+
+	rec->beginTimeStamp.seconds = Date2TimeStamp( static_cast<std::string> (row["begin_time"]) );
+	rec->endTimeStamp.seconds = Date2TimeStamp( static_cast<std::string> (row["end_time"]));
+
+	rec->frameRate = static_cast<std::string>(row["frame_rate"]);
+
+	return rec;
 
 }
 
