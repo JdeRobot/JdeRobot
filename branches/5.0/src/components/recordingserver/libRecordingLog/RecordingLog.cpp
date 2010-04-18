@@ -21,6 +21,8 @@
 
 
 #include "RecordingLog.h"
+#include <jderobot/recorder.h>
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -211,14 +213,16 @@ jderobot::RecordingSequence RecordingLog::getAllRecording()
 
 	while(mysqlpp::Row row = res.fetch_row())
 	{
-		jderobot::RecordingPtr rec = new jderobot::Recording();
+		jderobot::RecorderConfigPtr rec = new jderobot::RecorderConfig();
 
 		rec->id = static_cast<int>(row["id"]);
-		rec->name = static_cast<string>(row["name"]);
-		rec->pathFileVideo = static_cast<string>(row["video_file"]);
-		//rec->beginTimeStamp = static_cast<datetime>(row["begin_time"]);
-		//rec->endTimeStamp = static_cast<string>(row["end_time"]);
-		rec->frameRate = static_cast<string>(row["frame_rate"]);
+		rec->name = static_cast<std::string>(row["name"]);
+		rec->path = "unknow";
+
+		rec->beginTimeStamp.seconds = Date2TimeStamp( static_cast<std::string> (row["begin_time"]) );
+		rec->endTimeStamp.seconds = Date2TimeStamp( static_cast<std::string> (row["end_time"]));
+
+		rec->frameRate = static_cast<std::string>(row["frame_rate"]);
 
 		recList.push_back(rec);
 	}
@@ -226,6 +230,22 @@ jderobot::RecordingSequence RecordingLog::getAllRecording()
 	return recList;
 
 }
+
+long RecordingLog::Date2TimeStamp(std::string date)
+{
+	string s_query = "SELECT UNIX_TIMESTAMP('" + date + "');";
+
+	mysqlpp::Query query = m_conn->query (s_query);
+	mysqlpp::UseQueryResult res = query.use();
+
+	if (mysqlpp::Row row = res.fetch_row())
+	{
+		std::cout << row[0] << std::endl;
+		return atol(row[0].c_str());
+	}
+	return 0;
+}
+
 
 jderobot::RecordingEventPtr RecordingLog::getEvent (int eventId)
 {

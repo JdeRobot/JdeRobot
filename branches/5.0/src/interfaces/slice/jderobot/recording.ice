@@ -53,7 +53,7 @@ module jderobot {
 	};
 	
 	//! A sequence of recordings
-  	sequence<Recording> RecordingSequence;
+  	sequence<RecorderConfig> RecordingSequence;
 	
 	//! Description of the recording's event
 	class RecordingEvent
@@ -105,7 +105,8 @@ module jderobot {
 		
 		//! Returns: 0 if all was ok
 		//           -1 in other case        
-		int stopRecording (int idRecording);
+		int stopRecording (int recordingId);
+		
 		
   	};
 
