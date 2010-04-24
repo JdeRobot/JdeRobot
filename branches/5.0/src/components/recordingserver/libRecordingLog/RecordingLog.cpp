@@ -250,27 +250,6 @@ jderobot::RecorderConfigPtr RecordingLog::getRecording(int recordingId)
 
 }
 
-long RecordingLog::Date2TimeStamp(std::string date)
-{
-	string s_query = "SELECT UNIX_TIMESTAMP('" + date + "')";
-
-	std::cout << s_query << std::endl;
-
-	mysqlpp::Query query = m_conn->query (s_query);
-	mysqlpp::UseQueryResult res = query.use();
-
-	if (res)
-		std::cout << "len: " << res.fetch_lengths() << std::endl;
-	else
-		std::cout << "res regulererrrrr" << std::endl;
-
-	if (mysqlpp::Row row = res.fetch_row())
-	{
-		std::cout << row[1] << std::endl;
-		return atol(row[1].c_str());
-	}
-	return 0;
-}
 
 
 jderobot::RecordingEventPtr RecordingLog::getEvent (int eventId)
@@ -303,8 +282,8 @@ jderobot::RecorderConfigPtr RecordingLog::Row2Recorder (mysqlpp::Row row)
 	rec->name = static_cast<std::string>(row["name"]);
 	rec->path =  static_cast<std::string>(row["video_file"]);
 
-	rec->beginTimeStamp.seconds = 0;// Date2TimeStamp( static_cast<std::string> (row["begin_time"]) );
-	rec->endTimeStamp.seconds = 0; //Date2TimeStamp( static_cast<std::string> (row["end_time"]));
+	rec->beginTimeStamp.seconds = ((time_t) ((mysqlpp::DateTime) row["begin_time"]));
+	rec->endTimeStamp.seconds = ((time_t) ((mysqlpp::DateTime) row["end_time"]));
 
 	rec->frameRate = static_cast<std::string>(row["frame_rate"]);
 
