@@ -25,6 +25,13 @@
 #include <jderobot/recorder.h>
 #include "libRecordingLog/RecordingLog.h"
 
+#include <iostream>
+#include <fstream>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 int descPipe [2];
 
 class RecordingI: public jderobot::RecordingManager
@@ -39,6 +46,8 @@ public:
 	  virtual jderobot::RecordingSequence getRecordings(const Ice::Current& c){
 
 		  RecordingLog* recLog = initRecordingHandler();
+
+		  getThumbRecording(72,c);
 
 		  return recLog->getAllRecording();
 
@@ -96,6 +105,7 @@ public:
 			  getRecorderProxy()->stopRecording(recId);
 			  recLog->endRecording(recId);
 		  }
+
 	  }
 
 	  virtual string startStreaming (Ice::Int id, const Ice::Current&)
@@ -122,6 +132,63 @@ public:
 		  }
 
 		  return NULL;
+	  }
+
+	  virtual jderobot::ByteSeq getThumbRecording (Ice::Int id,  const Ice::Current&)
+	  {
+
+		  jderobot::ByteSeq emptyVector;
+
+		  recLog = initRecordingHandler();
+
+		  jderobot::RecorderConfigPtr myRec = recLog->getRecording(id);
+
+		  if (myRec != NULL)
+		  {
+			  size_t found;
+			  found = (myRec->path).find_last_of("/");
+
+			  string dirThumb = (myRec->path).substr(0,found+1) + "thumbs/";
+			  string thumb = dirThumb + (myRec->path).substr(found+1) + ".png";
+
+			  struct stat mystat;
+
+			  if (stat(thumb.c_str(), &mystat) == -1)
+			  {
+				  // Create thumb
+				  string command = "ffmpeg -i " + myRec->path +" /tmp/thumb.jpg && convert /tmp/thumb.jpg " + thumb;
+				  system (command.c_str());
+
+			  }
+
+			  // Read File
+			  ifstream is;
+			  char * buffer;
+
+			  is.open (thumb.c_str(), ios::binary );
+
+			  is.seekg (0, ios::end);
+			  int length = is.tellg();
+			  is.seekg (0, ios::beg);
+
+			  // allocate memory:
+			  buffer = new char [length];
+
+			  // read data as a block:
+			  is.read (buffer,length);
+			  is.close();
+
+
+			  //Convert to ByteSeq
+			  jderobot::ByteSeq thumbVector (&buffer[0], &buffer[length]);
+			  delete[] buffer;
+
+			  return thumbVector;
+		  }
+
+
+
+		  return emptyVector;
 	  }
 
 private:

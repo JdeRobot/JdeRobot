@@ -111,6 +111,10 @@ module jderobot {
 		//			null in other case
 		string startStreaming (int id); 
 		
+		//! Return: bytes of thumb
+		//			null in other case	
+		ByteSeq getThumbRecording (int id);
+		
   	};
 
 }; /* module */

@@ -231,15 +231,11 @@ jderobot::RecorderConfigPtr RecordingLog::getRecording(int recordingId)
 
 	string s_query = "SELECT * FROM " + BBDD_RECORDINGS + " WHERE id=" + id.str() + ";";
 
-	std::cout << s_query << std::endl;
+	//std::cout << s_query << std::endl;
 
 	mysqlpp::Query query = m_conn->query (s_query);
 	mysqlpp::UseQueryResult res = query.use();
 
-	if (res)
-			std::cout << "len: " << res.fetch_lengths() << std::endl;
-		else
-			std::cout << "res regulererrrrr" << std::endl;
 
 	if (mysqlpp::Row row = res.fetch_row())
 	{
