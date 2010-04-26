@@ -87,9 +87,6 @@ public:
 	/// \brief GET PID of Recording
 	int getRecordingPID (int recordingId);
 
-	/// \brief set status of recording (recordingStatus -> 0:In progress, 1:Finished ,2: Error)
-	bool setStatusRecording (int recordingId, int recordingStatus);
-
 	/// \brief Get Events of Recording
 	jderobot::EventSequence getEventsOfRecording (int recordingId);
 
@@ -105,6 +102,9 @@ private:
 	jderobot::RecorderConfigPtr Row2Recorder (mysqlpp::Row row);
 
 	long Date2TimeStamp(std::string date);
+
+	/// \brief set status of recording (recordingStatus -> 0:In progress, 1:Finished ,2: Error)
+	bool setStatusRecording (int recordingId, int recordingStatus);
 
 	mysqlpp::Connection* m_conn;
 

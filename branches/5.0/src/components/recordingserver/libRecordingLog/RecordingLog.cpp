@@ -124,7 +124,7 @@ bool RecordingLog::endRecording (int recordingId)
 	s_id = out.str();
 
 	string s_query = " UPDATE " + BBDD_RECORDINGS + " SET end_time=" + nowTime.str();
-	s_query +=        " WHERE id_rec=" + s_id;
+	s_query +=        " WHERE id=" + s_id;
 
 	mysqlpp::Query query = m_conn->query (s_query);
 	mysqlpp::SimpleResult res = query.execute();
