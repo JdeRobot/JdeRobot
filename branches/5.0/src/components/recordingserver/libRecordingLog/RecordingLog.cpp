@@ -247,6 +247,30 @@ jderobot::RecorderConfigPtr RecordingLog::getRecording(int recordingId)
 }
 
 
+int RecordingLog::getRecordingPID (int recordingId)
+{
+
+	std::stringstream id;
+	id << recordingId;
+
+	string s_query = "SELECT * FROM " + BBDD_RECORDINGS + " WHERE id=" + id.str() + ";";
+
+	mysqlpp::Query query = m_conn->query (s_query);
+	mysqlpp::UseQueryResult res = query.use();
+
+
+	if (mysqlpp::Row row = res.fetch_row())
+	{
+		return static_cast<int>(row["id_rec"]);
+	}
+
+	return -1;
+
+}
+
+
+
+
 
 jderobot::RecordingEventPtr RecordingLog::getEvent (int eventId)
 {

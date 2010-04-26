@@ -81,6 +81,9 @@ public:
 	/// \brief Get Recording
 	jderobot::RecorderConfigPtr getRecording(int recordingId);
 
+	/// \brief GET PID of Recording
+	int getRecordingPID (int recordingId);
+
 	/// \brief Get Events of Recording
 	jderobot::EventSequence getEventsOfRecording (int recordingId);
 

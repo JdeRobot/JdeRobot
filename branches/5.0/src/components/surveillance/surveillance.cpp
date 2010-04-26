@@ -87,7 +87,7 @@ int main(int argc, char** argv){
 
 		int recId = recManagerPrx->startRecording(recConfig);
 
-		std::cout << " [*] New Recording launched, PID = " << recId << " - " + timeRecording << " min." << std::endl;
+		std::cout << " [*] New Recording launched, with ID = " << recId << " - " + timeRecording << " min." << std::endl;
 
 		sleep( recConfig->duration );
 

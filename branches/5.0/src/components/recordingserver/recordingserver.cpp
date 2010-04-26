@@ -90,21 +90,30 @@ public:
 		  recConfig->id = pid_rec;
 
 		  // Log recording
-		  recLog->startRecording(recConfig);
+		  int recordingId = recLog->startRecording(recConfig);
 
-		  return pid_rec;
+		  std::cout << " [*] Recording with ID: " << recordingId  << "(" << pid_rec << ")" << " starting correctly!" << std::endl;
+
+		  return recordingId;
 	  }
 
 	  virtual Ice::Int stopRecording(Ice::Int recId, const Ice::Current&)
 	  {
 		  recLog = initRecordingHandler();
 
-		  std::cout << " [*] Recording with PID: " << recId << " is being stopping!\n" << std::endl;
-		  if (recId>0)
+		  std::cout << " [*] Recording ID: " << recId << " is being stopping!\n" << std::endl;
+
+		  int pid = recLog->getRecordingPID(recId);
+
+		  if (pid != -1)
 		  {
-			  getRecorderProxy()->stopRecording(recId);
+			  getRecorderProxy()->stopRecording(pid);
 			  recLog->endRecording(recId);
+
+			  return 0;
 		  }
+
+		  return -1;
 
 	  }
 
@@ -203,7 +212,6 @@ private:
 
 			  virtual void ice_response(const jderobot::RecorderConfigPtr& recConfig)
 			  {
-				  std::cout << " [*] Recording with PID: " << recConfig->id  << " starting correctly!" << std::endl;
 
 				  int rec_id = recConfig->id;
 
