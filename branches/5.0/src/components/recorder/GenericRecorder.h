@@ -28,12 +28,16 @@
 #include <jderobotice/application.h>
 #include <IceUtil/Thread.h>
 
+const int RECORDING_IN_PROGRESS = 0;
+const int RECORDING_FINISHED = 1;
+const int RECORDING_ERROR = 2;
+
 class GenericRecorder
 {
 
 	public:
 		/// \brief Constructor
-		GenericRecorder(const jderobotice::Context& context) : mContext(context),mRecConfig(NULL), mId() {};
+		GenericRecorder(const jderobotice::Context& context) : mContext(context),mRecConfig(NULL), mId(), mStatus() {};
 
 
 		void setId (int id) {mId = id;};
@@ -49,6 +53,7 @@ class GenericRecorder
 
 		jderobotice::Context getContext(){ return mContext; };
 
+		int getStatus();
 
 		int startRecording();
 
@@ -64,6 +69,8 @@ class GenericRecorder
 		jderobotice::Context mContext;
 
 		int mId;
+
+		int mStatus;
 };
 
 #endif GENERIC_RECORDER_H

@@ -25,6 +25,8 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 
+
+
 int GenericRecorder::startRecording()
 {
 
@@ -54,11 +56,19 @@ int GenericRecorder::startRecording()
 			write (descPipe[1], &p_rec, sizeof(int));
 
 			int status = 0;
+			mStatus = RECORDING_IN_PROGRESS;
 
 			std::cout << "Waiting for end recording (" << p_rec << ") .... " <<  std::endl;
 			int ret = wait (&status);
 
-			std::cout << "End recording process (" << p_rec << "): " << status << " - errno: " << errno  << std::endl;
+			std::cout << "End recording process (" << p_rec << "): " << status << " - errno: " << errno << " - ret = " << ret << " - " << WIFEXITED(status) << std::endl;
+
+			if (WIFEXITED(status) != 0)
+			{
+				std::cout << "Finished recording with error." << std::endl;
+				mStatus = RECORDING_ERROR;
+			}
+
 			exit(0);
 		}
 	}
