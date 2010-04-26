@@ -97,7 +97,7 @@ public:
 		  return recordingId;
 	  }
 
-	  virtual Ice::Int stopRecording(Ice::Int recId, const Ice::Current&)
+	  virtual Ice::Int stopRecording(Ice::Int recId, const Ice::Current& c)
 	  {
 		  recLog = initRecordingHandler();
 
@@ -105,10 +105,18 @@ public:
 
 		  int pid = recLog->getRecordingPID(recId);
 
+		  std::cout << "stopRecording = " << pid << std::endl;
+
 		  if (pid != -1)
 		  {
+			  // Stop the recording
 			  getRecorderProxy()->stopRecording(pid);
+
+			  // Save data of recording
 			  recLog->endRecording(recId);
+
+			  // Generate Thumb
+			  getThumbRecording(recId, c);
 
 			  return 0;
 		  }
@@ -165,7 +173,7 @@ public:
 			  if (stat(thumb.c_str(), &mystat) == -1)
 			  {
 				  // Create thumb
-				  string command = "ffmpeg -i " + myRec->path +" /tmp/thumb.jpg && convert /tmp/thumb.jpg " + thumb;
+				  string command = "ffmpeg -i " + myRec->path + " -r 1 -t 00:00:01 /tmp/thumb.jpg && convert /tmp/thumb.jpg " + thumb;
 				  system (command.c_str());
 
 			  }
