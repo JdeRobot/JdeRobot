@@ -41,6 +41,9 @@ using namespace std;
    \date  12/04/2009
 **/
 
+const int RECORDING_IN_PROGRESS = 0;
+const int RECORDING_FINISHED = 1;
+const int RECORDING_ERROR = 2;
 
 class RecordingLog
 {
@@ -83,6 +86,9 @@ public:
 
 	/// \brief GET PID of Recording
 	int getRecordingPID (int recordingId);
+
+	/// \brief set status of recording (recordingStatus -> 0:In progress, 1:Finished ,2: Error)
+	bool setStatusRecording (int recordingId, int recordingStatus);
 
 	/// \brief Get Events of Recording
 	jderobot::EventSequence getEventsOfRecording (int recordingId);

@@ -106,6 +106,8 @@ int RecordingLog::startRecording (const jderobot::RecorderConfigPtr& recConfig)
 
 	m_recordingId = query.insert_id();
 
+	setStatusRecording(m_recordingId,RECORDING_IN_PROGRESS);
+
 	return m_recordingId;
 
 }
@@ -131,10 +133,10 @@ bool RecordingLog::endRecording (int recordingId)
 	if ( !res)
 	{
 		cerr << "Failed to update in table: " << query.error() << endl;
-		return true;
+		return false;
 	}
 
-	return false;
+	return setStatusRecording(m_recordingId,RECORDING_FINISHED);
 }
 
 
@@ -269,8 +271,28 @@ int RecordingLog::getRecordingPID (int recordingId)
 }
 
 
+bool RecordingLog::setStatusRecording (int recordingId, int recordingStatus)
+{
+	std::stringstream id, status;
+	id << recordingId;
+	status << recordingStatus;
+
+	string s_query = " UPDATE " + BBDD_RECORDINGS + " SET status=" + status.str();
+	s_query +=        " WHERE id=" + id.str();
+
+	mysqlpp::Query query = m_conn->query (s_query);
+	mysqlpp::SimpleResult res = query.execute();
 
 
+	if (!res)
+	{
+		cerr << "RecordingLog::setStatusRecording:: Failed to update in table: " << query.error() << endl;
+		return true;
+	}
+
+	return false;
+
+}
 
 jderobot::RecordingEventPtr RecordingLog::getEvent (int eventId)
 {
@@ -306,6 +328,8 @@ jderobot::RecorderConfigPtr RecordingLog::Row2Recorder (mysqlpp::Row row)
 	rec->endTimeStamp.seconds = ((time_t) ((mysqlpp::DateTime) row["end_time"]));
 
 	rec->frameRate = static_cast<std::string>(row["frame_rate"]);
+
+	rec->status = static_cast<int>(row["status"]);
 
 	return rec;
 

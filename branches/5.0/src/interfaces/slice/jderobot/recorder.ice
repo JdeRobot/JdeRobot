@@ -65,6 +65,13 @@ module jderobot
 		
 		//! Seconds of recording
 		int duration;
+		
+		//! Status
+		// 0: In progress
+		// 1: Finished
+		// 2: Error
+		int status;
+		
   	};
   	
   	interface Recorder
