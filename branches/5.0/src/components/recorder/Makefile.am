@@ -2,7 +2,7 @@ if ENABLE_COMPONENT_RECORDER
 bin_PROGRAMS = recorder recorder_client
 endif
 
-recorder_SOURCES = recorder.cpp ffmpegRecorder.cpp  ffmpegRecorder.h  GenericRecorder.h GenericRecorder.cpp 
+recorder_SOURCES = recorder.cpp deviceRecorder.cpp deviceRecorder.h  GenericRecorder.h GenericRecorder.cpp 
 
 recorder_CXXFLAGS = -I$(top_srcdir)/src/interfaces/cpp $(LIBJDEROBOTICE_CPPFLAGS) 
 

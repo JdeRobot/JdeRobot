@@ -47,8 +47,6 @@ public:
 
 		  RecordingLog* recLog = initRecordingHandler();
 
-		  getThumbRecording(72,c);
-
 		  return recLog->getAllRecording();
 
 	  }
@@ -109,14 +107,15 @@ public:
 
 		  if (pid != -1)
 		  {
+			  // Generate Thumb
+			  getThumbRecording(recId, c);
+
 			  // Stop the recording
 			  getRecorderProxy()->stopRecording(pid);
 
 			  // Save data of recording
 			  recLog->endRecording(recId);
 
-			  // Generate Thumb
-			  getThumbRecording(recId, c);
 
 			  return 0;
 		  }

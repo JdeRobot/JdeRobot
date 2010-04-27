@@ -25,7 +25,7 @@
 #include <jderobotice/application.h>
 #include <list>
 
-#include "ffmpegRecorder.h"
+#include "deviceRecorder.h"
 
 namespace RecorderProcess {
 
@@ -34,50 +34,110 @@ namespace RecorderProcess {
 		public:
 		  RecorderI(std::string& prefix,
 					const jderobotice::Context& context)
-			:prefix(prefix), context(context)
+			:prefix(prefix), context(context), mProvider()
 		  {
+
+			  Ice::PropertiesPtr prop = context.properties();
+			  std::string objPrefix(context.tag() + ".Recorder.");
+			  std::string recorderName = prop->getProperty(objPrefix + "Provider");
+
+			  if (recorderName.compare("ffmpeg") == 0)
+			  {
+				  mProvider = RECORDING_PROVIDER_FFMPEG;
+			  }
+			  else if (recorderName.compare("mencoder") == 0)
+			  {
+				  mProvider = RECORDING_PROVIDER_MENCODER;
+			  }
+			  else if (recorderName.compare("mplayer") == 0)
+			  {
+				  mProvider = RECORDING_PROVIDER_MPLAYER;
+			  }
+			  else if (recorderName.compare("vlc") == 0)
+			  {
+				  mProvider = RECORDING_PROVIDER_VLC;
+			  }
+			  else
+			  {
+				 throw "Recording Provider Unknow!";
+			  }
 
 		  }
 
 
 		  virtual jderobot::RecorderConfigPtr startRecording(const jderobot::RecorderConfigPtr& recConfig,
-										  const Ice::Current& c)
+															 const Ice::Current& c)
 		  {
 
-	    	  ffmpegRecorder* myRecorder = new ffmpegRecorder(context);
-	    	  myRecorder->setConfig(recConfig);
+			  jderobot::RecorderConfigPtr rec = new jderobot::RecorderConfig();
 
-	    	  myRecorder->startRecording();
+			  GenericRecorder* myRecorder = NULL;
 
-	    	  std::cout << "Insert in list" << std::endl;
-	    	  IceUtil::Mutex::Lock sync(listMutex);
-	    	  recList.push_back(myRecorder);
+			  // Initialize and launch the Recorder
+			  if ( (recConfig->protocol).find(RECORDING_PROTOCOL_V4L) != std::string::npos)
+			  {
+				  // V4L & V4L2 protocol
+				  myRecorder = new deviceRecorder (context, RECORDING_PROVIDER_FFMPEG);
 
-	    	  // Return de Id of recording (id == pid)
+				  myRecorder->setConfig(recConfig);
+				  myRecorder->startRecording();
 
-	    	  jderobot::RecorderConfigPtr rec = new jderobot::RecorderConfig();
+			  }
+			  else if ( (recConfig->protocol).compare(RECORDING_PROTOCOL_CAMERASERVER) == 0)
+			  {
+				  // cameraServer Protocol
 
-	    	  rec = recConfig;
-	    	  rec->id = myRecorder->getId();
+				  // Aquí iría el código para cargar la clase que se encarga de grabar a través
+				  // del protocolo de cameraServer, en este caso a través de una secuencía de imágenes.
 
-	    	  return rec;
 
+			  }
+			  else
+			  {
+				  context.tracer().error("Recording Protocol Unknow: " + recConfig->protocol);
+				  rec = recConfig;
+				  rec->id = -1;
+			  }
+
+			  // The recorder is saved in a list.
+
+			  if (myRecorder != NULL)
+			  {
+				  IceUtil::Mutex::Lock sync(listMutex);
+				  recList.push_back(myRecorder);
+
+				  // Return recordingId
+				  jderobot::RecorderConfigPtr rec = new jderobot::RecorderConfig();
+
+				  rec = recConfig;
+				  rec->id = myRecorder->getId();
+
+				  return rec;
+			  }
+			  else
+			  {
+				  //Error
+				  context.tracer().error("Impossible initialize the recorder!");
+				  rec = recConfig;
+				  rec->id = -1;
+
+				  return rec;
+			  }
 		  }
 
 		  virtual Ice::Int stopRecording (Ice::Int recId, const Ice::Current& c)
 		  {
 			  IceUtil::Mutex::Lock sync(listMutex);
-			  std::cout << "recList.size()=" << recList.size() << std::endl;
 
 
 			  for (unsigned int i=0; i<recList.size(); i++)
 			  {
 
-				  std::cout << "recList[i]->getId(): " << recList[i]->getId() << " - recId: " << recId << std::endl;
+				  // std::cout << "recList[i]->getId(): " << recList[i]->getId() << " - recId: " << recId << std::endl;
 
 				  if (recList[i]->getId() == recId)
 				  {
-					  std::cout << "Recorder::stopRecording, detele recording objetc ..." << std::endl;
+					  context.tracer().info("Recorder::stopRecording - Stopping recording ... ");
 
 					  recList[i]->stopRecording();
 					  delete (recList[i]);
@@ -99,6 +159,8 @@ namespace RecorderProcess {
 
 		  IceUtil::Mutex listMutex;
 		  std::vector<GenericRecorder*> recList;
+
+		  std::string mProvider;
 
 	};
 

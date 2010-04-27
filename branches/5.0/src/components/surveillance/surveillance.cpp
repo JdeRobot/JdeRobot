@@ -74,8 +74,8 @@ int main(int argc, char** argv){
 		// Set the recording config
 		jderobot::RecorderConfigPtr recConfig = new  jderobot::RecorderConfig();
 		recConfig->name = prop->getProperty("Surveillance.name");
-		recConfig->v4lVersion = prop->getProperty("Surveillance.v4lVersion");
-		recConfig->v4lDevice = prop->getProperty("Surveillance.v4lDevice");
+		recConfig->protocol = prop->getProperty("Surveillance.protocol");
+		recConfig->device = prop->getProperty("Surveillance.device");
 		recConfig->frameRate = prop->getProperty("Surveillance.fps");
 		recConfig->height = prop->getProperty("Surveillance.height");
 		recConfig->width = prop->getProperty("Surveillance.width");

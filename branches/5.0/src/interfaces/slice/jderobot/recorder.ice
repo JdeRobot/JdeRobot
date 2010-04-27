@@ -39,11 +39,11 @@ module jderobot
   		// Recording camera proxy
   		string cameraProxy;
   		
-  		// V4L version: v4l | v4l2
-  		string v4lVersion;
+  		// Protocol: v4l | v4l2 | cameraServer
+  		string protocol;
   		
-  		// V4L device
-  		string v4lDevice;
+  		// Device: /dev/video0 | proxy to cameraserver
+  		string device;
   		
   		// Height resolution
   		string height;

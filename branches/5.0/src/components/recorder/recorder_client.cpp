@@ -78,8 +78,8 @@ int main(int argc, char** argv){
 
     // Set the recording config
     jderobot::RecorderConfigPtr recConfig = new  jderobot::RecorderConfig();
-    recConfig->v4lVersion = "v4l";
-    recConfig->v4lDevice = "/dev/video0";
+    recConfig->protocol = "v4l";
+    recConfig->device = "/dev/video0";
     recConfig->frameRate = "25.0";
     recConfig->height = "240";
     recConfig->width = "320";
