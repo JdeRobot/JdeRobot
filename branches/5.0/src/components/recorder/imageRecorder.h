@@ -15,29 +15,28 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/.
  *
- *  Author : Roberto Calvo Palomino <rocapal@gmail.com>
+ *  Author : Sara Marugán Alonso <smarugan@gsyc.es>
  *
  */
 
-#ifndef FFMPEG_RECORDER_H
-#define FFMPEG_RECORDER_H
+#ifndef IMAGE_RECORDER_H
+#define IMAGE_RECORDER_H
 
 #include "GenericRecorder.h"
 #include <jderobotice/component.h>
 #include <jderobotice/application.h>
+#include <jderobot/camera.h>
 
-class ffmpegRecorder : public GenericRecorder
+class imageRecorder : public GenericRecorder
 {
 
 	public:
 		/// \brief Recorder
-		ffmpegRecorder(const jderobotice::Context& context);
-
+		imageRecorder(const jderobotice::Context& context,const jderobot::RecorderConfigPtr& recConfig,int recordingProvider);
 
 	private:
 
 		int doRecording();
-
 };
 
-#endif FFMPEG_RECORDER_H
+#endif IMAGE_RECORDER_H

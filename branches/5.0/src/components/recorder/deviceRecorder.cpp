@@ -27,7 +27,7 @@
 
 void *record_function( void *ptr );
 
-deviceRecorder::deviceRecorder(const jderobotice::Context& context, int recordingProvider) : GenericRecorder(context, recordingProvider)
+deviceRecorder::deviceRecorder(const jderobotice::Context& context,const jderobot::RecorderConfigPtr& recConfig,int recordingProvider) : GenericRecorder(context, recConfig, recordingProvider)
 {
 
 }

@@ -26,6 +26,7 @@
 #include <list>
 
 #include "deviceRecorder.h"
+#include "imageRecorder.h"
 
 namespace RecorderProcess {
 
@@ -77,9 +78,7 @@ namespace RecorderProcess {
 			  if ( (recConfig->protocol).find(RECORDING_PROTOCOL_V4L) != std::string::npos)
 			  {
 				  // V4L & V4L2 protocol
-				  myRecorder = new deviceRecorder (context, RECORDING_PROVIDER_FFMPEG);
-
-				  myRecorder->setConfig(recConfig);
+				  myRecorder = new deviceRecorder (context,recConfig,RECORDING_PROVIDER_FFMPEG);
 				  myRecorder->startRecording();
 
 			  }
@@ -87,9 +86,8 @@ namespace RecorderProcess {
 			  {
 				  // cameraServer Protocol
 
-				  // Aquí iría el código para cargar la clase que se encarga de grabar a través
-				  // del protocolo de cameraServer, en este caso a través de una secuencía de imágenes.
-
+				  myRecorder = new imageRecorder (context,recConfig,RECORDING_PROVIDER_MENCODER);
+				  myRecorder->startRecording();
 
 			  }
 			  else

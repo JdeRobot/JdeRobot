@@ -31,7 +31,7 @@ class deviceRecorder : public GenericRecorder
 
 	public:
 		/// \brief Recorder
-		deviceRecorder(const jderobotice::Context& context, int recordingProvider);
+		deviceRecorder(const jderobotice::Context& context,const jderobot::RecorderConfigPtr& recConfig, int recordingProvider);
 
 
 	private:

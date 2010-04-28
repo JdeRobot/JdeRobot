@@ -64,7 +64,7 @@ module jderobot
 		string frameRate;
 		
 		//! Seconds of recording
-		int duration;
+		string duration;
 		
 		//! Status
 		// 0: In progress

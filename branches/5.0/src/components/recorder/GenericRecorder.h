@@ -48,8 +48,8 @@ class GenericRecorder
 
 	public:
 		/// \brief Constructor
-		GenericRecorder(const jderobotice::Context& context, int recordingProvider) : mContext(context),
-																				      mRecConfig(NULL),
+		GenericRecorder(const jderobotice::Context& context,const jderobot::RecorderConfigPtr& recConfig, int recordingProvider) : mContext(context),
+																				      mRecConfig(recConfig),
 																				      mId(),
 																				      mStatus(),
 																				      mProvider(recordingProvider) {};
