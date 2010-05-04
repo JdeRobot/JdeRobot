@@ -743,7 +743,7 @@ if test "x$enable_schemas_calibrador" != xno; then
 	    AM_CONDITIONAL([ENABLE_CALIBRADOR],[true])],
 	[AC_MSG_FAILURE([--enable-schemas-calibrador was given, but there was errors: $CALIBRADOR_PKG_ERRORS])])
     ERRORS=""
-    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h glcanvas.h GL/gl.h GL/glx.h GL/glu.h GL/glut.h],
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h GL/gl.h GL/gl.h GL/glx.h GL/glu.h GL/glut.h],
 	[],
 	[ERRORS="$ERRORS, $ac_header not found"])
     AC_CHECK_LIB([forms],[main],
@@ -980,7 +980,7 @@ AM_CONDITIONAL([ENABLE_OPENGLDEMO],[false])
 if test "x$enable_schemas_opengldemo" != xno; then
     ERRORS=""
     AC_MSG_NOTICE([**** Checking schema opengldemo:])
-    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h glcanvas.h GL/gl.h GL/glx.h GL/glu.h],
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h GL/gl.h GL/gl.h GL/glx.h GL/glu.h],
 	[],
 	[ERRORS="$ERRORS, $ac_header not found"])
     AC_CHECK_LIB([forms],[main],
@@ -1050,7 +1050,7 @@ AM_CONDITIONAL([ENABLE_TELEOPERATOR],[false])
 if test "x$enable_schemas_teleoperator" != xno; then
     ERRORS=""
     AC_MSG_NOTICE([**** Checking schema teleoperator:])
-    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h glcanvas.h GL/gl.h GL/glx.h GL/glu.h],
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h GL/gl.h GL/gl.h GL/glx.h GL/glu.h],
 	[],
 	[ERRORS="$ERRORS, $ac_header not found"])
     AC_CHECK_LIB([forms],[main],

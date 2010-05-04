@@ -285,7 +285,7 @@ gravity: FL_NoGravity FL_NoGravity
 name: posX
 callback: 
 argument: 
-	slsize: 0,00
+	slsize: 0.00
 
 --------------------
 class: FL_SLIDER
@@ -304,7 +304,7 @@ gravity: FL_NoGravity FL_NoGravity
 name: posY
 callback: 
 argument: 
-	slsize: 0,00
+	slsize: 0.00
 
 --------------------
 class: FL_SLIDER
@@ -323,7 +323,7 @@ gravity: FL_NoGravity FL_NoGravity
 name: posZ
 callback: 
 argument: 
-	slsize: 0,00
+	slsize: 0.00
 
 --------------------
 class: FL_SLIDER
@@ -342,7 +342,7 @@ gravity: FL_NoGravity FL_NoGravity
 name: posR
 callback: 
 argument: 
-	slsize: 0,00
+	slsize: 0.00
 
 --------------------
 class: FL_BUTTON
@@ -739,7 +739,7 @@ gravity: FL_NoGravity FL_NoGravity
 name: ptspeed
 callback: 
 argument: 
-	slsize: 0,00
+	slsize: 0.00
 
 --------------------
 class: FL_END_GROUP
@@ -794,7 +794,7 @@ gravity: FL_NoGravity FL_NoGravity
 name: zoom
 callback: 
 argument: 
-	slsize: 0,00
+	slsize: 0.00
 
 --------------------
 class: FL_BUTTON

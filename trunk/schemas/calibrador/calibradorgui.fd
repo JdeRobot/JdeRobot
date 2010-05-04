@@ -1345,7 +1345,7 @@ callback:
 argument: 
 	bounds: 10 0
 	value: 5
-	slsize: 0,15
+	slsize: 0.15
 
 --------------------
 class: FL_BUTTON

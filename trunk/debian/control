@@ -21,7 +21,7 @@ Description: jde is a software development suite for robotics applications.
 Package: jderobot-schemas
 Section: net
 Architecture: i386
-Depends: ${shlibs:Depends}, jderobot, jderobot-libs, jderobot-drivers, jderobot-services, robot-player, libcv1, libcvaux1, libforms1, libformsgl1
+Depends: ${shlibs:Depends}, jderobot, jderobot-libs, jderobot-drivers, jderobot-services, robot-player, libcv4, libcvaux4, libforms1, libformsgl1
 Recommends: 
 Suggests: jderobot-doc
 Description: jde is a software development suite for robotics applications (schemas)
