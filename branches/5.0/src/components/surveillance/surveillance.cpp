@@ -89,7 +89,7 @@ int main(int argc, char** argv){
 
 		std::cout << " [*] New Recording launched, with ID = " << recId << " - " + timeRecording << " min." << std::endl;
 
-		sleep( atoi(recConfig->duration.c_str()) );
+		sleep( atoi(timeRecording.c_str()) * 60 );
 
 		recManagerPrx->stopRecording(recId);
     }
