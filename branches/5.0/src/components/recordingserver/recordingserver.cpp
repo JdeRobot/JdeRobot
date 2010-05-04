@@ -183,6 +183,12 @@ public:
 
 			  is.open (thumb.c_str(), ios::binary );
 
+			  if (!is.is_open())
+			  {
+				  jderobot::ByteSeq thumbVector;
+				  return thumbVector;
+			  }
+
 			  is.seekg (0, ios::end);
 			  int length = is.tellg();
 			  is.seekg (0, ios::beg);
@@ -193,7 +199,6 @@ public:
 			  // read data as a block:
 			  is.read (buffer,length);
 			  is.close();
-
 
 			  //Convert to ByteSeq
 			  jderobot::ByteSeq thumbVector (&buffer[0], &buffer[length]);
