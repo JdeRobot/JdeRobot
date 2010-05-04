@@ -84,9 +84,24 @@ int deviceRecorder::doRecording()
 		execv("/usr/bin/mencoder", parmList);
 
 	}
-	//VLC
+	else if  (getProvider() == RECORDING_PROVIDER_VLC)
+	{
+		std::string v4lConfig, vlcTranscode;
 
-	// vlc v4l:///dev/video1 -I dummy --sout "#transcode{vcodec=mp4v,acodec=aac,fps=20}:standard{mux="ogg",access="file",dst="stream.xyz"}"
+		if (getConfig()->protocol == "v4l")
+			v4lConfig = "v4l://" + getConfig()->device;
+		else
+			v4lConfig = "v4l2://" + getConfig()->device;
+
+		vlcTranscode = "--sout=#transcode{vcodec=mp4v,acodec=aac,fps=" + getConfig()->frameRate +
+						",width=" + getConfig()->width + ",height=" +  getConfig()->height +
+						+"}:standard{mux='ps',access='file',dst='" + getConfig()->path + "'}";
+
+		char *paramList[] = {"vlc", (char*) v4lConfig.c_str(),"-I","dummy", (char*) vlcTranscode.c_str(), NULL};
+
+		execv("/usr/bin/vlc", paramList);
+
+	}
 	else
 	{
 		getContext().tracer().error ("Recording Provider Unknow! - ");
