@@ -534,7 +534,7 @@ int EVILib::Open(int id, char *portname)
     }
 
 //    _port = open(portname, O_RDWR | O_NOCTTY | O_NONBLOCK | O_NDELAY);
-  _port = open(portname, O_CREAT | O_RDWR| O_NOCTTY );
+  _port = open(portname, O_CREAT | O_RDWR| O_NOCTTY, S_IRUSR|S_IWUSR);
   fcntl(_port, F_SETFL, 0);
 
   if(_port == -1)
