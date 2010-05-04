@@ -78,7 +78,7 @@ namespace RecorderProcess {
 			  if ( (recConfig->protocol).find(RECORDING_PROTOCOL_V4L) != std::string::npos)
 			  {
 				  // V4L & V4L2 protocol
-				  myRecorder = new deviceRecorder (context,recConfig,RECORDING_PROVIDER_FFMPEG);
+				  myRecorder = new deviceRecorder (context,recConfig,mProvider);
 				  myRecorder->startRecording();
 
 			  }
@@ -158,7 +158,7 @@ namespace RecorderProcess {
 		  IceUtil::Mutex listMutex;
 		  std::vector<GenericRecorder*> recList;
 
-		  std::string mProvider;
+		  int mProvider;
 
 	};
 

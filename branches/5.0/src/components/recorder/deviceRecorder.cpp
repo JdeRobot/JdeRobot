@@ -41,8 +41,6 @@ int deviceRecorder::doRecording()
 								 getConfig()->frameRate + " fps - " + " - device: " + getConfig()->device );
 
 
-	//char *const parmList[] = {"mencoder","tv://","-tv", "driver=v4l:width=320:height=240:device=/dev/video0", "-ovc", "lavc", "-fps", "15.0", "-o", "webcam-15.mpg", NULL};
-
 	if (getProvider() == RECORDING_PROVIDER_FFMPEG)
 	{
 		std::string v4lVersion, resolution;
@@ -65,6 +63,30 @@ int deviceRecorder::doRecording()
 		execv("/usr/bin/ffmpeg", parmList);
 
 	}
+	else if (getProvider() == RECORDING_PROVIDER_MENCODER)
+	{
+		std::string v4lVersion;
+
+		if (getConfig()->protocol == "v4l")
+			v4lVersion = "v4l";
+		else
+			v4lVersion = "v4l2";
+
+		std::string config = "driver=" + v4lVersion +
+							 ":width=" + getConfig()->width + ":height=" + getConfig()->height +
+							 ":device=" + getConfig()->device;
+
+		char *parmList[] = {"mencoder","tv://","-tv", (char*) config.c_str(),
+								  "-ovc", "lavc",
+								  "-fps", (char*)getConfig()->frameRate.c_str(),
+								  "-o", (char*) (getConfig()->path).c_str(), NULL};
+
+		execv("/usr/bin/mencoder", parmList);
+
+	}
+	//VLC
+
+	// vlc v4l:///dev/video1 -I dummy --sout "#transcode{vcodec=mp4v,acodec=aac,fps=20}:standard{mux="ogg",access="file",dst="stream.xyz"}"
 	else
 	{
 		getContext().tracer().error ("Recording Provider Unknow! - ");
