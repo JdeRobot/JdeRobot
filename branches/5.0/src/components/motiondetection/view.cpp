@@ -7,7 +7,7 @@
 #include <string>
 #include <iostream>
 #include <cmath>
-#include <jderobotutil/ipscounter.h>
+#include <jderobotutil/time.h>
 
 /*FIXME: check this http://svn.drobilla.net/lad/trunk/eugene/gui/Widget.hpp*/
 
