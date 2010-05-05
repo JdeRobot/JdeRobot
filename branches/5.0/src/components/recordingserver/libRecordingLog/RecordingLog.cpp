@@ -225,6 +225,25 @@ jderobot::RecordingSequence RecordingLog::getAllRecording()
 
 }
 
+jderobot::RecordingSequence RecordingLog::getRecordingsByDate (std::string date)
+{
+
+	jderobot::RecordingSequence recList;
+
+	string s_query = "SELECT * FROM " + BBDD_RECORDINGS + "WHERE DATE_FORMAT(begin_time,'%Y-%m-%d')='" + date + "'";
+
+	mysqlpp::Query query = m_conn->query (s_query);
+	mysqlpp::UseQueryResult res = query.use();
+
+	while(mysqlpp::Row row = res.fetch_row())
+	{
+		jderobot::RecorderConfigPtr rec = Row2Recorder(row);
+		recList.push_back(rec);
+	}
+
+	return recList;
+}
+
 jderobot::RecorderConfigPtr RecordingLog::getRecording(int recordingId)
 {
 

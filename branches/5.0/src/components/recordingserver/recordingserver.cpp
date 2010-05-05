@@ -38,7 +38,7 @@ class RecordingI: public jderobot::RecordingManager
 {
 public:
 	  RecordingI(std::string& prefix, Ice::CommunicatorPtr& communicator)
-	    :prefix(prefix),communicator(communicator), recLog(NULL), mRecorderPrx(NULL), mStreamingURI()
+	    :prefix(prefix),communicator(communicator), recLog(NULL), mRecorderPrx(NULL), mStreamingURI(), mStreamingPort(11000)
 	  {
 
 	  }
@@ -48,6 +48,14 @@ public:
 		  RecordingLog* recLog = initRecordingHandler();
 
 		  return recLog->getAllRecording();
+	  }
+
+	  virtual jderobot::RecordingSequence getRecordingsByDate(const std::string& date, const Ice::Current& c)
+	  {
+
+		  RecordingLog* recLog = initRecordingHandler();
+
+		  return recLog->getRecordingsByDate(date);
 
 	  }
 
@@ -124,7 +132,7 @@ public:
 
 	  }
 
-	  virtual string startStreaming (Ice::Int id, const Ice::Current&)
+	  virtual string startStreaming (Ice::Int id, const Ice::Current& c)
 	  {
 
 		  recLog = initRecordingHandler();
@@ -137,6 +145,9 @@ public:
 			  string vlc_command = "vlc -vvv " + myRec->path +" --play-and-exit -I dummy --sout '#transcode{vcodec=mp4v,acodec=aac}:rtp{dst=0.0.0.0,port=1234,sdp=" + getStreamingURI() +"}' & ";
 
 			  std::cout << vlc_command << std::endl;
+
+			  //FIXME:
+			  system("killall -9 vlc");
 
 			  int ret = system (vlc_command.c_str());
 
@@ -291,6 +302,8 @@ private:
 	  RecordingLog* recLog;
 	  std::string prefix;
 	  Ice::CommunicatorPtr communicator;
+
+	  int mStreamingPort;
 };
 
 

@@ -84,6 +84,9 @@ public:
 	/// \brief Get Recording
 	jderobot::RecorderConfigPtr getRecording(int recordingId);
 
+	/// \brief Get Recordings by Date
+	jderobot::RecordingSequence getRecordingsByDate (std::string date);
+
 	/// \brief GET PID of Recording
 	int getRecordingPID (int recordingId);
 

@@ -91,6 +91,11 @@ module jderobot {
 		//! Returns the list of recordings
 		idempotent RecordingSequence getRecordings();
 		
+		//! Returns the list of recordings by date
+		// Format Date = "YYYY-MM-DD" - "2010-05-28"
+		idempotent RecordingSequence getRecordingsByDate(string date);
+		
+		
 		//! Return the event list of recording
 		EventSequence getEventsOfRecording (int recordingId);
 		
