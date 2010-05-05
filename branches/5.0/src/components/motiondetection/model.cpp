@@ -27,7 +27,7 @@
 
 namespace motiondetection {
   Model::Model(gbxutilacfr::Tracer& tracer, const colorspaces::Image& initialImg) throw()
-    : motionThreshold(3),algorithm(new NullAlgorithm(tracer,initialImg)),_tracer(tracer) {}
+    : motionThreshold(3),algorithm(new OpticalFlowAlgorithm(tracer,initialImg)),_tracer(tracer) {}
 
   void Model::setImage(const colorspaces::Image& img) throw(){
     algorithm->calcMotion(img);

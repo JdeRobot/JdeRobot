@@ -46,6 +46,8 @@ namespace motiondetection
 
     virtual void start()
     {
+      Ice::PropertiesPtr prop = context().properties();
+
       Ice::ObjectPrx base =
 	context().communicator()->propertyToProxy("Motiondetection.Camera.Proxy");
       if (0==base)
@@ -81,7 +83,8 @@ namespace motiondetection
 
       //build model and controller
       model.reset(new Model(context().tracer(),image));
-      controller.reset(new Controller(context().tracer(),model));
+      bool useUI = static_cast<bool>(prop->getPropertyAsIntWithDefault("Motiondetection.UseUI",1));
+      controller.reset(new Controller(context().tracer(),model,useUI));
       
       while (controller->isRunning()){
 	data = cprx->getImageData();//get image
