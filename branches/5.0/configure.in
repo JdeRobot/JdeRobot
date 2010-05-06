@@ -85,6 +85,7 @@ m4_include([m4/libgearbox.m4])
 m4_include([m4/libopencv.m4])
 m4_include([m4/libgtkmm.m4])
 m4_include([m4/libgstreamer.m4])
+m4_include([m4/lib1394.m4])
 
 dnl # Check for built libraries dependencies
 m4_include([m4/jderobotutil.m4])
