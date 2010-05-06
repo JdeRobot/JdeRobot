@@ -79,13 +79,17 @@ public:
 
 
 	/// \brief Get all recordings
-	jderobot::RecordingSequence getAllRecording();
+	/// \param from The begin of the list of recordings
+	/// \param elems The number of elements, -1 return all the elements
+	jderobot::RecordingSequence getAllRecording(int from, int elems);
 
 	/// \brief Get Recording
 	jderobot::RecorderConfigPtr getRecording(int recordingId);
 
 	/// \brief Get Recordings by Date
-	jderobot::RecordingSequence getRecordingsByDate (std::string date);
+	/// \param from The begin of the list of recordings
+	/// \param elems The number of elements, -1 return all the elements
+	jderobot::RecordingSequence getRecordingsByDate (std::string date, int from, int elems);
 
 	/// \brief GET PID of Recording
 	int getRecordingPID (int recordingId);

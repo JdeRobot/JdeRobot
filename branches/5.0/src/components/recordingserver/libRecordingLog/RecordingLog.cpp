@@ -200,15 +200,19 @@ bool RecordingLog::saveRecordingEvent (const jderobot::RecordingEventPtr& recEve
 
 }
 
-jderobot::RecordingSequence RecordingLog::getAllRecording()
+jderobot::RecordingSequence RecordingLog::getAllRecording(int from, int elems)
 {
 
 	jderobot::RecordingSequence recList;
-	string s_id;
-	std::stringstream out;
+	std::stringstream limit;
+
+	if (elems != -1)
+		limit << " LIMIT " << from << "," << elems ;
+	else
+		limit << "";
 
 
-	string s_query = "SELECT * FROM " + BBDD_RECORDINGS + ";";
+	string s_query = "SELECT * FROM " + BBDD_RECORDINGS + limit.str() + ";";
 
 	std::cout << s_query << std::endl;
 
@@ -225,12 +229,19 @@ jderobot::RecordingSequence RecordingLog::getAllRecording()
 
 }
 
-jderobot::RecordingSequence RecordingLog::getRecordingsByDate (std::string date)
+jderobot::RecordingSequence RecordingLog::getRecordingsByDate (std::string date, int from, int elems)
 {
 
 	jderobot::RecordingSequence recList;
+	std::stringstream limit;
 
-	string s_query = "SELECT * FROM " + BBDD_RECORDINGS + "WHERE DATE_FORMAT(begin_time,'%Y-%m-%d')='" + date + "'";
+	if (elems != -1)
+		limit << " LIMIT " << from << "," << elems ;
+	else
+		limit << "";
+
+
+	string s_query = "SELECT * FROM " + BBDD_RECORDINGS + "WHERE DATE_FORMAT(begin_time,'%Y-%m-%d')='" + date + "'" + limit.str() + ";";
 
 	mysqlpp::Query query = m_conn->query (s_query);
 	mysqlpp::UseQueryResult res = query.use();

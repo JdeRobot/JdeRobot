@@ -43,19 +43,19 @@ public:
 
 	  }
 
-	  virtual jderobot::RecordingSequence getRecordings(const Ice::Current& c){
+	  virtual jderobot::RecordingSequence getRecordings(Ice::Int from, Ice::Int elems, const Ice::Current& c){
 
 		  RecordingLog* recLog = initRecordingHandler();
 
-		  return recLog->getAllRecording();
+		  return recLog->getAllRecording(from, elems);
 	  }
 
-	  virtual jderobot::RecordingSequence getRecordingsByDate(const std::string& date, const Ice::Current& c)
+	  virtual jderobot::RecordingSequence getRecordingsByDate(const std::string& date, Ice::Int from, Ice::Int elems, const Ice::Current& c)
 	  {
 
 		  RecordingLog* recLog = initRecordingHandler();
 
-		  return recLog->getRecordingsByDate(date);
+		  return recLog->getRecordingsByDate(date,from,elems);
 
 	  }
 

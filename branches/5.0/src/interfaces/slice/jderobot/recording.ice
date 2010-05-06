@@ -89,11 +89,11 @@ module jderobot {
   	interface RecordingManager
   	{
 		//! Returns the list of recordings
-		idempotent RecordingSequence getRecordings();
+		idempotent RecordingSequence getRecordings(int from, int elems);
 		
 		//! Returns the list of recordings by date
 		// Format Date = "YYYY-MM-DD" - "2010-05-28"
-		idempotent RecordingSequence getRecordingsByDate(string date);
+		idempotent RecordingSequence getRecordingsByDate(string date, int from, int elems);
 		
 		
 		//! Return the event list of recording
