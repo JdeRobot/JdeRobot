@@ -1,0 +1,176 @@
+jderobot (4.3.1-1) unstable; urgency=low
+  
+  * Fix Bug #155 (salons)
+  * New naooperator schema (frivas)
+  * New colortuner schema (pmiangolarra)
+  * Fix yuv at libcolorspaces #246 (pmiangolarra)
+  * Fix Bug #248 (jmplaza) 
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Tue, 04 May 2010 11:12:56 +0000
+
+jderobot (4.3.0-1) unstable; urgency=low
+
+  * JDEROBOT 4.3.0 released :-)
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Mon, 13 Apr 2009 22:36:22 +0000
+
+jderobot (4.3.0-rc7) unstable; urgency=low
+
+  * Add libforms1, libformsgl1 dependencies in jderobot-schemas 
+  * Fix Bug #244 (salons)
+  * Add dependency to robot-player
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Fri, 10 Apr 2009 15:36:27 +0000
+
+jderobot (4.3.0-rc6) unstable; urgency=low
+
+  * Change control dependencies: delete ode dependency
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Thu, 02 Apr 2009 22:45:13 +0000
+
+
+jderobot (4.3.0-rc5) unstable; urgency=low
+
+  * Fix Bug #242 (eperdes)
+  * Fix Bug #241 (jmplaza & rocapal)
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Mon, 23 Mar 2009 22:54:57 +0100
+
+jderobot (4.3.0-rc4) unstable; urgency=low
+	
+  * Fix Bug #238 (jmplaza)
+  * Fix Bug #237 (jmplaza) 
+  * Fix Bug #236 (jmplaza)  
+  * New Hough transform at opencvdemo (eperdes)
+  * New initial robot position in gazebo driver (jmplaza and Jose M.Dominguez)
+  * fix bug #196 #197 (rocapal)	
+  * Update config file with killers schemas
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sat, 21 Mar 2009 13:07:06 +0100
+
+
+jderobot (4.3.0-rc3) unstable; urgency=low
+
+  * fix bug #215 (dario)
+  * fix bug #216 (jmplaza)
+  * add license to jderobot console (rocapal)
+  * Change jde to jderobot in binary and conf file.
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 08 Mar 2009 21:59:55 +0000
+
+jde (4.3.0-rc2) unstable; urgency=low
+
+  * The wiioperator has been updated and tested (jmplaza and eperdes)
+  * Renaming of schema API (jmplaza)
+  * New jde shell (dlobato)
+  * New camera model in progeo (jmplaza and salons)
+  * New examples of convolution matrix at the opencvdemo configuration file (jmplaza)
+  * Fix Bugs: #213 #212 #211 (jmplaza)
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 15 Feb 2009 17:02:14 +0000
+
+jde (4.3.0-rc1) unstable; urgency=low
+
+  * Change licence header to GPL v3.0
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 04 Jan 2009 15:48:50 +0100
+
+jde (4.3.0-beta-269) unstable; urgency=low
+
+  * [jmplaza] ticket#209 solved: imagefile driver accepts now varcolorA, 
+    varcolorB, varcolorC and varcolorD interfaces. Their sizes may be 
+    specified in the configuration file, but the autosize feature has also 
+    been implemented. With autosize no image size must be setup in 
+    the configuration file, the driver itself takes the size from the image source file. 
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sat, 03 Jan 2009 23:59:26 +0100
+
+jde (4.3.0-beta-267) unstable; urgency=low
+
+  * add opencvdemo.conf in jderobot-doc package
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 28 Dec 2008 22:52:50 +0100
+
+jde (4.3.0-beta-266) unstable; urgency=low
+
+  * include opencvdemo directory in subdirs (rocapal)
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 28 Dec 2008 21:21:40 +0100
+
+jde (4.3.0-beta-265) unstable; urgency=low
+
+  * firewire driver disabled (rocapal)
+  * create /etc/ld.so.conf.d/jderobot.conf file to ldconfig (rocapal)
+  * change path to library and includes to "jde-robot" (rocapal)
+  * Fixed #208: (jmplaza) 
+  * new configure.in that takes account for the new schema: opencvdemo (eperdes)
+  * new schema opencvdemo (eperdes)
+  * Bug #207 fixed (dlobato)
+  * Bug #200 fixed (dlobato)
+  * Fixed #199 (dlobato)
+  * Fixed #202 (dlobato)
+  * Fixed #201 (jmplaza) 
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 28 Dec 2008 17:52:08 +0100
+
+jde (4.3.0-beta-256) unstable; urgency=low
+
+  * Fix Bug: the logitech cams are initialized ok! (gabella)
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Tue, 09 Dec 2008 01:01:42 +0100
+
+jde (4.3.0-beta-255) unstable; urgency=low
+
+  * Fixed bug #194 (dlobato) 
+  * Add -O2 compile option in g++ and gcc. (rocapal)
+  * Fixed likn errors in player driver #195 (dlobato) 
+  * Autotoolized new video4linux2 driver #184 (dlobato) 
+  * Add new license header with GPL v3.0 (rocapal)
+
+ -- Roberto Calvo <rocapal@gsyc.es> Sat, 22 Nov 2008 12:47:04 +0100
+
+jde (4.3.0-beta-249) unstable; urgency=low
+
+  * Fix Bug: add glade path in jde.conf
+  * Add new LICENSE: GPL v3.0
+  * Change license in mastergui interface
+
+ -- Roberto Calvo <rocapal@gsyc.es> Sun, 16 Nov 2008 13:03:13 +0100
+
+jde (4.3.0-beta-245) unstable; urgency=low
+
+  * Fixed Bug #191: 
+
+ -- Roberto Calvo <rocapal@gsyc.es> Fri, 14 Nov 2008 23:10:53 +0100   
+
+jde (4.3.0-beta-243) unstable; urgency=low
+
+  * Fixed Bug #190: 
+  * Soluciona problemas con variables del configure que no se exportaban
+  correctamente, dejando mal enlazados varios drivers/esquemas.
+
+  * Fixed Bug #165 (gdago)
+  * Fixed Bug #177 (dlobato)
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 02 Nov 2008 21:05:08 +0100
+
+jde (4.3.0-beta-1) unstable; urgency=low
+
+  * Changes in debian package structure
+  * Modify library path in jde.conf
+  * Change name package jderobot-schemas
+  * Modify dependences of packages.
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Wed, 08 Oct 2008 23:20:23 +0200
+
+jde (4.3.0) UNRELEASED; urgency=low
+
+  * Create several debian packages for the application
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Sun, 05 Oct 2008 19:07:48 +0200
+
+jde (4.3.0) UNRELEASED; urgency=low
+
+  * Fix Bug: pantiltmotors_cycle was not initialized [gdago,rocapal]
+
+ -- Roberto Calvo <rocapal@gsyc.es>  Thu, 02 Oct 2008 00:51:00 +0200

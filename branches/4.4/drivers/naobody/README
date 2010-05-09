@@ -1,0 +1,11 @@
+para compilarlo se utiliza el archivo "compilacion", en el
+cual hay que indicar los siguientes parámetros:
+
+NAOPATH: Ruta donde tenemos la librería naoqi.
+DESTINO: Ruta de destino donde se guardan los ejecutables de los
+schemas de jde (cuidado con el copy del final
+PYPATH: La ruta donde tenemos instalado python, aunque normalmente
+será la que viene por defecto.
+JDEPATH: La ruta donde tenemos instalado jde, para usar los includes
+necesarios, si compilais desde la ruta normal de
+<ruta-jde>/drivers/naobody podéis dejarla como está por defecto.

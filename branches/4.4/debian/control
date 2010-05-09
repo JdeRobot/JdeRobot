@@ -1,0 +1,78 @@
+Source: jderobot
+Section: net
+Priority: extra
+Maintainer: Roberto Calvo <rocapal@gsyc.es>
+Build-Depends: debhelper (>= 6), autotools-dev
+Standards-Version: 3.7.3
+Homepage: http://jde.gsyc.es
+
+Package: jderobot
+Section: net
+Architecture: i386
+Depends: ${shlibs:Depends}, ${misc:Depends}, robot-player, jderobot-schemas, jderobot-drivers, jderobot-services, jderobot-libs, jderobot-doc, libreadline5
+Recommends: 
+Suggests: 
+Description: jde is a software development suite for robotics applications.
+ jde.c is a software development suite for robotics applications, written
+ in C language. It provides a programming environment where the robot control
+ program is made up of a collection of several concurrent asynchronous threads
+ named schemas. It is based on JDE cognitive architecture for autonomous robots
+
+Package: jderobot-schemas
+Section: net
+Architecture: i386
+Depends: ${shlibs:Depends}, jderobot, jderobot-libs, jderobot-drivers, jderobot-services, robot-player, libcv4, libcvaux4, libforms1, libformsgl1
+Recommends: 
+Suggests: jderobot-doc
+Description: jde is a software development suite for robotics applications (schemas)
+ jde.c is a software development suite for robotics applications, written
+ in C language. It provides a programming environment where the robot control
+ program is made up of a collection of several concurrent asynchronous threads
+ named schemas. It is based on JDE cognitive architecture for autonomous robots
+
+Package: jderobot-drivers
+Section: net
+Architecture: i386
+Depends: ${shlibs:Depends}, jderobot, jderobot-schemas, jderobot-libs, jderobot-services, robot-player, stage, gazebo
+Recommends: 
+Suggests: jderobot-doc
+Description: jde is a software development suite for robotics applications (drivers)
+ jde.c is a software development suite for robotics applications, written
+ in C language. It provides a programming environment where the robot control
+ program is made up of a collection of several concurrent asynchronous threads
+ named schemas. It is based on JDE cognitive architecture for autonomous robots
+
+Package: jderobot-services
+Section: net
+Architecture: i386
+Depends: ${shlibs:Depends}, jderobot, jderobot-drivers, jderobot-schemas, jderobot-libs, libgtkglext1
+Recommends: 
+Suggests: jderobot-doc
+Description: jde is a software development suite for robotics applications (services)
+ jde.c is a software development suite for robotics applications, written
+ in C language. It provides a programming environment where the robot control
+ program is made up of a collection of several concurrent asynchronous threads
+ named schemas. It is based on JDE cognitive architecture for autonomous robots
+
+Package: jderobot-libs
+Section: net
+Architecture: i386
+Depends: ${shlibs:Depends}, jderobot
+Recommends: jderobot-schemas, jderobot-drivers, jderobot-services
+Suggests: jderobot-doc
+Description: jde is a software development suite for robotics applications (libs)
+ jde.c is a software development suite for robotics applications, written
+ in C language. It provides a programming environment where the robot control
+ program is made up of a collection of several concurrent asynchronous threads
+ named schemas. It is based on JDE cognitive architecture for autonomous robots
+
+Package: jderobot-doc
+Section: doc
+Architecture: any
+Depends: ${shlibs:Depends}
+Recommends: jderobot-doc, jderobot-schemas, jderobot-drivers, jderobot-libs
+Description: jde is a software development suite for robotics applications (documentation)
+ jde.c is a software development suite for robotics applications, written
+ in C language. It provides a programming environment where the robot control
+ program is made up of a collection of several concurrent asynchronous threads
+ named schemas. It is based on JDE cognitive architecture for autonomous robots

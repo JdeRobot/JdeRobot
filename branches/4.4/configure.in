@@ -1,0 +1,1237 @@
+dnl #############################################################
+dnl #
+dnl #  For information about autoconf, see:
+dnl #
+dnl #  http://www.gnu.org/software/autoconf/
+dnl #
+dnl #
+dnl #############################################################
+
+
+dnl ########################################
+dnl #
+dnl # Autoconf and automake initialization
+dnl #
+dnl ########################################
+AC_INIT([jderobot],[4.3])
+AC_CONFIG_AUX_DIR([config])
+dnl # AC_PREFIX_DEFAULT([/usr/local/jdec-AC_PACKAGE_VERSION])
+dnl#init automake
+AM_INIT_AUTOMAKE
+dnl#config pkg-config
+PKG_PROG_PKG_CONFIG
+
+AC_PROG_LIBTOOL
+AC_SUBST([LIBTOOL_DEPS])
+
+dnl#init dirs
+libdir='${exec_prefix}/lib/jderobot'
+includedir='${prefix}/include/jderobot'
+
+AC_SUBST([driverdir],['${libdir}/drivers'])
+AC_SUBST([schemadir],['${libdir}/schemas'])
+AC_SUBST([servicedir],['${libdir}/services'])
+AC_SUBST([swigdir],['${libdir}/swig'])
+AC_SUBST([confdir],['${pkgdatadir}/conf'])
+AC_SUBST([gladedir],['${pkgdatadir}/glade'])
+
+dnl ########################################
+dnl #
+dnl # command line options and precious variables
+dnl #
+dnl ########################################
+dnl##### switches to enable/disable features
+
+dnl### DRIVERS
+dnl### evi driver switch
+AC_ARG_ENABLE([drivers-evi],
+    [AS_HELP_STRING([--disable-drivers-evi],
+	    [disable evi driver compilation])],
+    [],
+    [enable_drivers_evi=yes])
+
+dnl### firewire driver switch
+AC_ARG_ENABLE([drivers-firewire],
+    [AS_HELP_STRING([--disable-drivers-firewire],
+	    [disable firewire driver compilation])],
+    [],
+    [enable_drivers_firewire=yes])
+
+dnl### gazebo driver switch
+AC_ARG_ENABLE([drivers-gazebo],
+    [AS_HELP_STRING([--disable-drivers-gazebo],
+	    [disable gazebo driver compilation])],
+    [],
+    [enable_drivers_gazebo=yes])
+
+dnl### imagefile  driver switch
+AC_ARG_ENABLE([drivers-imagefile],
+    [AS_HELP_STRING([--disable-drivers-imagefile],
+	    [disable imagefile driver compilation])],
+    [],
+    [enable_drivers_imagefile=yes])
+
+dnl### mplayer  driver switch
+AC_ARG_ENABLE([drivers-mplayer],
+    [AS_HELP_STRING([--disable-drivers-mplayer],
+	    [disable mplayer driver compilation])],
+    [],
+    [enable_drivers_mplayer=yes])
+
+dnl### networkclient  driver switch
+AC_ARG_ENABLE([drivers-networkclient],
+    [AS_HELP_STRING([--disable-drivers-networkclient],
+	    [disable networkclient driver compilation])],
+    [],
+    [enable_drivers_networkclient=yes])
+
+dnl### pantilt  driver switch
+AC_ARG_ENABLE([drivers-pantilt],
+    [AS_HELP_STRING([--disable-drivers-pantilt],
+	    [disable pantilt driver compilation])],
+    [],
+    [enable_drivers_pantilt=yes])
+
+dnl### player  driver switch
+AC_ARG_ENABLE([drivers-player],
+    [AS_HELP_STRING([--disable-drivers-player],
+	    [disable player driver compilation])],
+    [],
+    [enable_drivers_player=yes])
+
+dnl### video4linux  driver switch
+AC_ARG_ENABLE([drivers-video4linux],
+    [AS_HELP_STRING([--disable-drivers-video4linux],
+	    [disable video4linux driver compilation])],
+    [],
+    [enable_drivers_video4linux=yes])
+
+dnl### wiimote driver switch
+AC_ARG_ENABLE([drivers-wiimote],
+    [AS_HELP_STRING([--disable-drivers-wiimote],
+	    [disable wiimote driver compilation])],
+    [],
+    [enable_drivers_wiimote=yes])
+
+dnl### x10  driver switch
+AC_ARG_ENABLE([drivers-x10],
+    [AS_HELP_STRING([--disable-drivers-x10],
+	    [disable x10 driver compilation])],
+    [],
+    [enable_drivers_x10=yes])
+
+dnl### simulated3D  driver switch
+AC_ARG_ENABLE([drivers-simulated3D],
+    [AS_HELP_STRING([--disable-drivers-simulated3D],
+	    [disable simulated3D driver compilation])],
+    [],
+    [enable_drivers_simulated3D=yes])
+
+dnl### opencv  driver switch
+AC_ARG_ENABLE([drivers-opencv],
+    [AS_HELP_STRING([--disable-drivers-opencv],
+	    [disable opencv driver compilation])],
+    [],
+    [enable_drivers_opencv=yes])
+
+dnl### SERVICES
+dnl### graphics_gtk service switch
+AC_ARG_ENABLE([services-graphics_gtk],
+    [AS_HELP_STRING([--disable-services-graphics_gtk],
+	    [disable graphics_gtk driver compilation])],
+    [],
+    [enable_services_graphics_gtk=yes])
+
+dnl### graphics_xforms service switch
+AC_ARG_ENABLE([services-graphics_xforms],
+    [AS_HELP_STRING([--disable-services-graphics_xforms],
+	    [disable graphics_xforms driver compilation])],
+    [],
+    [enable_services_graphics_xforms=yes])
+
+dnl### networkserver  driver switch
+AC_ARG_ENABLE([services-networkserver],
+    [AS_HELP_STRING([--disable-services-networkserver],
+	    [disable networkserver driver compilation])],
+    [],
+    [enable_services_networkserver=yes])
+
+dnl### SCHEMAS
+AC_ARG_ENABLE([schemas-calibrador],
+    [AS_HELP_STRING([--disable-schemas-calibrador],
+	    [disable calibrador schema compilation])],
+    [],
+    [enable_schemas_calibrador=yes])
+
+AC_ARG_ENABLE([schemas-extrinsics],
+    [AS_HELP_STRING([--disable-schemas-extrinsics],
+	    [disable extrinsics schema compilation])],
+    [],
+    [enable_schemas_extrinsics=yes])
+
+dnl AC_ARG_ENABLE([schemas-eyeoperator],
+dnl     [AS_HELP_STRING([--enable-schemas-eyeoperator],
+dnl 	    [enable eyeoperator1/4 schema compilation])],
+dnl     [],
+dnl     [enable_schemas_eyeoperator=no])
+
+AC_ARG_ENABLE([schemas-followball],
+    [AS_HELP_STRING([--disable-schemas-followball],
+	    [disable followball schema compilation])],
+    [],
+    [enable_schemas_followball=yes])
+
+AC_ARG_ENABLE([schemas-hsvtuner],
+    [AS_HELP_STRING([--disable-schemas-hsvtuner],
+	    [disable hsvtuner schema compilation])],
+    [],
+    [enable_schemas_hsvtuner=yes])
+
+AC_ARG_ENABLE([schemas-colortuner],
+    [AS_HELP_STRING([--disable-schemas-colortuner],
+	    [disable colortuner schema compilation])],
+    [],
+    [enable_schemas_colortuner=yes])
+
+AC_ARG_ENABLE([schemas-image_viewer],
+    [AS_HELP_STRING([--disable-schemas-image_viewer],
+	    [disable image_viewer schema compilation])],
+    [],
+    [enable_schemas_image_viewer=yes])
+
+AC_ARG_ENABLE([schemas-imgrectifier],
+    [AS_HELP_STRING([--disable-schemas-imgrectifier],
+	    [disable imgrectifier schema compilation])],
+    [],
+    [enable_schemas_imgrectifier=yes])
+
+AC_ARG_ENABLE([schemas-introrob],
+    [AS_HELP_STRING([--disable-schemas-introrob],
+	    [disable introrob schema compilation])],
+    [],
+    [enable_schemas_introrob=yes])
+
+AC_ARG_ENABLE([schemas-mastergui],
+    [AS_HELP_STRING([--disable-schemas-mastergui],
+	    [disable mastergui schema compilation])],
+    [],
+    [enable_schemas_mastergui=yes])
+
+AC_ARG_ENABLE([schemas-myschema],
+    [AS_HELP_STRING([--disable-schemas-myschema],
+	    [disable myschema schema compilation])],
+    [],
+    [enable_schemas_myschema=yes])
+
+AC_ARG_ENABLE([schemas-opencvdemo],
+    [AS_HELP_STRING([--disable-schemas-opencvdemo],
+	    [disable opencvdemo schema compilation])],
+    [],
+    [enable_schemas_opencvdemo=yes])
+
+AC_ARG_ENABLE([schemas-opengldemo],
+    [AS_HELP_STRING([--disable-schemas-opengldemo],
+	    [disable opengldemo schema compilation])],
+    [],
+    [enable_schemas_opengldemo=yes])
+
+AC_ARG_ENABLE([schemas-opengl_viewer],
+    [AS_HELP_STRING([--disable-schemas-opengl_viewer],
+	    [disable opengl_viewer schema compilation])],
+    [],
+    [enable_schemas_opengl_viewer=yes])
+
+AC_ARG_ENABLE([schemas-recorder],
+    [AS_HELP_STRING([--disable-schemas-recorder],
+	    [disable recorder schema compilation])],
+    [],
+    [enable_schemas_recorder=yes])
+
+AC_ARG_ENABLE([schemas-teleoperator],
+    [AS_HELP_STRING([--disable-schemas-teleoperator],
+	    [disable teleoperator schema compilation])],
+    [],
+    [enable_schemas_teleoperator=yes])
+
+AC_ARG_ENABLE([schemas-wiimote_viewer],
+    [AS_HELP_STRING([--disable-schemas-wiimote_viewer],
+	    [disable wiimote_viewer schema compilation])],
+    [],
+    [enable_schemas_wiimote_viewer=yes])
+
+AC_ARG_ENABLE([schemas-wiioperator],
+    [AS_HELP_STRING([--disable-schemas-wiioperator],
+	    [disable wiioperator schema compilation])],
+    [],
+    [enable_schemas_wiimoteoperator=yes])
+
+AC_ARG_ENABLE([schemas-x10_controller],
+    [AS_HELP_STRING([--disable-schemas-x10_controller],
+	    [disable x10_controller schema compilation])],
+    [],
+    [enable_schemas_x10_controller=yes])
+
+AC_ARG_ENABLE([schemas-naooperator],
+    [AS_HELP_STRING([--disable-schemas-naooperator],
+	    [disable naooperator schema compilation])],
+    [],
+    [enable_schemas_naooperator=yes])
+
+
+AC_ARG_ENABLE([docs],
+    [AS_HELP_STRING([--disable-docs],
+	    [disable docs compilation])],
+    [],
+    [enable_docs=yes])
+
+dnl##### external software FIXME: poner argumento como optativo, escapar []
+AC_ARG_WITH([player],
+    [AS_HELP_STRING([--with-player=<path>],[player software prefix path. Default /usr/local])],
+    [],
+    [with_player="/usr/local"])
+
+AC_ARG_WITH([gazebo],
+    [AS_HELP_STRING([--with-gazebo=<path>],[gazebo software prefix path. Default /usr/local])],
+    [],
+    [with_gazebo="/usr/local"])
+
+dnl AC_ARG_WITH([ipp],
+dnl     [AS_HELP_STRING([--with-ipp=<path>],[ipp software prefix path])],
+dnl     [],
+dnl     [with_ipp="/usr/local"])
+
+dnl##### precious variables
+dnl # Allow user to define variables
+AC_ARG_VAR([FDESIGN],[command used to build xforms guis])
+AC_ARG_VAR([DOXYGEN],[command used to generate code documentation])
+AC_ARG_VAR([LATEX],[tex compiler command])
+AC_ARG_VAR([PDFLATEX],[pdf generator command])
+AC_ARG_VAR([DVIPS],[dvi to ps conversion command])
+AC_ARG_VAR([BIBTEX],[latex bibliography generator command])
+dnl#AC_ARG_VAR([SWIG],[command use to build swig files])
+
+
+dnl ########################################
+dnl #
+dnl # compiler options
+dnl #
+dnl ########################################
+dnl # set compiler flags
+dnl #CFLAGS="-g -O2 -pedantic -Wall"
+dnl # check gcc
+AC_PROG_CC_C99
+AM_PROG_CC_C_O
+dnl#CXXFLAGS="-g -O2 -pedantic -Wall"
+AC_PROG_CXX
+
+dnl # check stdc headers
+AC_HEADER_STDC
+
+dnl ########################################
+dnl #
+dnl # core headers and libraries check
+dnl #
+dnl ########################################
+dnl # check pthreads
+AC_CHECK_HEADERS([pthread.h],[],AC_MSG_ERROR([pthread.h not found]))
+AC_CHECK_LIB([pthread],[pthread_create],
+    [CFLAGS="$CFLAGS -pthread -D_REENTRANT -D_POSIX_PTHREAD_SEMANTICS"],
+    AC_MSG_ERROR([pthread library not found]))
+
+dnl # check m
+AC_CHECK_HEADERS([math.h])
+AC_CHECK_LIB([m],[floor],
+    [],
+    AC_MSG_ERROR([m library not found]))
+
+AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
+AC_PYTHON_DEVEL
+dnl#AC_PROG_SWIG
+dnl#SWIG_PYTHON
+
+dnl ########################################
+dnl #
+dnl # external software check
+dnl #
+dnl ########################################
+AC_ARG_VAR([PLAYER_CFLAGS],[C compiler flags for player])
+AC_ARG_VAR([PLAYER_CPPFLAGS],[C processor flags for player])
+AC_ARG_VAR([PLAYER_LIBS],[linker flags for player])
+if test "x$with_player" != xno; then
+    PLAYER_PREFIX=$with_player
+    PLAYER_INCLUDE=`find $PLAYER_PREFIX/include -name "player-*"`
+    PLAYER_VERSION=`basename $PLAYER_INCLUDE`
+    PLAYER_CFLAGS="$PLAYER_CFLAGS -I$PLAYER_INCLUDE"
+    PLAYER_CPPFLAGS="$PLAYER_CPPFLAGS -I$PLAYER_INCLUDE"
+    PLAYER_LIBS="$PLAYER_LIBS -L$PLAYER_PREFIX/lib"
+fi
+AC_SUBST([PLAYER_PREFIX])
+AC_SUBST([PLAYER_INCLUDE])
+AC_SUBST([PLAYER_VERSION])
+
+
+
+AC_ARG_VAR([GAZEBO_CFLAGS],[C compiler flags for gazebo])
+AC_ARG_VAR([GAZEBO_LIBS],[linker flags for gazebo])
+if test "x$with_gazebo" != xno; then
+    GAZEBO_PREFIX=$with_gazebo
+    GAZEBO_CFLAGS="$GAZEBO_CFLAGS -I$GAZEBO_PREFIX/include"
+    GAZEBO_CPPFLAGS="$GAZEBO_CPPFLAGS -I$GAZEBO_PREFIX/include"
+    GAZEBO_LIBS="$GAZEBO_LIBS -L$GAZEBO_PREFIX/lib"
+fi
+AC_SUBST([GAZEBO_PREFIX])
+
+
+dnl ########################################
+dnl #
+dnl # jde headers and libraries checks
+dnl #
+dnl ########################################
+AC_CHECK_HEADERS([dlfcn.h])
+AC_CHECK_LIB([dl],[dlopen],
+    [JDE_LIBS="-ldl $JDE_LIBS"],
+    AC_MSG_ERROR([dl library not found]))
+AC_SUBST([JDE_LIBS])
+
+AC_CHECK_HEADERS([readline/readline.h readline/history.h])
+AC_CHECK_LIB([readline],[readline],
+    [JDESHELL_LIBS="-lreadline $JDESHELL_LIBS"],
+    AC_MSG_ERROR([readline library not found]))
+AC_SUBST([JDESHELL_LIBS])
+
+dnl#AC_PATH_PROG([SWIG],[swig],[no])
+dnl#if test "x$SWIG" = xno; then
+dnl#    AC_MSG_FAILURE([swig command not found])
+dnl#fi
+
+AM_CONDITIONAL([ENABLE_PYTHON],[false])
+
+
+dnl ########################################
+dnl #
+dnl # drivers headers and libraries checks
+dnl #
+dnl # * <driver>_CFLAGS and <driver>_LIBS can be defined as environment variables in
+dnl #   configure time to set paths and other compile/link options
+dnl #
+dnl ########################################
+AC_MSG_NOTICE([*** Checking drivers:])
+DRIVER_CFLAGS=''
+DRIVER_LIBS='$(top_srcdir)/base/libjde.la'
+DRIVER_LDFLAGS=''
+AC_ARG_VAR([DRIVER_CFLAGS],[C compiler flags used with drivers])
+AC_ARG_VAR([DRIVER_LIBS],[libraries to pass to the linker used with drivers])
+AC_ARG_VAR([DRIVER_LDFLAGS],[linker flags used with drivers])
+
+AM_CONDITIONAL([ENABLE_EVI],[false])
+if test "x$enable_drivers_evi" != xno; then
+    AC_MSG_NOTICE([**** Checking driver evi:])
+    ENABLED_DRIVERS="$ENABLED_DRIVERS evi"
+    AM_CONDITIONAL([ENABLE_EVI],[true])
+fi
+
+AM_CONDITIONAL([ENABLE_FIREWIRE],[false])
+if test "x$enable_drivers_firewire" != xno; then
+    AC_MSG_NOTICE([**** Checking driver firewire:])
+    PKG_CHECK_MODULES([FIREWIRE],[libraw1394 libdc1394],
+	[ENABLED_DRIVERS="$ENABLED_DRIVERS firewire"
+	    AM_CONDITIONAL([ENABLE_FIREWIRE],[true])],
+	[AC_MSG_FAILURE([--enable-drivers-firewire was given, but there was errors: $FIREWIRE_PKG_ERRORS])])
+fi
+
+AM_CONDITIONAL([ENABLE_GAZEBO],[false])
+if test "x$enable_drivers_gazebo" != xno; then
+    _SAVE_CFLAGS=$CFLAGS
+    _SAVE_CPPFLAGS=$CPPFLAGS
+    _SAVE_LIBS=$LIBS
+    CFLAGS="$CFLAGS $GAZEBO_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $GAZEBO_CPPFLAGS"
+    LIBS="$LIBS $GAZEBO_LIBS"
+    AC_MSG_NOTICE([**** Checking driver gazebo:])
+    ERRORS=""
+    AC_CHECK_HEADERS([gazebo.h math.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([m],[floor],
+	[GAZEBO_LIBS="$GAZEBO_LIBS -lm"],
+    	[ERRORS="$ERRORS, m library not found. Use --with-gazebo flag"])
+    AC_CHECK_LIB([gazebo],[main],
+	[GAZEBO_LIBS="$GAZEBO_LIBS -lgazebo"],
+	[ERRORS="$ERRORS, libgazebo not found. Use --with-gazebo flag"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-drivers-gazebo was given, but there was errors: $ERRORS])
+    else
+	ENABLED_DRIVERS="$ENABLED_DRIVERS gazebo"
+	AM_CONDITIONAL([ENABLE_GAZEBO],[true])
+    fi
+    CFLAGS=$_SAVE_CFLAGS
+    CPPFLAGS=$_SAVE_CPPFLAGS
+    LIBS=$_SAVE_LIBS
+fi
+
+AM_CONDITIONAL([ENABLE_IMAGEFILE],[false])
+if test "x$enable_drivers_imagefile" != xno; then
+    AC_MSG_NOTICE([**** Checking driver imagefile:])
+    ENABLED_DRIVERS="$ENABLED_DRIVERS imagefile"
+    AM_CONDITIONAL([ENABLE_IMAGEFILE],[true])
+fi
+
+AC_ARG_VAR([MPLAYER],[command used by mplayer driver as video source])
+AC_ARG_VAR([MENCODER],[command used by mplayer driver as video source])
+AM_CONDITIONAL([ENABLE_MPLAYER],[false])
+if test "x$enable_drivers_mplayer" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking driver mplayer:])
+    AC_PATH_PROG([MPLAYER],[mplayer],[no])
+    if test "x$MPLAYER" = xno; then
+	ERRORS="mplayer not found"
+    fi
+    AC_PATH_PROG([MENCODER],[mencoder],[no])
+    if test "x$MENCODER" = xno; then
+	ERRORS="$ERRORS, mencoder not found"
+    fi
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-drivers-mplayer was given, but there was errors: $ERRORS])
+    else
+	ENABLED_DRIVERS="$ENABLED_DRIVERS mplayer"
+	AM_CONDITIONAL([ENABLE_MPLAYER],[true])
+    fi
+fi
+
+AM_CONDITIONAL([ENABLE_NETWORKCLIENT],[false])
+if test "x$enable_drivers_networkclient" != xno; then
+    AC_MSG_NOTICE([**** Checking driver networkclient:])
+    ENABLED_DRIVERS="$ENABLED_DRIVERS networkclient"
+    AM_CONDITIONAL([ENABLE_NETWORKCLIENT],[true])
+fi
+
+AM_CONDITIONAL([ENABLE_PANTILT],[false])
+if test "x$enable_drivers_pantilt" != xno; then
+    AC_MSG_NOTICE([**** Checking driver pantilt:])
+    ENABLED_DRIVERS="$ENABLED_DRIVERS pantilt"
+    AM_CONDITIONAL([ENABLE_PANTILT],[true])
+fi
+
+AM_CONDITIONAL([ENABLE_PLAYER],[false])
+if test "x$enable_drivers_player" != xno; then
+    _SAVE_CFLAGS=$CFLAGS
+    _SAVE_CPPFLAGS=$CPPFLAGS
+    _SAVE_LIBS=$LIBS
+    CFLAGS="$CFLAGS $PLAYER_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $PLAYER_CPPFLAGS"
+    LIBS="$LIBS $PLAYER_LIBS"
+    AC_MSG_NOTICE([*** Checking driver player:])
+    ERRORS=""
+    AC_CHECK_HEADERS([libplayerc/playerc.h],
+	[],
+	[ERRORS="$ac_header not found"])
+    AC_CHECK_LIB([playerc],[main],
+	[PLAYER_LIBS="$PLAYER_LIBS -lplayerc"],
+	[ERRORS="$ERRORS, libplayerc not found. Use --with-player flag"])
+    AC_CHECK_LIB([playerxdr],[main],
+	[PLAYER_LIBS="$PLAYER_LIBS -lplayerxdr"],
+	[ERRORS="$ERRORS, libplayerxdr not found. Use --with-player flag"])
+    AC_CHECK_LIB([playererror],[main],
+	[PLAYER_LIBS="$PLAYER_LIBS -lplayererror"],
+	[ERRORS="$ERRORS, libplayererror not found. Use --with-player flag"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-drivers-player was given, but there was errors: $ERRORS])
+    else
+	ENABLED_DRIVERS="$ENABLED_DRIVERS player"
+	AM_CONDITIONAL([ENABLE_PLAYER],[true])
+    fi
+    CFLAGS=$_SAVE_CFLAGS
+    CPPFLAGS=$_SAVE_CPPFLAGS
+    LIBS=$_SAVE_LIBS
+fi
+
+AM_CONDITIONAL([ENABLE_VIDEO4LINUX],[false])
+if test "x$enable_drivers_video4linux" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking driver video4linux:])
+    AC_CHECK_HEADERS([linux/videodev.h linux/videodev2.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-drivers-video4linux was given, but there was errors: $ERRORS])
+    else
+	ENABLED_DRIVERS="$ENABLED_DRIVERS video4linux"
+	AM_CONDITIONAL([ENABLE_VIDEO4LINUX],[true])
+    fi
+fi
+
+AM_CONDITIONAL([ENABLE_WIIMOTE],[false])
+if test "x$enable_drivers_wiimote" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking driver wiimote:])
+    AC_CHECK_HEADERS([bluetooth/bluetooth.h cwiid.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([cwiid],[main],
+	[WIIMOTE_LIBS="$WIIMOTE_LIBS -lcwiid"],
+	[ERRORS="$ERRORS, libcwiid not found"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-drivers-wiimote was given, but there was errors: $ERRORS])
+    else
+	ENABLED_DRIVERS="$ENABLED_DRIVERS wiimote"
+	AM_CONDITIONAL([ENABLE_WIIMOTE],[true])
+    fi
+    AC_SUBST([WIIMOTE_LIBS])
+fi
+
+AM_CONDITIONAL([ENABLE_X10],[false])
+if test "x$enable_drivers_x10" != xno; then
+    AC_MSG_NOTICE([**** Checking driver x10:])
+    ENABLED_DRIVERS="$ENABLED_DRIVERS x10"
+    AM_CONDITIONAL([ENABLE_X10],[true])
+fi
+
+AM_CONDITIONAL([ENABLE_SIMULATED3D],[false])
+if test "x$enable_drivers_simulated3D" != xno; then
+    _SAVE_CFLAGS=$CFLAGS		       
+    _SAVE_CPPFLAGS=$CPPFLAGS
+    _SAVE_LIBS=$LIBS
+    CFLAGS="$CFLAGS $SIMULATED3D_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $SIMULATED3D_CPPFLAGS"
+    LIBS="$LIBS $SIMULATED3D_LIBS"
+    AC_MSG_NOTICE([**** Checking driver simulated3D:])
+    ERRORS=""
+    AC_CHECK_HEADERS([math.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([m],[floor],
+	[SIMULATED3D_LIBS="-lm"],
+    	[ERRORS="$ERRORS, m library not found. Use --with-simulated3d flag"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-drivers-simulated was given, but there was errors: $ERRORS])
+    else
+        ENABLED_DRIVERS="$ENABLED_DRIVERS simulated3D"
+    	AM_CONDITIONAL([ENABLE_SIMULATED3D],[true])
+    fi
+    CFLAGS=$_SAVE_CFLAGS
+    CPPFLAGS=$_SAVE_CPPFLAGS
+    LIBS=$_SAVE_LIBS
+fi
+
+AM_CONDITIONAL([ENABLE_OPENCV],[false])
+if test "x$enable_drivers_opencv" != xno; then
+    _SAVE_CFLAGS=$CFLAGS		       
+    _SAVE_CPPFLAGS=$CPPFLAGS
+    _SAVE_LIBS=$LIBS
+    CFLAGS="$CFLAGS $OPENCV_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $OPENCV_CPPFLAGS"
+    LIBS="$LIBS $OPENCV_LIBS"
+    AC_MSG_NOTICE([**** Checking driver opencv:])
+    ERRORS=""
+    AC_CHECK_HEADERS([opencv/cv.h opencv/highgui.h],
+        [],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([cxcore],[main], 
+	[OPENCV_LIBS="$OPENCV_LIBS -lcxcore"],
+    	[ERRORS="$ERRORS, cxcore library not found. Use --with-opencv flag"])
+    AC_CHECK_LIB([cv],[main], 
+	[OPENCV_LIBS="$OPENCV_LIBS -lcv"],
+    	[ERRORS="$ERRORS, cv library not found. Use --with-opencv flag"])
+    AC_CHECK_LIB([highgui],[main], 
+	[OPENCV_LIBS="$OPENCV_LIBS -lhighgui"],
+    	[ERRORS="$ERRORS, highgui library not found. Use --with-opencv flag"])
+    AC_CHECK_LIB([cvaux],[main], 
+	[OPENCV_LIBS="$OPENCV_LIBS -lcvaux"],
+    	[ERRORS="$ERRORS, cvaux library not found. Use --with-opencv flag"])
+    AC_CHECK_LIB([ml],[main], 
+	[OPENCV_LIBS="$OPENCV_LIBS -lml"],
+    	[ERRORS="$ERRORS, ml library not found. Use --with-opencv flag"])
+
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-drivers-opencv was given, but there was errors: $ERRORS])
+    else
+        ENABLED_DRIVERS="$ENABLED_DRIVERS opencv"
+    	AM_CONDITIONAL([ENABLE_OPENCV],[true])
+    fi
+    CFLAGS=$_SAVE_CFLAGS
+    CPPFLAGS=$_SAVE_CPPFLAGS
+    LIBS=$_SAVE_LIBS
+fi
+
+AC_SUBST([ENABLED_DRIVERS])
+
+dnl ########################################
+dnl #
+dnl # services checks
+dnl #
+dnl # * <service>_CFLAGS and <service>_LIBS can be defined as environment variables in
+dnl #   configure time to set paths and other compile/link options
+dnl #
+dnl ########################################
+AC_MSG_NOTICE([*** Checking services:])
+SERVICE_CFLAGS=''
+SERVICE_LIBS='$(top_srcdir)/base/libjde.la'
+SERVICE_LDFLAGS=''
+AC_ARG_VAR([SERVICE_CFLAGS],[C compiler flags used with services])
+AC_ARG_VAR([SERVICE_LIBS],[libraries to pass to the linker used with services])
+AC_ARG_VAR([SERVICE_LDFLAGS],[linker flags used with services])
+
+AM_CONDITIONAL([ENABLE_GRAPHICS_GTK],[false])
+if test "x$enable_services_graphics_gtk" != xno; then
+    AC_MSG_NOTICE([**** Checking service graphics_gtk:])
+    PKG_CHECK_MODULES([GRAPHICS_GTK],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SERVICES="$ENABLED_SERVICES graphics_gtk"
+	    AM_CONDITIONAL([ENABLE_GRAPHICS_GTK],[true])],
+	[AC_MSG_FAILURE([--enable-services-graphics_gtk was given, but there was errors: $GRAPHICS_GTK_PKG_ERRORS])])
+fi
+
+dnl#workarround to see forms.h if found in /usr/include/X11
+CFLAGS="$CFLAGS -I/usr/include/X11"
+CPPFLAGS="$CFLAGS -I/usr/include/X11"
+CXXFLAGS="$CXXFLAGS -I/usr/include/X11"
+
+dnl#check graphics_xforms deps
+AM_CONDITIONAL([ENABLE_GRAPHICS_XFORMS],[false])
+if test "x$enable_services_graphics_xforms" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking service graphics_xforms:])
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([forms],[main],
+	[GRAPHICS_XFORMS_LIBS="$GRAPHICS_XFORMS_LIBS -lforms"],
+	[ERRORS="$ERRORS, libforms not found"],[-lm])
+    AC_CHECK_LIB([X11],[main],
+	[GRAPHICS_XFORMS_LIBS="$GRAPHICS_XFORMS_LIBS -lX11"],
+	[ERRORS="$ERRORS, libX11 not found"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-services-graphics_xforms was given, but there was errors: $ERRORS])
+    else
+	ENABLED_SERVICES="$ENABLED_SERVICES graphics_xforms"
+	AM_CONDITIONAL([ENABLE_GRAPHICS_XFORMS],[true])
+    fi
+    AC_SUBST([GRAPHICS_XFORMS_LIBS])
+fi
+
+dnl#check networkserver deps
+AM_CONDITIONAL([ENABLE_NETWORKSERVER],[false])
+if test "x$enable_services_networkserver" != xno; then
+    AC_MSG_NOTICE([**** Checking service networkserver:])
+    ENABLED_SERVICES="$ENABLED_SERVICES networkserver"
+    AM_CONDITIONAL([ENABLE_NETWORKSERVER],[true])
+fi
+
+AC_SUBST([ENABLED_SERVICES])
+
+dnl ########################################
+dnl #
+dnl # schemas checks
+dnl #
+dnl # * <schema>_CFLAGS and <schema>_LIBS can be defined as environment variables in
+dnl #   configure time to set paths and other compile/link options
+dnl #
+dnl ########################################
+AC_MSG_NOTICE([*** Checking schemas:])
+SCHEMA_CFLAGS=''
+SCHEMA_LIBS='$(top_srcdir)/base/libjde.la'
+SCHEMA_LDFLAGS=''
+AC_ARG_VAR([SCHEMA_CFLAGS],[C compiler flags used with schemas])
+AC_ARG_VAR([SCHEMA_LIBS],[libraries to pass to the linker used with schemas])
+AC_ARG_VAR([SCHEMA_LDFLAGS],[linker flags used with schemas])
+
+dnl # schema calibrador
+AM_CONDITIONAL([ENABLE_CALIBRADOR],[false])
+if test "x$enable_schemas_calibrador" != xno; then
+    AC_MSG_NOTICE([**** Checking schema calibrador:])
+    PKG_CHECK_MODULES([CALIBRADOR],[gsl glib-2.0],
+        [ENABLED_SCHEMAS="$ENABLED_SCHEMAS calibrador"
+	    AM_CONDITIONAL([ENABLE_CALIBRADOR],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-calibrador was given, but there was errors: $CALIBRADOR_PKG_ERRORS])])
+    ERRORS=""
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h GL/gl.h GL/gl.h GL/glx.h GL/glu.h GL/glut.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([forms],[main],
+	[CALIBRADOR_LIBS="$CALIBRADOR_LIBS -lforms"],
+	[ERRORS="$ERRORS, libforms not found"],[-lm])
+    AC_CHECK_LIB([X11],[main],
+	[CALIBRADOR_LIBS="$CALIBRADOR_LIBS -lX11"],
+	[ERRORS="$ERRORS, libX11 not found"])
+    AC_CHECK_LIB([formsGL],[main],
+	[CALIBRADOR_LIBS="$CALIBRADOR_LIBS -lformsGL"],
+	[ERRORS="$ERRORS, libformsGL not found"],[-lm])
+    AC_CHECK_LIB([GL],[main],
+	[CALIBRADOR_LIBS="$CALIBRADOR_LIBS -lGL"],
+	[ERRORS="$ERRORS, libGL not found"])
+    AC_CHECK_LIB([GLU],[main],
+	[CALIBRADOR_LIBS="$CALIBRADOR_LIBS -lGLU"],
+	[ERRORS="$ERRORS, libGLU not found"])
+    AC_CHECK_LIB([glut],[main],
+	[CALIBRADOR_LIBS="$CALIBRADOR_LIBS -lglut"],
+	[ERRORS="$ERRORS, libglut not found"])
+    AC_PATH_PROG([FDESIGN],[fdesign],
+	[ERRORS="$ERRORS, fdesign needed to build calibrador schema not found"])
+    AC_SUBST([CALIBRADOR_LIBS])
+fi
+
+dnl # schema extrinsics
+AM_CONDITIONAL([ENABLE_EXTRINSICS],[false])
+if test "x$enable_schemas_extrinsics" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking schema extrinsics:])
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([forms],[main],
+	[EXTRINSICS_LIBS="$EXTRINSICS_LIBS -lforms"],
+	[ERRORS="$ERRORS, libforms not found"],[-lm])
+    AC_CHECK_LIB([X11],[main],
+	[EXTRINSICS_LIBS="$EXTRINSICS_LIBS -lX11"],
+	[ERRORS="$ERRORS, libX11 not found"])
+    AC_PATH_PROG([FDESIGN],[fdesign],
+	[ERRORS="$ERRORS, fdesign needed to build extrinsics schema not found"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-schemas-extrinsics was given, but there was errors: $ERRORS])
+    else
+	ENABLED_SCHEMAS="$ENABLED_SCHEMAS extrinsics"
+	AM_CONDITIONAL([ENABLE_EXTRINSICS],[true])
+    fi
+    AC_SUBST([EXTRINSICS_LIBS])
+fi
+dnl dnl#check eyeoperator1/4
+dnl AM_CONDITIONAL([ENABLE_EYEOPERATOR],[false])
+dnl if test "x$enable_schemas_eyeoperator" != xno; then
+dnl     ERRORS=""
+dnl     AC_MSG_NOTICE([**** Checking schema eyeoperator1/4:])
+dnl     AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
+dnl 	[],
+dnl 	[EYEOPERATOR_PKG_ERRORS="$EYEOPERATOR_PKG_ERRORS, $ac_header not found"])
+dnl     AC_CHECK_LIB([forms],[main],
+dnl 	[EYEOPERATOR_LIBS="$EYEOPERATOR_LIBS -lforms"],
+dnl 	[ERRORS="$ERRORS, libforms not found"],[-lm])
+dnl     AC_CHECK_LIB([X11],[main],
+dnl 	[EYEOPERATOR_LIBS="$EYEOPERATOR_LIBS -lX11"],
+dnl 	[ERRORS="$ERRORS, libX11 not found"])
+dnl     AC_PATH_PROG([FDESIGN],[fdesign],
+dnl 	[ERRORS="$ERRORS, fdesign needed to build eyeoperator schema not found"])
+dnl     if test "x$with_ipp" = xno; then
+dnl 	ERRORS="$ERRORS, ipp software not found, use --with-ipp=<path>"
+dnl     fi
+dnl     if test "$ERRORS"; then
+dnl 	AC_MSG_FAILURE([--enable-schemas-eyeoperator was given, but there was errors: $ERRORS])
+dnl     else
+dnl 	ENABLED_SCHEMAS="$ENABLED_SCHEMAS eyeoperator"
+dnl 	AM_CONDITIONAL([ENABLE_EYEOPERATOR],[true])
+dnl     fi
+dnl     CFLAGS=$_SAVE_CFLAGS
+dnl     LIBS=$_SAVE_LIBS
+dnl fi
+
+dnl # schema followball
+AM_CONDITIONAL([ENABLE_FOLLOWBALL],[false])
+if test "x$enable_schemas_followball" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking schema followball:])
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([forms],[main],
+	[FOLLOWBALL_LIBS="$FOLLOWBALL_LIBS -lforms"],
+	[ERRORS="$ERRORS, libforms not found"],[-lm])
+    AC_CHECK_LIB([X11],[main],
+	[FOLLOWBALL_LIBS="$FOLLOWBALL_LIBS -lX11"],
+	[ERRORS="$ERRORS, libX11 not found"])
+    AC_PATH_PROG([FDESIGN],[fdesign],
+	[ERRORS="$ERRORS, fdesign needed to build followball schema not found"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-schemas-followball was given, but there was errors: $ERRORS])
+    else
+	ENABLED_SCHEMAS="$ENABLED_SCHEMAS followball"
+	AM_CONDITIONAL([ENABLE_FOLLOWBALL],[true])
+    fi
+    AC_SUBST([FOLLOWBALL_LIBS])
+fi
+
+dnl # schema hsvtuner
+AM_CONDITIONAL([ENABLE_HSVTUNER],[false])
+if test "x$enable_schemas_hsvtuner" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking schema hsvtuner:])
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([forms],[main],
+	[HSVTUNER_LIBS="$HSVTUNER_LIBS -lforms"],
+	[ERRORS="$ERRORS, libforms not found"],[-lm])
+    AC_CHECK_LIB([X11],[main],
+	[HSVTUNER_LIBS="$HSVTUNER_LIBS -lX11"],
+	[ERRORS="$ERRORS, libX11 not found"])
+    AC_PATH_PROG([FDESIGN],[fdesign],
+	[ERRORS="$ERRORS, fdesign needed to build hsvtuner schema not found"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-schemas-hsvtuner was given, but there was errors: $ERRORS])
+    else
+	ENABLED_SCHEMAS="$ENABLED_SCHEMAS hsvtuner"
+	AM_CONDITIONAL([ENABLE_HSVTUNER],[true])
+    fi
+    AC_SUBST([HSVTUNER_LIBS])
+fi
+
+
+dnl # schema colortuner
+AM_CONDITIONAL([ENABLE_COLORTUNER],[false])
+if test "x$enable_schemas_colortuner" != xno; then
+    AC_MSG_NOTICE([**** Checking schema colortuner:])
+    PKG_CHECK_MODULES([COLORTUNER],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS colortuner"
+	    AM_CONDITIONAL([ENABLE_COLORTUNER],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-colortuner was given, but there was errors: $COLORTUNER_PKG_ERRORS])])
+fi
+
+
+dnl # schema image_viewer
+AM_CONDITIONAL([ENABLE_IMAGE_VIEWER],[false])
+if test "x$enable_schemas_image_viewer" != xno; then
+    AC_MSG_NOTICE([**** Checking schema image_viewer:])
+    PKG_CHECK_MODULES([IMAGE_VIEWER],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS image_viewer"
+	    AM_CONDITIONAL([ENABLE_IMAGE_VIEWER],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-image_viewer was given, but there was errors: $IMAGE_VIEWER_PKG_ERRORS])])
+fi
+
+dnl # schema imgrectifier
+AM_CONDITIONAL([ENABLE_IMGRECTIFIER],[false])
+if test "x$enable_schemas_imgrectifier" != xno; then
+    AC_MSG_NOTICE([**** Checking schema imgrectifier:])
+    PKG_CHECK_MODULES([IMGRECTIFIER],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0 gsl],
+        [ENABLED_SCHEMAS="$ENABLED_SCHEMAS imgrectifier"
+	    AM_CONDITIONAL([ENABLE_IMGRECTIFIER],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-imgrectifier was given, but there was errors: $IMGRECTIFIER_PKG_ERRORS])])
+fi
+   
+dnl # schema introrob
+AM_CONDITIONAL([ENABLE_INTROROB],[false])
+if test "x$enable_schemas_introrob" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking schema introrob:])
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([forms],[main],
+	[INTROROB_LIBS="$INTROROB_LIBS -lforms"],
+	[ERRORS="$ERRORS, libforms not found"],[-lm])
+    AC_CHECK_LIB([X11],[main],
+	[INTROROB_LIBS="$INTROROB_LIBS -lX11"],
+	[ERRORS="$ERRORS, libX11 not found"])
+    AC_PATH_PROG([FDESIGN],[fdesign],
+	[ERRORS="$ERRORS, fdesign needed to build introrob schema not found"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-schemas-introrob was given, but there was errors: $ERRORS])
+    else
+	ENABLED_SCHEMAS="$ENABLED_SCHEMAS introrob"
+	AM_CONDITIONAL([ENABLE_INTROROB],[true])
+    fi
+    AC_SUBST([INTROROB_LIBS])
+fi
+
+dnl # schema mastergui
+AM_CONDITIONAL([ENABLE_MASTERGUI],[false])
+if test "x$enable_schemas_mastergui" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking schema mastergui:])
+    PKG_CHECK_MODULES([MASTERGUI],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS mastergui"
+	    AM_CONDITIONAL([ENABLE_MASTERGUI],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-mastergui was given, but there was errors: $MASTERGUI_PKG_ERRORS])])
+fi
+
+dnl # schema myschema
+AM_CONDITIONAL([ENABLE_MYSCHEMA],[false])
+if test "x$enable_schemas_myschema" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking schema myschema:])
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([forms],[main],
+	[MYSCHEMA_LIBS="$MYSCHEMA_LIBS -lforms"],
+	[ERRORS="$ERRORS, libforms not found"],[-lm])
+    AC_CHECK_LIB([X11],[main],
+	[MYSCHEMA_LIBS="$MYSCHEMA_LIBS -lX11"],
+	[ERRORS="$ERRORS, libX11 not found"])
+    AC_PATH_PROG([FDESIGN],[fdesign],
+	[ERRORS="$ERRORS, fdesign needed to build myschema schema not found"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-schemas-myschema was given, but there was errors: $ERRORS])
+    else
+	ENABLED_SCHEMAS="$ENABLED_SCHEMAS myschema"
+	AM_CONDITIONAL([ENABLE_MYSCHEMA],[true])
+    fi
+    AC_SUBST([MYSCHEMA_LIBS])
+fi
+
+dnl # schema opencvdemo
+AM_CONDITIONAL([ENABLE_OPENCVDEMO],[false])
+if test "x$enable_schemas_opencvdemo" != xno; then
+    AC_MSG_NOTICE([**** Checking schema opencvdemo:])
+    PKG_CHECK_MODULES([OPENCVDEMO],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0 opencv],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS opencvdemo"
+	    AM_CONDITIONAL([ENABLE_OPENCVDEMO],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-opencvdemo was given, but there was errors: $OPENCVDEMO_PKG_ERRORS])])
+fi
+
+dnl # schema opengldemo
+AM_CONDITIONAL([ENABLE_OPENGLDEMO],[false])
+if test "x$enable_schemas_opengldemo" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking schema opengldemo:])
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h GL/gl.h GL/gl.h GL/glx.h GL/glu.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([forms],[main],
+	[OPENGLDEMO_LIBS="$OPENGLDEMO_LIBS -lforms"],
+	[ERRORS="$ERRORS, libforms not found"],[-lm])
+    AC_CHECK_LIB([X11],[main],
+	[OPENGLDEMO_LIBS="$OPENGLDEMO_LIBS -lX11"],
+	[ERRORS="$ERRORS, libX11 not found"])
+    AC_CHECK_LIB([formsGL],[main],
+	[OPENGLDEMO_LIBS="$OPENGLDEMO_LIBS -lformsGL"],
+	[ERRORS="$ERRORS, libformsGL not found"],[-lm])
+    AC_CHECK_LIB([GL],[main],
+	[OPENGLDEMO_LIBS="$OPENGLDEMO_LIBS -lGL"],
+	[ERRORS="$ERRORS, libGL not found"])
+    AC_CHECK_LIB([GLU],[main],
+	[OPENGLDEMO_LIBS="$OPENGLDEMO_LIBS -lGLU"],
+	[ERRORS="$ERRORS, libGLU not found"])
+    AC_PATH_PROG([FDESIGN],[fdesign],
+	[ERRORS="$ERRORS, fdesign needed to build opengldemo schema not found"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-schemas-opengldemo was given, but there was errors: $ERRORS])
+    else
+	ENABLED_SCHEMAS="$ENABLED_SCHEMAS opengldemo"
+	AM_CONDITIONAL([ENABLE_OPENGLDEMO],[true])
+    fi
+    AC_SUBST([OPENGLDEMO_LIBS])
+fi
+
+dnl # schema opengl_viewer
+AM_CONDITIONAL([ENABLE_OPENGL_VIEWER],[false])
+if test "x$enable_schemas_opengl_viewer" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking schema opengl_viewer:])
+    PKG_CHECK_MODULES([OPENGL_VIEWER],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS opengl_viewer"
+	    AM_CONDITIONAL([ENABLE_OPENGL_VIEWER],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-opengl_viewer was given, but there was errors: $OPENGL_VIEWER_PKG_ERRORS])])
+fi
+
+dnl # schema recorder
+AM_CONDITIONAL([ENABLE_RECORDER],[false])
+if test "x$enable_schemas_recorder" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking schema recorder:])
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([forms],[main],
+	[RECORDER_LIBS="$RECORDER_LIBS -lforms"],
+	[ERRORS="$ERRORS, libforms not found"],[-lm])
+    AC_CHECK_LIB([X11],[main],
+	[RECORDER_LIBS="$RECORDER_LIBS -lX11"],
+	[ERRORS="$ERRORS, libX11 not found"])
+    AC_PATH_PROG([FDESIGN],[fdesign],
+	[ERRORS="$ERRORS, fdesign needed to build recorder schema not found"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-schemas-recorder was given, but there was errors: $ERRORS])
+    else
+	ENABLED_SCHEMAS="$ENABLED_SCHEMAS recorder"
+	AM_CONDITIONAL([ENABLE_RECORDER],[true])
+    fi
+    AC_SUBST([RECORDER_LIBS])
+fi
+
+dnl # schema teleoperator
+AM_CONDITIONAL([ENABLE_TELEOPERATOR],[false])
+if test "x$enable_schemas_teleoperator" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking schema teleoperator:])
+    AC_CHECK_HEADERS([X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h forms.h GL/gl.h GL/gl.h GL/glx.h GL/glu.h],
+	[],
+	[ERRORS="$ERRORS, $ac_header not found"])
+    AC_CHECK_LIB([forms],[main],
+	[TELEOPERATOR_LIBS="$TELEOPERATOR_LIBS -lforms"],
+	[ERRORS="$ERRORS, libforms not found"],[-lm])
+    AC_CHECK_LIB([X11],[main],
+	[TELEOPERATOR_LIBS="$TELEOPERATOR_LIBS -lX11"],
+	[ERRORS="$ERRORS, libX11 not found"])
+    AC_CHECK_LIB([formsGL],[main],
+	[TELEOPERATOR_LIBS="$TELEOPERATOR_LIBS -lformsGL"],
+	[ERRORS="$ERRORS, libformsGL not found"],[-lm])
+    AC_CHECK_LIB([GL],[main],
+	[TELEOPERATOR_LIBS="$TELEOPERATOR_LIBS -lGL"],
+	[ERRORS="$ERRORS, libGL not found"])
+    AC_CHECK_LIB([GLU],[main],
+	[TELEOPERATOR_LIBS="$TELEOPERATOR_LIBS -lGLU"],
+	[ERRORS="$ERRORS, libGLU not found"])
+    AC_PATH_PROG([FDESIGN],[fdesign],
+	[ERRORS="$ERRORS, fdesign needed to build teleoperator schema not found"])
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-schemas-teleoperator was given, but there was errors: $ERRORS])
+    else
+	ENABLED_SCHEMAS="$ENABLED_SCHEMAS teleoperator"
+	AM_CONDITIONAL([ENABLE_TELEOPERATOR],[true])
+    fi
+    AC_SUBST([TELEOPERATOR_LIBS])
+fi
+
+dnl # schema wiimote_viewer
+AM_CONDITIONAL([ENABLE_WIIMOTE_VIEWER],[false])
+if test "x$enable_schemas_wiimote_viewer" != xno; then
+    AC_MSG_NOTICE([**** Checking schema wiimote_viewer:])
+    PKG_CHECK_MODULES([WIIMOTE_VIEWER],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS wiimote_viewer"
+	    AM_CONDITIONAL([ENABLE_WIIMOTE_VIEWER],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-wiimote_viewer was given, but there was errors: $WIIMOTE_VIEWER_PKG_ERRORS])])
+fi
+
+dnl # schema wiioperator
+AM_CONDITIONAL([ENABLE_WIIOPERATOR],[false])
+if test "x$enable_schemas_wiioperator" != xno; then
+    AC_MSG_NOTICE([**** Checking schema wiioperator:])	
+     PKG_CHECK_MODULES([WIIOPERATOR],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS wiioperator"
+	    AM_CONDITIONAL([ENABLE_WIIOPERATOR],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-wiioperator was given, but there was errors: $WIIOPERATOR_PKG_ERRORS])])
+fi
+
+dnl # schema x10_controller
+AM_CONDITIONAL([ENABLE_X10_CONTROLLER],[false])
+if test "x$enable_schemas_x10_controller" != xno; then
+    AC_MSG_NOTICE([**** Checking schema x10_controller:])
+    PKG_CHECK_MODULES([X10_CONTROLLER],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS x10_controller"
+	    AM_CONDITIONAL([ENABLE_X10_CONTROLLER],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-x10_controller was given, but there was errors: $X10_CONTROLLER_PKG_ERRORS])])
+fi
+
+dnl # schema naooperator
+AM_CONDITIONAL([ENABLE_NAOOPERATOR],[false])
+if test "x$enable_schemas_naooperator" != xno; then
+    AC_MSG_NOTICE([**** Checking schema naooperator:])
+    PKG_CHECK_MODULES([NAOOPERATOR],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS naooperator"
+	    AM_CONDITIONAL([ENABLE_NAOOPERATOR],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-naooperator was given, but there was errors: $NAOOPERATOR_PKG_ERRORS])])
+fi
+
+dnl # schema domoticdemo
+AM_CONDITIONAL([ENABLE_DOMOTICDEMO],[false])
+if test "x$enable_schemas_domoticdemo" != xno; then
+    AC_MSG_NOTICE([**** Checking schema domoticdemo:])
+    PKG_CHECK_MODULES([DOMOTICDEMO],[gtkglext-1.0 gdkglext-1.0 gthread-2.0 libglade-2.0 opencv],
+	[ENABLED_SCHEMAS="$ENABLED_SCHEMAS domoticdemo"
+	    AM_CONDITIONAL([ENABLE_DOMOTICDEMO],[true])],
+	[AC_MSG_FAILURE([--enable-schemas-domoticdemo was given, but there was errors: $DOMOTICDEMO_PKG_ERRORS])])
+fi
+
+
+dnl ########################################
+dnl #
+dnl # doc checks
+dnl #
+dnl ########################################
+AM_CONDITIONAL([ENABLE_DOCS],[false])
+if test "x$enable_docs" != xno; then
+    ERRORS=""
+    AC_MSG_NOTICE([**** Checking docs:])
+    AC_PATH_PROG([DOXYGEN],[doxygen],[no])
+    if test "x$DOXYGEN" = xno; then
+	ERRORS="doxygen not found"
+    fi
+    AC_PATH_PROG([DOT],[dot],[no])
+    if test "x$DOT" = xno; then
+	ERRORS="$ERRORS, dot not found"
+    fi
+    if test "$ERRORS"; then
+	AC_MSG_FAILURE([--enable-docs was given, but there was errors: $ERRORS])
+    else
+	AM_CONDITIONAL([ENABLE_DOCS],[true])
+    fi
+fi
+
+
+dnl ########################################
+dnl #
+dnl # libs checks
+dnl #
+dnl ########################################
+
+
+dnl ########################################
+dnl #
+dnl # examples generators check
+dnl #
+dnl ########################################
+
+
+dnl ########################################
+dnl #
+dnl # Generate output, main and core makefiles
+dnl #
+dnl ########################################
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([base/Makefile])
+dnl # generate utils Makefiles
+AC_CONFIG_FILES([libs/Makefile \
+    libs/colorspaces/Makefile \
+    libs/fuzzylib/Makefile \
+    libs/pioneer/Makefile \
+    libs/progeo/Makefile \
+    libs/simclist/Makefile])
+dnl # generate interfaces Makefiles
+AC_CONFIG_FILES([interfaces/Makefile])
+dnl # generate driver Makefiles
+AC_CONFIG_FILES([drivers/Makefile \
+    drivers/evi/Makefile \
+    drivers/firewire/Makefile \
+    drivers/gazebo/Makefile \
+    drivers/imagefile/Makefile \
+    drivers/mplayer/Makefile \
+    drivers/networkclient/Makefile \
+    drivers/pantilt/Makefile \
+    drivers/player/Makefile \
+    drivers/video4linux/Makefile \
+    drivers/video4linux2/Makefile \
+    drivers/wiimote/Makefile \
+    drivers/x10/Makefile \
+    drivers/simulated3D/Makefile \
+    drivers/opencv/Makefile ])
+dnl # generate services Makefiles
+AC_CONFIG_FILES([services/Makefile \
+    services/graphics_gtk/Makefile \
+    services/graphics_xforms/Makefile \
+    services/networkserver/Makefile])
+dnl # generate schemas Makefiles
+AC_CONFIG_FILES([schemas/Makefile \
+    schemas/calibrador/Makefile \
+    schemas/extrinsics/Makefile \
+    schemas/followball/Makefile \
+    schemas/hsvtuner/Makefile \
+    schemas/colortuner/Makefile \
+    schemas/image_viewer/Makefile \
+    schemas/imgrectifier/Makefile \
+    schemas/introrob/Makefile \
+    schemas/introrob2/Makefile \
+    schemas/mastergui/Makefile \
+    schemas/myschema/Makefile \
+    schemas/opencvdemo/Makefile \
+    schemas/opengldemo/Makefile \
+    schemas/opengl_viewer/Makefile \
+    schemas/recorder/Makefile \
+    schemas/teleoperator/Makefile \
+    schemas/wiimote_viewer/Makefile \
+    schemas/wiioperator/Makefile \
+    schemas/x10_controller/Makefile \
+    schemas/naooperator/Makefile \
+    schemas/domoticdemo/Makefile ]) 
+dnl # generate docs Makefiles
+AC_CONFIG_FILES([docs/Makefile])
+dnl # generate examples Makefiles
+AC_CONFIG_FILES([examples/Makefile])
+
+AC_OUTPUT

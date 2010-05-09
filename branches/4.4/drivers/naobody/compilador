@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#Editables
+NAOPATH="NAOQILib"
+DESTINO="/usr/local/lib/jderobot/drivers"
+PYPATH="/usr/include/python2.5"
+JDEPATH="../.."
+#Generales
+GCCRUTA="/usr/lib/gcc/$(g++ -dumpmachine)/$(g++ -dumpversion)"
+FILES="adapter.h adapter.cpp naobody.h naobody.cpp"
+NAME="naobody.so"
+
+### LINKADO
+
+g++ $FILES -c -I. -g -O2 -Wall -pthread -I/usr/include/X11 -I$JDEPATH -I$JDEPATH/base -DWITH_NOIDREF -I$NAOPATH/modules/proxies -I$PYPATH -I$NAOPATH/extern/c/include -I$NAOPATH/extern/c/aldebaran/alcommon/include -I$NAOPATH/extern/c/aldebaran/alcommon/interface -I$NAOPATH/extern/c/aldebaran/alcommon/soap -I$NAOPATH/extern/c/src/tinyxml
+
+### ENLAZADO
+
+g++ -shared -nostdlib naobody.o adapter.o $GCCRUTA/../../../../lib/crti.o $GCCRUTA/crtbeginS.o -L/usr/local/lib/../lib -L$GCCRUTA -L$GCCRUTA/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/local/lib -L. -L$GCCRUTA/../../.. -lstdc++ -lm -lc -lgcc_s $GCCRUTA/crtendS.o $GCCRUTA/../../../../lib/crtn.o  -Wl,-soname -Wl,$NAME -o $NAME -rdynamic -ldl -lpython2.5 -ldl -lpython2.5 -lutil $NAOPATH/extern/c/linux/lib/libboost_filesystem-mt.a $NAOPATH/extern/c/linux/lib/libboost_signals-mt.a $NAOPATH/extern/c/linux/lib/libboost_thread-gcc41-mt.a $NAOPATH/extern/c/aldebaran/alcommon/lib/linux/libalcommon.a -lpthread $NAOPATH/extern/c/linux/lib/libtinyxml.a $NAOPATH/extern/c/linux/lib/libboost_filesystem-mt.a $NAOPATH/extern/c/linux/lib/libboost_signals-mt.a $NAOPATH/extern/c/linux/lib/libboost_thread-gcc41-mt.a $NAOPATH/extern/c/aldebaran/alcommon/lib/linux/libalcommon.a -lpthread $NAOPATH/extern/c/linux/lib/libtinyxml.a
+
+### INSTALACION
+
+cp $NAME $DESTINO/$NAME

@@ -1,0 +1,29 @@
+### PATH WHERE THE MODULES CAN BE FOUND
+path .:@driverdir@:@schemadir@:@servicedir@:@gladedir@
+
+### DRIVER CONFIGURATION 
+driver player
+hostname localhost port 6665
+##initial position X(mm) Y(mm) Theta(deg)
+initial_position -6500 -6500 45
+provides laser 180 1 
+#provides sonars
+provides encoders
+provides motors
+#provides bumpers
+end_driver
+
+### SCHEMA CONFIGURATION 
+
+### DRIVER LOAD FOR SENSOR SOURCES AND MOTOR DEVICES -----------------------
+
+load_driver graphics_gtk
+load_driver graphics_xforms
+load_driver player
+
+### SCHEMA LOAD --------------------
+load mastergui
+
+### INITIAL ACTIVATION------------
+resume mastergui
+
