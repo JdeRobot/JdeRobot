@@ -15,6 +15,7 @@ dnl #
 dnl ########################################
 AC_INIT([jderobot],[4.3])
 AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_MACRO_DIR([m4])
 dnl # AC_PREFIX_DEFAULT([/usr/local/jdec-AC_PACKAGE_VERSION])
 dnl#init automake
 AM_INIT_AUTOMAKE
@@ -308,7 +309,7 @@ AC_ARG_VAR([LATEX],[tex compiler command])
 AC_ARG_VAR([PDFLATEX],[pdf generator command])
 AC_ARG_VAR([DVIPS],[dvi to ps conversion command])
 AC_ARG_VAR([BIBTEX],[latex bibliography generator command])
-dnl#AC_ARG_VAR([SWIG],[command use to build swig files])
+AC_ARG_VAR([SWIG],[command use to build swig files])
 
 
 dnl ########################################
@@ -346,8 +347,8 @@ AC_CHECK_LIB([m],[floor],
 
 AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
 AC_PYTHON_DEVEL
-dnl#AC_PROG_SWIG
-dnl#SWIG_PYTHON
+AC_PROG_SWIG
+SWIG_PYTHON
 
 dnl ########################################
 dnl #
@@ -399,10 +400,10 @@ AC_CHECK_LIB([readline],[readline],
     AC_MSG_ERROR([readline library not found]))
 AC_SUBST([JDESHELL_LIBS])
 
-dnl#AC_PATH_PROG([SWIG],[swig],[no])
-dnl#if test "x$SWIG" = xno; then
-dnl#    AC_MSG_FAILURE([swig command not found])
-dnl#fi
+AC_PATH_PROG([SWIG],[swig],[no])
+if test "x$SWIG" = xno; then
+    AC_MSG_ERROR([swig command not found])
+fi
 
 AM_CONDITIONAL([ENABLE_PYTHON],[false])
 
@@ -1175,7 +1176,8 @@ dnl # Generate output, main and core makefiles
 dnl #
 dnl ########################################
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([base/Makefile])
+AC_CONFIG_FILES([base/Makefile \
+    base/swig/Makefile])
 dnl # generate utils Makefiles
 AC_CONFIG_FILES([libs/Makefile \
     libs/colorspaces/Makefile \
@@ -1184,7 +1186,8 @@ AC_CONFIG_FILES([libs/Makefile \
     libs/progeo/Makefile \
     libs/simclist/Makefile])
 dnl # generate interfaces Makefiles
-AC_CONFIG_FILES([interfaces/Makefile])
+AC_CONFIG_FILES([interfaces/Makefile \
+    interfaces/swig/Makefile])
 dnl # generate driver Makefiles
 AC_CONFIG_FILES([drivers/Makefile \
     drivers/evi/Makefile \

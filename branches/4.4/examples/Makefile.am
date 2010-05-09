@@ -1,4 +1,5 @@
 bin_PROGRAMS = randomwalk
+bin_SCRIPTS = randomwalk.py
 
 dist_conf_DATA = randomwalk.conf
 

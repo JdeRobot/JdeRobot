@@ -1,5 +1,5 @@
 ### PATH WHERE THE MODULES CAN BE FOUND
-path .:@driverdir@:@schemadir@:@servicedir@:@gladedir@
+path .:@driverdir@
 
 ### DRIVER CONFIGURATION 
 driver player
@@ -17,13 +17,9 @@ end_driver
 
 ### DRIVER LOAD FOR SENSOR SOURCES AND MOTOR DEVICES -----------------------
 
-load_driver graphics_gtk
-load_driver graphics_xforms
 load_driver player
 
 ### SCHEMA LOAD --------------------
-load mastergui
 
 ### INITIAL ACTIVATION------------
-resume mastergui
 
