@@ -1,0 +1,3 @@
+#!/bin/bash
+gcc -g -Wall -c `pkg-config --cflags gmodule-2.0 libglade-2.0` schema_gui.c
+gcc -g -Wall `pkg-config --libs gmodule-2.0 libglade-2.0` -shared -o schema_gui.jde schema_gui.o

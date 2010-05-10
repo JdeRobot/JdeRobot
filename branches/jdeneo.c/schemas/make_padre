@@ -1,0 +1,10 @@
+#!/bin/bash
+
+gcc  -g -Wall -c `pkg-config --cflags gmodule-2.0 libglade-2.0` padre.c
+gcc  -g -Wall `pkg-config --libs gmodule-2.0 libglade-2.0` -shared -o padre.jde padre.o
+
+gcc  -g -Wall -c `pkg-config --cflags gmodule-2.0 libglade-2.0` hijo1.c
+gcc  -g -Wall `pkg-config --libs gmodule-2.0 libglade-2.0` -shared -o hijo1.jde hijo1.o
+
+gcc  -g -Wall -c `pkg-config --cflags gmodule-2.0 libglade-2.0` hijo2.c
+gcc  -g -Wall `pkg-config --libs gmodule-2.0 libglade-2.0` -shared -o hijo2.jde hijo2.o

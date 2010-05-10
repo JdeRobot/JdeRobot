@@ -1,0 +1,13 @@
+#!/bin/bash
+
+gcc  -g -Wall -c `pkg-config --cflags gmodule-2.0 libglade-2.0 libgnomecanvas-2.0` example.c
+gcc  -g -Wall `pkg-config --libs gmodule-2.0 libglade-2.0 libgnomecanvas-2.0` -shared -o example.jde example.o
+
+gcc  -g -Wall -c `pkg-config --cflags gmodule-2.0 libglade-2.0` goon.c
+gcc  -g -Wall `pkg-config --libs gmodule-2.0 libglade-2.0` -shared -o goon.jde goon.o
+
+gcc  -g -Wall -c `pkg-config --cflags gmodule-2.0 libglade-2.0` vff.c
+gcc  -g -Wall `pkg-config --libs gmodule-2.0 libglade-2.0` -shared -o vff.jde vff.o
+
+gcc  -g -Wall -c `pkg-config --cflags gmodule-2.0 libglade-2.0` stop.c
+gcc  -g -Wall `pkg-config --libs gmodule-2.0 libglade-2.0` -shared -o stop.jde stop.o
