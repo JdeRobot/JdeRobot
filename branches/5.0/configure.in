@@ -86,6 +86,7 @@ m4_include([m4/libopencv.m4])
 m4_include([m4/libgtkmm.m4])
 m4_include([m4/libgstreamer.m4])
 m4_include([m4/lib1394.m4])
+m4_include([m4/libgazebo.m4])
 
 dnl # Check for built libraries dependencies
 m4_include([m4/jderobotutil.m4])
@@ -102,6 +103,8 @@ m4_include([m4/component_alarmgenerator.m4])
 m4_include([m4/component_motiondetection.m4])
 m4_include([m4/component_recorder.m4])
 m4_include([m4/component_surveillance.m4])
+m4_include([m4/component_gazeboserver.m4])
+m4_include([m4/component_introrob.m4])
 
 dnl#AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
 dnl#AC_PYTHON_DEVEL
@@ -151,6 +154,8 @@ AC_CONFIG_FILES([src/components/Makefile \
     src/components/surveillance/Makefile \
     src/components/alarmgenerator/Makefile \
     src/components/motiondetection/Makefile \
+    src/components/gazeboserver/Makefile \
+    src/components/introrob/Makefile \
     src/components/motiondetection/test/Makefile ])
 
 AC_OUTPUT
