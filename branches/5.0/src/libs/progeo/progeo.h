@@ -80,9 +80,13 @@ typedef struct {
 } TPinHoleStereocamera;
 #endif
 
-extern void update_camera_matrix(TPinHoleCamera *camera);
-extern void update_stereocamera_matrix(TPinHoleStereocamera *stereo);
-extern int project(HPoint3D in, HPoint2D *out, TPinHoleCamera camera);
-extern int backproject(HPoint3D *out, HPoint2D in, TPinHoleCamera camera);
-extern int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b, TPinHoleCamera camera);
-extern void display_camerainfo(TPinHoleCamera camera);
+#ifdef __cplusplus
+extern "C" {
+	void update_camera_matrix(TPinHoleCamera *camera);
+	void update_stereocamera_matrix(TPinHoleStereocamera *stereo);
+	int project(HPoint3D in, HPoint2D *out, TPinHoleCamera camera);
+	int backproject(HPoint3D *out, HPoint2D in, TPinHoleCamera camera);
+	int displayline(HPoint2D p1, HPoint2D p2, HPoint2D *a, HPoint2D *b, TPinHoleCamera camera);
+	void display_camerainfo(TPinHoleCamera camera);
+}
+#endif
