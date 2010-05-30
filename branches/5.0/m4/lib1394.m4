@@ -19,7 +19,7 @@ AC_CHECK_LIB([raw1394],[main],
     [ERRORS="$ERRORS, libraw1394 not found"])
 if test "$ERRORS"; then
     AC_MSG_FAILURE([Errors found checking firewire support: $ERRORS.])
-    AM_CONDITIONAL([ENABLE_LIB1394],[true])
+    AM_CONDITIONAL([ENABLE_LIB1394],[false])
     ENABLED_LIB1394="no"
 else
     AM_CONDITIONAL([ENABLE_LIB1394],[true])
