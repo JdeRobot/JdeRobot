@@ -2,7 +2,7 @@ dnl # Ice checks and variables definitions
 AC_MSG_NOTICE([**** Checking Ice support:])
 AC_LANG_PUSH([C++])
 ERRORS=""
-AC_CHECK_HEADERS([X11/forms.h X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h],
+AC_CHECK_HEADERS([forms.h X11/Xlib.h X11/Xutil.h X11/Xos.h X11/Xatom.h],
     [],
     [ERRORS="$ac_header not found"]) 
 AC_CHECK_LIB([X11],[main],
