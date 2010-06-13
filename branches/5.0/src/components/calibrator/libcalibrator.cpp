@@ -29,8 +29,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <progeo/progeo.h>
-#include "calibratorgui.h"
 #include "libcalibrator.h"
+extern "C" {
+#include "calibratorgui.h"
+};
 
 /* array de camaras */
 TPinHoleCamera mycameras[2];

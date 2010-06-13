@@ -17,6 +17,9 @@ if test "x$enable_component_calibrator" != xno; then
 	ERRORS="$ERRORS, libforms support not found."
     fi
 
+    AC_PATH_PROG([FDESIGN],[fdesign],
+	[ERRORS="$ERRORS, fdesign not found"])
+
     if test "$ERRORS"; then
         AC_MSG_NOTICE([Errors found checking calibrator requirements: $ERRORS. Component disabled])
 	AM_CONDITIONAL([ENABLE_COMPONENT_CALIBRATOR],[false])
