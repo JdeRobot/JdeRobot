@@ -89,13 +89,7 @@ class ImageConsumerI: virtual public jderobot::ImageConsumer {
 
 		if(timeStampOld!=timeStampNew){
 			int s=size/3;
-			for (int j=0; j<s; j++) {
-				imageData[j*3] = img.data[(s-1-j)*3];
-				imageData[j*3+1] = img.data[(s-1-j)*3+1];
-				imageData[j*3+2] = img.data[(s-1-j)*3+2];
-			}	
-
-			if (write (fifo_fd, imageData, size)>size){
+			if (write (fifo_fd, img.data, size)>size){
 				fprintf (stderr, "imageRecorder error: could not write on fifo\n");
 			}
 		}
