@@ -28,16 +28,6 @@
 
 module jderobot{  
 
-/*!
-    @ingroup jderobot_interfaces
-    @defgroup jderobot_interface_image Image
-    @brief Represents an image source.
-
-This and several other interfaces -- @ref jderobot_interface_camera, @ref jderobot_interface_pixmap 
--- are related. They could probably be merged into one or at least refactored.
-
-    @{
-*/
 
   /**
    *  Static description of the image source.
@@ -88,7 +78,6 @@ This and several other interfaces -- @ref jderobot_interface_camera, @ref jderob
       throws DataNotExistException, HardwareFailedException;
   };
 
-//!  //@}
 }; //module
 
 #endif //IMAGE_ICE
