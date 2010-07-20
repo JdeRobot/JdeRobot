@@ -3,11 +3,8 @@ bin_PROGRAMS = calibrator
 endif
 
 calibrator_SOURCES = libcalibrator.cpp libcalibrator.h calibrator.cpp calibratorgui.fd calibratorgui.c calibratorgui.h
-
-calibrator_CPPFLAGS = -I$(top_srcdir)/src/libs -I$(top_srcdir)/src/interfaces/cpp $(LIBCOLORSPACESMM_CPPFLAGS) 
-
-calibrator_LDFLAGS =  $(LIBICE) $(LIBICEUTIL) $(LIBCOLORSPACESMM_LDFLAGS) $(LIBX11) $(LIBFORMS) 
-
+calibrator_CPPFLAGS = $(JDEROBOTICE_CPPFLAGS) $(COLORSPACESMM_CPPFLAGS) 
+calibrator_LDFLAGS =  $(JDEROBOTICE_LDFLAGS) $(COLORSPACESMM_LDFLAGS) $(LIBX11) $(LIBFORMS) 
 calibrator_LDADD = $(top_srcdir)/src/libs/colorspaces/libcolorspacesmm.la \
 			$(top_srcdir)/src/interfaces/cpp/jderobot/libJderobotInterfaces.la \
 			$(top_srcdir)/src/libs/progeo/libprogeo.la

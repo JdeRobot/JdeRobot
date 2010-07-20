@@ -4,13 +4,9 @@ endif
 
 
 surveillance_SOURCES = surveillance.cpp
-
-surveillance_CXXFLAGS = -I$(top_srcdir)/src/interfaces/cpp $(LIBJDEROBOTICE_CPPFLAGS)
-
-surveillance_LDFLAGS =  $(LIBICE) $(LIBICEUTIL) $(RECORDER_LIBS) -pthread
-
+surveillance_CPPFLAGS = $(JDEROBOTICE_CPPFLAGS)
+surveillance_LDFLAGS =  $(JDEROBOTICE_LDFLAGS) $(RECORDER_LIBS) -pthread
 surveillance_LDADD = $(top_srcdir)/src/interfaces/cpp/jderobot/libJderobotInterfaces.la \
- 		     $(top_srcdir)/src/libs/jderobotice/libJderobotIce.la 
-
+			$(top_srcdir)/src/libs/jderobotice/libJderobotIce.la 
 
 dist_conf_DATA = surveillance.cfg

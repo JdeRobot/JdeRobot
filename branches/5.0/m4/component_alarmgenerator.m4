@@ -1,4 +1,4 @@
-dnl # Requirements for component varcolorviewgtkmm
+dnl # Requirements for component alarmgenerator
 dnl # GTKmm
 
 AC_ARG_ENABLE([component-alarmgenerator],

@@ -7,11 +7,11 @@ introrob_SOURCES = introrob.cpp \
 			introrobgui.h \
 			navega.cpp \
 			navega.h
-introrob_CPPFLAGS = -I$(top_srcdir)/src/libs -I$(top_srcdir)/src/interfaces/cpp \
-			$(GTKMM_CPPFLAGS) $(LIBCOLORSPACESMM_CPPFLAGS) \
+introrob_CPPFLAGS = $(JDEROBOTICE_CPPFLAGS) \
+			$(GTKMM_CPPFLAGS) $(COLORSPACESMM_CPPFLAGS) \
 			-DGLADE_DIR=\""$(gladedir)"\" \
 			$(LIBGNOMEUI-DEV_CPPFLAGS)
-introrob_LDFLAGS =  $(LIBICE) $(LIBICEUTIL) $(GTKMM_LDFLAGS) $(LIBGNOMEUI-DEV_LDFLAGS) $(LIBCOLORSPACESMM_LDFLAGS)
+introrob_LDFLAGS =  $(JDEROBOTICE_LDFLAGS) $(GTKMM_LDFLAGS) $(LIBGNOMEUI-DEV_LDFLAGS) $(COLORSPACESMM_LDFLAGS)
 introrob_LDADD = $(top_srcdir)/src/libs/colorspaces/libcolorspacesmm.la \
 			$(top_srcdir)/src/interfaces/cpp/jderobot/libJderobotInterfaces.la
 

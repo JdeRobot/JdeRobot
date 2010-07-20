@@ -8,10 +8,8 @@ opencvdemo_SOURCES = opencvdemo.cpp \
 			model.cpp \
 			model.h
 opencvdemo_CPPFLAGS =  $(GTKMM_CPPFLAGS) $(OPENCV_CPPFLAGS) \
-			$(LIBJDEROBOTICE_CPPFLAGS) \
-			-I$(top_srcdir)/src/libs/colorspaces \
-			-I$(top_srcdir)/src/interfaces/cpp -DGLADE_DIR=\""$(gladedir)"\"
-opencvdemo_LDFLAGS = $(GTKMM_LDFLAGS) $(OPENCV_LDFLAGS)
+			$(JDEROBOTICE_CPPFLAGS) -DGLADE_DIR=\""$(gladedir)"\"
+opencvdemo_LDFLAGS = $(JDEROBOTICE_LDFLAGS) $(GTKMM_LDFLAGS) $(OPENCV_LDFLAGS)
 opencvdemo_LDADD = $(top_srcdir)/src/libs/jderobotice/libJderobotIce.la \
 			$(top_srcdir)/src/libs/jderobotutil/libJderobotUtil.la \
 			$(top_srcdir)/src/libs/colorspaces/libcolorspaces.la \

@@ -1,5 +1,5 @@
 dnl # Requirements for component gazeboserver
-dnl # GStreamer
+dnl # Gtkmm
 
 AC_ARG_ENABLE([component-gazeboserver],
     [AS_HELP_STRING([--disable-component-gazeboserver],
@@ -10,9 +10,6 @@ AC_ARG_ENABLE([component-gazeboserver],
 
 if test "x$enable_component_gazeboserver" != xno; then
     AC_MSG_NOTICE([**** Checking gazeboserver component requirements:])
-    if test "x$with_gstreamer" = xno; then
-	ERRORS="$ERRORS, gstreamer support not found. Try setting --with-gstreamer"
-    fi
     if test "x$with_gazebo" = xno; then
 	ERRORS="$ERRORS, gazebo support not found. Try setting --with-gazebo"
     fi

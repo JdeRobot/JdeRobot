@@ -1,2 +1,2 @@
-SUBDIRS = cameraserver cameraview cameraview_icestorm recordingserver opencvdemo alarmgenerator motiondetection recorder surveillance gazeboserver introrob calibrator
+SUBDIRS = cameraserver cameraview cameraview_icestorm motiondetection gazeboserver introrob
 MAINTAINERCLEANFILES = Makefile.in Makefile

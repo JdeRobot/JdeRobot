@@ -5,16 +5,14 @@ endif
 
 libmotiondetection_la_SOURCES = motiondetection.cpp motiondetection.h \
 				view.cpp view.h model.cpp model.h controller.cpp controller.h
-libmotiondetection_la_CPPFLAGS = $(GEARBOX_CPPFLAGS) $(GTKMM_CPPFLAGS) $(OPENCV_CPPFLAGS) \
-				-I$(top_srcdir)/src/libs -DGLADE_DIR=\""$(gladedir)"\"
+libmotiondetection_la_CPPFLAGS = $(JDEROBOTICE_CPPFLAGS) $(GTKMM_CPPFLAGS) $(OPENCV_CPPFLAGS) \
+				-DGLADE_DIR=\""$(gladedir)"\"
 libmotiondetection_la_LIBADD = $(top_srcdir)/src/libs/colorspaces/libcolorspacesmm.la \
 				$(top_srcdir)/src/libs/jderobotutil/libJderobotUtil.la
-libmotiondetection_la_LDFLAGS = $(GEARBOX_LDFLAGS) $(OPENCV_LDFLAGS) $(GTKMM_LDFLAGS)
+libmotiondetection_la_LDFLAGS = $(JDEROBOTICE_LDFLAGS) $(OPENCV_LDFLAGS) $(GTKMM_LDFLAGS)
 
 motiondetection_SOURCES = main.cpp
-motiondetection_CPPFLAGS = $(LIBJDEROBOTICE_CPPFLAGS) \
-			-I$(top_srcdir)/src/libs \
-			-I$(top_srcdir)/src/interfaces/cpp \
+motiondetection_CPPFLAGS = $(JDEROBOTICE_CPPFLAGS) \
 			$(libmotiondetection_la_CPPFLAGS)
 #motiondetection_LDFLAGS = $(libmotiondetection_la_LDFLAGS)
 motiondetection_LDADD = $(top_srcdir)/src/libs/jderobotice/libJderobotIce.la \

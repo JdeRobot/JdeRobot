@@ -10,11 +10,11 @@ AC_ARG_ENABLE([component-cameraview],
 if test "x$enable_component_cameraview" != xno; then
     AC_MSG_NOTICE([**** Checking cameraview component requirements:])
     ERRORS=""
-    if test "x$ENABLED_LIBCOLORSPACESMM" != xyes; then
+    if test "x$with_colorspacesmm" = xno; then
 	ERRORS="libcolorspacesmm not enabled"
     fi
     if test "x$with_gtkmm" = xno; then
-	ERRORS="$ERRORS, gtkmm support not found. Try setting --with-gtkmm"
+	ERRORS="$ERRORS, gtkmm support not found"
     fi
     if test "$ERRORS"; then
         AC_MSG_NOTICE([Errors found checking cameraview requirements: $ERRORS. Component disabled])

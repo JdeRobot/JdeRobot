@@ -10,8 +10,8 @@ libcolorspaces_la_CFLAGS = -I..
 
 libcolorspacesmm_ladir = $(includedir)/colorspaces
 libcolorspacesmm_la_SOURCES = imagecv.cpp
-libcolorspacesmm_la_LDFLAGS = $(LIBCOLORSPACESMM_LDFLAGS)
-libcolorspacesmm_la_CPPFLAGS = -I.. $(LIBCOLORSPACESMM_CPPFLAGS)
+libcolorspacesmm_la_LDFLAGS = $(COLORSPACESMM_LDFLAGS)
+libcolorspacesmm_la_CPPFLAGS = -I.. $(COLORSPACESMM_CPPFLAGS)
 libcolorspacesmm_la_HEADERS = imagecv.h uncopyable.h
 
 include_HEADERS = colorspaces.h colorspacesmm.h

@@ -1,5 +1,5 @@
 dnl # Requirements for component surveillance 
-
+dnl # FIXME: check dependencies
 AC_ARG_ENABLE([component-surveillance],
     [AS_HELP_STRING([--disable-component-surveillance],
 	    [disable surveillance component compilation])],
@@ -19,6 +19,5 @@ if test "x$enable_component_surveillance" != xno; then
 	ENABLED_COMPONENTS="$ENABLED_SCHEMASCOMPONENTS surveillance"
 	AM_CONDITIONAL([ENABLE_COMPONENT_SURVEILLANCE],[true])
     fi
-    dnl AC_LANG_POP([C])
     AC_SUBST([SURVEILLANCE_LIBS])
 fi

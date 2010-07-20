@@ -10,14 +10,14 @@ AC_ARG_ENABLE([component-motiondetection],
 if test "x$enable_component_motiondetection" != xno; then
     AC_MSG_NOTICE([**** Checking motiondetection component requirements:])
     ERRORS=""
-    if test "x$ENABLED_LIBJDEROBOTICE" != xyes; then
+    if test "x$with_jderobotice" = xno; then
 	ERRORS="libjderobotice not enabled"
     fi
     if test "x$with_opencv" = xno; then
 	ERRORS="$ERRORS, opencv support not found. Try setting --with-opencv"
     fi
     if test "x$with_gtkmm" = xno; then
-	ERRORS="$ERRORS, gtkmm support not found. Try setting --with-gtkmm"
+	ERRORS="$ERRORS, gtkmm support not found"
     fi
     if test "$ERRORS"; then
         AC_MSG_NOTICE([Errors found checking motiondetection requirements: $ERRORS. Component disabled])

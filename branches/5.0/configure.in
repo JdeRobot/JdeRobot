@@ -15,7 +15,7 @@ dnl #
 dnl ########################################
 AC_INIT([jderobot],[5.0])
 AC_CONFIG_AUX_DIR([config])
-AC_CONFIG_HEADER([config.h]) 
+AC_CONFIG_HEADER([config.h])
 dnl#init automake
 AM_INIT_AUTOMAKE
 dnl#config pkg-config
@@ -42,16 +42,7 @@ dnl##### switches to enable/disable features
 
 dnl##### precious variables
 dnl # Allow user to define variables
-AC_ARG_VAR([FDESIGN],[command used to build xforms guis])
 AC_ARG_VAR([DOXYGEN],[command used to generate code documentation])
-AC_ARG_VAR([LATEX],[tex compiler command])
-AC_ARG_VAR([PDFLATEX],[pdf generator command])
-AC_ARG_VAR([DVIPS],[dvi to ps conversion command])
-AC_ARG_VAR([BIBTEX],[latex bibliography generator command])
-AC_ARG_VAR([SWIG],[command use to build swig files])
-AC_ARG_VAR([SLICE2CPP],[command use to generate c++ code from slice])
-AC_ARG_VAR([SLICE2JAVA],[command use to generate java code from slice])
-AC_ARG_VAR([SLICE2PYTHON],[command use to generate python code from slice])
 
 
 dnl ########################################
@@ -87,7 +78,6 @@ m4_include([m4/libgtkmm.m4])
 m4_include([m4/libgstreamer.m4])
 m4_include([m4/lib1394.m4])
 m4_include([m4/libgazebo.m4])
-m4_include([m4/libxforms.m4])
 
 dnl # Check for built libraries dependencies
 m4_include([m4/jderobotutil.m4])
@@ -106,7 +96,6 @@ m4_include([m4/component_recorder.m4])
 m4_include([m4/component_surveillance.m4])
 m4_include([m4/component_gazeboserver.m4])
 m4_include([m4/component_introrob.m4])
-m4_include([m4/component_calibrator.m4])
 
 dnl#AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
 dnl#AC_PYTHON_DEVEL
@@ -158,7 +147,6 @@ AC_CONFIG_FILES([src/components/Makefile \
     src/components/motiondetection/Makefile \
     src/components/gazeboserver/Makefile \
     src/components/introrob/Makefile \
-    src/components/motiondetection/test/Makefile \
-    src/components/calibrator/Makefile])
+    src/components/motiondetection/test/Makefile])
 
 AC_OUTPUT

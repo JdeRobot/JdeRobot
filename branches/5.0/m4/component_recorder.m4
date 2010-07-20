@@ -23,6 +23,5 @@ if test "x$enable_component_recorder" != xno; then
 	ENABLED_COMPONENTS="$ENABLED_SCHEMASCOMPONENTS recorder"
 	AM_CONDITIONAL([ENABLE_COMPONENT_RECORDER],[true])
     fi
-    AC_LANG_POP([C++])
     AC_SUBST([RECORDER_LIBS])
 fi

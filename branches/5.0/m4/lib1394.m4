@@ -1,6 +1,7 @@
-dnl # Firewire checks and variables definitions
-AC_MSG_NOTICE([**** Checking Ice support:])
-AC_LANG_PUSH([C++])
+dnl # Firewire support checks and variables definitions
+dnl # If package found HAVE_FIREWIRE is defined in config header and with_firewire is /= no
+
+AC_MSG_NOTICE([**** Checking firewire support:])
 ERRORS=""
 AC_CHECK_HEADERS([libraw1394/raw1394.h dc1394/control.h],
     [],
@@ -19,10 +20,7 @@ AC_CHECK_LIB([raw1394],[main],
     [ERRORS="$ERRORS, libraw1394 not found"])
 if test "$ERRORS"; then
     AC_MSG_FAILURE([Errors found checking firewire support: $ERRORS.])
-    AM_CONDITIONAL([ENABLE_LIB1394],[false])
-    ENABLED_LIB1394="no"
+    with_firewire="no"
 else
-    AM_CONDITIONAL([ENABLE_LIB1394],[true])
-    ENABLED_LIB1394="yes"
+    AC_DEFINE([HAVE_FIREWIRE],[1],[Defined if firewire found])
 fi
-AC_LANG_POP([C++])

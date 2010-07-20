@@ -5,10 +5,10 @@ endif
 cameraview_SOURCES = cameraview.cpp \
 			viewer.cpp \
 			viewer.h
-cameraview_CPPFLAGS = -I$(top_srcdir)/src/libs -I$(top_srcdir)/src/interfaces/cpp \
-			$(GTKMM_CPPFLAGS) $(LIBCOLORSPACESMM_CPPFLAGS) \
+cameraview_CPPFLAGS = $(JDEROBOTICE_CPPFLAGS) \
+			$(GTKMM_CPPFLAGS) $(COLORSPACESMM_CPPFLAGS) \
 			-DGLADE_DIR=\""$(gladedir)"\"
-cameraview_LDFLAGS =  $(LIBICE) $(LIBICEUTIL) $(GTKMM_LDFLAGS) $(LIBCOLORSPACESMM_LDFLAGS)
+cameraview_LDFLAGS =  $(JDEROBOTICE_LDFLAGS) $(GTKMM_LDFLAGS) $(COLORSPACESMM_LDFLAGS)
 cameraview_LDADD = $(top_srcdir)/src/libs/colorspaces/libcolorspacesmm.la \
 			$(top_srcdir)/src/interfaces/cpp/jderobot/libJderobotInterfaces.la
 

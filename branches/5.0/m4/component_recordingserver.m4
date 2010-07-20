@@ -27,4 +27,5 @@ if test "x$enable_component_recordingserver" != xno; then
 	AM_CONDITIONAL([ENABLE_COMPONENT_RECORDINGSERVER],[true])
     fi
     AC_SUBST([RECORDINGSERVER_LIBS])
+    AC_LANG_POP([C++])
 fi

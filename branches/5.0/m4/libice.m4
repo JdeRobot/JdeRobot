@@ -1,4 +1,6 @@
 dnl # Ice checks and variables definitions
+dnl # If package found HAVE_ICE is defined in config header and with_ice is /= no
+
 AC_MSG_NOTICE([**** Checking Ice support:])
 AC_LANG_PUSH([C++])
 ERRORS=""
@@ -41,25 +43,33 @@ AC_CHECK_LIB([IceStormService],[main],
 	AC_DEFINE([HAVE_LIBICESTORMSERVICE],[1],[Define if you have libIceStormService])
     ],
     [ERRORS="$ERRORS, libIceStormService not found"])
-if test "$ERRORS"; then
-    AC_MSG_FAILURE([Errors found checking Ice support: $ERRORS.])
-fi
 AC_LANG_POP([C++])
+
+AC_ARG_VAR([SLICE2CPP],[command use to generate c++ code from slice])
+AC_ARG_VAR([SLICE2JAVA],[command use to generate java code from slice])
+AC_ARG_VAR([SLICE2PYTHON],[command use to generate python code from slice])
 
 
 AC_PATH_PROG([SLICE2CPP],[slice2cpp],[no])
 if test "x$SLICE2CPP" = xno; then
-    AC_MSG_FAILURE([could not find slice2cpp needed to build c++ interfaces code])
+    ERRORS="$ERRORS, could not find slice2cpp needed to build c++ interfaces code"
 fi
 
 AC_PATH_PROG([SLICE2JAVA],[slice2java],[no])
 if test "x$SLICE2JAVA" = xno; then
-    AC_MSG_FAILURE([could not find slice2java needed to build java interfaces code])
+    ERRORS="$ERRORS, could not find slice2java needed to build java interfaces code"
 fi
 
-    
 AC_PATH_PROG([SLICE2PYTHON],[slice2py],[no])
 if test "x$SLICE2PYTHON" = xno; then
-    AC_MSG_FAILURE([could not find slice2py needed to build python interfaces code])
+    ERRORS="$ERRORS, could not find slice2py needed to build python interfaces code"
 fi
 
+if test "$ERRORS"; then
+    AC_MSG_NOTICE([Errors found checking Ice support: $ERRORS. Ice support disabled])
+    with_ice="no"
+else
+    AC_DEFINE([HAVE_ICE],[1],[Defined if Ice found])
+    AC_SUBST([ICE_CPPFLAGS])
+    AC_SUBST([ICE_LDFLAGS],["$LIBICE $LIBICEUTIL $LIBICEGRID $LIBICEBOX $LIBICESTORM $LIBICESTORMSERVICE"])
+fi

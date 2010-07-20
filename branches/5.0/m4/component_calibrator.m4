@@ -1,4 +1,5 @@
 dnl # Requirements for component calibrator
+dnl # FIXME: use gtk+
 
 AC_ARG_ENABLE([component-calibrator],
     [AS_HELP_STRING([--disable-component-calibrator],

@@ -12,8 +12,8 @@ BUILT_SOURCES = $(SLICECPP_BUILT_CPP) $(SLICECPP_BUILT_H)
 nodist_libJderobotInterfaces_la_SOURCES = $(SLICECPP_BUILT_CPP) 
 
 libJderobotInterfaces_ladir = $(includedir)/jderobot
-libJderobotInterfaces_la_LDFLAGS = $(LIBICE) $(LIBICEUTIL) $(LIBICEBOX) $(LIBICESTORM) $(LIBICESTORMSERVICE) -version-info 0:0:0
-libJderobotInterfaces_la_CPPFLAGS = -I..
+libJderobotInterfaces_la_LDFLAGS = $(ICE_LDFLAGS) -version-info 0:0:0
+libJderobotInterfaces_la_CPPFLAGS = $(ICE_CPPFLAGS) -I..
 
 #built headers will be distributed
 libJderobotInterfaces_la_HEADERS = $(SLICECPP_BUILT_H)
@@ -26,9 +26,9 @@ CLEANFILES = $(BUILT_SOURCES)
 vpath %.ice $(SLICESRCDIR)/jderobot
 .ice.d:
 	@set -e; rm -f $@; \
-	$(SLICE2CPP) --depend -I $(SLICESRCDIR) -I/usr/share/slice -I/usr/share/Ice-3.3.1/slice $< > $@.$$$$; \
+	$(SLICE2CPP) --depend -I $(SLICESRCDIR) -I/usr/share/Ice/slice $< > $@.$$$$; \
 	sed 's/\($*\)\.cpp[ :]*/\1.cpp $@: /g' < $@.$$$$ > $(DEPDIR)/$@; \
 	rm -f $@.$$$$
 
 .ice.cpp:
-	$(SLICE2CPP) -I../../slice -I/usr/share/slice -I/usr/share/Ice-3.3.1/slice $<
+	$(SLICE2CPP) -I../../slice -I/usr/share/Ice/slice $<
