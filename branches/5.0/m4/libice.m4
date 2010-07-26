@@ -65,6 +65,11 @@ if test "x$SLICE2PYTHON" = xno; then
     ERRORS="$ERRORS, could not find slice2py needed to build python interfaces code"
 fi
 
+dnl #define SLICEDIR if empty
+if test -z "$SLICEDIR"; then
+   SLICEDIR="/usr/share/slice"
+fi
+
 if test "$ERRORS"; then
     AC_MSG_NOTICE([Errors found checking Ice support: $ERRORS. Ice support disabled])
     with_ice="no"

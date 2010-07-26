@@ -26,9 +26,9 @@ CLEANFILES = $(BUILT_SOURCES)
 vpath %.ice $(SLICESRCDIR)/jderobot
 .ice.d:
 	@set -e; rm -f $@; \
-	$(SLICE2CPP) --depend -I $(SLICESRCDIR) -I/usr/share/Ice/slice $< > $@.$$$$; \
+	$(SLICE2CPP) --depend -I $(SLICESRCDIR) -I$(SLICEDIR) $< > $@.$$$$; \
 	sed 's/\($*\)\.cpp[ :]*/\1.cpp $@: /g' < $@.$$$$ > $(DEPDIR)/$@; \
 	rm -f $@.$$$$
 
 .ice.cpp:
-	$(SLICE2CPP) -I../../slice -I/usr/share/Ice/slice $<
+	$(SLICE2CPP) -I../../slice -I$(SLICEDIR) $<
