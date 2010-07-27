@@ -10,9 +10,9 @@ libJderobotIce_la_SOURCES = component.cpp context.cpp application.cpp \
 libJderobotIce_la_CPPFLAGS = $(JDEROBOTICE_CPPFLAGS)
 libJderobotIce_la_LDFLAGS =  $(JDEROBOTICE_LDFLAGS)
 libJderobotIce_la_HEADERS = component.h context.h application.h \
-				exceptions.h catchutils.h subsystemthread.h interfaceconnect.h
-
-include_HEADERS = jderobotice.h
+				exceptions.h catchutils.h subsystemthread.h \
+				interfaceconnect.h
+libJderobotIce_la_HEADERS = jderobotice.h
 
 EXTRA_DIST = Changelog
 MAINTAINERCLEANFILES = Makefile.in Makefile

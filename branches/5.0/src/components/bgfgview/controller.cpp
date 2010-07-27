@@ -21,7 +21,7 @@
 
 #include "controller.h"
 
-namespace carspeed {
+namespace bgfgview {
   class Controller::PImpl{
   public:
     PImpl()

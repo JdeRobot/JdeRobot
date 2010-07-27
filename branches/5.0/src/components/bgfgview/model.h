@@ -23,9 +23,9 @@
 #define BGFGVIEW_MODEL_H
 
 #include <jderobotutil/observer.h>
-#include <colorspacesmm.h>
+#include <colorspaces/colorspacesmm.h>
 #include <gbxutilacfr/tracer.h>
-#include <cvaux.h>
+#include <opencv/cvaux.h>
 
 namespace bgfgview {
   class Model : public jderobotutil::Subject{
@@ -43,11 +43,11 @@ namespace bgfgview {
     const colorspaces::Image& getBGImage() const throw()  { return bgImage; }
 
     /*Returned image is available until BG model updated*/
-    const colorspaces::Image& getFGMaskImage() const throw()  { return bgMaskImage; }
+    const colorspaces::Image& getFGMaskImage() const throw()  { return fgMaskImage; }
 
     gbxutilacfr::Tracer& tracer() { return _tracer; };
 
-    void setBGModel(const CvBGStatModel* newBGModel) throw();
+    void setBGModel(CvBGStatModel* newBGModel) throw();
     //return a null pointer until algorithm is set
     CvBGStatModel const* bgModel() const throw() { return bg_model; }
   private:

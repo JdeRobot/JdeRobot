@@ -24,11 +24,11 @@
 #include <jderobotice/application.h>
 #include "mainthread.h"
 
-namespace carspeed{
+namespace bgfgview{
   class Component: public jderobotice::Component{
   public:
     Component()
-      : jderobotice::Component("Carspeed") {}
+      : jderobotice::Component("BGFGview") {}
 
     virtual void start() {
       mainThread = new MainThread( context() );
@@ -49,7 +49,7 @@ namespace carspeed{
 
 
 int main(int argc, char **argv){
-  carspeed::Component component;
+  bgfgview::Component component;
 
   jderobotice::Application app( component );
   return app.jderobotMain(argc, argv);

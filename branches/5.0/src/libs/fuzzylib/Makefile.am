@@ -1,6 +1,7 @@
 lib_LTLIBRARIES = libfuzzy.la
 
+libfuzzy_ladir = $(includedir)/fuzzylib
 libfuzzy_la_SOURCES = fuzzylib.c
-include_HEADERS = fuzzylib.h
+libfuzzy_la_HEADERS = fuzzylib.h
 
 MAINTAINERCLEANFILES = Makefile.in Makefile

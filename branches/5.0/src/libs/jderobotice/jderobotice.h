@@ -22,7 +22,7 @@
 #ifndef JDEROBOTICE_JDEROBOTICE_H
 #define JDEROBOTICE_JDEROBOTICE_H
 
-#include <jderobotice/context.h>
-#include <jderobotice/component.h>
+#include "context.h"
+#include "component.h"
 
 #endif /*JDEROBOTICE_JDEROBOTICE_H*/

@@ -44,8 +44,8 @@ namespace bgfgview {
 
     void exit() throw();//FIXME
     
-    void setImage(const colorspaces::Image &img) throw() { _model.setImage(img); }
-    void setBGModel(const CvBGStatModel* newBGModel) throw() { _model.setBGModel(newBGModel); }
+    void setImage(const colorspaces::Image &img) throw() { _model.updateBGModel(img); }
+    void setBGModel(CvBGStatModel* newBGModel) throw() { _model.setBGModel(newBGModel); }
 
 
     const Model& model() const throw() { return _model; }    

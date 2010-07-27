@@ -23,8 +23,8 @@
 #define BGFGVIEW_BGMODEL_H
 
 #include <string>
-#include <cvaux.h>
-#include <bgfgfilters.h>
+#include <opencv/cvaux.h>
+#include <bgfgfilters/bgfgfilters.h>
 
 namespace bgfgview {
   class BGModelFactory{

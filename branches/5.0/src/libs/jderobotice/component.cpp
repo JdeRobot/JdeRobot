@@ -14,9 +14,9 @@
 
 #include <string>
 #include <jderobot/common.h>
-#include <jderobotice/jderobotice.h>
 #include <jderobotutil/jderobotutil.h>
 
+#include "jderobotice.h"
 #include "component.h"
 #include "componentthread.h"
 #include "tracerImpl.h"

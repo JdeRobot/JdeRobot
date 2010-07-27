@@ -26,10 +26,11 @@
 #include <gtkmm.h>
 #include <gtkmm/socket.h>
 #include <libglademm.h>
-#include <colorspacesmm.h>
+#include <colorspaces/colorspacesmm.h>
 #include <memory>
 #include "widget.h"
 #include "controller.h" //class View
+#include "bgmodelfactory.h"
 
 namespace bgfgview {
   class ViewGtk: public View {
@@ -40,10 +41,10 @@ namespace bgfgview {
 			jderobotutil::ObserverArg* arg = 0)
       throw(gbxutilacfr::Exception);
   private:
-    void drawImage(const Gtk::DrawingArea* drawingArea, 
+    void drawImage(Gtk::DrawingArea* drawingArea, 
 		   const colorspaces::Image& image);    
 
-    void setBGModel(const BGModel& m);
+    void setBGModel(const BGModelFactory& m);
 
     Gtk::Main gtkmain;
     Glib::RefPtr<Gnome::Glade::Xml> refXml;
@@ -68,9 +69,10 @@ namespace bgfgview {
     class ModelColumns : public Gtk::TreeModel::ColumnRecord{
     public:
       ModelColumns()
-	{ add(m_col_id); }//add(m_col_desc); }
+	{ add(m_col_name);
+	  add(m_col_desc); }
       
-      //Gtk::TreeModelColumn<BGModel::BGModelID> m_col_id;
+      Gtk::TreeModelColumn<std::string> m_col_name;
       Gtk::TreeModelColumn<std::string> m_col_desc;
     };
 
@@ -78,7 +80,7 @@ namespace bgfgview {
     Widget<Gtk::ComboBox> comboboxBGModel;
     Glib::RefPtr<Gtk::ListStore> comboboxBGModelLSRef;
     Widget<Gtk::Frame> frameCvFGD;
-    Widget<Gtk::Frame> frameCvMog;
+    Widget<Gtk::Frame> frameCvMoG;
     Widget<Gtk::Frame> frameExp;
     Widget<Gtk::Frame> frameMean;
     Widget<Gtk::Frame> frameMode;

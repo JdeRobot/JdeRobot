@@ -17,8 +17,8 @@
 
 #include <Ice/ObjectAdapter.h>
 #include <IceUtil/Config.h> /*noncopyable*/
-#include <jderobotice/context.h>
 #include <gbxutilacfr/stoppable.h>
+#include "context.h"
 
 namespace jderobotice
 {

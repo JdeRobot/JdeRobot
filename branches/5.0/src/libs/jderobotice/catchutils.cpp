@@ -14,9 +14,9 @@
 
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
+#include <jderobot/exceptions.h>
 #include "catchutils.h"
 #include "exceptions.h"
-#include <jderobot/exceptions.h>
 
 // #include <iostream>
 #include <sstream>

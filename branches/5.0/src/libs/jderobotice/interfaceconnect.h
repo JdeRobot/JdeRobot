@@ -15,9 +15,10 @@
 #ifndef JDEROBOTICE_CONNECT_UTILITIES_H
 #define JDEROBOTICE_CONNECT_UTILITIES_H
 
-#include <jderobotice/context.h>
-#include <jderobotice/exceptions.h>
 #include <Ice/LocalException.h>
+#include "context.h"
+#include "exceptions.h"
+
 
 namespace jderobotice
 {

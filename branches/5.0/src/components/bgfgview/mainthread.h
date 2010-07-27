@@ -22,7 +22,7 @@
 #include <jderobot/image.h>
 #include <jderobotice/context.h>
 #include <jderobotice/subsystemthread.h>
-#include <colorspacesmm.h>
+#include <colorspaces/colorspacesmm.h>
 #include <memory>
 #include "model.h"
 #include "controller.h"

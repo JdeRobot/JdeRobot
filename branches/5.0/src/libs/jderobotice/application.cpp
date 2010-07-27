@@ -12,11 +12,12 @@
  * included in jderobot project.
  */
 
-#include <jderobotice/application.h>
-#include <jderobotice/component.h>
-#include <jderobotice/jderobotice.h>
 #include <jderobotutil/jderobotutil.h>
 #include <iostream>
+#include "application.h"
+#include "component.h"
+#include "jderobotice.h"
+
 
 using namespace std;
 

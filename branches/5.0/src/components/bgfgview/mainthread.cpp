@@ -23,7 +23,7 @@
 #include "mainthread.h"
 #include "viewgtk.h"
 
-namespace carspeed {
+namespace bgfgview {
   MainThread::MainThread(const jderobotice::Context &context)
     : jderobotice::SubsystemThread(context.tracer(),context.status(),"MainThread"),
       imagePrx(),fmt(),
@@ -59,46 +59,10 @@ namespace carspeed {
 				  &(img->pixelData[0]));//data will be available until img is destroyed
 
     //init model. Road dimensions 
-    model.reset(new Model(context.tracer(), initialImg.clone()));
+    model.reset(new Model(context.tracer(), initialImg));
     
     //create controller
     controller.reset(new Controller(context.tracer(), *model));
-
-    //read properties to get road points and size
-    std::vector<cv::Point> roadPoints;
-    cv::Point p;
-    double width, length;
-    
-    //check if A.x is set. if that fails we suppose there is no road
-    //parameters. FIXME
-    if (prop->getProperty(prefix+"Road.A.x").length() > 0){
-      context.tracer().info("Initializing algorithm with config file data");
-      p = cv::Point(prop->getPropertyAsInt(prefix+"Road.A.x"),
-		    prop->getPropertyAsInt(prefix+"Road.A.y"));
-      roadPoints.push_back(p);
-      p = cv::Point(prop->getPropertyAsInt(prefix+"Road.B.x"),
-		    prop->getPropertyAsInt(prefix+"Road.B.y"));
-      roadPoints.push_back(p);
-      p = cv::Point(prop->getPropertyAsInt(prefix+"Road.C.x"),
-		    prop->getPropertyAsInt(prefix+"Road.C.y"));
-      roadPoints.push_back(p);
-      p = cv::Point(prop->getPropertyAsInt(prefix+"Road.D.x"),
-		    prop->getPropertyAsInt(prefix+"Road.D.y"));
-      roadPoints.push_back(p);
-      ss.str(prop->getProperty(prefix+"Road.Width"));
-      ss >> width;
-      ss.clear();
-      ss.str(prop->getProperty(prefix+"Road.Length"));
-      ss >> length;
-      ss.clear();
-      ss.str("");
-      ss << "Setting new algorithm: width=" << width << ",length=" << length;
-      context.tracer().info(ss.str());
-      CarspeedAlgorithmConfig cfg(width,length,roadPoints);
-      CarspeedAlgorithmPtr newAlg(new CarspeedAlgorithm(controller->model().getImage().clone(), cfg));
-      controller->setAlgorithm(newAlg);
-    }
-    
 
     //create view: maybe we could activate/deactivate gui through config
     ViewPtr vp(new ViewGtk(*controller));
@@ -127,6 +91,6 @@ namespace carspeed {
 			    img->description->height,
 			    fmt,
 			    &(img->pixelData[0]));//data will be available until img is destroyed
-    model->setImage(cImg.clone());//FIXME: find a way to avoid this copy
+    model->updateBGModel(cImg);
   }
 }

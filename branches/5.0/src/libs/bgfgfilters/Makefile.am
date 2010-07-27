@@ -2,13 +2,11 @@ if ENABLE_LIBBGFGFILTERS
 lib_LTLIBRARIES = libbgfgfilters.la
 endif
 
-libbgfgfilters_ladir = $(includedir)
+libbgfgfilters_ladir = $(includedir)/bgfgfilters
 libbgfgfilters_la_SOURCES = bgfg_common.cpp \
 				bgfg_exp.cpp \
 				bgfg_mean.cpp \
 				bgfg_mode.cpp
 libbgfgfilters_la_CPPFLAGS = $(OPENCV_CPPFLAGS)
 libbgfgfilters_la_LDFLAGS = $(OPENCV_LDFLAGS)
-libbgfgfilters_la_HEADERS =
-
-include_HEADERS = bgfgfilters.h
+libbgfgfilters_la_HEADERS = bgfgfilters.h

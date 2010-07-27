@@ -7,7 +7,7 @@ if test "x$with_opencv" != xno; then
     AM_CONDITIONAL([ENABLE_LIBCOLORSPACESMM],[true])
     with_colorspacesmm="yes"
     AC_DEFINE([HAVE_COLORSPACESMM],[1],[Defined if colorspacesmm enabled])
-    AC_SUBST([COLORSPACESMM_CPPFLAGS],["$OPENCV_CPPFLAGS"])
+    AC_SUBST([COLORSPACESMM_CPPFLAGS],["$OPENCV_CPPFLAGS" -I\${top_srcdir}/src/libs])
     AC_SUBST([COLORSPACESMM_LDFLAGS],["$OPENCV_LDFLAGS"])
     AC_MSG_NOTICE([libcolorspacesmm enabled])
 else

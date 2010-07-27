@@ -21,14 +21,13 @@
 
 
 #include "model.h"
-#include <cmath>
-#include <algorithm>
-#include <tr1/memory>
 
 namespace bgfgview {
   Model::Model(gbxutilacfr::Tracer& tracer, const colorspaces::Image& initialImg) throw ()
-    : _tracer(tracer), currentImage(initialImg), bgImage(initialImg), 
-      fgMaskImage(initialImg.width, initialImg.height, colorspaces::ImageGRAY8:FORMAT_GRAY8),
+    : _tracer(tracer), currentImage(initialImg.clone()), bgImage(currentImage), 
+      fgMaskImage(initialImg.width, 
+		  initialImg.height,
+		  colorspaces::ImageGRAY8::FORMAT_GRAY8),
       bg_model(0) {
   }
 
@@ -38,17 +37,20 @@ namespace bgfgview {
   }
   
   void Model::updateBGModel(const colorspaces::Image& img) throw () {
-    currentImage = img;
+    currentImage = img.clone();//FIXME: avoid copy
     if (bg_model != 0) {
-      cvUpdateBGStatModel(&bg_model, &currentImage);
+      IplImage tmpImg(currentImage);
+      cvUpdateBGStatModel(&tmpImg, bg_model);
       /*data isn't copied*/
-      bgImage = colorspaces::Image(cv::Mat(bg_model->background), colorspaces::ImageRGB888:FORMAT_RGB888);
-      fgMaskImage = colorspaces::Image(cv::Mat(bg_model->foreground), colorspaces::ImageGRAY8:FORMAT_GRAY8);
+      bgImage = colorspaces::Image(cv::Mat(bg_model->background), 
+				   colorspaces::ImageRGB888::FORMAT_RGB888);
+      fgMaskImage = colorspaces::Image(cv::Mat(bg_model->foreground), 
+				       colorspaces::ImageGRAY8::FORMAT_GRAY8);
     }
     notifyObservers();
   }
 
-  void Model::setBGModel(const CvBGStatModel* newBGModel) throw()
+  void Model::setBGModel(CvBGStatModel* newBGModel) throw()
   { 
     if (bg_model != 0)
       cvReleaseBGStatModel(&bg_model);

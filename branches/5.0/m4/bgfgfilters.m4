@@ -10,7 +10,7 @@ if test "x$with_opencv" = xno; then
 else
     AM_CONDITIONAL([ENABLE_LIBBGFGFILTERS],[true])
     with_bgfgfilters="yes"
-    AC_SUBST([BGFGFILTERS_CPPFLAGS],["$OPENCV_CPPFLAGS"])
+    AC_SUBST([BGFGFILTERS_CPPFLAGS],["$OPENCV_CPPFLAGS" -I\${top_srcdir}/src/libs])
     AC_SUBST([BGFGFILTERS_LDFLAGS],["$OPENCV_LDFLAGS"])
     AC_MSG_NOTICE([libbgfgfilters enabled])
 fi

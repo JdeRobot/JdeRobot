@@ -19,7 +19,7 @@
  *
  */
 
-#include "bgmodel.h"
+#include "bgmodelfactory.h"
 
 namespace bgfgview{
   BGModelFactory::BGModelFactory(const std::string desc)
@@ -44,13 +44,13 @@ namespace bgfgview{
   BGModelCvFGDFactory::BGModelCvFGDFactory(const std::string desc, const CvFGDStatModelParams& params)
     :BGModelFactory(desc), params(params) {}
 
-  virtual BGModelCvFGDFactory* BGModelCvFGD::clone() const{
+  BGModelCvFGDFactory* BGModelCvFGDFactory::clone() const{
     return new BGModelCvFGDFactory(*this);
   }
 
   CvBGStatModel* BGModelCvFGDFactory::createModel(IplImage* firstFrame) const{
     CvFGDStatModelParams tmpParams(params);//params is const
-    return cvCreateFGDStatModel(firstFrame,&params);
+    return cvCreateFGDStatModel(firstFrame,&tmpParams);
   }
 
   const CvGaussBGStatModelParams BGModelCvMoGFactory::defaultParams = {200,//win_size
@@ -65,13 +65,13 @@ namespace bgfgview{
   BGModelCvMoGFactory::BGModelCvMoGFactory(const std::string desc, const CvGaussBGStatModelParams& params)
     :BGModelFactory(desc), params(params) {}
 
-  virtual BGModelCvMoGFactory* BGModelCvMoGFactory::clone() const{
+  BGModelCvMoGFactory* BGModelCvMoGFactory::clone() const{
     return new BGModelCvMoGFactory(*this);
   }
 
   CvBGStatModel* BGModelCvMoGFactory::createModel(IplImage* firstFrame) const{
     CvGaussBGStatModelParams tmpParams(params);//params is const
-    return cvCreateGaussianBGModel(firstFrame,&params);
+    return cvCreateGaussianBGModel(firstFrame,&tmpParams);
   }
 
   const BGExpStatModelParams BGModelExpFactory::defaultParams = {};
@@ -79,13 +79,13 @@ namespace bgfgview{
   BGModelExpFactory::BGModelExpFactory(const std::string desc, const BGExpStatModelParams& params)
     :BGModelFactory(desc), params(params) {}
 
-  virtual BGModelExpFactory* BGModelExpFactory:clone() const{
+  BGModelExpFactory* BGModelExpFactory::clone() const{
     return new BGModelExpFactory(*this);
   }
 
   CvBGStatModel* BGModelExpFactory::createModel(IplImage* firstFrame) const{
     BGExpStatModelParams tmpParams(params);//params is const
-    return createBGExpStatModel(firstFrame,&params);
+    return createBGExpStatModel(firstFrame,&tmpParams);
   }
 
   const BGMeanStatModelParams BGModelMeanFactory::defaultParams = {};
@@ -93,13 +93,13 @@ namespace bgfgview{
   BGModelMeanFactory::BGModelMeanFactory(const std::string desc, const BGMeanStatModelParams& params)
     :BGModelFactory(desc), params(params) {}
 
-  virtual BGModelMeanFactory* BGModelMeanFactory:clone() const{
+  BGModelMeanFactory* BGModelMeanFactory::clone() const{
     return new BGModelMeanFactory(*this);
   }  
 
   CvBGStatModel* BGModelMeanFactory::createModel(IplImage* firstFrame) const{
     BGMeanStatModelParams tmpParams(params);//params is const
-    return createBGMeanStatModel(firstFrame,&params);
+    return createBGMeanStatModel(firstFrame,&tmpParams);
   }
 
   const BGModeStatModelParams BGModelModeFactory::defaultParams = {};
@@ -107,13 +107,13 @@ namespace bgfgview{
   BGModelModeFactory::BGModelModeFactory(const std::string desc, const BGModeStatModelParams& params)
     :BGModelFactory(desc), params(params) {}
 
-  virtual BGModelModeFactory* BGModelModeFactory:clone() const{
+  BGModelModeFactory* BGModelModeFactory::clone() const{
     return new BGModelModeFactory(*this);
   }
 
   CvBGStatModel* BGModelModeFactory::createModel(IplImage* firstFrame) const{
     BGModeStatModelParams tmpParams(params);//params is const
-    return createBGModeStatModel(firstFrame,&params);
+    return createBGModeStatModel(firstFrame,&tmpParams);
   }
 
 }//namespace

@@ -19,7 +19,6 @@
  *
  */
 
-#include <colorspacesmm.h>
 #include <libglademm.h>
 #include <cairomm/context.h>
 #include <string>
@@ -27,18 +26,18 @@
 #include <iostream>
 #include <cmath>
 #include <map>
+#include <tr1/memory>
 #include <string>
-#include <cvaux.h>
+#include <opencv/cvaux.h>
 #include "viewgtk.h"
 #include "model.h"
-#include "bgmodelfactory.h"
 
 namespace bgfgview {
   const std::string gladepath = std::string(GLADE_DIR) + std::string("/bgfgview.glade");
 
-  typedef std::map<std::string, const std::auto_ptr<BGModelFactory>> BGModelFactoryMap;//const auto_ptr to avoid lose ownership
+  typedef std::map<std::string, std::tr1::shared_ptr<BGModelFactory> > BGModelFactoryMap;
 
-  class ViewGtk::Pimpl{
+  class ViewGtk::PImpl{
   public:
     BGModelFactoryMap bgmodelF;
     //std::auto_ptr<BGModel> currentModel;
@@ -56,9 +55,10 @@ namespace bgfgview {
       INIT_WIDGET(drawingareaFgMask, refXml),
       INIT_WIDGET(drawingareaImage, refXml),
       INIT_WIDGET(statusbarMain, refXml),
+      INIT_WIDGET(dialogBGModelSelection, refXml),
       INIT_WIDGET(comboboxBGModel, refXml),
       INIT_WIDGET(frameCvFGD, refXml),
-      INIT_WIDGET(frameCvMog, refXml),
+      INIT_WIDGET(frameCvMoG, refXml),
       INIT_WIDGET(frameExp, refXml),
       INIT_WIDGET(frameMean, refXml),
       INIT_WIDGET(frameMode, refXml),
@@ -72,8 +72,7 @@ namespace bgfgview {
 
 
     toolbuttonApplyMaskToImage->set_active(false);
-    toolbuttonApplyMaskToImage->signal_toggled().connect(sigc::mem_fun(this, &ViewGtk::onToolbuttonSelectRoadPointsToggled));
-    
+        
     drawingareaBg->signal_expose_event().connect(sigc::mem_fun(this, &ViewGtk::onDrawingAreaBgExposeEvent));
     drawingareaFgMask->signal_expose_event().connect(sigc::mem_fun(this, &ViewGtk::onDrawingAreaFgMaskExposeEvent));
     drawingareaImage->signal_expose_event().connect(sigc::mem_fun(this, &ViewGtk::onDrawingAreaImageExposeEvent));
@@ -193,28 +192,25 @@ namespace bgfgview {
     for(bgmodelIt = pImpl->bgmodelF.begin();
 	bgmodelIt != pImpl->bgmodelF.end();
 	bgmodelIt++){
-      Gtk::MenuItem item(it->first);
-      item.signal_activate().connect(sigc::bind<std::string>(sigc::mem_fun(this, &ViewGtk::onMenutoolbuttonSelectBGModelMenuItemClicked)),it->first);
+      Gtk::MenuItem item(bgmodelIt->first);
+      item.signal_activate().connect(sigc::bind<std::string>(sigc::mem_fun(this, &ViewGtk::onMenutoolbuttonSelectBGModelMenuItemClicked),bgmodelIt->first));
       selectBGModelMenu.append(item);
     }
   }
 
-  void ViewGtk::setBGModel(const BGModel& m){
-    CvBGStatModel const* bgModel = model.bgModel();
-    CvBGStatModel* newBgModel = 0;
-    if (bgModel != 0)//if bg model already exists use bg as first frame
-      newBgModel = m.createModel(bgModel->background);
-    else
-      newBgModel = m.createModel(&model.getImage());//const¿?
+  void ViewGtk::setBGModel(const BGModelFactory& m){
+    IplImage tmpImg(controller.model().getBGImage());
+    CvBGStatModel* newBgModel = m.createModel(&tmpImg);
     controller.setBGModel(newBgModel);
-    pImpl->bgmodelF[std::string("Current")] = std::auto_ptr<BGModel>(m.clone());//reset current value
-    //pImpl->currentModel.reset(m.clone());
+    pImpl->bgmodelF["Current"] = 
+      std::tr1::shared_ptr<BGModelFactory>(m.clone());
   }
 
   void ViewGtk::onMenutoolbuttonSelectBGModelMenuItemClicked(const std::string bgmodelDesc){
     //apply set algorithm
-    BGModelFactoryMap::const_iterator bgmodelIt = bgmodelF.find(bgmodelDesc);
-    if (bgmodelIt != bgmodelF.end()){
+    BGModelFactoryMap::const_iterator bgmodelIt = 
+      pImpl->bgmodelF.find(bgmodelDesc);
+    if (bgmodelIt != pImpl->bgmodelF.end()){
       setBGModel(*(bgmodelIt->second));
     }
   }
@@ -225,51 +221,53 @@ namespace bgfgview {
     ModelColumns comboboxBGModelCols;
     comboboxBGModelLSRef = Gtk::ListStore::create(comboboxBGModelCols);
     Gtk::TreeModel::iterator tmIt;
-    Gtk::TreeModel::iterator currentIt = pImpl->bgmodelF.end();
-
+    bool hasCurrent = false;
+    Gtk::TreeModel::iterator currIt;
+    
     Gtk::TreeModel::Row r;
     for(bgmodelIt = pImpl->bgmodelF.begin();
 	bgmodelIt != pImpl->bgmodelF.end();
 	bgmodelIt++){
       tmIt = comboboxBGModelLSRef->append();
       r = *tmIt;
-      //r[comboboxBGModelCols.m_col_id] = bgmodelIt->second.id;
+      r[comboboxBGModelCols.m_col_name] = bgmodelIt->first;
       r[comboboxBGModelCols.m_col_desc] = bgmodelIt->second->description;
-      if (bgmodelIt->second->description.compare("Current") == 0)
-	currentIt = tmIt;
+      if (bgmodelIt->first.compare("Current") == 0){
+	hasCurrent = true;
+	currIt = tmIt;
+      }
     }
 
     comboboxBGModel->set_model(comboboxBGModelLSRef);
-    //comboboxBGModel->pack_start(comboboxBGModelCols.m_col_id);
+    comboboxBGModel->pack_start(comboboxBGModelCols.m_col_name);
     comboboxBGModel->pack_start(comboboxBGModelCols.m_col_desc);
-    if (currentIt != pImpl->bgmodelF.end())
-      comboboxBGModel->set_active(currentIt);
+    if (hasCurrent)
+      comboboxBGModel->set_active(currIt);
   }
 
   void ViewGtk::updateDialogBGModelSelection(){
     //hide parameter frames
     frameCvFGD->hide();
-    frameCvMog->hide();;
+    frameCvMoG->hide();;
     frameExp->hide();;
     frameMean->hide();;
     frameMode->hide();;
-
-
   }
 
   void ViewGtk::onComboboxBGModelChanged(){
+    ModelColumns comboboxBGModelCols;
     Gtk::TreeModel::iterator it = comboboxBGModel->get_active();
 
     if (it){
       Gtk::TreeModel::Row row = *it;
       if (row){
-	std::string desc = row[m_col_desc];
-	BGModelFactoryMap::const_iterator bgmodelFIt = pImpl->bgmodelF.find(desc);
+	std::string name = row[comboboxBGModelCols.m_col_name];
+	BGModelFactoryMap::const_iterator bgmodelFIt = pImpl->bgmodelF.find(name);
 	
 	
-	if (bgmodelFIt != bgmodelF.end()){
+	if (bgmodelFIt != pImpl->bgmodelF.end()){
 	  //cast to get bgmodelF type
-	  BGModelCvFGDFactory* bgmCvFGDFactoryPtr = dynamic_cast<BGModelCvFGDFactory*>(bgmodelFIt.second.get());
+	  BGModelCvFGDFactory* bgmCvFGDFactoryPtr = dynamic_cast<BGModelCvFGDFactory*>(bgmodelFIt->second.get());
 	  if (bgmCvFGDFactoryPtr != 0){
 	    frameCvFGD->show();
 	    goto onComboboxBGModelChanged_end;
@@ -282,8 +280,10 @@ namespace bgfgview {
 	  frameMean->show();
 	  frameMode->show();
 	
+	}
       }
     }
+
   }
 
   void ViewGtk::onButtonBGModelCancelClicked(){
@@ -293,6 +293,8 @@ namespace bgfgview {
   void ViewGtk::onButtonBGModelApplyClicked(){
     
   }
-  void ViewGtk::onButtonBGModelAcceptClicked();
+
+  void ViewGtk::onButtonBGModelAcceptClicked(){
+  }
 
 }//namespace
