@@ -51,6 +51,10 @@ createBGModeStatModel( IplImage* first_frame, BGModeStatModelParams* parameters 
 
   // Initialize parameters:
   if( parameters == NULL ){
+    params.sg_params.is_obj_without_holes = BGFG_SEG_OBJ_WITHOUT_HOLES;
+    params.sg_params.perform_morphing = BGFG_SEG_PERFORM_MORPH;
+    params.sg_params.minArea = BGFG_SEG_MINAREA;
+    params.perform_segmentation = 1;
   }else
     params = *parameters;
 

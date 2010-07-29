@@ -28,6 +28,7 @@
 #include <libglademm.h>
 #include <colorspaces/colorspacesmm.h>
 #include <memory>
+#include <vector>
 #include "widget.h"
 #include "controller.h" //class View
 #include "bgmodelfactory.h"
@@ -52,6 +53,8 @@ namespace bgfgview {
     //main window
     Widget<Gtk::Window> mainwindow;
     Widget<Gtk::MenuToolButton> menutoolbuttonSelectBGModel;
+    //Gtk::Menu selectBGModelMenu;
+    //std::vector< Glib::RefPtr<Gtk::MenuItem> > menutoolbuttonSelectBGModelItems;
     Widget<Gtk::ToggleToolButton> toolbuttonApplyMaskToImage;
     Widget<Gtk::DrawingArea> drawingareaBg;
     Widget<Gtk::DrawingArea> drawingareaFgMask;

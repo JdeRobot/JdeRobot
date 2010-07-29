@@ -20,7 +20,7 @@
  */
 
 #include "bgfgfilters.h"
-
+#include <iostream>
 
 //fw declarations
 static void releaseBGExpStatModel( BGExpStatModel** _model );
@@ -55,8 +55,12 @@ createBGExpStatModel( IplImage* first_frame, BGExpStatModelParams* parameters ){
     params.sg_params.is_obj_without_holes = BGFG_SEG_OBJ_WITHOUT_HOLES;
     params.sg_params.perform_morphing = BGFG_SEG_PERFORM_MORPH;
     params.sg_params.minArea = BGFG_SEG_MINAREA;
+    params.perform_segmentation = 1;
   }else
     params = *parameters;
+
+  std::cerr << "Params: alpha=" << params.alpha << 
+    ", perform segmentation=" << params.perform_segmentation << std::endl;
 
   CV_CALL( p_model = (BGExpStatModel*)cvAlloc( sizeof(*p_model) ));
   memset( p_model, 0, sizeof(*p_model) );
@@ -131,8 +135,9 @@ updateBGExpStatModel( IplImage* curr_frame, BGExpStatModel*  model ){
   //update model
   cv::Mat curr(curr_frame);
   cv::Mat bg(model->background);
-  cv::accumulateWeighted(curr, bg, model->params.alpha);
-
+  cv::addWeighted(curr, model->params.alpha, 
+		  bg, (1.0-model->params.alpha), 
+		  0, bg);
   return region_count;
 }
 

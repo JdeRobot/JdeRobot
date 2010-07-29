@@ -28,6 +28,7 @@ namespace bgfgview {
       fgMaskImage(initialImg.width, 
 		  initialImg.height,
 		  colorspaces::ImageGRAY8::FORMAT_GRAY8),
+      bg_model_ips(),
       bg_model(0) {
   }
 
@@ -47,6 +48,7 @@ namespace bgfgview {
       fgMaskImage = colorspaces::Image(cv::Mat(bg_model->foreground), 
 				       colorspaces::ImageGRAY8::FORMAT_GRAY8);
     }
+    bg_model_ips.inc();
     notifyObservers();
   }
 

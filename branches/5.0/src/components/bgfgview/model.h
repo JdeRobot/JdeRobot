@@ -23,6 +23,7 @@
 #define BGFGVIEW_MODEL_H
 
 #include <jderobotutil/observer.h>
+#include <jderobotutil/time.h>
 #include <colorspaces/colorspacesmm.h>
 #include <gbxutilacfr/tracer.h>
 #include <opencv/cvaux.h>
@@ -48,6 +49,9 @@ namespace bgfgview {
     gbxutilacfr::Tracer& tracer() { return _tracer; };
 
     void setBGModel(CvBGStatModel* newBGModel) throw();
+    
+    const jderobotutil::IpsCounter& bgModelIps() const { return bg_model_ips; }
+    
     //return a null pointer until algorithm is set
     CvBGStatModel const* bgModel() const throw() { return bg_model; }
   private:
@@ -55,6 +59,7 @@ namespace bgfgview {
     colorspaces::Image currentImage;
     colorspaces::Image bgImage;
     colorspaces::Image fgMaskImage;
+    jderobotutil::IpsCounter bg_model_ips;
     CvBGStatModel* bg_model;
   };
 }//namespace

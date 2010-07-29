@@ -74,7 +74,12 @@ namespace bgfgview{
     return cvCreateGaussianBGModel(firstFrame,&tmpParams);
   }
 
-  const BGExpStatModelParams BGModelExpFactory::defaultParams = {};
+  const BGExpStatModelParams BGModelExpFactory::defaultParams = {BGFG_EXP_ALPHA, //alpha
+								 {BGFG_SEG_OBJ_WITHOUT_HOLES,
+								  BGFG_SEG_PERFORM_MORPH,
+								  BGFG_SEG_MINAREA},//segmentation params
+								 1 //perform segmentation
+  };
 
   BGModelExpFactory::BGModelExpFactory(const std::string desc, const BGExpStatModelParams& params)
     :BGModelFactory(desc), params(params) {}
@@ -88,7 +93,12 @@ namespace bgfgview{
     return createBGExpStatModel(firstFrame,&tmpParams);
   }
 
-  const BGMeanStatModelParams BGModelMeanFactory::defaultParams = {};
+  const BGMeanStatModelParams BGModelMeanFactory::defaultParams = { BGFG_MEAN_NFRAMES,//n_frames
+								    {BGFG_SEG_OBJ_WITHOUT_HOLES,
+								     BGFG_SEG_PERFORM_MORPH,
+								     BGFG_SEG_MINAREA},//segmentation params
+								    1 //perform segmentation
+  };
 
   BGModelMeanFactory::BGModelMeanFactory(const std::string desc, const BGMeanStatModelParams& params)
     :BGModelFactory(desc), params(params) {}

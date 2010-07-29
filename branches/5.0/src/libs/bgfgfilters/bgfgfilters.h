@@ -49,8 +49,12 @@ typedef struct BGFGSegmentationParams
 CVAPI(int) bgfgSegmentation(CvBGStatModel*  model, BGFGSegmentationParams* sg_params);
 
 /* BG mean based API*/
+/* BG Exp dafault parameters*/
+#define BGFG_MEAN_NFRAMES 30
+
 typedef struct BGMeanStatModelParams
 {
+  int n_frames;/*number of frames to calculate mean*/
   BGFGSegmentationParams sg_params;
   int perform_segmentation;
 }BGMeanStatModelParams;
@@ -58,6 +62,11 @@ typedef struct BGMeanStatModelParams
 typedef struct BGMeanStatModel
 {
   CV_BG_STAT_MODEL_FIELDS();
+  int pixel_count;/*number of pixels*/
+  uchar* frame_cbuffer;/*circular frame buffer*/
+  int cbuffer_idx;/*circular buffer idx*/
+  double* mean;
+  double* std_dev;
   BGMeanStatModelParams params;
 }BGMeanStatModel;
 

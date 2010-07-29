@@ -46,10 +46,14 @@ createBGMeanStatModel( IplImage* first_frame, BGMeanStatModelParams* parameters 
     CV_ERROR( CV_StsBadArg, "Invalid or NULL first_frame parameter" );
   
   if (first_frame->nChannels != 3)
-    CV_ERROR( CV_StsBadArg, "first_frame must have 3 color channels" );
+    CV_ERROR( CV_StsBadArg, "first_frame must have 1-3 color channels" );
   
   // Initialize parameters:
   if( parameters == NULL ){
+    params.sg_params.is_obj_without_holes = BGFG_SEG_OBJ_WITHOUT_HOLES;
+    params.sg_params.perform_morphing = BGFG_SEG_PERFORM_MORPH;
+    params.sg_params.minArea = BGFG_SEG_MINAREA;
+    params.perform_segmentation = 1;
   }else{
     params = *parameters;
   }
@@ -60,6 +64,19 @@ createBGMeanStatModel( IplImage* first_frame, BGMeanStatModelParams* parameters 
   p_model->release = (CvReleaseBGStatModel)releaseBGMeanStatModel;
   p_model->update = (CvUpdateBGStatModel)updateBGMeanStatModel;;
   p_model->params = params;
+
+  // Initialize storage pools:
+  pixel_count = first_frame->width * first_frame->height * sizeof(uchar);
+  buf_size = pixel_count * first_frame->nChannels * params.n_frames;
+
+  CV_CALL( p_model->frame_cbuffer = (uchar*)cvAlloc(buf_size) );
+  memset( p_model->frame_cbuffer, 0, buf_size );
+  p_model->cbuffer_idx = 0;
+
+  buf_size = pixel_count * first_frame->nChannels * sizeof(double);
+  CV_CALL( p_model->mean = (double*)cvAlloc(buf_size) );
+  CV_CALL( p_model->std_dev = (double*)cvAlloc(buf_size) );
+  
 
   // Init temporary images:
   CV_CALL( p_model->foreground = cvCreateImage(cvSize(first_frame->width, first_frame->height),
@@ -95,6 +112,9 @@ releaseBGMeanStatModel( BGMeanStatModel** _model ){
   if( *_model ){
     BGMeanStatModel* model = *_model;
     
+    cvFree( &model->frame_cbuffer );
+    cvFree( &model->mean );
+    cvFree( &model->std_dev );
     cvReleaseImage( &model->foreground );
     cvReleaseImage( &model->background );
     cvReleaseMemStorage(&model->storage);
@@ -118,14 +138,59 @@ updateBGMeanStatModel( IplImage* curr_frame, BGMeanStatModel*  model ){
 
 
   //difference bg - curr_frame. Adaptative threshold
-  cvChangeDetection( model->background, curr_frame, model->foreground );
+  cvChangeDetection( model->background, curr_frame, model->foreground );//FIXME: just 3 channel support
 
   //segmentation if required
   if (model->params.perform_segmentation)
     region_count = bgfgSegmentation((CvBGStatModel*)model, &model->params.sg_params);
 
   //update model
+
+  //insert curr_frame in circular buffer
+  int i,j,k;
+  int frame_cbuffer_pixelcluster_step = model->params.n_frames*model->background->nChannels;
+  int frame_cbuffer_cbufferpixel_offset = model->cbuffer_idx*model->background->nChannels;
+  int frame_cbuffer_width_step = model->background->width*frame_cbuffer_pixelcluster_step;
   
+  cv::Scalar mean, std_dev;
+
+  //bg and curr_frame have same size
+  for (i = 0; i < model->background->height; i++){//rows
+    uchar* frame_cbuffer_row_p = model->frame_cbuffer + i*frame_cbuffer_width_step;
+    uchar* curr_frame_row_p = (uchar*)curr_frame->imageData + i*curr_frame->widthStep;
+    uchar* bg_frame_row_p = (uchar*)model->background->imageData + i*model->background->widthStep;
+    for (j = 0; j < model->background->width; j++){//cols
+      uchar* pixel_cluster_p = frame_cbuffer_row_p + j*frame_cbuffer_pixelcluster_step;
+      uchar* pixel_to_update_p = pixel_cluster_p + frame_cbuffer_cbufferpixel_offset;//pointer to pixel in circular buffer to update
+      uchar* curr_pixel_p = curr_frame_row_p + j*model->background->nChannels;//pixel from curr_frame
+      //update circular buffer
+      for (k=0; k<model->background->nChannels; k++)
+	pixel_to_update_p[k] = curr_pixel_p[k];
+
+      //calc mean and std dev   
+      cv::Mat pixel_cluster(1, model->params.n_frames, 
+			    CV_MAKETYPE(CV_8U,model->background->nChannels),
+			    pixel_cluster_p);/*cv::Mat with pixel cluster with last n frames*/
+      cv::meanStdDev(pixel_cluster, mean, std_dev);
+
+      int pixel_offset = j*model->background->nChannels + (i * model->background->width * model->background->nChannels);
+      double* mean_p = model->mean + pixel_offset;
+      double* std_dev_p = model->std_dev + pixel_offset;
+      uchar* bg_p = bg_frame_row_p + j*model->background->nChannels;
+      /*copy mean and std dev to each channel*/
+      for (k=0; k<model->background->nChannels; k++){
+	mean_p[k] = mean[k];
+	std_dev_p[k] = std_dev[k];
+	bg_p[k] = cv::saturate_cast<uchar>(mean[k]);//FIXME: use std dev correction
+      }
+    }
+  }
+  //update circular buffer idx
+  if (model->cbuffer_idx < model->params.n_frames)
+    model->cbuffer_idx++;
+  else
+    model->cbuffer_idx = 0;
+
   return region_count;
 }
 
