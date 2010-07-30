@@ -21,49 +21,68 @@
 
 #include "bgfgfilters.h"
 
-
-//fw declarations
 static void releaseBGModeStatModel( BGModeStatModel** _model );
 static int updateBGModeStatModel( IplImage* curr_frame,
-					   BGModeStatModel*  model );
+				  BGModeStatModel*  model );
 
 // Function createBGModeStatModel initializes foreground detection process
 // parameters:
 //      first_frame - frame from video sequence
 //      parameters  - (optional) if NULL default parameters of the algorithm will be used
-//      p_model     - pointer to BGModeStatModel structure
+//      p_model     - pointer to CvFGDStatModel structure
 CV_IMPL CvBGStatModel*
 createBGModeStatModel( IplImage* first_frame, BGModeStatModelParams* parameters ){
   BGModeStatModel* p_model = 0;
-    
+  
   CV_FUNCNAME( "createBGModeStatModel" );
-
+  
   __BEGIN__;
-
+  
+  int i, j, k, pixel_count, buf_size;
   BGModeStatModelParams params;
-
+  
   if( !CV_IS_IMAGE(first_frame) )
     CV_ERROR( CV_StsBadArg, "Invalid or NULL first_frame parameter" );
   
   if (first_frame->nChannels != 3)
-    CV_ERROR( CV_StsBadArg, "first_frame must have 3 color channels" );
-
-
+    CV_ERROR( CV_StsBadArg, "first_frame must have 1-3 color channels" );
+  
   // Initialize parameters:
   if( parameters == NULL ){
+    params.n_frames = BGFG_MODE_NFRAMES;
+    params.bg_update_rate = BGFG_MODE_BG_UPDATE_RATE;
+    params.fg_update_rate = BGFG_MODE_FG_UPDATE_RATE;
     params.sg_params.is_obj_without_holes = BGFG_SEG_OBJ_WITHOUT_HOLES;
     params.sg_params.perform_morphing = BGFG_SEG_PERFORM_MORPH;
     params.sg_params.minArea = BGFG_SEG_MINAREA;
     params.perform_segmentation = 1;
-  }else
+  }else{
     params = *parameters;
+  }
 
   CV_CALL( p_model = (BGModeStatModel*)cvAlloc( sizeof(*p_model) ));
   memset( p_model, 0, sizeof(*p_model) );
   p_model->type = BG_MODEL_MODE;
   p_model->release = (CvReleaseBGStatModel)releaseBGModeStatModel;
-  p_model->update = (CvUpdateBGStatModel)updateBGModeStatModel;
+  p_model->update = (CvUpdateBGStatModel)updateBGModeStatModel;;
   p_model->params = params;
+
+  //init frame counters. Max value so first call will inialize bg & fg: FIXME: fast initialization??
+  p_model->bg_frame_count = params.bg_update_rate;
+  p_model->fg_frame_count = params.fg_update_rate;
+
+  // Initialize storage pools:
+  pixel_count = first_frame->width * first_frame->height * sizeof(uchar);
+  buf_size = pixel_count * first_frame->nChannels * params.n_frames;
+
+  CV_CALL( p_model->frame_cbuffer = (uchar*)cvAlloc(buf_size) );
+  memset( p_model->frame_cbuffer, 0, buf_size );
+  p_model->cbuffer_idx = 0;
+
+  // buf_size = pixel_count * first_frame->nChannels * sizeof(double);
+  // CV_CALL( p_model->mode = (double*)cvAlloc(buf_size) );
+  // CV_CALL( p_model->std_dev = (double*)cvAlloc(buf_size) );
+  
 
   // Init temporary images:
   CV_CALL( p_model->foreground = cvCreateImage(cvSize(first_frame->width, first_frame->height),
@@ -73,7 +92,7 @@ createBGModeStatModel( IplImage* first_frame, BGModeStatModelParams* parameters 
 
 
   __END__;
-
+  
   if( cvGetErrStatus() < 0 ){
     CvBGStatModel* base_ptr = (CvBGStatModel*)p_model;
     
@@ -88,28 +107,31 @@ createBGModeStatModel( IplImage* first_frame, BGModeStatModelParams* parameters 
 }
 
 void
-releaseBGModeStatModel( BGModeStatModel** _model )
-{
-    CV_FUNCNAME( "releaseBGModeStatModel" );
-
-    __BEGIN__;
+releaseBGModeStatModel( BGModeStatModel** _model ){
+  CV_FUNCNAME( "releaseBGModeStatModel" );
+  
+  __BEGIN__;
+  
+  if( !_model )
+    CV_ERROR( CV_StsNullPtr, "" );
+  
+  if( *_model ){
+    BGModeStatModel* model = *_model;
     
-    if( !_model )
-        CV_ERROR( CV_StsNullPtr, "" );
-
-    if( *_model ){
-      BGModeStatModel* model = *_model;
-    
-      cvReleaseImage( &model->foreground );
-      cvReleaseImage( &model->background );
-      cvReleaseMemStorage(&model->storage);
-      cvFree( _model );
-    }
-
-    __END__;
+    cvFree( &model->frame_cbuffer );
+    // cvFree( &model->mode );
+    // cvFree( &model->std_dev );
+    cvReleaseImage( &model->foreground );
+    cvReleaseImage( &model->background );
+    cvReleaseMemStorage(&model->storage);
+    cvFree( _model );
+  }
+  
+  __END__;
 }
 
-// Function updateBGModeStatModel updates statistical model and returns number of foreground regions
+
+// Function updateBGModeStatModel updates model and returns number of foreground regions
 // parameters:
 //      curr_frame  - current frame from video sequence
 //      p_model     - pointer to BGModeStatModel structure
@@ -117,20 +139,72 @@ int
 updateBGModeStatModel( IplImage* curr_frame, BGModeStatModel*  model ){
   int region_count = 0;
 
-  //clear fg
-  cvZero(model->foreground);
+  if (model->fg_frame_count >= model->params.fg_update_rate){
+    model->fg_frame_count = 0;
+    //clear fg
+    cvZero(model->foreground);
 
-  //difference bg - curr_frame. Adaptative threshold
-  cvChangeDetection( model->background, curr_frame, model->foreground );
+    //difference bg - curr_frame. Adaptative threshold
+    cvChangeDetection( model->background, curr_frame, model->foreground );//FIXME: just 3 channel support
 
-  //segmentation if required
-  if (model->params.perform_segmentation)
-    region_count = bgfgSegmentation((CvBGStatModel*)model, &model->params.sg_params);
+    //segmentation if required
+    if (model->params.perform_segmentation)
+      region_count = bgfgSegmentation((CvBGStatModel*)model, &model->params.sg_params);
+  }
 
-  //update model
-  
+  if (model->bg_frame_count >= model->params.bg_update_rate){
+    model->bg_frame_count = 0;
+    //update model
+    //insert curr_frame in circular buffer
+    int i,j,k;
+    int frame_cbuffer_pixelcluster_step = model->params.n_frames*model->background->nChannels;
+    int frame_cbuffer_cbufferpixel_offset = model->cbuffer_idx*model->background->nChannels;
+    int frame_cbuffer_width_step = model->background->width*frame_cbuffer_pixelcluster_step;
+    
+    // cv::Scalar mode, std_dev;
+
+    // //bg and curr_frame have same size
+    // for (i = 0; i < model->background->height; i++){//rows
+    //   uchar* frame_cbuffer_row_p = model->frame_cbuffer + i*frame_cbuffer_width_step;
+    //   uchar* curr_frame_row_p = (uchar*)curr_frame->imageData + i*curr_frame->widthStep;
+    //   uchar* bg_frame_row_p = (uchar*)model->background->imageData + i*model->background->widthStep;
+    //   for (j = 0; j < model->background->width; j++){//cols
+    // 	uchar* pixel_cluster_p = frame_cbuffer_row_p + j*frame_cbuffer_pixelcluster_step;
+    // 	uchar* pixel_to_update_p = pixel_cluster_p + frame_cbuffer_cbufferpixel_offset;//pointer to pixel in circular buffer to update
+    // 	uchar* curr_pixel_p = curr_frame_row_p + j*model->background->nChannels;//pixel from curr_frame
+    // 	//update circular buffer
+    // 	for (k=0; k<model->background->nChannels; k++)
+    // 	  pixel_to_update_p[k] = curr_pixel_p[k];
+	
+    // 	//calc mode and std dev   
+    // 	cv::Mat pixel_cluster(1, model->params.n_frames, 
+    // 			      CV_MAKETYPE(CV_8U,model->background->nChannels),
+    // 			      pixel_cluster_p);/*cv::Mat with pixel cluster with last n frames*/
+    // 	cv::modeStdDev(pixel_cluster, mode, std_dev);
+	
+    // 	int pixel_offset = j*model->background->nChannels + (i * model->background->width * model->background->nChannels);
+    // 	// double* mode_p = model->mode + pixel_offset;
+    // 	// double* std_dev_p = model->std_dev + pixel_offset;
+    // 	// uchar* bg_p = bg_frame_row_p + j*model->background->nChannels;
+    // 	// /*copy mode and std dev to each channel*/
+	// for (k=0; k<model->background->nChannels; k++){
+	//   mode_p[k] = mode[k];
+	//   std_dev_p[k] = std_dev[k];
+	//   bg_p[k] = cv::saturate_cast<uchar>(mode[k]);//FIXME: use std dev correction
+	// }
+    //  }
+    //}
+    //update circular buffer idx
+    if (model->cbuffer_idx < model->params.n_frames)
+      model->cbuffer_idx++;
+    else
+      model->cbuffer_idx = 0;
+  }
+
+  //update counters
+  model->fg_frame_count++;
+  model->bg_frame_count++;
 
   return region_count;
 }
-
 

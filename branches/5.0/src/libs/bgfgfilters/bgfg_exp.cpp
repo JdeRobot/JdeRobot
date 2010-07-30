@@ -52,6 +52,8 @@ createBGExpStatModel( IplImage* first_frame, BGExpStatModelParams* parameters ){
   // Initialize parameters:
   if( parameters == NULL ){
     params.alpha = BGFG_EXP_ALPHA;
+    params.bg_update_rate = BGFG_EXP_BG_UPDATE_RATE;
+    params.fg_update_rate = BGFG_EXP_FG_UPDATE_RATE;
     params.sg_params.is_obj_without_holes = BGFG_SEG_OBJ_WITHOUT_HOLES;
     params.sg_params.perform_morphing = BGFG_SEG_PERFORM_MORPH;
     params.sg_params.minArea = BGFG_SEG_MINAREA;
@@ -68,6 +70,10 @@ createBGExpStatModel( IplImage* first_frame, BGExpStatModelParams* parameters ){
   p_model->release = (CvReleaseBGStatModel)releaseBGExpStatModel;
   p_model->update = (CvUpdateBGStatModel)updateBGExpStatModel;
   p_model->params = params;
+  
+  //init frame counters. Max value so first call will inialize bg & fg: FIXME: fast initialization??
+  p_model->bg_frame_count = params.bg_update_rate;
+  p_model->fg_frame_count = params.fg_update_rate;
 
   // Init temporary images:
   CV_CALL( p_model->foreground = cvCreateImage(cvSize(first_frame->width, first_frame->height),
@@ -121,23 +127,34 @@ int
 updateBGExpStatModel( IplImage* curr_frame, BGExpStatModel*  model ){
   int region_count = 0;
 
-  //clear fg
-  cvZero(model->foreground);
+  if (model->fg_frame_count >= model->params.fg_update_rate){
+    model->fg_frame_count = 0;
+    //clear fg
+    cvZero(model->foreground);
 
+    //difference bg - curr_frame. Adaptative threshold
+    cvChangeDetection( model->background, curr_frame, model->foreground );
 
-  //difference bg - curr_frame. Adaptative threshold
-  cvChangeDetection( model->background, curr_frame, model->foreground );
+    //segmentation if required
+    if (model->params.perform_segmentation)
+      region_count = bgfgSegmentation((CvBGStatModel*)model, &model->params.sg_params);
+  }
+  
 
-  //segmentation if required
-  if (model->params.perform_segmentation)
-    region_count = bgfgSegmentation((CvBGStatModel*)model, &model->params.sg_params);
+  if (model->bg_frame_count >= model->params.bg_update_rate){
+    model->bg_frame_count = 0;
+    //update model
+    cv::Mat curr(curr_frame);
+    cv::Mat bg(model->background);
+    cv::addWeighted(curr, model->params.alpha, 
+		    bg, (1.0-model->params.alpha), 
+		    0, bg);
+  }
 
-  //update model
-  cv::Mat curr(curr_frame);
-  cv::Mat bg(model->background);
-  cv::addWeighted(curr, model->params.alpha, 
-		  bg, (1.0-model->params.alpha), 
-		  0, bg);
+  //update counters
+  model->fg_frame_count++;
+  model->bg_frame_count++;
+
   return region_count;
 }
 

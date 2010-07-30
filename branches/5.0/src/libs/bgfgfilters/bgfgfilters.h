@@ -51,18 +51,24 @@ CVAPI(int) bgfgSegmentation(CvBGStatModel*  model, BGFGSegmentationParams* sg_pa
 /* BG mean based API*/
 /* BG Exp dafault parameters*/
 #define BGFG_MEAN_NFRAMES 30
+#define BGFG_MEAN_BG_UPDATE_RATE 25
+#define BGFG_MEAN_FG_UPDATE_RATE 1
 
 typedef struct BGMeanStatModelParams
 {
   int n_frames;/*number of frames to calculate mean*/
+  int bg_update_rate;/*number of frames every bg is updated. [1..]*/
+  int fg_update_rate;/*number of frames every fg mask is updated. if 0 fg mask is never updated [0..]*/
   BGFGSegmentationParams sg_params;
-  int perform_segmentation;
+  int perform_segmentation;/*apply segmentation to calculated fg mask*/
 }BGMeanStatModelParams;
 
 typedef struct BGMeanStatModel
 {
   CV_BG_STAT_MODEL_FIELDS();
   int pixel_count;/*number of pixels*/
+  int bg_frame_count;/*count updated bg frames*/
+  int fg_frame_count;/*count updated fg frames*/
   uchar* frame_cbuffer;/*circular frame buffer*/
   int cbuffer_idx;/*circular buffer idx*/
   double* mean;
@@ -75,8 +81,16 @@ CVAPI(CvBGStatModel*) createBGMeanStatModel( IplImage* first_frame,
 
 
 /* BG mode based API*/
+#define BGFG_MODE_NFRAMES 30
+#define BGFG_MODE_BG_UPDATE_RATE 25
+#define BGFG_MODE_FG_UPDATE_RATE 1
+
+
 typedef struct BGModeStatModelParams
 {
+  int n_frames;/*number of frames to calculate mode*/
+  int bg_update_rate;/*number of frames every bg is updated. [1..]*/
+  int fg_update_rate;/*number of frames every fg mask is updated. if 0 fg mask is never updated [0..]*/
   BGFGSegmentationParams sg_params;
   int perform_segmentation;
 }BGModeStatModelParams;
@@ -84,6 +98,11 @@ typedef struct BGModeStatModelParams
 typedef struct BGModeStatModel
 {
   CV_BG_STAT_MODEL_FIELDS();
+  int pixel_count;/*number of pixels*/
+  int bg_frame_count;/*count updated bg frames*/
+  int fg_frame_count;/*count updated fg frames*/
+  uchar* frame_cbuffer;/*circular frame buffer*/
+  int cbuffer_idx;/*circular buffer idx*/
   BGModeStatModelParams params;
 }BGModeStatModel;
 
@@ -92,11 +111,16 @@ CVAPI(CvBGStatModel*) createBGModeStatModel( IplImage* first_frame,
 
 /*BG Exp dafault parameters*/
 #define BGFG_EXP_ALPHA 0.2f
+#define BGFG_EXP_BG_UPDATE_RATE 25
+#define BGFG_EXP_FG_UPDATE_RATE 1
+
 
 /* BG exponential based API*/
 typedef struct BGExpStatModelParams
 {
   float alpha; /*Input image weight. values in [0,1].*/
+  int bg_update_rate;/*number of frames every bg is updated. [1..]*/
+  int fg_update_rate;/*number of frames every fg mask is updated. if 0 fg mask is never updated [0..]*/
   BGFGSegmentationParams sg_params;
   int perform_segmentation;
 }BGExpStatModelParams;
@@ -104,6 +128,8 @@ typedef struct BGExpStatModelParams
 typedef struct BGExpStatModel
 {
   CV_BG_STAT_MODEL_FIELDS();
+  int bg_frame_count;/*count updated bg frames*/
+  int fg_frame_count;/*count updated fg frames*/
   BGExpStatModelParams params;
 }BGExpStatModel;
 

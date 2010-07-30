@@ -75,6 +75,8 @@ namespace bgfgview{
   }
 
   const BGExpStatModelParams BGModelExpFactory::defaultParams = {BGFG_EXP_ALPHA, //alpha
+								 BGFG_EXP_BG_UPDATE_RATE,
+								 BGFG_EXP_FG_UPDATE_RATE,
 								 {BGFG_SEG_OBJ_WITHOUT_HOLES,
 								  BGFG_SEG_PERFORM_MORPH,
 								  BGFG_SEG_MINAREA},//segmentation params
@@ -94,6 +96,8 @@ namespace bgfgview{
   }
 
   const BGMeanStatModelParams BGModelMeanFactory::defaultParams = { BGFG_MEAN_NFRAMES,//n_frames
+								    BGFG_MEAN_BG_UPDATE_RATE,
+								    BGFG_MEAN_FG_UPDATE_RATE,
 								    {BGFG_SEG_OBJ_WITHOUT_HOLES,
 								     BGFG_SEG_PERFORM_MORPH,
 								     BGFG_SEG_MINAREA},//segmentation params
@@ -112,7 +116,14 @@ namespace bgfgview{
     return createBGMeanStatModel(firstFrame,&tmpParams);
   }
 
-  const BGModeStatModelParams BGModelModeFactory::defaultParams = {};
+  const BGModeStatModelParams BGModelModeFactory::defaultParams = {BGFG_MODE_NFRAMES,//n_frames
+								   BGFG_MODE_BG_UPDATE_RATE,
+								   BGFG_MODE_FG_UPDATE_RATE,
+								   {BGFG_SEG_OBJ_WITHOUT_HOLES,
+								    BGFG_SEG_PERFORM_MORPH,
+								    BGFG_SEG_MINAREA},//segmentation params
+								   1 //perform segmentation
+  };
 
   BGModelModeFactory::BGModelModeFactory(const std::string desc, const BGModeStatModelParams& params)
     :BGModelFactory(desc), params(params) {}
