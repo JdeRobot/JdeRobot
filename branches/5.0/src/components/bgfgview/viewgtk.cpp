@@ -26,7 +26,6 @@
 #include <iostream>
 #include <cmath>
 #include <map>
-#include <tr1/memory>
 #include <string>
 #include <opencv/cvaux.h>
 #include "viewgtk.h"
@@ -35,7 +34,7 @@
 namespace bgfgview {
   const std::string gladepath = std::string(GLADE_DIR) + std::string("/bgfgview.glade");
 
-  typedef std::map<std::string, std::tr1::shared_ptr<BGModelFactory> > BGModelFactoryMap;
+  typedef std::map<std::string,BGModelFactoryPtr> BGModelFactoryMap;
 
   class ViewGtk::PImpl{
   public:
@@ -53,6 +52,7 @@ namespace bgfgview {
       //selectBGModelMenu(),
       //menutoolbuttonSelectBGModelItems(),
       INIT_WIDGET(toolbuttonApplyMaskToImage, refXml),
+      INIT_WIDGET(toolbuttonDumpData, refXml),
       INIT_WIDGET(drawingareaBg, refXml),
       INIT_WIDGET(drawingareaFgMask, refXml),
       INIT_WIDGET(drawingareaImage, refXml),
@@ -67,6 +67,12 @@ namespace bgfgview {
       INIT_WIDGET(buttonBGModelCancel, refXml),
       INIT_WIDGET(buttonBGModelApply, refXml),
       INIT_WIDGET(buttonBGModelAccept, refXml),
+      INIT_WIDGET(filechooserdialogDumpData, refXml),
+      INIT_WIDGET(checkbuttonImgDump, refXml),
+      INIT_WIDGET(checkbuttonBgDump, refXml),
+      INIT_WIDGET(checkbuttonFgMaskDump, refXml),
+      INIT_WIDGET(buttonDumpDataCancel, refXml),
+      INIT_WIDGET(buttonDumpDataAccept, refXml),
       pImpl(new PImpl())
   {
     //main window
@@ -86,6 +92,7 @@ namespace bgfgview {
     buttonBGModelApply->signal_clicked().connect(sigc::mem_fun(this, &ViewGtk::onButtonBGModelApplyClicked));
     buttonBGModelAccept->signal_clicked().connect(sigc::mem_fun(this, &ViewGtk::onButtonBGModelAcceptClicked));
     dialogBGModelSelection->hide();
+
 
     //populate bgmodelF
     //OpenCv FGD
@@ -107,6 +114,12 @@ namespace bgfgview {
 
     //update algorithm selection button
     updateMenutoolbuttonItems();
+
+    //dump data file chooser dialog
+    toolbuttonDumpData->signal_toggled().connect(sigc::mem_fun(this, &ViewGtk::onToolbuttonDumpDataToggled));
+    buttonDumpDataCancel->signal_clicked().connect(sigc::mem_fun(this, &ViewGtk::onButtonDumpDataCancelClicked));  
+    buttonDumpDataAccept->signal_clicked().connect(sigc::mem_fun(this, &ViewGtk::onButtonDumpDataAcceptClicked));
+    filechooserdialogDumpData->hide();
 
   }
 
@@ -205,12 +218,11 @@ namespace bgfgview {
     menutoolbuttonSelectBGModel->set_menu(*selectBGModelMenu);
   }
 
-  void ViewGtk::setBGModel(const BGModelFactory& m){
+  void ViewGtk::setBGModel(BGModelFactoryPtr m){
     IplImage tmpImg(controller.model().getBGImage());
-    CvBGStatModel* newBgModel = m.createModel(&tmpImg);
+    CvBGStatModel* newBgModel = m->createModel(&tmpImg);
     controller.setBGModel(newBgModel);
-    pImpl->bgmodelF["Current"] = 
-      std::tr1::shared_ptr<BGModelFactory>(m.clone());
+    pImpl->bgmodelF["Current"] = m;
   }
 
   void ViewGtk::onMenutoolbuttonSelectBGModelMenuItemClicked(const std::string bgmodelDesc){
@@ -218,7 +230,7 @@ namespace bgfgview {
     BGModelFactoryMap::const_iterator bgmodelIt = 
       pImpl->bgmodelF.find(bgmodelDesc);
     if (bgmodelIt != pImpl->bgmodelF.end()){
-      setBGModel(*(bgmodelIt->second));
+      setBGModel(bgmodelIt->second);
     }
   }
 
@@ -281,6 +293,8 @@ namespace bgfgview {
 	std::string name = row[comboboxBGModelCols.m_col_name];
 	BGModelFactoryMap::const_iterator bgmodelFIt = pImpl->bgmodelF.find(name);
 	
+	
+	
 	// if (bgmodelFIt != pImpl->bgmodelF.end()){
 	//   //cast to get bgmodelF type
 	//   BGModelCvFGDFactory* bgmCvFGDFactoryPtr = dynamic_cast<BGModelCvFGDFactory*>(bgmodelFIt->second.get());
@@ -335,7 +349,7 @@ namespace bgfgview {
 	BGModelFactoryMap::const_iterator bgmodelFIt = pImpl->bgmodelF.find(name);
 	
 	if (bgmodelFIt != pImpl->bgmodelF.end())
-	  setBGModel(*(bgmodelFIt->second));
+	  setBGModel(bgmodelFIt->second);
       }
     }
   }
@@ -385,5 +399,32 @@ namespace bgfgview {
     onButtonBGModelApplyClicked();
     dialogBGModelSelection->hide();
   }
+
+  void ViewGtk::onToolbuttonDumpDataToggled(){
+    bool toggled = toolbuttonDumpData->get_active();
+    filechooserdialogDumpData->set_visible(toggled);
+    //if not active stop dump data via controller
+    if (!toggled)
+      controller.stopDumpData();
+  }
+
+  void ViewGtk::onButtonDumpDataCancelClicked(){
+    filechooserdialogDumpData->hide();
+  }
+
+  void ViewGtk::onButtonDumpDataAcceptClicked(){
+    std::string filename;
+
+    filename = filechooserdialogDumpData->get_filename();
+    //activate dump data via controller
+    controller.startDumpData(filename,
+			     checkbuttonImgDump->get_active(),
+			     checkbuttonBgDump->get_active(),
+			     checkbuttonFgMaskDump->get_active());
+
+    filechooserdialogDumpData->hide();
+  }
+
+  
 
 }//namespace

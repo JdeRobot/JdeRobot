@@ -25,6 +25,7 @@
 #include <string>
 #include <opencv/cvaux.h>
 #include <bgfgfilters/bgfgfilters.h>
+#include <tr1/memory>
 
 namespace bgfgview {
   class BGModelFactory{
@@ -40,6 +41,7 @@ namespace bgfgview {
 
     const std::string description;
   };
+  typedef std::tr1::shared_ptr<BGModelFactory> BGModelFactoryPtr;
 
   class BGModelCvFGDFactory: public BGModelFactory{
   public:

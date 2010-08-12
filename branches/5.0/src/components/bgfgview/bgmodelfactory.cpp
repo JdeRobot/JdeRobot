@@ -117,6 +117,7 @@ namespace bgfgview{
   }
 
   const BGModeStatModelParams BGModelModeFactory::defaultParams = {BGFG_MODE_NFRAMES,//n_frames
+								   BGFG_MODE_LEVELS,
 								   BGFG_MODE_BG_UPDATE_RATE,
 								   BGFG_MODE_FG_UPDATE_RATE,
 								   {BGFG_SEG_OBJ_WITHOUT_HOLES,

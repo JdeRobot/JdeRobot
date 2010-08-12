@@ -45,7 +45,7 @@ namespace bgfgview {
     void drawImage(Gtk::DrawingArea* drawingArea, 
 		   const colorspaces::Image& image);    
 
-    void setBGModel(const BGModelFactory& m);
+    void setBGModel(BGModelFactoryPtr m);
 
     Gtk::Main gtkmain;
     Glib::RefPtr<Gnome::Glade::Xml> refXml;
@@ -56,6 +56,7 @@ namespace bgfgview {
     //Gtk::Menu selectBGModelMenu;
     //std::vector< Glib::RefPtr<Gtk::MenuItem> > menutoolbuttonSelectBGModelItems;
     Widget<Gtk::ToggleToolButton> toolbuttonApplyMaskToImage;
+    Widget<Gtk::ToggleToolButton> toolbuttonDumpData;
     Widget<Gtk::DrawingArea> drawingareaBg;
     Widget<Gtk::DrawingArea> drawingareaFgMask;
     Widget<Gtk::DrawingArea> drawingareaImage;
@@ -66,6 +67,7 @@ namespace bgfgview {
     void onMenutoolbuttonSelectBGModelClicked();
     void updateMenutoolbuttonItems();
     void onMenutoolbuttonSelectBGModelMenuItemClicked(const std::string algDesc);
+    void onToolbuttonDumpDataToggled();
 
     //algorithm selection dialog
     //Tree model columns for comboboxBGModel
@@ -96,6 +98,17 @@ namespace bgfgview {
     void onButtonBGModelCancelClicked();
     void onButtonBGModelApplyClicked();
     void onButtonBGModelAcceptClicked();
+
+    //dump data file chooser dialog
+    Widget<Gtk::FileChooserDialog> filechooserdialogDumpData;
+    Widget<Gtk::CheckButton> checkbuttonImgDump;
+    Widget<Gtk::CheckButton> checkbuttonBgDump;
+    Widget<Gtk::CheckButton> checkbuttonFgMaskDump;
+    Widget<Gtk::Button> buttonDumpDataCancel;
+    Widget<Gtk::Button> buttonDumpDataAccept;
+    void onButtonDumpDataCancelClicked();
+    void onButtonDumpDataAcceptClicked();
+    
 
     class PImpl;
     std::auto_ptr<PImpl> pImpl;

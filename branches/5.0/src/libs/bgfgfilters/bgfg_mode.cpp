@@ -20,6 +20,7 @@
  */
 
 #include "bgfgfilters.h"
+#include <cassert>
 
 static void releaseBGModeStatModel( BGModeStatModel** _model );
 static int updateBGModeStatModel( IplImage* curr_frame,
@@ -50,6 +51,7 @@ createBGModeStatModel( IplImage* first_frame, BGModeStatModelParams* parameters 
   // Initialize parameters:
   if( parameters == NULL ){
     params.n_frames = BGFG_MODE_NFRAMES;
+    params.levels = BGFG_MODE_LEVELS;
     params.bg_update_rate = BGFG_MODE_BG_UPDATE_RATE;
     params.fg_update_rate = BGFG_MODE_FG_UPDATE_RATE;
     params.sg_params.is_obj_without_holes = BGFG_SEG_OBJ_WITHOUT_HOLES;
@@ -72,17 +74,23 @@ createBGModeStatModel( IplImage* first_frame, BGModeStatModelParams* parameters 
   p_model->fg_frame_count = params.fg_update_rate;
 
   // Initialize storage pools:
-  pixel_count = first_frame->width * first_frame->height * sizeof(uchar);
-  buf_size = pixel_count * first_frame->nChannels * params.n_frames;
+  pixel_count = first_frame->width * first_frame->height;
 
-  CV_CALL( p_model->frame_cbuffer = (uchar*)cvAlloc(buf_size) );
-  memset( p_model->frame_cbuffer, 0, buf_size );
-  p_model->cbuffer_idx = 0;
-
-  // buf_size = pixel_count * first_frame->nChannels * sizeof(double);
-  // CV_CALL( p_model->mode = (double*)cvAlloc(buf_size) );
-  // CV_CALL( p_model->std_dev = (double*)cvAlloc(buf_size) );
+  p_model->frame_cbuffer_elemsize = pixel_count * first_frame->nChannels * sizeof(uchar);
+  p_model->frame_cbuffer_size = params.n_frames * p_model->frame_cbuffer_elemsize;
+  p_model->frame_cbuffer_idx = 0;
+  CV_CALL( p_model->frame_cbuffer = (uchar*)cvAlloc(p_model->frame_cbuffer_size) );
+  memset( p_model->frame_cbuffer, 0, p_model->frame_cbuffer_size );
+  p_model->frame_cbuffer_idx = 0;
   
+
+  buf_size = pixel_count * first_frame->nChannels * params.levels * sizeof(uchar);
+  p_model->mode_buffer_elemsize = params.levels * sizeof(uchar);/*each element is the history for a pixel channel*/
+  p_model->mode_buffer_size = p_model->mode_buffer_elemsize * first_frame->nChannels * pixel_count;
+  CV_CALL( p_model->mode_buffer = (uchar*)cvAlloc(p_model->mode_buffer_size) );
+  memset( p_model->mode_buffer, 0, p_model->mode_buffer_size );
+  
+  p_model->to_levels_scale = (params.levels-1.0)/255.0;
 
   // Init temporary images:
   CV_CALL( p_model->foreground = cvCreateImage(cvSize(first_frame->width, first_frame->height),
@@ -139,66 +147,65 @@ int
 updateBGModeStatModel( IplImage* curr_frame, BGModeStatModel*  model ){
   int region_count = 0;
 
+  assert(curr_frame->imageSize == model->background->imageSize);
   if (model->fg_frame_count >= model->params.fg_update_rate){
     model->fg_frame_count = 0;
     //clear fg
     cvZero(model->foreground);
-
+      
     //difference bg - curr_frame. Adaptative threshold
     cvChangeDetection( model->background, curr_frame, model->foreground );//FIXME: just 3 channel support
-
+      
     //segmentation if required
     if (model->params.perform_segmentation)
       region_count = bgfgSegmentation((CvBGStatModel*)model, &model->params.sg_params);
   }
-
+    
   if (model->bg_frame_count >= model->params.bg_update_rate){
     model->bg_frame_count = 0;
     //update model
-    //insert curr_frame in circular buffer
-    int i,j,k;
-    int frame_cbuffer_pixelcluster_step = model->params.n_frames*model->background->nChannels;
-    int frame_cbuffer_cbufferpixel_offset = model->cbuffer_idx*model->background->nChannels;
-    int frame_cbuffer_width_step = model->background->width*frame_cbuffer_pixelcluster_step;
-    
-    // cv::Scalar mode, std_dev;
+      
+    //IplImage *curr_frame_scaled = cvCloneImage(curr_frame);
+    //cvConvertScaleAbs(curr_frame,curr_frame_scaled,model->to_levels_scale,0);
 
-    // //bg and curr_frame have same size
-    // for (i = 0; i < model->background->height; i++){//rows
-    //   uchar* frame_cbuffer_row_p = model->frame_cbuffer + i*frame_cbuffer_width_step;
-    //   uchar* curr_frame_row_p = (uchar*)curr_frame->imageData + i*curr_frame->widthStep;
-    //   uchar* bg_frame_row_p = (uchar*)model->background->imageData + i*model->background->widthStep;
-    //   for (j = 0; j < model->background->width; j++){//cols
-    // 	uchar* pixel_cluster_p = frame_cbuffer_row_p + j*frame_cbuffer_pixelcluster_step;
-    // 	uchar* pixel_to_update_p = pixel_cluster_p + frame_cbuffer_cbufferpixel_offset;//pointer to pixel in circular buffer to update
-    // 	uchar* curr_pixel_p = curr_frame_row_p + j*model->background->nChannels;//pixel from curr_frame
-    // 	//update circular buffer
-    // 	for (k=0; k<model->background->nChannels; k++)
-    // 	  pixel_to_update_p[k] = curr_pixel_p[k];
+    assert(model->frame_cbuffer_elemsize == curr_frame->imageSize);
+    uchar* frameT0_p = model->frame_cbuffer + model->frame_cbuffer_idx*model->frame_cbuffer_elemsize;
+    uchar* frameNew_p = (uchar*)curr_frame->imageData;
+    uchar* bg = (uchar*)model->background->imageData;
+      
+    for (int i=0; i<model->frame_cbuffer_elemsize; i++){//through each pixel channel p0ch0,p0ch1,...,p0chN,..
+      //delete count from frame t0
+      assert(frameT0_p[i] < model->params.levels);
+      uchar* mode_buffer_p = model->mode_buffer + (i*model->mode_buffer_elemsize);
+      if (mode_buffer_p[frameT0_p[i]] > 0)//first n_frames will initialize mode_buffer
+	mode_buffer_p[frameT0_p[i]]--;
 	
-    // 	//calc mode and std dev   
-    // 	cv::Mat pixel_cluster(1, model->params.n_frames, 
-    // 			      CV_MAKETYPE(CV_8U,model->background->nChannels),
-    // 			      pixel_cluster_p);/*cv::Mat with pixel cluster with last n frames*/
-    // 	cv::modeStdDev(pixel_cluster, mode, std_dev);
+      //update frame_cbuffer with new frame
+      frameT0_p[i] = round((double)frameNew_p[i] * model->to_levels_scale);
+      if (frameT0_p[i] < 0)
+	frameT0_p[i] = 0;
+      else if (frameT0_p[i] > (model->params.levels-1))
+	frameT0_p[i] = model->params.levels-1;
+
+      //update count for new frame
+      assert(frameT0_p[i] < model->params.levels);
+      assert(mode_buffer_p[frameT0_p[i]] < 255);
+      mode_buffer_p[frameT0_p[i]]++;
 	
-    // 	int pixel_offset = j*model->background->nChannels + (i * model->background->width * model->background->nChannels);
-    // 	// double* mode_p = model->mode + pixel_offset;
-    // 	// double* std_dev_p = model->std_dev + pixel_offset;
-    // 	// uchar* bg_p = bg_frame_row_p + j*model->background->nChannels;
-    // 	// /*copy mode and std dev to each channel*/
-	// for (k=0; k<model->background->nChannels; k++){
-	//   mode_p[k] = mode[k];
-	//   std_dev_p[k] = std_dev[k];
-	//   bg_p[k] = cv::saturate_cast<uchar>(mode[k]);//FIXME: use std dev correction
-	// }
-    //  }
-    //}
-    //update circular buffer idx
-    if (model->cbuffer_idx < model->params.n_frames)
-      model->cbuffer_idx++;
-    else
-      model->cbuffer_idx = 0;
+      //get mode: position of max value
+      cv::Mat mode_mat(1,model->mode_buffer_elemsize,CV_8UC1,mode_buffer_p);
+      cv::Point mode_pos;
+      cv::minMaxLoc(mode_mat,0,0,0,&mode_pos);//y:rows,x:cols -> x=value in range [0..levels-1]
+	
+      //update background
+      double v = round((double)mode_pos.x / model->to_levels_scale);
+      bg[i] = (uchar)v;
+    }
+      
+    //update frame circular buffer idx
+    model->frame_cbuffer_idx++;
+    if ((model->frame_cbuffer_idx % model->params.n_frames) == 0)
+      model->frame_cbuffer_idx = 0;
   }
 
   //update counters

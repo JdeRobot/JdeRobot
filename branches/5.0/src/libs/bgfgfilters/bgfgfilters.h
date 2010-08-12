@@ -82,6 +82,7 @@ CVAPI(CvBGStatModel*) createBGMeanStatModel( IplImage* first_frame,
 
 /* BG mode based API*/
 #define BGFG_MODE_NFRAMES 30
+#define BGFG_MODE_LEVELS 64
 #define BGFG_MODE_BG_UPDATE_RATE 25
 #define BGFG_MODE_FG_UPDATE_RATE 1
 
@@ -89,6 +90,7 @@ CVAPI(CvBGStatModel*) createBGMeanStatModel( IplImage* first_frame,
 typedef struct BGModeStatModelParams
 {
   int n_frames;/*number of frames to calculate mode*/
+  int levels;/*quantization per levels color channel*/
   int bg_update_rate;/*number of frames every bg is updated. [1..]*/
   int fg_update_rate;/*number of frames every fg mask is updated. if 0 fg mask is never updated [0..]*/
   BGFGSegmentationParams sg_params;
@@ -102,7 +104,13 @@ typedef struct BGModeStatModel
   int bg_frame_count;/*count updated bg frames*/
   int fg_frame_count;/*count updated fg frames*/
   uchar* frame_cbuffer;/*circular frame buffer*/
-  int cbuffer_idx;/*circular buffer idx*/
+  int frame_cbuffer_idx;/*circular buffer idx*/
+  int frame_cbuffer_elemsize;
+  int frame_cbuffer_size;
+  uchar* mode_buffer;
+  int mode_buffer_elemsize;
+  int mode_buffer_size;
+  double to_levels_scale;/*scale factor to adjust from 0..255 to 0..levels-1*/
   BGModeStatModelParams params;
 }BGModeStatModel;
 

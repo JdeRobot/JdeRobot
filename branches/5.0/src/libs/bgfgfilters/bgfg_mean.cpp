@@ -218,9 +218,8 @@ updateBGMeanStatModel( IplImage* curr_frame, BGMeanStatModel*  model ){
       }
     }
     //update circular buffer idx
-    if (model->cbuffer_idx < model->params.n_frames)
-      model->cbuffer_idx++;
-    else
+    model->cbuffer_idx++;
+    if ((model->cbuffer_idx % model->params.n_frames) == 0)
       model->cbuffer_idx = 0;
   }
 

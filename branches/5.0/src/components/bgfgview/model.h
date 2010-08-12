@@ -27,6 +27,7 @@
 #include <colorspaces/colorspacesmm.h>
 #include <gbxutilacfr/tracer.h>
 #include <opencv/cvaux.h>
+#include <fstream>
 
 namespace bgfgview {
   class Model : public jderobotutil::Subject{
@@ -37,6 +38,12 @@ namespace bgfgview {
     /*model input data*/
     void updateBGModel(const colorspaces::Image& img) throw();
 
+
+    bool startDumpData(std::string filename="modeldata.dump", 
+		       bool dumpDataImg=true, 
+		       bool dumpDataBg=true, 
+		       bool dumpDataFgMask=false);
+    void stopDumpData();
 
     const colorspaces::Image& getCurrentImage() const throw() { return currentImage; }
 
@@ -61,6 +68,16 @@ namespace bgfgview {
     colorspaces::Image fgMaskImage;
     jderobotutil::IpsCounter bg_model_ips;
     CvBGStatModel* bg_model;
+    bool dumpDataOn;
+    bool dumpDataImg;
+    bool dumpDataBg;
+    bool dumpDataFgMask;
+    std::string dumpDataFilename;
+    int dumpDataFrameCounter;
+    std::ofstream ofDumpData;
+    std::ofstream ofDumpDataImg;
+    std::ofstream ofDumpDataBg;
+    std::ofstream ofDumpDataFgMask;
   };
 }//namespace
 #endif /*BGFGVIEW_MODEL_H*/

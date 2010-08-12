@@ -47,6 +47,12 @@ namespace bgfgview {
     void setImage(const colorspaces::Image &img) throw() { _model.updateBGModel(img); }
     void setBGModel(CvBGStatModel* newBGModel) throw() { _model.setBGModel(newBGModel); }
 
+    bool startDumpData(std::string filename="modeldata.dump", 
+		       bool dumpDataImg=true, 
+		       bool dumpDataBg=true, 
+		       bool dumpDataFgMask=false) { _model.startDumpData(filename,dumpDataImg,dumpDataBg,dumpDataFgMask); }
+    void stopDumpData() { _model.stopDumpData(); }
+
 
     const Model& model() const throw() { return _model; }    
     gbxutilacfr::Tracer& tracer() { return _tracer; };
