@@ -108,6 +108,19 @@ namespace bgfgview {
     static const BGModeStatModelParams defaultParams;
   };
 
+  class BGModelCBFactory: public BGModelFactory{
+  public:
+    BGModelCBFactory(const std::string desc = std::string("CB"), 
+		     const BGCBStatModelParams& params = BGModelCBFactory::defaultParams);
+    virtual ~BGModelCBFactory() {}
+
+    virtual BGModelCBFactory* clone() const;
+    virtual CvBGStatModel* createModel(IplImage* firstFrame) const;
+
+    const BGCBStatModelParams params;
+    static const BGCBStatModelParams defaultParams;
+  };
+
 }//namespace
 
 #endif //BGFGVIEW_BGMODEL_H

@@ -111,6 +111,9 @@ namespace bgfgview {
     //Mode
     bgmF = new BGModelModeFactory();
     pImpl->bgmodelF.insert(make_pair(bgmF->description,bgmF));
+    //CB
+    bgmF = new BGModelCBFactory();
+    pImpl->bgmodelF.insert(make_pair(bgmF->description,bgmF));
 
     //update algorithm selection button
     updateMenutoolbuttonItems();

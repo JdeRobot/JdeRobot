@@ -138,4 +138,26 @@ namespace bgfgview{
     return createBGModeStatModel(firstFrame,&tmpParams);
   }
 
+  const BGCBStatModelParams BGModelCBFactory::defaultParams = {BGFG_CB_ROTATION_RATE,
+							       BGFG_CB_BG_UPDATE_RATE,
+							       BGFG_CB_FG_UPDATE_RATE,
+							       {BGFG_SEG_OBJ_WITHOUT_HOLES,
+								BGFG_SEG_PERFORM_MORPH,
+								BGFG_SEG_MINAREA},//segmentation params
+							       1 //perform segmentation
+  };
+  
+  BGModelCBFactory::BGModelCBFactory(const std::string desc, const BGCBStatModelParams& params)
+    :BGModelFactory(desc), params(params) {}
+
+  BGModelCBFactory* BGModelCBFactory::clone() const{
+    return new BGModelCBFactory(*this);
+  }
+
+  CvBGStatModel* BGModelCBFactory::createModel(IplImage* firstFrame) const{
+    BGCBStatModelParams tmpParams(params);//params is const
+    return createBGCBStatModel(firstFrame,&tmpParams);
+  }
+
+
 }//namespace
