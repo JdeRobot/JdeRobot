@@ -24,60 +24,59 @@ writeImgSeq <- function(imgSeq, conn){
   writeImg(as.vector(imgSeq),conn)
 }
 
-calcIdealBGMean <- function(conn){
-  imgDumpDataIdx <- 1 #row in dump info file for img data
+calcIdealBGMean <- function(conn,nimage,nrow,ncol,nchannel){
   if (is.character(conn))
-    myconn <- file(conn,"r")
+    myconn <- file(conn,"rb")
   else
     myconn <- conn
-  
-  datafiles <- scan(myconn,list(0,0,0,0,""))
-  close(myconn)
-  
-  nframes <- datafiles[[1]][imgDumpDataIdx]
-  rows <- datafiles[[2]][imgDumpDataIdx]
-  cols <- datafiles[[3]][imgDumpDataIdx]
-  channels <- datafiles[[4]][imgDumpDataIdx]
-  filename <- datafiles[[5]][imgDumpDataIdx]
-  imgsize <- rows*cols*channels
-  
-  imgSeqFile<-file(filename,"rb")
 
-  imgMean <- array(0.0,dim=c(1,imgsize))
-  for (i in 1:nframes)
-    imgMean<-imgMean+(readImg(imgSeqFile,imgsize)/nframes)
+  imgsize<-nrow*ncol*nchannel
+  npixel<-nrow*ncol
 
-  close(imgSeqFile)
+  imgMean<-vector("numeric",imgsize)
+  
+  for (i in 1:nimage)
+    imgMean<-imgMean+(readImg(myconn,imgsize)/nimage)
+
   as.integer(round(imgMean))
 }
 
-calcIdealBGMode <- function(conn,levels){
-  imgDumpDataIdx <- 1 #row in dump info file for img data
+calcIdealBGMeanT <- function(conn,nimage,nrow,ncol,nchannel){
   if (is.character(conn))
-    myconn <- file(conn,"r")
+    myconn <- file(conn,"rb")
   else
     myconn <- conn
-  
-  datafiles <- scan(myconn,list(0,0,0,0,""))
-  close(myconn)
-  
-  nframes <- datafiles[[1]][imgDumpDataIdx]
-  rows <- datafiles[[2]][imgDumpDataIdx]
-  cols <- datafiles[[3]][imgDumpDataIdx]
-  channels <- datafiles[[4]][imgDumpDataIdx]
-  filename <- datafiles[[5]][imgDumpDataIdx]
-  imgsize <- rows*cols*channels
 
-  imgSeqFile<-file(filename,"rb")
-  
-  imgMode<-array(0,dim=c(levels,imgsize))
-  for (i in 1:nframes){
+  pxDataSize<-nimage*nchannel
+  imgsize<-nrow*ncol*nchannel
+  npixel<-nrow*ncol
+
+  imgMean<-NULL
+  for (i in 1:npixel){
+    pxData<-matrix(readBin(myconn,integer(),n=pxDataSize,size=1,signed=F),ncol=nchannel)
+    pxMean<-apply(pxData,2,mean)
+    imgMeanOffset<-((i-1)*nchannel+1)
+    imgMean<-append(imgMean,pxMean)
+  }
+  as.integer(round(imgMean))
+}
+
+calcIdealBGMode <- function(conn,nimage,nrow,ncol,nchannel,levels){
+  if (is.character(conn))
+    myconn <- file(conn,"rb")
+  else
+    myconn <- conn
+
+  imgsize<-nrow*ncol*nchannel
+  npixel<-nrow*ncol
+
+  imgMode<-array(0,dim=c(levels,imgsize)) #each col has level entries to count every occurence
+  for (i in 1:nimage){
     #read image and adjust values to [0..levels-1]
-    img<-round(readImg(imgSeqFile,imgsize)*((levels-1)/255))+1
+    img<-round(readImg(myconn,imgsize)*((levels-1)/255))+1
+    #indexing [[level,pixel]]
     imgMode[cbind(img,seq(imgsize))] <- imgMode[cbind(img,seq(imgsize))] + 1
   }
-  
-  close(imgSeqFile)
   
   maxAndAdjust<-function(v){#get maximun and adjust to range [0..255]
     (which.max(v)-1)*(255/(levels-1))
@@ -85,30 +84,86 @@ calcIdealBGMode <- function(conn,levels){
   apply(imgMode,2,maxAndAdjust)
 }
 
-calcIdealBGClustering <- function(conn,radius){
-  imgDumpDataIdx <- 1 #row in dump info file for img data
+calcIdealBGClustering <- function(conn,nimage,nrow,ncol,nchannel,radius){
   if (is.character(conn))
-    myconn <- file(conn,"r")
+    myconn <- file(conn,"rb")
   else
     myconn <- conn
-  
-  datafiles <- scan(myconn,list(0,0,0,0,""))
-  close(myconn)
-  
-  nframes <- datafiles[[1]][imgDumpDataIdx]
-  rows <- datafiles[[2]][imgDumpDataIdx]
-  cols <- datafiles[[3]][imgDumpDataIdx]
-  channels <- datafiles[[4]][imgDumpDataIdx]
-  filename <- datafiles[[5]][imgDumpDataIdx]
-  imgsize <- rows*cols*channels
 
-  imgSeq <-readImgSeq(filename,nframes,imgsize)
+  pxDataSize<-nimage*nchannel
+  imgsize<-nrow*ncol*nchannel
+  npixel<-nrow*ncol
 
-  imgClust <- NULL
-  for (i in 1:rows*cols){#pixel index
-    pData <- t(imgSeq[i:(i+channels-1),]) #cols RGB
-    cl <- qtclust(pData,radius=radius)
-    imgClust <-append(imgClust,cl@centers[1,])
+  imgClust<-NULL
+  centers<-NULL
+  for (i in 1:npixel){#pixel index
+    #read pixel data, each channel in a column
+    pxData<-matrix(readBin(myconn,integer(),n=pxDataSize,size=1,signed=F),ncol=nchannel)
+    cl <- try(qtclust(pxData,radius=radius),TRUE)
+    #cl<-try(kcca(pData,2),TRUE)
+    if (isS4(cl)){#qtclust returned a solution
+      centers<-cl@centers[1,]
+    }else{#just one, so center is the mean
+      centers<-apply(pxData,2,mean)
+    }
+    imgClust<-append(imgClust,centers)
   }
   as.integer(round(imgClust))
 }
+
+# image is a matrix with dim height x (width*nchannels)
+# data is P0ch0P0ch1...P0chN...
+# return a list with an matrix per channel
+splitChannels <- function(img,nchannels){
+  channelList<-NULL
+  ncol<-dim(img)[2]
+  for (i in 1:nchannels){
+    channelList<-c(channelList,list(img[,seq(i,ncol,by=nchannels)]))
+  }
+  channelList
+}
+
+# list contains each channel in an element
+# return an image with channels interleaved P0ch0P0ch1...P0chN..
+mixChannels <- function(list){
+  nchannels<-length(list)
+  nrow<-dim(list[[1]])[1]
+  ncol<-dim(list[[1]])[2]*nchannels
+  img<-matrix(0,nrow,ncol)
+  for (i in 1:nchannels){
+    img[,seq(i,ncol,by=nchannels)]<-list[[i]]
+  }
+  img
+}
+
+
+# image is a matrix with dim height x (width x nchannels)
+# data is P0ch0P0ch1...P0chN... in range 0..255
+# return a matrix where channels have been fused to get one element so height x width
+# channel data is adjusted to the range 0..levels-1 and then fused
+# ch0+(ch1+levels)+..+(chN+levels*N)
+#fuseChannels <- function(img, nchannels, levels){
+#  imgAdj<-round(img*((levels-1)/255))
+#  channelList<-splitChannels(img,nchannels)
+#  fusedImg<-array(0,dim=dim(channelList[[1]]))
+#  for (i in 1:nchannels){
+#    fusedImg<-fusedImg+(channelList[[i]]*(levels^(i-1)))
+#  }
+#  fusedImg
+#}
+
+# image is  a matrix with dim height x width
+# data is P0P1... in range 0..levels-1
+# return the reviously fused image with data in range 0..255
+#unfuseChannels <- function(img, nchannels, levels){
+#  channelList<-NULL
+  
+#  channelList<-splitChannels(img,nchannels)
+#  fusedImg<-array(0,dim=dim(channelList[[1]]))
+#  for (i in 1:nchannels){
+#    fusedImg<-fusedImg+(channelList[[i]]*(levels^(i-1)))
+#  }
+#  fusedImg
+#}
+
+

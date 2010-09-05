@@ -20,70 +20,73 @@
  */
 
 #include "bgfgfilters.h"
-#include <iostream>
 
-//fw declarations
-static void releaseBGExpStatModel( BGExpStatModel** _model );
-static int updateBGExpStatModel( IplImage* curr_frame,
-				 BGExpStatModel*  model );
+static void releaseBGCBStatModel( BGCBStatModel** _model );
+static int updateBGCBStatModel( IplImage* curr_frame,
+				BGCBStatModel*  model );
 
-// Function createBGExpStatModel initializes foreground detection process
+// Function createBGCBStatModel initializes foreground detection process
 // parameters:
 //      first_frame - frame from video sequence
 //      parameters  - (optional) if NULL default parameters of the algorithm will be used
-//      p_model     - pointer to BGExpStatModel structure
+//      p_model     - pointer to CvFGDStatModel structure
 CV_IMPL CvBGStatModel*
-createBGExpStatModel( IplImage* first_frame, BGExpStatModelParams* parameters ){
-  BGExpStatModel* p_model = 0;
-    
-  CV_FUNCNAME( "createBGExpStatModel" );
-
+createBGCBStatModel( IplImage* first_frame, BGCBStatModelParams* parameters ){
+  BGCBStatModel* p_model = 0;
+  
+  CV_FUNCNAME( "createBGCBStatModel" );
+  
   __BEGIN__;
-
-  BGExpStatModelParams params;
-
+  
+  int i, j, k, pixel_count, buf_size;
+  BGCBStatModelParams params;
+  
   if( !CV_IS_IMAGE(first_frame) )
     CV_ERROR( CV_StsBadArg, "Invalid or NULL first_frame parameter" );
   
   if (first_frame->nChannels != 3)
     CV_ERROR( CV_StsBadArg, "first_frame must have 3 color channels" );
-
-
+  
   // Initialize parameters:
   if( parameters == NULL ){
-    params.alpha = BGFG_EXP_ALPHA;
-    params.bg_update_rate = BGFG_EXP_BG_UPDATE_RATE;
-    params.fg_update_rate = BGFG_EXP_FG_UPDATE_RATE;
+    params.cb_rotation_rate = BGFG_CB_ROTATION_RATE;
+    params.bg_update_rate = BGFG_CB_BG_UPDATE_RATE;
+    params.fg_update_rate = BGFG_CB_FG_UPDATE_RATE;
     params.sg_params.is_obj_without_holes = BGFG_SEG_OBJ_WITHOUT_HOLES;
     params.sg_params.perform_morphing = BGFG_SEG_PERFORM_MORPH;
     params.sg_params.minArea = BGFG_SEG_MINAREA;
     params.perform_segmentation = 1;
-  }else
+  }else{
     params = *parameters;
+  }
 
-  std::cerr << "Params: alpha=" << params.alpha << 
-    ", perform segmentation=" << params.perform_segmentation << std::endl;
-
-  CV_CALL( p_model = (BGExpStatModel*)cvAlloc( sizeof(*p_model) ));
+  CV_CALL( p_model = (BGCBStatModel*)cvAlloc( sizeof(*p_model) ));
   memset( p_model, 0, sizeof(*p_model) );
-  p_model->type = BG_MODEL_EXP;
-  p_model->release = (CvReleaseBGStatModel)releaseBGExpStatModel;
-  p_model->update = (CvUpdateBGStatModel)updateBGExpStatModel;
+  p_model->type = BG_MODEL_CB;
+  p_model->release = (CvReleaseBGStatModel)releaseBGCBStatModel;
+  p_model->update = (CvUpdateBGStatModel)updateBGCBStatModel;;
   p_model->params = params;
-  
-  //init frame counters. Max value so first call will inialize bg & fg: FIXME: fast initialization??
+
+  //init frame counters
+  //Max value so first call will inialize bg & fg: FIXME: fast initialization??
   p_model->bg_frame_count = params.bg_update_rate;
   p_model->fg_frame_count = params.fg_update_rate;
 
+  // Initialize storage pools:
   // Init temporary images:
   CV_CALL( p_model->foreground = cvCreateImage(cvSize(first_frame->width, first_frame->height),
 					       IPL_DEPTH_8U, 1));
   CV_CALL( p_model->background = cvCloneImage(first_frame));
   CV_CALL( p_model->storage = cvCreateMemStorage(0));
 
+  //Init codebook models
+  p_model->cb_rotation_count = 0;
+  CV_CALL( p_model->active_cb = cvCreateBGCodeBookModel());
+  CV_CALL( p_model->updating_cb = cvCreateBGCodeBookModel());
+  
 
   __END__;
-
+  
   if( cvGetErrStatus() < 0 ){
     CvBGStatModel* base_ptr = (CvBGStatModel*)p_model;
     
@@ -98,64 +101,73 @@ createBGExpStatModel( IplImage* first_frame, BGExpStatModelParams* parameters ){
 }
 
 void
-releaseBGExpStatModel( BGExpStatModel** _model )
-{
-    CV_FUNCNAME( "releaseBGExpStatModel" );
-
-    __BEGIN__;
+releaseBGCBStatModel( BGCBStatModel** _model ){
+  CV_FUNCNAME( "releaseBGCBStatModel" );
+  
+  __BEGIN__;
+  
+  if( !_model )
+    CV_ERROR( CV_StsNullPtr, "" );
+  
+  if( *_model ){
+    BGCBStatModel* model = *_model;
     
-    if( !_model )
-        CV_ERROR( CV_StsNullPtr, "" );
-
-    if( *_model ){
-      BGExpStatModel* model = *_model;
-
-      cvReleaseImage( &model->foreground );
-      cvReleaseImage( &model->background );
-      cvReleaseMemStorage(&model->storage);
-      cvFree( _model );
-    }
-
-    __END__;
+    cvReleaseImage( &model->foreground );
+    cvReleaseImage( &model->background );
+    cvReleaseMemStorage(&model->storage);
+    cvReleaseBGCodeBookModel(&model->active_cb);
+    cvReleaseBGCodeBookModel(&model->updating_cb);
+    cvFree( _model );
+  }
+  
+  __END__;
 }
 
-// Function updateBGExpStatModel updates statistical model and returns number of foreground regions
+
+// Function updateBGCBStatModel updates model and returns number of foreground regions
 // parameters:
 //      curr_frame  - current frame from video sequence
-//      p_model     - pointer to BGExpStatModel structure
+//      p_model     - pointer to BGCBStatModel structure
 int
-updateBGExpStatModel( IplImage* curr_frame, BGExpStatModel*  model ){
+updateBGCBStatModel( IplImage* curr_frame, BGCBStatModel*  model ){
   int region_count = 0;
-  
+
+  if (model->cb_rotation_count >= model->params.cb_rotation_rate){
+    model->cb_rotation_count=0;
+
+    //clear stale from active
+    cvBGCodeBookClearStale(model->active_cb,model->active_cb->t/2);
+
+    //switch codebooks
+    CvBGCodeBookModel* tmp_cb = model->active_cb;
+    model->active_cb = model->updating_cb;
+    model->updating_cb = tmp_cb;
+  }
+
   if (model->bg_frame_count >= model->params.bg_update_rate){
-    model->bg_frame_count = 0;
+    model->bg_frame_count = 0;//reset counter
     //update model
-    cv::Mat curr(curr_frame);
-    cv::Mat bg(model->background);
-    cv::addWeighted(curr, model->params.alpha, 
-		    bg, (1.0-model->params.alpha), 
-		    0, bg);
+    cvBGCodeBookUpdate(model->updating_cb, curr_frame);
   }
 
   if (model->fg_frame_count >= model->params.fg_update_rate){
-    model->fg_frame_count = 0;
+    model->fg_frame_count = 0;//reset counter
     //clear fg
     cvZero(model->foreground);
 
-    //difference bg - curr_frame. Adaptative threshold
-    cvChangeDetection( model->background, curr_frame, model->foreground );
+    //difference
+    cvBGCodeBookDiff(model->active_cb, curr_frame, model->foreground);
 
     //segmentation if required
     if (model->params.perform_segmentation)
       region_count = bgfgSegmentation((CvBGStatModel*)model, &model->params.sg_params);
   }
 
-
   //update counters
   model->fg_frame_count++;
   model->bg_frame_count++;
+  model->cb_rotation_count++;
 
   return region_count;
 }
-
 

@@ -32,6 +32,7 @@
 #define BG_MODEL_MEAN 3
 #define BG_MODEL_MODE 4
 #define BG_MODEL_EXP 5
+#define BG_MODEL_CB 6
 
 /* BG/FG Segmentation API*/
 
@@ -143,5 +144,38 @@ typedef struct BGExpStatModel
 
 CVAPI(CvBGStatModel*) createBGExpStatModel( IplImage* first_frame,
 					    BGExpStatModelParams* parameters CV_DEFAULT(NULL));
+
+
+
+/* BG cb based API*/
+#define BGFG_CB_ROTATION_RATE 300
+#define BGFG_CB_BG_UPDATE_RATE 25
+#define BGFG_CB_FG_UPDATE_RATE 1
+
+
+typedef struct BGCBStatModelParams
+{
+  int cb_rotation_rate;/*number of frames between cb rotation*/
+  int bg_update_rate;/*number of frames every bg is updated. [1..]*/
+  int fg_update_rate;/*number of frames every fg mask is updated. if 0 fg mask is never updated [0..]*/
+  BGFGSegmentationParams sg_params;
+  int perform_segmentation;
+}BGCBStatModelParams;
+
+typedef struct BGCBStatModel
+{
+  CV_BG_STAT_MODEL_FIELDS();
+  int pixel_count;/*number of pixels*/
+  int cb_rotation_count;/*count frames using codebook*/
+  int bg_frame_count;/*count updated bg frames*/
+  int fg_frame_count;/*count updated fg frames*/
+  CvBGCodeBookModel* active_cb;
+  CvBGCodeBookModel* updating_cb;
+  BGCBStatModelParams params;
+}BGCBStatModel;
+
+CVAPI(CvBGStatModel*) createBGCBStatModel( IplImage* first_frame,
+					   BGCBStatModelParams* parameters CV_DEFAULT(NULL));
+
 
 #endif //BGFGFILTER_H
