@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef BGFGVIEW_CONTROLLER_H
-#define BGFGVIEW_CONTROLLER_H
+#ifndef BGFGLAB_CONTROLLER_H
+#define BGFGLAB_CONTROLLER_H
 #include <vector>
 #include <gbxutilacfr/tracer.h>
 #include <jderobotutil/observer.h>
@@ -30,7 +30,7 @@
 
 //View and Controller defined here to avoid circular dependencies
 
-namespace bgfgview {
+namespace bgfglab {
   class View;//forward declaration
   typedef std::tr1::shared_ptr<View> ViewPtr;
 
@@ -74,4 +74,4 @@ namespace bgfgview {
   };
 } /*namespace*/
 
-#endif /*BGFGVIEW_CONTROLLER_H*/
+#endif /*BGFGLAB_CONTROLLER_H*/

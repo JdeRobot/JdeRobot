@@ -31,8 +31,8 @@
 #include "viewgtk.h"
 #include "model.h"
 
-namespace bgfgview {
-  const std::string gladepath = std::string(GLADE_DIR) + std::string("/bgfgview.glade");
+namespace bgfglab {
+  const std::string gladepath = std::string(GLADE_DIR) + std::string("/bgfglab.glade");
 
   typedef std::map<std::string,BGModelFactoryPtr> BGModelFactoryMap;
 
@@ -141,7 +141,7 @@ namespace bgfgview {
 
     mainwindow->resize(1, 1);
 
-    //FIXME: gui use bgfgview thread, we have to move this to another thread
+    //FIXME: gui use bgfglab thread, we have to move this to another thread
     while (gtkmain.events_pending())
       gtkmain.iteration();
   }

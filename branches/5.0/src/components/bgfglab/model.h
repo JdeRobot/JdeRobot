@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef BGFGVIEW_MODEL_H
-#define BGFGVIEW_MODEL_H
+#ifndef BGFGLAB_MODEL_H
+#define BGFGLAB_MODEL_H
 
 #include <jderobotutil/observer.h>
 #include <jderobotutil/time.h>
@@ -29,7 +29,7 @@
 #include <opencv/cvaux.h>
 #include <fstream>
 
-namespace bgfgview {
+namespace bgfglab {
   class Model : public jderobotutil::Subject{
   public:
     Model(gbxutilacfr::Tracer& tracer, const colorspaces::Image& initialImg) throw();
@@ -64,8 +64,8 @@ namespace bgfgview {
   private:
     gbxutilacfr::Tracer& _tracer;
     colorspaces::Image currentImage;
-    colorspaces::Image bgImage;
-    colorspaces::Image fgMaskImage;
+    colorspaces::ImageRGB888 bgImage;
+    colorspaces::ImageGRAY8 fgMaskImage;
     jderobotutil::IpsCounter bg_model_ips;
     CvBGStatModel* bg_model;
     bool dumpDataOn;
@@ -80,4 +80,4 @@ namespace bgfgview {
     std::ofstream ofDumpDataFgMask;
   };
 }//namespace
-#endif /*BGFGVIEW_MODEL_H*/
+#endif /*BGFGLAB_MODEL_H*/

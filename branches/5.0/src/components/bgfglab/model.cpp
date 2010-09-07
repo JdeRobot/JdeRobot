@@ -24,7 +24,7 @@
 #include <assert.h>
 #include <iostream>
 
-namespace bgfgview {
+namespace bgfglab {
   const std::string imgdumpSuffix = ".imgdump";
   const std::string bgdumpSuffix = ".bgdump";
   const std::string fgmaskdumpSuffix = ".fgmaskdump";
@@ -52,11 +52,13 @@ namespace bgfgview {
     return stream;
   }
 
-  Model::Model(gbxutilacfr::Tracer& tracer, const colorspaces::Image& initialImg) throw ()
-    : _tracer(tracer), currentImage(initialImg.clone()), bgImage(currentImage), 
+  Model::Model(gbxutilacfr::Tracer& tracer, 
+	       const colorspaces::Image& initialImg) throw ()
+    : _tracer(tracer), 
+      currentImage(initialImg.clone()), 
+      bgImage(currentImage), 
       fgMaskImage(initialImg.width, 
-		  initialImg.height,
-		  colorspaces::ImageGRAY8::FORMAT_GRAY8),
+		  initialImg.height),
       bg_model_ips(),
       bg_model(0) {}
 
@@ -70,20 +72,23 @@ namespace bgfgview {
   void Model::updateBGModel(const colorspaces::Image& img) throw () {
     currentImage = img.clone();//FIXME: avoid copy
     if (bg_model != 0) {
-      IplImage tmpImg(currentImage);
+      //working in hsv colorspace
+      colorspaces::ImageHSV888 hsvImg(currentImage);
+      IplImage tmpImg(hsvImg);
       cvUpdateBGStatModel(&tmpImg, bg_model);
       /*data isn't copied*/
-      bgImage = colorspaces::Image(cv::Mat(bg_model->background), 
-				   colorspaces::ImageRGB888::FORMAT_RGB888);
+      colorspaces::Image hsvBG(cv::Mat(bg_model->background), 
+			       colorspaces::ImageHSV888::FORMAT_HSV888);
+      hsvBG.convert(bgImage);
       fgMaskImage = colorspaces::Image(cv::Mat(bg_model->foreground), 
 				       colorspaces::ImageGRAY8::FORMAT_GRAY8);
 
       if (ofDumpData.is_open()){//dump data
 	dumpDataFrameCounter++;
 	if (ofDumpDataImg.is_open())
-	  ofDumpDataImg << currentImage;//operator<< defined above
+	  ofDumpDataImg << hsvImg;//operator<< defined above
 	if (ofDumpDataBg.is_open())
-	  ofDumpDataBg << bgImage;
+	  ofDumpDataBg << hsvBG;
 	if (ofDumpDataFgMask.is_open())
 	  ofDumpDataFgMask << fgMaskImage;
       }

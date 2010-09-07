@@ -19,33 +19,34 @@
  *
  */
 
+#include <jderobot/image.h>
+#include <jderobotice/context.h>
+#include <jderobotice/subsystemthread.h>
+#include <colorspaces/colorspacesmm.h>
+#include <memory>
+#include "model.h"
 #include "controller.h"
 
-namespace bgfgview {
-  class Controller::PImpl{
+namespace bgfglab {
+  class MainThread: public jderobotice::SubsystemThread {
   public:
-    PImpl()
-      : running(true) {}
-    bool running;
+    MainThread(const jderobotice::Context &context);
+  private:
+    virtual void initialize();
+    virtual void work();
+    virtual void finalize();
+    
+    //copy image to local variable
+    void getImage();
+
+    //imageprovider interface
+    jderobot::ImageProviderPrx imagePrx;
+    colorspaces::Image::FormatPtr fmt;
+
+    //context within we are running
+    jderobotice::Context context;
+
+    std::auto_ptr<Model> model;//data container
+    std::auto_ptr<Controller> controller;
   };
-
-  Controller::Controller(gbxutilacfr::Tracer& tracer, Model &m)
-    : _tracer(tracer), _model(m), _views(), pImpl(new PImpl()) {}
-
-  Controller::~Controller() {
-    std::vector<ViewPtr>::iterator v_it;
-    for (v_it = _views.begin();
-	 v_it != _views.end(); v_it++)
-      _model.deleteObserver(*v_it);//jderobotutil::ObserverPtr(view));
-  }
-
-  void Controller::addView(ViewPtr v) throw(){
-    _views.push_back(v);//FIXME: check for duplicated views!?
-    _model.addObserver(v);
-  }
-
-  void Controller::exit() throw(){
-    pImpl->running = false;
-  }
-} /*namespace*/
-
+}

@@ -21,7 +21,7 @@
 
 #include "bgmodelfactory.h"
 
-namespace bgfgview{
+namespace bgfglab{
   BGModelFactory::BGModelFactory(const std::string desc)
     :description(desc) {}
 

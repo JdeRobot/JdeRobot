@@ -19,34 +19,38 @@
  *
  */
 
-#include <jderobot/image.h>
-#include <jderobotice/context.h>
-#include <jderobotice/subsystemthread.h>
-#include <colorspaces/colorspacesmm.h>
-#include <memory>
-#include "model.h"
-#include "controller.h"
 
-namespace bgfgview {
-  class MainThread: public jderobotice::SubsystemThread {
+#include <jderobotice/component.h>
+#include <jderobotice/application.h>
+#include "mainthread.h"
+
+namespace bgfglab{
+  class Component: public jderobotice::Component{
   public:
-    MainThread(const jderobotice::Context &context);
+    Component()
+      : jderobotice::Component("BGFGlab") {}
+
+    virtual void start() {
+      mainThread = new MainThread( context() );
+      mainThread->start();
+    }
+
+    virtual void stop() {
+      context().tracer().debug( "stopping main thread");
+      gbxiceutilacfr::stopAndJoin( mainThread );
+      context().tracer().debug( "stopped main thread");
+      
+      mainThread = 0;
+    }
   private:
-    virtual void initialize();
-    virtual void work();
-    virtual void finalize();
-    
-    //copy image to local variable
-    void getImage();
-
-    //imageprovider interface
-    jderobot::ImageProviderPrx imagePrx;
-    colorspaces::Image::FormatPtr fmt;
-
-    //context within we are running
-    jderobotice::Context context;
-
-    std::auto_ptr<Model> model;//data container
-    std::auto_ptr<Controller> controller;
+    gbxiceutilacfr::ThreadPtr mainThread;
   };
+}
+
+
+int main(int argc, char **argv){
+  bgfglab::Component component;
+
+  jderobotice::Application app( component );
+  return app.jderobotMain(argc, argv);
 }

@@ -19,15 +19,15 @@
  *
  */
 
-#ifndef BGFGVIEW_BGMODEL_H
-#define BGFGVIEW_BGMODEL_H
+#ifndef BGFGLAB_BGMODEL_H
+#define BGFGLAB_BGMODEL_H
 
 #include <string>
 #include <opencv/cvaux.h>
-#include <bgfgfilters/bgfgfilters.h>
+#include <bgfgsegmentation/bgfgsegmentation.h>
 #include <tr1/memory>
 
-namespace bgfgview {
+namespace bgfglab {
   class BGModelFactory{
   public:
     BGModelFactory(const std::string desc);
@@ -123,4 +123,4 @@ namespace bgfgview {
 
 }//namespace
 
-#endif //BGFGVIEW_BGMODEL_H
+#endif //BGFGLAB_BGMODEL_H

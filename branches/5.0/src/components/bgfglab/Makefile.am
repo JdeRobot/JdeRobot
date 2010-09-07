@@ -1,20 +1,20 @@
-if ENABLE_COMPONENT_BGFGVIEW
-bin_PROGRAMS = bgfgview
+if ENABLE_COMPONENT_BGFGLAB
+bin_PROGRAMS = bgfglab
 endif
 
-bgfgview_SOURCES = bgmodelfactory.cpp \
+bgfglab_SOURCES = bgmodelfactory.cpp \
 			controller.cpp \
 			main.cpp  \
 			mainthread.cpp \
 			model.cpp \
 			viewgtk.cpp
 
-bgfgview_CPPFLAGS = $(JDEROBOTICE_CPPFLAGS) $(JDEROBOTUTIL_CPPFLAGS) \
+bgfglab_CPPFLAGS = $(JDEROBOTICE_CPPFLAGS) $(JDEROBOTUTIL_CPPFLAGS) \
 			$(GTKMM_CPPFLAGS) $(COLORSPACESMM_CPPFLAGS) \
 			-DGLADE_DIR=\""$(gladedir)"\"
-bgfgview_LDFLAGS = $(JDEROBOTICE_LDFLAGS) $(JDEROBOTUTIL_LDFLAGS) $(GTKMM_LDFLAGS) $(COLORSPACESMM_LDFLAGS)
-bgfgview_LDADD = $(top_srcdir)/src/libs/colorspaces/libcolorspacesmm.la \
-			$(top_srcdir)/src/libs/bgfgfilters/libbgfgfilters.la \
+bgfglab_LDFLAGS = $(JDEROBOTICE_LDFLAGS) $(JDEROBOTUTIL_LDFLAGS) $(GTKMM_LDFLAGS) $(COLORSPACESMM_LDFLAGS)
+bgfglab_LDADD = $(top_srcdir)/src/libs/colorspaces/libcolorspacesmm.la \
+			$(top_srcdir)/src/libs/bgfgsegmentation/libbgfgsegmentation.la \
 			$(top_srcdir)/src/interfaces/cpp/jderobot/libJderobotInterfaces.la \
 			$(top_srcdir)/src/libs/jderobotice/libJderobotIce.la \
 			$(top_srcdir)/src/libs/jderobotutil/libJderobotUtil.la
@@ -27,7 +27,7 @@ noinst_HEADERS = bgmodelfactory.h \
 			viewgtk.h \
 			widget.h
 
-dist_conf_DATA = bgfgview.cfg
-dist_glade_DATA = bgfgview.glade
+dist_conf_DATA = bgfglab.cfg
+dist_glade_DATA = bgfglab.glade
 
 MAINTAINERCLEANFILES = Makefile.in Makefile

@@ -3,7 +3,7 @@
   <!-- interface-requires gtk+ 2.16 -->
   <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkWindow" id="mainwindow">
-    <property name="title" translatable="yes">BG/FG View</property>
+    <property name="title" translatable="yes">BG/FG Lab</property>
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>

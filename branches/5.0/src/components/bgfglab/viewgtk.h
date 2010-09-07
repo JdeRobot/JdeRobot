@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef BGFGVIEW_VIEW_H
-#define BGFGVIEW_VIEW_H
+#ifndef BGFGLAB_VIEW_H
+#define BGFGLAB_VIEW_H
 
 #include <gbxutilacfr/exceptions.h>
 #include <gtkmm.h>
@@ -33,7 +33,7 @@
 #include "controller.h" //class View
 #include "bgmodelfactory.h"
 
-namespace bgfgview {
+namespace bgfglab {
   class ViewGtk: public View {
   public:
     ViewGtk(Controller &controller) throw();
@@ -116,4 +116,4 @@ namespace bgfgview {
   
 }//namespace
 
-#endif /*BGFGVIEW_VIEW_H*/
+#endif /*BGFGLAB_VIEW_H*/

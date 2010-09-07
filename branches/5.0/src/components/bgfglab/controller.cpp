@@ -19,38 +19,33 @@
  *
  */
 
+#include "controller.h"
 
-#include <jderobotice/component.h>
-#include <jderobotice/application.h>
-#include "mainthread.h"
-
-namespace bgfgview{
-  class Component: public jderobotice::Component{
+namespace bgfglab {
+  class Controller::PImpl{
   public:
-    Component()
-      : jderobotice::Component("BGFGview") {}
-
-    virtual void start() {
-      mainThread = new MainThread( context() );
-      mainThread->start();
-    }
-
-    virtual void stop() {
-      context().tracer().debug( "stopping main thread");
-      gbxiceutilacfr::stopAndJoin( mainThread );
-      context().tracer().debug( "stopped main thread");
-      
-      mainThread = 0;
-    }
-  private:
-    gbxiceutilacfr::ThreadPtr mainThread;
+    PImpl()
+      : running(true) {}
+    bool running;
   };
-}
 
+  Controller::Controller(gbxutilacfr::Tracer& tracer, Model &m)
+    : _tracer(tracer), _model(m), _views(), pImpl(new PImpl()) {}
 
-int main(int argc, char **argv){
-  bgfgview::Component component;
+  Controller::~Controller() {
+    std::vector<ViewPtr>::iterator v_it;
+    for (v_it = _views.begin();
+	 v_it != _views.end(); v_it++)
+      _model.deleteObserver(*v_it);//jderobotutil::ObserverPtr(view));
+  }
 
-  jderobotice::Application app( component );
-  return app.jderobotMain(argc, argv);
-}
+  void Controller::addView(ViewPtr v) throw(){
+    _views.push_back(v);//FIXME: check for duplicated views!?
+    _model.addObserver(v);
+  }
+
+  void Controller::exit() throw(){
+    pImpl->running = false;
+  }
+} /*namespace*/
+

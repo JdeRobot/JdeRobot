@@ -23,7 +23,7 @@
 #include "mainthread.h"
 #include "viewgtk.h"
 
-namespace bgfgview {
+namespace bgfglab {
   MainThread::MainThread(const jderobotice::Context &context)
     : jderobotice::SubsystemThread(context.tracer(),context.status(),"MainThread"),
       imagePrx(),fmt(),
