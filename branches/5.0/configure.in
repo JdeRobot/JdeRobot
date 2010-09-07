@@ -84,7 +84,7 @@ dnl # Check for built libraries dependencies
 m4_include([m4/jderobotutil.m4])
 m4_include([m4/jderobotice.m4])
 m4_include([m4/colorspacesmm.m4])
-m4_include([m4/bgfgfilters.m4])
+m4_include([m4/bgfgsegmentation.m4])
 
 dnl # Components checks
 m4_include([m4/component_cameraserver.m4])
@@ -98,7 +98,7 @@ m4_include([m4/component_recorder.m4])
 m4_include([m4/component_surveillance.m4])
 m4_include([m4/component_gazeboserver.m4])
 m4_include([m4/component_introrob.m4])
-m4_include([m4/component_bgfgview.m4])
+m4_include([m4/component_bgfglab.m4])
 
 dnl#AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
 dnl#AC_PYTHON_DEVEL
@@ -136,7 +136,7 @@ AC_CONFIG_FILES([src/libs/Makefile \
     src/libs/fuzzylib/Makefile \
     src/libs/pioneer/Makefile \
     src/libs/progeo/Makefile \
-    src/libs/bgfgfilters/Makefile])
+    src/libs/bgfgsegmentation/Makefile])
 
 dnl # generate components Makefiles
 AC_CONFIG_FILES([src/components/Makefile \
@@ -152,6 +152,6 @@ AC_CONFIG_FILES([src/components/Makefile \
     src/components/gazeboserver/Makefile \
     src/components/introrob/Makefile \
     src/components/motiondetection/test/Makefile \
-    src/components/bgfgview/Makefile])
+    src/components/bgfglab/Makefile])
 
 AC_OUTPUT
