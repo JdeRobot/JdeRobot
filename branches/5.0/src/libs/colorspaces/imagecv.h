@@ -157,6 +157,8 @@ namespace colorspaces {
      */
     void toGRAY8(Image& dst) const throw(FormatMismatch);
     void toYUY2(Image& dst) const throw(FormatMismatch);
+    void toHSV888(Image& dst) const throw(FormatMismatch);
+    void toYCRCB(Image& dst) const throw(FormatMismatch);
     
     /**
      * Factory method
@@ -196,6 +198,7 @@ namespace colorspaces {
      */
     void toGRAY8(Image& dst) const throw(FormatMismatch);
     void toRGB888(Image& dst) const throw(FormatMismatch);
+    void toYCRCB(Image& dst) const throw(FormatMismatch);
     
     /**
      * Factory method
@@ -243,38 +246,80 @@ namespace colorspaces {
     static const FormatPtr FORMAT_GRAY8;
   };
 
-    /* /\** */
-/*      * Creates a synthetic rgb88 image with an horizontal line */
-/*      *\/ */
-/*     static Image& createTestHline(const int width, */
-/* 				  const int height, */
-/* 				  const int lineWidth, */
-/* 				  const int startRow, */
-/* 				  const RGBColor *bgColor = 0, */
-/* 				  const RGBColor *fgColor = 0); */
+  /**
+   * A HSV888 image
+   */
+  class ImageHSV888: public  Image {
+  public:
+    /**
+     * Constructor
+     */
+    ImageHSV888(const int width, const int height);
     
-/*     /\** */
-/*      * Creates a synthetic rgb888 image with an vertical line */
-/*      *\/ */
-/*     static Image& createTestVline(const int width, */
-/* 				  const int height, */
-/* 				  const int lineWidth, */
-/* 				  const int startCol, */
-/* 				  const RGBColor *bgColor = 0, */
-/* 				  const RGBColor *fgColor = 0); */
+    /**
+     * Constructor from user data
+     */
+    ImageHSV888(const int width, const int height, void *const data);
+
+    /**
+     * Copy constructor.
+     * if \param i doesn't match format a conversion will happen.
+     */
+    ImageHSV888(const Image& i);
+
     
-/*     /\** */
-/*      * Creates a synthetic rgb888 image with a square */
-/*      * \sa Image_createTestSquare */
-/*      *\/ */
-/*     static Image& createTestSquare(const int width, */
-/* 				   const int height, */
-/* 				   const int sideLength, */
-/* 				   const int xStartCorner, */
-/* 				   const int yStartCorner, */
-/* 				   const RGBColor *bgColor = 0, */
-/* 				   const RGBColor *fgColor = 0); */
-//  };
+    /**
+     * Conversion methods.
+     * Returns a copy
+     */
+    void toRGB888(Image& dst) const throw(FormatMismatch);
+
+    /**
+     * Factory method
+     */
+    static Image* createInstance(const int width, const int height, void *const data);
+    static Image& imageCvt(const Image& src, Image& dst) throw(NoConversion);
+    static const FormatPtr FORMAT_HSV888;
+  };
+
+  /**
+   * A YCRCB image
+   */
+  class ImageYCRCB: public  Image {
+  public:
+    /**
+     * Constructor
+     */
+    ImageYCRCB(const int width, const int height);
+    
+    /**
+     * Constructor from user data
+     */
+    ImageYCRCB(const int width, const int height, void *const data);
+
+    /**
+     * Copy constructor.
+     * if \param i doesn't match format a conversion will happen.
+     */
+    ImageYCRCB(const Image& i);
+
+    
+    /**
+     * Conversion methods.
+     * Returns a copy
+     */
+    void toRGB888(Image& dst) const throw(FormatMismatch);
+    //void toYUY2(Image& dst) const throw(FormatMismatch);
+
+    /**
+     * Factory method
+     */
+    static Image* createInstance(const int width, const int height, void *const data);
+    static Image& imageCvt(const Image& src, Image& dst) throw(NoConversion);
+    static const FormatPtr FORMAT_YCRCB;
+  };
+  
+
 } //namespace
 
 //declarations outside the namespace

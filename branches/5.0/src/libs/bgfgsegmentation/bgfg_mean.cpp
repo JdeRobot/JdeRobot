@@ -19,7 +19,7 @@
  *
  */
 
-#include "bgfgfilters.h"
+#include "bgfgsegmentation.h"
 
 static void releaseBGMeanStatModel( BGMeanStatModel** _model );
 static int updateBGMeanStatModel( IplImage* curr_frame,

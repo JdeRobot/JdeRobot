@@ -20,7 +20,7 @@
  *
  */
 
-#include "bgfgfilters.h"
+#include "bgfgsegmentation.h"
 
 
 // Function bgfgSegmentation returns number of foreground regions

@@ -39,38 +39,61 @@ int main(int argc, char **argv){
 
   std::cerr << "Converting to GRAY8\n";
   ImageGRAY8 img6 = img4;
-  std::cerr << img5 << "\n";
+  std::cerr << img6 << "\n";
 
   std::cerr << "Converting to RGB888\n";
   ImageRGB888 img7 = img4;
-  std::cerr << img6 << "\n";
+  std::cerr << img7 << "\n";
 
+  std::cerr << "Converting to HSV888\n";
+  ImageHSV888 img71 = img4;
+  std::cerr << img71 << "\n";
+
+  std::cerr << "Converting to HSV888\n";
+  ImageYCRCB img72 = img4;
+  std::cerr << img72 << "\n";
 
   //YUY2 conversions
   std::cerr << "YUY2 to..........\n";
   std::cerr << "Converting to GRAY8\n";
   ImageGRAY8 img8 = img5;
-  std::cerr << img5 << "\n";
+  std::cerr << img8 << "\n";
 
   std::cerr << "Converting to RGB888\n";
   ImageRGB888 img9 = img5;
-  std::cerr << img6 << "\n";
+  std::cerr << img9 << "\n";
 
   std::cerr << "Converting to YUY2\n";
   ImageYUY2 img10 = img5;
-  std::cerr << img5 << "\n";
+  std::cerr << img10 << "\n";
+
+  std::cerr << "Converting to YCRCB\n";
+  ImageYCRCB img101 = img5;
+  std::cerr << img101 << "\n";
 
   //GRAY8 conversions
   std::cerr << "GRAY8 to..........\n";
   std::cerr << "Converting to RGB888\n";
   ImageRGB888 img11 = img6;
-  std::cerr << img6 << "\n";
+  std::cerr << img11 << "\n";
 
   std::cerr << "Converting to YUY2\n";
   ImageYUY2 img12 = img6;
-  std::cerr << img5 << "\n";
+  std::cerr << img12 << "\n";
 
   std::cerr << "Converting to GRAY8\n";
   ImageGRAY8 img13 = img6;
-  std::cerr << img5 << "\n";
+  std::cerr << img13 << "\n";
+
+  //HSV888 Conversions
+  std::cerr << "HSV888 to..........\n";
+  std::cerr << "Converting to RGB888\n";
+  ImageRGB888 img121 = img71;
+  std::cerr << img121 << "\n";
+
+  //YCRCB Conversions
+  std::cerr << "YCRCB to..........\n";
+  std::cerr << "Converting to RGB888\n";
+  ImageRGB888 img122 = img101;
+  std::cerr << img122 << "\n";
 }

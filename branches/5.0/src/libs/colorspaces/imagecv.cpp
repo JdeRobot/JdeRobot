@@ -47,9 +47,11 @@ namespace colorspaces {
 
   //static definitions
   const Image::FormatPtr Image::FORMAT_NONE = Image::Format::createFormat("NONE",0,0,0);
-  const Image::FormatPtr  ImageRGB888::FORMAT_RGB888 = Image::Format::createFormat("RGB888",CV_8UC3,&ImageRGB888::createInstance,&ImageRGB888::imageCvt);
-  const Image::FormatPtr  ImageYUY2::FORMAT_YUY2 = Image::Format::createFormat("YUY2",CV_8UC2,&ImageYUY2::createInstance,&ImageYUY2::imageCvt);
-  const Image::FormatPtr  ImageGRAY8::FORMAT_GRAY8 = Image::Format::createFormat("GRAY8",CV_8UC1,&ImageGRAY8::createInstance,&ImageGRAY8::imageCvt);
+  const Image::FormatPtr ImageRGB888::FORMAT_RGB888 = Image::Format::createFormat("RGB888",CV_8UC3,&ImageRGB888::createInstance,&ImageRGB888::imageCvt);
+  const Image::FormatPtr ImageYUY2::FORMAT_YUY2 = Image::Format::createFormat("YUY2",CV_8UC2,&ImageYUY2::createInstance,&ImageYUY2::imageCvt);
+  const Image::FormatPtr ImageGRAY8::FORMAT_GRAY8 = Image::Format::createFormat("GRAY8",CV_8UC1,&ImageGRAY8::createInstance,&ImageGRAY8::imageCvt);
+  const Image::FormatPtr ImageHSV888::FORMAT_HSV888 = Image::Format::createFormat("HSV888",CV_8UC3,&ImageHSV888::createInstance,&ImageHSV888::imageCvt);
+  const Image::FormatPtr ImageYCRCB::FORMAT_YCRCB = Image::Format::createFormat("YCRCB",CV_8UC3,&ImageYCRCB::createInstance,&ImageYCRCB::imageCvt);
 
   Image::Image(const int width, const int height, const FormatPtr fmt)
     : cv::Mat(height,width,fmt->cvType),width(width),height(height),_format(fmt) {}
@@ -84,6 +86,10 @@ namespace colorspaces {
 	srcRgb888.toYUY2(dst);
       else if (dst.format() == ImageGRAY8::FORMAT_GRAY8)
 	srcRgb888.toGRAY8(dst);
+      else if (dst.format() == ImageYCRCB::FORMAT_YCRCB)
+	srcRgb888.toYCRCB(dst);
+      else if (dst.format() == ImageHSV888::FORMAT_HSV888)
+	srcRgb888.toHSV888(dst);
       else
 	throw Image::NoConversion();
     }
@@ -116,6 +122,18 @@ namespace colorspaces {
     }
   }
 
+  void ImageRGB888::toHSV888(Image& dst) const throw(FormatMismatch){
+    if (dst.format() != ImageHSV888::FORMAT_HSV888)
+      throw Image::FormatMismatch("FORMAT_HSV888 required for dst");
+    cv::cvtColor(*this,dst,CV_RGB2HSV);
+  }
+
+  void ImageRGB888::toYCRCB(Image& dst) const throw(FormatMismatch){
+    if (dst.format() != ImageYCRCB::FORMAT_YCRCB)
+      throw Image::FormatMismatch("FORMAT_YCRCB required for dst");
+    cv::cvtColor(*this,dst,CV_RGB2YCrCb);
+  }
+
   Image* ImageRGB888::createInstance(const int width, const int height, void *const data){
     if (data)
       return new ImageRGB888(width,height,data);
@@ -144,6 +162,8 @@ namespace colorspaces {
 	srcYuy2.toRGB888(dst);
       else if (dst.format() == ImageGRAY8::FORMAT_GRAY8)
 	srcYuy2.toGRAY8(dst);
+      else if (dst.format() == ImageYCRCB::FORMAT_YCRCB)
+	srcYuy2.toYCRCB(dst);
       else
 	throw Image::NoConversion();
     }
@@ -164,7 +184,16 @@ namespace colorspaces {
     if ((dst.width % 2 != 0) || (this->width % 2 != 0))
       throw Image::FormatMismatch("src and dst images have to have even number of columns");
 
-    cv::Mat_<cv::Vec3b> ycrcb(dst.height,dst.width,dst.type());//YUV444 previous conversion
+    ImageYCRCB ycrcbImg(dst.height,dst.width);//YCRCB previous conversion
+    toYCRCB(ycrcbImg);
+    
+    cv::cvtColor(ycrcbImg,dst,CV_YCrCb2RGB);
+  }
+
+  void ImageYUY2::toYCRCB(Image& dst) const throw(FormatMismatch){
+    if (dst.format() != ImageYCRCB::FORMAT_YCRCB)
+      throw Image::FormatMismatch("FORMAT_YCRCB required for dst");
+    cv::Mat_<cv::Vec3b> ycrcb(dst);
     cv::Mat_<cv::Vec2b> yuy2(*this);
 
     for (int i=0; i < height; i++){
@@ -177,7 +206,6 @@ namespace colorspaces {
 	ycrcb(i,j+1)[2] = yuy2(i,j)[1];//U1<-U0
       }
     }
-    cv::cvtColor(ycrcb,dst,CV_YCrCb2RGB);
   }
 
   Image* ImageYUY2::createInstance(const int width, const int height, void *const data){
@@ -238,6 +266,88 @@ namespace colorspaces {
     else
       return new ImageGRAY8(width,height);
   }
+
+
+  ImageHSV888::ImageHSV888(const int width, const int height)
+    : Image(width,height,FORMAT_HSV888) {}
+    
+  ImageHSV888::ImageHSV888(const int width, const int height, void *const data)
+    : Image(width,height,FORMAT_HSV888,data) {}
+
+  ImageHSV888::ImageHSV888(const Image& i)
+    : Image(i.width,i.height,FORMAT_HSV888) {
+    i.convert(*this);
+  }
+
+  Image& ImageHSV888::imageCvt(const Image& src, Image& dst) throw(NoConversion){
+    assert(src.format() == FORMAT_HSV888 && "src is not a HSV888 image");
+    if (dst.format() == FORMAT_HSV888)
+      dst = src;
+    else {
+      const ImageHSV888 srcHsv888(src);
+      if (dst.format() == ImageRGB888::FORMAT_RGB888)
+	srcHsv888.toRGB888(dst);
+      else
+	throw Image::NoConversion();
+    }
+    return dst;
+  }
+
+  void ImageHSV888::toRGB888(Image& dst) const throw(Image::FormatMismatch){
+    if (dst.format() != ImageRGB888::FORMAT_RGB888)
+      throw Image::FormatMismatch("FORMAT_RGB888 required for dst");
+
+    cv::cvtColor(*this,dst,CV_HSV2RGB);
+  }
+
+  Image* ImageHSV888::createInstance(const int width, const int height, void *const data){
+    if (data)
+      return new ImageHSV888(width,height,data);
+    else
+      return new ImageHSV888(width,height);
+  }
+
+  ImageYCRCB::ImageYCRCB(const int width, const int height)
+    : Image(width,height,FORMAT_YCRCB) {}
+    
+  ImageYCRCB::ImageYCRCB(const int width, const int height, void *const data)
+    : Image(width,height,FORMAT_YCRCB,data) {}
+
+  ImageYCRCB::ImageYCRCB(const Image& i)
+    : Image(i.width,i.height,FORMAT_YCRCB) {
+    i.convert(*this);
+  }
+
+  Image& ImageYCRCB::imageCvt(const Image& src, Image& dst) throw(NoConversion){
+    assert(src.format() == FORMAT_YCRCB && "src is not a YCRCB image");
+    if (dst.format() == FORMAT_YCRCB)
+      dst = src;
+    else {
+      const ImageYCRCB srcYcrcb(src);
+      if (dst.format() == ImageRGB888::FORMAT_RGB888)
+	srcYcrcb.toRGB888(dst);
+      else
+	throw Image::NoConversion();
+    }
+    return dst;
+  }
+
+  void ImageYCRCB::toRGB888(Image& dst) const throw(FormatMismatch){
+    if (dst.format() != ImageRGB888::FORMAT_RGB888)
+      throw Image::FormatMismatch("FORMAT_RGB888 required for dst");
+    
+    cv::cvtColor(*this,dst,CV_YCrCb2RGB);
+  }
+
+  Image* ImageYCRCB::createInstance(const int width, const int height, void *const data){
+    if (data)
+      return new ImageYCRCB(width,height,data);
+    else
+      return new ImageYCRCB(width,height);
+  }
+
+  
+
 
 //   ImageppPtr Imagepp::createTestHline(const int width,
 // 				      const int height,

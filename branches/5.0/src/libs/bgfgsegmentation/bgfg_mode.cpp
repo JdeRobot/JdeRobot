@@ -19,7 +19,7 @@
  *
  */
 
-#include "bgfgfilters.h"
+#include "bgfgsegmentation.h"
 #include <cassert>
 
 static void releaseBGModeStatModel( BGModeStatModel** _model );

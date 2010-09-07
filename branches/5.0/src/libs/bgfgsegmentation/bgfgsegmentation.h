@@ -169,6 +169,7 @@ typedef struct BGCBStatModel
   int cb_rotation_count;/*count frames using codebook*/
   int bg_frame_count;/*count updated bg frames*/
   int fg_frame_count;/*count updated fg frames*/
+  int fast_init_count;/*update cb faster upon init until count*/
   CvBGCodeBookModel* active_cb;
   CvBGCodeBookModel* updating_cb;
   BGCBStatModelParams params;
