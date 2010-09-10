@@ -26,7 +26,7 @@
 #include <jderobotutil/observer.h>
 #include <tr1/memory>
 #include "model.h"
-
+#include "bgmodelfactory.h"
 
 //View and Controller defined here to avoid circular dependencies
 
@@ -45,12 +45,17 @@ namespace bgfglab {
     void exit() throw();//FIXME
     
     void setImage(const colorspaces::Image &img) throw() { _model.updateBGModel(img); }
-    void setBGModel(CvBGStatModel* newBGModel) throw() { _model.setBGModel(newBGModel); }
+    void setBGModel(const std::string modelName, const ParamDict& param) throw();
 
-    bool startDumpData(std::string filename="modeldata.dump", 
+    bool startDumpData(std::string filename="modeldata.dump",
+		       int maxFrames=-1,
+		       int startDumpingAfterFrames=0,
 		       bool dumpDataImg=true, 
 		       bool dumpDataBg=true, 
-		       bool dumpDataFgMask=false) { _model.startDumpData(filename,dumpDataImg,dumpDataBg,dumpDataFgMask); }
+		       bool dumpDataFgMask=false) { 
+      _model.startDumpData(filename,maxFrames,startDumpingAfterFrames,
+			   dumpDataImg,dumpDataBg,dumpDataFgMask);
+    }
     void stopDumpData() { _model.stopDumpData(); }
 
 

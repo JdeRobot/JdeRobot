@@ -30,16 +30,15 @@
 #include <opencv/cvaux.h>
 #include "viewgtk.h"
 #include "model.h"
+#include "bgmodelfactory.h"
 
 namespace bgfglab {
   const std::string gladepath = std::string(GLADE_DIR) + std::string("/bgfglab.glade");
 
-  typedef std::map<std::string,BGModelFactoryPtr> BGModelFactoryMap;
-
   class ViewGtk::PImpl{
   public:
-    BGModelFactoryMap bgmodelF;
-    //std::auto_ptr<BGModel> currentModel;
+    std::string currentModelName;
+    ParamDict currentModelParam;
   };
 
 
@@ -78,7 +77,6 @@ namespace bgfglab {
     //main window
     menutoolbuttonSelectBGModel->signal_clicked().connect(sigc::mem_fun(this,&ViewGtk::onMenutoolbuttonSelectBGModelClicked));
 
-
     toolbuttonApplyMaskToImage->set_active(false);
         
     drawingareaBg->signal_expose_event().connect(sigc::mem_fun(this, &ViewGtk::onDrawingAreaBgExposeEvent));
@@ -92,28 +90,6 @@ namespace bgfglab {
     buttonBGModelApply->signal_clicked().connect(sigc::mem_fun(this, &ViewGtk::onButtonBGModelApplyClicked));
     buttonBGModelAccept->signal_clicked().connect(sigc::mem_fun(this, &ViewGtk::onButtonBGModelAcceptClicked));
     dialogBGModelSelection->hide();
-
-
-    //populate bgmodelF
-    //OpenCv FGD
-    BGModelFactory* bgmF;
-    bgmF = new BGModelCvFGDFactory();
-    pImpl->bgmodelF.insert(make_pair(bgmF->description,bgmF));
-    //OpenCv Mog
-    bgmF = new BGModelCvMoGFactory();
-    pImpl->bgmodelF.insert(make_pair(bgmF->description,bgmF));
-    //Exp
-    bgmF = new BGModelExpFactory();
-    pImpl->bgmodelF.insert(make_pair(bgmF->description,bgmF));
-    //Mean
-    bgmF = new BGModelMeanFactory();
-    pImpl->bgmodelF.insert(make_pair(bgmF->description,bgmF));
-    //Mode
-    bgmF = new BGModelModeFactory();
-    pImpl->bgmodelF.insert(make_pair(bgmF->description,bgmF));
-    //CB
-    bgmF = new BGModelCBFactory();
-    pImpl->bgmodelF.insert(make_pair(bgmF->description,bgmF));
 
     //update algorithm selection button
     updateMenutoolbuttonItems();
@@ -138,6 +114,9 @@ namespace bgfglab {
     std::stringstream ss;
     ss << controller.model().bgModelIps().ips();
     statusbarMain->push(ss.str());    
+
+    //dump status
+    toolbuttonDumpData->set_active(controller.model().isDumpingData());
 
     mainwindow->resize(1, 1);
 
@@ -206,39 +185,27 @@ namespace bgfglab {
   }
   
   void ViewGtk::updateMenutoolbuttonItems() {
-    BGModelFactoryMap::const_iterator bgmodelIt;
+    // BGModelFactoryMap::const_iterator bgmodelIt;
 
-    Gtk::Menu* selectBGModelMenu = Gtk::manage(new Gtk::Menu());
+    // Gtk::Menu* selectBGModelMenu = Gtk::manage(new Gtk::Menu());
 
-    for(bgmodelIt = pImpl->bgmodelF.begin();
-	bgmodelIt != pImpl->bgmodelF.end();
-	bgmodelIt++){
-      Gtk::MenuItem* itemp = Gtk::manage(new Gtk::MenuItem(bgmodelIt->first));
-      itemp->signal_activate().connect(sigc::bind<std::string>(sigc::mem_fun(this, &ViewGtk::onMenutoolbuttonSelectBGModelMenuItemClicked),bgmodelIt->first));
-      selectBGModelMenu->append(*itemp);
-    }
+    // for(bgmodelIt = pImpl->bgmodelF.begin();
+    // 	bgmodelIt != pImpl->bgmodelF.end();
+    // 	bgmodelIt++){
+    //   Gtk::MenuItem* itemp = Gtk::manage(new Gtk::MenuItem(bgmodelIt->first));
+    //   itemp->signal_activate().connect(sigc::bind<std::string>(sigc::mem_fun(this, &ViewGtk::onMenutoolbuttonSelectBGModelMenuItemClicked),bgmodelIt->first));
+    //   selectBGModelMenu->append(*itemp);
+    // }
 
-    menutoolbuttonSelectBGModel->set_menu(*selectBGModelMenu);
-  }
-
-  void ViewGtk::setBGModel(BGModelFactoryPtr m){
-    IplImage tmpImg(controller.model().getBGImage());
-    CvBGStatModel* newBgModel = m->createModel(&tmpImg);
-    controller.setBGModel(newBgModel);
-    pImpl->bgmodelF["Current"] = m;
+    // menutoolbuttonSelectBGModel->set_menu(*selectBGModelMenu);
   }
 
   void ViewGtk::onMenutoolbuttonSelectBGModelMenuItemClicked(const std::string bgmodelDesc){
-    //apply set algorithm
-    BGModelFactoryMap::const_iterator bgmodelIt = 
-      pImpl->bgmodelF.find(bgmodelDesc);
-    if (bgmodelIt != pImpl->bgmodelF.end()){
-      setBGModel(bgmodelIt->second);
-    }
+    //constroller.setBGModel(bgmodelDesc);
   }
 
   void ViewGtk::updateComboboxBGModelItems(){
-    BGModelFactoryMap::const_iterator bgmodelIt;
+    BGModelFactory::FactoryDict::const_iterator fIt;
     
     ModelColumns comboboxBGModelCols;
     comboboxBGModelLSRef = Gtk::ListStore::create(comboboxBGModelCols);
@@ -250,86 +217,43 @@ namespace bgfglab {
     comboboxBGModel->set_model(comboboxBGModelLSRef);
 
     Gtk::TreeModel::Row r;
-    for(bgmodelIt = pImpl->bgmodelF.begin();
-	bgmodelIt != pImpl->bgmodelF.end();
-	bgmodelIt++){
+    for(fIt = BGModelFactory::factories.begin();
+	fIt != BGModelFactory::factories.end();
+	fIt++){
       tmIt = comboboxBGModelLSRef->append();
       r = *tmIt;
-      r[comboboxBGModelCols.m_col_name] = bgmodelIt->first;
-      r[comboboxBGModelCols.m_col_desc] = bgmodelIt->second->description;
-      if (bgmodelIt->first.compare("Current") == 0){
-	hasCurrent = true;
-	currIt = tmIt;
-      }
+      r[comboboxBGModelCols.m_col_name] = fIt->first;
+      r[comboboxBGModelCols.m_col_desc] = fIt->second->description;
     }
+
+    // if (pImpl->currentModelName.lenght() > 0){
+    //   hasCurrent = true;
+    //   tmIt = comboboxBGModelLSRef->append();
+    //   r = *tmIt;
+    //   r[comboboxBGModelCols.m_col_name] = pImpl->currentModelName;
+    //   r[comboboxBGModelCols.m_col_desc] = "Last model selected";
+    //   currIt = tmIt;
+    // }
 
     
     comboboxBGModel->pack_start(comboboxBGModelCols.m_col_name);
     comboboxBGModel->pack_start(comboboxBGModelCols.m_col_desc);
-    if (hasCurrent)
-      comboboxBGModel->set_active(currIt);
+    // if (hasCurrent)
+    //   comboboxBGModel->set_active(currIt);
   }
 
-  void ViewGtk::updateDialogBGModelSelection(){
-    //hide parameter frames
-    frameCvFGD->hide();
-    frameCvMoG->hide();
-    frameExp->hide();
-    frameMean->hide();
-    frameMode->hide();
-  }
+  void ViewGtk::updateDialogBGModelSelection(){}
 
   void ViewGtk::onComboboxBGModelChanged(){
     ModelColumns comboboxBGModelCols;
     Gtk::TreeModel::iterator it = comboboxBGModel->get_active();
 
-    //hide parameter frames
-    frameCvFGD->hide();
-    frameCvMoG->hide();
-    frameExp->hide();
-    frameMean->hide();
-    frameMode->hide();
-
     if (it){
       Gtk::TreeModel::Row row = *it;
       if (row){
 	std::string name = row[comboboxBGModelCols.m_col_name];
-	BGModelFactoryMap::const_iterator bgmodelFIt = pImpl->bgmodelF.find(name);
-	
-	
-	
-	// if (bgmodelFIt != pImpl->bgmodelF.end()){
-	//   //cast to get bgmodelF type
-	//   BGModelCvFGDFactory* bgmCvFGDFactoryPtr = dynamic_cast<BGModelCvFGDFactory*>(bgmodelFIt->second.get());
-	//   if (bgmCvFGDFactoryPtr != 0){
-	//     frameCvFGD->show();
-	//     goto onComboboxBGModelChanged_end;
-	//   }
-
-	//   BGModelCvMoGFactory* bgmCvMoGFactoryPtr = dynamic_cast<BGModelCvMoGFactory*>(bgmodelFIt->second.get());
-	//   if (bgmCvMoGFactoryPtr != 0){
-	//     frameCvMoG->show();
-	//     goto onComboboxBGModelChanged_end;
-	//   }
-
-	//   BGModelExpFactory* bgmExpFactoryPtr = dynamic_cast<BGModelExpFactory*>(bgmodelFIt->second.get());
-	//   if (bgmExpFactoryPtr != 0){
-	//     frameExp->show();
-	//     goto onComboboxBGModelChanged_end;
-	//   }
-
-	//   BGModelMeanFactory* bgmMeanFactoryPtr = dynamic_cast<BGModelMeanFactory*>(bgmodelFIt->second.get());
-	//   if (bgmMeanFactoryPtr != 0){
-	//     frameMean->show();
-	//     goto onComboboxBGModelChanged_end;
-	//   }
-
-	//   BGModelModeFactory* bgmModeFactoryPtr = dynamic_cast<BGModelModeFactory*>(bgmodelFIt->second.get());
-	//   if (bgmModeFactoryPtr != 0){
-	//     frameMode->show();	    
-	//     goto onComboboxBGModelChanged_end;
-	//   }
-	// }
+	BGModelFactory::FactoryDict::const_iterator fIt = BGModelFactory::factories.find(name);
+	//FIXME: show info for this model¿?
       }
     }
   onComboboxBGModelChanged_end:
@@ -349,54 +273,10 @@ namespace bgfglab {
       Gtk::TreeModel::Row row = *it;
       if (row){
 	std::string name = row[comboboxBGModelCols.m_col_name];
-	BGModelFactoryMap::const_iterator bgmodelFIt = pImpl->bgmodelF.find(name);
-	
-	if (bgmodelFIt != pImpl->bgmodelF.end())
-	  setBGModel(bgmodelFIt->second);
+	controller.setBGModel(name,ParamDict());//FIXME: get param
       }
     }
   }
-
-
-	//   //cast to get bgmodelF type
-	//   BGModelCvFGDFactory* bgmCvFGDFactoryPtr = dynamic_cast<BGModelCvFGDFactory*>(bgmodelFIt->second.get());
-	//   if (bgmCvFGDFactoryPtr != 0){
-	//     //get params, build factory
-	    
-
-	//     goto onButtonBGModelApplyClicked_end;
-	//   }
-
-	//   BGModelCvMoGFactory* bgmCvMoGFactoryPtr = dynamic_cast<BGModelCvMoGFactory*>(bgmodelFIt->second.get());
-	//   if (bgmCvMoGFactoryPtr != 0){
-	    
-	//     goto onButtonBGModelApplyClicked_end;
-	//   }
-
-	//   BGModelExpFactory* bgmExpFactoryPtr = dynamic_cast<BGModelExpFactory*>(bgmodelFIt->second.get());
-	//   if (bgmExpFactoryPtr != 0){
-	    
-	//     goto onButtonBGModelApplyClicked_end;
-	//   }
-
-	//   BGModelMeanFactory* bgmMeanFactoryPtr = dynamic_cast<BGModelMeanFactory*>(bgmodelFIt->second.get());
-	//   if (bgmMeanFactoryPtr != 0){
-	    
-	//     goto onButtonBGModelApplyClicked_end;
-	//   }
-
-	//   BGModelModeFactory* bgmModeFactoryPtr = dynamic_cast<BGModelModeFactory*>(bgmodelFIt->second.get());
-	//   if (bgmModeFactoryPtr != 0){
-	        
-	//     goto onButtonBGModelApplyClicked_end;
-	//   }
-	//}
-	//}
-	//}
-  //onButtonBGModelApplyClicked_end:
-    //check errors, createModel
-  
-	//}
 
   void ViewGtk::onButtonBGModelAcceptClicked(){
     onButtonBGModelApplyClicked();
@@ -421,13 +301,11 @@ namespace bgfglab {
     filename = filechooserdialogDumpData->get_filename();
     //activate dump data via controller
     controller.startDumpData(filename,
+			     -1,-1,//FIXME: set values from dialog
 			     checkbuttonImgDump->get_active(),
 			     checkbuttonBgDump->get_active(),
 			     checkbuttonFgMaskDump->get_active());
-
     filechooserdialogDumpData->hide();
   }
-
-  
 
 }//namespace

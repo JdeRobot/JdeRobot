@@ -19,108 +19,119 @@
  *
  */
 
-#ifndef BGFGLAB_BGMODEL_H
-#define BGFGLAB_BGMODEL_H
+#ifndef BGFGLAB_BGMODELFACTORY_H
+#define BGFGLAB_BGMODELFACTORY_H
 
 #include <string>
 #include <opencv/cvaux.h>
 #include <bgfgsegmentation/bgfgsegmentation.h>
 #include <tr1/memory>
+#include <map>
 
 namespace bgfglab {
+  class ParamDict: public std::map<std::string, std::string>{
+  public:
+    ParamDict();
+    ParamDict(const std::string filename, const std::string keyprefix = "");
+    ParamDict(const std::map<std::string, std::string>& params, const std::string keyprefix = "");
+
+    std::string getParam(const std::string paramkey) const;
+    std::string getParamWithDefault(const std::string paramkey, const std::string defaultValue) const;
+    int getParamAsInt(const std::string paramkey) const;
+    int getParamAsIntWithDefault(const std::string paramkey, const int defaultValue) const;
+    float getParamAsFloat(const std::string paramkey) const;
+    float getParamAsFloatWithDefault(const std::string paramkey, const float defaultValue) const;
+  private:
+    std::string keyprefix;
+  };
+
   class BGModelFactory{
   public:
     BGModelFactory(const std::string desc);
     virtual ~BGModelFactory() {}
     
     //virtual copy constructor
-    virtual BGModelFactory* clone() const = 0;
-
-    virtual CvBGStatModel* createModel(IplImage* firstFrame) const = 0;
-    
-
+    //virtual BGModelFactory* clone() const = 0;
+    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const = 0;
     const std::string description;
+
+    typedef std::map<std::string, std::tr1::shared_ptr<BGModelFactory> > FactoryDict;
+    static const FactoryDict factories;
   };
   typedef std::tr1::shared_ptr<BGModelFactory> BGModelFactoryPtr;
 
   class BGModelCvFGDFactory: public BGModelFactory{
   public:
-    BGModelCvFGDFactory(const std::string desc = std::string("CvFGD"), 
-			const CvFGDStatModelParams& params = BGModelCvFGDFactory::defaultParams);
+    BGModelCvFGDFactory(const std::string desc = std::string("CvFGD"));
     virtual ~BGModelCvFGDFactory() {}
 
-    virtual BGModelCvFGDFactory* clone() const;
-    virtual CvBGStatModel* createModel(IplImage* firstFrame) const;
+    //virtual BGModelCvFGDFactory* clone() const;
+    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
 
-    const CvFGDStatModelParams params;
+    //const CvFGDStatModelParams params;
     static const CvFGDStatModelParams defaultParams;
   };
 
   class BGModelCvMoGFactory: public BGModelFactory{
   public:
-    BGModelCvMoGFactory(const std::string desc = std::string("CvMoG"), 
-			const CvGaussBGStatModelParams& params = BGModelCvMoGFactory::defaultParams);
+    BGModelCvMoGFactory(const std::string desc = std::string("CvMoG"));
     virtual ~BGModelCvMoGFactory(){}
 
-    virtual BGModelCvMoGFactory* clone() const;
-    virtual CvBGStatModel* createModel(IplImage* firstFrame) const;
+    //virtual BGModelCvMoGFactory* clone() const;
+    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
 
-    const CvGaussBGStatModelParams params;
+    //const CvGaussBGStatModelParams params;
     static const CvGaussBGStatModelParams defaultParams;
   };
 
   class BGModelExpFactory: public BGModelFactory{
   public:
-    BGModelExpFactory(const std::string desc = std::string("Exp"), 
-		      const BGExpStatModelParams& params = BGModelExpFactory::defaultParams);
+    BGModelExpFactory(const std::string desc = std::string("Exp"));
     virtual ~BGModelExpFactory() {}
     
-    virtual BGModelExpFactory* clone() const;
-    virtual CvBGStatModel* createModel(IplImage* firstFrame) const;
+    //virtual BGModelExpFactory* clone() const;
+    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
 
-    const BGExpStatModelParams params;
+    //const BGExpStatModelParams params;
     static const BGExpStatModelParams defaultParams;
   };
 
   class BGModelMeanFactory: public BGModelFactory{
   public:
-    BGModelMeanFactory(const std::string desc = std::string("Mean"), 
-		       const BGMeanStatModelParams& params = BGModelMeanFactory::defaultParams);
+    BGModelMeanFactory(const std::string desc = std::string("Mean"));
     virtual ~BGModelMeanFactory() {}
 
-    virtual BGModelMeanFactory* clone() const;
-    virtual CvBGStatModel* createModel(IplImage* firstFrame) const;
+    //virtual BGModelMeanFactory* clone() const;
+    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
 
-    const BGMeanStatModelParams params;
+    //const BGMeanStatModelParams params;
     static const BGMeanStatModelParams defaultParams;
   };
 
   class BGModelModeFactory: public BGModelFactory{
   public:
-    BGModelModeFactory(const std::string desc = std::string("Mode"), 
-		       const BGModeStatModelParams& params = BGModelModeFactory::defaultParams);
+    BGModelModeFactory(const std::string desc = std::string("Mode"));
     virtual ~BGModelModeFactory() {}
 
-    virtual BGModelModeFactory* clone() const;
-    virtual CvBGStatModel* createModel(IplImage* firstFrame) const;
+    //virtual BGModelModeFactory* clone() const;
+    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
 
-    const BGModeStatModelParams params;
+    //const BGModeStatModelParams params;
     static const BGModeStatModelParams defaultParams;
   };
 
   class BGModelCBFactory: public BGModelFactory{
   public:
-    BGModelCBFactory(const std::string desc = std::string("CB"), 
-		     const BGCBStatModelParams& params = BGModelCBFactory::defaultParams);
+    BGModelCBFactory(const std::string desc = std::string("CvCB"));
     virtual ~BGModelCBFactory() {}
 
-    virtual BGModelCBFactory* clone() const;
-    virtual CvBGStatModel* createModel(IplImage* firstFrame) const;
+    //virtual BGModelCBFactory* clone() const;
+    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
 
-    const BGCBStatModelParams params;
+    //const BGCBStatModelParams params;
     static const BGCBStatModelParams defaultParams;
   };
 
 }//namespace
 
-#endif //BGFGLAB_BGMODEL_H
+#endif //BGFGLAB_BGMODELFACTORY_H

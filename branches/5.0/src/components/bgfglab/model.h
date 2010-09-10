@@ -38,8 +38,10 @@ namespace bgfglab {
     /*model input data*/
     void updateBGModel(const colorspaces::Image& img) throw();
 
-
-    bool startDumpData(std::string filename="modeldata.dump", 
+    bool isDumpingData(int* dumpedFrames = 0) const;
+    bool startDumpData(std::string filename="modeldata.dump",
+		       int maxFrames=-1,
+		       int startDumpingAfterFrames=0,
 		       bool dumpDataImg=true, 
 		       bool dumpDataBg=true, 
 		       bool dumpDataFgMask=false);
@@ -74,6 +76,8 @@ namespace bgfglab {
     bool dumpDataFgMask;
     std::string dumpDataFilename;
     int dumpDataFrameCounter;
+    int maxDumpFrames;
+    int noDumpFrames;
     std::ofstream ofDumpData;
     std::ofstream ofDumpDataImg;
     std::ofstream ofDumpDataBg;

@@ -83,21 +83,35 @@ namespace bgfglab {
       fgMaskImage = colorspaces::Image(cv::Mat(bg_model->foreground), 
 				       colorspaces::ImageGRAY8::FORMAT_GRAY8);
 
-      if (ofDumpData.is_open()){//dump data
-	dumpDataFrameCounter++;
-	if (ofDumpDataImg.is_open())
-	  ofDumpDataImg << hsvImg;//operator<< defined above
-	if (ofDumpDataBg.is_open())
-	  ofDumpDataBg << hsvBG;
-	if (ofDumpDataFgMask.is_open())
-	  ofDumpDataFgMask << fgMaskImage;
+      if (noDumpFrames > 0)
+	noDumpFrames--;
+      else{
+	if(ofDumpData.is_open()){//dump data
+	  dumpDataFrameCounter++;
+	  if (ofDumpDataImg.is_open())
+	    ofDumpDataImg << hsvImg;//operator<< defined above
+	  if (ofDumpDataBg.is_open())
+	    ofDumpDataBg << hsvBG;
+	  if (ofDumpDataFgMask.is_open())
+	    ofDumpDataFgMask << fgMaskImage;
+	  if ((maxDumpFrames > 0) && (dumpDataFrameCounter >= maxDumpFrames))
+	    stopDumpData();
+	}
       }
     }
     bg_model_ips.inc();
     notifyObservers();
   }
 
+  bool Model::isDumpingData(int* dumpedFrames) const{
+    if (dumpedFrames != 0)
+      *dumpedFrames = dumpDataFrameCounter;
+    return ofDumpData.is_open();
+  }
+
   bool Model::startDumpData(std::string filename, 
+			    int maxFrames,
+			    int startDumpingAfterFrames,
 			    bool dumpDataImg, 
 			    bool dumpDataBg, 
 			    bool dumpDataFgMask){
@@ -107,8 +121,13 @@ namespace bgfglab {
     if (bg_model == 0)
       return false;
 
+    if (maxFrames == 0)
+      return false;
+
     this->dumpDataFilename = filename;
     this->dumpDataFrameCounter = 0;
+    this->maxDumpFrames = maxFrames;
+    this->noDumpFrames = startDumpingAfterFrames;
     
     ofDumpData.open(dumpDataFilename.c_str(),std::ios_base::out|std::ios_base::trunc);
     if (!ofDumpData.is_open())//error, stop dump and return false

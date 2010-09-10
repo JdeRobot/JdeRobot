@@ -1,27 +1,55 @@
 library(flexclust)
+library(bigmemory)
+library(multicore)
+library(foreach)
+library(doMC)
+
+registerDoMC(cores=multicore:::detectCores())
 
 readImg <- function(conn,imgsize){
   readBin(conn,integer(),n=imgsize,size=1,signed=F)
 }
 
-#sequence is a matrix with one image per column
+#sequence is a big.matrix with one image per column
 readImgSeq <- function(conn,n,imgsize){
-  #imgSeq <- NULL
-  #for (i in 1:n){
-  #  img <- readBin(myconn,integer(),n=imgsize,size=1,signed=F)
-  #  if (length(img) != imgsize)#read less than imgsize, so return
-  #    break
-  #  imgSeq <- rbind(imgSeq,img)
-  #}
-  matrix(readImg(conn,imgsize*n),ncol=n)
+  if (is.character(conn))
+    myconn <- file(conn,"rb")
+  else
+    myconn <- conn
+  
+  imgSeq<-big.matrix(imgsize,n,type="short",shared="F")
+  for (col in 1:n){
+    imgSeq[,col]<-readImg(myconn,imgsize)
+  }
+  imgSeq
 }
 
+#read dump data info file produced by bgfglab dump
+readDumpDataInfo<-function(conn){
+  if (is.character(conn))
+    myconn <- file(conn,"r")
+  else
+    myconn <- conn
+  
+  dumpinfo <- scan(myconn,list(nframe=0,nrow=0,ncol=0,nchannel=0,filename=""))
+  close(myconn)
+  dumpinfo
+} 
+  
 writeImg <- function(img, conn){
   writeBin(as.integer(img),conn,size=1)
 }
 
+#imgSeq must be a big.matrix
 writeImgSeq <- function(imgSeq, conn){
-  writeImg(as.vector(imgSeq),conn)
+  if (is.character(conn))
+    myconn <- file(conn,"rb")
+  else
+    myconn <- conn
+
+  for (col in 1:ncol(imgSeq)){
+    writeImg(imgSeq[,col],myconn)
+  }
 }
 
 calcIdealBGMean <- function(conn,nimage,nrow,ncol,nchannel){
@@ -41,23 +69,15 @@ calcIdealBGMean <- function(conn,nimage,nrow,ncol,nchannel){
   as.integer(round(imgMean))
 }
 
-calcIdealBGMeanT <- function(conn,nimage,nrow,ncol,nchannel){
-  if (is.character(conn))
-    myconn <- file(conn,"rb")
-  else
-    myconn <- conn
-
-  pxDataSize<-nimage*nchannel
+calcIdealBGMeanMC <- function(conn,nimage,nrow,ncol,nchannel,rowsbyjob){
   imgsize<-nrow*ncol*nchannel
   npixel<-nrow*ncol
 
-  imgMean<-NULL
-  for (i in 1:npixel){
-    pxData<-matrix(readBin(myconn,integer(),n=pxDataSize,size=1,signed=F),ncol=nchannel)
-    pxMean<-apply(pxData,2,mean)
-    imgMeanOffset<-((i-1)*nchannel+1)
-    imgMean<-append(imgMean,pxMean)
+  if ((imgsize %% rowsbyjob) != 0){
+    stop("imgsize should be divisible by rowsbyjob")
   }
+  imgSeq<-readImgSeq(conn,nimage,imgsize)
+  imgMean<-foreach(i=seq(1:nrow(imgSeq),by=rowsbyjob),.combine=c) %dopar% apply(imgSeq[i:(i+rowsbyjob-1),],1,mean)
   as.integer(round(imgMean))
 }
 
@@ -107,6 +127,26 @@ calcIdealBGClustering <- function(conn,nimage,nrow,ncol,nchannel,radius){
       centers<-apply(pxData,2,mean)
     }
     imgClust<-append(imgClust,centers)
+  }
+  as.integer(round(imgClust))
+}
+  
+calcIdealBGClusteringMC <- function(conn,nimage,nrow,ncol,nchannel,radius){
+  pxDataSize<-nimage*nchannel
+  imgsize<-nrow*ncol*nchannel
+  npixel<-nrow*ncol
+
+  imgSeq<-readImgSeq(conn,nimage,imgsize)
+  imgClust<-foreach(i=seq(1:nrow(imgSeq),by=nchannel),.combine=c) %dopar% {
+    pxData<-t(imgSeq[i:(i+nchannel-1),])
+    cl <- try(qtclust(pxData,radius),TRUE)
+    centers<-NULL
+    if (isS4(cl)){#qtclust returned a solution
+      centers<-cl@centers[1,]
+    }else{#just one, so center is the mean
+      centers<-apply(pxData,2,mean)
+    }
+    centers
   }
   as.integer(round(imgClust))
 }

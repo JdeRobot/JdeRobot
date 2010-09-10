@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef BGFGLAB_VIEW_H
-#define BGFGLAB_VIEW_H
+#ifndef BGFGLAB_VIEWGTK_H
+#define BGFGLAB_VIEWGTK_H
 
 #include <gbxutilacfr/exceptions.h>
 #include <gtkmm.h>
@@ -31,7 +31,6 @@
 #include <vector>
 #include "widget.h"
 #include "controller.h" //class View
-#include "bgmodelfactory.h"
 
 namespace bgfglab {
   class ViewGtk: public View {
@@ -44,8 +43,6 @@ namespace bgfglab {
   private:
     void drawImage(Gtk::DrawingArea* drawingArea, 
 		   const colorspaces::Image& image);    
-
-    void setBGModel(BGModelFactoryPtr m);
 
     Gtk::Main gtkmain;
     Glib::RefPtr<Gnome::Glade::Xml> refXml;
@@ -116,4 +113,4 @@ namespace bgfglab {
   
 }//namespace
 
-#endif /*BGFGLAB_VIEW_H*/
+#endif /*BGFGLAB_VIEWGTK_H*/

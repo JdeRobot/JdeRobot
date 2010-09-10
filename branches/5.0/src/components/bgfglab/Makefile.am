@@ -7,7 +7,8 @@ bgfglab_SOURCES = bgmodelfactory.cpp \
 			main.cpp  \
 			mainthread.cpp \
 			model.cpp \
-			viewgtk.cpp
+			viewgtk.cpp \
+			viewtext.cpp
 
 bgfglab_CPPFLAGS = $(JDEROBOTICE_CPPFLAGS) $(JDEROBOTUTIL_CPPFLAGS) \
 			$(GTKMM_CPPFLAGS) $(COLORSPACESMM_CPPFLAGS) \

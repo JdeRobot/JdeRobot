@@ -20,57 +20,160 @@
  */
 
 #include "bgmodelfactory.h"
+#include <sstream>
 
 namespace bgfglab{
+  ParamDict::ParamDict() {}
+
+  ParamDict::ParamDict(const std::string filename, const std::string keyprefix)
+    : std::map<std::string, std::string>(), keyprefix(keyprefix) {
+    //parse file
+    
+  }
+
+  ParamDict::ParamDict(const std::map<std::string, std::string>& params, const std::string keyprefix)
+     : std::map<std::string, std::string>(params),keyprefix(keyprefix) {}
+
+  std::string ParamDict::getParam(const std::string paramkey) const{
+    return getParamWithDefault(paramkey,std::string());
+  }
+
+  std::string ParamDict::getParamWithDefault(const std::string paramkey, std::string defaultValue) const{
+    ParamDict::const_iterator pIt(this->find(paramkey));
+    if (pIt != this->end())
+      return pIt->second;
+    return defaultValue;
+  }
+
+  int ParamDict::getParamAsInt(const std::string paramkey) const{
+    return getParamAsIntWithDefault(paramkey,0);
+  }
+
+  int ParamDict::getParamAsIntWithDefault(const std::string paramkey, const int defaultValue) const{
+    std::string p(getParam(paramkey));
+    if (p.length() == 0)
+      return defaultValue;
+
+    std::istringstream iss(p);
+    int value;
+    iss >> value;
+    if (iss.fail())
+      return defaultValue;
+    return value;
+  }
+
+  float ParamDict::getParamAsFloat(const std::string paramkey) const{
+    return getParamAsFloatWithDefault(paramkey,0.0f);
+  }
+
+  float ParamDict::getParamAsFloatWithDefault(const std::string paramkey, const float defaultValue) const{
+    std::string p(getParam(paramkey));
+    if (p.length() == 0)
+      return defaultValue;
+  
+    std::istringstream iss(p);
+    float value;
+    iss >> value;
+    if (iss.fail())
+      return defaultValue;
+    return value;
+  }
+
+  BGModelFactory::FactoryDict registerBGFactories(){
+    BGModelFactory::FactoryDict dict;
+
+    BGModelFactory* bgmF = new BGModelCvFGDFactory();
+    dict.insert(make_pair(bgmF->description,bgmF));
+    bgmF = new BGModelCvMoGFactory();
+    dict.insert(make_pair(bgmF->description,bgmF));
+    bgmF = new BGModelExpFactory();
+    dict.insert(make_pair(bgmF->description,bgmF));
+    bgmF = new BGModelMeanFactory();
+    dict.insert(make_pair(bgmF->description,bgmF));
+    bgmF = new BGModelModeFactory();
+    dict.insert(make_pair(bgmF->description,bgmF));
+    bgmF = new BGModelCBFactory();
+    dict.insert(make_pair(bgmF->description,bgmF));
+
+    return dict;
+  }
+  
+  const BGModelFactory::FactoryDict BGModelFactory::factories = registerBGFactories();
+
   BGModelFactory::BGModelFactory(const std::string desc)
     :description(desc) {}
 
-  const CvFGDStatModelParams BGModelCvFGDFactory::defaultParams = {128, //Lc
-								   15,//N1c
-								   25,//N2c
-								   64,//Lcc
-								   25,//N1cc
-								   40,//N2cc
+  const CvFGDStatModelParams BGModelCvFGDFactory::defaultParams = {CV_BGFG_FGD_LC, //Lc
+								   CV_BGFG_FGD_N1C,//N1c
+								   CV_BGFG_FGD_N2C,//N2c
+								   CV_BGFG_FGD_LCC,//Lcc
+								   CV_BGFG_FGD_N1CC,//N1cc
+								   CV_BGFG_FGD_N2CC,//N2cc
 								   1,//is_obj_without_holes
 								   1,//perform_morphing
-								   0.1f,//alpha1
-								   0.005f,//alpha2
-								   0.1f,//alpha3
-								   2,//delta
-								   0.9f,//T
-								   15.0f//minArea
+								   CV_BGFG_FGD_ALPHA_1,//alpha1
+								   CV_BGFG_FGD_ALPHA_2,//alpha2
+								   CV_BGFG_FGD_ALPHA_3,//alpha3
+								   CV_BGFG_FGD_DELTA,//delta
+								   CV_BGFG_FGD_T,//T
+								   CV_BGFG_FGD_MINAREA//minArea
   };
   
-  BGModelCvFGDFactory::BGModelCvFGDFactory(const std::string desc, const CvFGDStatModelParams& params)
-    :BGModelFactory(desc), params(params) {}
+  BGModelCvFGDFactory::BGModelCvFGDFactory(const std::string desc)
+    :BGModelFactory(desc) {}
 
-  BGModelCvFGDFactory* BGModelCvFGDFactory::clone() const{
-    return new BGModelCvFGDFactory(*this);
-  }
+  // BGModelCvFGDFactory* BGModelCvFGDFactory::clone() const{
+  //   return new BGModelCvFGDFactory(*this);
+  // }
 
-  CvBGStatModel* BGModelCvFGDFactory::createModel(IplImage* firstFrame) const{
-    CvFGDStatModelParams tmpParams(params);//params is const
+
+  CvBGStatModel* BGModelCvFGDFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+    CvFGDStatModelParams tmpParams;
+    //parse params
+    tmpParams.Lc = params.getParamAsIntWithDefault("Lc",defaultParams.Lc);
+    tmpParams.N1c = params.getParamAsIntWithDefault("N1c",defaultParams.N1c);
+    tmpParams.N2c = params.getParamAsIntWithDefault("N2c",defaultParams.N2c);
+    tmpParams.Lcc = params.getParamAsIntWithDefault("Lcc",defaultParams.Lcc);
+    tmpParams.N1cc = params.getParamAsIntWithDefault("N1cc",defaultParams.N1cc);
+    tmpParams.N2cc = params.getParamAsIntWithDefault("N2cc",defaultParams.N2cc);
+    tmpParams.is_obj_without_holes = params.getParamAsIntWithDefault("is_obj_without_holes",
+								     defaultParams.is_obj_without_holes);
+    tmpParams.perform_morphing = params.getParamAsIntWithDefault("perform_morphing",
+								 defaultParams.perform_morphing);
+    tmpParams.alpha1 = params.getParamAsFloatWithDefault("alpha1",defaultParams.alpha1);
+    tmpParams.alpha2 = params.getParamAsFloatWithDefault("alpha2",defaultParams.alpha2);
+    tmpParams.alpha3 = params.getParamAsFloatWithDefault("alpha3",defaultParams.alpha3);
+    tmpParams.delta = params.getParamAsFloatWithDefault("delta",defaultParams.delta);
+    tmpParams.T = params.getParamAsFloatWithDefault("T",defaultParams.T);
+    tmpParams.minArea = params.getParamAsFloatWithDefault("minArea",defaultParams.minArea);
     return cvCreateFGDStatModel(firstFrame,&tmpParams);
   }
 
-  const CvGaussBGStatModelParams BGModelCvMoGFactory::defaultParams = {200,//win_size
-								5,//n_gauss
-								0.7,//bg_threshold
-								2.5,//std_threshold
-								15.0f,//minArea
-								0.05f,//weight_init
-								30,//variance_init
+  const CvGaussBGStatModelParams BGModelCvMoGFactory::defaultParams = {CV_BGFG_MOG_WINDOW_SIZE,//win_size
+								       CV_BGFG_MOG_NGAUSSIANS,//n_gauss
+								       CV_BGFG_MOG_BACKGROUND_THRESHOLD,//bg_threshold
+								       CV_BGFG_MOG_STD_THRESHOLD,//std_threshold
+								       CV_BGFG_MOG_MINAREA,//minArea
+								       CV_BGFG_MOG_WEIGHT_INIT,//weight_init
+								       CV_BGFG_MOG_SIGMA_INIT,//variance_init
   };
 
-  BGModelCvMoGFactory::BGModelCvMoGFactory(const std::string desc, const CvGaussBGStatModelParams& params)
-    :BGModelFactory(desc), params(params) {}
+  BGModelCvMoGFactory::BGModelCvMoGFactory(const std::string desc)
+    :BGModelFactory(desc) {}
 
-  BGModelCvMoGFactory* BGModelCvMoGFactory::clone() const{
-    return new BGModelCvMoGFactory(*this);
-  }
+  // BGModelCvMoGFactory* BGModelCvMoGFactory::clone() const{
+  //   return new BGModelCvMoGFactory(*this);
+  // }
 
-  CvBGStatModel* BGModelCvMoGFactory::createModel(IplImage* firstFrame) const{
-    CvGaussBGStatModelParams tmpParams(params);//params is const
+  CvBGStatModel* BGModelCvMoGFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+    CvGaussBGStatModelParams tmpParams;
+    tmpParams.win_size = params.getParamAsIntWithDefault("win_size",defaultParams.win_size);
+    tmpParams.n_gauss = params.getParamAsIntWithDefault("n_gauss",defaultParams.n_gauss);
+    tmpParams.bg_threshold = params.getParamAsFloatWithDefault("bg_threshold",defaultParams.bg_threshold);
+    tmpParams.std_threshold = params.getParamAsFloatWithDefault("std_threshold",defaultParams.std_threshold);
+    tmpParams.minArea  = params.getParamAsFloatWithDefault("minArea",defaultParams.minArea);
+    tmpParams.weight_init = params.getParamAsFloatWithDefault("weight_init",defaultParams.weight_init);
+    tmpParams.variance_init = params.getParamAsFloatWithDefault("variance_init",defaultParams.variance_init);
     return cvCreateGaussianBGModel(firstFrame,&tmpParams);
   }
 
@@ -83,15 +186,23 @@ namespace bgfglab{
 								 1 //perform segmentation
   };
 
-  BGModelExpFactory::BGModelExpFactory(const std::string desc, const BGExpStatModelParams& params)
-    :BGModelFactory(desc), params(params) {}
+  BGModelExpFactory::BGModelExpFactory(const std::string desc)
+    :BGModelFactory(desc) {}
 
-  BGModelExpFactory* BGModelExpFactory::clone() const{
-    return new BGModelExpFactory(*this);
-  }
+  // BGModelExpFactory* BGModelExpFactory::clone() const{
+  //   return new BGModelExpFactory(*this);
+  // }
 
-  CvBGStatModel* BGModelExpFactory::createModel(IplImage* firstFrame) const{
-    BGExpStatModelParams tmpParams(params);//params is const
+  CvBGStatModel* BGModelExpFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+    BGExpStatModelParams tmpParams;
+    tmpParams.alpha  = params.getParamAsFloatWithDefault("alpha",defaultParams.alpha);
+    tmpParams.bg_update_rate = params.getParamAsIntWithDefault("bg_update_rate",defaultParams.bg_update_rate);
+    tmpParams.fg_update_rate = params.getParamAsIntWithDefault("fg_update_rate",defaultParams.fg_update_rate);
+    tmpParams.sg_params.is_obj_without_holes  = params.getParamAsIntWithDefault("is_obj_without_holes",
+										defaultParams.sg_params.is_obj_without_holes);
+    tmpParams.sg_params.perform_morphing = params.getParamAsIntWithDefault("perform_morphing",defaultParams.sg_params.perform_morphing);
+    tmpParams.sg_params.minArea = params.getParamAsFloatWithDefault("minArea",defaultParams.sg_params.minArea);
+    tmpParams.perform_segmentation = params.getParamAsIntWithDefault("perform_segmentation",defaultParams.perform_segmentation);
     return createBGExpStatModel(firstFrame,&tmpParams);
   }
 
@@ -104,15 +215,24 @@ namespace bgfglab{
 								    1 //perform segmentation
   };
 
-  BGModelMeanFactory::BGModelMeanFactory(const std::string desc, const BGMeanStatModelParams& params)
-    :BGModelFactory(desc), params(params) {}
+  BGModelMeanFactory::BGModelMeanFactory(const std::string desc)
+    :BGModelFactory(desc) {}
 
-  BGModelMeanFactory* BGModelMeanFactory::clone() const{
-    return new BGModelMeanFactory(*this);
-  }  
+  // BGModelMeanFactory* BGModelMeanFactory::clone() const{
+  //   return new BGModelMeanFactory(*this);
+  // }
+  
 
-  CvBGStatModel* BGModelMeanFactory::createModel(IplImage* firstFrame) const{
-    BGMeanStatModelParams tmpParams(params);//params is const
+  CvBGStatModel* BGModelMeanFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+    BGMeanStatModelParams tmpParams;
+    tmpParams.n_frames  = params.getParamAsIntWithDefault("n_frames",defaultParams.n_frames);
+    tmpParams.bg_update_rate = params.getParamAsIntWithDefault("bg_update_rate",defaultParams.bg_update_rate);
+    tmpParams.fg_update_rate = params.getParamAsIntWithDefault("fg_update_rate",defaultParams.fg_update_rate);
+    tmpParams.sg_params.is_obj_without_holes  = params.getParamAsIntWithDefault("is_obj_without_holes",
+										defaultParams.sg_params.is_obj_without_holes);
+    tmpParams.sg_params.perform_morphing = params.getParamAsIntWithDefault("perform_morphing",defaultParams.sg_params.perform_morphing);
+    tmpParams.sg_params.minArea = params.getParamAsFloatWithDefault("minArea",defaultParams.sg_params.minArea);
+    tmpParams.perform_segmentation = params.getParamAsIntWithDefault("perform_segmentation",defaultParams.perform_segmentation);
     return createBGMeanStatModel(firstFrame,&tmpParams);
   }
 
@@ -126,15 +246,24 @@ namespace bgfglab{
 								   1 //perform segmentation
   };
 
-  BGModelModeFactory::BGModelModeFactory(const std::string desc, const BGModeStatModelParams& params)
-    :BGModelFactory(desc), params(params) {}
+  BGModelModeFactory::BGModelModeFactory(const std::string desc)
+    :BGModelFactory(desc) {}
 
-  BGModelModeFactory* BGModelModeFactory::clone() const{
-    return new BGModelModeFactory(*this);
-  }
+  // BGModelModeFactory* BGModelModeFactory::clone() const{
+  //   return new BGModelModeFactory(*this);
+  // }
 
-  CvBGStatModel* BGModelModeFactory::createModel(IplImage* firstFrame) const{
-    BGModeStatModelParams tmpParams(params);//params is const
+  CvBGStatModel* BGModelModeFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+    BGModeStatModelParams tmpParams;
+    tmpParams.n_frames  = params.getParamAsIntWithDefault("n_frames",defaultParams.n_frames);
+    tmpParams.levels  = params.getParamAsIntWithDefault("levels",defaultParams.levels);
+    tmpParams.bg_update_rate = params.getParamAsIntWithDefault("bg_update_rate",defaultParams.bg_update_rate);
+    tmpParams.fg_update_rate = params.getParamAsIntWithDefault("fg_update_rate",defaultParams.fg_update_rate);
+    tmpParams.sg_params.is_obj_without_holes  = params.getParamAsIntWithDefault("is_obj_without_holes",
+										defaultParams.sg_params.is_obj_without_holes);
+    tmpParams.sg_params.perform_morphing = params.getParamAsIntWithDefault("perform_morphing",defaultParams.sg_params.perform_morphing);
+    tmpParams.sg_params.minArea = params.getParamAsFloatWithDefault("minArea",defaultParams.sg_params.minArea);
+    tmpParams.perform_segmentation = params.getParamAsIntWithDefault("perform_segmentation",defaultParams.perform_segmentation);
     return createBGModeStatModel(firstFrame,&tmpParams);
   }
 
@@ -147,15 +276,23 @@ namespace bgfglab{
 							       1 //perform segmentation
   };
   
-  BGModelCBFactory::BGModelCBFactory(const std::string desc, const BGCBStatModelParams& params)
-    :BGModelFactory(desc), params(params) {}
+  BGModelCBFactory::BGModelCBFactory(const std::string desc)
+    :BGModelFactory(desc) {}
 
-  BGModelCBFactory* BGModelCBFactory::clone() const{
-    return new BGModelCBFactory(*this);
-  }
+  // BGModelCBFactory* BGModelCBFactory::clone() const{
+  //   return new BGModelCBFactory(*this);
+  // }
 
-  CvBGStatModel* BGModelCBFactory::createModel(IplImage* firstFrame) const{
-    BGCBStatModelParams tmpParams(params);//params is const
+  CvBGStatModel* BGModelCBFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+    BGCBStatModelParams tmpParams;
+    tmpParams.cb_rotation_rate  = params.getParamAsIntWithDefault("cb_rotation_rate",defaultParams.cb_rotation_rate);
+    tmpParams.bg_update_rate = params.getParamAsIntWithDefault("bg_update_rate",defaultParams.bg_update_rate);
+    tmpParams.fg_update_rate = params.getParamAsIntWithDefault("fg_update_rate",defaultParams.fg_update_rate);
+    tmpParams.sg_params.is_obj_without_holes  = params.getParamAsIntWithDefault("is_obj_without_holes",
+										defaultParams.sg_params.is_obj_without_holes);
+    tmpParams.sg_params.perform_morphing = params.getParamAsIntWithDefault("perform_morphing",defaultParams.sg_params.perform_morphing);
+    tmpParams.sg_params.minArea = params.getParamAsFloatWithDefault("minArea",defaultParams.sg_params.minArea);
+    tmpParams.perform_segmentation = params.getParamAsIntWithDefault("perform_segmentation",defaultParams.perform_segmentation);
     return createBGCBStatModel(firstFrame,&tmpParams);
   }
 

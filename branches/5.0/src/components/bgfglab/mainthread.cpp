@@ -20,8 +20,11 @@
  */
 
 #include <jderobotice/interfaceconnect.h>
+#include <algorithm>
+#include <cctype>
 #include "mainthread.h"
 #include "viewgtk.h"
+#include "viewtext.h"
 
 namespace bgfglab {
   MainThread::MainThread(const jderobotice::Context &context)
@@ -64,8 +67,36 @@ namespace bgfglab {
     //create controller
     controller.reset(new Controller(context.tracer(), *model));
 
-    //create view: maybe we could activate/deactivate gui through config
-    ViewPtr vp(new ViewGtk(*controller));
+    //read algorithm config and set it if present
+    std::string bgalgPropPrefix(prefix+"BGAlgorithm.");
+    std::string bgalg(prop->getProperty(bgalgPropPrefix+"Name"));
+    if (bgalg.length() > 0){
+      ParamDict bgalgParams(prop->getPropertiesForPrefix(bgalgPropPrefix), bgalgPropPrefix);
+      controller->setBGModel(bgalg,bgalgParams);
+    }
+
+    //start dumping?
+    std::string dumpPropPrefix(prefix+"Dump.");
+    std::string dumpfilename(prop->getPropertyWithDefault(dumpPropPrefix+"File","bgfglab.dump"));
+    int dumpFrames = prop->getPropertyAsInt(dumpPropPrefix+"Frames");
+    int delayFrames = prop->getPropertyAsInt(dumpPropPrefix+"DelayFrames");
+    int dumpDataImg = prop->getPropertyAsIntWithDefault(dumpPropPrefix+"DumpIMG",1);
+    int dumpDataBg = prop->getPropertyAsIntWithDefault(dumpPropPrefix+"DumpBG",1);
+    int dumpDataFg = prop->getPropertyAsIntWithDefault(dumpPropPrefix+"DumpFG",0);
+    if (dumpFrames > 0)
+      controller->startDumpData(dumpfilename,dumpFrames,delayFrames,
+				dumpDataImg,dumpDataBg,dumpDataFg);
+
+    //create view: ui can be gui or text
+    std::string uiPropPrefix(prefix+"UI.");
+    std::string uiMode(prop->getPropertyWithDefault(uiPropPrefix+"Mode","gui"));
+    std::transform(uiMode.begin(), uiMode.end(), uiMode.begin(), ::tolower);//to lower case
+
+    ViewPtr vp;
+    if (uiMode.compare("text") == 0){//text ui
+      vp.reset(new ViewText(*controller));
+    }else//graphic ui. Default mode
+      vp.reset(new ViewGtk(*controller));
     controller->addView(vp);
   }
 
