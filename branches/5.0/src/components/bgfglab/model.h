@@ -32,7 +32,9 @@
 namespace bgfglab {
   class Model : public jderobotutil::Subject{
   public:
-    Model(gbxutilacfr::Tracer& tracer, const colorspaces::Image& initialImg) throw();
+    Model(gbxutilacfr::Tracer& tracer, 
+	  const colorspaces::Image& initialImg,
+	  const colorspaces::Image::FormatPtr internalFmt) throw();
     ~Model();
 
     /*model input data*/
@@ -50,10 +52,10 @@ namespace bgfglab {
     const colorspaces::Image& getCurrentImage() const throw() { return currentImage; }
 
     /*Returned image is available until BG model updated*/
-    const colorspaces::Image& getBGImage() const throw()  { return bgImage; }
+    const colorspaces::Image& getBGImage() const throw();
 
     /*Returned image is available until BG model updated*/
-    const colorspaces::Image& getFGMaskImage() const throw()  { return fgMaskImage; }
+    const colorspaces::Image& getFGMaskImage() const throw();
 
     gbxutilacfr::Tracer& tracer() { return _tracer; };
 
@@ -66,10 +68,11 @@ namespace bgfglab {
   private:
     gbxutilacfr::Tracer& _tracer;
     colorspaces::Image currentImage;
-    colorspaces::ImageRGB888 bgImage;
+    colorspaces::Image bgImage;
     colorspaces::ImageGRAY8 fgMaskImage;
     jderobotutil::IpsCounter bg_model_ips;
     CvBGStatModel* bg_model;
+    colorspaces::Image::FormatPtr internalFmt;
     bool dumpDataOn;
     bool dumpDataImg;
     bool dumpDataBg;

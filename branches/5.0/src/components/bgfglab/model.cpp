@@ -23,6 +23,7 @@
 #include "model.h"
 #include <assert.h>
 #include <iostream>
+#include <unistd.h>
 
 namespace bgfglab {
   const std::string imgdumpSuffix = ".imgdump";
@@ -53,14 +54,16 @@ namespace bgfglab {
   }
 
   Model::Model(gbxutilacfr::Tracer& tracer, 
-	       const colorspaces::Image& initialImg) throw ()
+	       const colorspaces::Image& initialImg,
+	       const colorspaces::Image::FormatPtr internalFmt) throw ()
     : _tracer(tracer), 
       currentImage(initialImg.clone()), 
       bgImage(currentImage), 
       fgMaskImage(initialImg.width, 
 		  initialImg.height),
       bg_model_ips(),
-      bg_model(0) {}
+      bg_model(0),
+      internalFmt(internalFmt?internalFmt:initialImg.format()) {}
 
   Model::~Model(){
     if (bg_model != 0){
@@ -72,14 +75,13 @@ namespace bgfglab {
   void Model::updateBGModel(const colorspaces::Image& img) throw () {
     currentImage = img.clone();//FIXME: avoid copy
     if (bg_model != 0) {
-      //working in hsv colorspace
-      colorspaces::ImageHSV888 hsvImg(currentImage);
-      IplImage tmpImg(hsvImg);
+      colorspaces::Image workingImg(img.width,img.height,internalFmt);
+      img.convert(workingImg);//conversion if needed
+      IplImage tmpImg(workingImg);
       cvUpdateBGStatModel(&tmpImg, bg_model);
-      /*data isn't copied*/
-      colorspaces::Image hsvBG(cv::Mat(bg_model->background), 
-			       colorspaces::ImageHSV888::FORMAT_HSV888);
-      hsvBG.convert(bgImage);
+
+      //update bg & fgmask
+      bgImage = colorspaces::Image(cv::Mat(bg_model->background),internalFmt);
       fgMaskImage = colorspaces::Image(cv::Mat(bg_model->foreground), 
 				       colorspaces::ImageGRAY8::FORMAT_GRAY8);
 
@@ -89,11 +91,11 @@ namespace bgfglab {
 	if(ofDumpData.is_open()){//dump data
 	  dumpDataFrameCounter++;
 	  if (ofDumpDataImg.is_open())
-	    ofDumpDataImg << hsvImg;//operator<< defined above
+	    ofDumpDataImg << workingImg;//operator<< defined above
 	  if (ofDumpDataBg.is_open())
-	    ofDumpDataBg << hsvBG;
+	    ofDumpDataBg << getBGImage();
 	  if (ofDumpDataFgMask.is_open())
-	    ofDumpDataFgMask << fgMaskImage;
+	    ofDumpDataFgMask << getFGMaskImage();
 	  if ((maxDumpFrames > 0) && (dumpDataFrameCounter >= maxDumpFrames))
 	    stopDumpData();
 	}
@@ -105,7 +107,7 @@ namespace bgfglab {
 
   bool Model::isDumpingData(int* dumpedFrames) const{
     if (dumpedFrames != 0)
-      *dumpedFrames = dumpDataFrameCounter;
+      *dumpedFrames = dumpDataFrameCounter-noDumpFrames;
     return ofDumpData.is_open();
   }
 
@@ -123,12 +125,23 @@ namespace bgfglab {
 
     if (maxFrames == 0)
       return false;
+    
+    //if filename relative prefix cwd to make paths absolute
+    std::string pathprefix;
+    if (filename[0] != '/'){
+      char cwd[PATH_MAX];
 
-    this->dumpDataFilename = filename;
+      if (getcwd(cwd,PATH_MAX))
+	pathprefix = cwd;
+    }
+      
+    this->dumpDataFilename = pathprefix + '/' + filename;
     this->dumpDataFrameCounter = 0;
     this->maxDumpFrames = maxFrames;
     this->noDumpFrames = startDumpingAfterFrames;
     
+    std::cerr << "Dumping to: " << this->dumpDataFilename << std::endl;
+
     ofDumpData.open(dumpDataFilename.c_str(),std::ios_base::out|std::ios_base::trunc);
     if (!ofDumpData.is_open())//error, stop dump and return false
       goto startDumpData_err;
@@ -176,8 +189,9 @@ namespace bgfglab {
 	channels = currentImage.channels();
 	nframes = dumpDataFrameCounter;
       }
-      ofDumpData << nframes << ' ' << rows << ' ' << cols << ' ' 
-		 << channels << ' ' << dumpDataFilename + imgdumpSuffix << std::endl;
+      ofDumpData << dumpDataFilename + imgdumpSuffix << ' ' << nframes << ' ' 
+		 << rows << ' ' << cols << ' ' 
+		 << channels << std::endl;
 
       rows = cols = channels = nframes = 0;
       if (ofDumpDataBg.is_open()){
@@ -203,21 +217,23 @@ namespace bgfglab {
       ofDumpData.close();
     }
   }
-  
+
+  const colorspaces::Image& Model::getBGImage() const throw() {
+    return bgImage;
+  }
+
+  const colorspaces::Image& Model::getFGMaskImage() const throw(){
+    return fgMaskImage;
+  }
+
   void Model::setBGModel(CvBGStatModel* newBGModel) throw()
   { 
     assert(newBGModel != 0);
 
     stopDumpData();
 
-    /*Update data. data isn't copied*/
-    bgImage = colorspaces::Image(cv::Mat(newBGModel->background), 
-				 colorspaces::ImageRGB888::FORMAT_RGB888);
-    fgMaskImage = colorspaces::Image(cv::Mat(newBGModel->foreground), 
-				     colorspaces::ImageGRAY8::FORMAT_GRAY8);
     CvBGStatModel* oldBGModel = bg_model;
     bg_model = newBGModel;
-
     if (oldBGModel != 0)
       cvReleaseBGStatModel(&oldBGModel);
 

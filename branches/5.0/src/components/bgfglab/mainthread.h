@@ -48,5 +48,7 @@ namespace bgfglab {
 
     std::auto_ptr<Model> model;//data container
     std::auto_ptr<Controller> controller;
+
+    bool stopAfterDumpFinished;//controlls if thread is stoped after dumping finished
   };
 }

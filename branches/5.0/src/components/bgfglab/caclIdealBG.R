@@ -1,27 +1,23 @@
 #!/usr/bin/Rscript
 
-source(bgstats.R)
-
 args<-commandArgs(T)
 
-if (length(args) != 3){
-  stop("Usage: caclIdealBGClustering.R <dumpfile> <idealbg> <radius>")
+if (length(args) != 7){
+  stop("Usage: caclIdealBG.R <imgseqfile> <nimage> <nrow> <ncol> <nchannel> <radius> <outidealbgfile>")
 }
 
 #get args
-dumpfile<-args[1]
-idealbgfile<-args[2]
-radius<-as.integer(args[3])
+imgseqfile<-args[1]
+nimage<-as.integer(args[2])
+nrow<-as.integer(args[3])
+ncol<-as.integer(args[4])
+nchannel<-as.integer(args[5])
+radius<-as.integer(args[6])
+outidealbgfile<-args[7]
 
-#read dump info file
-dumpinfo<-readDumpDataInfo(dumpfile)
-imgIdx<-1 #dumpfile first line is real image data
 
-idealBG<-calcIdealBGClustering(dumpinfo$filename[imgIdx],
-                               dumpinfo$nimage[imgIdx],
-                               dumpinfo$nrow[imgIdx],
-                               dumpinfo$ncol[imgIdx],
-                               dumpinfo$nchannel[imgIdx],
-                               radius)
-writeImg(idealBG,idealfile)
+library(bgfglab)
+
+idealBG<-idealBGClusteringMC(imgseqfile,nimage,nrow,ncol,nchannel,radius)
+writeImg(idealBG,outidealbgfile)
 

@@ -30,7 +30,8 @@ namespace bgfglab {
   MainThread::MainThread(const jderobotice::Context &context)
     : jderobotice::SubsystemThread(context.tracer(),context.status(),"MainThread"),
       imagePrx(),fmt(),
-      context(context),model(),controller() {}
+      context(context),model(),controller(),
+      stopAfterDumpFinished(false) {}
 
   void MainThread::initialize(){
     //read configuration
@@ -61,15 +62,19 @@ namespace bgfglab {
 				  fmt,
 				  &(img->pixelData[0]));//data will be available until img is destroyed
 
+    //read algorithm config and set it if present
+    std::string bgalgPropPrefix(prefix+"BGAlgorithm.");
+    std::string bgalg(prop->getProperty(bgalgPropPrefix+"Name"));
+    std::string bgalgFmtName(prop->getProperty(bgalgPropPrefix+"Fmt"));
+
     //init model. Road dimensions 
-    model.reset(new Model(context.tracer(), initialImg));
+    model.reset(new Model(context.tracer(), initialImg,
+			  colorspaces::Image::Format::searchFormat(bgalgFmtName)));
     
     //create controller
     controller.reset(new Controller(context.tracer(), *model));
 
-    //read algorithm config and set it if present
-    std::string bgalgPropPrefix(prefix+"BGAlgorithm.");
-    std::string bgalg(prop->getProperty(bgalgPropPrefix+"Name"));
+    
     if (bgalg.length() > 0){
       ParamDict bgalgParams(prop->getPropertiesForPrefix(bgalgPropPrefix), bgalgPropPrefix);
       controller->setBGModel(bgalg,bgalgParams);
@@ -83,7 +88,7 @@ namespace bgfglab {
     int dumpDataImg = prop->getPropertyAsIntWithDefault(dumpPropPrefix+"DumpIMG",1);
     int dumpDataBg = prop->getPropertyAsIntWithDefault(dumpPropPrefix+"DumpBG",1);
     int dumpDataFg = prop->getPropertyAsIntWithDefault(dumpPropPrefix+"DumpFG",0);
-    if (dumpFrames > 0)
+    if (dumpDataImg || dumpDataBg || dumpDataFg)
       controller->startDumpData(dumpfilename,dumpFrames,delayFrames,
 				dumpDataImg,dumpDataBg,dumpDataFg);
 
@@ -95,6 +100,8 @@ namespace bgfglab {
     ViewPtr vp;
     if (uiMode.compare("text") == 0){//text ui
       vp.reset(new ViewText(*controller));
+      if (model->isDumpingData())
+	stopAfterDumpFinished = true;
     }else//graphic ui. Default mode
       vp.reset(new ViewGtk(*controller));
     controller->addView(vp);
@@ -105,6 +112,8 @@ namespace bgfglab {
 
     while(!isStopping()){
       getImage();
+      if (stopAfterDumpFinished && !model->isDumpingData())
+	stop();
     }
 
   }

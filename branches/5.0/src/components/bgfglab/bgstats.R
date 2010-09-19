@@ -1,9 +1,11 @@
 library(flexclust)
 library(bigmemory)
+library(biganalytics)
 library(multicore)
 library(foreach)
 library(doMC)
 
+options(bigmemory.typecast.warning=FALSE) #remove cast warning
 registerDoMC(cores=multicore:::detectCores())
 
 readImg <- function(conn,imgsize){
@@ -16,7 +18,7 @@ readImgSeq <- function(conn,n,imgsize){
     myconn <- file(conn,"rb")
   else
     myconn <- conn
-  
+
   imgSeq<-big.matrix(imgsize,n,type="short",shared="F")
   for (col in 1:n){
     imgSeq[,col]<-readImg(myconn,imgsize)
@@ -31,7 +33,7 @@ readDumpDataInfo<-function(conn){
   else
     myconn <- conn
   
-  dumpinfo <- scan(myconn,list(nframe=0,nrow=0,ncol=0,nchannel=0,filename=""))
+  dumpinfo <- scan(myconn,list(filename="",nimage=0,nrow=0,ncol=0,nchannel=0))
   close(myconn)
   dumpinfo
 } 
@@ -52,7 +54,7 @@ writeImgSeq <- function(imgSeq, conn){
   }
 }
 
-calcIdealBGMean <- function(conn,nimage,nrow,ncol,nchannel){
+idealBGMean <- function(conn,nimage,nrow,ncol,nchannel){
   if (is.character(conn))
     myconn <- file(conn,"rb")
   else
@@ -69,7 +71,7 @@ calcIdealBGMean <- function(conn,nimage,nrow,ncol,nchannel){
   as.integer(round(imgMean))
 }
 
-calcIdealBGMeanMC <- function(conn,nimage,nrow,ncol,nchannel,rowsbyjob){
+idealBGMeanMC <- function(conn,nimage,nrow,ncol,nchannel,rowsbyjob){
   imgsize<-nrow*ncol*nchannel
   npixel<-nrow*ncol
 
@@ -81,7 +83,7 @@ calcIdealBGMeanMC <- function(conn,nimage,nrow,ncol,nchannel,rowsbyjob){
   as.integer(round(imgMean))
 }
 
-calcIdealBGMode <- function(conn,nimage,nrow,ncol,nchannel,levels){
+idealBGMode <- function(conn,nimage,nrow,ncol,nchannel,levels){
   if (is.character(conn))
     myconn <- file(conn,"rb")
   else
@@ -104,40 +106,37 @@ calcIdealBGMode <- function(conn,nimage,nrow,ncol,nchannel,levels){
   apply(imgMode,2,maxAndAdjust)
 }
 
-calcIdealBGClustering <- function(conn,nimage,nrow,ncol,nchannel,radius){
-  if (is.character(conn))
-    myconn <- file(conn,"rb")
-  else
-    myconn <- conn
-
-  pxDataSize<-nimage*nchannel
-  imgsize<-nrow*ncol*nchannel
-  npixel<-nrow*ncol
-
-  imgClust<-NULL
-  centers<-NULL
-  for (i in 1:npixel){#pixel index
-    #read pixel data, each channel in a column
-    pxData<-matrix(readBin(myconn,integer(),n=pxDataSize,size=1,signed=F),ncol=nchannel)
-    cl <- try(qtclust(pxData,radius=radius),TRUE)
-    #cl<-try(kcca(pData,2),TRUE)
-    if (isS4(cl)){#qtclust returned a solution
-      centers<-cl@centers[1,]
-    }else{#just one, so center is the mean
-      centers<-apply(pxData,2,mean)
-    }
-    imgClust<-append(imgClust,centers)
-  }
-  as.integer(round(imgClust))
-}
-  
-calcIdealBGClusteringMC <- function(conn,nimage,nrow,ncol,nchannel,radius){
+idealBGClustering <- function(conn,nimage,nrow,ncol,nchannel,radius){
   pxDataSize<-nimage*nchannel
   imgsize<-nrow*ncol*nchannel
   npixel<-nrow*ncol
 
   imgSeq<-readImgSeq(conn,nimage,imgsize)
-  imgClust<-foreach(i=seq(1:nrow(imgSeq),by=nchannel),.combine=c) %dopar% {
+  
+  imgClust<-NULL
+  centers<-NULL
+  for (i in seq(1,imgsize,by=nchannel)){#row index
+    #read pixel data, each channel in a column
+    pxData<-t(imgSeq[i:(i+nchannel-1),])
+     cl <- try(qtclust(pxData,radius=radius),TRUE)
+     #cl<-try(kcca(pData,2),TRUE)
+     if (isS4(cl)){#qtclust returned a solution
+       centers<-cl@centers[1,]
+     }else{#just one, so center is the mean
+       centers<-apply(pxData,2,mean)
+     }
+     imgClust<-append(imgClust,centers)
+   }
+   as.integer(round(imgClust))
+ }
+
+idealBGClusteringMC <- function(conn,nimage,nrow,ncol,nchannel,radius){
+  pxDataSize<-nimage*nchannel
+  imgsize<-nrow*ncol*nchannel
+  npixel<-nrow*ncol
+  
+  imgSeq<-readImgSeq(conn,nimage,imgsize)
+  imgClust<-foreach(i=seq(1,imgsize,by=nchannel),.combine=c) %dopar% {
     pxData<-t(imgSeq[i:(i+nchannel-1),])
     cl <- try(qtclust(pxData,radius),TRUE)
     centers<-NULL
@@ -151,16 +150,35 @@ calcIdealBGClusteringMC <- function(conn,nimage,nrow,ncol,nchannel,radius){
   as.integer(round(imgClust))
 }
 
-# image is a matrix with dim height x (width*nchannels)
-# data is P0ch0P0ch1...P0chN...
-# return a list with an matrix per channel
-splitChannels <- function(img,nchannels){
-  channelList<-NULL
-  ncol<-dim(img)[2]
-  for (i in 1:nchannels){
-    channelList<-c(channelList,list(img[,seq(i,ncol,by=nchannels)]))
+euclideanDiffBG <- function(conn,nimage,nrow,ncol,nchannel,idealBG){
+  pxDataSize<-nimage*nchannel
+  imgsize<-nrow*ncol*nchannel
+  npixel<-nrow*ncol
+
+  idealBGPlanar<-splitChannels(idealBG,nchannel)
+
+  bgimgSeq<-readImgSeq(conn,nimage,imgsize)
+  meanDiff<-vector("integer",npixel)
+  for (i in seq(1,nimage)){
+    bgimgPlanar<-splitChannels(bgimgSeq[,i],nchannel)
+    meanDiff<-meanDiff+(sqrt(apply((idealBGPlanar-bgimgPlanar)^2,1,sum))/nimage)
   }
-  channelList
+  meanDiff
+}
+
+# image is fitted in a column matrix
+# data is P0ch0P0ch1...P0chN...
+# return a matrix with one channel per column
+splitChannels <- function(img,nchannel){
+  if (length(img) %% nchannel != 0){
+    stop("img length not divisible by nchannel")
+  }
+  
+  channelMat<-matrix(img,ncol=nchannel)
+  for (i in 1:nchannel){
+    channelMat[,i]<-img[seq(i,length(img),by=nchannel)]
+  }
+  channelMat
 }
 
 # list contains each channel in an element

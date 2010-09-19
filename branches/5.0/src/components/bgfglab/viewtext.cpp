@@ -35,7 +35,7 @@ namespace bgfglab {
     int dumpedFrames = 0;
     controller.model().isDumpingData(&dumpedFrames);
 
-    std::cout << controller.model().bgModelIps().ips() << "iterations/s | " << dumpedFrames << "frames dumped\r";
+    std::cout << controller.model().bgModelIps().ips() << " iterations/s | " << dumpedFrames << " frames dumped        \r";
     
     //Actions are done here, while in update method we are in bgfglab thread
     
