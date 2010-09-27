@@ -85,6 +85,11 @@ namespace colorspaces {
     /**
      * Constructor
      */
+    Image();
+
+    /**
+     * Constructor
+     */
     Image(const int width, const int height, const FormatPtr fmt);
     
     /**
@@ -116,7 +121,6 @@ namespace colorspaces {
      * Convert image to dst fmt
      */
     Image& convert(Image& dst) const throw(NoConversion);
-
 
     /**
      * Clone image returning a new copy
@@ -159,6 +163,19 @@ namespace colorspaces {
     void toYUY2(Image& dst) const throw(FormatMismatch);
     void toHSV888(Image& dst) const throw(FormatMismatch);
     void toYCRCB(Image& dst) const throw(FormatMismatch);
+
+    /**
+     * Read from a file
+     * See cv::imread for flags and params
+     */
+    static ImageRGB888 read(const std::string& filename);
+    
+    /**
+     * Write to a file
+     * See cv::imwrite for flags and params
+     */
+    bool write(const std::string& filename, const std::vector<int>& params=std::vector<int>());
+
     
     /**
      * Factory method
@@ -237,6 +254,18 @@ namespace colorspaces {
      */
     void toRGB888(Image& dst) const throw(FormatMismatch);
     void toYUY2(Image& dst) const throw(FormatMismatch);
+
+    /**
+     * Read from a file
+     * See cv::imread for flags and params
+     */
+    static ImageGRAY8 read(const std::string& filename);
+    
+    /**
+     * Write to a file
+     * See cv::imwrite for flags and params
+     */
+    bool write(const std::string& filename, const std::vector<int>& params=std::vector<int>());
 
     /**
      * Factory method

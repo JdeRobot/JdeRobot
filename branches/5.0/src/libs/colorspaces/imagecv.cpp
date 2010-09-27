@@ -2,6 +2,11 @@
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
+#include <highgui.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <stdexcept>
 
 namespace colorspaces {
   Image::Format::Format(const std::string name, const int id, const int cvType, imageCtor ctor, imageCvt cvt)
@@ -53,6 +58,9 @@ namespace colorspaces {
   const Image::FormatPtr ImageHSV888::FORMAT_HSV888 = Image::Format::createFormat("HSV888",CV_8UC3,&ImageHSV888::createInstance,&ImageHSV888::imageCvt);
   const Image::FormatPtr ImageYCRCB::FORMAT_YCRCB = Image::Format::createFormat("YCRCB",CV_8UC3,&ImageYCRCB::createInstance,&ImageYCRCB::imageCvt);
 
+  Image::Image()
+    : cv::Mat(),width(0),height(0),_format() {}
+
   Image::Image(const int width, const int height, const FormatPtr fmt)
     : cv::Mat(height,width,fmt->cvType),width(width),height(height),_format(fmt) {}
 
@@ -74,6 +82,21 @@ namespace colorspaces {
   ImageRGB888::ImageRGB888(const Image& i)
     : Image(i.width,i.height,FORMAT_RGB888) {
     i.convert(*this);
+  }
+
+  ImageRGB888 ImageRGB888::read(const std::string& filename){
+    struct stat s;
+    if (stat(filename.c_str(),&s) == -1)
+      throw std::runtime_error(filename+" not found");
+    cv::Mat readImage(cv::imread(filename));//BGR
+    cv::cvtColor(readImage,readImage,CV_BGR2RGB);
+    return ImageRGB888(Image(readImage,FORMAT_RGB888));
+  }
+
+  bool ImageRGB888::write(const std::string& filename,const std::vector<int>& params){
+    cv::Mat bgrImage(this->size(),this->type());
+    cv::cvtColor(*this,bgrImage,CV_RGB2BGR);
+    return cv::imwrite(filename, bgrImage, params);
   }
 
   Image& ImageRGB888::imageCvt(const Image& src, Image& dst) throw(NoConversion){
@@ -224,6 +247,17 @@ namespace colorspaces {
   ImageGRAY8::ImageGRAY8(const Image& i)
     : Image(i.width,i.height,FORMAT_GRAY8) {
     i.convert(*this);
+  }
+
+  ImageGRAY8 ImageGRAY8::read(const std::string& filename){
+    struct stat s;
+    if (stat(filename.c_str(),&s) == -1)
+      throw std::runtime_error(filename+" not found");
+    return ImageGRAY8(Image(cv::imread(filename,0),FORMAT_GRAY8));
+  }
+
+  bool ImageGRAY8::write(const std::string& filename,const std::vector<int>& params){
+    return cv::imwrite(filename, *this, params);
   }
 
   Image& ImageGRAY8::imageCvt(const Image& src, Image& dst) throw(NoConversion){

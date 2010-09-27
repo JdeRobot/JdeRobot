@@ -96,4 +96,13 @@ int main(int argc, char **argv){
   std::cerr << "Converting to RGB888\n";
   ImageRGB888 img122 = img101;
   std::cerr << img122 << "\n";
+
+  //read/write
+  std::cerr << "Read/write RGB888..........\n";
+  ImageRGB888 readImage(ImageRGB888::read("testimg.jpg"));
+  readImage.write("testimgout.pnm");
+
+  std::cerr << "Read/write GRAY8..........\n";
+  ImageGRAY8 readImageG(ImageGRAY8::read("testimg.jpg"));
+  readImageG.write("testimgoutG.pnm");
 }
