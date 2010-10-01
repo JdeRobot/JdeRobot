@@ -80,6 +80,7 @@ namespace bgfglab {
     std::string dumpDataFilename;
     int dumpDataFrameCounter;
     int maxDumpFrames;
+    int maxDumpSeqDigits;
     int noDumpFrames;
     std::ofstream ofDumpData;
     std::ofstream ofDumpDataImg;

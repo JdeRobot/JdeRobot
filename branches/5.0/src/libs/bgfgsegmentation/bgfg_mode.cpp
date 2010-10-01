@@ -189,23 +189,24 @@ updateBGModeStatModel( IplImage* curr_frame, BGModeStatModel*  model ){
       bg[i] = (uchar)v;
     }
 
-    if (model->fg_frame_count >= model->params.fg_update_rate){
-      model->fg_frame_count = 0;
-      //clear fg
-      cvZero(model->foreground);
-      
-      //difference bg - curr_frame. Adaptative threshold
-      cvChangeDetection( model->background, curr_frame, model->foreground );//FIXME: just 3 channel support
-      
-      //segmentation if required
-      if (model->params.perform_segmentation)
-	region_count = bgfgSegmentation((CvBGStatModel*)model, &model->params.sg_params);
-    }
-    
     //update frame circular buffer idx
     model->frame_cbuffer_idx++;
-    if ((model->frame_cbuffer_idx % model->params.n_frames) == 0)
+    if (model->frame_cbuffer_idx >= model->params.n_frames)
       model->frame_cbuffer_idx = 0;
+
+  }
+
+  if (model->fg_frame_count >= model->params.fg_update_rate){
+    model->fg_frame_count = 0;
+    //clear fg
+    cvZero(model->foreground);
+    
+    //difference bg - curr_frame. Adaptative threshold
+    cvChangeDetection( model->background, curr_frame, model->foreground );//FIXME: just 3 channel support
+    
+    //segmentation if required
+    if (model->params.perform_segmentation)
+      region_count = bgfgSegmentation((CvBGStatModel*)model, &model->params.sg_params);
   }
 
   //update counters

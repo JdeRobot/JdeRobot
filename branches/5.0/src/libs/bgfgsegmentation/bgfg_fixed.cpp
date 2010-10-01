@@ -138,7 +138,6 @@ updateBGFIXEDStatModel( IplImage* curr_frame, BGFIXEDStatModel*  model ){
 
   //update counters
   model->fg_frame_count++;
-  model->bg_frame_count++;
 
   return region_count;
 }

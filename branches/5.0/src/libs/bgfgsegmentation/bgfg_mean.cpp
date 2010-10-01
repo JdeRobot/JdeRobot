@@ -20,6 +20,7 @@
  */
 
 #include "bgfgsegmentation.h"
+#include <algorithm>
 
 static void releaseBGMeanStatModel( BGMeanStatModel** _model );
 static int updateBGMeanStatModel( IplImage* curr_frame,
@@ -78,6 +79,7 @@ createBGMeanStatModel( IplImage* first_frame, BGMeanStatModelParams* parameters 
   CV_CALL( p_model->frame_cbuffer = (uchar*)cvAlloc(buf_size) );
   memset( p_model->frame_cbuffer, 0, buf_size );
   p_model->cbuffer_idx = 0;
+  p_model->cbuffer_nentries_init = 0;
 
   buf_size = pixel_count * first_frame->nChannels * sizeof(double);
   CV_CALL( p_model->mean = (double*)cvAlloc(buf_size) );
@@ -170,6 +172,10 @@ updateBGMeanStatModel( IplImage* curr_frame, BGMeanStatModel*  model ){
     
     cv::Scalar mean, std_dev;
 
+    //idx_last is used to avoid calc mean over not initialized values
+    if (model->cbuffer_nentries_init < model->params.n_frames)
+      model->cbuffer_nentries_init++;
+
     //bg and curr_frame have same size
     for (i = 0; i < model->background->height; i++){//rows
       uchar* frame_cbuffer_row_p = model->frame_cbuffer + i*frame_cbuffer_width_step;
@@ -184,7 +190,7 @@ updateBGMeanStatModel( IplImage* curr_frame, BGMeanStatModel*  model ){
 	  pixel_to_update_p[k] = curr_pixel_p[k];
 	
 	//calc mean and std dev   
-	cv::Mat pixel_cluster(1, model->params.n_frames, 
+	cv::Mat pixel_cluster(1, std::min(model->params.n_frames,model->cbuffer_nentries_init), 
 			      CV_MAKETYPE(CV_8U,model->background->nChannels),
 			      pixel_cluster_p);/*cv::Mat with pixel cluster with last n frames*/
 	cv::meanStdDev(pixel_cluster, mean, std_dev);
@@ -206,7 +212,7 @@ updateBGMeanStatModel( IplImage* curr_frame, BGMeanStatModel*  model ){
     }
     //update circular buffer idx
     model->cbuffer_idx++;
-    if ((model->cbuffer_idx % model->params.n_frames) == 0)
+    if (model->cbuffer_idx >= model->params.n_frames)
       model->cbuffer_idx = 0;
   }
   
@@ -222,7 +228,6 @@ updateBGMeanStatModel( IplImage* curr_frame, BGMeanStatModel*  model ){
     if (model->params.perform_segmentation)
       region_count = bgfgSegmentation((CvBGStatModel*)model, &model->params.sg_params);
   }
-
 
   //update counters
   model->fg_frame_count++;

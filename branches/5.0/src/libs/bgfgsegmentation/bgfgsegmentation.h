@@ -73,6 +73,7 @@ typedef struct BGMeanStatModel
   int fg_frame_count;/*count updated fg frames*/
   uchar* frame_cbuffer;/*circular frame buffer*/
   int cbuffer_idx;/*circular buffer idx*/
+  int cbuffer_nentries_init;/*circular buffer idx*/
   double* mean;
   double* std_dev;
   BGMeanStatModelParams params;

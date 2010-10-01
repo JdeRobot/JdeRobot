@@ -22,6 +22,11 @@
 #include <jderobotice/interfaceconnect.h>
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
+#include <cstdio>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include "mainthread.h"
 #include "viewgtk.h"
 #include "viewtext.h"
@@ -29,7 +34,7 @@
 namespace bgfglab {
   MainThread::MainThread(const jderobotice::Context &context)
     : jderobotice::SubsystemThread(context.tracer(),context.status(),"MainThread"),
-      imagePrx(),fmt(),
+      imgSource(0),localSourcePath(),localSourceSeqCounter(1),imagePrx(),fmt(),
       context(context),model(),controller(),
       stopAfterDumpFinished(false) {}
 
@@ -43,29 +48,58 @@ namespace bgfglab {
     if ( isStopping() )
       return;
     
-    //connect to required interfaces
-    //read image provider proxy address from config: XX.Config.ImageProvide.Proxy = <address>
-    jderobotice::connectToInterfaceWithString(context,imagePrx,prop->getProperty(prefix+"ImageProvider.Proxy"));
+    imgSource = prop->getPropertyAsIntWithDefault(prefix+"ImageProvider.Source",0);//default remote
+  
+    colorspaces::Image initialImg;
+    jderobot::ImageDataPtr img;
+    if (imgSource == 0){//read images from proxy
+      //connect to required interfaces
+      //read image provider proxy address from config: XX.Config.ImageProvide.Proxy = <address>
+      jderobotice::connectToInterfaceWithString(context,imagePrx,prop->getProperty(prefix+"ImageProvider.Proxy"));
+      
+      //read first image to build model
+      img = imagePrx->getImageData();
+      //we try to know if we understand this format
+      fmt = colorspaces::Image::Format::searchFormat(img->description->format);
+      if (!fmt)
+	throw colorspaces::Image::FormatMismatch("Format not supported:" + img->description->format);
+      
+      std::stringstream ss;
+      ss << "Received fmt " << *fmt;
+      context.tracer().info(ss.str());
+      initialImg = colorspaces::Image(img->description->width,
+				      img->description->height,
+				      fmt,
+				      &(img->pixelData[0]));//data will be available until img is destroyed
+    }else{//read images from local sequence
+      localSourcePath = prop->getProperty(prefix+"ImageProvider.LocalSourcePath");
+      if (localSourcePath.length() == 0)
+	throw gbxutilacfr::Exception( ERROR_INFO, "ImageProvider.LocalSourcePath not provided" );
 
-    //read first image to build model
-    jderobot::ImageDataPtr img = imagePrx->getImageData();
-    //we try to know if we understand this format
-    fmt = colorspaces::Image::Format::searchFormat(img->description->format);
-    if (!fmt)
-      throw colorspaces::Image::FormatMismatch("Format not supported:" + img->description->format);
+      char imgpath[PATH_MAX];
+      if (sprintf(imgpath,localSourcePath.c_str(),localSourceSeqCounter) < 0)
+	throw gbxutilacfr::Exception( ERROR_INFO, "ImageProvider.LocalSourcePath not a valid format. See sprintf(3)" );
 
-    std::stringstream ss;
-    ss << "Received fmt " << *fmt;
-    context.tracer().info(ss.str());
-    colorspaces::Image initialImg(img->description->width,
-				  img->description->height,
-				  fmt,
-				  &(img->pixelData[0]));//data will be available until img is destroyed
+      //ffmpeg starts sequences in 1, so try to guess if 0 exists if not inc counter
+      // struct stat s;
+      // if (stat(imgpath,&s) == -1){
+      // 	localSourceSeqCounter++;
+      // 	sprintf(imgpath,localSourcePath.c_str(),localSourceSeqCounter);
+      // }
 
+      initialImg = colorspaces::ImageRGB888::read(imgpath);
+    }
     //read algorithm config and set it if present
     std::string bgalgPropPrefix(prefix+"BGAlgorithm.");
     std::string bgalg(prop->getProperty(bgalgPropPrefix+"Name"));
     std::string bgalgFmtName(prop->getProperty(bgalgPropPrefix+"Fmt"));
+    std::string bgalgInitialImgFilename(prop->getProperty(bgalgPropPrefix+"InitialImg"));
+
+    if (bgalgInitialImgFilename.length() > 0){//read initial image
+      colorspaces::ImageRGB888 readImg(colorspaces::ImageRGB888::read(bgalgInitialImgFilename));
+      if (readImg.size() == initialImg.size())
+	initialImg = readImg;
+    }
 
     //init model. Road dimensions 
     model.reset(new Model(context.tracer(), initialImg,
@@ -124,13 +158,23 @@ namespace bgfglab {
   
   //copy image to local variable
   void MainThread::getImage(){
-    //read from interface and place data in model
-    jderobot::ImageDataPtr img = imagePrx->getImageData();
-    //we suppose fmt is not going to change so fmt is not checked again
-    colorspaces::Image cImg(img->description->width,
-			    img->description->height,
-			    fmt,
-			    &(img->pixelData[0]));//data will be available until img is destroyed
+    colorspaces::Image cImg;
+    jderobot::ImageDataPtr img;
+    if (imgSource == 0){//read from remote source
+      //read from interface and place data in model
+      img = imagePrx->getImageData();
+      //we suppose fmt is not going to change so fmt is not checked again
+      cImg = colorspaces::Image(img->description->width,
+				img->description->height,
+				fmt,
+				&(img->pixelData[0]));//data will be available until img is destroyed
+    }else{//local source
+      char imgpath[PATH_MAX];
+      if (sprintf(imgpath,localSourcePath.c_str(),localSourceSeqCounter) < 0)
+	throw gbxutilacfr::Exception( ERROR_INFO, "ImageProvider.LocalSourcePath not a valid format. See sprintf(3)" );
+      localSourceSeqCounter++;
+      cImg = colorspaces::ImageRGB888::read(imgpath);
+    }
     model->updateBGModel(cImg);
   }
 }

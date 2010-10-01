@@ -132,6 +132,18 @@ namespace bgfglab {
     static const BGCBStatModelParams defaultParams;
   };
 
+  class BGModelFIXEDFactory: public BGModelFactory{
+  public:
+    BGModelFIXEDFactory(const std::string desc = std::string("Fixed"));
+    virtual ~BGModelFIXEDFactory() {}
+
+    //virtual BGModelFIXEDFactory* clone() const;
+    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
+
+    //const BGFIXEDStatModelParams params;
+    static const BGFIXEDStatModelParams defaultParams;
+  };
+
 }//namespace
 
 #endif //BGFGLAB_BGMODELFACTORY_H

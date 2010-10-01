@@ -32,20 +32,19 @@ namespace jderobotice {
   //         3. component config file
   //         4. command line arguments
   // */
-  // void setProperties( Ice::PropertiesPtr   &properties,
-  //                     const Ice::StringSeq &commandLineArgs,
-  //                     const std::string    &componentTag )
-  // {
+  //void setProperties( Ice::PropertiesPtr   &properties,
+  //		      const Ice::StringSeq &commandLineArgs,
+  //		      const std::string    &componentTag ){
   //     // pre-parse Jderobot-specific command line arguments
   //     // (nothing here right now)
   //     // jderobotice::parseJderobotCommandLineOptions( args );
-
-  //     // Level 4. Highest priority, apply properties from the command line arguments
-  //     // read in all command line options starting with '--", but not "-"
-  //     // note that something like --bullshit will be parsed to --bullshit=1
-  //     // Note that this is a standard Ice function.
-  //     properties->parseCommandLineOptions( "", commandLineArgs );
-  //     initTracerInfo( componentTag+": Loaded command line properties" );
+    
+    // Level 4. Highest priority, apply properties from the command line arguments
+    // read in all command line options starting with '--", but not "-"
+    // note that something like --bullshit will be parsed to --bullshit=1
+    // Note that this is a standard Ice function.
+    //properties->parseCommandLineOptions( "", commandLineArgs );
+    //initTracerInfo( componentTag+": Loaded command line properties" );
 
   //     // Level 3. Now, apply properties from this component's config file (do not force!)
   //     detail::addPropertiesFromApplicationConfigFile( properties, commandLineArgs, componentTag );
@@ -59,7 +58,7 @@ namespace jderobotice {
 
   //     // Level 0. sort out platform and component names, apply defaults, set adapter names.
   //     jderobotice::detail::postProcessComponentProperties( properties, componentTag );
-  // }
+  //}
 
   // }
 
@@ -101,15 +100,17 @@ namespace jderobotice {
     //     jderobotice::detail::printAllVersions( component_ );
 
     //Ice::InitializationData initData;
-    //     // Note that we don't use the version which takes arguments so that the config file which may be
-    //     // specified by mistake with --Ice.Config is not loaded.
+    // Note that we don't use the version which takes arguments so that the config file which may be
+    // specified by mistake with --Ice.Config is not loaded.
     //initData.properties = Ice::createProperties();
 
-    //     // Set the component's properties based on the various sources from which properties can be read
-    //     setProperties( initData.properties, args, component_.context().tag() );
+    // Set the component's properties based on the various sources from which properties can be read
+    //setProperties( initData.properties, args, component_.context().tag() );
+
+    //args = initData.properties->parseCommandLineOptions( "", args );
 
     // now pass the startup options to Ice which will start the Communicator
-    return Ice::Application::main( argc, argv);//, initData );
+    return Ice::Application::main(args);//,initData);//, argv );
   }
 
   int
@@ -118,6 +119,8 @@ namespace jderobotice {
     // communicator is already initialized by Ice::Application
     // all defaults are already applied
     Ice::PropertiesPtr props = communicator()->getProperties();
+    Ice::StringSeq args = Ice::argsToStringSeq( argc, argv );
+    args = props->parseCommandLineOptions( "", args );
 
     // what to do when a signal is received (e.g. Ctrl-C)
     if ( props->getPropertyAsInt("Jderobot.Application.CallbackOnInterrupt") ) {

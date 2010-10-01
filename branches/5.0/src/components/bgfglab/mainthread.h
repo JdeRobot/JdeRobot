@@ -39,6 +39,11 @@ namespace bgfglab {
     //copy image to local variable
     void getImage();
 
+    //image source: 0 remote, 1 local
+    int imgSource;
+    std::string localSourcePath;//local source path
+    int localSourceSeqCounter;
+
     //imageprovider interface
     jderobot::ImageProviderPrx imagePrx;
     colorspaces::Image::FormatPtr fmt;

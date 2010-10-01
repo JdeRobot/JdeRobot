@@ -39,7 +39,7 @@ namespace bgfglab{
   }
 
   std::string ParamDict::getParamWithDefault(const std::string paramkey, std::string defaultValue) const{
-    ParamDict::const_iterator pIt(this->find(paramkey));
+    ParamDict::const_iterator pIt(this->find(keyprefix+paramkey));
     if (pIt != this->end())
       return pIt->second;
     return defaultValue;
@@ -93,6 +93,8 @@ namespace bgfglab{
     bgmF = new BGModelModeFactory();
     dict.insert(make_pair(bgmF->description,bgmF));
     bgmF = new BGModelCBFactory();
+    dict.insert(make_pair(bgmF->description,bgmF));
+    bgmF = new BGModelFIXEDFactory();
     dict.insert(make_pair(bgmF->description,bgmF));
 
     return dict;
@@ -296,5 +298,27 @@ namespace bgfglab{
     return createBGCBStatModel(firstFrame,&tmpParams);
   }
 
+  const BGFIXEDStatModelParams BGModelFIXEDFactory::defaultParams = {BGFG_FIXED_BG_UPDATE_RATE,
+								     BGFG_FIXED_FG_UPDATE_RATE,
+								     {BGFG_SEG_OBJ_WITHOUT_HOLES,
+								      BGFG_SEG_PERFORM_MORPH,
+								      BGFG_SEG_MINAREA},//segmentation params
+								     1 //perform segmentation
+  };
+  
+  BGModelFIXEDFactory::BGModelFIXEDFactory(const std::string desc)
+    :BGModelFactory(desc) {}
+
+  CvBGStatModel* BGModelFIXEDFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+    BGFIXEDStatModelParams tmpParams;
+    tmpParams.bg_update_rate = params.getParamAsIntWithDefault("bg_update_rate",defaultParams.bg_update_rate);
+    tmpParams.fg_update_rate = params.getParamAsIntWithDefault("fg_update_rate",defaultParams.fg_update_rate);
+    tmpParams.sg_params.is_obj_without_holes  = params.getParamAsIntWithDefault("is_obj_without_holes",
+										defaultParams.sg_params.is_obj_without_holes);
+    tmpParams.sg_params.perform_morphing = params.getParamAsIntWithDefault("perform_morphing",defaultParams.sg_params.perform_morphing);
+    tmpParams.sg_params.minArea = params.getParamAsFloatWithDefault("minArea",defaultParams.sg_params.minArea);
+    tmpParams.perform_segmentation = params.getParamAsIntWithDefault("perform_segmentation",defaultParams.perform_segmentation);
+    return createBGFIXEDStatModel(firstFrame,&tmpParams);
+  }
 
 }//namespace

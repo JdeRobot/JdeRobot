@@ -23,12 +23,17 @@
 #include "model.h"
 #include <assert.h>
 #include <iostream>
-#include <unistd.h>
+#include <sstream>
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
+#include <iomanip>
 
 namespace bgfglab {
-  const std::string imgdumpSuffix = ".imgdump";
-  const std::string bgdumpSuffix = ".bgdump";
-  const std::string fgmaskdumpSuffix = ".fgmaskdump";
+  const std::string imgdumpSuffix = ".img";
+  const std::string bgdumpSuffix = ".bg";
+  const std::string fgmaskdumpSuffix = ".fgmask";
+  const std::string dumpext = "pnm";//file extension
 
   //dump image data per byte
   std::ostream &operator<<(std::ostream &stream, const colorspaces::Image& src){
@@ -84,21 +89,48 @@ namespace bgfglab {
       bgImage = colorspaces::Image(cv::Mat(bg_model->background),internalFmt);
       fgMaskImage = colorspaces::Image(cv::Mat(bg_model->foreground), 
 				       colorspaces::ImageGRAY8::FORMAT_GRAY8);
+    }
 
-      if (noDumpFrames > 0)
+    if(isDumpingData()){//dump data
+      if (noDumpFrames > 0)//dalay
 	noDumpFrames--;
       else{
-	if(ofDumpData.is_open()){//dump data
-	  dumpDataFrameCounter++;
-	  if (ofDumpDataImg.is_open())
-	    ofDumpDataImg << workingImg;//operator<< defined above
-	  if (ofDumpDataBg.is_open())
-	    ofDumpDataBg << getBGImage();
-	  if (ofDumpDataFgMask.is_open())
-	    ofDumpDataFgMask << getFGMaskImage();
-	  if ((maxDumpFrames > 0) && (dumpDataFrameCounter >= maxDumpFrames))
-	    stopDumpData();
+	std::stringstream ss;//sequence number string filled with 0s
+	ss << std::setw(maxDumpSeqDigits) << std::setfill('0') << (dumpDataFrameCounter+1);//start sequences from 1
+
+	char s[PATH_MAX];
+	snprintf(s,PATH_MAX,dumpDataFilename.c_str(),(dumpDataFrameCounter+1));
+	std::string dumpfname(s);
+	if (dumpDataImg){
+	  //std::string fname(dumpDataFilename + imgdumpSuffix + ss.str() + '.' + dumpext);
+	  std::string fname(dumpfname + imgdumpSuffix + '.' + dumpext);
+	  colorspaces::ImageRGB888 imgdump(img);
+	  imgdump.write(fname);
 	}
+	
+	if (dumpDataBg){
+	  //std::string fname(dumpDataFilename + bgdumpSuffix + ss.str() + '.' + dumpext);
+	  std::string fname(dumpfname + bgdumpSuffix + '.' + dumpext);
+	  colorspaces::ImageRGB888 bgdump(bgImage);
+	  bgdump.write(fname);
+	}
+	
+	if (dumpDataFgMask){
+	  //std::string fname(dumpDataFilename + fgmaskdumpSuffix + ss.str() + '.' + dumpext);
+	  std::string fname(dumpfname + fgmaskdumpSuffix + '.' + dumpext);
+	  colorspaces::ImageGRAY8 fgmaskdump(fgMaskImage);
+	  fgmaskdump.write(fname);
+	}
+
+	//update frame counter
+	dumpDataFrameCounter++;
+
+	// if (ofDumpDataBg.is_open())
+	//   ofDumpDataBg << getBGImage();
+	// if (ofDumpDataFgMask.is_open())
+	//   ofDumpDataFgMask << getFGMaskImage();
+	if ((maxDumpFrames > 0) && (dumpDataFrameCounter >= maxDumpFrames))
+	  stopDumpData();
       }
     }
     bg_model_ips.inc();
@@ -108,7 +140,7 @@ namespace bgfglab {
   bool Model::isDumpingData(int* dumpedFrames) const{
     if (dumpedFrames != 0)
       *dumpedFrames = dumpDataFrameCounter-noDumpFrames;
-    return ofDumpData.is_open();
+    return dumpDataOn;
   }
 
   bool Model::startDumpData(std::string filename, 
@@ -120,101 +152,78 @@ namespace bgfglab {
     //stop previously running dump
     stopDumpData();
 
-    if (bg_model == 0)
-      return false;
-
     if (maxFrames == 0)
       return false;
     
-    //if filename relative prefix cwd to make paths absolute
-    std::string pathprefix;
-    if (filename[0] != '/'){
-      char cwd[PATH_MAX];
+    char *filenameAbsPath;
+    if ((filenameAbsPath=realpath(filename.c_str(),0))){
+      this->dumpDataFilename = std::string(filenameAbsPath);
+      free(filenameAbsPath);
+    }else//can't resolve, continue with it
+      this->dumpDataFilename = filename;
 
-      if (getcwd(cwd,PATH_MAX))
-	pathprefix = cwd;
-    }
-      
-    this->dumpDataFilename = pathprefix + '/' + filename;
     this->dumpDataFrameCounter = 0;
     this->maxDumpFrames = maxFrames;
+    if (this->maxDumpFrames > 0)
+      this->maxDumpSeqDigits = (int)ceil(log10(this->maxDumpFrames));
+    else
+      this->maxDumpSeqDigits = 10;//if unlimited frames requested use 10 digits
     this->noDumpFrames = startDumpingAfterFrames;
+    this->dumpDataImg = dumpDataImg;
+    this->dumpDataBg = (dumpDataBg && bg_model);//dumped only if bg_model present
+    this->dumpDataFgMask = (dumpDataFgMask && bg_model);//dumped only if bg_model present
     
     std::cerr << "Dumping to: " << this->dumpDataFilename << std::endl;
 
-    ofDumpData.open(dumpDataFilename.c_str(),std::ios_base::out|std::ios_base::trunc);
-    if (!ofDumpData.is_open())//error, stop dump and return false
-      goto startDumpData_err;
+    //ofDumpData.open(dumpDataFilename.c_str(),std::ios_base::out|std::ios_base::trunc);
+    //dumpDataOn = ofDumpData.is_open();
+    dumpDataOn=true;
+    //if (!dumpDataOn)//error, stop dump and return false
+    //  stopDumpData();
 
-    if (dumpDataImg){
-      std::string fname(dumpDataFilename + imgdumpSuffix);
-      ofDumpDataImg.open(fname.c_str(),std::ios_base::out|std::ios_base::trunc);
-      if (!ofDumpDataImg.is_open())//error, stop dump and return false
-	goto startDumpData_err;
-      //operator<< from colorspaces
-      //::operator<<(ofDumpData,currentImage) << std::endl;
-    }
-
-    if (dumpDataBg){
-      std::string fname(dumpDataFilename + bgdumpSuffix);
-      ofDumpDataBg.open(fname.c_str(),std::ios_base::out|std::ios_base::trunc);
-      if (!ofDumpDataBg.is_open())//error, stop dump and return false
-	goto startDumpData_err;
-      //::operator<<(ofDumpData,bgImage) << std::endl;
-    }
-
-    if (dumpDataFgMask){
-      std::string fname(dumpDataFilename + fgmaskdumpSuffix);
-      ofDumpDataFgMask.open(fname.c_str(),std::ios_base::out|std::ios_base::trunc);
-      if (!ofDumpDataFgMask.is_open())//error, stop dump and return false
-	goto startDumpData_err;
-      //::operator<<(ofDumpData,fgMaskImage) << std::endl;
-    }
-
-    return ofDumpData.is_open();
-
-  startDumpData_err:
-    stopDumpData();
-    return ofDumpData.is_open();
+    return dumpDataOn;
   }
     
   void Model::stopDumpData(){
-    if (ofDumpData.is_open()){
-      int rows = 0,cols = 0,channels = 0,nframes=0;
+    if (dumpDataOn){
+      // int rows = 0,cols = 0,channels = 0,nframes=0;
 
-      if (ofDumpDataImg.is_open()){
-	ofDumpDataImg.close();
-	rows = currentImage.rows;
-	cols = currentImage.cols;
-	channels = currentImage.channels();
-	nframes = dumpDataFrameCounter;
-      }
-      ofDumpData << dumpDataFilename + imgdumpSuffix << ' ' << nframes << ' ' 
-		 << rows << ' ' << cols << ' ' 
-		 << channels << std::endl;
+      // //if (ofDumpDataImg.is_open()){
+      // if (dumpDataImg){
+      // 	//ofDumpDataImg.close();
+      // 	rows = currentImage.rows;
+      // 	cols = currentImage.cols;
+      // 	channels = currentImage.channels();
+      // 	nframes = dumpDataFrameCounter;
+      // }
+      // ofDumpData << dumpDataFilename + imgdumpSuffix + "%0" << maxDumpSeqDigits << "d." << dumpext
+      // 		 << ' ' << nframes << ' ' << rows << ' ' << cols << ' ' << channels << std::endl;
 
-      rows = cols = channels = nframes = 0;
-      if (ofDumpDataBg.is_open()){
-	ofDumpDataBg.close();
-	rows = bgImage.rows;
-	cols = bgImage.cols;
-	channels = bgImage.channels();
-	nframes = dumpDataFrameCounter;
-      }
-      ofDumpData << nframes << ' ' << rows << ' ' << cols << ' ' 
-		 << channels << ' ' << dumpDataFilename + bgdumpSuffix << std::endl;
+      // rows = cols = channels = nframes = 0;
+      // //if (ofDumpDataBg.is_open()){
+      // if (dumpDataBg){
+      // 	//ofDumpDataBg.close();
+      // 	rows = bgImage.rows;
+      // 	cols = bgImage.cols;
+      // 	channels = bgImage.channels();
+      // 	nframes = dumpDataFrameCounter;
+      // }
+      // ofDumpData << dumpDataFilename + bgdumpSuffix + "%0" << maxDumpSeqDigits << "d." << dumpext
+      // 		 << ' ' << nframes << ' ' << rows << ' ' << cols << ' ' << channels << std::endl;
 
-      rows = cols = channels = nframes = 0;
-      if (ofDumpDataFgMask.is_open()){
-	ofDumpDataFgMask.close();
-	rows = fgMaskImage.rows;
-	cols = fgMaskImage.cols;
-	channels = fgMaskImage.channels();
-	nframes = dumpDataFrameCounter;
-      }
-      ofDumpData << nframes << ' ' << rows << ' ' << cols << ' ' 
-		 << channels << ' ' << dumpDataFilename + fgmaskdumpSuffix << std::endl;
-      ofDumpData.close();
+      // rows = cols = channels = nframes = 0;
+      // //if (ofDumpDataFgMask.is_open()){
+      // if (dumpDataFgMask){
+      // 	//ofDumpDataFgMask.close();
+      // 	rows = fgMaskImage.rows;
+      // 	cols = fgMaskImage.cols;
+      // 	channels = fgMaskImage.channels();
+      // 	nframes = dumpDataFrameCounter;
+      // }
+      // ofDumpData << dumpDataFilename + fgmaskdumpSuffix + "%0" << maxDumpSeqDigits << "d." << dumpext
+      // 		 << ' ' << nframes << ' ' << rows << ' ' << cols << ' ' << channels << std::endl;
+      // ofDumpData.close();
+      dumpDataOn = false;
     }
   }
 
