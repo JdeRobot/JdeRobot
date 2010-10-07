@@ -23,4 +23,6 @@ if test "$ERRORS"; then
     with_firewire="no"
 else
     AC_DEFINE([HAVE_FIREWIRE],[1],[Defined if firewire found])
+    AC_SUBST([FIREWIRE_CPPFLAGS])
+    AC_SUBST([FIREWIRE_LDFLAGS],["-ldc1394 -lraw1394"])
 fi
