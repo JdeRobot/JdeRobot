@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef progeo_types
-#define progeo_types
+#ifndef PROGEO_H
+#define PROGEO_H
 
 /* geometric distances */
 #define DIST2D(p1,p2) sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y))
@@ -78,7 +78,6 @@ typedef struct {
 	/* name */
 	char name[256];	
 } TPinHoleStereocamera;
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -90,3 +89,5 @@ extern "C" {
 	void display_camerainfo(TPinHoleCamera camera);
 }
 #endif
+
+#endif /*PROGEO_H*/
