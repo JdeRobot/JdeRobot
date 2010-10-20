@@ -110,7 +110,15 @@ namespace bgfglab {
 
     
     if (bgalg.length() > 0){
-      ParamDict bgalgParams(prop->getPropertiesForPrefix(bgalgPropPrefix), bgalgPropPrefix);
+      ParamDict bgalgParams(bgalgPropPrefix,prop->getPropertiesForPrefix(bgalgPropPrefix));
+      // //test
+      // std::stringstream ss;
+      // ss << bgalgParams;
+      // std::cout << "bgalgParams:" << bgalgParams << std::endl;
+      // ParamDict testParams;
+      // ss >> testParams;
+      // std::cout << "testParams:" << testParams << std::endl;
+
       controller->setBGModel(bgalg,bgalgParams);
     }
 

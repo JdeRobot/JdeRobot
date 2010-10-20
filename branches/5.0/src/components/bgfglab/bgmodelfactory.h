@@ -31,9 +31,8 @@
 namespace bgfglab {
   class ParamDict: public std::map<std::string, std::string>{
   public:
-    ParamDict();
-    ParamDict(const std::string filename, const std::string keyprefix = "");
-    ParamDict(const std::map<std::string, std::string>& params, const std::string keyprefix = "");
+    ParamDict(const std::string keyprefix = "", 
+	      const std::map<std::string, std::string>& params = std::map<std::string, std::string>::map());
 
     std::string getParam(const std::string paramkey) const;
     std::string getParamWithDefault(const std::string paramkey, const std::string defaultValue) const;
@@ -41,7 +40,9 @@ namespace bgfglab {
     int getParamAsIntWithDefault(const std::string paramkey, const int defaultValue) const;
     float getParamAsFloat(const std::string paramkey) const;
     float getParamAsFloatWithDefault(const std::string paramkey, const float defaultValue) const;
-  private:
+
+    std::string toString() const;
+  
     std::string keyprefix;
   };
 
@@ -145,5 +146,8 @@ namespace bgfglab {
   };
 
 }//namespace
+
+std::ostream &operator<<(std::ostream &out, const bgfglab::ParamDict& param);
+std::istream &operator>>(std::istream &in, bgfglab::ParamDict& param);
 
 #endif //BGFGLAB_BGMODELFACTORY_H

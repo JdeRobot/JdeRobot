@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#usage: runAlgandStats.sh <cfg-path> <video-in> <data-dir>
+
 set -e
 
 IMGW=320
@@ -110,7 +112,7 @@ for f in ${CFGPATH}/*.cfg; do
     fi
 done
 
-plotStats.R ${DATADIR}/*.cmp
+rocAnalysis.R ${DATADIR}/*.cmp
 
 #mix ideal and calculated fg in one image. ideal->green channel cacl->red channel
 #concatenate img with fg cmp 

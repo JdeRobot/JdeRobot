@@ -26,7 +26,6 @@
 #include <jderobotutil/observer.h>
 #include <tr1/memory>
 #include "model.h"
-#include "bgmodelfactory.h"
 
 //View and Controller defined here to avoid circular dependencies
 

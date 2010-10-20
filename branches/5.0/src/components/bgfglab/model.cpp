@@ -68,7 +68,11 @@ namespace bgfglab {
 		  initialImg.height),
       bg_model_ips(),
       bg_model(0),
-      internalFmt(internalFmt?internalFmt:initialImg.format()) {}
+      bg_modelParam(),
+      internalFmt(internalFmt?internalFmt:initialImg.format()),
+      dumpDataFrameCounter(0),
+      maxDumpFrames(0),
+      noDumpFrames(0){}
 
   Model::~Model(){
     if (bg_model != 0){
@@ -235,17 +239,22 @@ namespace bgfglab {
     return fgMaskImage;
   }
 
-  void Model::setBGModel(CvBGStatModel* newBGModel) throw()
+  void Model::setBGModel(const std::string modelName, const ParamDict& param) throw()
   { 
-    assert(newBGModel != 0);
+    BGModelFactory::FactoryDict::const_iterator fIt = BGModelFactory::factories.find(modelName);
 
-    stopDumpData();
+    if (fIt != BGModelFactory::factories.end()){
+      stopDumpData();
+      IplImage tmp(bgImage);
 
-    CvBGStatModel* oldBGModel = bg_model;
-    bg_model = newBGModel;
-    if (oldBGModel != 0)
-      cvReleaseBGStatModel(&oldBGModel);
+      CvBGStatModel* newBGModel = fIt->second->createModel(param,&tmp);
+      CvBGStatModel* oldBGModel = bg_model;
 
+      bg_model = newBGModel;
+      bg_modelParam = param;
+      if (oldBGModel != 0)
+	cvReleaseBGStatModel(&oldBGModel);
+    }
     notifyObservers(); 
   }
 

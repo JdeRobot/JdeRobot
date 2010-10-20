@@ -57,6 +57,7 @@ namespace bgfglab {
     Widget<Gtk::DrawingArea> drawingareaBg;
     Widget<Gtk::DrawingArea> drawingareaFgMask;
     Widget<Gtk::DrawingArea> drawingareaImage;
+    Widget<Gtk::TextView> textviewAlgInfo;
     Widget<Gtk::Statusbar> statusbarMain;
     bool onDrawingAreaBgExposeEvent(GdkEventExpose* event);
     bool onDrawingAreaFgMaskExposeEvent(GdkEventExpose* event);
@@ -65,6 +66,8 @@ namespace bgfglab {
     void updateMenutoolbuttonItems();
     void onMenutoolbuttonSelectBGModelMenuItemClicked(const std::string algDesc);
     void onToolbuttonDumpDataToggled();
+
+    void setBGModel(const std::string modelName, const ParamDict& param) throw();
 
     //algorithm selection dialog
     //Tree model columns for comboboxBGModel
@@ -81,11 +84,7 @@ namespace bgfglab {
     Widget<Gtk::Dialog> dialogBGModelSelection;
     Widget<Gtk::ComboBox> comboboxBGModel;
     Glib::RefPtr<Gtk::ListStore> comboboxBGModelLSRef;
-    Widget<Gtk::Frame> frameCvFGD;
-    Widget<Gtk::Frame> frameCvMoG;
-    Widget<Gtk::Frame> frameExp;
-    Widget<Gtk::Frame> frameMean;
-    Widget<Gtk::Frame> frameMode;
+    Widget<Gtk::TextView> textviewAlgParam;
     Widget<Gtk::Button> buttonBGModelCancel;
     Widget<Gtk::Button> buttonBGModelApply;
     Widget<Gtk::Button> buttonBGModelAccept;

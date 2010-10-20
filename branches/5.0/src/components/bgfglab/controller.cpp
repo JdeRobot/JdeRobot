@@ -40,14 +40,8 @@ namespace bgfglab {
   }
 
   void Controller::setBGModel(const std::string modelName, const ParamDict& param) throw() { 
-    BGModelFactory::FactoryDict::const_iterator fIt = BGModelFactory::factories.find(modelName);
-
-    if (fIt != BGModelFactory::factories.end()){
-      IplImage tmpImg(_model.getBGImage());
-      CvBGStatModel* newBGModel = fIt->second->createModel(param,&tmpImg);
-      _model.setBGModel(newBGModel); 
-    }
-   }
+    _model.setBGModel(modelName,param);
+  }
 
   void Controller::addView(ViewPtr v) throw(){
     _views.push_back(v);//FIXME: check for duplicated views!?

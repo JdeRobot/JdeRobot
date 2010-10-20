@@ -55,14 +55,11 @@ namespace bgfglab {
       INIT_WIDGET(drawingareaBg, refXml),
       INIT_WIDGET(drawingareaFgMask, refXml),
       INIT_WIDGET(drawingareaImage, refXml),
+      INIT_WIDGET(textviewAlgInfo, refXml),
       INIT_WIDGET(statusbarMain, refXml),
       INIT_WIDGET(dialogBGModelSelection, refXml),
       INIT_WIDGET(comboboxBGModel, refXml),
-      INIT_WIDGET(frameCvFGD, refXml),
-      INIT_WIDGET(frameCvMoG, refXml),
-      INIT_WIDGET(frameExp, refXml),
-      INIT_WIDGET(frameMean, refXml),
-      INIT_WIDGET(frameMode, refXml),
+      INIT_WIDGET(textviewAlgParam, refXml),
       INIT_WIDGET(buttonBGModelCancel, refXml),
       INIT_WIDGET(buttonBGModelApply, refXml),
       INIT_WIDGET(buttonBGModelAccept, refXml),
@@ -82,6 +79,7 @@ namespace bgfglab {
     drawingareaBg->signal_expose_event().connect(sigc::mem_fun(this, &ViewGtk::onDrawingAreaBgExposeEvent));
     drawingareaFgMask->signal_expose_event().connect(sigc::mem_fun(this, &ViewGtk::onDrawingAreaFgMaskExposeEvent));
     drawingareaImage->signal_expose_event().connect(sigc::mem_fun(this, &ViewGtk::onDrawingAreaImageExposeEvent));
+    textviewAlgInfo->get_buffer()->set_text(controller.model().bgModelParam().toString());
     mainwindow->show();
 
     //algorithm selection dialog
@@ -112,11 +110,14 @@ namespace bgfglab {
     
     //get iterations per second
     std::stringstream ss;
-    ss << controller.model().bgModelIps().ips();
-    statusbarMain->push(ss.str());    
+    ss << controller.model().bgModelIps().ips() << " fps";  
 
     //dump status
-    toolbuttonDumpData->set_active(controller.model().isDumpingData());
+    int dumpedFrames = 0;
+    toolbuttonDumpData->set_active(controller.model().isDumpingData(&dumpedFrames));
+    ss << " | " << dumpedFrames << " f. dumped";
+    statusbarMain->pop();
+    statusbarMain->push(ss.str()); 
 
     mainwindow->resize(1, 1);
 
@@ -180,6 +181,8 @@ namespace bgfglab {
   void ViewGtk::onMenutoolbuttonSelectBGModelClicked(){
     //update combobox entries
     updateComboboxBGModelItems();
+    //show AlgInfo textbuffer
+    textviewAlgParam->get_buffer()->set_text(controller.model().bgModelParam().toString());
     //show algorithm selection dialog
     dialogBGModelSelection->show();
   }
@@ -253,7 +256,7 @@ namespace bgfglab {
       if (row){
 	std::string name = row[comboboxBGModelCols.m_col_name];
 	BGModelFactory::FactoryDict::const_iterator fIt = BGModelFactory::factories.find(name);
-	//FIXME: show info for this model¿?
+	//FIXME: get default values for algorithms??
       }
     }
   onComboboxBGModelChanged_end:
@@ -273,7 +276,10 @@ namespace bgfglab {
       Gtk::TreeModel::Row row = *it;
       if (row){
 	std::string name = row[comboboxBGModelCols.m_col_name];
-	controller.setBGModel(name,ParamDict());//FIXME: get param
+	ParamDict param;
+	std::stringstream textss(textviewAlgParam->get_buffer()->get_text());
+	textss >> param;
+	setBGModel(name,param);
       }
     }
   }
@@ -306,6 +312,13 @@ namespace bgfglab {
 			     checkbuttonBgDump->get_active(),
 			     checkbuttonFgMaskDump->get_active());
     filechooserdialogDumpData->hide();
+  }
+
+  void ViewGtk::setBGModel(const std::string modelName, const ParamDict& param) throw(){
+    //Glib::RefPtr< Gtk::TextBuffer > buffer();
+    textviewAlgInfo->get_buffer()->set_text(param.toString());
+    textviewAlgInfo->show();
+    controller.setBGModel(modelName,param);
   }
 
 }//namespace

@@ -23,16 +23,9 @@
 #include <sstream>
 
 namespace bgfglab{
-  ParamDict::ParamDict() {}
-
-  ParamDict::ParamDict(const std::string filename, const std::string keyprefix)
-    : std::map<std::string, std::string>(), keyprefix(keyprefix) {
-    //parse file
-    
-  }
-
-  ParamDict::ParamDict(const std::map<std::string, std::string>& params, const std::string keyprefix)
-     : std::map<std::string, std::string>(params),keyprefix(keyprefix) {}
+  ParamDict::ParamDict(const std::string keyprefix, 
+		       const std::map<std::string, std::string>& params)
+    : std::map<std::string, std::string>(params), keyprefix(keyprefix) {}
 
   std::string ParamDict::getParam(const std::string paramkey) const{
     return getParamWithDefault(paramkey,std::string());
@@ -77,6 +70,12 @@ namespace bgfglab{
     if (iss.fail())
       return defaultValue;
     return value;
+  }
+  
+  std::string ParamDict::toString() const{
+    std::stringstream ss;
+    ss << *this;
+    return ss.str();
   }
 
   BGModelFactory::FactoryDict registerBGFactories(){
@@ -322,3 +321,42 @@ namespace bgfglab{
   }
 
 }//namespace
+
+std::ostream &operator<<(std::ostream &out, const bgfglab::ParamDict& param){
+  bgfglab::ParamDict::const_iterator pIt;
+  std::string key;
+  int keyprefixlen = param.keyprefix.length();
+  
+  for( pIt = param.begin(); pIt != param.end(); pIt++){
+    key = pIt->first;
+    if ((keyprefixlen > 0) && (key.find(param.keyprefix) == 0))//erase keyprefix
+      key = key.substr(keyprefixlen);
+    out << key << '=' << pIt->second << std::endl;
+  }
+  return out;
+}
+
+std::istream &operator>>(std::istream &in, bgfglab::ParamDict& param){
+  std::string line;
+  while(!in.eof()){
+    std::getline(in,line);
+    //if data read check for comments
+    if (line.length() > 0){
+      int commentpos = line.find_first_of('#');
+      if (commentpos != std::string::npos)
+	line = line.erase(commentpos);
+    }
+
+    //split line by =
+    if (line.length() > 0){
+      int delpos = line.find_first_of('=');
+      if (delpos != std::string::npos){
+	std::string key,value;
+	key = line.substr(0,delpos);
+	value = line.substr(delpos+1);
+	param[key] = value;
+      }
+    }
+  }
+  return in;
+}
