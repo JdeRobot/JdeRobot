@@ -62,8 +62,8 @@ namespace motiondetection {
     public:
       AlgorithmState(const colorspaces::Image& initialImg)
 	: previousImage(initialImg),currentImage(initialImg), ipsCounter() {}
-      colorspaces::ImageRGB888 previousImage;
-      colorspaces::ImageRGB888 currentImage;
+      colorspaces::ImageRGB8 previousImage;
+      colorspaces::ImageRGB8 currentImage;
       MotionItem2DSeq motionDetected;
       MotionItem2D maxMotionDetected;
       jderobotutil::IpsCounter ipsCounter;
@@ -147,11 +147,11 @@ namespace motiondetection {
 	  background(initialImg.clone()),
 	  difference(colorspaces::Image(cv::Mat::zeros(initialImg.rows,
 						       initialImg.cols,
-						       colorspaces::ImageRGB888::FORMAT_RGB888->cvType),
-					colorspaces::ImageRGB888::FORMAT_RGB888)),
+						       colorspaces::ImageRGB8::FORMAT_RGB8->cvType),
+					colorspaces::ImageRGB8::FORMAT_RGB8)),
 	  backgroundCount(0) {}
-      colorspaces::ImageRGB888 background;
-      colorspaces::ImageRGB888 difference;
+      colorspaces::ImageRGB8 background;
+      colorspaces::ImageRGB8 difference;
       int backgroundCount;
     };
     

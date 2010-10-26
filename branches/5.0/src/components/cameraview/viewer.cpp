@@ -50,15 +50,15 @@ namespace cameraview{
 
   void Viewer::display( const colorspaces::Image& image )
   {
-    colorspaces::ImageRGB888 img_rgb888(image);//conversion will happen if needed
+    colorspaces::ImageRGB8 img_rgb8(image);//conversion will happen if needed
     Glib::RefPtr<Gdk::Pixbuf> imgBuff = 
-      Gdk::Pixbuf::create_from_data((const guint8*)img_rgb888.data,
+      Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8.data,
 				    Gdk::COLORSPACE_RGB,
 				    false,
 				    8,
-				    img_rgb888.width,
-				    img_rgb888.height,
-				    img_rgb888.step);
+				    img_rgb8.width,
+				    img_rgb8.height,
+				    img_rgb8.step);
     
     gtkimage->clear();
     gtkimage->set(imgBuff);

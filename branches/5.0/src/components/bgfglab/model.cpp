@@ -108,14 +108,14 @@ namespace bgfglab {
 	if (dumpDataImg){
 	  //std::string fname(dumpDataFilename + imgdumpSuffix + ss.str() + '.' + dumpext);
 	  std::string fname(dumpfname + imgdumpSuffix + '.' + dumpext);
-	  colorspaces::ImageRGB888 imgdump(img);
+	  colorspaces::ImageRGB8 imgdump(img);
 	  imgdump.write(fname);
 	}
 	
 	if (dumpDataBg){
 	  //std::string fname(dumpDataFilename + bgdumpSuffix + ss.str() + '.' + dumpext);
 	  std::string fname(dumpfname + bgdumpSuffix + '.' + dumpext);
-	  colorspaces::ImageRGB888 bgdump(bgImage);
+	  colorspaces::ImageRGB8 bgdump(bgImage);
 	  bgdump.write(fname);
 	}
 	

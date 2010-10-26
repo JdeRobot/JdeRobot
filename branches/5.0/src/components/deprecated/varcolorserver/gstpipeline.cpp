@@ -110,7 +110,7 @@ namespace varcolorserver {
 				    "format", GST_TYPE_FOURCC, GST_MAKE_FOURCC('Y','U','Y','2'),
 				    NULL);
 
-    if (pixelFormat->format == FORMAT_RGB_888 ){
+    if (pixelFormat->format == FORMAT_RGB_8 ){
       caps = gst_caps_new_simple ("video/x-raw-rgb",
 				  "bpp", G_TYPE_INT,pixelFormat->bitsPerPixel,
 				  "depth",G_TYPE_INT,pixelFormat->bitsPerPixel,

@@ -87,7 +87,7 @@ namespace bgfglab {
       // 	sprintf(imgpath,localSourcePath.c_str(),localSourceSeqCounter);
       // }
 
-      initialImg = colorspaces::ImageRGB888::read(imgpath);
+      initialImg = colorspaces::ImageRGB8::read(imgpath);
     }
     //read algorithm config and set it if present
     std::string bgalgPropPrefix(prefix+"BGAlgorithm.");
@@ -96,7 +96,7 @@ namespace bgfglab {
     std::string bgalgInitialImgFilename(prop->getProperty(bgalgPropPrefix+"InitialImg"));
 
     if (bgalgInitialImgFilename.length() > 0){//read initial image
-      colorspaces::ImageRGB888 readImg(colorspaces::ImageRGB888::read(bgalgInitialImgFilename));
+      colorspaces::ImageRGB8 readImg(colorspaces::ImageRGB8::read(bgalgInitialImgFilename));
       if (readImg.size() == initialImg.size())
 	initialImg = readImg;
     }
@@ -181,7 +181,7 @@ namespace bgfglab {
       if (sprintf(imgpath,localSourcePath.c_str(),localSourceSeqCounter) < 0)
 	throw gbxutilacfr::Exception( ERROR_INFO, "ImageProvider.LocalSourcePath not a valid format. See sprintf(3)" );
       localSourceSeqCounter++;
-      cImg = colorspaces::ImageRGB888::read(imgpath);
+      cImg = colorspaces::ImageRGB8::read(imgpath);
     }
     model->updateBGModel(cImg);
   }

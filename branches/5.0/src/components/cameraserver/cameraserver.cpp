@@ -350,11 +350,11 @@ namespace cameraserver{
 		    	if(mycamera->firewire_mode){
 			    dc1394_capture_enqueue (camera, frame);
 
-			    if (mycamera->imageFmt == colorspaces::ImageRGB888::FORMAT_RGB888){
+			    if (mycamera->imageFmt == colorspaces::ImageRGB8::FORMAT_RGB8){
 				mycamera->uyvy2rgb((unsigned char*)frame->image,&(reply->pixelData[0]),frame->size[0]*frame->size[1]);
 			    }
 			    else{
-			    // Format colorspaces::ImageRGB888::FORMAT_YUYV
+			    // Format colorspaces::ImageRGB8::FORMAT_YUYV
 				memmove( &(reply->pixelData[0]),frame->image, mycamera->imageDescription->size);
 			    }
 		    	}

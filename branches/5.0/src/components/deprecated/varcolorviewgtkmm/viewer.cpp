@@ -32,7 +32,7 @@ bool Viewer::isVisible(){
 
 void Viewer::display( const colorspaces::Imagepp& image )
 {
-  colorspaces::ImageppPtr img_converted(image.toRGB888());
+  colorspaces::ImageppPtr img_converted(image.toRGB8());
   
   if (img_converted.get() != 0){
     Glib::RefPtr<Gdk::Pixbuf> imgBuff = 

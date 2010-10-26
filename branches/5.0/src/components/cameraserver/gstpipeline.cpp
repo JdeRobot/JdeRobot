@@ -89,7 +89,7 @@ namespace cameraserver {
 	gst_bus_add_watch(bus, GSTPipeline::my_bus_cb, (void*) this);
 	gst_object_unref(bus);
 
-	if (config_.format == colorspaces::ImageRGB888::FORMAT_RGB888) {
+	if (config_.format == colorspaces::ImageRGB8::FORMAT_RGB8) {
 	    caps = gst_caps_new_simple("video/x-raw-rgb",
 		    "bpp", G_TYPE_INT, (8 * config_.format->bytesPerPixel()),
 		    "depth", G_TYPE_INT, (8 * config_.format->bytesPerPixel()),

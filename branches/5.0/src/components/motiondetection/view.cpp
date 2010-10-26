@@ -65,15 +65,15 @@ namespace motiondetection {
     
     void drawImage(const colorspaces::Image& image, Gtk::DrawingArea* drawingArea){
       /*convert to RGB*/
-      colorspaces::ImageRGB888 img_rgb888(image);
+      colorspaces::ImageRGB8 img_rgb8(image);
       Glib::RefPtr<Gdk::Pixbuf> imgBuff = 
-	Gdk::Pixbuf::create_from_data((const guint8*)img_rgb888.data,
+	Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8.data,
 				      Gdk::COLORSPACE_RGB,
 				      false,
 				      8,
-				      img_rgb888.width,
-				      img_rgb888.height,
-				      img_rgb888.step);
+				      img_rgb8.width,
+				      img_rgb8.height,
+				      img_rgb8.step);
       
       Glib::RefPtr<Gdk::Window> window = drawingArea->get_window();
       const Glib::RefPtr< const Gdk::GC > gc;/*empty*/
@@ -84,8 +84,8 @@ namespace motiondetection {
 			  imgBuff->get_width(),
 			  imgBuff->get_height(),
 			  Gdk::RGB_DITHER_NONE, 0, 0);
-      drawingArea->set_size_request(img_rgb888.width,
-				    img_rgb888.height);
+      drawingArea->set_size_request(img_rgb8.width,
+				    img_rgb8.height);
     }
     
     void drawImages(const Model* model){

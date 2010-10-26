@@ -6,7 +6,7 @@ using namespace motiondetection;
 using namespace colorspaces;
 
 int main(int argc, char** argv){
-  Image img1(cv::Mat::zeros(240,320,ImageRGB888::FORMAT_RGB888->cvType), ImageRGB888::FORMAT_RGB888);
+  Image img1(cv::Mat::zeros(240,320,ImageRGB8::FORMAT_RGB8->cvType), ImageRGB8::FORMAT_RGB8);
   Image img2(img1.clone());//2 copies of same image
 
   std::cout << "Instantiating optical flow algorithm\n";

@@ -139,36 +139,36 @@ namespace colorspaces {
   /**
    * A RGB 24 bit image
    */
-  class ImageRGB888: public Image {
+  class ImageRGB8: public Image {
   public:
     /**
      * Constructor
      */
-    ImageRGB888(const int width, const int height);
+    ImageRGB8(const int width, const int height);
     
     /**
      * Constructor from user data
      */
-    ImageRGB888(const int width, const int height, void *const data);
+    ImageRGB8(const int width, const int height, void *const data);
 
     /**
      * Copy constructor from Image, conversion will happen if needed
      */
-    ImageRGB888(const Image& i);
+    ImageRGB8(const Image& i);
     
     /**
      * Conversion methods.
      */
     void toGRAY8(Image& dst) const throw(FormatMismatch);
     void toYUY2(Image& dst) const throw(FormatMismatch);
-    void toHSV888(Image& dst) const throw(FormatMismatch);
+    void toHSV8(Image& dst) const throw(FormatMismatch);
     void toYCRCB(Image& dst) const throw(FormatMismatch);
 
     /**
      * Read from a file
      * See cv::imread for flags and params
      */
-    static ImageRGB888 read(const std::string& filename);
+    static ImageRGB8 read(const std::string& filename);
     
     /**
      * Write to a file
@@ -182,7 +182,7 @@ namespace colorspaces {
      */
     static Image* createInstance(const int width, const int height, void *const data);
     static Image& imageCvt(const Image& src, Image& dst) throw(NoConversion);
-    static const FormatPtr FORMAT_RGB888;
+    static const FormatPtr FORMAT_RGB8;
   };
 
   /**
@@ -214,7 +214,7 @@ namespace colorspaces {
      * Returns a copy
      */
     void toGRAY8(Image& dst) const throw(FormatMismatch);
-    void toRGB888(Image& dst) const throw(FormatMismatch);
+    void toRGB8(Image& dst) const throw(FormatMismatch);
     void toYCRCB(Image& dst) const throw(FormatMismatch);
     
     /**
@@ -252,7 +252,7 @@ namespace colorspaces {
      * Conversion methods.
      * Returns a copy
      */
-    void toRGB888(Image& dst) const throw(FormatMismatch);
+    void toRGB8(Image& dst) const throw(FormatMismatch);
     void toYUY2(Image& dst) const throw(FormatMismatch);
 
     /**
@@ -276,39 +276,39 @@ namespace colorspaces {
   };
 
   /**
-   * A HSV888 image
+   * A HSV8 image
    */
-  class ImageHSV888: public  Image {
+  class ImageHSV8: public  Image {
   public:
     /**
      * Constructor
      */
-    ImageHSV888(const int width, const int height);
+    ImageHSV8(const int width, const int height);
     
     /**
      * Constructor from user data
      */
-    ImageHSV888(const int width, const int height, void *const data);
+    ImageHSV8(const int width, const int height, void *const data);
 
     /**
      * Copy constructor.
      * if \param i doesn't match format a conversion will happen.
      */
-    ImageHSV888(const Image& i);
+    ImageHSV8(const Image& i);
 
     
     /**
      * Conversion methods.
      * Returns a copy
      */
-    void toRGB888(Image& dst) const throw(FormatMismatch);
+    void toRGB8(Image& dst) const throw(FormatMismatch);
 
     /**
      * Factory method
      */
     static Image* createInstance(const int width, const int height, void *const data);
     static Image& imageCvt(const Image& src, Image& dst) throw(NoConversion);
-    static const FormatPtr FORMAT_HSV888;
+    static const FormatPtr FORMAT_HSV8;
   };
 
   /**
@@ -337,7 +337,7 @@ namespace colorspaces {
      * Conversion methods.
      * Returns a copy
      */
-    void toRGB888(Image& dst) const throw(FormatMismatch);
+    void toRGB8(Image& dst) const throw(FormatMismatch);
     //void toYUY2(Image& dst) const throw(FormatMismatch);
 
     /**
