@@ -20,7 +20,7 @@ dnl#init automake
 AM_INIT_AUTOMAKE
 dnl#config pkg-config
 PKG_PROG_PKG_CONFIG
-
+AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 AC_SUBST([LIBTOOL_DEPS])
 
@@ -79,6 +79,10 @@ m4_include([m4/libgtkmm.m4])
 m4_include([m4/libgstreamer.m4])
 m4_include([m4/lib1394.m4])
 m4_include([m4/libgazebo.m4])
+m4_include([m4/libplayer.m4])
+m4_include([m4/libgtkglextmm.m4])
+m4_include([m4/libopengl.m4])
+m4_include([m4/libgsl.m4])
 
 dnl # Check for built libraries dependencies
 m4_include([m4/jderobotutil.m4])
@@ -99,6 +103,7 @@ m4_include([m4/component_surveillance.m4])
 m4_include([m4/component_gazeboserver.m4])
 m4_include([m4/component_introrob.m4])
 m4_include([m4/component_bgfglab.m4])
+m4_include([m4/component_teleoperator.m4])
 
 dnl#AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
 dnl#AC_PYTHON_DEVEL
@@ -150,6 +155,7 @@ AC_CONFIG_FILES([src/components/Makefile \
     src/components/alarmgenerator/Makefile \
     src/components/motiondetection/Makefile \
     src/components/gazeboserver/Makefile \
+    src/components/teleoperator/Makefile \
     src/components/introrob/Makefile \
     src/components/motiondetection/test/Makefile \
     src/components/bgfglab/Makefile])

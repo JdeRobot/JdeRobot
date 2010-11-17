@@ -31,7 +31,7 @@ typedef struct voxel{
 
 extern void us2xy(int numsensor, float d,float phi, Tvoxel *point, float *jderobot);
 extern void laser2xy(int reading, float d, Tvoxel *point, float *jderobot);
-extern void init_pioneer(void);
+extern void init_pioneer();
 
 /***************** Robot Configuration ***************/
 #define NUM_LASER 180
@@ -55,7 +55,6 @@ extern void init_pioneer(void);
 extern float laser_coord[5]; /* laser sensor position */
 extern float us_coord[NUM_SONARS][5];/* us sensor positions */
 extern float camera_coord[5]; /* camera position */
-
 
 #ifdef __cplusplus
 }
