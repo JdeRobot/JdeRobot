@@ -24,8 +24,8 @@ png("tpr_fpr.png")
 tpr<-vector()
 fpr<-vector()
 for(i in names(dataList)){
-  tpr<-append(tpr,as.double(mean(dataList[[i]]$TPR)))
-  fpr<-append(fpr,as.double(mean(dataList[[i]]$FPR)))
+  tpr<-append(tpr,as.double(mean(dataList[[i]]$TPR[!is.nan(dataList[[i]]$TPR)])))
+  fpr<-append(fpr,as.double(mean(dataList[[i]]$FPR[!is.nan(dataList[[i]]$FPR)])))
 }
 plot(fpr,tpr,pch=1:length(fpr),col=1:length(fpr),xlim=c(0,1),ylim=c(0,1))
 lines(c(0,1),c(0,1),col="red",lty=2)#random prediction

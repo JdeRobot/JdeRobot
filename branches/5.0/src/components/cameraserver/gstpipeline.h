@@ -57,6 +57,7 @@ namespace cameraserver {
     virtual void walk();
 
     GstBuffer* pull_buffer();
+    bool isEos();
   private:
     static gboolean my_bus_cb(GstBus *bus,
 			      GstMessage *message,
@@ -74,6 +75,7 @@ namespace cameraserver {
     jderobotice::Context context;
     GMainLoop *mainloop;
     GstElement *pipeline,*source,*decoder,*videoscale,*videorate,*videocolor,*sink;
+    bool eos;
     
   };
   typedef IceUtil::Handle<GSTPipeline> GSTPipelinePtr;

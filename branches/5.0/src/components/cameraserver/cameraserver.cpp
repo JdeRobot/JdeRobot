@@ -94,7 +94,7 @@ namespace cameraserver{
       }
       else{
       	context.tracer().info("Creating pipeline with config: " + pipelineCfg.toString());
-      	pipeline = new GSTPipeline(context,pipelineCfg);
+      	resetPipeline(pipelineCfg);
       }
       
       context.tracer().info("Starting thread for camera: " + cameraDescription->name);
@@ -177,6 +177,10 @@ namespace cameraserver{
     	context.tracer().info("Stoping Streaming in " + cameraDescription->name);
     	system ("killall vlc");
     	return;
+    }
+
+    void resetPipeline(const Config &cfg){
+      pipeline = new GSTPipeline(context,cfg);
     }
 
   private:
@@ -335,9 +339,13 @@ namespace cameraserver{
 		  else{
 		  	buff = mycamera->pipeline->pull_buffer();
 			if(!buff){
-				new_frame=false;
-		    		mycamera->context.tracer().info("Pipeline return empty buffer. Waiting...");
-		    		IceUtil::ThreadControl::sleep(IceUtil::Time::seconds(1));
+			  //mycamera->context.tracer().info("Pipeline return empty buffer.");
+			  new_frame=false;
+			  IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(100));
+			  if (mycamera->pipeline->isEos()){
+			    mycamera->context.tracer().info("Pipeline is eos.Restarting pipeline...");
+			    mycamera->resetPipeline(mycamera->pipelineCfg);
+			  }
 			}
 		  }
 

@@ -16,6 +16,15 @@ if test "x$enable_component_teleoperator" != xno; then
     if test "x$with_gtkmm" = xno; then
 			ERRORS="$ERRORS, gtkmm support not found"
     fi
+    if test "x$with_gtkglextmm" = xno; then
+			ERRORS="$ERRORS, gtkglextmm support not found"
+    fi
+    if test "x$with_opengl" = xno; then
+			ERRORS="$ERRORS, opengl support not found"
+    fi
+    if test "x$with_gsl" = xno; then
+			ERRORS="$ERRORS, gsl support not found"
+    fi
     if test "$ERRORS"; then
       AC_MSG_NOTICE([Errors found checking teleoperator requirements: $ERRORS. Component disabled])
 			AM_CONDITIONAL([ENABLE_COMPONENT_TELEOPERATOR],[false])
