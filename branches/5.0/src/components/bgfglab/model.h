@@ -24,6 +24,7 @@
 
 #include <jderobotutil/observer.h>
 #include <jderobotutil/time.h>
+#include <jderobotutil/paramdict.h>
 #include <colorspaces/colorspacesmm.h>
 #include <gbxutilacfr/tracer.h>
 #include <opencv/cvaux.h>
@@ -60,13 +61,13 @@ namespace bgfglab {
 
     gbxutilacfr::Tracer& tracer() { return _tracer; };
 
-    void setBGModel(const std::string modelName, const ParamDict& param) throw();
+    void setBGModel(const std::string modelName, const jderobotutil::ParamDict& param) throw();
     
     const jderobotutil::IpsCounter& bgModelIps() const { return bg_model_ips; }
     
     //return a null pointer until algorithm is set
     CvBGStatModel const* bgModel() const throw() { return bg_model; }
-    const ParamDict& bgModelParam() const throw() { return bg_modelParam; }
+    const jderobotutil::ParamDict& bgModelParam() const throw() { return bg_modelParam; }
   private:
     gbxutilacfr::Tracer& _tracer;
     colorspaces::Image currentImage;
@@ -74,7 +75,7 @@ namespace bgfglab {
     colorspaces::ImageGRAY8 fgMaskImage;
     jderobotutil::IpsCounter bg_model_ips;
     CvBGStatModel* bg_model;
-    ParamDict bg_modelParam;
+    jderobotutil::ParamDict bg_modelParam;
     colorspaces::Image::FormatPtr internalFmt;
     bool dumpDataOn;
     bool dumpDataImg;

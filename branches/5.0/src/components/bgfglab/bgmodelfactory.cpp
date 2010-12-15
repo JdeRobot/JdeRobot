@@ -23,61 +23,6 @@
 #include <sstream>
 
 namespace bgfglab{
-  ParamDict::ParamDict(const std::string keyprefix, 
-		       const std::map<std::string, std::string>& params)
-    : std::map<std::string, std::string>(params), keyprefix(keyprefix) {}
-
-  std::string ParamDict::getParam(const std::string paramkey) const{
-    return getParamWithDefault(paramkey,std::string());
-  }
-
-  std::string ParamDict::getParamWithDefault(const std::string paramkey, std::string defaultValue) const{
-    ParamDict::const_iterator pIt(this->find(keyprefix+paramkey));
-    if (pIt != this->end())
-      return pIt->second;
-    return defaultValue;
-  }
-
-  int ParamDict::getParamAsInt(const std::string paramkey) const{
-    return getParamAsIntWithDefault(paramkey,0);
-  }
-
-  int ParamDict::getParamAsIntWithDefault(const std::string paramkey, const int defaultValue) const{
-    std::string p(getParam(paramkey));
-    if (p.length() == 0)
-      return defaultValue;
-
-    std::istringstream iss(p);
-    int value;
-    iss >> value;
-    if (iss.fail())
-      return defaultValue;
-    return value;
-  }
-
-  float ParamDict::getParamAsFloat(const std::string paramkey) const{
-    return getParamAsFloatWithDefault(paramkey,0.0f);
-  }
-
-  float ParamDict::getParamAsFloatWithDefault(const std::string paramkey, const float defaultValue) const{
-    std::string p(getParam(paramkey));
-    if (p.length() == 0)
-      return defaultValue;
-  
-    std::istringstream iss(p);
-    float value;
-    iss >> value;
-    if (iss.fail())
-      return defaultValue;
-    return value;
-  }
-  
-  std::string ParamDict::toString() const{
-    std::stringstream ss;
-    ss << *this;
-    return ss.str();
-  }
-
   BGModelFactory::FactoryDict registerBGFactories(){
     BGModelFactory::FactoryDict dict;
 
@@ -128,7 +73,7 @@ namespace bgfglab{
   // }
 
 
-  CvBGStatModel* BGModelCvFGDFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+  CvBGStatModel* BGModelCvFGDFactory::createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const{
     CvFGDStatModelParams tmpParams;
     //parse params
     tmpParams.Lc = params.getParamAsIntWithDefault("Lc",defaultParams.Lc);
@@ -166,7 +111,7 @@ namespace bgfglab{
   //   return new BGModelCvMoGFactory(*this);
   // }
 
-  CvBGStatModel* BGModelCvMoGFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+  CvBGStatModel* BGModelCvMoGFactory::createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const{
     CvGaussBGStatModelParams tmpParams;
     tmpParams.win_size = params.getParamAsIntWithDefault("win_size",defaultParams.win_size);
     tmpParams.n_gauss = params.getParamAsIntWithDefault("n_gauss",defaultParams.n_gauss);
@@ -194,7 +139,7 @@ namespace bgfglab{
   //   return new BGModelExpFactory(*this);
   // }
 
-  CvBGStatModel* BGModelExpFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+  CvBGStatModel* BGModelExpFactory::createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const{
     BGExpStatModelParams tmpParams;
     tmpParams.alpha  = params.getParamAsFloatWithDefault("alpha",defaultParams.alpha);
     tmpParams.bg_update_rate = params.getParamAsIntWithDefault("bg_update_rate",defaultParams.bg_update_rate);
@@ -224,7 +169,7 @@ namespace bgfglab{
   // }
   
 
-  CvBGStatModel* BGModelMeanFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+  CvBGStatModel* BGModelMeanFactory::createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const{
     BGMeanStatModelParams tmpParams;
     tmpParams.n_frames  = params.getParamAsIntWithDefault("n_frames",defaultParams.n_frames);
     tmpParams.bg_update_rate = params.getParamAsIntWithDefault("bg_update_rate",defaultParams.bg_update_rate);
@@ -254,7 +199,7 @@ namespace bgfglab{
   //   return new BGModelModeFactory(*this);
   // }
 
-  CvBGStatModel* BGModelModeFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+  CvBGStatModel* BGModelModeFactory::createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const{
     BGModeStatModelParams tmpParams;
     tmpParams.n_frames  = params.getParamAsIntWithDefault("n_frames",defaultParams.n_frames);
     tmpParams.levels  = params.getParamAsIntWithDefault("levels",defaultParams.levels);
@@ -284,7 +229,7 @@ namespace bgfglab{
   //   return new BGModelCBFactory(*this);
   // }
 
-  CvBGStatModel* BGModelCBFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+  CvBGStatModel* BGModelCBFactory::createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const{
     BGCBStatModelParams tmpParams;
     tmpParams.cb_rotation_rate  = params.getParamAsIntWithDefault("cb_rotation_rate",defaultParams.cb_rotation_rate);
     tmpParams.bg_update_rate = params.getParamAsIntWithDefault("bg_update_rate",defaultParams.bg_update_rate);
@@ -308,7 +253,7 @@ namespace bgfglab{
   BGModelFIXEDFactory::BGModelFIXEDFactory(const std::string desc)
     :BGModelFactory(desc) {}
 
-  CvBGStatModel* BGModelFIXEDFactory::createModel(const ParamDict params, IplImage* firstFrame) const{
+  CvBGStatModel* BGModelFIXEDFactory::createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const{
     BGFIXEDStatModelParams tmpParams;
     tmpParams.bg_update_rate = params.getParamAsIntWithDefault("bg_update_rate",defaultParams.bg_update_rate);
     tmpParams.fg_update_rate = params.getParamAsIntWithDefault("fg_update_rate",defaultParams.fg_update_rate);
@@ -321,42 +266,3 @@ namespace bgfglab{
   }
 
 }//namespace
-
-std::ostream &operator<<(std::ostream &out, const bgfglab::ParamDict& param){
-  bgfglab::ParamDict::const_iterator pIt;
-  std::string key;
-  int keyprefixlen = param.keyprefix.length();
-  
-  for( pIt = param.begin(); pIt != param.end(); pIt++){
-    key = pIt->first;
-    if ((keyprefixlen > 0) && (key.find(param.keyprefix) == 0))//erase keyprefix
-      key = key.substr(keyprefixlen);
-    out << key << '=' << pIt->second << std::endl;
-  }
-  return out;
-}
-
-std::istream &operator>>(std::istream &in, bgfglab::ParamDict& param){
-  std::string line;
-  while(!in.eof()){
-    std::getline(in,line);
-    //if data read check for comments
-    if (line.length() > 0){
-      int commentpos = line.find_first_of('#');
-      if (commentpos != std::string::npos)
-	line = line.erase(commentpos);
-    }
-
-    //split line by =
-    if (line.length() > 0){
-      int delpos = line.find_first_of('=');
-      if (delpos != std::string::npos){
-	std::string key,value;
-	key = line.substr(0,delpos);
-	value = line.substr(delpos+1);
-	param[key] = value;
-      }
-    }
-  }
-  return in;
-}

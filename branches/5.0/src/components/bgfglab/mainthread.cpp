@@ -20,6 +20,7 @@
  */
 
 #include <jderobotice/interfaceconnect.h>
+#include <jderobotutil/paramdict.h>
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
@@ -110,12 +111,12 @@ namespace bgfglab {
 
     
     if (bgalg.length() > 0){
-      ParamDict bgalgParams(bgalgPropPrefix,prop->getPropertiesForPrefix(bgalgPropPrefix));
+      jderobotutil::ParamDict bgalgParams(bgalgPropPrefix,prop->getPropertiesForPrefix(bgalgPropPrefix));
       // //test
       // std::stringstream ss;
       // ss << bgalgParams;
       // std::cout << "bgalgParams:" << bgalgParams << std::endl;
-      // ParamDict testParams;
+      // jderobotutil::ParamDict testParams;
       // ss >> testParams;
       // std::cout << "testParams:" << testParams << std::endl;
 

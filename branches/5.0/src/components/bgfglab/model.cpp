@@ -239,7 +239,7 @@ namespace bgfglab {
     return fgMaskImage;
   }
 
-  void Model::setBGModel(const std::string modelName, const ParamDict& param) throw()
+  void Model::setBGModel(const std::string modelName, const jderobotutil::ParamDict& param) throw()
   { 
     BGModelFactory::FactoryDict::const_iterator fIt = BGModelFactory::factories.find(modelName);
 

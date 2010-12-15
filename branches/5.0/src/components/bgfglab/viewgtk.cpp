@@ -38,7 +38,7 @@ namespace bgfglab {
   class ViewGtk::PImpl{
   public:
     std::string currentModelName;
-    ParamDict currentModelParam;
+    jderobotutil::ParamDict currentModelParam;
   };
 
 
@@ -276,7 +276,7 @@ namespace bgfglab {
       Gtk::TreeModel::Row row = *it;
       if (row){
 	std::string name = row[comboboxBGModelCols.m_col_name];
-	ParamDict param;
+	jderobotutil::ParamDict param;
 	std::stringstream textss(textviewAlgParam->get_buffer()->get_text());
 	textss >> param;
 	setBGModel(name,param);
@@ -314,7 +314,7 @@ namespace bgfglab {
     filechooserdialogDumpData->hide();
   }
 
-  void ViewGtk::setBGModel(const std::string modelName, const ParamDict& param) throw(){
+  void ViewGtk::setBGModel(const std::string modelName, const jderobotutil::ParamDict& param) throw(){
     //Glib::RefPtr< Gtk::TextBuffer > buffer();
     textviewAlgInfo->get_buffer()->set_text(param.toString());
     textviewAlgInfo->show();

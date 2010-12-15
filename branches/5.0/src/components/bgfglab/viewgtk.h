@@ -22,6 +22,7 @@
 #ifndef BGFGLAB_VIEWGTK_H
 #define BGFGLAB_VIEWGTK_H
 
+#include <jderobotutil/paramdict.h>
 #include <gbxutilacfr/exceptions.h>
 #include <gtkmm.h>
 #include <gtkmm/socket.h>
@@ -67,7 +68,7 @@ namespace bgfglab {
     void onMenutoolbuttonSelectBGModelMenuItemClicked(const std::string algDesc);
     void onToolbuttonDumpDataToggled();
 
-    void setBGModel(const std::string modelName, const ParamDict& param) throw();
+    void setBGModel(const std::string modelName, const jderobotutil::ParamDict& param) throw();
 
     //algorithm selection dialog
     //Tree model columns for comboboxBGModel

@@ -27,25 +27,9 @@
 #include <bgfgsegmentation/bgfgsegmentation.h>
 #include <tr1/memory>
 #include <map>
+#include <jderobotutil/paramdict.h>
 
 namespace bgfglab {
-  class ParamDict: public std::map<std::string, std::string>{
-  public:
-    ParamDict(const std::string keyprefix = "", 
-	      const std::map<std::string, std::string>& params = std::map<std::string, std::string>::map());
-
-    std::string getParam(const std::string paramkey) const;
-    std::string getParamWithDefault(const std::string paramkey, const std::string defaultValue) const;
-    int getParamAsInt(const std::string paramkey) const;
-    int getParamAsIntWithDefault(const std::string paramkey, const int defaultValue) const;
-    float getParamAsFloat(const std::string paramkey) const;
-    float getParamAsFloatWithDefault(const std::string paramkey, const float defaultValue) const;
-
-    std::string toString() const;
-  
-    std::string keyprefix;
-  };
-
   class BGModelFactory{
   public:
     BGModelFactory(const std::string desc);
@@ -53,7 +37,7 @@ namespace bgfglab {
     
     //virtual copy constructor
     //virtual BGModelFactory* clone() const = 0;
-    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const = 0;
+    virtual CvBGStatModel* createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const = 0;
     const std::string description;
 
     typedef std::map<std::string, std::tr1::shared_ptr<BGModelFactory> > FactoryDict;
@@ -67,7 +51,7 @@ namespace bgfglab {
     virtual ~BGModelCvFGDFactory() {}
 
     //virtual BGModelCvFGDFactory* clone() const;
-    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
+    virtual CvBGStatModel* createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const;
 
     //const CvFGDStatModelParams params;
     static const CvFGDStatModelParams defaultParams;
@@ -79,7 +63,7 @@ namespace bgfglab {
     virtual ~BGModelCvMoGFactory(){}
 
     //virtual BGModelCvMoGFactory* clone() const;
-    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
+    virtual CvBGStatModel* createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const;
 
     //const CvGaussBGStatModelParams params;
     static const CvGaussBGStatModelParams defaultParams;
@@ -91,7 +75,7 @@ namespace bgfglab {
     virtual ~BGModelExpFactory() {}
     
     //virtual BGModelExpFactory* clone() const;
-    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
+    virtual CvBGStatModel* createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const;
 
     //const BGExpStatModelParams params;
     static const BGExpStatModelParams defaultParams;
@@ -103,7 +87,7 @@ namespace bgfglab {
     virtual ~BGModelMeanFactory() {}
 
     //virtual BGModelMeanFactory* clone() const;
-    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
+    virtual CvBGStatModel* createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const;
 
     //const BGMeanStatModelParams params;
     static const BGMeanStatModelParams defaultParams;
@@ -115,7 +99,7 @@ namespace bgfglab {
     virtual ~BGModelModeFactory() {}
 
     //virtual BGModelModeFactory* clone() const;
-    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
+    virtual CvBGStatModel* createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const;
 
     //const BGModeStatModelParams params;
     static const BGModeStatModelParams defaultParams;
@@ -127,7 +111,7 @@ namespace bgfglab {
     virtual ~BGModelCBFactory() {}
 
     //virtual BGModelCBFactory* clone() const;
-    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
+    virtual CvBGStatModel* createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const;
 
     //const BGCBStatModelParams params;
     static const BGCBStatModelParams defaultParams;
@@ -139,15 +123,12 @@ namespace bgfglab {
     virtual ~BGModelFIXEDFactory() {}
 
     //virtual BGModelFIXEDFactory* clone() const;
-    virtual CvBGStatModel* createModel(const ParamDict params, IplImage* firstFrame) const;
+    virtual CvBGStatModel* createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const;
 
     //const BGFIXEDStatModelParams params;
     static const BGFIXEDStatModelParams defaultParams;
   };
 
 }//namespace
-
-std::ostream &operator<<(std::ostream &out, const bgfglab::ParamDict& param);
-std::istream &operator>>(std::istream &in, bgfglab::ParamDict& param);
 
 #endif //BGFGLAB_BGMODELFACTORY_H

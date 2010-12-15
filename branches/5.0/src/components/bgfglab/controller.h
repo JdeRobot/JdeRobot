@@ -25,6 +25,7 @@
 #include <gbxutilacfr/tracer.h>
 #include <jderobotutil/observer.h>
 #include <tr1/memory>
+#include <jderobotutil/paramdict.h>
 #include "model.h"
 
 //View and Controller defined here to avoid circular dependencies
@@ -44,7 +45,7 @@ namespace bgfglab {
     void exit() throw();//FIXME
     
     void setImage(const colorspaces::Image &img) throw() { _model.updateBGModel(img); }
-    void setBGModel(const std::string modelName, const ParamDict& param) throw();
+    void setBGModel(const std::string modelName, const jderobotutil::ParamDict& param) throw();
 
     bool startDumpData(std::string filename="modeldata.dump",
 		       int maxFrames=-1,

@@ -39,7 +39,7 @@ namespace bgfglab {
       _model.deleteObserver(*v_it);//jderobotutil::ObserverPtr(view));
   }
 
-  void Controller::setBGModel(const std::string modelName, const ParamDict& param) throw() { 
+  void Controller::setBGModel(const std::string modelName, const jderobotutil::ParamDict& param) throw() { 
     _model.setBGModel(modelName,param);
   }
 
