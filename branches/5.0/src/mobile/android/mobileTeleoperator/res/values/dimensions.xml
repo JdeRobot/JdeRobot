@@ -1,0 +1,12 @@
+<resources>
+	<dimen name="title_margin">20sp</dimen>
+	<dimen name="secure_margin">30sp</dimen>
+	
+	<dimen name="error_button_width">100sp</dimen>
+	<dimen name="error_text_margin">5sp</dimen>
+	<dimen name="error_button_margin">10sp</dimen>
+	
+	<dimen name="ok_button_width">100sp</dimen>
+	<dimen name="ok_text_margin">5sp</dimen>
+	<dimen name="ok_button_margin">10sp</dimen>
+</resources>

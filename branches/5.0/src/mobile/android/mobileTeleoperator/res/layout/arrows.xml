@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+<TextView
+	android:id="@+id/text_title"
+    android:layout_height="wrap_content" android:text="@string/main_title" style="@style/item_title" android:layout_width="wrap_content" android:layout_centerHorizontal="true" android:layout_marginBottom="@dimen/title_margin"/>
+<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/button_up" android:src="@drawable/arrow_up" android:layout_below="@+id/text_title" android:layout_centerHorizontal="true"></ImageButton>
+<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/button_up" android:id="@+id/button_left" android:src="@drawable/arrow_left" android:layout_toLeftOf="@+id/button_up"></ImageButton>
+<ImageButton android:layout_centerHorizontal="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/button_right" android:src="@drawable/arrow_right" android:layout_toRightOf="@+id/button_up" android:layout_below="@+id/button_up"></ImageButton>
+<ImageButton android:layout_centerHorizontal="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/button_right" android:id="@+id/button_down" android:src="@drawable/arrow_down"></ImageButton>
+<ImageButton android:layout_below="@+id/button_up" android:layout_width="wrap_content" android:id="@+id/button_stop" android:layout_height="wrap_content" android:layout_centerHorizontal="true" android:src="@drawable/stop"></ImageButton>
+<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/button_left" android:id="@+id/button_side_right" android:src="@drawable/arrow_right" android:layout_toRightOf="@+id/button_right"></ImageButton>
+<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/button_left" android:id="@+id/button_side_left" android:src="@drawable/arrow_left" android:layout_toLeftOf="@+id/button_left"></ImageButton>
+
+
+</RelativeLayout>
