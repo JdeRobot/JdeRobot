@@ -16,52 +16,52 @@
  *
  *  Authors : Jose María Cañas <jmplaza@gsyc.es>
  *            Francisco Miguel Rivas Montero <fm.rivas@alumnos.urjc.es>	
- *  		 Javier Vazquez Pereda <javiervarper@yahoo.es>
  */
 
-#ifndef PTMOTORS_ICE
-#define PTMOTORS_ICE
+#ifndef BODYENCODERS_ICE
+#define BODYENCODERS_ICE
 
 #include <jderobot/common.ice>
+#include <jderobot/body.ice>
 
 module jderobot{  
 
-	/** 
-   * PTMotorsData a class that contains the pantilt data
-   */
-	class PTMotorsData
-	{
-		float latitude;
-		float latitudeSpeed;
-		float longitude;
-		float longitudeSpeed;
+	/**
+	* Arm 
+	*/
+	class ArmEncodersData{
+		BodyMotor shoulder;
+		BodyMotor elbow;
+		int clock;
 	};
-
-	/** 
-   * PTMotorsParams a class that contains the motors parametres.
-   */
-	class PTMotorsParams
-	{
-		float maxLongitude;
-		float minLongitude;
-		float maxLatitude;
-		float minLatitude;
-		float maxLongitudeSpeed;
-		float maxLatitudeSpeed;
+	
+	/**
+	*	Leg
+	*/
+	class LegEncodersData{
+		BodyMotor hip;
+		BodyMotor knee;
+		BodyMotor ankle;
+		int clock;
 	};
-
+	
+	/**
+	* 	camera odometry
+	*/
+	class OdometryData{
+		seqFloat odometry;
+	};
 
   /** 
-   * Interface to the PTMotors Actuators interaction.
+   * Interface to the Humanoid Body Encoders.
    */
-	interface PTMotors
+	interface BodyEncoders
 	{
-		int setPTMotorsData(PTMotorsData data);
-		idempotent PTMotorsData getPTMotorsData();
-		idempotent PTMotorsParams getPTMotorsParams();
+		idempotent ArmEncodersData getArmEncodersData(BodySide side);
+		idempotent LegEncodersData getLegEncodersData(BodySide side);
+		idempotent OdometryData getOdometryData(CameraBody camera);
 	};
 
+};
 
-}; //module
-
-#endif //PTMOTORS_ICE
+#endif 

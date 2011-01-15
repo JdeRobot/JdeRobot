@@ -304,6 +304,14 @@ namespace gazeboserver{
 	       	   return 0;
           };
 
+		virtual  Ice::Int setL(Ice::Float l, const Ice::Current&){
+	       	   return -1;
+          };
+
+		virtual float getL(const Ice::Current&){
+				return 0.0;
+    	 };
+
          std::string prefix;
          jderobotice::Context context;
 
@@ -477,26 +485,22 @@ namespace gazeboserver{
   		PTMotorsI(std::string& propertyPrefix, const jderobotice::Context& context)
        : prefix(propertyPrefix),context(context)
      {
-
-
-       Ice::PropertiesPtr prop = context.properties();
-
-			   gazeboserver_id=0;
-              	        gazeboclient_id=0;
-
-              	        // Create a client object
-              	        gazeboclient = gz_client_alloc();
-
-       	        // Connect to the server
-       	        if (gz_client_connect_wait(gazeboclient, gazeboserver_id, gazeboclient_id) != 0) {
-       	      	  printf("ERROR: Connecting to Gazebo server.\n");
-      	      	}
-		gazeboPTZ = gz_ptz_alloc();
-      			if (gz_ptz_open (gazeboPTZ, gazeboclient, "robot1") != 0)
-		{
-			  fprintf (stderr, "Error opening \"%s\" ptz\n","robot1");
-			  //return (-1);
-		}
+			Ice::PropertiesPtr prop = context.properties();
+			gazeboserver_id=0;
+			gazeboclient_id=0;
+			// Create a client object
+			gazeboclient = gz_client_alloc();
+			// Connect to the server
+			if (gz_client_connect_wait(gazeboclient, gazeboserver_id, gazeboclient_id) != 0) {
+				printf("ERROR: Connecting to Gazebo server.\n");
+			}
+			gazeboPTZ = gz_ptz_alloc();
+			if (gz_ptz_open (gazeboPTZ, gazeboclient, "robot1") != 0)
+			{
+				fprintf (stderr, "Error opening \"%s\" ptz\n","robot1");
+				//return (-1);
+			}
+			// ptmotorsparams should be initialized here
      }
 
      virtual ~PTMotorsI(){};
@@ -530,15 +534,22 @@ namespace gazeboserver{
 		return 0; 
      };
 
+	virtual jderobot::PTMotorsParamsPtr getPTMotorsParams(const Ice::Current&){
+		return ptMotorsParams;
+	};
+	virtual jderobot::PTMotorsDataPtr getPTMotorsData (const Ice::Current&){
+		return ptMotorsData;
+	};
 
+	private:
          std::string prefix;
          jderobotice::Context context;
-	jderobot::PTMotorsDataPtr ptMotorsData;
-
-                  gz_client_t *gazeboclient;
-                  int gazeboserver_id;
-                  int gazeboclient_id;
-		  gz_ptz_t * gazeboPTZ;
+		jderobot::PTMotorsDataPtr ptMotorsData;
+		jderobot::PTMotorsParamsPtr ptMotorsParams;
+        gz_client_t *gazeboclient;
+        int gazeboserver_id;
+        int gazeboclient_id;
+		gz_ptz_t * gazeboPTZ;
                   
     };
 

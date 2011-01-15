@@ -13,4 +13,4 @@ teleoperator_LDADD = $(top_srcdir)/src/libs/jderobotice/libJderobotIce.la \
 			$(top_srcdir)/src/libs/pioneer/libpioneer.la
 
 dist_conf_DATA = teleoperator.cfg
-
+dist_glade_DATA = teleoperatorgui.glade

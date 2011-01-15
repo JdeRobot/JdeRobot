@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1997-2010 JDE Developers Team
+ *  Copyright (C) 1997-2009 JDE Developers Team
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,37 +15,30 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/.
  *
  *  Authors : Jose María Cañas <jmplaza@gsyc.es>
- *            Francisco Miguel Rivas Montero <fm.rivas@alumnos.urjc.es>	
- *  		 Javier Vazquez Pereda <javiervarper@yahoo.es>
+			Francisco Miguel Rivas Montero <fm.rivas@alumnos.urjc.es>
+			
  */
 
+#ifndef PTENCODERS_CONTROLLER_H
+#define PTENCODERS_CONTROLLER_H
+#include <string>
+#include <iostream>
+#include <colorspaces/colorspacesmm.h>
+#include <jderobot/ptencoders.h>
 
-#ifndef PTENCODERS_ICE
-#define PTENCODERS_ICE
-
-#include <jderobot/common.ice>
-
-
-module jderobot{  
-	/**
-	* ptencoders dat information 
-	*/
-  class PTEncodersData
-  {
-  	float panAngle;
-	float tiltAngle;
-	int clock;
-  };
+namespace DevicesController{
+	class PTEncodersController{
+	public:
+		PTEncodersController(jderobot::PTEncodersPrx prx);
+		~PTEncodersController();
+		std::vector<float> getValues();
 
 
-  /** 
-   * Interface to the ptencoders sensor.
-   */
-  interface PTEncoders
-  {
-	idempotent	PTEncodersData getPTEncodersData();
-  };
+	private:
+		jderobot::PTEncodersPrx pteprx;
+		jderobot::PTEncodersDataPtr data;
+		int clock;
+	};
+}
 
-}; //module
-
-#endif //PTENCODERS_ICE
+#endif

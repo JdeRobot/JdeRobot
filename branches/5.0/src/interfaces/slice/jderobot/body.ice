@@ -16,52 +16,26 @@
  *
  *  Authors : Jose María Cañas <jmplaza@gsyc.es>
  *            Francisco Miguel Rivas Montero <fm.rivas@alumnos.urjc.es>	
- *  		 Javier Vazquez Pereda <javiervarper@yahoo.es>
  */
 
-#ifndef PTMOTORS_ICE
-#define PTMOTORS_ICE
+#ifndef BODY_ICE
+#define BODY_ICE
 
 #include <jderobot/common.ice>
 
 module jderobot{  
 
-	/** 
-   * PTMotorsData a class that contains the pantilt data
-   */
-	class PTMotorsData
-	{
-		float latitude;
-		float latitudeSpeed;
-		float longitude;
-		float longitudeSpeed;
+	enum BodySide { Left, Right};
+	enum CameraBody { Top, Bottom};
+	enum MotorsName { HipYawPitch, HipPitch, HipRoll, KneePitch, AnklePitch, AnkleRoll, ShoulderPitch, ShoulderRoll, ElbowYaw, ElbowRoll};
+
+	/**
+	* simply body motor
+	*/
+	struct BodyMotor{
+		float pitch;
+		float yaw;
+		float roll;
 	};
-
-	/** 
-   * PTMotorsParams a class that contains the motors parametres.
-   */
-	class PTMotorsParams
-	{
-		float maxLongitude;
-		float minLongitude;
-		float maxLatitude;
-		float minLatitude;
-		float maxLongitudeSpeed;
-		float maxLatitudeSpeed;
-	};
-
-
-  /** 
-   * Interface to the PTMotors Actuators interaction.
-   */
-	interface PTMotors
-	{
-		int setPTMotorsData(PTMotorsData data);
-		idempotent PTMotorsData getPTMotorsData();
-		idempotent PTMotorsParams getPTMotorsParams();
-	};
-
-
-}; //module
-
-#endif //PTMOTORS_ICE
+};
+#endif
