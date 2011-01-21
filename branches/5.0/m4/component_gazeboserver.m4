@@ -8,6 +8,7 @@ AC_ARG_ENABLE([component-gazeboserver],
     [enable_component_gazeboserver=yes])
 
 
+AM_CONDITIONAL([ENABLE_COMPONENT_GAZEBOSERVER],[false])
 if test "x$enable_component_gazeboserver" != xno; then
     AC_MSG_NOTICE([**** Checking gazeboserver component requirements:])
     if test "x$with_gazebo" = xno; then

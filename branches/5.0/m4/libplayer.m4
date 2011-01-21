@@ -22,7 +22,7 @@ if test "x$with_player" != xno; then
 
     AC_MSG_NOTICE([**** Checking player support:])
     PKG_CHECK_MODULES(
-	[PLAYER],[player],
+	[PLAYER],[libplayer],
 	[
 	    AC_DEFINE([HAVE_PLAYER],[1],[Defined if player found])
 	    AC_SUBST([PLAYER_CPPFLAGS])

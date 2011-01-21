@@ -1,0 +1,5 @@
+jderobot (5.0.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Eduardo Perdices <edupergar@gsyc.es>  Thu, 20 Jan 2011 15:08:33 +0100

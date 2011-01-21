@@ -22,7 +22,7 @@ if test "x$with_gazebo" != xno; then
 
     AC_MSG_NOTICE([**** Checking gazebo support:])
     PKG_CHECK_MODULES(
-	[GAZEBO],[gazebo],
+	[GAZEBO],[libgazebo],
 	[
 	    AC_DEFINE([HAVE_GAZEBO],[1],[Defined if gazebo found])
 	    AC_SUBST([GAZEBO_CPPFLAGS])
