@@ -23,7 +23,7 @@ if test "x$enable_component_calibrator" != xno; then
 			ERRORS="$ERRORS, opencv support not found"
     fi
     if test "$ERRORS"; then
-      AC_MSG_NOTICE([Errors found checking teleoperator requirements: $ERRORS. Component disabled])
+      AC_MSG_NOTICE([Errors found checking calibrator requirements: $ERRORS. Component disabled])
 			AM_CONDITIONAL([ENABLE_COMPONENT_CALIBRATOR],[false])
     else
 			AC_MSG_NOTICE([Component enabled])
