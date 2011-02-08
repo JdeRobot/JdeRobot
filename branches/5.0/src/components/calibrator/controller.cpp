@@ -28,7 +28,6 @@ namespace calibrator {
 		this->gladepath = std::string("./calibrator.glade");
 
 		this->world = prop->getProperty("Calibrator.World.File");
-		cout << "world es " << this->world << endl;
 		this->camOut = prop->getProperty("Calibrator.Camera.FileOut");
 
 		this->drawCenter = false;

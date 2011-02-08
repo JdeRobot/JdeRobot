@@ -9,7 +9,7 @@ AC_ARG_WITH([player],
     [with_player="/usr"])
 
 if test "x$with_player" != xno; then
-    PLAYER_CPPFLAGS="-I$with_player/include"
+    PLAYER_CPPFLAGS="-I$with_player/include/player-2.1"
     PLAYER_LDFLAGS="-L$with_player/lib"
                        
     _SAVE_CPPFLAGS=$CPPFLAGS
@@ -22,7 +22,7 @@ if test "x$with_player" != xno; then
 
     AC_MSG_NOTICE([**** Checking player support:])
     PKG_CHECK_MODULES(
-	[PLAYER],[libplayer],
+	[PLAYER],[playerc++],
 	[
 	    AC_DEFINE([HAVE_PLAYER],[1],[Defined if player found])
 	    AC_SUBST([PLAYER_CPPFLAGS])

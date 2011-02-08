@@ -9,7 +9,7 @@ Homepage: http://jderobot.org/
 Package: jderobot
 Section: net
 Architecture: i386
-Depends: ${shlibs:Depends}, ${misc:Depends}, libode-jderobot-dev, gearbox-jderobot-dev, gazebo-jderobot-dev, libgtkglextmm-x11-1.2-dev, libzeroc-ice33-dev, libcv-dev, libglademm-2.4-dev, libgstreamer-plugins-base0.10-dev, libdc1394-22-dev, libraw1394-dev, libplayer-dev, robot-player-dev, libgtkgl2.0-dev, libglut3-dev, ffmpeg
+Depends: ${shlibs:Depends}, ${misc:Depends}, libode-jderobot-dev, gearbox-jderobot-dev, gazebo-jderobot-dev, player-jderobot-dev, stage-jderobot-dev, libgtkglextmm-x11-1.2-dev, libzeroc-ice33-dev, libcv-dev, libglademm-2.4-dev, libgstreamer-plugins-base0.10-dev, libdc1394-22-dev, libraw1394-dev, libgtkgl2.0-dev, libglut3-dev, ffmpeg
 Description: jderobot is a software development suite for robotics applications.
  jderobot is a software development suite for robotics applications, written
  in C++ language. It provides a programming environment where the robot control

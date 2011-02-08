@@ -107,6 +107,7 @@ m4_include([m4/component_bgfglab.m4])
 m4_include([m4/component_teleoperator.m4])
 m4_include([m4/component_calibrator.m4])
 m4_include([m4/component_naooperator.m4])
+m4_include([m4/component_playerserver.m4])
 
 dnl#AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
 dnl#AC_PYTHON_DEVEL
@@ -163,6 +164,7 @@ AC_CONFIG_FILES([src/components/Makefile \
     src/components/calibrator/Makefile \
     src/components/naooperator/Makefile \
     src/components/introrob/Makefile \
+    src/components/playerserver/Makefile \
     src/components/motiondetection/test/Makefile \
     src/components/bgfglab/Makefile])
 

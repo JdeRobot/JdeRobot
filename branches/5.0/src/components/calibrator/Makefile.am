@@ -2,7 +2,7 @@ if ENABLE_COMPONENT_CALIBRATOR
 bin_PROGRAMS = calibrator
 endif
 
-calibrator_SOURCES = calibrator.cpp calibrator.h controller.cpp controller.h view.cpp view.h
+calibrator_SOURCES = calibrator.cpp controller.cpp controller.h view.cpp view.h
 calibrator_CPPFLAGS = $(JDEROBOTICE_CPPFLAGS) $(COLORSPACESMM_CPPFLAGS) $(GTKMM_CPPFLAGS) $(GTKGLEXTMM_CPPFLAGS) $(OPENCV_CPPFLAGS) -DGLADE_DIR=\""$(gladedir)"\"
 calibrator_LDFLAGS =  $(JDEROBOTICE_LDFLAGS) $(COLORSPACESMM_LDFLAGS) $(GTKMM_LDFLAGS) $(GTKGLEXTMM_LDFLAGS) $(OPENCV_LDFLAGS)
 calibrator_LDADD = $(top_srcdir)/src/libs/jderobotice/libJderobotIce.la \
