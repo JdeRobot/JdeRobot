@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (C) 1997-2009 JDERobot Developers Team
+ *  Copyright (C) 1997-2011 JDERobot Developers Team
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,10 +15,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
- *  Authors : Javier Vazquez Pereda <javiervazper@yahoo.es>
- *            Julio Vega <julio.vega@urjc.es>
+ *  Authors : Julio Vega <julio.vega@urjc.es>
+ *            Javier Vazquez Pereda <javiervazper@yahoo.es>
+ *            
  *
  *  DATE					COMMENT
+ *  11/02/2011   Modified to use Gazebo 0.9
  *  14/01/2011   Modified in order to use Gazebo 0.10
  *  21/03/2010				Initial version. It's an adaptation of cameraserver component
  *  						It only supports 1 camera from gazebo interface.
@@ -291,39 +293,15 @@ namespace gazeboserver {
 				}
 				gazeboPositionData = gazeboPosition->data;
 
-				printf ("La vel. que lleva ahora es: %f\n",gazeboPositionData->velocity.pos.x);
-
 				gazeboPosition->Lock(1);
 				gazeboPositionData->cmdEnableMotors = 1;
 				gazeboPosition->Unlock();
 
-				while (true) {
-					gazeboPosition->Lock(1);
-					gazeboPositionData->cmdVelocity.pos.x = v;
-					gazeboPosition->Unlock();
-
-					usleep(100000);
-				}
-/*
 				gazeboPosition->Lock(1);
-				gazeboPositionData->cmdVelocity = gazebo::Pose (gazebo::Vec3(v,0,0), 0., 0., 0.);
+				// jderobot trabaja con mm/s, gazebo con m/s
+				gazeboPositionData->cmdVelocity.pos.x = (v/1000);
 				gazeboPosition->Unlock();
-*/
-				printf ("Y ahora la establecemos en: %f\n",gazeboPositionData->cmdVelocity.pos.x);
-/*
-  		  gazebo::Pose pose;
-		    pose.pos.x = 0.;
-		    pose.pos.z = 0.145;
-		    pose.yaw = M_PI/2;
-		    gazebo::Vec3 linearVel(20., 0, 0);
-		    gazebo::Vec3 angularVel(0, 0, 0);
-		    gazebo::Vec3 linearAccel(0, 0, 0);
-		    gazebo::Vec3 angularAccel(0, 0, 0);
-    
-				printf ("Cambiando state\n");
-				gazeboSim->SetState("pioneer2dx_model1", pose, linearVel, angularVel, 
-                       linearAccel, angularAccel);
-*/
+
 				return 0;
 			};
 
@@ -340,7 +318,7 @@ namespace gazeboserver {
 				gazeboPosition->Unlock();
 
 				gazeboPosition->Lock(1);
-				gazeboPositionData->cmdVelocity.pos.y=w;
+				gazeboPositionData->cmdVelocity.yaw=w*(3.14159265/180);
 				gazeboPosition->Unlock();
 				return 0;
 			};
@@ -446,7 +424,6 @@ namespace gazeboserver {
 		  gazebo::SimulationIface *gazeboLaserSim;
 	};
 
-
 	class EncodersI: virtual public jderobot::Encoders {
 		public:
 			EncodersI(std::string& propertyPrefix, const jderobotice::Context& context)
@@ -495,15 +472,15 @@ namespace gazeboserver {
 				gazeboPositionData = gazeboPosition->data;
 				float robotx, roboty, robottheta;
 				gazeboPosition->Lock(1);
-				encodersData->roboty =
+				encodersData->robotx =
 				(gazeboPositionData->pose.pos.x) * 1000 * (float) cos (DEGTORAD * correcting_theta) -
 				(gazeboPositionData->pose.pos.y) * 1000 * (float) sin (DEGTORAD * correcting_theta) +
 				correcting_x;
-				encodersData->robotx =
+				encodersData->roboty =
 				(gazeboPositionData->pose.pos.y) * 1000 * (float) cos (DEGTORAD * correcting_theta) +
 				(gazeboPositionData->pose.pos.x) * 1000 * (float) sin (DEGTORAD * correcting_theta) +
 				correcting_y;
-				encodersData->robottheta = (gazeboPositionData->pose.pos.z * RADTODEG) + correcting_theta;
+				encodersData->robottheta = (gazeboPositionData->pose.yaw * RADTODEG) + correcting_theta;
 				if (encodersData->robottheta <= 0) encodersData->robottheta = encodersData->robottheta + 360;
 				else if (encodersData->robottheta > 360) encodersData->robottheta = encodersData->robottheta - 360;
 				gazeboPosition->Unlock();

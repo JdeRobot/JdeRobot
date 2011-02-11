@@ -22,11 +22,11 @@
 #include "controller.h"
 
 namespace introrob {
-	const float Controller::V_MOTOR = 2.;
-	const float Controller::W_MOTOR = 2.;
+	const float Controller::V_MOTOR = 200.; // mm/s
+	const float Controller::W_MOTOR = 2.; // deg/s
 
 	Controller::Controller(jderobot::MotorsPrx mprx, jderobot::EncodersPrx eprx, jderobot::LaserPrx lprx) {
-		this->gladepath = std::string("./introrob.glade");//std::string(GLADE_DIR) + std::string("/teleoperatorgui.glade");
+		this->gladepath = std::string("./introrob.glade");
 
 		// Obtenemos los enlaces de componentes del Pioneer
 		this->mprx = mprx;
@@ -43,14 +43,42 @@ namespace introrob {
 		return this->gladepath;
   }
 
-	void Controller::playMotors () {
-		this->mprx->setW (W_MOTOR);
-		this->mprx->setV (V_MOTOR);
-	}
-
 	void Controller::stopMotors () {
-		this->mprx->setW (0.0);
+		this->mprx->setV (V_MOTOR/1.1);
+		this->mprx->setW (W_MOTOR/1.1);
+		usleep (400000);
+		this->mprx->setV (V_MOTOR/1.2);
+		this->mprx->setW (W_MOTOR/1.2);
+		usleep (400000);
+		this->mprx->setV (V_MOTOR/1.4);
+		this->mprx->setW (W_MOTOR/1.4);
+		usleep (400000);
+		this->mprx->setV (V_MOTOR/1.6);
+		this->mprx->setW (W_MOTOR/1.6);
+		usleep (400000);
+		this->mprx->setV (V_MOTOR/1.8);
+		this->mprx->setW (W_MOTOR/1.8);
+		usleep (400000);
+		this->mprx->setV (V_MOTOR/2.);
+		this->mprx->setW (W_MOTOR/2.);
+		usleep (400000);
+		this->mprx->setV (V_MOTOR/2.5);
+		this->mprx->setW (W_MOTOR/2.5);
+		usleep (400000);
+		this->mprx->setV (V_MOTOR/3.);
+		this->mprx->setW (W_MOTOR/3.);
+		usleep (400000);
+		this->mprx->setV (V_MOTOR/4.);
+		this->mprx->setW (W_MOTOR/4.);
+		usleep (400000);
+		this->mprx->setV (V_MOTOR/6.);
+		this->mprx->setW (W_MOTOR/6.);
+		usleep (400000);
+		this->mprx->setV (V_MOTOR/8.);
+		this->mprx->setW (W_MOTOR/8.);
+		usleep (400000);
 		this->mprx->setV (0.0);
+		this->mprx->setW (0.0);
 	}
 
 	void Controller::goLeft () {

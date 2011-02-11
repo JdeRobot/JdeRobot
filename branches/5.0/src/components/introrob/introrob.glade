@@ -126,26 +126,6 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkButton" id="playButton">
-            <property name="width_request">40</property>
-            <property name="height_request">40</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="image_position">bottom</property>
-            <child>
-              <widget class="GtkImage" id="image6">
-                <property name="visible">True</property>
-                <property name="stock">gtk-media-play</property>
-              </widget>
-            </child>
-          </widget>
-          <packing>
-            <property name="x">112</property>
-            <property name="y">657</property>
-          </packing>
-        </child>
-        <child>
           <widget class="GtkButton" id="camera1Button">
             <property name="label" translatable="yes">View Point 1</property>
             <property name="width_request">100</property>

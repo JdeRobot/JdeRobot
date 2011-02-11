@@ -49,16 +49,15 @@ int main(int argc, char** argv){
     if (0==mprx)
       throw "Invalid proxy Introrob.Motors.Proxy";
 
-		/*Get driver camera*
+		// Get driver camera
 		Ice::ObjectPrx camara = ic->propertyToProxy("Introrob.Camera.Proxy");
 		if (0==camara)
 			throw "Could not create proxy to camera server";
 
-		/*cast to CameraPrx*
+		// cast to CameraPrx
 		jderobot::CameraPrx cprx = jderobot::CameraPrx::checkedCast(camara);
 		if (0==cprx)
 			throw "Invalid proxy";
-		*/
 
 		// Contact to ENCODERS interface
     Ice::ObjectPrx baseEncoders = ic->propertyToProxy("Introrob.Encoders.Proxy");
@@ -87,7 +86,7 @@ int main(int argc, char** argv){
 		while(view->isVisible()){
 			controller->updatePioneerStatus ();
 
-			/*Get image*
+			// Get image
       jderobot::ImageDataPtr data = cprx->getImageData();
       colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(data->description->format);
       if (!fmt)
@@ -97,8 +96,8 @@ int main(int argc, char** argv){
 			       data->description->height,
 			       fmt,
 			       &(data->pixelData[0]));
-*/
-      view->display(/*image*/);
+
+      view->display(image);
 
 			usleep(10000);
 		}

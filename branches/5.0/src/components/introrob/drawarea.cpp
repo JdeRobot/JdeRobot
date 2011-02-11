@@ -332,7 +332,6 @@ namespace introrob {
 
 		start.x=laser_coord[0]*10.;
 		start.y=laser_coord[1];
-		printf ("pintando lasers\n");
 		for(k=0;k<this->numLasers;k++) {
 			Xp_sensor = this->distanceData[k]*cos(((float)k-90.)*DEGTORAD);
 			Yp_sensor = this->distanceData[k]*sin(((float)k-90.)*DEGTORAD);
@@ -346,7 +345,7 @@ namespace introrob {
 				glVertex3f (start.x/100., start.y/100., 3.2);
 				glVertex3f (end.x/100., end.y/100., 3.2);
 			glEnd();
-			printf ("pintando lasers[%i]=%f, %f\n", k, end.x, end.y);
+
 			start.x=end.x;
 			start.y=end.y;
 		}

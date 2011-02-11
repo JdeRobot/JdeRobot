@@ -41,7 +41,6 @@ namespace introrob {
     refXml->get_widget("mainwindow", mainwindow);
 
 		// Botones para base del robot
-    refXml->get_widget("playButton", playButton);
     refXml->get_widget("stopButton", stopButton);
     refXml->get_widget("upButton", upButton);
     refXml->get_widget("downButton", downButton);
@@ -61,7 +60,6 @@ namespace introrob {
 		// Mundo OpenGL
     refXml->get_widget_derived("world",world);
 
-		playButton->signal_clicked().connect(sigc::mem_fun(this,&View::playButton_clicked));
 		stopButton->signal_clicked().connect(sigc::mem_fun(this,&View::stopButton_clicked));
 		upButton->signal_clicked().connect(sigc::mem_fun(this,&View::upButton_clicked));
 		downButton->signal_clicked().connect(sigc::mem_fun(this,&View::downButton_clicked));
@@ -72,9 +70,6 @@ namespace introrob {
 		camera3Button->signal_clicked().connect(sigc::mem_fun(this,&View::camera3Button_clicked));
 		camera4Button->signal_clicked().connect(sigc::mem_fun(this,&View::camera4Button_clicked));
 		pioneerCameraButton->signal_clicked().connect(sigc::mem_fun(this,&View::pioneerCameraButton_clicked));
-
-		this->playButton->hide();
-		this->stopButton->show();
 
 		/*Show window. Note: Set window visibility to false in Glade, otherwise opengl won't work*/
 		mainwindow->show();
@@ -103,19 +98,19 @@ namespace introrob {
 		}
 	}
 
-  void View::display(/*const colorspaces::Image& image*/) {
+  void View::display(const colorspaces::Image& image) {
 		this->getEncoders(); // cogemos del controller
 		this->getLaser();
 
 		this->setEncoders(); // ponemos en el drawarea
 		this->setLaser();
-/*
+
 		IplImage src; // conversión a IplImage
 		src = image;
 
 		prepare2draw (src); // cambio del orden de bytes
 
-		/*Set image**
+		// Set image
 		colorspaces::ImageRGB8 img_rgb8881(image); // conversion will happen if needed
 
 		Glib::RefPtr<Gdk::Pixbuf> imgBuff1 = Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8881.data,
@@ -127,7 +122,7 @@ namespace introrob {
 				    img_rgb8881.step); 
     gtk_image->clear();
     gtk_image->set(imgBuff1);
-*/
+
 		if (this->isFollowing == true)
 			this->world->setToPioneerCamera();
 
@@ -173,15 +168,7 @@ namespace introrob {
     return mainwindow->is_visible();
   }
 
-	void View::playButton_clicked() {
-		this->playButton->hide();
-		this->stopButton->show();
-		this->controller->playMotors();
-	}
-
 	void View::stopButton_clicked() {
-		this->stopButton->hide();
-		this->playButton->show();
 		this->controller->stopMotors();
 	}
 

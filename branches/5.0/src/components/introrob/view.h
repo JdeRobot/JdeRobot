@@ -45,7 +45,7 @@ namespace introrob {
 			void prepare2draw (IplImage &image);
 
 		  /*Display window*/
-		  void display(/*const colorspaces::Image& image*/);
+		  void display(const colorspaces::Image& image);
 
 		protected:
 			float robotx;
@@ -69,7 +69,6 @@ namespace introrob {
 			void setEncoders ();
 			void setLaser ();
 
-			void playButton_clicked();
 			void stopButton_clicked();
 			void upButton_clicked();
 			void downButton_clicked();
@@ -84,7 +83,6 @@ namespace introrob {
 		  Glib::RefPtr<Gnome::Glade::Xml> refXml;
 		  Gtk::Main gtkmain;
 		  Gtk::Window *mainwindow;
-			Gtk::Button *playButton;
 			Gtk::Button *stopButton;
 			Gtk::Button *upButton;
 			Gtk::Button *downButton;
