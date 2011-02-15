@@ -485,8 +485,8 @@ namespace gazeboserver {
 				else if (encodersData->robottheta > 360) encodersData->robottheta = encodersData->robottheta - 360;
 				gazeboPosition->Unlock();
 
-				encodersData->robotcos=cos(encodersData->robottheta);
-				encodersData->robotsin=sin(encodersData->robottheta);
+				encodersData->robotcos=cos(gazeboPositionData->pose.yaw);
+				encodersData->robotsin=sin(gazeboPositionData->pose.yaw);
 				return encodersData;
 			};
 

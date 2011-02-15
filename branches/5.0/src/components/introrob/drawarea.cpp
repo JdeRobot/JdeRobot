@@ -276,7 +276,7 @@ namespace introrob {
 		mypioneer.foax=this->robotx/100.;
 		mypioneer.foay=this->roboty/100.;
 		mypioneer.foaz=10.;
-		mypioneer.roll=this->robottheta*(180/PI);
+		mypioneer.roll=this->robottheta;
 
 		glTranslatef(mypioneer.posx,mypioneer.posy,mypioneer.posz);
 		dx=(mypioneer.foax-mypioneer.posx);
