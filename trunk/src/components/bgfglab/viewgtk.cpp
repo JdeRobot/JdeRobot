@@ -30,7 +30,7 @@
 #include <opencv/cvaux.h>
 #include "viewgtk.h"
 #include "model.h"
-#include "bgmodelfactory.h"
+#include <bgfgsegmentation/bgmodelfactory.h>
 
 namespace bgfglab {
   const std::string gladepath = std::string(GLADE_DIR) + std::string("/bgfglab.glade");
@@ -208,7 +208,7 @@ namespace bgfglab {
   }
 
   void ViewGtk::updateComboboxBGModelItems(){
-    BGModelFactory::FactoryDict::const_iterator fIt;
+    bgfgsegmentation::BGModelFactory::FactoryDict::const_iterator fIt;
     
     ModelColumns comboboxBGModelCols;
     comboboxBGModelLSRef = Gtk::ListStore::create(comboboxBGModelCols);
@@ -220,8 +220,8 @@ namespace bgfglab {
     comboboxBGModel->set_model(comboboxBGModelLSRef);
 
     Gtk::TreeModel::Row r;
-    for(fIt = BGModelFactory::factories.begin();
-	fIt != BGModelFactory::factories.end();
+    for(fIt = bgfgsegmentation::BGModelFactory::factories.begin();
+	fIt != bgfgsegmentation::BGModelFactory::factories.end();
 	fIt++){
       tmIt = comboboxBGModelLSRef->append();
       r = *tmIt;
@@ -255,7 +255,8 @@ namespace bgfglab {
       Gtk::TreeModel::Row row = *it;
       if (row){
 	std::string name = row[comboboxBGModelCols.m_col_name];
-	BGModelFactory::FactoryDict::const_iterator fIt = BGModelFactory::factories.find(name);
+	bgfgsegmentation::BGModelFactory::FactoryDict::const_iterator fIt = 
+	  bgfgsegmentation::BGModelFactory::factories.find(name);
 	//FIXME: get default values for algorithms??
       }
     }
@@ -269,7 +270,7 @@ namespace bgfglab {
 
   void ViewGtk::onButtonBGModelApplyClicked(){
     ModelColumns comboboxBGModelCols;
-    BGModelFactory* newF;
+    bgfgsegmentation::BGModelFactory* newF;
     Gtk::TreeModel::iterator it = comboboxBGModel->get_active();
 
     if (it){

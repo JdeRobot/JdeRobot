@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef BGFGFILTER_H
-#define BGFGFILTER_H
+#ifndef BGFGSEGMENTATION_BGFGSEGMENTATION_H
+#define BGFGSEGMENTATION_BGFGSEGMENTATION_H
 
 /* We are going to use OpenCV API to implement our background/foreground filters*/
 
@@ -206,4 +206,4 @@ CVAPI(CvBGStatModel*) createBGFIXEDStatModel( IplImage* first_frame,
 					      BGFIXEDStatModelParams* parameters CV_DEFAULT(NULL));
 
 
-#endif //BGFGFILTER_H
+#endif //BGFGSEGMENTATION_BGFGSEGMENTATION_H

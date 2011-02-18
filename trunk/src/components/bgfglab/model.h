@@ -29,7 +29,6 @@
 #include <gbxutilacfr/tracer.h>
 #include <opencv/cvaux.h>
 #include <fstream>
-#include "bgmodelfactory.h"
 
 namespace bgfglab {
   class Model : public jderobotutil::Subject{

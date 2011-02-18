@@ -19,17 +19,16 @@
  *
  */
 
-#ifndef BGFGLAB_BGMODELFACTORY_H
-#define BGFGLAB_BGMODELFACTORY_H
+#ifndef BGFGSEGMENTATION_BGMODELFACTORY_H
+#define BGFGSEGMENTATION_BGMODELFACTORY_H
 
+#include "bgfgsegmentation.h"
 #include <string>
-#include <opencv/cvaux.h>
-#include <bgfgsegmentation/bgfgsegmentation.h>
 #include <tr1/memory>
 #include <map>
 #include <jderobotutil/paramdict.h>
 
-namespace bgfglab {
+namespace bgfgsegmentation {
   class BGModelFactory{
   public:
     BGModelFactory(const std::string desc);
@@ -131,4 +130,4 @@ namespace bgfglab {
 
 }//namespace
 
-#endif //BGFGLAB_BGMODELFACTORY_H
+#endif //BGFGSEGMENTATION_BGMODELFACTORY_H

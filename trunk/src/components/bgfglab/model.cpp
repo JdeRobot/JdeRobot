@@ -28,6 +28,7 @@
 #include <cstdio>
 #include <cmath>
 #include <iomanip>
+#include <bgfgsegmentation/bgmodelfactory.h>
 
 namespace bgfglab {
   const std::string imgdumpSuffix = ".img";
@@ -241,9 +242,10 @@ namespace bgfglab {
 
   void Model::setBGModel(const std::string modelName, const jderobotutil::ParamDict& param) throw()
   { 
-    BGModelFactory::FactoryDict::const_iterator fIt = BGModelFactory::factories.find(modelName);
+    bgfgsegmentation::BGModelFactory::FactoryDict::const_iterator fIt = 
+      bgfgsegmentation::BGModelFactory::factories.find(modelName);
 
-    if (fIt != BGModelFactory::factories.end()){
+    if (fIt != bgfgsegmentation::BGModelFactory::factories.end()){
       stopDumpData();
       IplImage tmp(bgImage);
 

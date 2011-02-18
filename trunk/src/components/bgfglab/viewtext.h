@@ -27,7 +27,6 @@
 #include <memory>
 #include <vector>
 #include "controller.h" //class View
-#include "bgmodelfactory.h"
 
 namespace bgfglab {
   class ViewText: public View {

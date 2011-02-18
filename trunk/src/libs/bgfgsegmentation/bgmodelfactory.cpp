@@ -20,9 +20,8 @@
  */
 
 #include "bgmodelfactory.h"
-#include <sstream>
 
-namespace bgfglab{
+namespace bgfgsegmentation {
   BGModelFactory::FactoryDict registerBGFactories(){
     BGModelFactory::FactoryDict dict;
 

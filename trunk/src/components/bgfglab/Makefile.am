@@ -2,8 +2,7 @@ if ENABLE_COMPONENT_BGFGLAB
 bin_PROGRAMS = bgfglab
 endif
 
-bgfglab_SOURCES = bgmodelfactory.cpp \
-			controller.cpp \
+bgfglab_SOURCES = controller.cpp \
 			main.cpp  \
 			mainthread.cpp \
 			model.cpp \
@@ -21,8 +20,7 @@ bgfglab_LDADD = $(top_srcdir)/src/libs/colorspaces/libcolorspacesmm.la \
 			$(top_srcdir)/src/libs/jderobotutil/libJderobotUtil.la
 
 #headers will not be installed but they will be distributed
-noinst_HEADERS = bgmodelfactory.h \
-			controller.h \
+noinst_HEADERS = controller.h \
 			mainthread.h \
 			model.h \
 			viewgtk.h \
