@@ -1,7 +1,7 @@
 lib_LTLIBRARIES = libJderobotInterfaces.la
 
 #could we build this list?
-SLICESOURCES = camera.ice common.ice body.ice containers.ice datetime.ice exceptions.ice image.ice jcm.ice recording.ice varcolor.ice recorder.ice motors.ice laser.ice encoders.ice ptmotors.ice ptencoders.ice sonars.ice surveillance.ice bodyencoders.ice bodymotors.ice jointmotor.ice
+SLICESOURCES = camera.ice common.ice body.ice containers.ice datetime.ice exceptions.ice image.ice jcm.ice recording.ice varcolor.ice recorder.ice motors.ice laser.ice encoders.ice ptmotors.ice ptencoders.ice sonars.ice surveillance.ice bodyencoders.ice bodymotors.ice jointmotor.ice bodymovements.ice
 SLICECPP_BUILT_CPP = $(SLICESOURCES:.ice=.cpp)
 SLICECPP_BUILT_H = $(SLICESOURCES:.ice=.h)
 
