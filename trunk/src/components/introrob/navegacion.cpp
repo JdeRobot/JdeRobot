@@ -116,7 +116,7 @@ namespace introrob {
 
 	void Navegacion::run(introrob::Controller * controller) {
 		this->controller = controller;
-		this->navega = new Navega (this->controller, this, this->view->world);
+		this->navega = new Navega (this->controller, this, NULL); //BUG!!
 		this->running=false;
     pthread_create(&thread, 0, &callback, this);
   }
