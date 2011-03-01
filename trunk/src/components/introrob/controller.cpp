@@ -25,16 +25,43 @@ namespace introrob {
 	const float Controller::V_MOTOR = 200.; // mm/s
 	const float Controller::W_MOTOR = 2.; // deg/s
 
-	Controller::Controller(jderobot::MotorsPrx mprx, jderobot::EncodersPrx eprx, jderobot::LaserPrx lprx) {
+	Controller::Controller(jderobot::MotorsPrx mprx, jderobot::EncodersPrx eprx, jderobot::LaserPrx lprx, jderobot::CameraPrx cprx1, jderobot::CameraPrx cprx2) {
 		this->gladepath = std::string("./introrob.glade");
 
 		// Obtenemos los enlaces de componentes del Pioneer
 		this->mprx = mprx;
 		this->eprx = eprx;
 		this->lprx = lprx;
+		this->cprx1 = cprx1;
+		this->cprx2 = cprx2;
 
 		this->ed = this->eprx->getEncodersData(); // cogemos informacion de los encoders
 		this->ld = this->lprx->getLaserData(); // cogemos informacion de los lasers
+		this->getCameraData(); // cogemos información de las cámaras
+	}
+
+	void Controller::getCameraData() {
+		// Get image1
+    data1 = this->cprx1->getImageData();
+    colorspaces::Image::FormatPtr fmt1 = colorspaces::Image::Format::searchFormat(data1->description->format);
+    if (!fmt1)
+			throw "Format not supported";
+
+    image1 = new colorspaces::Image (data1->description->width,
+		       data1->description->height,
+		       fmt1,
+		       &(data1->pixelData[0]));
+
+		// Get image2
+    data2 = this->cprx2->getImageData();
+    colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(data2->description->format);
+    if (!fmt2)
+			throw "Format not supported";
+
+    image2 = new colorspaces::Image (data2->description->width,
+		       data2->description->height,
+		       fmt2,
+		       &(data2->pixelData[0]));
 	}
 
   Controller::~Controller() {}
@@ -100,6 +127,7 @@ namespace introrob {
 	void Controller::updatePioneerStatus () {
 		this->ed = this->eprx->getEncodersData(); // cogemos informacion de los encoders
 		this->ld = this->lprx->getLaserData(); // cogemos informacion de los lasers
+		this->getCameraData(); // cogemos información de las cámaras
 	}
 } // namespace
 

@@ -1,5 +1,5 @@
 /*
-*  Copyright (C) 1997-2011 JDERobot Developers Team
+ *  Copyright (C) 1997-2011 JDERobot Developers Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@
 #include <jderobot/sonars.h>
 #include "pioneer.h"
 #include "pioneeropengl.h"
+#include "navega.h"
 #define v3f glVertex3f
 #define IMAGE_WIDTH 320
 #define IMAGE_HEIGHT 240
@@ -57,56 +58,65 @@ typedef struct SoRtype {
 } SofReference;
 
 namespace introrob {
-	class DrawArea : public Gtk::DrawingArea, public Gtk::GL::Widget<DrawArea>
-	{
-	public:
-		DrawArea(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml>& builder);
-		virtual ~DrawArea();
 
-		float robotx;
-		float roboty;
-		float robottheta;
+	class Navega;
 
-		int numSonars;
-		std::vector <float> us;
+	class DrawArea : public Gtk::DrawingArea, public Gtk::GL::Widget<DrawArea> {
+		private:
+			CvPoint2D32f destino;
+			void linePlaneIntersection (HPoint3D A, HPoint3D B, HPoint3D *intersectionPoint);
 
-		int numLasers;
-		std::vector <float> distanceData;
+		public:
+			DrawArea(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml>& builder);
+			virtual ~DrawArea();
 
-		static const float MAXWORLD;
-		static const float PI;
+			float robotx;
+			float roboty;
+			float robottheta;
 
-		void setToCamera1 ();
-		void setToCamera2 ();
-		void setToCamera3 ();
-		void setToCamera4 ();
-		void setToPioneerCamera ();
-		void setToUserCamera ();
+			int numSonars;
+			std::vector <float> us;
 
-	protected:
-		/*Override default signal handler*/
-		virtual bool on_expose_event(GdkEventExpose* event);
-		virtual bool on_motion_notify(GdkEventMotion* event);
-		virtual bool on_drawarea_scroll(GdkEventScroll * event);
+			int numLasers;
+			std::vector <float> distanceData;
 
-		bool on_timeout();
+			introrob::Navega *navega;
 
-		void drawScene();
-		void draw_world();
-		void InitOGL (int w, int h);
+			static const float MAXWORLD;
+			static const float PI;
 
-		SofReference mypioneer;
-		int refresh_time;
-		HPoint3D glcam_pos;
-		HPoint3D glcam_foa;
-		HPoint3D cam_pos;
+			void setToCamera1 ();
+			void setToCamera2 ();
+			void setToCamera3 ();
+			void setToCamera4 ();
+			void setToPioneerCamera ();
+			void setToUserCamera ();
+			void getDestino (CvPoint2D32f &point);
 
-    float scale;
-    float radius;
-    float lati;
-    float longi;
-    float old_x;
-    float old_y; 
+		protected:
+			/*Override default signal handler*/
+			virtual bool on_expose_event(GdkEventExpose* event);
+			virtual bool on_motion_notify(GdkEventMotion* event);
+			virtual bool on_drawarea_scroll(GdkEventScroll * event);
+
+			bool on_timeout();
+
+			void drawScene();
+			void draw_world();
+			void InitOGL (int w, int h);
+
+			SofReference mypioneer;
+			int refresh_time;
+			HPoint3D glcam_pos;
+			HPoint3D glcam_foa;
+			HPoint3D cam_pos;
+
+		  float scale;
+		  float radius;
+		  float lati;
+		  float longi;
+		  float old_x;
+		  float old_y; 
 	};
 } // namespace
 

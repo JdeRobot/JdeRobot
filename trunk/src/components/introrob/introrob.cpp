@@ -33,6 +33,7 @@ int main(int argc, char** argv){
   int status,i;
 	introrob::View * view;
 	introrob::Controller * controller;
+	introrob::Navegacion navegacion;
   Ice::CommunicatorPtr ic;
 
 	float v, w;  
@@ -50,13 +51,23 @@ int main(int argc, char** argv){
       throw "Invalid proxy Introrob.Motors.Proxy";
 
 		// Get driver camera
-		Ice::ObjectPrx camara = ic->propertyToProxy("Introrob.Camera.Proxy");
-		if (0==camara)
-			throw "Could not create proxy to camera server";
+		Ice::ObjectPrx camara1 = ic->propertyToProxy("Introrob.Camera1.Proxy");
+		if (0==camara1)
+			throw "Could not create proxy to camera1 server";
 
 		// cast to CameraPrx
-		jderobot::CameraPrx cprx = jderobot::CameraPrx::checkedCast(camara);
-		if (0==cprx)
+		jderobot::CameraPrx cprx1 = jderobot::CameraPrx::checkedCast(camara1);
+		if (0==cprx1)
+			throw "Invalid proxy";
+
+		// Get driver camera
+		Ice::ObjectPrx camara2 = ic->propertyToProxy("Introrob.Camera2.Proxy");
+		if (0==camara2)
+			throw "Could not create proxy to camera2 server";
+
+		// cast to CameraPrx
+		jderobot::CameraPrx cprx2 = jderobot::CameraPrx::checkedCast(camara2);
+		if (0==cprx2)
 			throw "Invalid proxy";
 
 		// Contact to ENCODERS interface
@@ -80,34 +91,28 @@ int main(int argc, char** argv){
       throw "Invalid proxy Introrob.Laser.Proxy";
 
 		// Create Controller and View
-		controller = new introrob::Controller(mprx, eprx, lprx);
-		view = new introrob::View(controller);
+		controller = new introrob::Controller(mprx, eprx, lprx, cprx1, cprx2);
+
+		navegacion.run(controller); // hebra de control
+
+		view = new introrob::View (controller, &navegacion);
 
 		while(view->isVisible()){
 			controller->updatePioneerStatus ();
-
-			// Get image
-      jderobot::ImageDataPtr data = cprx->getImageData();
-      colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(data->description->format);
-      if (!fmt)
-				throw "Format not supported";
-
-      colorspaces::Image image(data->description->width,
-			       data->description->height,
-			       fmt,
-			       &(data->pixelData[0]));
-
-      view->display(image);
-
+      view->display(*controller->image1, *controller->image2);
 			usleep(10000);
 		}
-  }catch (const Ice::Exception& ex) {
+  } catch (const Ice::Exception& ex) {
     std::cerr << ex << std::endl;
     status = 1;
   } catch (const char* msg) {
     std::cerr << msg << std::endl;
     status = 1;
   }
+
+	/* Stop thread */
+	navegacion.stop();
+	navegacion.join();
 
   if (ic)
     ic->destroy();

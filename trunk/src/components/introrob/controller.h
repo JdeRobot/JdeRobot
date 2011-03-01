@@ -34,7 +34,7 @@
 namespace introrob {
   class Controller {
 		public:
-			Controller (jderobot::MotorsPrx mprx, jderobot::EncodersPrx eprx, jderobot::LaserPrx lprx);
+			Controller (jderobot::MotorsPrx mprx, jderobot::EncodersPrx eprx, jderobot::LaserPrx lprx, jderobot::CameraPrx cprx1, jderobot::CameraPrx cprx2);
 		  virtual ~Controller();
 		  
 		  std::string getGladePath();
@@ -54,12 +54,20 @@ namespace introrob {
 
 			jderobot::EncodersDataPtr ed;
 			jderobot::LaserDataPtr ld;
+			jderobot::ImageDataPtr data1;
+			jderobot::ImageDataPtr data2;
+			colorspaces::Image* image1;
+			colorspaces::Image* image2;
 
 		private:
 			std::string gladepath;
 			jderobot::MotorsPrx mprx;
 			jderobot::EncodersPrx eprx;
 			jderobot::LaserPrx lprx;
+			jderobot::CameraPrx cprx1;
+			jderobot::CameraPrx cprx2;
+
+			void getCameraData();
   };
 } // namespace
 

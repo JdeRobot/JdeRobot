@@ -22,9 +22,9 @@
 #include "view.h"
 
 namespace introrob {
-	View::View(Controller * controller): gtkmain(0,0) {
-		/*Create controller*/
+	View::View (Controller* controller, Navegacion* navegacion): gtkmain(0,0) {
 		this->controller = controller;
+		this->navegacion = navegacion;
 
 		this->isFollowing = false;
 
@@ -54,11 +54,17 @@ namespace introrob {
     refXml->get_widget("camera4Button", camera4Button);
     refXml->get_widget("pioneerCameraButton", pioneerCameraButton);
 
-		// Imagen de la cámara
-    refXml->get_widget("image",gtk_image);
+    refXml->get_widget("yourCodeButton", yourCodeButton);
+    refXml->get_widget("stopCodeButton", stopCodeButton);
+    refXml->get_widget("exitButton", exitButton);
+
+		// Imágenes de la cámara
+    refXml->get_widget("image1",gtk_image1);
+    refXml->get_widget("image2",gtk_image2);
 
 		// Mundo OpenGL
     refXml->get_widget_derived("world",world);
+		world->navega = this->navegacion->navega;
 
 		stopButton->signal_clicked().connect(sigc::mem_fun(this,&View::stopButton_clicked));
 		upButton->signal_clicked().connect(sigc::mem_fun(this,&View::upButton_clicked));
@@ -70,13 +76,18 @@ namespace introrob {
 		camera3Button->signal_clicked().connect(sigc::mem_fun(this,&View::camera3Button_clicked));
 		camera4Button->signal_clicked().connect(sigc::mem_fun(this,&View::camera4Button_clicked));
 		pioneerCameraButton->signal_clicked().connect(sigc::mem_fun(this,&View::pioneerCameraButton_clicked));
+		yourCodeButton->signal_clicked().connect(sigc::mem_fun(this,&View::yourCodeButton_clicked));
+		stopCodeButton->signal_clicked().connect(sigc::mem_fun(this,&View::stopCodeButton_clicked));
+		exitButton->signal_clicked().connect(sigc::mem_fun(this,&View::exitButton_clicked));
 
 		/*Show window. Note: Set window visibility to false in Glade, otherwise opengl won't work*/
 		mainwindow->show();
+		stopCodeButton->hide();
 	}
 
 	View::~View() {
 		delete this->controller;
+		delete this->world;
 	}
 
 	/** prepare2draw ************************************************************************
@@ -98,30 +109,14 @@ namespace introrob {
 		}
 	}
 
-  void View::display(const colorspaces::Image& image) {
+  void View::display(const colorspaces::Image& image1, const colorspaces::Image& image2) {
 		this->getEncoders(); // cogemos del controller
 		this->getLaser();
 
 		this->setEncoders(); // ponemos en el drawarea
 		this->setLaser();
-
-		IplImage src; // conversión a IplImage
-		src = image;
-
-		prepare2draw (src); // cambio del orden de bytes
-
-		// Set image
-		colorspaces::ImageRGB8 img_rgb8881(image); // conversion will happen if needed
-
-		Glib::RefPtr<Gdk::Pixbuf> imgBuff1 = Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8881.data,
-				    Gdk::COLORSPACE_RGB,
-				    false,
-				    8,
-				    img_rgb8881.width,
-				    img_rgb8881.height,
-				    img_rgb8881.step); 
-    gtk_image->clear();
-    gtk_image->set(imgBuff1);
+		this->setCamara(image1, 1);
+		this->setCamara(image2, 2);
 
 		if (this->isFollowing == true)
 			this->world->setToPioneerCamera();
@@ -161,6 +156,32 @@ namespace introrob {
 		for (k = 0; k < this->numLasers; k++) {
 			this->world->distanceData.push_back (this->distanceData[k]);
 			this->world->numLasers ++;
+		}
+	}
+
+	void View::setCamara (const colorspaces::Image& image, int id) {
+		// Set image
+		IplImage src; // conversión a IplImage
+		src = image;
+
+		prepare2draw (src); // cambio del orden de bytes
+
+		colorspaces::ImageRGB8 img_rgb888(image); // conversion will happen if needed
+
+		Glib::RefPtr<Gdk::Pixbuf> imgBuff = Gdk::Pixbuf::create_from_data((const guint8*)img_rgb888.data,
+				    Gdk::COLORSPACE_RGB,
+				    false,
+				    8,
+				    img_rgb888.width,
+				    img_rgb888.height,
+				    img_rgb888.step);
+
+		if (id == 1) {
+		  gtk_image1->clear();
+		  gtk_image1->set(imgBuff);
+		} else {
+		  gtk_image2->clear();
+		  gtk_image2->set(imgBuff);
 		}
 	}
 
@@ -211,5 +232,25 @@ namespace introrob {
 	void View::pioneerCameraButton_clicked() {
 		this->isFollowing = true;
 		this->world->setToPioneerCamera();
+	}
+
+	void View::yourCodeButton_clicked() {
+		/*Create a thread with the students algorithm */
+		this->navegacion->start();
+		yourCodeButton->hide();
+		stopCodeButton->show();
+	}
+
+	void View::stopCodeButton_clicked() {
+		this->navegacion->stop();
+		yourCodeButton->show();
+		stopCodeButton->hide();
+	}
+
+	void View::exitButton_clicked() {
+		this->navegacion->stop();
+		this->navegacion->join();
+		mainwindow->hide();
+		exit (0);
 	}
 } // namespace

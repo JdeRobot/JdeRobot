@@ -19,7 +19,7 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkImage" id="image">
+          <widget class="GtkImage" id="image2">
             <property name="width_request">320</property>
             <property name="height_request">240</property>
             <property name="visible">True</property>
@@ -37,14 +37,14 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <child>
-              <widget class="GtkImage" id="image1">
+              <widget class="GtkImage" id="image3">
                 <property name="visible">True</property>
                 <property name="stock">gtk-go-forward</property>
               </widget>
             </child>
           </widget>
           <packing>
-            <property name="x">158</property>
+            <property name="x">134</property>
             <property name="y">657</property>
           </packing>
         </child>
@@ -56,14 +56,14 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <child>
-              <widget class="GtkImage" id="image2">
+              <widget class="GtkImage" id="image4">
                 <property name="visible">True</property>
                 <property name="stock">gtk-go-up</property>
               </widget>
             </child>
           </widget>
           <packing>
-            <property name="x">112</property>
+            <property name="x">81</property>
             <property name="y">610</property>
           </packing>
         </child>
@@ -76,14 +76,14 @@
             <property name="receives_default">True</property>
             <property name="image_position">right</property>
             <child>
-              <widget class="GtkImage" id="image3">
+              <widget class="GtkImage" id="image5">
                 <property name="visible">True</property>
                 <property name="stock">gtk-go-down</property>
               </widget>
             </child>
           </widget>
           <packing>
-            <property name="x">112</property>
+            <property name="x">81</property>
             <property name="y">703</property>
           </packing>
         </child>
@@ -95,14 +95,14 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <child>
-              <widget class="GtkImage" id="image4">
+              <widget class="GtkImage" id="image6">
                 <property name="visible">True</property>
                 <property name="stock">gtk-go-back</property>
               </widget>
             </child>
           </widget>
           <packing>
-            <property name="x">64</property>
+            <property name="x">27</property>
             <property name="y">657</property>
           </packing>
         </child>
@@ -114,14 +114,14 @@
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <child>
-              <widget class="GtkImage" id="image5">
+              <widget class="GtkImage" id="image7">
                 <property name="visible">True</property>
                 <property name="stock">gtk-media-stop</property>
               </widget>
             </child>
           </widget>
           <packing>
-            <property name="x">112</property>
+            <property name="x">81</property>
             <property name="y">657</property>
           </packing>
         </child>
@@ -177,8 +177,8 @@
             <property name="receives_default">True</property>
           </widget>
           <packing>
-            <property name="x">371</property>
-            <property name="y">543</property>
+            <property name="x">253</property>
+            <property name="y">601</property>
           </packing>
         </child>
         <child>
@@ -191,8 +191,77 @@
             <property name="receives_default">True</property>
           </widget>
           <packing>
-            <property name="x">490</property>
-            <property name="y">543</property>
+            <property name="x">213</property>
+            <property name="y">655</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkImage" id="image1">
+            <property name="width_request">320</property>
+            <property name="height_request">240</property>
+            <property name="visible">True</property>
+          </widget>
+          <packing>
+            <property name="x">366</property>
+            <property name="y">539</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="yourCodeButton">
+            <property name="width_request">138</property>
+            <property name="height_request">66</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <child>
+              <widget class="GtkImage" id="image8">
+                <property name="visible">True</property>
+                <property name="stock">gtk-media-play</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">214</property>
+            <property name="y">707</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="stopCodeButton">
+            <property name="width_request">138</property>
+            <property name="height_request">66</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <child>
+              <widget class="GtkImage" id="image9">
+                <property name="visible">True</property>
+                <property name="stock">gtk-media-pause</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">214</property>
+            <property name="y">707</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="exitButton">
+            <property name="width_request">66</property>
+            <property name="height_request">66</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image_position">bottom</property>
+            <child>
+              <widget class="GtkImage" id="image10">
+                <property name="visible">True</property>
+                <property name="stock">gtk-quit</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">134</property>
+            <property name="y">707</property>
           </packing>
         </child>
       </widget>

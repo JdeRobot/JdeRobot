@@ -87,6 +87,9 @@ namespace introrob {
     this->old_y = 0.0; 
 
 		init_pioneer(); // IMPORTANTE: para cargar los vectores de sonares y lasers
+
+		destino.x = 0.;
+		destino.y = 0.;
 	}
 
 	DrawArea::~DrawArea() {	}
@@ -269,6 +272,8 @@ namespace introrob {
 		glEnd();
 		glLineWidth(1.0f);
 
+		this->navega->iteracionGrafica ();
+
 		// Robot Frame of Reference
 		mypioneer.posx=this->robotx/100.;
 		mypioneer.posy=this->roboty/100.;
@@ -350,17 +355,43 @@ namespace introrob {
 			start.y=end.y;
 		}
 		glDisable (GL_LIGHTING);
+	}
 
-		/* ADD YOUR CODE HERE */
+	/* We want to know the intersection between a line given by two points (A and B) on 3D, and a plan (the ground, for example). Then, we'll get another point; it'll be our solution */
+	void DrawArea::linePlaneIntersection (HPoint3D A, HPoint3D B, HPoint3D *intersectionPoint) {
+		HPoint3D v;	// Line director vector: it the same to take A or B as origin or destination extrem...
+		float t;
+
+		A.X = A.X;
+		A.Y = A.Y;
+		A.Z = A.Z;
+
+		B.X = B.X;
+		B.Y = B.Y;
+		B.Z = B.Z;
+
+		v.X = (B.X - A.X);
+		v.Y = (B.Y - A.Y);
+		v.Z = (B.Z - A.Z);
+
+		// We'll calculate the groun intersection (Z = 0) on our robot system. Parametric equations:
+		intersectionPoint->Z = 0; // intersectionPoint->Z = A.Z + t*v.Z => t = (-A.Z / v.Z)
+		t = (-A.Z) / (v.Z);
+
+		intersectionPoint->X = A.X + (t*v.X);
+		intersectionPoint->Y = A.Y + (t*v.Y);
 	}
 
 	bool DrawArea::on_motion_notify(GdkEventMotion* event) {
 		float desp = 0.01;
 		float x=event->x;
 		float y=event->y;
+		TPinHoleCamera myActualCamera;
+		HPoint2D myActualPoint2D, boton;
+		HPoint3D cameraPos3D, myActualPoint3D, intersectionPoint;
 
 		/* if left mouse button is toggled */
-		if (event->state & GDK_BUTTON1_MASK) {
+		if (event->state & GDK_BUTTON1_MASK) { // aquí además comprobamos punto de pulsación
 			if ((x - old_x) > 0.0) longi -= desp;
 			else if ((x - old_x) < 0.0) longi += desp;
 
@@ -385,8 +416,47 @@ namespace introrob {
 			this->glcam_foa.Z=-radius*sinf(lati) + this->glcam_pos.Z;
 		}
 
+		if (event->state & GDK_BUTTON2_MASK) { // con el botón del centro vamos a coger el destino
+			myActualCamera.position.X = this->glcam_pos.X;
+			myActualCamera.position.Y = this->glcam_pos.Y;
+			myActualCamera.position.Z = this->glcam_pos.Z;
+			myActualCamera.foa.X = this->glcam_foa.X;
+			myActualCamera.foa.Y = this->glcam_foa.Y;
+			myActualCamera.foa.Z = this->glcam_foa.Z;
+		  myActualCamera.v0=504.5; // 1009/2
+		  myActualCamera.u0=267.; // 534/2
+		  myActualCamera.fdistx = 405.399994;//1009.0/(2.0*tan(DEGTORAD*45.0/2.0));
+		  myActualCamera.fdisty = 405.399994;//534.0/(2.0*tan(DEGTORAD*45.0/2.0));
+		  update_camera_matrix(&myActualCamera);
+
+			myActualPoint2D.x=534.-1.-event->y; //Modificamos la asignación de valores del pixel para el backproject
+			myActualPoint2D.y=event->x;
+			myActualPoint2D.h = 1.;
+
+		  myActualPoint3D.X=1.; myActualPoint3D.Y=1.; myActualPoint3D.Z=1.; myActualPoint3D.H=1.;
+
+			// Proyectamos tal punto en 3D sobre el Plano Imagen de nuestra cámara virtual
+			backproject(&myActualPoint3D, myActualPoint2D, myActualCamera);
+
+			// Coordenadas en 3D de la posicion de la cámara
+			cameraPos3D.X = myActualCamera.position.X;
+			cameraPos3D.Y = myActualCamera.position.Y;
+			cameraPos3D.Z = myActualCamera.position.Z;
+			cameraPos3D.H = 1;
+
+			linePlaneIntersection (myActualPoint3D, cameraPos3D, &intersectionPoint);
+
+			destino.x = intersectionPoint.X;
+			destino.y = intersectionPoint.Y;
+		}
+
 		old_x=x;
 		old_y=y;
+	}
+
+	void DrawArea::getDestino (CvPoint2D32f &point) {
+		point.x = destino.x;
+		point.y = destino.y;
 	}
 
 	bool DrawArea::on_drawarea_scroll(GdkEventScroll * event) {

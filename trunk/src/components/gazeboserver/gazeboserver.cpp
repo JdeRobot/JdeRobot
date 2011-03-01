@@ -61,8 +61,8 @@ namespace gazeboserver {
 		imageFmt(),
 		imageDescription(new jderobot::ImageDescription()),
 		cameraDescription(new jderobot::CameraDescription()),
-		replyTask() {
 
+		replyTask() {
 			Ice::PropertiesPtr prop = context.properties();
 
 			//fill cameraDescription
@@ -87,6 +87,10 @@ namespace gazeboserver {
 			replyTask = new ReplyTask(this);
 
 			replyTask->start();//my own thread
+		}
+
+		std::string getName () {
+			return (cameraDescription->name);
 		}
 
 		virtual ~CameraI() {
@@ -143,14 +147,20 @@ namespace gazeboserver {
 					}
 
 					gazebocamera = new gazebo::CameraIface();
+					std::string myIface = "pioneer2dx_model1::sonyvid30_model_"	+ camera->getName () + "::camera_iface_0";
 
 					/// Open the Camera interface
 					try {
 						printf("Connecting to camera device on server...\n");
-						gazebocamera->Open (gazeboclient, "pioneer2dx_model1::sonyvid30_model::camera_iface_0");
+						gazebocamera->Open (gazeboclient, myIface);
 					} catch (std::string e) {
-						std::cout << "Gazebo error: Unable to connect to the camera interface\n" << e << "\n";
-						exit (-1);
+						try {
+							printf("Connecting to camera device on server...\n");
+							gazebocamera->Open (gazeboclient, myIface);
+						} catch (std::string e) {
+							std::cout << "Gazebo error: Unable to connect to the camera interface\n" << e << "\n";
+							exit (-1);
+						}
 					}
 
 					gazeboCamData = gazebocamera->data;
@@ -285,6 +295,10 @@ namespace gazeboserver {
 				return (float)w_double;
 			};
 
+			virtual float getL(const Ice::Current&) {
+				return 0.;
+			};
+
 			virtual  Ice::Int setV(Ice::Float v, const Ice::Current&) {
 				gazeboclient->Wait ();
 
@@ -323,11 +337,7 @@ namespace gazeboserver {
 				return 0;
 			};
 
-			virtual float getL(const Ice::Current&) {
-				return (float)0.0;
-			};
-
-			virtual  Ice::Int setL(Ice::Float w, const Ice::Current&) {
+			virtual  Ice::Int setL(Ice::Float l, const Ice::Current&) {
 				return 0;
 			};
 
@@ -663,6 +673,8 @@ namespace gazeboserver {
 			:jderobotice::Component("GazeboServer"), cameras(0), motors1(0), laser1(0), encoders1(0), ptmotors1(0), ptencoders1(0), sonars1(0) {}
 
 			virtual void start() {
+
+				//Cameras
 				Ice::PropertiesPtr prop = context().properties();
 				int nCameras = prop->getPropertyAsInt(context().tag() + ".NCameras");
 				cameras.resize(nCameras);
@@ -681,6 +693,7 @@ namespace gazeboserver {
 					cameras[i] = new CameraI(objPrefix,context());
 					context().createInterfaceWithString(cameras[i],cameraName);
 				}
+
 				//Motors
 				std::string objPrefix2="motors1";
 				std::string gazeboactName = "motors1";

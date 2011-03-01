@@ -28,15 +28,21 @@
 #include <libglademm.h>
 #include <IceUtil/Thread.h>
 #include <IceUtil/Time.h>
-#include "controller.h"
+#include <jderobot/camera.h>
 #include <colorspaces/colorspacesmm.h>
+#include "controller.h"
 #include "drawarea.h"
+#include "navegacion.h"
 
 namespace introrob {
+
+	class Navegacion;
+	class DrawArea;
+	class Controller;
+
   class View {
 		public:
-
-		  View(Controller * controller);
+		  View(Controller* controller, Navegacion* navega);
 		  virtual ~View();
 
 			/*Return true if the windows is visible*/
@@ -45,7 +51,9 @@ namespace introrob {
 			void prepare2draw (IplImage &image);
 
 		  /*Display window*/
-		  void display(const colorspaces::Image& image);
+		  void display(const colorspaces::Image& image1, const colorspaces::Image& image2);
+
+			DrawArea* world;
 
 		protected:
 			float robotx;
@@ -68,6 +76,7 @@ namespace introrob {
 			// SETS: lo que "ponemos" a disposición del drawarea
 			void setEncoders ();
 			void setLaser ();
+			void setCamara (const colorspaces::Image& image, int id);
 
 			void stopButton_clicked();
 			void upButton_clicked();
@@ -79,6 +88,9 @@ namespace introrob {
 			void camera3Button_clicked();
 			void camera4Button_clicked();
 			void pioneerCameraButton_clicked();
+			void yourCodeButton_clicked();
+			void stopCodeButton_clicked();
+			void exitButton_clicked();
 
 		  Glib::RefPtr<Gnome::Glade::Xml> refXml;
 		  Gtk::Main gtkmain;
@@ -93,10 +105,13 @@ namespace introrob {
 			Gtk::Button *camera3Button;
 			Gtk::Button *camera4Button;
 			Gtk::Button *pioneerCameraButton;
-			Gtk::Image *gtk_image;
-
-			DrawArea* world;
+			Gtk::Button *yourCodeButton;
+			Gtk::Button *stopCodeButton;
+			Gtk::Button *exitButton;
+			Gtk::Image *gtk_image1;
+			Gtk::Image *gtk_image2;
 			Controller* controller;
+			Navegacion* navegacion;
   };
 } // namespace
 
