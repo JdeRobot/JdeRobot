@@ -26,7 +26,9 @@
 #include <iostream>
 #include <colorspaces/colorspacesmm.h>
 #include <jderobot/motors.h>
+#include <jderobot/ptmotors.h>
 #include <jderobot/encoders.h>
+#include <jderobot/ptencoders.h>
 #include <jderobot/laser.h>
 #include "pioneer.h"
 #include "drawarea.h"
@@ -34,7 +36,7 @@
 namespace introrob {
   class Controller {
 		public:
-			Controller (jderobot::MotorsPrx mprx, jderobot::EncodersPrx eprx, jderobot::LaserPrx lprx, jderobot::CameraPrx cprx1, jderobot::CameraPrx cprx2);
+			Controller (jderobot::MotorsPrx mprx, jderobot::EncodersPrx eprx, jderobot::LaserPrx lprx, jderobot::CameraPrx cprx1, jderobot::CameraPrx cprx2, jderobot::PTMotorsPrx ptmprx1, jderobot::PTEncodersPrx pteprx1, jderobot::PTMotorsPrx ptmprx2, jderobot::PTEncodersPrx pteprx2);
 		  virtual ~Controller();
 		  
 		  std::string getGladePath();
@@ -66,6 +68,10 @@ namespace introrob {
 			jderobot::LaserPrx lprx;
 			jderobot::CameraPrx cprx1;
 			jderobot::CameraPrx cprx2;
+			jderobot::PTMotorsPrx ptmprx1;
+			jderobot::PTEncodersPrx pteprx1;
+			jderobot::PTMotorsPrx ptmprx2;
+			jderobot::PTEncodersPrx pteprx2;
 
 			void getCameraData();
   };

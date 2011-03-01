@@ -3,7 +3,7 @@ Section: net
 Priority: extra
 Maintainer: Eduardo Perdices <edupergar@gsyc.es>
 Build-Depends: debhelper (>= 7), autotools-dev, autoconf, libtool
-Standards-Version: 5.0.0
+Standards-Version: 5.0.1
 Homepage: http://jderobot.org/
 
 Package: jderobot

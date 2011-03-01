@@ -24,8 +24,10 @@
 #include <IceUtil/IceUtil.h>
 #include <jderobot/camera.h>
 #include <jderobot/motors.h>
+#include <jderobot/ptmotors.h>
 #include <jderobot/laser.h>
 #include <jderobot/encoders.h>
+#include <jderobot/ptencoders.h>
 #include <colorspaces/colorspacesmm.h>
 #include "view.h"
 
@@ -90,8 +92,49 @@ int main(int argc, char** argv){
     if (0==lprx)
       throw "Invalid proxy Introrob.Laser.Proxy";
 
+		// Contact to PTMOTORS interface
+    Ice::ObjectPrx ptmotors1 = ic->propertyToProxy("Introrob.PTMotors1.Proxy");
+    if (0==ptmotors1)
+      throw "Could not create proxy with motors";
+
+    // Cast to ptmotors
+    jderobot::PTMotorsPrx ptmprx1 = jderobot::PTMotorsPrx::checkedCast(ptmotors1);
+    if (0==ptmprx1)
+      throw "Invalid proxy Introrob.PTMotors1.Proxy";
+
+		// Contact to PTMOTORS interface
+    Ice::ObjectPrx ptmotors2 = ic->propertyToProxy("Introrob.PTMotors2.Proxy");
+    if (0==ptmotors2)
+      throw "Could not create proxy with motors";
+
+    // Cast to ptmotors
+    jderobot::PTMotorsPrx ptmprx2 = jderobot::PTMotorsPrx::checkedCast(ptmotors2);
+    if (0==ptmprx2)
+      throw "Invalid proxy Introrob.PTMotors2.Proxy";
+
+		// Contact to PTENCODERS interface
+    Ice::ObjectPrx ptencoders1 = ic->propertyToProxy("Introrob.PTEncoders1.Proxy");
+    if (0==ptencoders1)
+      throw "Could not create proxy with encoders";
+
+    // Cast to encoders
+    jderobot::PTEncodersPrx pteprx1 = jderobot::PTEncodersPrx::checkedCast(ptencoders1);
+    if (0==pteprx1)
+      throw "Invalid proxy Introrob.PTEncoders1.Proxy";
+
+		// Contact to PTENCODERS interface
+    Ice::ObjectPrx ptencoders2 = ic->propertyToProxy("Introrob.PTEncoders2.Proxy");
+    if (0==ptencoders2)
+      throw "Could not create proxy with encoders";
+
+    // Cast to encoders
+    jderobot::PTEncodersPrx pteprx2 = jderobot::PTEncodersPrx::checkedCast(ptencoders2);
+    if (0==pteprx2)
+      throw "Invalid proxy Introrob.PTEncoders2.Proxy";
+
+		/**************************************************************************/
 		// Create Controller and View
-		controller = new introrob::Controller(mprx, eprx, lprx, cprx1, cprx2);
+		controller = new introrob::Controller(mprx, eprx, lprx, cprx1, cprx2, ptmprx1, pteprx1, ptmprx2, pteprx2);
 
 		navegacion.run(controller); // hebra de control
 

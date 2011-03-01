@@ -25,7 +25,7 @@ namespace introrob {
 	const float Controller::V_MOTOR = 200.; // mm/s
 	const float Controller::W_MOTOR = 2.; // deg/s
 
-	Controller::Controller(jderobot::MotorsPrx mprx, jderobot::EncodersPrx eprx, jderobot::LaserPrx lprx, jderobot::CameraPrx cprx1, jderobot::CameraPrx cprx2) {
+	Controller::Controller(jderobot::MotorsPrx mprx, jderobot::EncodersPrx eprx, jderobot::LaserPrx lprx, jderobot::CameraPrx cprx1, jderobot::CameraPrx cprx2, jderobot::PTMotorsPrx ptmprx1, jderobot::PTEncodersPrx pteprx1, jderobot::PTMotorsPrx ptmprx2, jderobot::PTEncodersPrx pteprx2) {
 		this->gladepath = std::string("./introrob.glade");
 
 		// Obtenemos los enlaces de componentes del Pioneer
@@ -34,6 +34,13 @@ namespace introrob {
 		this->lprx = lprx;
 		this->cprx1 = cprx1;
 		this->cprx2 = cprx2;
+		this->ptmprx1 = ptmprx1;
+		this->pteprx1 = pteprx1;
+		this->ptmprx2 = ptmprx2;
+		this->pteprx2 = pteprx2;
+
+		//this->ptmprx1->setPTMotorsData (new jderobot::PTMotorsData(0., 0.));
+		//this->ptmprx2->setPTMotorsData (new jderobot::PTMotorsData(0., 0.));
 
 		this->ed = this->eprx->getEncodersData(); // cogemos informacion de los encoders
 		this->ld = this->lprx->getLaserData(); // cogemos informacion de los lasers
