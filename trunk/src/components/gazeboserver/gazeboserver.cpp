@@ -594,6 +594,14 @@ namespace gazeboserver {
 				return 0; 
 			};
 
+			virtual jderobot::PTMotorsDataPtr getPTMotorsData(const Ice::Current&) {
+				return NULL;
+			}
+
+			virtual jderobot::PTMotorsParamsPtr getPTMotorsParams(const Ice::Current&) {
+				return NULL;
+			}
+
 			std::string prefix;
 			jderobotice::Context context;
 			jderobot::PTMotorsDataPtr ptMotorsData1;
@@ -664,6 +672,14 @@ namespace gazeboserver {
 
 				return 0; 
 			};
+
+			virtual jderobot::PTMotorsDataPtr getPTMotorsData(const Ice::Current&) {
+				return NULL;
+			}
+
+			virtual jderobot::PTMotorsParamsPtr getPTMotorsParams(const Ice::Current&) {
+				return NULL;
+			}
 
 			std::string prefix;
 			jderobotice::Context context;
