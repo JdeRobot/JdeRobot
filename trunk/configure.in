@@ -83,6 +83,7 @@ m4_include([m4/libplayer.m4])
 m4_include([m4/libgtkglextmm.m4])
 m4_include([m4/libopengl.m4])
 m4_include([m4/libgsl.m4])
+m4_include([m4/libfreenect.m4])
 
 dnl # Check for built libraries dependencies
 m4_include([m4/jderobotutil.m4])
@@ -107,6 +108,7 @@ m4_include([m4/component_bgfglab.m4])
 m4_include([m4/component_teleoperator.m4])
 m4_include([m4/component_calibrator.m4])
 m4_include([m4/component_naooperator.m4])
+m4_include([m4/component_jdenect.m4])
 m4_include([m4/component_playerserver.m4])
 
 dnl#AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
