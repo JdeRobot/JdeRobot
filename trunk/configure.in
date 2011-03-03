@@ -109,6 +109,7 @@ m4_include([m4/component_teleoperator.m4])
 m4_include([m4/component_calibrator.m4])
 m4_include([m4/component_naooperator.m4])
 m4_include([m4/component_jdenect.m4])
+m4_include([m4/component_visornect.m4])
 m4_include([m4/component_playerserver.m4])
 
 dnl#AC_ARG_VAR([PYTHON_VERSION],[Python interpreter version])
@@ -165,6 +166,8 @@ AC_CONFIG_FILES([src/components/Makefile \
     src/components/teleoperator/Makefile \
     src/components/calibrator/Makefile \
     src/components/naooperator/Makefile \
+	src/components/jdenect/Makefile \
+	src/components/visornect/Makefile \
     src/components/introrob/Makefile \
     src/components/playerserver/Makefile \
     src/components/motiondetection/test/Makefile \
