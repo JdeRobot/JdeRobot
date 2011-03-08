@@ -242,21 +242,21 @@ namespace bgfglab {
 
   void Model::setBGModel(const std::string modelName, const jderobotutil::ParamDict& param) throw()
   { 
-    bgfgsegmentation::BGModelFactory::FactoryDict::const_iterator fIt = 
-      bgfgsegmentation::BGModelFactory::factories.find(modelName);
+    CvBGStatModel* newBGModel;
 
-    if (fIt != bgfgsegmentation::BGModelFactory::factories.end()){
-      stopDumpData();
+    try{
       IplImage tmp(bgImage);
-
-      CvBGStatModel* newBGModel = fIt->second->createModel(param,&tmp);
-      CvBGStatModel* oldBGModel = bg_model;
-
-      bg_model = newBGModel;
-      bg_modelParam = param;
-      if (oldBGModel != 0)
-	cvReleaseBGStatModel(&oldBGModel);
+      newBGModel = bgfgsegmentation::BGModelFactory::instance(modelName,param,&tmp);
+    }catch(bgfgsegmentation::NoSuchBGModel e){
+      std::cerr << "No such model found: " << e.what() << std::endl;
+      return;//ignored
     }
+    CvBGStatModel* oldBGModel = bg_model;
+    stopDumpData();
+    bg_model = newBGModel;
+    bg_modelParam = param;
+    if (oldBGModel != 0)
+      cvReleaseBGStatModel(&oldBGModel);
     notifyObservers(); 
   }
 

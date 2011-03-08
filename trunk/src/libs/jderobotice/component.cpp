@@ -42,10 +42,14 @@ namespace jderobotice {
   };
 
   Component::Component( const std::string& tag,
-			ComponentAdapterActivationPolicy adapterPolicy )
+			const int* tracerConfig,
+			ComponentAdapterActivationPolicy adapterPolicy)
     : pImpl(new PImpl()) {
     
-    pImpl->tracer.reset(new TracerI());
+    if (tracerConfig)
+      pImpl->tracer.reset(new TracerI(tracerConfig));
+    else
+      pImpl->tracer.reset(new TracerI());
     pImpl->status.reset(new StatusI(*pImpl->tracer));
 
     pImpl->adapterPolicy = adapterPolicy;

@@ -22,23 +22,34 @@
 #ifndef BGFGSEGMENTATION_BGMODELFACTORY_H
 #define BGFGSEGMENTATION_BGMODELFACTORY_H
 
-#include "bgfgsegmentation.h"
 #include <string>
 #include <tr1/memory>
 #include <map>
 #include <jderobotutil/paramdict.h>
+#include <gbxutilacfr/exceptions.h>
+#include "bgfgsegmentation.h"
 
 namespace bgfgsegmentation {
+  /**
+   * NoSuchBGModel exception is thrown when trying to instance an unknown model
+   */
+  class NoSuchBGModel: public gbxutilacfr::Exception {
+  public:
+    NoSuchBGModel(const char *file, const char *line, const std::string &message)
+      :gbxutilacfr::Exception(file,line,message) {}
+  };
+
   class BGModelFactory{
   public:
     BGModelFactory(const std::string desc);
     virtual ~BGModelFactory() {}
     
-    //virtual copy constructor
-    //virtual BGModelFactory* clone() const = 0;
+    static CvBGStatModel* instance(const std::string modelName, 
+				   const jderobotutil::ParamDict params,
+				   IplImage* firstFrame) throw (NoSuchBGModel);
+
     virtual CvBGStatModel* createModel(const jderobotutil::ParamDict params, IplImage* firstFrame) const = 0;
     const std::string description;
-
     typedef std::map<std::string, std::tr1::shared_ptr<BGModelFactory> > FactoryDict;
     static const FactoryDict factories;
   };

@@ -73,6 +73,11 @@ namespace jderobotutil{
     float getParamAsFloatWithDefault(const std::string paramkey, const float defaultValue = 0.0) const;
     
     /**
+     * Get all params for prefix. Prefix is appended to keyprefix
+     */
+    ParamDict getParamsForPrefix(const std::string prefix) const;
+
+    /**
      * Convert ParamDict to a std::string
      */
     std::string toString() const;

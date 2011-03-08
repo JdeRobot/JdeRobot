@@ -27,8 +27,8 @@
 namespace bgfglab{
   class Component: public jderobotice::Component{
   public:
-    Component()
-      : jderobotice::Component("BGFGlab") {}
+    Component(const int* tracerConfig)
+      : jderobotice::Component("BGFGlab",tracerConfig) {}
 
     virtual void start() {
       mainThread = new MainThread( context() );
@@ -49,7 +49,9 @@ namespace bgfglab{
 
 
 int main(int argc, char **argv){
-  bgfglab::Component component;
+  int tracerConfig[5] = {9,9,9,9,9};
+  bgfglab::Component component(tracerConfig);
+
 
   jderobotice::Application app( component );
   return app.jderobotMain(argc, argv);

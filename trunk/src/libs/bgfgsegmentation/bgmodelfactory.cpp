@@ -45,6 +45,17 @@ namespace bgfgsegmentation {
   
   const BGModelFactory::FactoryDict BGModelFactory::factories = registerBGFactories();
 
+  CvBGStatModel* BGModelFactory::instance(const std::string modelName, 
+					  const jderobotutil::ParamDict params,
+					  IplImage* firstFrame) throw (NoSuchBGModel){
+    BGModelFactory::FactoryDict::const_iterator fIt = BGModelFactory::factories.find(modelName);
+
+    if (fIt == bgfgsegmentation::BGModelFactory::factories.end())
+      throw NoSuchBGModel(ERROR_INFO, "unknown model: " + modelName );
+    
+    return fIt->second->createModel(params,firstFrame);
+  }
+    
   BGModelFactory::BGModelFactory(const std::string desc)
     :description(desc) {}
 

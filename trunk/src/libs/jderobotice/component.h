@@ -87,9 +87,11 @@ namespace jderobotice
      * Constructor
      * \param tag with which to identify it in the config files.
      * \param adapterPolicy \sa ComponentAdapterActivationPolicy
+     * \param tracerConfig \sa gbxutilacfr::TrivialTracer and gbxutilacfr::Tracer::Config
      */
     Component( const std::string& tag,
-	       ComponentAdapterActivationPolicy adapterPolicy=AdapterAutoActivation );
+	       const int* tracerConfig = 0,
+	       ComponentAdapterActivationPolicy adapterPolicy=AdapterAutoActivation);
 
     /**
      * Destructor
@@ -128,7 +130,7 @@ namespace jderobotice
      * \endverbatim
      */
     virtual const std::string version() const { return std::string(""); };
-  
+
   protected:
     
     /**

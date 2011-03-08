@@ -71,6 +71,19 @@ namespace jderobotutil{
       return defaultValue;
     return value;
   }
+
+  ParamDict ParamDict::getParamsForPrefix(const std::string prefix) const{
+    ParamDict paramsForPrefix(keyprefix+prefix);
+    ParamDict::const_iterator pIt;
+
+    for (pIt = this->begin();
+	 pIt != this->end();
+	 pIt++){
+      if (pIt->first.find(keyprefix+prefix) == 0) //startswith
+	paramsForPrefix.insert(ParamDict::value_type(pIt->first,pIt->second));
+    }
+    return paramsForPrefix;
+  }
   
   std::string ParamDict::toString() const{
     std::stringstream ss;

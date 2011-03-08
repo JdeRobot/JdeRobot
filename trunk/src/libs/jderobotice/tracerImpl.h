@@ -25,10 +25,15 @@
 #include <gbxutilacfr/trivialtracer.h>
 
 namespace jderobotice{
+  static const int defaultTrivialTracerConfig[gbxutilacfr::NumberOfTraceTypes] = {9,9,9,0,0};
+
   class TracerI: public gbxutilacfr::TrivialTracer{
   public:  
-    TracerI()
-      : gbxutilacfr::TrivialTracer() {}
+  TracerI(const int* config = defaultTrivialTracerConfig)
+    : gbxutilacfr::TrivialTracer(config[gbxutilacfr::DebugTrace],
+				 config[gbxutilacfr::InfoTrace],
+				 config[gbxutilacfr::WarningTrace],
+				 config[gbxutilacfr::ErrorTrace]) {}
   };
 }
 
