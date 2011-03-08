@@ -10,6 +10,10 @@ AC_ARG_ENABLE([component-jdenect],
 
 if test "x$enable_component_jdenect" != xno; then
     AC_MSG_NOTICE([**** Checking jdenect component requirements:])
+    ERRORS=""
+    if test "x$with_freenect" = xno; then
+        ERRORS="libfreenect not enabled"
+    fi
     if test "$ERRORS"; then
         AC_MSG_NOTICE([Errors found checking jdenect requirements: $ERRORS. Component disabled])
 	AM_CONDITIONAL([ENABLE_COMPONENT_JDENECT],[false])
