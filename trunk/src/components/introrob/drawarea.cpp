@@ -423,13 +423,13 @@ namespace introrob {
 			myActualCamera.foa.X = this->glcam_foa.X;
 			myActualCamera.foa.Y = this->glcam_foa.Y;
 			myActualCamera.foa.Z = this->glcam_foa.Z;
-		  myActualCamera.v0=504.5; // 1009/2
-		  myActualCamera.u0=267.; // 534/2
-		  myActualCamera.fdistx = 405.399994;//1009.0/(2.0*tan(DEGTORAD*45.0/2.0));
-		  myActualCamera.fdisty = 405.399994;//534.0/(2.0*tan(DEGTORAD*45.0/2.0));
+		  myActualCamera.v0=497.; // 994/2
+		  myActualCamera.u0=225.; // 450/2
+		  myActualCamera.fdistx = 405.399994;
+		  myActualCamera.fdisty = 405.399994;
 		  update_camera_matrix(&myActualCamera);
 
-			myActualPoint2D.x=534.-1.-event->y; //Modificamos la asignación de valores del pixel para el backproject
+			myActualPoint2D.x=450.-1.-event->y; // Modificamos la asignación de valores del pixel para el backproject
 			myActualPoint2D.y=event->x;
 			myActualPoint2D.h = 1.;
 
@@ -454,9 +454,9 @@ namespace introrob {
 		old_y=y;
 	}
 
-	void DrawArea::getDestino (CvPoint2D32f &point) {
-		point.x = destino.x;
-		point.y = destino.y;
+	void DrawArea::getDestino (CvPoint2D32f *point) {
+		point->x = destino.x;
+		point->y = destino.y;
 	}
 
 	bool DrawArea::on_drawarea_scroll(GdkEventScroll * event) {

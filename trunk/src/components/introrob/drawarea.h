@@ -91,7 +91,7 @@ namespace introrob {
 			void setToCamera4 ();
 			void setToPioneerCamera ();
 			void setToUserCamera ();
-			void getDestino (CvPoint2D32f &point);
+			void getDestino (CvPoint2D32f *point);
 
 		protected:
 			/*Override default signal handler*/

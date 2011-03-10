@@ -24,7 +24,11 @@
 namespace introrob {
 	void Navega::iteracionControl () {
 		/* TODO: ADD YOUR ITERATION CODE HERE */
-		this->controller->goLeft(); // example of movement
+		// example of movement:
+		this->controller->setPT1 (-30.,-30.); // (latitude, longitude) - (grads. - grads.)
+		this->controller->setPT2 (-30.,-30.); // (latitude, longitude) - (grads. - grads.)
+		this->controller->setV(200.); // mm./s.
+		this->controller->setW(2.); // deg./s.
 	}
 
 	void Navega::iteracionGrafica () {
@@ -59,10 +63,9 @@ namespace introrob {
 		this->navegacion->pintaSegmento (a, b, color); // AZUL
 	}
 
-	Navega::Navega (Controller* controller, Navegacion* navegacion, DrawArea* drawarea) {
+	Navega::Navega (Controller* controller, Navegacion* navegacion) {
 		this->controller = controller;
 		this->navegacion = navegacion;
-		this->drawarea = drawarea;
 	}
 
 	Navega::~Navega () {}

@@ -143,6 +143,10 @@ namespace introrob {
 		}
 	}
 
+	void View::getDestino (CvPoint2D32f* destino) {
+		this->world->getDestino (destino);
+	}
+
 	void View::setEncoders () {
 		this->world->robotx = this->robotx;
 		this->world->roboty = this->roboty;

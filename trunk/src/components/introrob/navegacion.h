@@ -70,6 +70,7 @@ namespace introrob {
 			void cogerImagen2(unsigned char* image);
 			void cogerPosicion(CvPoint3D32f* myPoint);
 			void cogerLaser(std::vector<float>* laser, int *numLasers);
+			void cogerDestino(CvPoint2D32f* destino);
 	};
 } // namespace
 

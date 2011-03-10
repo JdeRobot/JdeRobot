@@ -39,8 +39,15 @@ namespace introrob {
 		this->ptmprx2 = ptmprx2;
 		this->pteprx2 = pteprx2;
 
-		//this->ptmprx1->setPTMotorsData (new jderobot::PTMotorsData(0., 0.));
-		//this->ptmprx2->setPTMotorsData (new jderobot::PTMotorsData(0., 0.));
+		jderobot::PTMotorsData* myData, *myData2;
+		myData = new jderobot::PTMotorsData ();
+		myData2 = new jderobot::PTMotorsData ();
+		myData->latitude = 0.;
+		myData->longitude = 0.;
+		myData2->latitude = 0.;
+		myData2->longitude = 0.;
+		this->ptmprx1->setPTMotorsData (myData);
+		this->ptmprx2->setPTMotorsData (myData2);
 
 		this->ed = this->eprx->getEncodersData(); // cogemos informacion de los encoders
 		this->ld = this->lprx->getLaserData(); // cogemos informacion de los lasers
@@ -129,6 +136,30 @@ namespace introrob {
 
 	void Controller::goDown () {
 		this->mprx->setV (-V_MOTOR);
+	}
+
+	void Controller::setV (float v) {
+		this->mprx->setV (v);
+	}
+
+	void Controller::setW (float w) {
+		this->mprx->setW (w);
+	}
+
+	void Controller::setPT1 (float latitude, float longitude) {
+		jderobot::PTMotorsData* myData;
+		myData = new jderobot::PTMotorsData ();
+		myData->latitude = latitude;
+		myData->longitude = longitude;
+		this->ptmprx1->setPTMotorsData (myData);
+	}
+
+	void Controller::setPT2 (float latitude, float longitude) {
+		jderobot::PTMotorsData* myData;
+		myData = new jderobot::PTMotorsData ();
+		myData->latitude = latitude;
+		myData->longitude = longitude;
+		this->ptmprx2->setPTMotorsData (myData);
 	}
 
 	void Controller::updatePioneerStatus () {

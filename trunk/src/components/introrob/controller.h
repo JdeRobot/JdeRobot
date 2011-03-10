@@ -49,6 +49,10 @@ namespace introrob {
 			void goRight ();
 			void goUp ();
 			void goDown ();
+			void setV (float v);
+			void setW (float w);
+			void setPT1 (float latitude, float longitude); // deg.
+			void setPT2 (float latitude, float longitude); // deg.
 
 			void updatePioneerStatus ();
 			static const float V_MOTOR;

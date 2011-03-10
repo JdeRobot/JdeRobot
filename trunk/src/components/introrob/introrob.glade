@@ -9,13 +9,13 @@
         <property name="visible">True</property>
         <child>
           <widget class="GtkDrawingArea" id="world">
-            <property name="width_request">1009</property>
-            <property name="height_request">534</property>
+            <property name="width_request">994</property>
+            <property name="height_request">450</property>
             <property name="visible">True</property>
           </widget>
           <packing>
-            <property name="x">3</property>
-            <property name="y">2</property>
+            <property name="x">1</property>
+            <property name="y">1</property>
           </packing>
         </child>
         <child>
@@ -25,14 +25,14 @@
             <property name="visible">True</property>
           </widget>
           <packing>
-            <property name="x">689</property>
-            <property name="y">539</property>
+            <property name="x">675</property>
+            <property name="y">454</property>
           </packing>
         </child>
         <child>
           <widget class="GtkButton" id="rightButton">
-            <property name="width_request">40</property>
-            <property name="height_request">40</property>
+            <property name="width_request">35</property>
+            <property name="height_request">35</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -44,14 +44,14 @@
             </child>
           </widget>
           <packing>
-            <property name="x">134</property>
-            <property name="y">657</property>
+            <property name="x">70</property>
+            <property name="y">622</property>
           </packing>
         </child>
         <child>
           <widget class="GtkButton" id="upButton">
-            <property name="width_request">40</property>
-            <property name="height_request">40</property>
+            <property name="width_request">35</property>
+            <property name="height_request">35</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -63,14 +63,14 @@
             </child>
           </widget>
           <packing>
-            <property name="x">81</property>
-            <property name="y">610</property>
+            <property name="x">36</property>
+            <property name="y">588</property>
           </packing>
         </child>
         <child>
           <widget class="GtkButton" id="downButton">
-            <property name="width_request">40</property>
-            <property name="height_request">40</property>
+            <property name="width_request">35</property>
+            <property name="height_request">35</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -83,14 +83,14 @@
             </child>
           </widget>
           <packing>
-            <property name="x">81</property>
-            <property name="y">703</property>
+            <property name="x">35</property>
+            <property name="y">656</property>
           </packing>
         </child>
         <child>
           <widget class="GtkButton" id="leftButton">
-            <property name="width_request">40</property>
-            <property name="height_request">40</property>
+            <property name="width_request">35</property>
+            <property name="height_request">35</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -102,14 +102,14 @@
             </child>
           </widget>
           <packing>
-            <property name="x">27</property>
-            <property name="y">657</property>
+            <property name="x">2</property>
+            <property name="y">622</property>
           </packing>
         </child>
         <child>
           <widget class="GtkButton" id="stopButton">
-            <property name="width_request">40</property>
-            <property name="height_request">40</property>
+            <property name="width_request">35</property>
+            <property name="height_request">35</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
@@ -121,64 +121,64 @@
             </child>
           </widget>
           <packing>
-            <property name="x">81</property>
-            <property name="y">657</property>
+            <property name="x">36</property>
+            <property name="y">622</property>
           </packing>
         </child>
         <child>
           <widget class="GtkButton" id="camera1Button">
             <property name="label" translatable="yes">View Point 1</property>
-            <property name="width_request">100</property>
+            <property name="width_request">89</property>
             <property name="height_request">45</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
           </widget>
           <packing>
-            <property name="x">16</property>
-            <property name="y">543</property>
+            <property name="x">1</property>
+            <property name="y">539</property>
           </packing>
         </child>
         <child>
           <widget class="GtkButton" id="camera2Button">
             <property name="label" translatable="yes">View Point 2</property>
-            <property name="width_request">100</property>
+            <property name="width_request">89</property>
             <property name="height_request">45</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
           </widget>
           <packing>
-            <property name="x">133</property>
-            <property name="y">543</property>
+            <property name="x">89</property>
+            <property name="y">539</property>
           </packing>
         </child>
         <child>
           <widget class="GtkButton" id="camera3Button">
             <property name="label" translatable="yes">View Point 3</property>
-            <property name="width_request">100</property>
+            <property name="width_request">89</property>
             <property name="height_request">45</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
           </widget>
           <packing>
-            <property name="x">253</property>
-            <property name="y">543</property>
+            <property name="x">177</property>
+            <property name="y">539</property>
           </packing>
         </child>
         <child>
           <widget class="GtkButton" id="camera4Button">
             <property name="label" translatable="yes">View Point 4</property>
-            <property name="width_request">100</property>
+            <property name="width_request">89</property>
             <property name="height_request">45</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
           </widget>
           <packing>
-            <property name="x">253</property>
-            <property name="y">601</property>
+            <property name="x">265</property>
+            <property name="y">539</property>
           </packing>
         </child>
         <child>
@@ -191,8 +191,8 @@
             <property name="receives_default">True</property>
           </widget>
           <packing>
-            <property name="x">213</property>
-            <property name="y">655</property>
+            <property name="x">215</property>
+            <property name="y">584</property>
           </packing>
         </child>
         <child>
@@ -202,8 +202,8 @@
             <property name="visible">True</property>
           </widget>
           <packing>
-            <property name="x">366</property>
-            <property name="y">539</property>
+            <property name="x">353</property>
+            <property name="y">454</property>
           </packing>
         </child>
         <child>
@@ -221,8 +221,8 @@
             </child>
           </widget>
           <packing>
-            <property name="x">214</property>
-            <property name="y">707</property>
+            <property name="x">215</property>
+            <property name="y">629</property>
           </packing>
         </child>
         <child>
@@ -240,8 +240,8 @@
             </child>
           </widget>
           <packing>
-            <property name="x">214</property>
-            <property name="y">707</property>
+            <property name="x">215</property>
+            <property name="y">629</property>
           </packing>
         </child>
         <child>
@@ -260,8 +260,8 @@
             </child>
           </widget>
           <packing>
-            <property name="x">134</property>
-            <property name="y">707</property>
+            <property name="x">149</property>
+            <property name="y">629</property>
           </packing>
         </child>
       </widget>

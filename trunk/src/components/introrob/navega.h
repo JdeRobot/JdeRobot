@@ -31,7 +31,6 @@
 namespace introrob {
 
 	class Controller;
-	class DrawArea;
 	class Navegacion;
 
 	class Navega {
@@ -39,10 +38,9 @@ namespace introrob {
 			CvPoint2D32f destino;
 			Controller* controller;
 			Navegacion* navegacion;
-			DrawArea* drawarea;
 
 		public:
-			Navega (Controller* controller, Navegacion* navegacion, DrawArea* drawarea);
+			Navega (Controller* controller, Navegacion* navegacion);
 			~Navega ();
 			void iteracionGrafica();
 			void iteracionControl();

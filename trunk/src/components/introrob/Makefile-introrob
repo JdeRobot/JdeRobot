@@ -1,0 +1,13 @@
+JDEROBOTDIR = /usr/local
+CXXFLAGS = -I $(JDEROBOTDIR)/include/jderobot `pkg-config --cflags opencv` `pkg-config --cflags gtkmm-2.4 libglademm-2.4 gthread-2.0` `pkg-config --cflags gtkglextmm-1.2`
+LDFLAGS = `pkg-config --libs gtkmm-2.4 libglademm-2.4 gthread-2.0` `pkg-config --libs opencv` -lgsl -lgslcblas `pkg-config --libs gtkglextmm-1.2` -lGL -lGLU -lglut
+LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotIce.la \
+	$(JDEROBOTDIR)/lib/jderobot/libJderobotUtil.la \
+	$(JDEROBOTDIR)/lib/jderobot/libcolorspacesmm.la \
+	$(JDEROBOTDIR)/lib/jderobot/libJderobotInterfaces.la \
+	$(JDEROBOTDIR)/lib/jderobot/libprogeo.la \
+	$(JDEROBOTDIR)/lib/jderobot/libpioneer.la
+
+introrob: introrob.o navegacion.o navega.o view.o controller.o drawarea.o pioneeropengl.o
+	libtool --mode=link g++ -g -O -o introrob introrob.o navegacion.o navega.o view.o controller.o drawarea.o pioneeropengl.o $(LDADD) $(LDFLAGS)
+

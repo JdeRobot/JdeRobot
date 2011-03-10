@@ -565,7 +565,7 @@ namespace gazeboserver {
 				}
 			}
 
-			virtual ~PTMotorsI(){};
+			~PTMotorsI(){};
 
 			virtual Ice::Int setPTMotorsData(const jderobot::PTMotorsDataPtr & data, const Ice::Current&) {
 				//waiting for next gazebo camera update
@@ -574,37 +574,46 @@ namespace gazeboserver {
 				if(!gazeboPTZ1){
 					printf("Gazebo PTMOTORS model not opened\n");
 				}
+
+				//ptMotorsData1 = gazeboPTZ1->data;
+
 				gazeboPTZ1->Lock(1);
-				ptMotorsData1->longitude=data->longitude;
+
+				//printf ("%f, %f\n", data->longitude, data->latitude);
+
+				gazeboPTZ1->data->cmd_pan = data->longitude * DEGTORAD;
+				gazeboPTZ1->data->cmd_tilt = data->latitude * DEGTORAD;
+/*				ptMotorsData1->longitude=data->longitude;
+				printf ("2\n");
 				if (data->longitude > MAX_PAN)
 					ptMotorsData1->longitude=MAX_PAN;
 				else if (data->longitude < -54)
 					ptMotorsData1->longitude= MIN_PAN;
-
+				printf ("3\n");
 				ptMotorsData1->latitude=data->latitude;
 				if (data->latitude > MAX_TILT)
 					ptMotorsData1->latitude= MAX_TILT;
 				else if (data->latitude < MIN_TILT)
 					ptMotorsData1->latitude= MIN_TILT;
-
-				gazeboPTZ1->data->cmd_pan=-ptMotorsData1->longitude * DEGTORAD;
-				gazeboPTZ1->data->cmd_tilt=-ptMotorsData1->latitude * DEGTORAD;
+				printf ("4\n");
+				//gazeboPTZ1->data->cmd_pan=-ptMotorsData1->longitude * DEGTORAD;
+				//gazeboPTZ1->data->cmd_tilt=-ptMotorsData1->latitude * DEGTORAD;*/
 				gazeboPTZ1->Unlock();
 
 				return 0; 
 			};
 
 			virtual jderobot::PTMotorsDataPtr getPTMotorsData(const Ice::Current&) {
-				return NULL;
-			}
+				return (NULL);
+			};
 
 			virtual jderobot::PTMotorsParamsPtr getPTMotorsParams(const Ice::Current&) {
-				return NULL;
-			}
+				return (NULL);
+			};
 
 			std::string prefix;
 			jderobotice::Context context;
-			jderobot::PTMotorsDataPtr ptMotorsData1;
+			//jderobot::PTMotorsDataPtr ptMotorsData1;
 			gazebo::Client *gazeboclient;
 			int gazeboserver_id;
 			int gazeboclient_id;
@@ -654,7 +663,10 @@ namespace gazeboserver {
 					printf("Gazebo PTMOTORS model not opened\n");
 				}
 				gazeboPTZ2->Lock(1);
-				ptMotorsData2->longitude=data->longitude;
+
+				gazeboPTZ2->data->cmd_pan = data->longitude * DEGTORAD;
+				gazeboPTZ2->data->cmd_tilt = data->latitude * DEGTORAD;
+/*				ptMotorsData2->longitude=data->longitude;
 				if (data->longitude > MAX_PAN)
 					ptMotorsData2->longitude=MAX_PAN;
 				else if (data->longitude < -54)
@@ -667,19 +679,19 @@ namespace gazeboserver {
 					ptMotorsData2->latitude= MIN_TILT;
 
 				gazeboPTZ2->data->cmd_pan=-ptMotorsData2->longitude * DEGTORAD;
-				gazeboPTZ2->data->cmd_tilt=-ptMotorsData2->latitude * DEGTORAD;
+				gazeboPTZ2->data->cmd_tilt=-ptMotorsData2->latitude * DEGTORAD;*/
 				gazeboPTZ2->Unlock();
 
 				return 0; 
 			};
 
 			virtual jderobot::PTMotorsDataPtr getPTMotorsData(const Ice::Current&) {
-				return NULL;
-			}
+				return (NULL);
+			};
 
 			virtual jderobot::PTMotorsParamsPtr getPTMotorsParams(const Ice::Current&) {
-				return NULL;
-			}
+				return (NULL);
+			};
 
 			std::string prefix;
 			jderobotice::Context context;

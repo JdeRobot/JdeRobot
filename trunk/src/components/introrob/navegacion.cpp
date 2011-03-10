@@ -83,6 +83,10 @@ namespace introrob {
 		}
 	}
 
+	void Navegacion::cogerDestino(CvPoint2D32f* destino) { // refresco la posición del pioneer
+		this->view->getDestino (destino);
+	}
+
 	int Navegacion::main() {
 		struct timeval a, b;
 		int cycle = 100;
@@ -116,7 +120,7 @@ namespace introrob {
 
 	void Navegacion::run(introrob::Controller * controller) {
 		this->controller = controller;
-		this->navega = new Navega (this->controller, this, NULL); //BUG!!
+		this->navega = new Navega (this->controller, this);
 		this->running=false;
     pthread_create(&thread, 0, &callback, this);
   }
