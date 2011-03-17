@@ -49,10 +49,20 @@ namespace introrob {
 			void goRight ();
 			void goUp ();
 			void goDown ();
+
+			/* v: velocidad lineal (mm./s.) a comandar al robot */
 			void setV (float v);
+
+			/* w: velocidad rotacional (deg./s.) a comandar al robot */
 			void setW (float w);
-			void setPT1 (float latitude, float longitude); // deg.
-			void setPT2 (float latitude, float longitude); // deg.
+
+			/* latitude: posición tilt (deg.) a comandar al cuello mecánico 
+			longitude: posición pan (deg.) a comandar al cuello mecánico */
+			void setPT1 (float latitude, float longitude);
+
+			/* latitude: posición tilt (deg.) a comandar al cuello mecánico 
+			longitude: posición pan (deg.) a comandar al cuello mecánico */
+			void setPT2 (float latitude, float longitude);
 
 			void updatePioneerStatus ();
 			static const float V_MOTOR;

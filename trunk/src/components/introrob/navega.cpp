@@ -21,14 +21,66 @@
 
 #include "navega.h"
 
+/* FUNCTIONS TO USE:
+v: velocidad lineal (mm./s.) a comandar al robot
+this->controller->setV (float v);
+
+w: velocidad rotacional (deg./s.) a comandar al robot
+this->controller->setW (float w);
+
+latitude: posición tilt (deg.) a comandar al cuello mecánico 
+longitude: posición pan (deg.) a comandar al cuello mecánico
+this->controller->setPT1 (float latitude, float longitude);
+
+latitude: posición tilt (deg.) a comandar al cuello mecánico 
+longitude: posición pan (deg.) a comandar al cuello mecánico
+this->controller->setPT2 (float latitude, float longitude);
+
+Formato estructura color RGB => color.x = R; color.y = G; color.z B)
+this->navegacion->pintaSegmento (CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color);
+
+Calcula la posicion relativa respecto del robot de un punto absoluto. 
+El robot se encuentra en robotx, roboty con orientacion robotheta respecto
+al sistema de referencia absoluto
+this->navegacion->absolutas2relativas(CvPoint3D32f in, CvPoint3D32f *out);
+
+Calcula la posicion absoluta de un punto expresado en el sistema de 
+coordenadas solidario al robot. El robot se encuentra en robotx, roboty 
+con orientacion robottheta respecto al sistema de referencia absoluto
+this->navegacion->relativas2absolutas(CvPoint3D32f in, CvPoint3D32f *out);
+
+image: vector correspondiente a la imagen
+this->navegacion->cogerImagen1(unsigned char* image);
+
+image: vector correspondiente a la imagen
+this->navegacion->cogerImagen2(unsigned char* image);
+
+Formato estructura myPoint => myPoint.x = X (mm.); myPoint.y = Y (mm.);
+myPoint.z = Theta (deg.)
+this->navegacion->cogerPosicion(CvPoint3D32f* myPoint);
+
+Return: nº lásers leídos
+Parámetro laser: vector de distancias (mm.) vertidos por el láser
+this->navegacion->cogerLaser(std::vector<float>* laser);
+
+Parámetro destino: posición canvas OpenGL establecida por usuario
+mediante botón central del ratón
+this->navegacion->cogerDestino(CvPoint2D32f* destino);
+*/
+
 namespace introrob {
 	void Navega::iteracionControl () {
 		/* TODO: ADD YOUR ITERATION CODE HERE */
 		// example of movement:
-		this->controller->setPT1 (-30.,-30.); // (latitude, longitude) - (grads. - grads.)
-		this->controller->setPT2 (-30.,-30.); // (latitude, longitude) - (grads. - grads.)
-		this->controller->setV(200.); // mm./s.
-		this->controller->setW(2.); // deg./s.
+		this->controller->setPT1 (-15.,0.);
+		this->controller->setPT2 (-15.,0.);
+
+		// example: how to get pioneer position
+		CvPoint3D32f myPoint;
+		this->navegacion->cogerPosicion (&myPoint);
+		//printf ("%f, %f, %f\n", myPoint.x, myPoint.y, myPoint.z);
+		this->controller->setV(0.); // mm./s.
+		this->controller->setW(20.); // deg./s.
 	}
 
 	void Navega::iteracionGrafica () {

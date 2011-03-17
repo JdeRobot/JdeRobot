@@ -22,7 +22,6 @@
 #include "navegacion.h"
 
 namespace introrob {
-	/* color (R, G, B) */
 	int Navegacion::pintaSegmento (CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color) {
 		glColor3f(color.x, color.y, color.z);
 		glLineWidth(2.0f);
@@ -33,7 +32,6 @@ namespace introrob {
 		return 1;
 	}
 
-	/* Calcula la posicion relativa respecto del robot de un punto absoluto. El robot se encuentra en robotx, roboty con orientacion robotheta respecto al sistema de referencia absoluto */
 	int Navegacion::absolutas2relativas(CvPoint3D32f in, CvPoint3D32f *out)	{
 		if (out!=NULL) {
 			(*out).x = in.x*cos(this->robottheta*DEGTORAD) - in.y*sin(this->robottheta*DEGTORAD) +
@@ -45,7 +43,6 @@ namespace introrob {
 		return 1;
 	}
 
-	/* Calcula la posicion absoluta de un punto expresado en el sistema de coordenadas solidario al robot. El robot se encuentra en robotx, roboty con orientacion robottheta respecto al sistema de referencia absoluto */
 	int Navegacion::relativas2absolutas(CvPoint3D32f in, CvPoint3D32f *out)	{
 		if (out!=NULL){
 			(*out).x = in.x*cos(this->robottheta*DEGTORAD) - in.y*sin(this->robottheta*DEGTORAD) + this->robotx;
@@ -74,13 +71,15 @@ namespace introrob {
 		myPoint->z = this->controller->ed->robottheta;
 	}
 
-	void Navegacion::cogerLaser(std::vector<float>* laser, int *numLasers) { // refrescamos el vector de valores de láser
-		int k;
+	int Navegacion::cogerLaser(std::vector<float>* laser) { // refrescamos el vector de valores de láser
+		int k, numLasers = 0;
 		laser->clear();
 		for (k = 0; k < this->controller->ld->numLaser; k++) {
 			laser->push_back (this->controller->ld->distanceData[k]);
-			*numLasers++;
+			numLasers++;
 		}
+
+		return numLasers;
 	}
 
 	void Navegacion::cogerDestino(CvPoint2D32f* destino) { // refresco la posición del pioneer

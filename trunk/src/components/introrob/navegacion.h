@@ -63,13 +63,35 @@ namespace introrob {
 			void stop ();
 			int main ();
 
+			/* Formato estructura color RGB => color.x = R; color.y = G; color.z B) */
 			int pintaSegmento (CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color);
+
+			/* Calcula la posicion relativa respecto del robot de un punto absoluto. 
+			El robot se encuentra en robotx, roboty con orientacion robotheta respecto
+			al sistema de referencia absoluto */
 			int absolutas2relativas(CvPoint3D32f in, CvPoint3D32f *out);
+
+			/* Calcula la posicion absoluta de un punto expresado en el sistema de 
+			coordenadas solidario al robot. El robot se encuentra en robotx, roboty 
+			con orientacion robottheta respecto al sistema de referencia absoluto */
 			int relativas2absolutas(CvPoint3D32f in, CvPoint3D32f *out);
+
+			/* image: vector correspondiente a la imagen */
 			void cogerImagen1(unsigned char* image);
+
+			/* image: vector correspondiente a la imagen */
 			void cogerImagen2(unsigned char* image);
+
+			/* Formato estructura myPoint => myPoint.x = X (mm.); myPoint.y = Y (mm.);
+			myPoint.z = Theta (deg.) */
 			void cogerPosicion(CvPoint3D32f* myPoint);
-			void cogerLaser(std::vector<float>* laser, int *numLasers);
+
+			/* Return: nº lásers leídos
+				 Parámetro laser: vector de distancias (mm.) vertidos por el láser */
+			int cogerLaser(std::vector<float>* laser);
+
+			/* Parámetro destino: posición canvas OpenGL establecida por usuario
+      mediante botón central del ratón */
 			void cogerDestino(CvPoint2D32f* destino);
 	};
 } // namespace

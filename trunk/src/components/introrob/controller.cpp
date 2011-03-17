@@ -22,8 +22,8 @@
 #include "controller.h"
 
 namespace introrob {
-	const float Controller::V_MOTOR = 200.; // mm/s
-	const float Controller::W_MOTOR = 2.; // deg/s
+	const float Controller::V_MOTOR = 250.; // mm/s
+	const float Controller::W_MOTOR = 20.; // deg/s
 
 	Controller::Controller(jderobot::MotorsPrx mprx, jderobot::EncodersPrx eprx, jderobot::LaserPrx lprx, jderobot::CameraPrx cprx1, jderobot::CameraPrx cprx2, jderobot::PTMotorsPrx ptmprx1, jderobot::PTEncodersPrx pteprx1, jderobot::PTMotorsPrx ptmprx2, jderobot::PTEncodersPrx pteprx2) {
 		this->gladepath = std::string("./introrob.glade");
@@ -85,39 +85,6 @@ namespace introrob {
   }
 
 	void Controller::stopMotors () {
-		this->mprx->setV (V_MOTOR/1.1);
-		this->mprx->setW (W_MOTOR/1.1);
-		usleep (400000);
-		this->mprx->setV (V_MOTOR/1.2);
-		this->mprx->setW (W_MOTOR/1.2);
-		usleep (400000);
-		this->mprx->setV (V_MOTOR/1.4);
-		this->mprx->setW (W_MOTOR/1.4);
-		usleep (400000);
-		this->mprx->setV (V_MOTOR/1.6);
-		this->mprx->setW (W_MOTOR/1.6);
-		usleep (400000);
-		this->mprx->setV (V_MOTOR/1.8);
-		this->mprx->setW (W_MOTOR/1.8);
-		usleep (400000);
-		this->mprx->setV (V_MOTOR/2.);
-		this->mprx->setW (W_MOTOR/2.);
-		usleep (400000);
-		this->mprx->setV (V_MOTOR/2.5);
-		this->mprx->setW (W_MOTOR/2.5);
-		usleep (400000);
-		this->mprx->setV (V_MOTOR/3.);
-		this->mprx->setW (W_MOTOR/3.);
-		usleep (400000);
-		this->mprx->setV (V_MOTOR/4.);
-		this->mprx->setW (W_MOTOR/4.);
-		usleep (400000);
-		this->mprx->setV (V_MOTOR/6.);
-		this->mprx->setW (W_MOTOR/6.);
-		usleep (400000);
-		this->mprx->setV (V_MOTOR/8.);
-		this->mprx->setW (W_MOTOR/8.);
-		usleep (400000);
 		this->mprx->setV (0.0);
 		this->mprx->setW (0.0);
 	}

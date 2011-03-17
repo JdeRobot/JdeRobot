@@ -552,6 +552,16 @@ namespace gazeboserver {
 					exit (-1);
 				}
 
+				gazeboSim = new gazebo::SimulationIface();
+
+				/// Open the Simulation Interface
+				try {
+					gazeboSim->Open(gazeboclient, "default");
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect to the sim interface\n" << e << "\n";
+					exit (-1);
+				}
+
 				gazeboPTZ1 = new gazebo::PTZIface();
 				std::string myRobot1 = prop->getProperty(context.tag()+".RobotName");
 				std::string myIface1 = "pioneer2dx_" + myRobot1 + "::sonyvid30_model_cameraA::ptz_iface_1";
@@ -575,29 +585,10 @@ namespace gazeboserver {
 					printf("Gazebo PTMOTORS model not opened\n");
 				}
 
-				//ptMotorsData1 = gazeboPTZ1->data;
-
 				gazeboPTZ1->Lock(1);
-
-				//printf ("%f, %f\n", data->longitude, data->latitude);
-
+				gazeboPTZ1->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
 				gazeboPTZ1->data->cmd_pan = data->longitude * DEGTORAD;
 				gazeboPTZ1->data->cmd_tilt = data->latitude * DEGTORAD;
-/*				ptMotorsData1->longitude=data->longitude;
-				printf ("2\n");
-				if (data->longitude > MAX_PAN)
-					ptMotorsData1->longitude=MAX_PAN;
-				else if (data->longitude < -54)
-					ptMotorsData1->longitude= MIN_PAN;
-				printf ("3\n");
-				ptMotorsData1->latitude=data->latitude;
-				if (data->latitude > MAX_TILT)
-					ptMotorsData1->latitude= MAX_TILT;
-				else if (data->latitude < MIN_TILT)
-					ptMotorsData1->latitude= MIN_TILT;
-				printf ("4\n");
-				//gazeboPTZ1->data->cmd_pan=-ptMotorsData1->longitude * DEGTORAD;
-				//gazeboPTZ1->data->cmd_tilt=-ptMotorsData1->latitude * DEGTORAD;*/
 				gazeboPTZ1->Unlock();
 
 				return 0; 
@@ -613,11 +604,11 @@ namespace gazeboserver {
 
 			std::string prefix;
 			jderobotice::Context context;
-			//jderobot::PTMotorsDataPtr ptMotorsData1;
 			gazebo::Client *gazeboclient;
 			int gazeboserver_id;
 			int gazeboclient_id;
 			gazebo::PTZIface * gazeboPTZ1;
+		  gazebo::SimulationIface *gazeboSim;
 	};
 
 	class PTMotorsII: virtual public jderobot::PTMotors {
@@ -637,6 +628,16 @@ namespace gazeboserver {
 					gazeboclient->ConnectWait(gazeboserver_id, gazeboclient_id);
 				} catch (std::string e) {
 					std::cout << "Gazebo error: Unable to connect\n" << e << "\n";
+					exit (-1);
+				}
+
+				gazeboSim = new gazebo::SimulationIface();
+
+				/// Open the Simulation Interface
+				try {
+					gazeboSim->Open(gazeboclient, "default");
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect to the sim interface\n" << e << "\n";
 					exit (-1);
 				}
 
@@ -662,24 +663,11 @@ namespace gazeboserver {
 				if(!gazeboPTZ2){
 					printf("Gazebo PTMOTORS model not opened\n");
 				}
-				gazeboPTZ2->Lock(1);
 
+				gazeboPTZ2->Lock(1);
+				gazeboPTZ2->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
 				gazeboPTZ2->data->cmd_pan = data->longitude * DEGTORAD;
 				gazeboPTZ2->data->cmd_tilt = data->latitude * DEGTORAD;
-/*				ptMotorsData2->longitude=data->longitude;
-				if (data->longitude > MAX_PAN)
-					ptMotorsData2->longitude=MAX_PAN;
-				else if (data->longitude < -54)
-					ptMotorsData2->longitude= MIN_PAN;
-
-				ptMotorsData2->latitude=data->latitude;
-				if (data->latitude > MAX_TILT)
-					ptMotorsData2->latitude= MAX_TILT;
-				else if (data->latitude < MIN_TILT)
-					ptMotorsData2->latitude= MIN_TILT;
-
-				gazeboPTZ2->data->cmd_pan=-ptMotorsData2->longitude * DEGTORAD;
-				gazeboPTZ2->data->cmd_tilt=-ptMotorsData2->latitude * DEGTORAD;*/
 				gazeboPTZ2->Unlock();
 
 				return 0; 
@@ -695,11 +683,11 @@ namespace gazeboserver {
 
 			std::string prefix;
 			jderobotice::Context context;
-			jderobot::PTMotorsDataPtr ptMotorsData2;
 			gazebo::Client *gazeboclient;
 			int gazeboserver_id;
 			int gazeboclient_id;
 			gazebo::PTZIface * gazeboPTZ2;
+		  gazebo::SimulationIface *gazeboSim;
 	};
 
 	//PTENCODERSI
@@ -878,7 +866,6 @@ namespace gazeboserver {
 			:jderobotice::Component("GazeboServer"), cameras(0), motors1(0), laser1(0), encoders1(0), ptmotors1(0), ptmotors2(0), ptencoders1(0), ptencoders2(0), sonars1(0) {}
 
 			virtual void start() {
-
 				//Cameras
 				Ice::PropertiesPtr prop = context().properties();
 				int nCameras = prop->getPropertyAsInt(context().tag() + ".NCameras");
@@ -955,7 +942,7 @@ namespace gazeboserver {
 				sonars1 = new SonarsI(objPrefix7,context());
 				context().createInterfaceWithString(sonars1,sonarsName);
 			*/
-
+				usleep (1000);
 			}
 
 			virtual ~Component(){}
