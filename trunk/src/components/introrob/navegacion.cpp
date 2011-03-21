@@ -57,12 +57,12 @@ namespace introrob {
 		return(0);
 	} // callback
 
-	void Navegacion::cogerImagen1(unsigned char* image) { // refresco el contenido de la imagen1
-		image = &this->controller->data1->pixelData[0];
+	void Navegacion::cogerImagen1(unsigned char** image) { // refresco el contenido de la imagen1
+		*image = &this->controller->data1->pixelData[0];
 	}
 
-	void Navegacion::cogerImagen2(unsigned char* image) { // refresco el contenido de la imagen1
-		image = &this->controller->data2->pixelData[0];
+	void Navegacion::cogerImagen2(unsigned char** image) { // refresco el contenido de la imagen1
+		*image = &this->controller->data2->pixelData[0];
 	}
 
 	void Navegacion::cogerPosicion(CvPoint3D32f* myPoint) { // refresco la posición del pioneer

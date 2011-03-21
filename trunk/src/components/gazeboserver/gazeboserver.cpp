@@ -176,7 +176,7 @@ namespace gazeboserver {
 					gazeboCamData = gazebocamera->data;
 					gazeboCamImage = gazeboCamData->image;
 
-					usleep(100000); // para que pille los valores, que parece que le cuesta un tiempo...
+					usleep(1000); // para que pille los valores, que parece que le cuesta un tiempo...
 
 					printf("Image width= %d, height= %d\n", gazeboCamData->width, gazeboCamData->height);
 				}
@@ -189,8 +189,15 @@ namespace gazeboserver {
 				virtual void walk(){
 					jderobot::ImageDataPtr reply(new jderobot::ImageData);
 					reply->description = mycamera->imageDescription;
+					struct timeval a, b;
+					int cycle = 100;
+					long totalb,totala;
+					long diff;
 
 					while(!isStopping()){
+						gettimeofday(&a,NULL);
+						totala=a.tv_sec*1000000+a.tv_usec;
+
 						IceUtil::Time t = IceUtil::Time::now();
 						reply->timeStamp.seconds = (long)t.toSeconds();
 						reply->timeStamp.useconds = (long)t.toMicroSeconds() - reply->timeStamp.seconds*1000000;
@@ -206,6 +213,21 @@ namespace gazeboserver {
 								cb->ice_response(reply);
 							}
 						} //critical region end
+
+						gettimeofday(&b,NULL);
+						totalb=b.tv_sec*1000000+b.tv_usec;
+						//std::cout << "Introrob takes " << (totalb-totala)/1000 << " ms" << std::endl;
+
+						diff = (totalb-totala)/1000;
+						if(diff < 0 || diff > cycle)
+							diff = cycle;
+						else
+							diff = cycle-diff;
+
+						/*Sleep Algorithm*/
+						usleep(diff*1000);
+						if(diff < 33)
+							usleep(33*1000);
 					}
 				}
 
@@ -489,7 +511,6 @@ namespace gazeboserver {
 			virtual ~EncodersI(){};
 
 			virtual jderobot::EncodersDataPtr getEncodersData(const Ice::Current&) {
-
 				gazeboclient->Wait ();
 
 				if(!gazeboPosition){
@@ -942,7 +963,7 @@ namespace gazeboserver {
 				sonars1 = new SonarsI(objPrefix7,context());
 				context().createInterfaceWithString(sonars1,sonarsName);
 			*/
-				usleep (1000);
+				usleep(1000); // para que pille los valores, que parece que le cuesta un tiempo...
 			}
 
 			virtual ~Component(){}

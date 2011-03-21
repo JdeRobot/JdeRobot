@@ -77,10 +77,10 @@ namespace introrob {
 			int relativas2absolutas(CvPoint3D32f in, CvPoint3D32f *out);
 
 			/* image: vector correspondiente a la imagen */
-			void cogerImagen1(unsigned char* image);
+			void cogerImagen1(unsigned char** image);
 
 			/* image: vector correspondiente a la imagen */
-			void cogerImagen2(unsigned char* image);
+			void cogerImagen2(unsigned char** image);
 
 			/* Formato estructura myPoint => myPoint.x = X (mm.); myPoint.y = Y (mm.);
 			myPoint.z = Theta (deg.) */

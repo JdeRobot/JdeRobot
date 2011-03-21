@@ -80,7 +80,13 @@ namespace introrob {
 		this->navegacion->cogerPosicion (&myPoint);
 		//printf ("%f, %f, %f\n", myPoint.x, myPoint.y, myPoint.z);
 		this->controller->setV(0.); // mm./s.
-		this->controller->setW(20.); // deg./s.
+		this->controller->setW(0.); // deg./s.
+
+		// example: how to get image stream
+		unsigned char *image1;
+		this->navegacion->cogerImagen1 (&image1);
+
+		printf ("%d\n", image1[0]);
 	}
 
 	void Navega::iteracionGrafica () {
