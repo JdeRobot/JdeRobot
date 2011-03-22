@@ -70,23 +70,31 @@ this->navegacion->cogerDestino(CvPoint2D32f* destino);
 
 namespace introrob {
 	void Navega::iteracionControl () {
-		/* TODO: ADD YOUR ITERATION CODE HERE */
-		// example of movement:
-		this->controller->setPT1 (-15.,0.);
-		this->controller->setPT2 (-15.,0.);
-
+			
 		// example: how to get pioneer position
 		CvPoint3D32f myPoint;
 		this->navegacion->cogerPosicion (&myPoint);
-		//printf ("%f, %f, %f\n", myPoint.x, myPoint.y, myPoint.z);
-		this->controller->setV(0.); // mm./s.
-		this->controller->setW(0.); // deg./s.
+		printf ("encoders: X=%f mm, Y=%f mm, Theta=%f (grados)\n", myPoint.x, myPoint.y, myPoint.z);
+
+                // example: how to get laser readings
+                std::vector<float> laser;
+                this->navegacion->cogerLaser(&laser);	
+	        printf("laser: %f (mm)\n",laser[90]);
 
 		// example: how to get image stream
-		unsigned char *image1;
-		this->navegacion->cogerImagen1 (&image1);
+		// unsigned char *image1;
+		// this->navegacion->cogerImagen1 (&image1);
+		// printf ("image: %d\n", image1[0]);
 
-		printf ("%d\n", image1[0]);
+                /* TODO: ADD YOUR ITERATION CODE HERE */	
+
+                // movement command to robot wheels
+		this->controller->setV(0.); // mm./s.
+		this->controller->setW(30.); // deg./s.
+
+		// example of pantilt movement:
+		this->controller->setPT1 (-15.,0.);
+		this->controller->setPT2 (-15.,0.);
 	}
 
 	void Navega::iteracionGrafica () {
