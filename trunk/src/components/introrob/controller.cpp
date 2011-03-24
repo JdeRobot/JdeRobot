@@ -39,6 +39,9 @@ namespace introrob {
 		this->ptmprx2 = ptmprx2;
 		this->pteprx2 = pteprx2;
 
+		myImage1 = (unsigned char*) calloc (320*240*3,sizeof(unsigned char));
+		myImage2 = (unsigned char*) calloc (320*240*3,sizeof(unsigned char));
+
 		jderobot::PTMotorsData* myData, *myData2;
 		myData = new jderobot::PTMotorsData ();
 		myData2 = new jderobot::PTMotorsData ();
@@ -51,20 +54,29 @@ namespace introrob {
 
 		this->ed = this->eprx->getEncodersData(); // cogemos informacion de los encoders
 		this->ld = this->lprx->getLaserData(); // cogemos informacion de los lasers
-		this->getCameraData(); // cogemos información de las cámaras
+		this->getCameraData(&myImage1, &myImage2); // cogemos información de las cámaras
+
+		pthread_mutex_init(&this->mutex, NULL);
+
+		//this->mutex = PTHREAD_MUTEX_INITIALIZER;
 	}
 
-	void Controller::getCameraData() {
+	void Controller::getCameraData(unsigned char **imagen1, unsigned char **imagen2) {
+
+		pthread_mutex_lock(&this->mutex); // lock
+
 		// Get image1
     data1 = this->cprx1->getImageData();
     colorspaces::Image::FormatPtr fmt1 = colorspaces::Image::Format::searchFormat(data1->description->format);
     if (!fmt1)
 			throw "Format not supported";
 
-    image1 = new colorspaces::Image (data1->description->width,
+    this->image1 = new colorspaces::Image (data1->description->width,
 		       data1->description->height,
 		       fmt1,
 		       &(data1->pixelData[0]));
+
+		memcpy (*imagen1, &data1->pixelData[0], data1->description->width*data1->description->height*3);
 
 		// Get image2
     data2 = this->cprx2->getImageData();
@@ -72,10 +84,14 @@ namespace introrob {
     if (!fmt2)
 			throw "Format not supported";
 
-    image2 = new colorspaces::Image (data2->description->width,
+    this->image2 = new colorspaces::Image (data2->description->width,
 		       data2->description->height,
 		       fmt2,
 		       &(data2->pixelData[0]));
+
+		memcpy (*imagen2, &data2->pixelData[0], data2->description->width*data2->description->height*3);
+
+		pthread_mutex_unlock(&this->mutex); // unlock
 	}
 
   Controller::~Controller() {}
@@ -132,7 +148,7 @@ namespace introrob {
 	void Controller::updatePioneerStatus () {
 		this->ed = this->eprx->getEncodersData(); // cogemos informacion de los encoders
 		this->ld = this->lprx->getLaserData(); // cogemos informacion de los lasers
-		this->getCameraData(); // cogemos información de las cámaras
+		this->getCameraData(&myImage1, &myImage2); // cogemos información de las cámaras
 	}
 } // namespace
 

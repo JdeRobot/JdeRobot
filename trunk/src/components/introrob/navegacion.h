@@ -53,6 +53,8 @@ namespace introrob {
 			float robotx;
 			float roboty;
 			float robottheta;
+			unsigned char *myImage1;
+			unsigned char *myImage2;
 
 		public:
 			introrob::Navega *navega;

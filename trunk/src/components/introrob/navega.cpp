@@ -76,21 +76,21 @@ namespace introrob {
 		this->navegacion->cogerPosicion (&myPoint);
 		printf ("encoders: X=%f mm, Y=%f mm, Theta=%f (grados)\n", myPoint.x, myPoint.y, myPoint.z);
 
-                // example: how to get laser readings
-                std::vector<float> laser;
-                this->navegacion->cogerLaser(&laser);	
-	        printf("laser: %f (mm)\n",laser[90]);
+		// example: how to get laser readings
+		std::vector<float> laser;
+		this->navegacion->cogerLaser(&laser);	
+		printf("laser: %f (mm)\n",laser[90]);
 
 		// example: how to get image stream
 		// unsigned char *image1;
 		// this->navegacion->cogerImagen1 (&image1);
 		// printf ("image: %d\n", image1[0]);
 
-                /* TODO: ADD YOUR ITERATION CODE HERE */	
+		/* TODO: ADD YOUR ITERATION CODE HERE */	
 
-                // movement command to robot wheels
-		this->controller->setV(0.); // mm./s.
-		this->controller->setW(30.); // deg./s.
+		// movement command to robot wheels
+		//this->controller->setV(0.); // mm./s.
+		//this->controller->setW(30.); // deg./s.
 
 		// example of pantilt movement:
 		this->controller->setPT1 (-15.,0.);

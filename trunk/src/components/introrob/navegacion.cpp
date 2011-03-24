@@ -58,11 +58,13 @@ namespace introrob {
 	} // callback
 
 	void Navegacion::cogerImagen1(unsigned char** image) { // refresco el contenido de la imagen1
-		*image = &this->controller->data1->pixelData[0];
+		this->controller->getCameraData (&myImage1, &myImage2);
+		*image = &myImage1[0];
 	}
 
 	void Navegacion::cogerImagen2(unsigned char** image) { // refresco el contenido de la imagen1
-		*image = &this->controller->data2->pixelData[0];
+		this->controller->getCameraData (&myImage1, &myImage2);
+		*image = &myImage2[0];
 	}
 
 	void Navegacion::cogerPosicion(CvPoint3D32f* myPoint) { // refresco la posición del pioneer
@@ -121,6 +123,9 @@ namespace introrob {
 		this->controller = controller;
 		this->navega = new Navega (this->controller, this);
 		this->running=false;
+		myImage1 = (unsigned char*) calloc (320*240*3,sizeof(unsigned char));
+		myImage2 = (unsigned char*) calloc (320*240*3,sizeof(unsigned char));
+
     pthread_create(&thread, 0, &callback, this);
   }
 

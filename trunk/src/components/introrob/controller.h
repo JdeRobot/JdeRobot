@@ -30,6 +30,7 @@
 #include <jderobot/encoders.h>
 #include <jderobot/ptencoders.h>
 #include <jderobot/laser.h>
+#include <pthread.h>
 #include "pioneer.h"
 #include "drawarea.h"
 
@@ -65,6 +66,9 @@ namespace introrob {
 			void setPT2 (float latitude, float longitude);
 
 			void updatePioneerStatus ();
+
+			void getCameraData(unsigned char **image1, unsigned char **image2);
+
 			static const float V_MOTOR;
 			static const float W_MOTOR;
 
@@ -86,8 +90,9 @@ namespace introrob {
 			jderobot::PTEncodersPrx pteprx1;
 			jderobot::PTMotorsPrx ptmprx2;
 			jderobot::PTEncodersPrx pteprx2;
-
-			void getCameraData();
+			pthread_mutex_t mutex;
+			unsigned char *myImage1;
+			unsigned char *myImage2;
   };
 } // namespace
 
