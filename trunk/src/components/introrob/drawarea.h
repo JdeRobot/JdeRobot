@@ -63,7 +63,6 @@ namespace introrob {
 
 	class DrawArea : public Gtk::DrawingArea, public Gtk::GL::Widget<DrawArea> {
 		private:
-			CvPoint2D32f destino;
 			void linePlaneIntersection (HPoint3D A, HPoint3D B, HPoint3D *intersectionPoint);
 
 		public:
@@ -92,6 +91,8 @@ namespace introrob {
 			void setToPioneerCamera ();
 			void setToUserCamera ();
 			void getDestino (CvPoint2D32f *point);
+
+			CvPoint2D32f destino;
 
 		protected:
 			/*Override default signal handler*/

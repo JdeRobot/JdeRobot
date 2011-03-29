@@ -143,8 +143,11 @@ namespace introrob {
 		}
 	}
 
-	void View::getDestino (CvPoint2D32f* destino) {
-		this->world->getDestino (destino);
+	void View::setDestino () {
+		printf ("view antes =%f, %f\n", destino.x, destino.y);
+		this->destino.x = this->world->destino.x;
+		this->destino.y = this->world->destino.y;
+		printf ("view destino =%f, %f\n", destino.x, destino.y);
 	}
 
 	void View::setEncoders () {

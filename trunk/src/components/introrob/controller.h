@@ -41,9 +41,19 @@ namespace introrob {
 		  virtual ~Controller();
 		  
 		  std::string getGladePath();
+			void update ();
 
+			// FUNCIONES 'GET'
+			void getCameraData1(unsigned char **image1);
+			void getCameraData2(unsigned char **image2);
+			void getPosition (CvPoint3D32f* myPoint);
+			int getNumLasers ();
+			void getLaser(std::vector<float>* laser);
+			void getPTEncoders1();
+			void getPTEncoders2();
+
+			// FUNCIONES 'SET'
 			void drawScene();
-
 			void playMotors ();
 			void stopMotors ();
 			void goLeft ();
@@ -65,9 +75,8 @@ namespace introrob {
 			longitude: posición pan (deg.) a comandar al cuello mecánico */
 			void setPT2 (float latitude, float longitude);
 
-			void updatePioneerStatus ();
-
-			void getCameraData(unsigned char **image1, unsigned char **image2);
+			colorspaces::Image* image1;
+			colorspaces::Image* image2;
 
 			static const float V_MOTOR;
 			static const float W_MOTOR;
@@ -76,8 +85,8 @@ namespace introrob {
 			jderobot::LaserDataPtr ld;
 			jderobot::ImageDataPtr data1;
 			jderobot::ImageDataPtr data2;
-			colorspaces::Image* image1;
-			colorspaces::Image* image2;
+			jderobot::PTEncodersDataPtr pted1;
+			jderobot::PTEncodersDataPtr pted2;
 
 		private:
 			std::string gladepath;
@@ -90,9 +99,22 @@ namespace introrob {
 			jderobot::PTEncodersPrx pteprx1;
 			jderobot::PTMotorsPrx ptmprx2;
 			jderobot::PTEncodersPrx pteprx2;
+
 			pthread_mutex_t mutex;
-			unsigned char *myImage1;
-			unsigned char *myImage2;
+			pthread_mutex_t cameraMutex1;
+			pthread_mutex_t cameraMutex2;
+			pthread_mutex_t encodersMutex;
+			pthread_mutex_t laserMutex;
+			pthread_mutex_t ptEncodersMutex1;
+			pthread_mutex_t ptEncodersMutex2;
+
+			// FUNCIONES 'SET' REFRESCO DE ESTRUCTURAS INTERNAS
+			void setEncoders();
+			void setLaser();
+			void setCameraData1();
+			void setCameraData2();
+			void setPTEncoders1();
+			void setPTEncoders2();
   };
 } // namespace
 

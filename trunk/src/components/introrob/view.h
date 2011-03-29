@@ -52,9 +52,11 @@ namespace introrob {
 
 		  /*Display window*/
 		  void display(const colorspaces::Image& image1, const colorspaces::Image& image2);
-			void getDestino (CvPoint2D32f* destino);
+			void setDestino ();
 
 			DrawArea* world;
+
+			CvPoint2D32f destino;
 
 		protected:
 			float robotx;

@@ -74,19 +74,23 @@ namespace introrob {
 		// example: how to get pioneer position
 		CvPoint3D32f myPoint;
 		this->navegacion->cogerPosicion (&myPoint);
-		printf ("encoders: X=%f mm, Y=%f mm, Theta=%f (grados)\n", myPoint.x, myPoint.y, myPoint.z);
+		//printf ("encoders: X=%f mm, Y=%f mm, Theta=%f (grados)\n", myPoint.x, myPoint.y, myPoint.z);
 
 		// example: how to get laser readings
 		std::vector<float> laser;
 		this->navegacion->cogerLaser(&laser);	
-		printf("laser: %f (mm)\n",laser[90]);
+		//printf("laser: %f (mm)\n",laser[90]);
 
 		// example: how to get image stream
-		// unsigned char *image1;
-		// this->navegacion->cogerImagen1 (&image1);
-		// printf ("image: %d\n", image1[0]);
+		unsigned char *image1;
+		this->navegacion->cogerImagen1 (&image1);
+		//printf ("image: %d\n", image1[0]);
 
 		/* TODO: ADD YOUR ITERATION CODE HERE */	
+
+		CvPoint2D32f destino;
+		//this->navegacion->cogerDestino (&destino);
+		//printf ("myPoint = [%f, %f]\n", destino.x, destino.y);
 
 		// movement command to robot wheels
 		//this->controller->setV(0.); // mm./s.

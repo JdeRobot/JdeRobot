@@ -209,7 +209,7 @@ namespace introrob {
 							0., 0., 1.);
 
 		/*Draw world*/
-		this->drawScene();
+		//this->drawScene();
 
 		/*Swap buffers*/
 		if (glwindow->is_double_buffered())

@@ -39,66 +39,76 @@ namespace introrob {
 		this->ptmprx2 = ptmprx2;
 		this->pteprx2 = pteprx2;
 
-		myImage1 = (unsigned char*) calloc (320*240*3,sizeof(unsigned char));
-		myImage2 = (unsigned char*) calloc (320*240*3,sizeof(unsigned char));
+		this->setEncoders();
+		this->setLaser();
+		this->setCameraData1();
+		this->setCameraData2();
+		this->setPTEncoders1();
+		this->setPTEncoders2();
 
-		jderobot::PTMotorsData* myData, *myData2;
-		myData = new jderobot::PTMotorsData ();
-		myData2 = new jderobot::PTMotorsData ();
-		myData->latitude = 0.;
-		myData->longitude = 0.;
-		myData2->latitude = 0.;
-		myData2->longitude = 0.;
-		this->ptmprx1->setPTMotorsData (myData);
-		this->ptmprx2->setPTMotorsData (myData2);
-
-		this->ed = this->eprx->getEncodersData(); // cogemos informacion de los encoders
-		this->ld = this->lprx->getLaserData(); // cogemos informacion de los lasers
-		this->getCameraData(&myImage1, &myImage2); // cogemos información de las cámaras
-
-		pthread_mutex_init(&this->mutex, NULL);
-
-		//this->mutex = PTHREAD_MUTEX_INITIALIZER;
+		//pthread_mutex_init(&this->cameraMutex1, NULL);
+		//pthread_mutex_init(&this->cameraMutex2, NULL);
+		pthread_mutex_init(&this->encodersMutex, NULL);
+		pthread_mutex_init(&this->laserMutex, NULL);
+		pthread_mutex_init(&this->ptEncodersMutex1, NULL);
+		pthread_mutex_init(&this->ptEncodersMutex2, NULL);
 	}
 
-	void Controller::getCameraData(unsigned char **imagen1, unsigned char **imagen2) {
-
-		pthread_mutex_lock(&this->mutex); // lock
+	void Controller::setCameraData1() {
+		printf ("antes\n");
+		//pthread_mutex_lock(&this->cameraMutex1); // lock
+		printf ("despues\n");
 
 		// Get image1
-    data1 = this->cprx1->getImageData();
-    colorspaces::Image::FormatPtr fmt1 = colorspaces::Image::Format::searchFormat(data1->description->format);
+    this->data1 = this->cprx1->getImageData();
+    colorspaces::Image::FormatPtr fmt1 = colorspaces::Image::Format::searchFormat(this->data1->description->format);
     if (!fmt1)
 			throw "Format not supported";
 
-    this->image1 = new colorspaces::Image (data1->description->width,
-		       data1->description->height,
+    this->image1 = new colorspaces::Image (this->data1->description->width,
+		       this->data1->description->height,
 		       fmt1,
-		       &(data1->pixelData[0]));
+		       &(this->data1->pixelData[0]));
 
-		memcpy (*imagen1, &data1->pixelData[0], data1->description->width*data1->description->height*3);
+		//pthread_mutex_unlock(&this->cameraMutex1); // unlock
+	}
+
+	void Controller::getCameraData1(unsigned char **imagen1) {
+		//pthread_mutex_lock(&this->cameraMutex1); // lock
+
+		// Set image1
+		memset (*imagen1, 0, this->data1->description->width*this->data1->description->height*3);
+		memcpy (*imagen1, &this->data1->pixelData[0], this->data1->description->width*this->data1->description->height*3);
+
+		//pthread_mutex_unlock(&this->cameraMutex1); // unlock
+	}
+
+	void Controller::setCameraData2() {
+		//pthread_mutex_lock(&this->cameraMutex2); // lock
 
 		// Get image2
-    data2 = this->cprx2->getImageData();
-    colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(data2->description->format);
+    this->data2 = this->cprx2->getImageData();
+    colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(this->data2->description->format);
     if (!fmt2)
 			throw "Format not supported";
 
-    this->image2 = new colorspaces::Image (data2->description->width,
-		       data2->description->height,
+    this->image2 = new colorspaces::Image (this->data2->description->width,
+		       this->data2->description->height,
 		       fmt2,
-		       &(data2->pixelData[0]));
+		       &(this->data2->pixelData[0]));
 
-		memcpy (*imagen2, &data2->pixelData[0], data2->description->width*data2->description->height*3);
-
-		pthread_mutex_unlock(&this->mutex); // unlock
+		//pthread_mutex_unlock(&this->cameraMutex2); // unlock
 	}
 
-  Controller::~Controller() {}
-  
-  std::string	Controller::getGladePath() {
-		return this->gladepath;
-  }
+	void Controller::getCameraData2(unsigned char **imagen2) {
+		//pthread_mutex_lock(&this->cameraMutex2); // lock
+
+		// Set image2
+		memset (*imagen2,0,this->data2->description->width*this->data2->description->height*3);
+		memcpy (*imagen2, &this->data2->pixelData[0], this->data2->description->width*this->data2->description->height*3);
+
+		//pthread_mutex_unlock(&this->cameraMutex2); // unlock
+	}
 
 	void Controller::stopMotors () {
 		this->mprx->setV (0.0);
@@ -145,10 +155,48 @@ namespace introrob {
 		this->ptmprx2->setPTMotorsData (myData);
 	}
 
-	void Controller::updatePioneerStatus () {
-		this->ed = this->eprx->getEncodersData(); // cogemos informacion de los encoders
-		this->ld = this->lprx->getLaserData(); // cogemos informacion de los lasers
-		this->getCameraData(&myImage1, &myImage2); // cogemos información de las cámaras
+	void Controller::getPosition (CvPoint3D32f* myPoint) {
+		myPoint->x = this->ed->robotx;
+		myPoint->y = this->ed->roboty;
+		myPoint->z = this->ed->robottheta;
 	}
+
+	int Controller::getNumLasers () {
+		return (this->ld->numLaser);
+	}
+
+	void Controller::getLaser (std::vector<float>* laser) {
+		//pthread_mutex_lock(&this->laserMutex); // lock
+
+		laser->clear();
+		for (int k = 0; k < this->ld->numLaser; k++)
+			laser->push_back (this->ld->distanceData[k]);
+
+		//pthread_mutex_unlock(&this->laserMutex); // unlock
+	}
+
+	void Controller::setEncoders () {
+		this->ed = this->eprx->getEncodersData(); // cogemos informacion de los encoders
+	}
+
+	void Controller::setLaser () {
+		this->ld = this->lprx->getLaserData(); // cogemos informacion de los lasers
+	}
+
+	void Controller::setPTEncoders1() {}
+	void Controller::setPTEncoders2() {}
+
+	void Controller::update () {
+		this->setEncoders(); // cogemos información de las cámaras
+		this->setLaser(); // cogemos información de las cámaras
+		this->setCameraData1(); // cogemos información de las cámaras
+		this->setCameraData2(); // cogemos información de las cámaras
+	}
+
+  Controller::~Controller() {}
+  
+  std::string	Controller::getGladePath() {
+		return this->gladepath;
+  }
 } // namespace
 

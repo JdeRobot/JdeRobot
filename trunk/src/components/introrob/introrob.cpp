@@ -38,7 +38,10 @@ int main(int argc, char** argv){
 	introrob::Navegacion navegacion;
   Ice::CommunicatorPtr ic;
 
-	float v, w;  
+	struct timeval a, b;
+	int cycle = 100;
+	long totalb,totala;
+	long diff;
 
   try{
     ic = Ice::initialize(argc,argv);
@@ -141,9 +144,26 @@ int main(int argc, char** argv){
 		view = new introrob::View (controller, &navegacion);
 
 		while(view->isVisible()){
-			controller->updatePioneerStatus ();
+			gettimeofday(&a,NULL);
+			totala=a.tv_sec*1000000+a.tv_usec;
+
+			controller->update ();
       view->display(*controller->image1, *controller->image2);
-			usleep(10000);
+
+			gettimeofday(&b,NULL);
+			totalb=b.tv_sec*1000000+b.tv_usec;
+			//std::cout << "Introrob takes " << (totalb-totala)/1000 << " ms" << std::endl;
+
+			diff = (totalb-totala)/1000;
+			if(diff < 0 || diff > cycle)
+				diff = cycle;
+			else
+				diff = cycle-diff;
+
+			/*Sleep Algorithm*/
+			usleep(diff*1000);
+			if(diff < 33)
+				usleep(33*1000);
 		}
   } catch (const Ice::Exception& ex) {
     std::cerr << ex << std::endl;

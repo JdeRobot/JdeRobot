@@ -58,34 +58,30 @@ namespace introrob {
 	} // callback
 
 	void Navegacion::cogerImagen1(unsigned char** image) { // refresco el contenido de la imagen1
-		this->controller->getCameraData (&myImage1, &myImage2);
+		this->controller->getCameraData1 (&myImage1);
 		*image = &myImage1[0];
 	}
 
 	void Navegacion::cogerImagen2(unsigned char** image) { // refresco el contenido de la imagen1
-		this->controller->getCameraData (&myImage1, &myImage2);
+		this->controller->getCameraData2 (&myImage2);
 		*image = &myImage2[0];
 	}
 
 	void Navegacion::cogerPosicion(CvPoint3D32f* myPoint) { // refresco la posición del pioneer
-		myPoint->x = this->controller->ed->robotx;
-		myPoint->y = this->controller->ed->roboty;
-		myPoint->z = this->controller->ed->robottheta;
+		this->controller->getPosition (myPoint);
 	}
 
 	int Navegacion::cogerLaser(std::vector<float>* laser) { // refrescamos el vector de valores de láser
-		int k, numLasers = 0;
-		laser->clear();
-		for (k = 0; k < this->controller->ld->numLaser; k++) {
-			laser->push_back (this->controller->ld->distanceData[k]);
-			numLasers++;
-		}
-
-		return numLasers;
+		this->controller->getLaser (laser);
+		return this->controller->getNumLasers();
 	}
 
 	void Navegacion::cogerDestino(CvPoint2D32f* destino) { // refresco la posición del pioneer
-		this->view->getDestino (destino);
+		printf ("navegacion antes\n");
+		this->view->setDestino ();
+		destino->x = this->view->destino.x;
+		destino->y = this->view->destino.y;
+		printf ("navegacion destino = %f, %f\n", destino->x, destino->y);
 	}
 
 	int Navegacion::main() {
@@ -123,8 +119,8 @@ namespace introrob {
 		this->controller = controller;
 		this->navega = new Navega (this->controller, this);
 		this->running=false;
-		myImage1 = (unsigned char*) calloc (320*240*3,sizeof(unsigned char));
-		myImage2 = (unsigned char*) calloc (320*240*3,sizeof(unsigned char));
+		this->myImage1 = (unsigned char*) calloc (this->controller->data1->description->width*this->controller->data1->description->height*3,sizeof(unsigned char));
+		this->myImage2 = (unsigned char*) calloc (this->controller->data1->description->width*this->controller->data1->description->height*3,sizeof(unsigned char));
 
     pthread_create(&thread, 0, &callback, this);
   }
