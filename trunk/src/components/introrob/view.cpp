@@ -63,8 +63,8 @@ namespace introrob {
     refXml->get_widget("image2",gtk_image2);
 
 		// Mundo OpenGL
-    refXml->get_widget_derived("world",world);
-		world->navega = this->navegacion->navega;
+    refXml->get_widget_derived("world",this->world);
+		this->world->navega = this->navegacion->navega;
 
 		stopButton->signal_clicked().connect(sigc::mem_fun(this,&View::stopButton_clicked));
 		upButton->signal_clicked().connect(sigc::mem_fun(this,&View::upButton_clicked));
@@ -144,10 +144,7 @@ namespace introrob {
 	}
 
 	void View::setDestino () {
-		printf ("view antes =%f, %f\n", destino.x, destino.y);
-		this->destino.x = this->world->destino.x;
-		this->destino.y = this->world->destino.y;
-		printf ("view destino =%f, %f\n", destino.x, destino.y);
+		this->world->getDestino(&this->destino);
 	}
 
 	void View::setEncoders () {

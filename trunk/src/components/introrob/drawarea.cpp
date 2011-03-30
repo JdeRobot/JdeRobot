@@ -209,7 +209,7 @@ namespace introrob {
 							0., 0., 1.);
 
 		/*Draw world*/
-		//this->drawScene();
+		this->drawScene();
 
 		/*Swap buffers*/
 		if (glwindow->is_double_buffered())
@@ -446,8 +446,8 @@ namespace introrob {
 
 			linePlaneIntersection (myActualPoint3D, cameraPos3D, &intersectionPoint);
 
-			destino.x = intersectionPoint.X;
-			destino.y = intersectionPoint.Y;
+			this->destino.x = intersectionPoint.X;
+			this->destino.y = intersectionPoint.Y;
 		}
 
 		old_x=x;

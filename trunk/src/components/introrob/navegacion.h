@@ -59,6 +59,7 @@ namespace introrob {
 		public:
 			introrob::Navega *navega;
 
+			void setView (View* view);
 			void run (introrob::Controller * controller);
 			int join ();
 			void start();

@@ -33,9 +33,9 @@
 
 int main(int argc, char** argv){
   int status,i;
-	introrob::View * view;
-	introrob::Controller * controller;
-	introrob::Navegacion navegacion;
+	introrob::View *view;
+	introrob::Controller *controller;
+	introrob::Navegacion *navegacion;
   Ice::CommunicatorPtr ic;
 
 	struct timeval a, b;
@@ -138,10 +138,13 @@ int main(int argc, char** argv){
 		/**************************************************************************/
 		// Create Controller and View
 		controller = new introrob::Controller(mprx, eprx, lprx, cprx1, cprx2, ptmprx1, pteprx1, ptmprx2, pteprx2);
+		navegacion = new introrob::Navegacion();
 
-		navegacion.run(controller); // hebra de control
+		navegacion->run(controller); // hebra de control
 
-		view = new introrob::View (controller, &navegacion);
+		view = new introrob::View (controller, navegacion);
+
+		navegacion->setView (view);
 
 		while(view->isVisible()){
 			gettimeofday(&a,NULL);
@@ -174,8 +177,8 @@ int main(int argc, char** argv){
   }
 
 	/* Stop thread */
-	navegacion.stop();
-	navegacion.join();
+	navegacion->stop();
+	navegacion->join();
 
   if (ic)
     ic->destroy();

@@ -22,6 +22,10 @@
 #include "navegacion.h"
 
 namespace introrob {
+	void Navegacion::setView (View* view) {
+		this->view = view;
+	}
+
 	int Navegacion::pintaSegmento (CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color) {
 		glColor3f(color.x, color.y, color.z);
 		glLineWidth(2.0f);
@@ -77,11 +81,9 @@ namespace introrob {
 	}
 
 	void Navegacion::cogerDestino(CvPoint2D32f* destino) { // refresco la posición del pioneer
-		printf ("navegacion antes\n");
 		this->view->setDestino ();
 		destino->x = this->view->destino.x;
 		destino->y = this->view->destino.y;
-		printf ("navegacion destino = %f, %f\n", destino->x, destino->y);
 	}
 
 	int Navegacion::main() {
