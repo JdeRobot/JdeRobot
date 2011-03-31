@@ -90,7 +90,7 @@ namespace introrob {
 
 		CvPoint2D32f destino;
 		this->navegacion->cogerDestino (&destino);
-		printf ("myPoint = [%f, %f]\n", destino.x, destino.y);
+		//printf ("myPoint = [%f, %f]\n", destino.x, destino.y);
 
 		// movement command to robot wheels
 		//this->controller->setV(0.); // mm./s.
