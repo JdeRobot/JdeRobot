@@ -84,7 +84,7 @@ namespace introrob {
 		// example: how to get image stream
 		unsigned char *image1;
 		this->navegacion->cogerImagen1 (&image1);
-		//printf ("image: %d\n", image1[0]);
+		printf ("image: %d\n", image1[0]);
 
 		/* TODO: ADD YOUR ITERATION CODE HERE */	
 
