@@ -91,7 +91,7 @@ namespace gazeboserver {
 			context.tracer().info("Starting thread for camera: " + cameraDescription->name);
 			replyTask = new ReplyTask(this);
 
-			replyTask->start();//my own thread
+			replyTask->start(); // my own thread
 		}
 
 		std::string getName () {
@@ -163,10 +163,12 @@ namespace gazeboserver {
 					try {
 						printf("Connecting to camera device on server...\n");
 						gazebocamera->Open (gazeboclient, myIface);
+						usleep(1000); // para que pille los valores, que parece que le cuesta un tiempo...
 					} catch (std::string e) {
 						try {
 							printf("Connecting to camera device on server...\n");
 							gazebocamera->Open (gazeboclient, myIface);
+							usleep(1000); // para que pille los valores, que parece que le cuesta un tiempo...
 						} catch (std::string e) {
 							std::cout << "Gazebo error: Unable to connect to the camera interface\n" << e << "\n";
 							exit (-1);
@@ -175,8 +177,6 @@ namespace gazeboserver {
 
 					gazeboCamData = gazebocamera->data;
 					gazeboCamImage = gazeboCamData->image;
-
-					usleep(1000); // para que pille los valores, que parece que le cuesta un tiempo...
 
 					printf("Image width= %d, height= %d\n", gazeboCamData->width, gazeboCamData->height);
 				}
@@ -190,7 +190,7 @@ namespace gazeboserver {
 					jderobot::ImageDataPtr reply(new jderobot::ImageData);
 					reply->description = mycamera->imageDescription;
 					struct timeval a, b;
-					int cycle = 100;
+					int cycle = 50;
 					long totalb,totala;
 					long diff;
 
@@ -216,18 +216,17 @@ namespace gazeboserver {
 
 						gettimeofday(&b,NULL);
 						totalb=b.tv_sec*1000000+b.tv_usec;
-						//std::cout << "Introrob takes " << (totalb-totala)/1000 << " ms" << std::endl;
 
 						diff = (totalb-totala)/1000;
-						if(diff < 0 || diff > cycle)
-							diff = cycle;
-						else
-							diff = cycle-diff;
+						diff = cycle-diff;
+
+						//std::cout << "Gazeboserver takes " << diff << " ms" << std::endl;
+
+						if(diff < 10)
+							diff = 10;
 
 						/*Sleep Algorithm*/
 						usleep(diff*1000);
-						if(diff < 33)
-							usleep(33*1000);
 					}
 				}
 
@@ -894,7 +893,7 @@ namespace gazeboserver {
 				for (int i=0; i<nCameras; i++) {//build camera objects
 					std::stringstream objIdS;
 					objIdS <<  i;
-					std::string objId = objIdS.str();// should this be something unique??
+					std::string objId = objIdS.str();
 					std::string objPrefix(context().tag() + ".Camera." + objId + ".");
 					std::string cameraName = prop->getProperty(objPrefix + "Name");
 
