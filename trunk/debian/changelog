@@ -1,3 +1,9 @@
+jderobot (5.0.4-1) unstable; urgency=low
+
+  * Bug gazeboserver fixed
+
+ -- Eduardo Perdices <edupergar@gsyc.es>  Thu, 04 Apr 2011 12:58:33 +0100
+
 jderobot (5.0.3-1) unstable; urgency=low
 
   * Added opencvdemo component

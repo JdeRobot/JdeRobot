@@ -155,7 +155,6 @@ AC_CONFIG_FILES([src/components/Makefile \
     src/components/cameraserver/Makefile \
     src/components/cameraview/Makefile \
     src/components/cameraview_icestorm/Makefile \
-    src/components/colortuner/Makefile \
     src/components/opencvdemo/Makefile \
     src/components/recordingserver/Makefile \
     src/components/recorder/Makefile \
@@ -167,8 +166,8 @@ AC_CONFIG_FILES([src/components/Makefile \
     src/components/teleoperator/Makefile \
     src/components/calibrator/Makefile \
     src/components/naooperator/Makefile \
-	src/components/jdenect/Makefile \
-	src/components/visornect/Makefile \
+    src/components/jdenect/Makefile \
+    src/components/visornect/Makefile \
     src/components/introrob/Makefile \
     src/components/playerserver/Makefile \
     src/components/motiondetection/test/Makefile \
