@@ -160,20 +160,17 @@ namespace gazeboserver {
 					std::string myIface = "pioneer2dx_" + myRobot + "::sonyvid30_model_" + camera->getName () + "::camera_iface_0";
 
 					/// Open the Camera interface
-					try {
-						printf("Connecting to camera device on server...\n");
-						gazebocamera->Open (gazeboclient, myIface);
-						usleep(1000); // para que pille los valores, que parece que le cuesta un tiempo...
-					} catch (std::string e) {
+					do {
 						try {
 							printf("Connecting to camera device on server...\n");
 							gazebocamera->Open (gazeboclient, myIface);
-							usleep(1000); // para que pille los valores, que parece que le cuesta un tiempo...
 						} catch (std::string e) {
 							std::cout << "Gazebo error: Unable to connect to the camera interface\n" << e << "\n";
 							exit (-1);
 						}
-					}
+						if ((gazebocamera->data->width == 0) || (gazebocamera->data->height == 0))
+							usleep(10000);
+					} while ((gazebocamera->data->width == 0) || (gazebocamera->data->height == 0));
 
 					gazeboCamData = gazebocamera->data;
 					gazeboCamImage = gazeboCamData->image;
