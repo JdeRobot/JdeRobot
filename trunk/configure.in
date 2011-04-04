@@ -97,6 +97,7 @@ m4_include([m4/component_cameraview.m4])
 m4_include([m4/component_cameraview_icestorm.m4])
 m4_include([m4/component_recordingserver.m4])
 m4_include([m4/component_opencvdemo.m4])
+m4_include([m4/component_colortuner.m4])
 m4_include([m4/component_alarmgenerator.m4])
 m4_include([m4/component_motiondetection.m4])
 m4_include([m4/component_recorder.m4])
@@ -156,6 +157,7 @@ AC_CONFIG_FILES([src/components/Makefile \
     src/components/cameraview/Makefile \
     src/components/cameraview_icestorm/Makefile \
     src/components/opencvdemo/Makefile \
+    src/components/colortuner/Makefile \
     src/components/recordingserver/Makefile \
     src/components/recorder/Makefile \
     src/components/surveillance/Makefile \
