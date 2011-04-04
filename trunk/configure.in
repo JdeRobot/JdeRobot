@@ -155,6 +155,7 @@ AC_CONFIG_FILES([src/components/Makefile \
     src/components/cameraserver/Makefile \
     src/components/cameraview/Makefile \
     src/components/cameraview_icestorm/Makefile \
+    src/components/colortuner/Makefile \
     src/components/opencvdemo/Makefile \
     src/components/recordingserver/Makefile \
     src/components/recorder/Makefile \

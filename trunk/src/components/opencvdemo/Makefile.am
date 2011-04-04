@@ -4,9 +4,8 @@ endif
 
 opencvdemo_SOURCES = opencvdemo.cpp \
 			view.cpp \
-			view.h \
-			model.cpp \
-			model.h
+			view.h 
+			
 opencvdemo_CPPFLAGS =  $(GTKMM_CPPFLAGS) $(OPENCV_CPPFLAGS) \
 			$(JDEROBOTICE_CPPFLAGS) -DGLADE_DIR=\""$(gladedir)"\"
 opencvdemo_LDFLAGS = $(JDEROBOTICE_LDFLAGS) $(GTKMM_LDFLAGS) $(OPENCV_LDFLAGS)
