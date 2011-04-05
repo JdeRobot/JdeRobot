@@ -3,8 +3,8 @@ bin_PROGRAMS = opencvdemo
 endif
 
 opencvdemo_SOURCES = opencvdemo.cpp \
-			view.cpp \
-			view.h 
+			viewer.cpp \
+			viewer.h 
 			
 opencvdemo_CPPFLAGS =  $(GTKMM_CPPFLAGS) $(OPENCV_CPPFLAGS) \
 			$(JDEROBOTICE_CPPFLAGS) -DGLADE_DIR=\""$(gladedir)"\"
