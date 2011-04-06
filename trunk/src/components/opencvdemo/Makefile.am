@@ -12,6 +12,7 @@ opencvdemo_LDFLAGS = $(JDEROBOTICE_LDFLAGS) $(GTKMM_LDFLAGS) $(OPENCV_LDFLAGS)
 opencvdemo_LDADD = $(top_srcdir)/src/libs/jderobotice/libJderobotIce.la \
 			$(top_srcdir)/src/libs/jderobotutil/libJderobotUtil.la \
 			$(top_srcdir)/src/libs/colorspaces/libcolorspaces.la \
+			$(top_srcdir)/src/libs/colorspaces/libcolorspacesmm.la \
 			$(top_srcdir)/src/interfaces/cpp/jderobot/libJderobotInterfaces.la
 
 dist_conf_DATA = opencvdemo.cfg
