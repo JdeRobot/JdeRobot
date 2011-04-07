@@ -1,5 +1,5 @@
 dnl # Requirements for component colortuner
-dnl # GTKmm & opencv
+dnl # GTKmm & opencv & libcolorspaces
 
 AC_ARG_ENABLE([component-colortuner],
     [AS_HELP_STRING([--disable-component-colortuner],
@@ -7,7 +7,6 @@ AC_ARG_ENABLE([component-colortuner],
     [],
     [enable_component_colortuner=yes])
 
-AM_CONDITIONAL([ENABLE_COMPONENT_COLORTUNER],[false])
 if test "x$enable_component_colortuner" != xno; then
     AC_MSG_NOTICE([**** Checking colortuner component requirements:])
     ERRORS=""
