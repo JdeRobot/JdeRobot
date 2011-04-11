@@ -72,13 +72,13 @@ namespace introrob {
 	}
 
 	void Controller::getCameraData1(unsigned char **imagen1) {
-		pthread_mutex_lock(&this->cameraMutex1); // lock
+	  //pthread_mutex_lock(&this->cameraMutex1); // lock
 
 		// Set image1
 		memset (*imagen1, 0, this->data1->description->width*this->data1->description->height*3);
 		memcpy (*imagen1, &this->data1->pixelData[0], this->data1->description->width*this->data1->description->height*3);
 
-		pthread_mutex_unlock(&this->cameraMutex1); // unlock
+		//pthread_mutex_unlock(&this->cameraMutex1); // unlock
 	}
 
 	void Controller::setCameraData2() {

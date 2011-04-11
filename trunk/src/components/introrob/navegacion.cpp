@@ -30,8 +30,8 @@ namespace introrob {
 		glColor3f(color.x, color.y, color.z);
 		glLineWidth(2.0f);
 		glBegin(GL_LINES);
-			v3f(a.x, a.y, a.z);
-			v3f(b.x, b.y, b.z);
+			v3f(a.x/SCALE, a.y/SCALE, a.z/SCALE);
+			v3f(b.x/SCALE, b.y/SCALE, b.z/SCALE);
 		glEnd();
 		return 1;
 	}

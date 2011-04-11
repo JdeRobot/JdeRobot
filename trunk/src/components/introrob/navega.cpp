@@ -120,11 +120,11 @@ namespace introrob {
 
 		this->navegacion->pintaSegmento (a, b, color); // ROJO
 
-		// ejemplo de segmento en posición absoluta
+		// ejemplo de segmento en posición relativa al robot
 		aa.x=50.; aa.y=50.;
-		this->navegacion->absolutas2relativas(aa,&a);
+		this->navegacion->relativas2absolutas(aa,&a);
 		aa.x=0.; aa.y=0.;
-		this->navegacion->absolutas2relativas(aa,&b);
+		this->navegacion->relativas2absolutas(aa,&b);
 
 		color.x = 0.; // Red
 		color.y = 0.; // Green
