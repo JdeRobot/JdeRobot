@@ -84,13 +84,13 @@ namespace introrob {
 		// example: how to get image stream
 		unsigned char *image1;
 		this->navegacion->cogerImagen1 (&image1);
-		printf ("image: %d\n", image1[0]);
+		//printf ("image: %d\n", image1[0]);
 
 		/* TODO: ADD YOUR ITERATION CODE HERE */	
 
 		CvPoint2D32f destino;
 		this->navegacion->cogerDestino (&destino);
-		//printf ("myPoint = [%f, %f]\n", destino.x, destino.y);
+		printf ("myPoint = [%f, %f]\n", destino.x, destino.y);
 
 		// movement command to robot wheels
 		//this->controller->setV(0.); // mm./s.
@@ -103,7 +103,7 @@ namespace introrob {
 
 	void Navega::iteracionGrafica () {
 		/* TODO: ADD YOUR GRAPHIC CODE HERE */
-
+/*
 		CvPoint3D32f aa;
 		CvPoint3D32f a,b;
 		CvPoint3D32f c,d;
@@ -131,6 +131,11 @@ namespace introrob {
 		color.z = 1.; // Blue
 
 		this->navegacion->pintaSegmento (a, b, color); // AZUL
+*/
+
+
+		this->navegacion->drawProjectionLines();
+
 	}
 
 	Navega::Navega (Controller* controller, Navegacion* navegacion) {

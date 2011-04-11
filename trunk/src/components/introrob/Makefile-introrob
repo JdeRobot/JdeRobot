@@ -8,6 +8,6 @@ LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotIce.la \
 	$(JDEROBOTDIR)/lib/jderobot/libprogeo.la \
 	$(JDEROBOTDIR)/lib/jderobot/libpioneer.la
 
-introrob: introrob.o navegacion.o navega.o view.o controller.o drawarea.o pioneeropengl.o
-	libtool --mode=link g++ -g -O -o introrob introrob.o navegacion.o navega.o view.o controller.o drawarea.o pioneeropengl.o $(LDADD) $(LDFLAGS)
+introrob: introrob.o navegacion.o navega.o view.o controller.o drawarea.o pioneeropengl.o camera.o
+	libtool --mode=link g++ -g -O -o introrob introrob.o navegacion.o navega.o view.o controller.o drawarea.o pioneeropengl.o camera.o $(LDADD) $(LDFLAGS)
 

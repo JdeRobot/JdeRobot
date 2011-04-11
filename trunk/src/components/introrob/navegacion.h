@@ -30,8 +30,11 @@
 #include "view.h"
 #include "controller.h"
 #include "navega.h"
+#include "camera.h"
 
 #define NUM_LASERS 180
+#define MAX_LINES 200
+#define SCALE 100
 
 namespace introrob {
 
@@ -48,13 +51,27 @@ namespace introrob {
 			bool running;
 
 			pthread_t thread;
-		  void** ret;
+		  	void** ret;
+	
+			//Progeo cameras
+			TPinHoleCamera myCamA, myCamB;
+
+			float extra_lines[MAX_LINES][9];
+			int numlines;
+
 
 			float robotx;
 			float roboty;
 			float robottheta;
 			unsigned char *myImage1;
 			unsigned char *myImage2;
+
+
+			void add_line(float x0,float y0, float z0, float x1, float y1, float z1,int color);
+			void get3DPositionX(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, double Z);
+			void pixel2optical(TPinHoleCamera *cam, HPoint2D *p);
+
+
 
 		public:
 			introrob::Navega *navega;
@@ -94,8 +111,15 @@ namespace introrob {
 			int cogerLaser(std::vector<float>* laser);
 
 			/* Parámetro destino: posición canvas OpenGL establecida por usuario
-      mediante botón central del ratón */
+      			mediante botón central del ratón */
 			void cogerDestino(CvPoint2D32f* destino);
+
+						
+			void initCameras();		
+			void calculate_projection_line(HPoint2D pix, int idcamera);	
+			void drawProjectionLines();	
+
+
 	};
 } // namespace
 

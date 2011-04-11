@@ -22,6 +22,8 @@
 #include "view.h"
 
 namespace introrob {
+
+
 	View::View (Controller* controller, Navegacion* navegacion): gtkmain(0,0) {
 		this->controller = controller;
 		this->navegacion = navegacion;
@@ -62,7 +64,17 @@ namespace introrob {
     refXml->get_widget("image1",gtk_image1);
     refXml->get_widget("image2",gtk_image2);
 
-		// Mundo OpenGL
+		// Eventbox para las imágenes
+    refXml->get_widget("eventbox_left",eventbox_left);
+    eventbox_left->add_events(Gdk::BUTTON_PRESS_MASK);
+    eventbox_left->signal_button_press_event().connect(sigc::mem_fun(this, &View::on_left_clicked));
+
+    refXml->get_widget("eventbox_right",eventbox_right);
+    eventbox_right->add_events(Gdk::BUTTON_PRESS_MASK);
+    eventbox_right->signal_button_press_event().connect(sigc::mem_fun(this, &View::on_right_clicked));
+	
+	
+	// Mundo OpenGL
     refXml->get_widget_derived("world",this->world);
 		this->world->navega = this->navegacion->navega;
 
@@ -83,6 +95,8 @@ namespace introrob {
 		/*Show window. Note: Set window visibility to false in Glade, otherwise opengl won't work*/
 		mainwindow->show();
 		stopCodeButton->hide();
+
+		this->navegacion->initCameras();
 	}
 
 	View::~View() {
@@ -257,4 +271,35 @@ namespace introrob {
 		mainwindow->hide();
 		exit (0);
 	}
+
+
+	bool View::on_right_clicked(GdkEventButton * event){
+
+		gint x,y;
+		gdk_window_at_pointer(&x,&y);
+
+		pixB.x=x;
+		pixB.y=y;
+		pixB.h=1.0;
+		//printf("click en camera derecha, punto %f,%f\n",pixB.x,pixB.y);
+		this->navegacion->calculate_projection_line(pixB,2);
+	return true;
+	}
+
+
+	bool View::on_left_clicked(GdkEventButton * event){
+		
+		gint x,y;
+		gdk_window_at_pointer(&x,&y);
+
+		pixA.x=x;
+		pixA.y=y;
+		pixA.h=1.0;
+		//printf("click en camera izquierda, punto %f,%f\n",pixA.x,pixA.y);
+		this->navegacion->calculate_projection_line(pixA,1);
+
+	return true;
+	}
+
+
 } // namespace

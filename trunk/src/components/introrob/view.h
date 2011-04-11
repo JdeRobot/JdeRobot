@@ -72,6 +72,10 @@ namespace introrob {
 		private:
 			bool isFollowing;
 
+			// for pixel projection
+			HPoint2D pixA;
+			HPoint2D pixB;	
+
 			// GETS: lo que "cogemos" del controller
 			void getEncoders ();
 			void getLaser ();
@@ -95,6 +99,9 @@ namespace introrob {
 			void stopCodeButton_clicked();
 			void exitButton_clicked();
 
+			virtual bool on_right_clicked(GdkEventButton * event);
+			virtual bool on_left_clicked(GdkEventButton * event);
+
 		  Glib::RefPtr<Gnome::Glade::Xml> refXml;
 		  Gtk::Main gtkmain;
 		  Gtk::Window *mainwindow;
@@ -115,6 +122,9 @@ namespace introrob {
 			Gtk::Image *gtk_image2;
 			Controller* controller;
 			Navegacion* navegacion;
+
+			Gtk::EventBox * eventbox_left;
+			Gtk::EventBox * eventbox_right;
   };
 } // namespace
 

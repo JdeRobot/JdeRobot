@@ -19,17 +19,6 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkImage" id="image2">
-            <property name="width_request">320</property>
-            <property name="height_request">240</property>
-            <property name="visible">True</property>
-          </widget>
-          <packing>
-            <property name="x">675</property>
-            <property name="y">454</property>
-          </packing>
-        </child>
-        <child>
           <widget class="GtkButton" id="rightButton">
             <property name="width_request">35</property>
             <property name="height_request">35</property>
@@ -196,17 +185,6 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkImage" id="image1">
-            <property name="width_request">320</property>
-            <property name="height_request">240</property>
-            <property name="visible">True</property>
-          </widget>
-          <packing>
-            <property name="x">353</property>
-            <property name="y">454</property>
-          </packing>
-        </child>
-        <child>
           <widget class="GtkButton" id="yourCodeButton">
             <property name="width_request">138</property>
             <property name="height_request">66</property>
@@ -262,6 +240,44 @@
           <packing>
             <property name="x">149</property>
             <property name="y">629</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkEventBox" id="eventbox_left">
+            <property name="width_request">320</property>
+            <property name="height_request">240</property>
+            <property name="visible">True</property>
+            <child>
+              <widget class="GtkImage" id="image1">
+                <property name="width_request">320</property>
+                <property name="height_request">240</property>
+                <property name="visible">True</property>
+                <property name="stock">gtk-missing-image</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">353</property>
+            <property name="y">454</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkEventBox" id="eventbox_right">
+            <property name="width_request">320</property>
+            <property name="height_request">240</property>
+            <property name="visible">True</property>
+            <child>
+              <widget class="GtkImage" id="image2">
+                <property name="width_request">320</property>
+                <property name="height_request">240</property>
+                <property name="visible">True</property>
+                <property name="stock">gtk-missing-image</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">675</property>
+            <property name="y">454</property>
           </packing>
         </child>
       </widget>

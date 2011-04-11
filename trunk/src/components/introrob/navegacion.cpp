@@ -124,6 +124,8 @@ namespace introrob {
 		this->myImage1 = (unsigned char*) calloc (this->controller->data1->description->width*this->controller->data1->description->height*3,sizeof(unsigned char));
 		this->myImage2 = (unsigned char*) calloc (this->controller->data1->description->width*this->controller->data1->description->height*3,sizeof(unsigned char));
 
+		this->numlines=0;
+
     pthread_create(&thread, 0, &callback, this);
   }
 
@@ -139,4 +141,120 @@ namespace introrob {
   int Navegacion::join() {
     return pthread_join(thread, ret);
   }
+
+
+	void Navegacion::initCameras () {
+
+			// Init camera 1		
+			camera *mycameraA = new camera("cameras/calibA");
+			myCamA= mycameraA->readConfig();
+
+			// Init camera 2
+			camera *mycameraB = new camera("cameras/calibB");
+			myCamB= mycameraB->readConfig();
+		}
+
+	void Navegacion::calculate_projection_line(HPoint2D pix, int idcamera){
+
+		HPoint3D pdraw3D;	
+
+		if(idcamera==1){
+			this->get3DPositionX(&myCamA,pdraw3D,pix,5000.0);// 5000 son los 5 metros a los que está la pared.
+			this->add_line(myCamA.position.X, myCamA.position.Y, myCamA.position.Z,(float)pdraw3D.X,(float)pdraw3D.Y, (float)pdraw3D.Z,idcamera);
+
+		}else{
+			this->get3DPositionX(&myCamB,pdraw3D,pix,5000.0);// 5000 son los 5 metros a los que está la pared.
+			this->add_line(myCamB.position.X, myCamB.position.Y, myCamB.position.Z,(float)pdraw3D.X,(float)pdraw3D.Y, (float)pdraw3D.Z,idcamera);
+
+		}
+	
+	}
+
+
+	void Navegacion::pixel2optical(TPinHoleCamera *cam, HPoint2D *p){
+	
+		float aux;
+		int height;
+
+		height=cam->rows;
+	 	 aux=p->x;
+	 	 p->x=height-1-p->y;
+	 	 p->y=aux; 
+	}
+
+	void Navegacion::get3DPositionX(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, double X = 0.0){
+		HPoint2D p2d;
+		HPoint3D p3d;
+		float x, y, z;
+		float xfinal, yfinal, zfinal;
+
+		x = camera->position.X;
+		y = camera->position.Y;
+		z = camera->position.Z;
+
+		p2d.x = in.x;
+		p2d.y = in.y;
+		p2d.h = in.h;
+
+		this->pixel2optical(camera, &p2d);
+		backproject(&p3d, p2d, *camera);
+
+
+		if((p3d.X-x) == 0.0) {
+			res.H = 0.0;
+			return;
+		}
+
+		xfinal = X;
+
+		//Linear equation (X-x)/(p3d.X-x) = (Y-y)/(p3d.Y-y) = (Z-z)/(p3d.Z-z)
+		yfinal = y + (p3d.Y - y)*(xfinal - x)/(p3d.X-x);	
+		zfinal = z + (p3d.Z - z)*(xfinal - x)/(p3d.X-x);
+
+
+		res.X = xfinal;
+		res.Y = yfinal;
+		res.Z = zfinal;
+		res.H = 1.0;
+
+	}
+
+	void Navegacion::add_line(float x0,float y0, float z0, float x1, float y1, float z1,int color){
+
+
+		if (numlines <MAX_LINES){
+			extra_lines[numlines][0] = x0;
+			extra_lines[numlines][1] = y0;
+			extra_lines[numlines][2] = z0;
+			extra_lines[numlines][3] = 0;
+			extra_lines[numlines][4] = x1;
+			extra_lines[numlines][5] = y1;
+			extra_lines[numlines][6] = z1;
+			extra_lines[numlines][7] = 0;
+			extra_lines[numlines][8] = color;
+			numlines++;
+		}
+		else{
+			printf("error, too many lines in the world\n");
+		}
+	} 
+
+	void Navegacion::drawProjectionLines(){
+
+		for(int i=0;i<numlines;i++) {
+
+			CvPoint3D32f a,b,aa,ba;
+			CvPoint3D32f color;
+			a.x=extra_lines[i][0]/SCALE;
+			a.y=extra_lines[i][1]/SCALE;
+			a.z=extra_lines[i][2]/SCALE;
+			b.x=extra_lines[i][4]/SCALE;
+			b.y=extra_lines[i][5]/SCALE;
+			b.z=extra_lines[i][6]/SCALE;
+
+			if (extra_lines[i][8]==1){color.x = 1.;color.y = 0.;color.z = 0.;}else{color.x = 0.;color.y = 0.;color.z = 1.;}
+			this->pintaSegmento (a, b, color);
+		}
+	}	
+
 } // namespace

@@ -98,6 +98,7 @@ namespace introrob {
 			/*Override default signal handler*/
 			virtual bool on_expose_event(GdkEventExpose* event);
 			virtual bool on_motion_notify(GdkEventMotion* event);
+			virtual	bool on_button_press(GdkEventButton* event);
 			virtual bool on_drawarea_scroll(GdkEventScroll * event);
 
 			bool on_timeout();

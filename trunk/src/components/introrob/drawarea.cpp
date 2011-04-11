@@ -61,6 +61,7 @@ namespace introrob {
 											Gdk::VISIBILITY_NOTIFY_MASK);
 
 		this->signal_motion_notify_event().connect(sigc::mem_fun(this,&DrawArea::on_motion_notify));
+		this->signal_button_press_event().connect(sigc::mem_fun(this,&DrawArea::on_button_press));
 		this->signal_scroll_event().connect(sigc::mem_fun(this,&DrawArea::on_drawarea_scroll));
 
 		/*Call to expose_event*/
@@ -272,7 +273,7 @@ namespace introrob {
 		glEnd();
 		glLineWidth(1.0f);
 
-		this->navega->iteracionGrafica ();
+		this->navega->iteracionGrafica (); // Your graphic code interation is called here
 
 		// Robot Frame of Reference
 		mypioneer.posx=this->robotx/100.;
@@ -382,41 +383,14 @@ namespace introrob {
 		intersectionPoint->Y = A.Y + (t*v.Y);
 	}
 
-	bool DrawArea::on_motion_notify(GdkEventMotion* event) {
-		float desp = 0.01;
+	bool DrawArea::on_button_press (GdkEventButton* event) {
 		float x=event->x;
 		float y=event->y;
 		TPinHoleCamera myActualCamera;
 		HPoint2D myActualPoint2D, boton;
 		HPoint3D cameraPos3D, myActualPoint3D, intersectionPoint;
 
-		/* if left mouse button is toggled */
-		if (event->state & GDK_BUTTON1_MASK) { // aquí además comprobamos punto de pulsación
-			if ((x - old_x) > 0.0) longi -= desp;
-			else if ((x - old_x) < 0.0) longi += desp;
-
-			if ((y - old_y) > 0.0) lati += desp;
-			else if ((y - old_y) < 0.0) lati -= desp;
-
-			this->glcam_pos.X=radius*cosf(lati)*cosf(longi) + this->glcam_foa.X;
-			this->glcam_pos.Y=radius*cosf(lati)*sinf(longi) + this->glcam_foa.Y;
-			this->glcam_pos.Z=radius*sinf(lati) + this->glcam_foa.Z;
-		}
-
-		/* if right mouse button is toggled */
-		if (event->state & GDK_BUTTON3_MASK) {
-			if ((x - old_x) > 0.0) longi -= desp;
-			else if ((x - old_x) < 0.0) longi += desp;
-
-			if ((y - old_y) > 0.0) lati += desp;
-			else if ((y - old_y) < 0.0) lati -= desp;
-
-			this->glcam_foa.X=-radius*cosf(lati)*cosf(longi) + this->glcam_pos.X;
-			this->glcam_foa.Y=-radius*cosf(lati)*sinf(longi) + this->glcam_pos.Y;
-			this->glcam_foa.Z=-radius*sinf(lati) + this->glcam_pos.Z;
-		}
-
-		if (event->state & GDK_BUTTON2_MASK) { // con el botón del centro vamos a coger el destino
+		if (event->button == 2) { // con el botón del centro vamos a coger el destino
 			myActualCamera.position.X = this->glcam_pos.X;
 			myActualCamera.position.Y = this->glcam_pos.Y;
 			myActualCamera.position.Z = this->glcam_pos.Z;
@@ -446,8 +420,41 @@ namespace introrob {
 
 			linePlaneIntersection (myActualPoint3D, cameraPos3D, &intersectionPoint);
 
-			this->destino.x = intersectionPoint.X;
-			this->destino.y = intersectionPoint.Y;
+			this->destino.x = intersectionPoint.X/10.;
+			this->destino.y = intersectionPoint.Y/10.;
+			printf ("%f, %f\n", this->destino.x, this->destino.y);
+		}
+	}
+
+	bool DrawArea::on_motion_notify(GdkEventMotion* event) {
+		float desp = 0.01;
+		float x=event->x;
+		float y=event->y;
+
+		/* if left mouse button is toggled */
+		if (event->state & GDK_BUTTON1_MASK) { // aquí además comprobamos punto de pulsación
+			if ((x - old_x) > 0.0) longi -= desp;
+			else if ((x - old_x) < 0.0) longi += desp;
+
+			if ((y - old_y) > 0.0) lati += desp;
+			else if ((y - old_y) < 0.0) lati -= desp;
+
+			this->glcam_pos.X=radius*cosf(lati)*cosf(longi) + this->glcam_foa.X;
+			this->glcam_pos.Y=radius*cosf(lati)*sinf(longi) + this->glcam_foa.Y;
+			this->glcam_pos.Z=radius*sinf(lati) + this->glcam_foa.Z;
+		}
+
+		/* if right mouse button is toggled */
+		if (event->state & GDK_BUTTON3_MASK) {
+			if ((x - old_x) > 0.0) longi -= desp;
+			else if ((x - old_x) < 0.0) longi += desp;
+
+			if ((y - old_y) > 0.0) lati += desp;
+			else if ((y - old_y) < 0.0) lati -= desp;
+
+			this->glcam_foa.X=-radius*cosf(lati)*cosf(longi) + this->glcam_pos.X;
+			this->glcam_foa.Y=-radius*cosf(lati)*sinf(longi) + this->glcam_pos.Y;
+			this->glcam_foa.Z=-radius*sinf(lati) + this->glcam_pos.Z;
 		}
 
 		old_x=x;
