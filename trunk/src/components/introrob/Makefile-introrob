@@ -11,3 +11,7 @@ LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotIce.la \
 introrob: introrob.o navegacion.o navega.o view.o controller.o drawarea.o pioneeropengl.o camera.o
 	libtool --mode=link g++ -g -O -o introrob introrob.o navegacion.o navega.o view.o controller.o drawarea.o pioneeropengl.o camera.o $(LDADD) $(LDFLAGS)
 
+clean:
+	rm -f *.o introrob
+
+

@@ -16,7 +16,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Author : Julio Vega <julio.vega@urjc.es>
- *
+ *           JoseMaria Cañas <jmplaza@gsyc.es> 
  */
 
 #include "navega.h"
@@ -90,7 +90,7 @@ namespace introrob {
 
 		CvPoint2D32f destino;
 		this->navegacion->cogerDestino (&destino);
-		printf ("myPoint = [%f, %f]\n", destino.x, destino.y);
+		//printf ("myPoint = [%f, %f]\n", destino.x, destino.y);
 
 		// movement command to robot wheels
 		//this->controller->setV(0.); // mm./s.
@@ -103,37 +103,38 @@ namespace introrob {
 
 	void Navega::iteracionGrafica () {
 		/* TODO: ADD YOUR GRAPHIC CODE HERE */
-/*
-		CvPoint3D32f aa;
+	        CvPoint3D32f aa,bb;
+		CvPoint2D32f destino;
 		CvPoint3D32f a,b;
 		CvPoint3D32f c,d;
 		CvPoint3D32f color;
 
 		// ejemplo de segmento en posición absoluta
-		a.x = 0.;	a.y = 0.;	a.z = 5.; // en mm.
-
-		b.x = 50.; b.y = 50.;	b.z = 7.; // en mm.
-
+		//a.x = 0.;	a.y = 0.;	a.z = 0.; // en mm.	
+		/*
+		this->navegacion->cogerDestino (&destino);
+		bb.x=destino.x;
+		bb.y=destino.y;
+		bb.z=0.;
+		this->navegacion->cogerPosicion (&aa);
+		aa.z=0.;
 		color.x = 1.; // Red
 		color.y = 0.; // Green
 		color.z = 0.; // Blue
-
-		this->navegacion->pintaSegmento (a, b, color); // ROJO
+		this->navegacion->pintaSegmento (aa, bb, color); // ROJO
+		*/
 
 		// ejemplo de segmento en posición relativa al robot
-		aa.x=50.; aa.y=50.;
-		this->navegacion->relativas2absolutas(aa,&a);
+		/*
 		aa.x=0.; aa.y=0.;
+		this->navegacion->relativas2absolutas(aa,&a);
+		aa.x = 1000.; aa.y = -2000.;  // en mm.	     		
 		this->navegacion->relativas2absolutas(aa,&b);
-
 		color.x = 0.; // Red
 		color.y = 0.; // Green
 		color.z = 1.; // Blue
-
 		this->navegacion->pintaSegmento (a, b, color); // AZUL
-*/
-
-
+		*/
 		this->navegacion->drawProjectionLines();
 
 	}

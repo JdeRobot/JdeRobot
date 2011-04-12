@@ -27,6 +27,9 @@ namespace introrob {
 	}
 
 	int Navegacion::pintaSegmento (CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color) {
+	  /* OJO mundo de coordenadas OpenGL está en decímetros, por compatibilidad con la plantilla OpenGL 
+	     del robotPioneer. El factor SCALE marca la relación entre las coordenadas en milímetros de a,b
+	     y los homólogos en el mundo OpenGL */
 		glColor3f(color.x, color.y, color.z);
 		glLineWidth(2.0f);
 		glBegin(GL_LINES);
@@ -38,20 +41,34 @@ namespace introrob {
 
 	int Navegacion::absolutas2relativas(CvPoint3D32f in, CvPoint3D32f *out)	{
 		if (out!=NULL) {
-			(*out).x = in.x*cos(this->robottheta*DEGTORAD) - in.y*sin(this->robottheta*DEGTORAD) +
-				this->robotx*cos(this->robottheta*DEGTORAD) + this->roboty*sin(this->robottheta*DEGTORAD);
-			(*out).y = in.y*cos(this->robottheta*DEGTORAD) + in.x*sin(this->robottheta*DEGTORAD) +
-				this->roboty*sin(this->robottheta*DEGTORAD) + this->roboty*cos(this->robottheta*DEGTORAD);
-			return 0;
+		  CvPoint3D32f myPoint;
+		  
+		  this->controller->getPosition(&myPoint);
+		  this->robotx = myPoint.x;
+		  this->roboty = myPoint.y;
+		  this->robottheta = myPoint.z;
+		  
+		  (*out).x = in.x*cos(this->robottheta*DEGTORAD) + in.y*sin(this->robottheta*DEGTORAD) -
+		    this->robotx*cos(this->robottheta*DEGTORAD) - this->roboty*sin(this->robottheta*DEGTORAD);
+		  (*out).y = in.y*cos(this->robottheta*DEGTORAD) - in.x*sin(this->robottheta*DEGTORAD) -
+		    this->roboty*cos(this->robottheta*DEGTORAD) + this->robotx*sin(this->robottheta*DEGTORAD);
+		  return 0;
 		}
 		return 1;
 	}
 
 	int Navegacion::relativas2absolutas(CvPoint3D32f in, CvPoint3D32f *out)	{
 		if (out!=NULL){
-			(*out).x = in.x*cos(this->robottheta*DEGTORAD) - in.y*sin(this->robottheta*DEGTORAD) + this->robotx;
-			(*out).y = in.y*cos(this->robottheta*DEGTORAD) + in.x*sin(this->robottheta*DEGTORAD) + this->roboty;
-			return 0;
+		  CvPoint3D32f myPoint;
+		  
+		  this->controller->getPosition(&myPoint);
+		  this->robotx = myPoint.x;
+		  this->roboty = myPoint.y;
+		  this->robottheta = myPoint.z;
+		  
+		  (*out).x = in.x*cos(this->robottheta*DEGTORAD) - in.y*sin(this->robottheta*DEGTORAD) + this->robotx;
+		  (*out).y = in.y*cos(this->robottheta*DEGTORAD) + in.x*sin(this->robottheta*DEGTORAD) + this->roboty;
+		  return 0;
 		}
 		return 1;
 	}

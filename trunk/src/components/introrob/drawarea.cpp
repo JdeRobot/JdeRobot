@@ -136,11 +136,11 @@ namespace introrob {
 	}
 
 	void DrawArea::setToPioneerCamera () {
-		this->glcam_pos.X = ((10000.)*(cos(this->robottheta)) - (0.*sin(this->robottheta)) + this->robotx)/100.;
-		this->glcam_pos.Y = ((10000.)*(-sin(this->robottheta)) + (0.+cos(this->robottheta)) + this->roboty)/100.;
+		this->glcam_pos.X = ((10000.)*(cos(this->robottheta)) - (0.*sin(this->robottheta)) + this->robotx)/SCALE;
+		this->glcam_pos.Y = ((10000.)*(-sin(this->robottheta)) + (0.+cos(this->robottheta)) + this->roboty)/SCALE;
 		this->glcam_pos.Z = 150.;
-		this->glcam_foa.X = this->robotx/100.;
-		this->glcam_foa.Y = this->roboty/100.;
+		this->glcam_foa.X = this->robotx/SCALE;
+		this->glcam_foa.Y = this->roboty/SCALE;
 		this->glcam_foa.Z = 0.;
 	}
 
@@ -363,24 +363,16 @@ namespace introrob {
 		HPoint3D v;	// Line director vector: it the same to take A or B as origin or destination extrem...
 		float t;
 
-		A.X = A.X;
-		A.Y = A.Y;
-		A.Z = A.Z;
-
-		B.X = B.X;
-		B.Y = B.Y;
-		B.Z = B.Z;
-
 		v.X = (B.X - A.X);
 		v.Y = (B.Y - A.Y);
 		v.Z = (B.Z - A.Z);
 
-		// We'll calculate the groun intersection (Z = 0) on our robot system. Parametric equations:
-		intersectionPoint->Z = 0; // intersectionPoint->Z = A.Z + t*v.Z => t = (-A.Z / v.Z)
+		// We'll calculate the ground intersection (Z = 0) on our robot system. Parametric equations:
+		// intersectionPoint->Z = A.Z + t*v.Z => t = (-A.Z / v.Z)
 		t = (-A.Z) / (v.Z);
-
 		intersectionPoint->X = A.X + (t*v.X);
 		intersectionPoint->Y = A.Y + (t*v.Y);
+		intersectionPoint->Z = A.Z + (t*v.Z); 
 	}
 
 	bool DrawArea::on_button_press (GdkEventButton* event) {
@@ -397,17 +389,21 @@ namespace introrob {
 			myActualCamera.foa.X = this->glcam_foa.X;
 			myActualCamera.foa.Y = this->glcam_foa.Y;
 			myActualCamera.foa.Z = this->glcam_foa.Z;
-		  myActualCamera.v0=497.; // 994/2
-		  myActualCamera.u0=225.; // 450/2
-		  myActualCamera.fdistx = 405.399994;
-		  myActualCamera.fdisty = 405.399994;
-		  update_camera_matrix(&myActualCamera);
+			myActualCamera.roll = 0.;
+		        myActualCamera.skew = 0.;
+			myActualCamera.rows = 450;
+			myActualCamera.columns = 994;
+			myActualCamera.v0=497.; // 994/2
+			myActualCamera.u0=225.; // 450/2
+			myActualCamera.fdistx = 483.; // 405.399994;
+			myActualCamera.fdisty = 483.; // 405.399994;
+			update_camera_matrix(&myActualCamera);
 
-			myActualPoint2D.x=450.-1.-event->y; // Modificamos la asignación de valores del pixel para el backproject
+			// Modificamos la asignación de valores del pixel para el backproject,
+			// sistema de referencia óptico
+			myActualPoint2D.x=450.-1.-event->y; 
 			myActualPoint2D.y=event->x;
 			myActualPoint2D.h = 1.;
-
-		  myActualPoint3D.X=1.; myActualPoint3D.Y=1.; myActualPoint3D.Z=1.; myActualPoint3D.H=1.;
 
 			// Proyectamos tal punto en 3D sobre el Plano Imagen de nuestra cámara virtual
 			backproject(&myActualPoint3D, myActualPoint2D, myActualCamera);
@@ -419,10 +415,8 @@ namespace introrob {
 			cameraPos3D.H = 1;
 
 			linePlaneIntersection (myActualPoint3D, cameraPos3D, &intersectionPoint);
-
-			this->destino.x = intersectionPoint.X/10.;
-			this->destino.y = intersectionPoint.Y/10.;
-			printf ("%f, %f\n", this->destino.x, this->destino.y);
+			this->destino.x = intersectionPoint.X*SCALE;
+			this->destino.y = intersectionPoint.Y*SCALE;		
 		}
 	}
 
