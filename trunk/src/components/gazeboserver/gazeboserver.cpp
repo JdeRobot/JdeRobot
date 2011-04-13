@@ -115,6 +115,10 @@ namespace gazeboserver {
 			return cameraDescription;
 		}
 
+		virtual Ice::Int setCameraDescription(const jderobot::CameraDescriptionPtr &description, const Ice::Current& c) {
+			return 0;
+		}
+
 		virtual void getImageData_async(const jderobot::AMD_ImageProvider_getImageDataPtr& cb,const Ice::Current& c){
 			replyTask->pushJob(cb);
 		}
@@ -487,6 +491,16 @@ namespace gazeboserver {
 					exit (-1);
 				}
 
+				gazeboEncodersSim = new gazebo::SimulationIface();
+
+				/// Open the Simulation Interface
+				try {
+					gazeboEncodersSim->Open(gazeboclient, "default");
+				}	catch (std::string e)	{
+					std::cout << "Gazebo error: Unable to connect to the sim interface\n" << e << "\n";
+					exit (-1);
+				}
+
 				gazeboPosition = new gazebo::PositionIface ();
 				std::string myRobot = prop->getProperty(context.tag()+".RobotName");
 				std::string myIface = "pioneer2dx_" + myRobot + "::position_iface_0";
@@ -512,24 +526,28 @@ namespace gazeboserver {
 				if(!gazeboPosition){
 					printf("Gazebo Position model not opened\n");
 				}
-				gazeboPositionData = gazeboPosition->data;
+
+				gazebo::Pose myPose;
+				gazeboEncodersSim->GetPose3d("pioneer2dx_robot1", myPose);
+
 				float robotx, roboty, robottheta;
 				gazeboPosition->Lock(1);
 				encodersData->robotx =
-				(gazeboPositionData->pose.pos.x) * 1000 * (float) cos (DEGTORAD * correcting_theta) -
-				(gazeboPositionData->pose.pos.y) * 1000 * (float) sin (DEGTORAD * correcting_theta) +
+				(myPose.pos.x) * 1000 * (float) cos (DEGTORAD * correcting_theta) -
+				(myPose.pos.y) * 1000 * (float) sin (DEGTORAD * correcting_theta) +
 				correcting_x;
 				encodersData->roboty =
-				(gazeboPositionData->pose.pos.y) * 1000 * (float) cos (DEGTORAD * correcting_theta) +
-				(gazeboPositionData->pose.pos.x) * 1000 * (float) sin (DEGTORAD * correcting_theta) +
+				(myPose.pos.y) * 1000 * (float) cos (DEGTORAD * correcting_theta) +
+				(myPose.pos.x) * 1000 * (float) sin (DEGTORAD * correcting_theta) +
 				correcting_y;
-				encodersData->robottheta = (gazeboPositionData->pose.yaw * RADTODEG) + correcting_theta;
+				encodersData->robottheta = (myPose.yaw * RADTODEG) + correcting_theta;
 				if (encodersData->robottheta <= 0) encodersData->robottheta = encodersData->robottheta + 360;
 				else if (encodersData->robottheta > 360) encodersData->robottheta = encodersData->robottheta - 360;
 				gazeboPosition->Unlock();
 
-				encodersData->robotcos=cos(gazeboPositionData->pose.yaw);
-				encodersData->robotsin=sin(gazeboPositionData->pose.yaw);
+				encodersData->robotcos=cos(myPose.yaw);
+				encodersData->robotsin=sin(myPose.yaw);
+
 				return encodersData;
 			};
 
@@ -540,12 +558,12 @@ namespace gazeboserver {
 			gazebo::Client *gazeboclient;
 			int gazeboserver_id;
 			int gazeboclient_id;
-			gazebo::PositionIface * gazeboPosition;
-			gazebo::PositionData * gazeboPositionData;
+			gazebo::PositionIface *gazeboPosition;
 			/* Variables put to 0.0 and no change during the execution */
 			float correcting_x; /* mm */
 			float correcting_y; /* mm */
 			float correcting_theta; /* deg */
+			gazebo::SimulationIface *gazeboEncodersSim;
 	};
 
 	//PTMOTORS
