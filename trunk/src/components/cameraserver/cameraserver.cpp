@@ -149,6 +149,10 @@ namespace cameraserver{
       return cameraDescription;
     }
 
+    virtual Ice::Int setCameraDescription(const jderobot::CameraDescriptionPtr &description, const Ice::Current& c){
+      return 0;
+    }
+
     virtual void getImageData_async(const jderobot::AMD_ImageProvider_getImageDataPtr& cb,
 			       const Ice::Current& c){
       replyTask->pushJob(cb);

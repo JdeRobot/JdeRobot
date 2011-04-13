@@ -32,7 +32,7 @@ ifneq "$(wildcard /usr/share/misc/config.guess)" ""
 	cp -f /usr/share/misc/config.guess config.guess
 endif
 	autoreconf -vfi
-	./configure --prefix=/usr/local --with-gazebo=/usr/local --with-player=/usr/local --disable-component-recordingserver --disable-component-opencvdemo
+	./configure --prefix=/usr/local --with-gazebo=/usr/local --with-player=/usr/local --disable-component-recordingserver
 
 #CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,defs"
 

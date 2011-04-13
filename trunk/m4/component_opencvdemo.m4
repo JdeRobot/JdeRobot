@@ -7,7 +7,6 @@ AC_ARG_ENABLE([component-opencvdemo],
     [],
     [enable_component_opencvdemo=yes])
 
-AM_CONDITIONAL([ENABLE_COMPONENT_OPENCVDEMO],[false])
 if test "x$enable_component_opencvdemo" != xno; then
     AC_MSG_NOTICE([**** Checking opencvdemo component requirements:])
     ERRORS=""

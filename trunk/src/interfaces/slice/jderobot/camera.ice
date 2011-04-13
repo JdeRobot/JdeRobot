@@ -35,6 +35,18 @@ module jderobot{
     string name;
     string shortDescription;
     string streamingUri;
+    float fdistx;
+    float fdisty;
+    float u0;
+    float v0;
+    float skew;
+    float posx;
+    float posy;
+    float posz;
+    float foax;
+    float foay;
+    float foaz;
+    float roll;
   };
     
   /**
@@ -43,6 +55,7 @@ module jderobot{
   interface Camera extends ImageProvider
   {
     idempotent CameraDescription getCameraDescription();
+    int setCameraDescription(CameraDescription description);
     
     string startCameraStreaming();
     
