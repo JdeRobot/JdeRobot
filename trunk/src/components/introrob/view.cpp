@@ -22,8 +22,6 @@
 #include "view.h"
 
 namespace introrob {
-
-
 	View::View (Controller* controller, Navegacion* navegacion): gtkmain(0,0) {
 		this->controller = controller;
 		this->navegacion = navegacion;
@@ -59,6 +57,7 @@ namespace introrob {
     refXml->get_widget("yourCodeButton", yourCodeButton);
     refXml->get_widget("stopCodeButton", stopCodeButton);
     refXml->get_widget("exitButton", exitButton);
+    refXml->get_widget("deleteLinesButton", deleteLinesButton);
 
 		// Imágenes de la cámara
     refXml->get_widget("image1",gtk_image1);
@@ -73,8 +72,7 @@ namespace introrob {
     eventbox_right->add_events(Gdk::BUTTON_PRESS_MASK);
     eventbox_right->signal_button_press_event().connect(sigc::mem_fun(this, &View::on_right_clicked));
 	
-	
-	// Mundo OpenGL
+		// Mundo OpenGL
     refXml->get_widget_derived("world",this->world);
 		this->world->navega = this->navegacion->navega;
 
@@ -91,6 +89,7 @@ namespace introrob {
 		yourCodeButton->signal_clicked().connect(sigc::mem_fun(this,&View::yourCodeButton_clicked));
 		stopCodeButton->signal_clicked().connect(sigc::mem_fun(this,&View::stopCodeButton_clicked));
 		exitButton->signal_clicked().connect(sigc::mem_fun(this,&View::exitButton_clicked));
+		deleteLinesButton->signal_clicked().connect(sigc::mem_fun(this,&View::deleteLinesButton_clicked));
 
 		/*Show window. Note: Set window visibility to false in Glade, otherwise opengl won't work*/
 		mainwindow->show();
@@ -272,9 +271,11 @@ namespace introrob {
 		exit (0);
 	}
 
+	void View::deleteLinesButton_clicked() {
+		this->navegacion->resetLines ();
+	}
 
 	bool View::on_right_clicked(GdkEventButton * event){
-
 		gint x,y;
 		gdk_window_at_pointer(&x,&y);
 
@@ -283,12 +284,10 @@ namespace introrob {
 		pixB.h=1.0;
 		//printf("click en camera derecha, punto %f,%f\n",pixB.x,pixB.y);
 		this->navegacion->calculate_projection_line(pixB,2);
-	return true;
+		return true;
 	}
 
-
 	bool View::on_left_clicked(GdkEventButton * event){
-		
 		gint x,y;
 		gdk_window_at_pointer(&x,&y);
 
@@ -297,8 +296,7 @@ namespace introrob {
 		pixA.h=1.0;
 		//printf("click en camera izquierda, punto %f,%f\n",pixA.x,pixA.y);
 		this->navegacion->calculate_projection_line(pixA,1);
-
-	return true;
+		return true;
 	}
 
 

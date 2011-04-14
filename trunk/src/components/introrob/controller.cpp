@@ -173,6 +173,22 @@ namespace introrob {
 		//pthread_mutex_unlock(&this->laserMutex); // unlock
 	}
 
+	float Controller::getPan1 () {
+		this->pted1->panAngle;
+	}
+
+	float Controller::getTilt1 () {
+		this->pted1->tiltAngle;
+	}
+
+	float Controller::getPan2 () {
+		this->pted1->panAngle;
+	}
+
+	float Controller::getTilt2 () {
+		this->pted2->tiltAngle;
+	}
+
 	void Controller::setEncoders () {
 		this->ed = this->eprx->getEncodersData(); // cogemos informacion de los encoders
 	}
@@ -181,8 +197,12 @@ namespace introrob {
 		this->ld = this->lprx->getLaserData(); // cogemos informacion de los lasers
 	}
 
-	void Controller::setPTEncoders1() {}
-	void Controller::setPTEncoders2() {}
+	void Controller::setPTEncoders1() {
+		//this->pted1 = this->pteprx1->getPTEncodersData();
+	}
+	void Controller::setPTEncoders2() {
+		//this->pted2 = this->pteprx2->getPTEncodersData();
+	}
 
 	void Controller::update () {
 		this->setEncoders(); // cogemos información de las cámaras

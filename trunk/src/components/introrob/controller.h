@@ -75,6 +75,11 @@ namespace introrob {
 			longitude: posición pan (deg.) a comandar al cuello mecánico */
 			void setPT2 (float latitude, float longitude);
 
+			float getPan1 ();
+			float getPan2 ();
+			float getTilt1 ();
+			float getTilt2 ();
+
 			colorspaces::Image* image1;
 			colorspaces::Image* image2;
 

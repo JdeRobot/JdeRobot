@@ -99,11 +99,29 @@ namespace introrob {
 		// example of pantilt movement:
 		this->controller->setPT1 (-15.,0.);
 		this->controller->setPT2 (-15.,0.);
+		this->navegacion->updatePT1 (0., -15.);
+		this->navegacion->updatePT2 (0., -15.);
+
+		// example: how to get a projection line from Pioneer cameras
+		this->navegacion->updateCamerasPos(); // actualizamos la posición de las cámaras en el mundo
+/*		HPoint2D pixelImagen;
+		pixelImagen.x=160.;
+		pixelImagen.y=120.;
+		pixelImagen.h=1.0;
+
+		TPinHoleCamera *myCam;
+		HPoint3D pixelImagen3D;
+		this->navegacion->getMyLeftCam (&myCam);
+
+		this->navegacion->calculate_projection_line(pixelImagen,1);
+		this->navegacion->get3DPositionZ(myCam,pixelImagen3D,pixelImagen,0.);// 5000 son los 5 metros a los que está la pared.
+		this->navegacion->add_line(myCam->position.X, myCam->position.Y, myCam->position.Z,(float)pixelImagen3D.X,(float)pixelImagen3D.Y, (float)pixelImagen3D.Z,1);
+*/
 	}
 
 	void Navega::iteracionGrafica () {
 		/* TODO: ADD YOUR GRAPHIC CODE HERE */
-	        CvPoint3D32f aa,bb;
+		CvPoint3D32f aa,bb;
 		CvPoint2D32f destino;
 		CvPoint3D32f a,b;
 		CvPoint3D32f c,d;
@@ -135,8 +153,9 @@ namespace introrob {
 		color.z = 1.; // Blue
 		this->navegacion->pintaSegmento (a, b, color); // AZUL
 		*/
-		this->navegacion->drawProjectionLines();
 
+		// example: drawing projection lines
+		this->navegacion->drawProjectionLines();
 	}
 
 	Navega::Navega (Controller* controller, Navegacion* navegacion) {

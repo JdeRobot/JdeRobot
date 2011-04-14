@@ -280,6 +280,20 @@
             <property name="y">454</property>
           </packing>
         </child>
+        <child>
+          <widget class="GtkButton" id="deleteLinesButton">
+            <property name="label" translatable="yes">Delete Lines</property>
+            <property name="width_request">95</property>
+            <property name="height_request">44</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </widget>
+          <packing>
+            <property name="x">118</property>
+            <property name="y">584</property>
+          </packing>
+        </child>
       </widget>
     </child>
   </widget>

@@ -98,6 +98,7 @@ namespace introrob {
 			void yourCodeButton_clicked();
 			void stopCodeButton_clicked();
 			void exitButton_clicked();
+			void deleteLinesButton_clicked();
 
 			virtual bool on_right_clicked(GdkEventButton * event);
 			virtual bool on_left_clicked(GdkEventButton * event);
@@ -118,6 +119,7 @@ namespace introrob {
 			Gtk::Button *yourCodeButton;
 			Gtk::Button *stopCodeButton;
 			Gtk::Button *exitButton;
+			Gtk::Button *deleteLinesButton;
 			Gtk::Image *gtk_image1;
 			Gtk::Image *gtk_image2;
 			Controller* controller;

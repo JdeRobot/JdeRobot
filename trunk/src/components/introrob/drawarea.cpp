@@ -80,7 +80,6 @@ namespace introrob {
 		this->glcam_foa.Y=0.;
 		this->glcam_foa.Z=0.;
 
-    this->scale = 0.1;
     this->radius = 20.0;
     this->lati = 0.2;
     this->longi = -1.0;
@@ -165,6 +164,7 @@ namespace introrob {
 		glLightModelfv (GL_LIGHT_MODEL_LOCAL_VIEWER, local_view);
 		glEnable (GL_LIGHT0);
 		// glEnable (GL_LIGHTING);
+    glEnable(GL_POINT_SMOOTH);
 
 		glEnable(GL_TEXTURE_2D);     // Enable Texture Mapping
 		glEnable (GL_AUTO_NORMAL);
@@ -390,13 +390,13 @@ namespace introrob {
 			myActualCamera.foa.Y = this->glcam_foa.Y;
 			myActualCamera.foa.Z = this->glcam_foa.Z;
 			myActualCamera.roll = 0.;
-		        myActualCamera.skew = 0.;
+			myActualCamera.skew = 0.;
 			myActualCamera.rows = 450;
 			myActualCamera.columns = 994;
 			myActualCamera.v0=497.; // 994/2
 			myActualCamera.u0=225.; // 450/2
-			myActualCamera.fdistx = 483.; // 405.399994;
-			myActualCamera.fdisty = 483.; // 405.399994;
+			myActualCamera.fdistx = 483.;
+			myActualCamera.fdisty = 483.;
 			update_camera_matrix(&myActualCamera);
 
 			// Modificamos la asignación de valores del pixel para el backproject,

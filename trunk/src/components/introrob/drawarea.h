@@ -113,7 +113,7 @@ namespace introrob {
 			HPoint3D glcam_foa;
 			HPoint3D cam_pos;
 
-		  float scale;
+		  //float scale;
 		  float radius;
 		  float lati;
 		  float longi;
