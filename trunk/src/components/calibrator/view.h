@@ -17,7 +17,7 @@
  *
  *   Authors : Eduardo Perdices <eperdices@gsyc.es>,
  *             Jose María Cañas Plaza <jmplaza@gsyc.es>
- *
+ *             Alejandro Hernández Cordero <ahcorde@gmail.com>
  */
 
 #ifndef GIRAFFECLIENT_VIEW_H
@@ -31,6 +31,7 @@
 #include <IceUtil/Time.h>
 #include "controller.h"
 #include <colorspaces/colorspacesmm.h>
+#include <progeo/progeo.h>
 
 namespace calibrator {
   class View {
@@ -48,6 +49,9 @@ namespace calibrator {
   private:
 
 		void button_center_clicked();
+		void button_save_clicked();
+		void button_KRT_clicked();
+		void button_Load_clicked();
 		void pos_x_changed();
 		void pos_y_changed();
 		void pos_z_changed();
@@ -60,24 +64,31 @@ namespace calibrator {
 		void v0_changed();
 		void roll_changed();
 
-    Glib::RefPtr<Gnome::Glade::Xml> refXml;
-    Gtk::Main gtkmain;
-    Gtk::Window* mainwindow;
- 		Gtk::VScale *vscale_pos_x;
- 		Gtk::VScale *vscale_pos_y;
- 		Gtk::VScale *vscale_pos_z;
- 		Gtk::VScale *vscale_foa_x;
- 		Gtk::VScale *vscale_foa_y;
- 		Gtk::VScale *vscale_foa_z;
- 		Gtk::VScale *vscale_fx;
- 		Gtk::VScale *vscale_fy;
- 		Gtk::VScale *vscale_u0;
- 		Gtk::VScale *vscale_v0;
- 		Gtk::VScale *vscale_roll;
-		Gtk::Image *gtk_image;
-		Gtk::Button* button_center;
-   
-		Controller * controller;
+        Glib::RefPtr<Gnome::Glade::Xml> refXml;
+        Gtk::Main gtkmain;
+        Gtk::Window* mainwindow;
+        Gtk::VScale *vscale_pos_x;
+        Gtk::VScale *vscale_pos_y;
+        Gtk::VScale *vscale_pos_z;
+        Gtk::VScale *vscale_foa_x;
+        Gtk::VScale *vscale_foa_y;
+        Gtk::VScale *vscale_foa_z;
+        Gtk::VScale *vscale_fx;
+        Gtk::VScale *vscale_fy;
+        Gtk::VScale *vscale_u0;
+        Gtk::VScale *vscale_v0;
+        Gtk::VScale *vscale_roll;
+        Gtk::Image *gtk_image;
+        Gtk::Button* button_center;
+        Gtk::Button* button_save;
+        Gtk::Button* button_Load;
+
+        Controller * controller;
+        
+        Gtk::Window* window;
+        Gtk::Label labelK[13];
+        Gtk::Label labelRT[13];
+        Gtk::Table m_table;
   };
 }//namespace
 

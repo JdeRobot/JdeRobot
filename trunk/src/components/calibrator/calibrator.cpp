@@ -16,8 +16,8 @@
 *  along with this program.  If not, see http://www.gnu.org/licenses/. 
 *
 *  Authors : Sara Marugán Alonso <smarugan@gsyc.es>,
- *           Eduardo Perdices <eperdices@gsyc.es>
-*
+*            Eduardo Perdices <eperdices@gsyc.es>
+*            Alejandro Hernández Cordero <ahcorde@gmail.com>
 */
 
 #include <iostream>
@@ -47,7 +47,7 @@ int main(int argc, char** argv){
 
 		Ice::PropertiesPtr prop = ic->getProperties();
 		std::string worldconf = prop->getProperty("Calibrator.World.File");
-		std::string camOutconf = prop->getProperty("Calibrator.Camera.FileOut");
+		//std::string camOutconf = prop->getProperty("Calibrator.Camera.FileOut");
 
 		/*Create Controller and View*/
 		controller = new calibrator::Controller(prop);

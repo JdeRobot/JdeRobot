@@ -17,7 +17,7 @@
  *
  *   Authors : Eduardo Perdices <eperdices@gsyc.es>,
  *             Jose María Cañas Plaza <jmplaza@gsyc.es>
- *
+ *             Alejandro Hernández Cordero <ahcorde@gmail.com>
  */
 
 #include "controller.h"
@@ -28,7 +28,7 @@ namespace calibrator {
 		this->gladepath = std::string("./calibrator.glade");
 
 		this->world = prop->getProperty("Calibrator.World.File");
-		this->camOut = prop->getProperty("Calibrator.Camera.FileOut");
+		//this->camOut = prop->getProperty("Calibrator.Camera.FileOut");
 
 		this->drawCenter = false;
 
@@ -126,6 +126,10 @@ namespace calibrator {
 	Controller::getRoll() {
 		return this->camera.roll*180.0/CALIBRATION_PI;	
 	}
+	
+	TPinHoleCamera Controller::getCam(){
+	    return camera;
+	}
 
 	void
 	Controller::changeDrawCenter() {
@@ -182,6 +186,10 @@ namespace calibrator {
 		/* for the undo operation be ready from the very beginning */
 		/*save_cam(cameraOUTfile);*/ 
 
+	}
+	
+	void Controller::resetLines(){
+        this->lines.clear();	
 	}
 
 	void
@@ -360,6 +368,43 @@ namespace calibrator {
 			return 1;
 		}
 
+	}
+	
+	int Controller::saveParameters(const char* fileName){
+	    FILE* fp;
+        fp = fopen (fileName , "w");
+        if (fp == NULL) 
+            return -1;
+        else{
+            fprintf ( fp, "Calibrator.Camera.Proxy=cameraB:tcp -h 0.0.0.0 -p 9999\n" );
+            fprintf ( fp, "Calibrator.Camera.FileOut=./config-example/cam-out\n");
+            fprintf ( fp, "Calibrator.World.File=./config-example/calib-world\n");
+            
+            fprintf ( fp, "\n#Extrinsics, position\n");
+            fprintf ( fp, "Calibrator.Config.Position.X=%lf\n", this->camera.position.X);
+            fprintf ( fp, "Calibrator.Config.Position.Y=%lf\n", this->camera.position.Y );
+            fprintf ( fp, "Calibrator.Config.Position.Z=%lf\n", this->camera.position.Z );
+            fprintf ( fp, "Calibrator.Config.Position.H=%lf\n", this->camera.position.H );
+            
+            fprintf ( fp, "\n#Extrinsics, orientation\n");
+            fprintf ( fp, "Calibrator.Config.FOAPosition.X=%lf\n", this->camera.foa.X );
+            fprintf ( fp, "Calibrator.Config.FOAPosition.Y=%lf\n", this->camera.foa.Y );
+            fprintf ( fp, "Calibrator.Config.FOAPosition.Z=%lf\n", this->camera.foa.Z );
+            fprintf ( fp, "Calibrator.Config.FOAPosition.H=%lf\n", this->camera.foa.H );
+            
+            fprintf ( fp, "\n#Intrinsics\n");
+            fprintf ( fp, "Calibrator.Config.Fx=%lf\n",   this->camera.fdistx);
+            fprintf ( fp, "Calibrator.Config.Fy=%lf\n",   this->camera.fdisty);
+            fprintf ( fp, "Calibrator.Config.Skew=%lf\n", this->camera.skew);
+            fprintf ( fp, "Calibrator.Config.U0=%lf\n",   this->camera.u0 );
+            fprintf ( fp, "Calibrator.Config.V0=%lf\n",   this->camera.v0 );
+            fprintf ( fp, "Calibrator.Config.Columns=%d\n", this->camera.columns);
+            fprintf ( fp, "Calibrator.Config.Rows=%d\n", this->camera.rows);
+            fprintf ( fp, "Calibrator.Config.Roll=%lf\n", this->camera.roll);        
+        }
+        fclose(fp);
+            
+	    return 1;
 	}
 
 	int

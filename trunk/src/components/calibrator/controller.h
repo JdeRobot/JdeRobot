@@ -17,7 +17,7 @@
  *
  *   Authors : Eduardo Perdices <eperdices@gsyc.es>,
  *             Jose María Cañas Plaza <jmplaza@gsyc.es>
- *
+ *            Alejandro Hernández Cordero <ahcorde@gmail.com>
  */
 
 #ifndef GIRAFFECLIENT_CONTROLLER_H
@@ -59,6 +59,7 @@ namespace calibrator {
 		float getU0();
 		float getV0();
 		float getRoll();
+		TPinHoleCamera getCam();
 
 		void setPos(float x, float y, float z);
 		void setFoa(float x, float y, float z);
@@ -68,14 +69,15 @@ namespace calibrator {
 		void setV0(float value);	
 		void setRoll(float value);
 		void changeDrawCenter();
+		int saveParameters(const char* fileName);
+		int load_world();
+		int load_world_line(FILE *myfile);
+		void resetLines();
 
   private:
 
 		void init(Ice::PropertiesPtr prop);
-		int load_world_line(FILE *myfile);
 		int load_camera_config(Ice::PropertyDict pd);
-		int load_world();
-		
 		void drawLine(IplImage * src, HPoint3D pini, HPoint3D pend);
 
 		std::string gladepath;

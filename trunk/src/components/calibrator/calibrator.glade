@@ -147,7 +147,7 @@
                               <widget class="GtkTable" id="table7">
                                 <property name="visible">True</property>
                                 <property name="n_rows">2</property>
-                                <property name="n_columns">3</property>
+                                <property name="n_columns">4</property>
                                 <child>
                                   <widget class="GtkLabel" id="label1">
                                     <property name="visible">True</property>
@@ -224,6 +224,33 @@
                                     <property name="bottom_attach">2</property>
                                   </packing>
                                 </child>
+                                <child>
+                                  <widget class="GtkLabel" id="label8">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">Roll</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="left_attach">3</property>
+                                    <property name="right_attach">4</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <widget class="GtkVScale" id="roll">
+                                    <property name="width_request">50</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="adjustment">0 -180 180 0 0 0</property>
+                                    <property name="inverted">True</property>
+                                    <property name="digits">2</property>
+                                    <property name="value_pos">bottom</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="left_attach">3</property>
+                                    <property name="right_attach">4</property>
+                                    <property name="top_attach">1</property>
+                                    <property name="bottom_attach">2</property>
+                                  </packing>
+                                </child>
                               </widget>
                             </child>
                           </widget>
@@ -257,7 +284,7 @@
                               <widget class="GtkTable" id="table8">
                                 <property name="visible">True</property>
                                 <property name="n_rows">2</property>
-                                <property name="n_columns">5</property>
+                                <property name="n_columns">4</property>
                                 <child>
                                   <widget class="GtkLabel" id="label4">
                                     <property name="visible">True</property>
@@ -292,16 +319,6 @@
                                   <packing>
                                     <property name="left_attach">3</property>
                                     <property name="right_attach">4</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <widget class="GtkLabel" id="label8">
-                                    <property name="visible">True</property>
-                                    <property name="label" translatable="yes">Roll</property>
-                                  </widget>
-                                  <packing>
-                                    <property name="left_attach">4</property>
-                                    <property name="right_attach">5</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -369,23 +386,6 @@
                                     <property name="bottom_attach">2</property>
                                   </packing>
                                 </child>
-                                <child>
-                                  <widget class="GtkVScale" id="roll">
-                                    <property name="width_request">50</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="adjustment">0 -180 180 0 0 0</property>
-                                    <property name="inverted">True</property>
-                                    <property name="digits">2</property>
-                                    <property name="value_pos">bottom</property>
-                                  </widget>
-                                  <packing>
-                                    <property name="left_attach">4</property>
-                                    <property name="right_attach">5</property>
-                                    <property name="top_attach">1</property>
-                                    <property name="bottom_attach">2</property>
-                                  </packing>
-                                </child>
                               </widget>
                             </child>
                           </widget>
@@ -415,6 +415,7 @@
                 <child>
                   <widget class="GtkVBox" id="vbox3">
                     <property name="visible">True</property>
+                    <property name="spacing">1</property>
                     <child>
                       <widget class="GtkImage" id="image">
                         <property name="visible">True</property>
@@ -435,6 +436,32 @@
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkButton" id="button_save">
+                        <property name="label" translatable="yes">Save parameters</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkButton" id="button_load">
+                        <property name="label" translatable="yes">Load World</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                   </widget>
