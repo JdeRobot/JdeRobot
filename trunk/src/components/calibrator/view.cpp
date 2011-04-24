@@ -81,6 +81,15 @@ namespace calibrator {
 	    
       m_table.resize(10,10);
       window = NULL;
+      
+
+    if(window!=NULL)
+        delete window;
+
+    window = new Gtk::Window();
+    window->set_visible(true);
+    window->set_title("KRT");
+	button_KRT_clicked();
 	}
 
 	View::~View() {
@@ -269,12 +278,6 @@ namespace calibrator {
         TPinHoleCamera camera = this->controller->getCam();
         gchar *str;
 
-        if(window!=NULL)
-            delete window;
-
-        window = new Gtk::Window();
-        window->set_visible(true);
-        window->set_title("KRT");
         
         str = g_strdup_printf ("|\t%.1lf", camera.k11);
         labelK[0].set_text(str); g_free (str);
