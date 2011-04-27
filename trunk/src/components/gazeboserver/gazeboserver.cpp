@@ -527,8 +527,11 @@ namespace gazeboserver {
 					printf("Gazebo Position model not opened\n");
 				}
 
+				Ice::PropertiesPtr prop = context.properties();
+                std::string myRobot = "pioneer2dx_" + prop->getProperty(context.tag()+".RobotName");
+
 				gazebo::Pose myPose;
-				gazeboEncodersSim->GetPose3d("pioneer2dx_robot1", myPose);
+				gazeboEncodersSim->GetPose3d(myRobot.data(), myPose);
 
 				float robotx, roboty, robottheta;
 				gazeboPosition->Lock(1);
@@ -569,7 +572,7 @@ namespace gazeboserver {
 	//PTMOTORS
 	class PTMotorsI: virtual public jderobot::PTMotors {
 		public:
-			PTMotorsI(std::string& propertyPrefix, const jderobotice::Context& context)
+			PTMotorsI(int index, std::string& propertyPrefix, const jderobotice::Context& context)
 			: prefix(propertyPrefix),context(context) {
 				Ice::PropertiesPtr prop = context.properties();
 
@@ -599,7 +602,10 @@ namespace gazeboserver {
 
 				gazeboPTZ1 = new gazebo::PTZIface();
 				std::string myRobot1 = prop->getProperty(context.tag()+".RobotName");
-				std::string myIface1 = "pioneer2dx_" + myRobot1 + "::sonyvid30_model_cameraA::ptz_iface_1";
+								std::stringstream scamera;
+				scamera << context.tag()+".Camera." << index << ".Name";
+				std::string camera = prop->getProperty(scamera.str());
+				std::string myIface1 = "pioneer2dx_" + myRobot1 + "::sonyvid30_model_"+ camera + "::ptz_iface_1";
 
 				/// Open the Position interface
 				try {
@@ -648,7 +654,7 @@ namespace gazeboserver {
 
 	class PTMotorsII: virtual public jderobot::PTMotors {
 		public:
-			PTMotorsII(std::string& propertyPrefix, const jderobotice::Context& context)
+			PTMotorsII(int index, std::string& propertyPrefix, const jderobotice::Context& context)
 			: prefix(propertyPrefix),context(context) {
 				Ice::PropertiesPtr prop = context.properties();
 
@@ -678,7 +684,10 @@ namespace gazeboserver {
 
 				gazeboPTZ2 = new gazebo::PTZIface();
 				std::string myRobot2 = prop->getProperty(context.tag()+".RobotName");
-				std::string myIface2 = "pioneer2dx_" + myRobot2 + "::sonyvid30_model_cameraB::ptz_iface_1";
+								std::stringstream scamera;
+				scamera << context.tag()+".Camera." << index << ".Name";
+				std::string camera = prop->getProperty(scamera.str());
+				std::string myIface2 = "pioneer2dx_" + myRobot2 + "::sonyvid30_model_"+ camera +"::ptz_iface_1";
 
 				/// Open the Position interface
 				try {
@@ -728,7 +737,7 @@ namespace gazeboserver {
 	//PTENCODERSI
 	class PTEncodersI: virtual public jderobot::PTEncoders {
 		public:
-			PTEncodersI(std::string& propertyPrefix, const jderobotice::Context& context)
+			PTEncodersI(int index ,std::string& propertyPrefix, const jderobotice::Context& context)
 			: prefix(propertyPrefix),context(context) {
 				Ice::PropertiesPtr prop = context.properties();
 
@@ -748,7 +757,10 @@ namespace gazeboserver {
 
 				gazeboPTZ1 = new gazebo::PTZIface();
 				std::string myRobot1 = prop->getProperty(context.tag()+".RobotName");
-				std::string myIface1 = "pioneer2dx_" + myRobot1 + "::sonyvid30_model_cameraA::ptz_iface_1";
+				std::stringstream scamera;
+				scamera << context.tag()+".Camera." << index << ".Name";
+				std::string camera = prop->getProperty(scamera.str());
+				std::string myIface1 = "pioneer2dx_" + myRobot1 + "::sonyvid30_model_"+ camera +"::ptz_iface_1";
 
 				/// Open the Position interface
 				try {
@@ -788,7 +800,7 @@ namespace gazeboserver {
 	//PTENCODERSII
 	class PTEncodersII: virtual public jderobot::PTEncoders {
 		public:
-			PTEncodersII(std::string& propertyPrefix, const jderobotice::Context& context)
+			PTEncodersII(int index, std::string& propertyPrefix, const jderobotice::Context& context)
 			: prefix(propertyPrefix),context(context) {
 				Ice::PropertiesPtr prop = context.properties();
 
@@ -808,7 +820,10 @@ namespace gazeboserver {
 
 				gazeboPTZ2 = new gazebo::PTZIface();
 				std::string myRobot2 = prop->getProperty(context.tag()+".RobotName");
-				std::string myIface2 = "pioneer2dx_" + myRobot2 + "::sonyvid30_model_cameraB::ptz_iface_1";
+				std::stringstream scamera;
+				scamera << context.tag()+".Camera." << index << ".Name";
+				std::string camera = prop->getProperty(scamera.str());
+				std::string myIface2 = "pioneer2dx_" + myRobot2 + "::sonyvid30_model_" + camera + "::ptz_iface_1";
 
 				/// Open the Position interface
 				try {
@@ -946,28 +961,28 @@ namespace gazeboserver {
 				std::string objPrefix5="ptmotors1";
 				std::string ptmotorsName1 = "ptmotors1";
 				context().tracer().info("Creating ptmotors1 " + ptmotorsName1);
-				ptmotors1 = new PTMotorsI(objPrefix5,context());
+				ptmotors1 = new PTMotorsI( 0, objPrefix5,context());
 				context().createInterfaceWithString(ptmotors1,ptmotorsName1);
 
 				//PTMotorsII
 				std::string objPrefix6="ptmotors2";
 				std::string ptmotorsName2 = "ptmotors2";
 				context().tracer().info("Creating ptmotors2 " + ptmotorsName2);
-				ptmotors2 = new PTMotorsII(objPrefix6,context());
+				ptmotors2 = new PTMotorsII(1, objPrefix6, context());
 				context().createInterfaceWithString(ptmotors2,ptmotorsName2);
 
 				//PTEncodersI
 				std::string objPrefix7="ptencoders1";
 				std::string ptencodersName1 = "ptencoders1";
 				context().tracer().info("Creating ptencoders1 " + ptencodersName1);
-				ptencoders1 = new PTEncodersI(objPrefix7,context());
+				ptencoders1 = new PTEncodersI(0, objPrefix7, context());
 				context().createInterfaceWithString(ptencoders1,ptencodersName1);
 
 				//PTEncodersII
 				std::string objPrefix8="ptencoders2";
 				std::string ptencodersName2 = "ptencoders2";
 				context().tracer().info("Creating ptencoders2 " + ptencodersName2);
-				ptencoders2 = new PTEncodersII(objPrefix8,context());
+				ptencoders2 = new PTEncodersII(1, objPrefix8, context());
 				context().createInterfaceWithString(ptencoders2,ptencodersName2);
 /*
 				//Sonars
