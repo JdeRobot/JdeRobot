@@ -181,7 +181,7 @@ namespace introrob {
 		IplImage src; // conversión a IplImage
 		src = image;
 
-		prepare2draw (src); // cambio del orden de bytes
+		//prepare2draw (src); // cambio del orden de bytes
 
 		colorspaces::ImageRGB8 img_rgb888(image); // conversion will happen if needed
 
