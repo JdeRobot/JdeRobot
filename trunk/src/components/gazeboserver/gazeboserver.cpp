@@ -98,6 +98,10 @@ namespace gazeboserver {
 			return (cameraDescription->name);
 		}
 
+		void prepare2draw (unsigned char** stream) {
+
+		}
+
 		std::string getRobotName () {
 			return ((context.properties())->getProperty(context.tag()+".RobotName"));
 		}
@@ -204,7 +208,18 @@ namespace gazeboserver {
 						reply->timeStamp.useconds = (long)t.toMicroSeconds() - reply->timeStamp.seconds*1000000;
 						reply->pixelData.resize(gazeboCamData->width*gazeboCamData->height*3);
 
-						memmove( &(reply->pixelData[0]), gazeboCamImage, mycamera->imageDescription->size);
+						memmove (&(reply->pixelData[0]), gazeboCamImage, mycamera->imageDescription->size);
+
+						int i;
+						int pos;
+						char temp;
+
+						for (i=0; i<gazeboCamData->width*gazeboCamData->height; i++) {
+							pos = i*3;
+							temp = reply->pixelData[pos+2];
+							reply->pixelData[pos+2]=reply->pixelData[pos];
+							reply->pixelData[pos]=temp;
+						}
 
 						{ //critical region start
 							IceUtil::Mutex::Lock sync(requestsMutex);
