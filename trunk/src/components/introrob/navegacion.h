@@ -122,8 +122,8 @@ namespace introrob {
 			void resetLines();
 			void updateCamerasPos();
 			void printCameraInformation (TPinHoleCamera* actualCamera);
-	   	void updatePT1(float pan, float tilt);
-	   	void updatePT2(float pan, float tilt);
+	   	void setPT1(float pan, float tilt);
+	   	void setPT2(float pan, float tilt);
 			void add_line(float x0,float y0, float z0, float x1, float y1, float z1,int color);
 			void get3DPositionX(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, double Z);
 			void get3DPositionZ(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, float Z);

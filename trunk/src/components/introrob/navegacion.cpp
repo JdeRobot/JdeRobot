@@ -164,7 +164,8 @@ namespace introrob {
   }
 
   int Navegacion::join() {
-    return pthread_join(thread, ret);
+	  pthread_exit(0);
+		return (0); /* Not needed, but this makes the compiler smile */
   }
 
 
@@ -534,12 +535,14 @@ namespace introrob {
 		printf ("%f %f %f %f\n", actualCamera->rt41, actualCamera->rt42, actualCamera->rt43, actualCamera->rt44);
 	}
 
-	void Navegacion::updatePT1(float pan, float tilt){
+	void Navegacion::setPT1(float pan, float tilt){
+		this->controller->setPT1(tilt, pan);
 		this->panA=pan;
 		this->tiltA=tilt;
 	}
 
-	void Navegacion::updatePT2(float pan, float tilt){
+	void Navegacion::setPT2(float pan, float tilt){
+		this->controller->setPT2(tilt, pan);
 		this->panB=pan;
 		this->tiltB=tilt;
 	}

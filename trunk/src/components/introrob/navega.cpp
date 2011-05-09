@@ -97,10 +97,8 @@ namespace introrob {
 		//this->controller->setW(30.); // deg./s.
 
 		// example of pantilt movement:
-		this->controller->setPT1 (-15.,0.);
-		this->controller->setPT2 (-15.,0.);
-		this->navegacion->updatePT1 (0., -15.);
-		this->navegacion->updatePT2 (0., -15.);
+		this->navegacion->setPT1 (0., -15.);
+		this->navegacion->setPT2 (0., -15.);
 
 		// example: how to get a projection line from Pioneer cameras
 		this->navegacion->updateCamerasPos(); // actualizamos la posición de las cámaras en el mundo
