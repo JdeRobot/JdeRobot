@@ -119,6 +119,9 @@ public:
 			camera_selected=0;
 		return camera_selected;
 	}
+	virtual Ice::Int setCameraDescription(const jderobot::CameraDescriptionPtr&, const Ice::Current&){
+		
+	}
 
 private:
 	class ReplyTask: public gbxiceutilacfr::SafeThread{
@@ -278,6 +281,9 @@ public:
 	
 	virtual Ice::Int changeCamera(const Ice::Current&) {
 		return -1;
+	}
+	virtual Ice::Int setCameraDescription(const jderobot::CameraDescriptionPtr&, const Ice::Current&){
+		
 	}
 
 private:
