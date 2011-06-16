@@ -18,7 +18,7 @@
  *   Authors : Eduardo Perdices <eperdices@gsyc.es>,
  *             Julio Vega <julio.vega@urjc.es>
  *             Jose María Cañas Plaza <jmplaza@gsyc.es>
- *				Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
+ *			Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
  *
  */
 
@@ -38,8 +38,10 @@ namespace visornect {
 		circle_p=0;
 		triangle_p=0;
 		sq_p=0;
-		
-
+		numextra_lines=0;
+		draw_kinect_points=false;
+		draw_kinect_with_color=false;
+		num_camera_lines=0;
 
 		Glib::RefPtr<Gdk::GL::Config> glconfig = Gdk::GL::Config::create(Gdk::GL::MODE_RGB | Gdk::GL::MODE_DEPTH | Gdk::GL::MODE_DOUBLE);
 		if (!glconfig) {
@@ -263,7 +265,7 @@ namespace visornect {
 		glEnd();
 
 		// absolute axis
-		/*glLineWidth(3.0f);
+		glLineWidth(3.0f);
 		glColor3f( 0.7, 0., 0. );
 		glBegin(GL_LINES);
 		v3f( 0.0, 0.0, 0.0 );   
@@ -278,7 +280,7 @@ namespace visornect {
 		glBegin(GL_LINES);
 		v3f( 0.0, 0.0, 0.0 );   
 		v3f( 0.0, 0.0, 10.0 );
-		glEnd();*/
+		glEnd();
 		glLineWidth(3.0f);
 
 		// Robot Frame of Reference
@@ -302,7 +304,7 @@ namespace visornect {
 		glRotatef(lati,0.,1.,0.);
 		glRotatef(mypioneer.roll,0.,0.,1.);
 
-		/*// X axis
+		// X axis
 		glColor3f( 1., 0., 0. );
 		glBegin(GL_LINES);
 		v3f( 0.0, 0.0, 0.0 );   
@@ -321,7 +323,7 @@ namespace visornect {
 		glBegin(GL_LINES);
 		v3f( 0.0, 0.0, 0.0 );   
 		v3f( 0.0, 0.0, 5.0 );
-		glEnd();*/
+		glEnd();
 
 		// robot body
 		glEnable (GL_LIGHTING);
@@ -349,16 +351,37 @@ namespace visornect {
 		glColor3f( 0, 0, 0 );
 		glLineWidth(2.0f);
 		for(int i=0;i<numlines;i++) {
-		glBegin(GL_LINES);
-			/*glVertex3f(0, 0,0);
-			glVertex3f(100, 100 ,0);*/
-			/*printf("-----------------\n");
-			printf("valores de las rectas: %f, %f, %f\n",lines[i][0]/scale, lines[i][1]/scale, lines[i][2]/scale);
-			printf("valores de las rectas: %f, %f, %f\n",lines[i][4]/scale, lines[i][5]/scale, lines[i][6]/scale);*/
-			glVertex3f(lines[i][0]/scale, lines[i][1]/scale, lines[i][2]/scale);
-			glVertex3f(lines[i][4]/scale, lines[i][5]/scale, lines[i][6]/scale);
-		glEnd();	
-	}
+			glBegin(GL_LINES);
+				glVertex3f(lines[i][0]/scale, lines[i][1]/scale, lines[i][2]/scale);
+				glVertex3f(lines[i][4]/scale, lines[i][5]/scale, lines[i][6]/scale);
+			glEnd();	
+		}
+		for(i=0;i<numextra_lines;i++) {
+			glBegin(GL_LINES);
+				glVertex3f(extra_lines[i][0]/scale, extra_lines[i][1]/scale, extra_lines[i][2]/scale);
+				glVertex3f(extra_lines[i][4]/scale, extra_lines[i][5]/scale, extra_lines[i][6]/scale);
+			glEnd();
+		}
+		glLineWidth(3.0f);
+		glColor3f( 0, 0.5, 0.5 );
+		for(i=0;i<num_camera_lines;i++) {
+			glBegin(GL_LINES);
+				glVertex3f(camera_lines[i][0]/scale, camera_lines[i][1]/scale, camera_lines[i][2]/scale);
+				glVertex3f(camera_lines[i][4]/scale, camera_lines[i][5]/scale, camera_lines[i][6]/scale);
+			glEnd();
+		}
+		glColor3f( 0, 0, 0 );
+		if (draw_kinect_points){
+			for(i=0;i<MAX_POINTS;i++) {
+				if (draw_kinect_with_color)
+					glColor3f( kinect_color[i][0], kinect_color[i][1], kinect_color[i][2] );
+				glBegin(GL_POINTS);
+					glVertex3f(kinect_points[i][0]/scale,kinect_points[i][1]/scale,kinect_points[i][2]/scale);
+				glEnd();
+			}
+		}
+		
+		
 		
 		
 	}
@@ -608,6 +631,66 @@ DrawArea::read_world_file(char* worldfile){
 	} while(i!=EOF);
 
 	fclose(myfile);
+}
+
+void
+DrawArea::add_line(float x0,float y0, float z0, float x1, float y1, float z1){
+	if (numextra_lines <MAX_LINES){
+		extra_lines[numextra_lines][0] = x0;
+		extra_lines[numextra_lines][1] = y0;
+		extra_lines[numextra_lines][2] = z0;
+		extra_lines[numextra_lines][3] = 0;
+		extra_lines[numextra_lines][4] = x1;
+		extra_lines[numextra_lines][5] = y1;
+		extra_lines[numextra_lines][6] = z1;
+		extra_lines[numextra_lines][7] = 0;
+		numextra_lines++;
+	}
+	else{
+		printf("NaoVision: error, too much lines in the world file configuration.\n");
+	}
+}
+
+void
+DrawArea::add_camera_line(float x0,float y0, float z0, float x1, float y1, float z1){
+	if (num_camera_lines <MAX_LINES){
+		camera_lines[num_camera_lines][0] = x0;
+		camera_lines[num_camera_lines][1] = y0;
+		camera_lines[num_camera_lines][2] = z0;
+		camera_lines[num_camera_lines][3] = 0;
+		camera_lines[num_camera_lines][4] = x1;
+		camera_lines[num_camera_lines][5] = y1;
+		camera_lines[num_camera_lines][6] = z1;
+		camera_lines[num_camera_lines][7] = 0;
+		num_camera_lines++;
+	}
+	else{
+		printf("NaoVision: error, too much camera lines in the world file configuration.\n");
+	}
+}
+
+void
+DrawArea::clear_camera_lines(){
+	num_camera_lines=0;
+}
+
+void
+DrawArea::add_kinect_point(float x,float y, float z, int pos){
+		kinect_points[pos][0] = x;
+		kinect_points[pos][1] = y;
+		kinect_points[pos][2] = z;
+} 
+
+void
+DrawArea::add_kinect_color(int r,int g, int b, int pos){
+		kinect_color[pos][0] = (float)r/255;
+		kinect_color[pos][1] = (float)g/255;
+		kinect_color[pos][2] = (float)b/255;
+} 
+
+void 
+DrawArea::clearExtraLines(){
+	numextra_lines=0;
 }
 
 } // namespace

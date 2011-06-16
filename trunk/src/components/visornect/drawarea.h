@@ -18,6 +18,7 @@
  *   Authors : Eduardo Perdices <eperdices@gsyc.es>,
  *             Julio Vega <julio.vega@urjc.es>
  *             Jose María Cañas Plaza <jmplaza@gsyc.es>
+ * 			Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
  *
  */
 
@@ -38,7 +39,8 @@
 #define v3f glVertex3f
 #define IMAGE_WIDTH 320
 #define IMAGE_HEIGHT 240
-#define MAX_LINES 100
+#define MAX_LINES 307200
+#define MAX_POINTS 307200
 #define MAX_POST 4
 #define MAX_JAMB 2
 #define MAX_CIRCLE 10
@@ -46,6 +48,7 @@
 #define MAX_SQUARE 4
 #define MAXZOOM 180
 #define MINZOOM 0
+#define MAX_CAMERA_LINES 300
 
 typedef struct SoRtype {
   struct SoRtype *father;
@@ -86,6 +89,17 @@ namespace visornect {
 		void setToUserCamera ();
 		void readFile(std::string path);
 		virtual bool on_expose_event(GdkEventExpose* event);
+		void add_line(float x0,float y0, float z0, float x1, float y1, float z1);
+		void add_camera_line(float x0,float y0, float z0, float x1, float y1, float z1);
+		void add_kinect_point(float x,float y, float z, int pos);
+		void add_kinect_color(int r,int g, int b, int pos);
+		void clearExtraLines();
+	
+		bool draw_kinect_points;
+		bool draw_kinect_with_color;
+		void clear_camera_lines();
+		float lines[MAX_LINES][8];
+		int numlines;
 
 	protected:
 		/*Override default signal handler*/
@@ -106,18 +120,26 @@ namespace visornect {
 		HPoint3D glcam_pos;
 		HPoint3D glcam_foa;
 		HPoint3D cam_pos;
-		int numlines;
+		
+		int numpoints;
+		int numextra_lines;
+		int num_camera_lines;
 		int post_p;		
 		int jamb_p;
 		int circle_p;
 		int triangle_p;
 		int sq_p;
-		float lines[MAX_LINES][8];
+		float camera_lines[MAX_CAMERA_LINES][8];
+		float extra_lines[MAX_LINES][8];
 		float post[MAX_POST][10];
 		float jamb[MAX_JAMB][10];
 		float circle[MAX_CIRCLE][3];
 		float triangle[MAX_TRIANGLE][3];
 		float sq[MAX_SQUARE][4];
+		float kinect_points[MAX_POINTS][3];
+		float kinect_color[MAX_POINTS][3];
+		
+		
 
     float scale;
     float radius;

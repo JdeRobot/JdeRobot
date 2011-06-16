@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1997-2010 JDE Developers Team
+ *  Copyright (C) 1997-2010 JDE Developers TeamVisorNect.camRGB
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -53,6 +53,8 @@
 #include <colorspaces/colorspacesmm.h>
 #include "visornectgui.h"
 #include "pthread.h"
+#include "controllers/ptmotors-controller.h"
+#include "controllers/leds-controller.h"
 
 
 
@@ -90,7 +92,6 @@ void *camera_server(void* arg){
 			colorspaces::Image imageRGB(dataRGB->description->width,dataRGB->description->height,fmtRGB,&(dataRGB->pixelData[0]));
 			colorspaces::Image imageDEPTH(dataDEPTH->description->width,dataDEPTH->description->height,fmtRGB,&(dataDEPTH->pixelData[0]));
 			visornectgui_ptx->update(imageRGB,imageDEPTH);
-			//usleep(0.06);
 		}
 	}catch (const Ice::Exception& ex) {
 		std::cerr << ex << std::endl;
@@ -116,6 +117,9 @@ int main(int argc, char** argv){
 	jderobot::PTMotorsPrx mprx;
 	jderobot::KinectLedsPrx lprx;
 	std::string path;
+	visornectController::PTMotorsController *ptmotors_ctr=NULL;
+	visornectController::LedsController *leds_ctr=NULL;
+
 	
 
 	pthread_attr_init(&attr);
@@ -128,7 +132,7 @@ int main(int argc, char** argv){
 		return 1;
 	}
 	catch (const char* msg) {
-		std::cerr << msg << std::endl;
+		std::cerr <<"Error :" << msg << std::endl;
 		return 1;
 	}
 	if (prop->getPropertyAsIntWithDefault("VisorNect.CameraRGBActive",0)){
@@ -139,9 +143,6 @@ int main(int argc, char** argv){
 			}
 			else {
 				camera_active=1;
-				//pthread_create(&threads[n_components], &attr, camera_server,NULL);
-				//n_components++;
-				
 			}
 		}catch (const Ice::Exception& ex) {
 			std::cerr << ex << std::endl;
@@ -161,9 +162,6 @@ int main(int argc, char** argv){
 			}
 			else {
 				camera_active=1;
-				//pthread_create(&threads[n_components], &attr, camera_server,NULL);
-				//n_components++;
-				
 			}
 		}catch (const Ice::Exception& ex) {
 			std::cerr << ex << std::endl;
@@ -186,7 +184,7 @@ int main(int argc, char** argv){
 		    if (0==mprx)
 				throw "VisorNect: Invalid proxy VisorNect.PTMotors.Proxy";
 			/*creating all the devices controllers*/
-			
+			ptmotors_ctr = new visornectController::PTMotorsController(mprx);
 		}catch (const Ice::Exception& ex) {
 			std::cerr << ex << std::endl;
 			return 1;
@@ -207,7 +205,7 @@ int main(int argc, char** argv){
 		    if (0==lprx)
 				throw "VisorNect: Invalid proxy VisorNect.KinectLeds.Proxy";
 			/*creating all the devices controllers*/
-			
+			leds_ctr = new visornectController::LedsController(lprx);
 		}catch (const Ice::Exception& ex) {
 			std::cerr << ex << std::endl;
 			return 1;
@@ -217,8 +215,9 @@ int main(int argc, char** argv){
 			return 1;
 		}
 	}
-
-	visornectgui_ptx = new visornect::visornectgui(mprx, lprx, prop->getProperty("VisorNect.WorldFile"));
+	visornectgui_ptx = new visornect::visornectgui(ptmotors_ctr, leds_ctr, prop->getProperty("VisorNect.WorldFile"), prop->getProperty("VisorNect.camRGB"), prop->getProperty("VisorNect.camIR"));
+	
+	
 	n_components++;
 	if (camera_active){
 		pthread_create(&threads[0], &attr, camera_server,NULL);

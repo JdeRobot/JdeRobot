@@ -2,7 +2,7 @@ if ENABLE_COMPONENT_VISORNECT
 bin_PROGRAMS = visornect
 endif
 
-visornect_SOURCES = drawarea.cpp  drawarea.h  lambecom.cfg  Makefile.am  visornect.cfg  visornect.cpp  visornectgui.cpp  visornectgui.glade  visornectgui.h
+visornect_SOURCES = gui-modules/ptmotorsGui.cpp gui-modules/ptmotorsGui.h gui-modules/ledsGui.cpp gui-modules/ledsGui.h controllers/ptmotors-controller.cpp controllers/ptmotors-controller.h controllers/leds-controller.cpp controllers/leds-controller.h util3d.cpp util3d.h myprogeo.cpp myprogeo.h drawarea.cpp  drawarea.h  lambecom.cfg  Makefile.am  visornect.cfg  visornect.cpp  visornectgui.cpp  visornectgui.glade  visornectgui.h
 visornect_CPPFLAGS = $(JDEROBOTICE_CPPFLAGS) $(GTKMM_CPPFLAGS) $(COLORSPACESMM_CPPFLAGS) $(GTKGLEXTMM_CPPFLAGS) $(OPENGL_CPPFLAGS) -DGLADE_DIR=\""$(gladedir)"\"
 visornect_LDFLAGS =  $(JDEROBOTICE_LDFLAGS) $(GTKMM_LDFLAGS) $(COLORSPACESMM_LDFLAGS) $(GTKGLEXTMM_LDFLAGS) $(OPENGL_LDFLAGS)
 visornect_LDADD = $(top_srcdir)/src/libs/jderobotice/libJderobotIce.la \
