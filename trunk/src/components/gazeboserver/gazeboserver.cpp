@@ -20,6 +20,7 @@
  *            
  *
  *  DATE					COMMENT
+ *  04/11/2011   v 3.1: Fix bug on PTEncoders class
  *  01/03/2011   v 3.0: Modified to use PTEncoders y PTMotors
  *  11/02/2011   v 2.0: Modified to use Gazebo 0.9
  *  14/01/2011   v 1.0: Modified in order to use Gazebo 0.10
@@ -753,7 +754,8 @@ namespace gazeboserver {
 	class PTEncodersI: virtual public jderobot::PTEncoders {
 		public:
 			PTEncodersI(int index ,std::string& propertyPrefix, const jderobotice::Context& context)
-			: prefix(propertyPrefix),context(context) {
+			: prefix(propertyPrefix),context(context),
+			ptEncodersData1(new jderobot::PTEncodersData()) {
 				Ice::PropertiesPtr prop = context.properties();
 
 				gazeboserver_id=0;
@@ -795,9 +797,10 @@ namespace gazeboserver {
 				if(!gazeboPTZ1){
 					printf("Gazebo PTENCODERS model not opened\n");
 				}
+
 				gazeboPTZ1->Lock(1);
-				ptEncodersData1->panAngle=-1 * gazeboPTZ1->data->pan * RADTODEG;
-				ptEncodersData1->tiltAngle= -1 * gazeboPTZ1->data->tilt * RADTODEG;
+				ptEncodersData1->panAngle=gazeboPTZ1->data->pan * RADTODEG;
+				ptEncodersData1->tiltAngle=gazeboPTZ1->data->tilt * RADTODEG;
 				gazeboPTZ1->Unlock();
 
 				return ptEncodersData1; 
@@ -816,7 +819,8 @@ namespace gazeboserver {
 	class PTEncodersII: virtual public jderobot::PTEncoders {
 		public:
 			PTEncodersII(int index, std::string& propertyPrefix, const jderobotice::Context& context)
-			: prefix(propertyPrefix),context(context) {
+			: prefix(propertyPrefix),context(context),
+			ptEncodersData2(new jderobot::PTEncodersData()) {
 				Ice::PropertiesPtr prop = context.properties();
 
 				gazeboserver_id=0;
@@ -859,8 +863,8 @@ namespace gazeboserver {
 					printf("Gazebo PTENCODERS model not opened\n");
 				}
 				gazeboPTZ2->Lock(1);
-				ptEncodersData2->panAngle=-1 * gazeboPTZ2->data->pan * RADTODEG;
-				ptEncodersData2->tiltAngle= -1 * gazeboPTZ2->data->tilt * RADTODEG;
+				ptEncodersData2->panAngle=gazeboPTZ2->data->pan * RADTODEG;
+				ptEncodersData2->tiltAngle=gazeboPTZ2->data->tilt * RADTODEG;
 				gazeboPTZ2->Unlock();
 
 				return ptEncodersData2;
