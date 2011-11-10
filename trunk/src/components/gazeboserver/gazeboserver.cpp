@@ -799,8 +799,8 @@ namespace gazeboserver {
 				}
 
 				gazeboPTZ1->Lock(1);
-				ptEncodersData1->panAngle=gazeboPTZ1->data->pan * RADTODEG;
-				ptEncodersData1->tiltAngle=gazeboPTZ1->data->tilt * RADTODEG;
+				ptEncodersData1->panAngle = gazeboPTZ1->data->pan * RADTODEG;
+				ptEncodersData1->tiltAngle = gazeboPTZ1->data->tilt * RADTODEG;
 				gazeboPTZ1->Unlock();
 
 				return ptEncodersData1; 
@@ -863,8 +863,8 @@ namespace gazeboserver {
 					printf("Gazebo PTENCODERS model not opened\n");
 				}
 				gazeboPTZ2->Lock(1);
-				ptEncodersData2->panAngle=gazeboPTZ2->data->pan * RADTODEG;
-				ptEncodersData2->tiltAngle=gazeboPTZ2->data->tilt * RADTODEG;
+				ptEncodersData2->panAngle = gazeboPTZ2->data->pan * RADTODEG;
+				ptEncodersData2->tiltAngle = gazeboPTZ2->data->tilt * RADTODEG;
 				gazeboPTZ2->Unlock();
 
 				return ptEncodersData2;
