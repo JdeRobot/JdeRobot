@@ -728,6 +728,8 @@ namespace gazeboserver {
 				gazeboPTZ2->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
 				gazeboPTZ2->data->cmd_pan = data->longitude * DEGTORAD;
 				gazeboPTZ2->data->cmd_tilt = data->latitude * DEGTORAD;
+				gazeboPTZ2->data->cmd_pan_speed = data->longitudeSpeed;
+				gazeboPTZ2->data->cmd_tilt_speed = data->latitudeSpeed;
 				gazeboPTZ2->Unlock();
 
 				return 0; 

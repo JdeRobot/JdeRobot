@@ -11,3 +11,6 @@ LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotIce.la \
 gazeboserver: gazeboserver.o
 	libtool --mode=link g++ -g -O -o gazeboserver gazeboserver.o $(LDADD) $(LDFLAGS)
 
+clean:
+	rm -f *.o gazeboserver
+
