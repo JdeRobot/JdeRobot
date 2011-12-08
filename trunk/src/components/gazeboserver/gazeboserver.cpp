@@ -52,6 +52,7 @@
 #include <gazebo/gazebo.h>
 
 #define NUM_LASER 180
+#define NUM_SONARS 16
 #define DEGTORAD 0.01745327
 #define RADTODEG 57.29582790
 #define MAX_PAN 54 /** gazebo pantilt max pan, degrees.*/
@@ -880,12 +881,13 @@ namespace gazeboserver {
 			int gazeboclient_id;
 			gazebo::PTZIface * gazeboPTZ2;
 	};
-/*
-	//SONARS
+
+	// SONARS
 	class SonarsI: virtual public jderobot::Sonars {
 		public:
 			SonarsI(std::string& propertyPrefix, const jderobotice::Context& context)
-			: prefix(propertyPrefix),context(context) {
+			: prefix(propertyPrefix),context(context),
+			sonarsData(new jderobot::SonarsData()) {
 				Ice::PropertiesPtr prop = context.properties();
 
 				gazeboserver_id=0;
@@ -894,10 +896,35 @@ namespace gazeboserver {
 				// Create a client object
 				gazeboclient = new gazebo::Client();
 
-				// Connect to the server
-				gazeboclient->ConnectWait(gazeboserver_id, gazeboclient_id);
-				gazeboSonar = new gazebo::FiducialIface();
-				gazeboSonar->Open (gazeboclient, "robot1");
+				/// Connect to the libgazebo server
+				try {
+					gazeboclient->ConnectWait(gazeboserver_id, gazeboclient_id);
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect\n" << e << "\n";
+					exit (-1);
+				}
+
+				gazeboSonarSim = new gazebo::SimulationIface();
+
+				/// Open the Simulation Interface
+				try {
+					gazeboSonarSim->Open(gazeboclient, "default");
+				}	catch (std::string e)	{
+					std::cout << "Gazebo error: Unable to connect to the sim interface\n" << e << "\n";
+					exit (-1);
+				}
+
+				gazeboSonar = new gazebo::FiducialIface ();
+				std::string myRobot = prop->getProperty(context.tag()+".RobotName");
+				std::string myIface = "pioneer2dx_" + myRobot + "::laser::fiducial_iface_0";
+
+				/// Open the Position interface
+				try {
+					gazeboSonar->Open (gazeboclient, myIface);
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect to the laser interface\n" << e << "\n";
+					exit (-1);
+				}
 
 				sonarsData->numSonars=NUM_SONARS;
 				sonarsData->us.resize(sizeof(int)*sonarsData->numSonars);
@@ -928,8 +955,9 @@ namespace gazeboserver {
 			int gazeboserver_id;
 			int gazeboclient_id;
 			gazebo::FiducialIface * gazeboSonar;
+		  gazebo::SimulationIface *gazeboSonarSim;
 	};
-*/
+
 	//COMPONENT
 	class Component: public jderobotice::Component{
 		public:
@@ -940,8 +968,12 @@ namespace gazeboserver {
 				//Cameras
 				Ice::PropertiesPtr prop = context().properties();
 				int nCameras = prop->getPropertyAsInt(context().tag() + ".NCameras");
+				int laser = prop->getPropertyAsInt(context().tag() + ".Laser");
+				int sonar = prop->getPropertyAsInt(context().tag() + ".Sonar");
 				cameras.resize(nCameras);
-				for (int i=0; i<nCameras; i++) {//build camera objects
+
+				// build camera objects
+				for (int i=0; i<nCameras; i++) {
 					std::stringstream objIdS;
 					objIdS <<  i;
 					std::string objId = objIdS.str();
@@ -963,13 +995,6 @@ namespace gazeboserver {
 				context().tracer().info("Creating motors1 " + gazeboactName);
 				motors1 = new MotorsI(objPrefix2,context());
 				context().createInterfaceWithString(motors1,gazeboactName);
-
-				//Laser
-				std::string objPrefix3="laser1";
-				std::string laserName = "laser1";
-				context().tracer().info("Creating laser1 " + laserName);
-				laser1 = new LaserI(objPrefix3,context());
-				context().createInterfaceWithString(laser1,laserName);
 				
 				//Encoders
 				std::string objPrefix4="encoders1";
@@ -978,42 +1003,49 @@ namespace gazeboserver {
 				encoders1 = new EncodersI(objPrefix4,context());
 				context().createInterfaceWithString(encoders1,encodersName);
 
-				//PTMotorsI
-				std::string objPrefix5="ptmotors1";
-				std::string ptmotorsName1 = "ptmotors1";
-				context().tracer().info("Creating ptmotors1 " + ptmotorsName1);
-				ptmotors1 = new PTMotorsI( 0, objPrefix5,context());
-				context().createInterfaceWithString(ptmotors1,ptmotorsName1);
+				if (laser) { //Laser
+					std::string objPrefix3="laser1";
+					std::string laserName = "laser1";
+					context().tracer().info("Creating laser1 " + laserName);
+					laser1 = new LaserI(objPrefix3,context());
+					context().createInterfaceWithString(laser1,laserName);
+				}
 
-				//PTMotorsII
-				std::string objPrefix6="ptmotors2";
-				std::string ptmotorsName2 = "ptmotors2";
-				context().tracer().info("Creating ptmotors2 " + ptmotorsName2);
-				ptmotors2 = new PTMotorsII(1, objPrefix6, context());
-				context().createInterfaceWithString(ptmotors2,ptmotorsName2);
+				if (nCameras>0) {	// PTMotorsI y PTEncodersI
+					std::string objPrefix5="ptmotors1";
+					std::string ptmotorsName1 = "ptmotors1";
+					context().tracer().info("Creating ptmotors1 " + ptmotorsName1);
+					ptmotors1 = new PTMotorsI( 0, objPrefix5,context());
+					context().createInterfaceWithString(ptmotors1,ptmotorsName1);
 
-				//PTEncodersI
-				std::string objPrefix7="ptencoders1";
-				std::string ptencodersName1 = "ptencoders1";
-				context().tracer().info("Creating ptencoders1 " + ptencodersName1);
-				ptencoders1 = new PTEncodersI(0, objPrefix7, context());
-				context().createInterfaceWithString(ptencoders1,ptencodersName1);
+					std::string objPrefix7="ptencoders1";
+					std::string ptencodersName1 = "ptencoders1";
+					context().tracer().info("Creating ptencoders1 " + ptencodersName1);
+					ptencoders1 = new PTEncodersI(0, objPrefix7, context());
+					context().createInterfaceWithString(ptencoders1,ptencodersName1);
 
-				//PTEncodersII
-				std::string objPrefix8="ptencoders2";
-				std::string ptencodersName2 = "ptencoders2";
-				context().tracer().info("Creating ptencoders2 " + ptencodersName2);
-				ptencoders2 = new PTEncodersII(1, objPrefix8, context());
-				context().createInterfaceWithString(ptencoders2,ptencodersName2);
-/*
-				//Sonars
-				std::string objPrefix7="sonars1";
-				std::string sonarsName = "sonars1";
-				context().tracer().info("Creating sonars1 " + sonarsName);
-				sonars1 = new SonarsI(objPrefix7,context());
-				context().createInterfaceWithString(sonars1,sonarsName);
-			*/
-				usleep(1000); // para que pille los valores, que parece que le cuesta un tiempo...
+					if (nCameras==2) { // PTMotorsII y PTEncodersII
+						std::string objPrefix6="ptmotors2";
+						std::string ptmotorsName2 = "ptmotors2";
+						context().tracer().info("Creating ptmotors2 " + ptmotorsName2);
+						ptmotors2 = new PTMotorsII(1, objPrefix6, context());
+						context().createInterfaceWithString(ptmotors2,ptmotorsName2);
+
+						std::string objPrefix8="ptencoders2";
+						std::string ptencodersName2 = "ptencoders2";
+						context().tracer().info("Creating ptencoders2 " + ptencodersName2);
+						ptencoders2 = new PTEncodersII(1, objPrefix8, context());
+						context().createInterfaceWithString(ptencoders2,ptencodersName2);
+					}
+				}
+
+				if (sonar) { // Sonars
+					std::string objPrefix7="sonars1";
+					std::string sonarsName = "sonars1";
+					context().tracer().info("Creating sonars1 " + sonarsName);
+					sonars1 = new SonarsI(objPrefix7,context());
+					context().createInterfaceWithString(sonars1,sonarsName);
+				}
 			}
 
 			virtual ~Component(){}
