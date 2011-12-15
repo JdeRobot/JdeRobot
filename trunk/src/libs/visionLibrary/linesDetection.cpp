@@ -151,7 +151,7 @@ namespace visionLibrary {
 							}
 						} else {
 							/*Check angle threshold*/
-							if (current_type == type || type == 0) {
+							if (current_type == type){// || type == 0) {
 								/*Save current end*/
 								mySegment.end.x = pend.x;
 								mySegment.end.y = pend.y;
