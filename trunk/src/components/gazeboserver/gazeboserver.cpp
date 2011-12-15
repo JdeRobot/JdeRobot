@@ -48,6 +48,8 @@
 #include <jderobot/ptencoders.h>
 #include <jderobot/ptmotors.h>
 #include <jderobot/sonars.h>
+#include <jderobot/pose3dmotors.h>
+#include <jderobot/pose3dencoders.h>
 #include <math.h>
 #include <gazebo/gazebo.h>
 
@@ -669,6 +671,7 @@ namespace gazeboserver {
 		  gazebo::SimulationIface *gazeboSim;
 	};
 
+	//PTMOTORSII
 	class PTMotorsII: virtual public jderobot::PTMotors {
 		public:
 			PTMotorsII(int index, std::string& propertyPrefix, const jderobotice::Context& context)
@@ -958,11 +961,317 @@ namespace gazeboserver {
 		  gazebo::SimulationIface *gazeboSonarSim;
 	};
 
+
+
+
+
+	//POSE3DMOTORSI
+	class Pose3DMotorsI: virtual public jderobot::Pose3DMotors {
+		public:
+			Pose3DMotorsI(int index, std::string& propertyPrefix, const jderobotice::Context& context)
+			: prefix(propertyPrefix),context(context) {
+				Ice::PropertiesPtr prop = context.properties();
+
+				gazeboserver_id=0;
+				gazeboclient_id=0;
+
+				// Create a client object
+				gazeboclient = new gazebo::Client();
+
+				/// Connect to the libgazebo server
+				try {
+					gazeboclient->ConnectWait(gazeboserver_id, gazeboclient_id);
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect\n" << e << "\n";
+					exit (-1);
+				}
+
+				gazeboSim = new gazebo::SimulationIface();
+
+				/// Open the Simulation Interface
+				try {
+					gazeboSim->Open(gazeboclient, "default");
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect to the sim interface\n" << e << "\n";
+					exit (-1);
+				}
+
+				gazeboPTZ1 = new gazebo::PTZIface();
+				std::string myRobot1 = prop->getProperty(context.tag()+".RobotName");
+								std::stringstream scamera;
+				scamera << context.tag()+".Camera." << index << ".Name";
+				std::string camera = prop->getProperty(scamera.str());
+				std::string myIface1 = "pioneer2dx_" + myRobot1 + "::sonyvid30_model_"+ camera + "::ptz_iface_1";
+
+				/// Open the Position interface
+				try {
+					gazeboPTZ1->Open (gazeboclient, myIface1);
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect to the position interface\n" << e << "\n";
+					exit (-1);
+				}
+			}
+
+			~Pose3DMotorsI(){};
+
+			virtual Ice::Int setPose3DMotorsData(const jderobot::Pose3DMotorsDataPtr & data, const Ice::Current&) {
+				//waiting for next gazebo camera update
+				gazeboclient->Wait();
+
+				if(!gazeboPTZ1){
+					printf("Gazebo PTMOTORS model not opened\n");
+				}
+
+				gazeboPTZ1->Lock(1);
+				gazeboPTZ1->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
+				gazeboPTZ1->data->cmd_pan = data->longitude * DEGTORAD;
+				gazeboPTZ1->data->cmd_tilt = data->latitude * DEGTORAD;
+				gazeboPTZ1->Unlock();
+
+				return 0; 
+			};
+
+			virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData(const Ice::Current&) {
+				return (NULL);
+			};
+
+			virtual jderobot::Pose3DMotorsParamsPtr getPose3DMotorsParams(const Ice::Current&) {
+				return (NULL);
+			};
+
+			std::string prefix;
+			jderobotice::Context context;
+			gazebo::Client *gazeboclient;
+			int gazeboserver_id;
+			int gazeboclient_id;
+			gazebo::PTZIface * gazeboPTZ1;
+		  gazebo::SimulationIface *gazeboSim;
+	};
+
+	//POSE3DMOTORSII
+	class Pose3DMotorsII: virtual public jderobot::Pose3DMotors {
+		public:
+			Pose3DMotorsII(int index, std::string& propertyPrefix, const jderobotice::Context& context)
+			: prefix(propertyPrefix),context(context) {
+				Ice::PropertiesPtr prop = context.properties();
+
+				gazeboserver_id=0;
+				gazeboclient_id=0;
+
+				// Create a client object
+				gazeboclient = new gazebo::Client();
+
+				/// Connect to the libgazebo server
+				try {
+					gazeboclient->ConnectWait(gazeboserver_id, gazeboclient_id);
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect\n" << e << "\n";
+					exit (-1);
+				}
+
+				gazeboSim = new gazebo::SimulationIface();
+
+				/// Open the Simulation Interface
+				try {
+					gazeboSim->Open(gazeboclient, "default");
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect to the sim interface\n" << e << "\n";
+					exit (-1);
+				}
+
+				gazeboPTZ2 = new gazebo::PTZIface();
+				std::string myRobot2 = prop->getProperty(context.tag()+".RobotName");
+								std::stringstream scamera;
+				scamera << context.tag()+".Camera." << index << ".Name";
+				std::string camera = prop->getProperty(scamera.str());
+				std::string myIface2 = "pioneer2dx_" + myRobot2 + "::sonyvid30_model_"+ camera +"::ptz_iface_1";
+
+				/// Open the Position interface
+				try {
+					gazeboPTZ2->Open (gazeboclient, myIface2);
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect to the position interface\n" << e << "\n";
+					exit (-1);
+				}
+			}
+
+			virtual ~Pose3DMotorsII(){};
+
+			virtual Ice::Int setPose3DMotorsData(const jderobot::Pose3DMotorsDataPtr & data, const Ice::Current&) {
+				//waiting for next gazebo camera update
+				gazeboclient->Wait();
+
+				if(!gazeboPTZ2){
+					printf("Gazebo PTMOTORS model not opened\n");
+				}
+
+				gazeboPTZ2->Lock(1);
+				gazeboPTZ2->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
+				gazeboPTZ2->data->cmd_pan = data->longitude * DEGTORAD;
+				gazeboPTZ2->data->cmd_tilt = data->latitude * DEGTORAD;
+				gazeboPTZ2->data->cmd_pan_speed = data->longitudeSpeed;
+				gazeboPTZ2->data->cmd_tilt_speed = data->latitudeSpeed;
+				gazeboPTZ2->Unlock();
+
+				return 0; 
+			};
+
+			virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData(const Ice::Current&) {
+				return (NULL);
+			};
+
+			virtual jderobot::Pose3DMotorsParamsPtr getPose3DMotorsParams(const Ice::Current&) {
+				return (NULL);
+			};
+
+			std::string prefix;
+			jderobotice::Context context;
+			gazebo::Client *gazeboclient;
+			int gazeboserver_id;
+			int gazeboclient_id;
+			gazebo::PTZIface * gazeboPTZ2;
+		  gazebo::SimulationIface *gazeboSim;
+	};
+
+	//POSE3DENCODERSI
+	class Pose3DEncodersI: virtual public jderobot::Pose3DEncoders {
+		public:
+			Pose3DEncodersI(int index ,std::string& propertyPrefix, const jderobotice::Context& context)
+			: prefix(propertyPrefix),context(context),
+			ptEncodersData1(new jderobot::Pose3DEncodersData()) {
+				Ice::PropertiesPtr prop = context.properties();
+
+				gazeboserver_id=0;
+				gazeboclient_id=0;
+
+				// Create a client object
+				gazeboclient = new gazebo::Client();
+
+				/// Connect to the libgazebo server
+				try {
+					gazeboclient->ConnectWait(gazeboserver_id, gazeboclient_id);
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect\n" << e << "\n";
+					exit (-1);
+				}
+
+				gazeboPTZ1 = new gazebo::PTZIface();
+				std::string myRobot1 = prop->getProperty(context.tag()+".RobotName");
+				std::stringstream scamera;
+				scamera << context.tag()+".Camera." << index << ".Name";
+				std::string camera = prop->getProperty(scamera.str());
+				std::string myIface1 = "pioneer2dx_" + myRobot1 + "::sonyvid30_model_"+ camera +"::ptz_iface_1";
+
+				/// Open the Position interface
+				try {
+					gazeboPTZ1->Open (gazeboclient, myIface1);
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect to the position interface\n" << e << "\n";
+					exit (-1);
+				}
+			}
+
+			virtual ~Pose3DEncodersI(){};
+
+			virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData(const Ice::Current&) {
+				//waiting for next gazebo camera update
+				gazeboclient->Wait ();
+
+				if(!gazeboPTZ1){
+					printf("Gazebo PTENCODERS model not opened\n");
+				}
+
+				gazeboPTZ1->Lock(1);
+				ptEncodersData1->panAngle = gazeboPTZ1->data->pan * RADTODEG;
+				ptEncodersData1->tiltAngle = gazeboPTZ1->data->tilt * RADTODEG;
+				gazeboPTZ1->Unlock();
+
+				return ptEncodersData1; 
+			};
+
+			std::string prefix;
+			jderobotice::Context context;
+			jderobot::Pose3DEncodersDataPtr ptEncodersData1;
+			gazebo::Client *gazeboclient;
+			int gazeboserver_id;
+			int gazeboclient_id;
+			gazebo::PTZIface * gazeboPTZ1;
+	};
+
+	//POSEENCODERSII
+	class Pose3DEncodersII: virtual public jderobot::Pose3DEncoders {
+		public:
+			Pose3DEncodersII(int index, std::string& propertyPrefix, const jderobotice::Context& context)
+			: prefix(propertyPrefix),context(context),
+			ptEncodersData2(new jderobot::Pose3DEncodersData()) {
+				Ice::PropertiesPtr prop = context.properties();
+
+				gazeboserver_id=0;
+				gazeboclient_id=0;
+
+				// Create a client object
+				gazeboclient = new gazebo::Client();
+
+				/// Connect to the libgazebo server
+				try {
+					gazeboclient->ConnectWait(gazeboserver_id, gazeboclient_id);
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect\n" << e << "\n";
+					exit (-1);
+				}
+
+				gazeboPTZ2 = new gazebo::PTZIface();
+				std::string myRobot2 = prop->getProperty(context.tag()+".RobotName");
+				std::stringstream scamera;
+				scamera << context.tag()+".Camera." << index << ".Name";
+				std::string camera = prop->getProperty(scamera.str());
+				std::string myIface2 = "pioneer2dx_" + myRobot2 + "::sonyvid30_model_" + camera + "::ptz_iface_1";
+
+				/// Open the Position interface
+				try {
+					gazeboPTZ2->Open (gazeboclient, myIface2);
+				} catch (std::string e) {
+					std::cout << "Gazebo error: Unable to connect to the position interface\n" << e << "\n";
+					exit (-1);
+				}
+			}
+
+			virtual ~Pose3DEncodersII(){};
+
+			virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData(const Ice::Current&) {
+				//waiting for next gazebo camera update
+				gazeboclient->Wait ();
+
+				if(!gazeboPTZ2){
+					printf("Gazebo PTENCODERS model not opened\n");
+				}
+				gazeboPTZ2->Lock(1);
+				ptEncodersData2->panAngle = gazeboPTZ2->data->pan * RADTODEG;
+				ptEncodersData2->tiltAngle = gazeboPTZ2->data->tilt * RADTODEG;
+				gazeboPTZ2->Unlock();
+
+				return ptEncodersData2;
+			};
+
+			std::string prefix;
+			jderobotice::Context context;
+			jderobot::Pose3DEncodersDataPtr ptEncodersData2;
+			gazebo::Client *gazeboclient;
+			int gazeboserver_id;
+			int gazeboclient_id;
+			gazebo::PTZIface * gazeboPTZ2;
+	};
+
+
+
+
+
+
 	//COMPONENT
 	class Component: public jderobotice::Component{
 		public:
 			Component()
-			:jderobotice::Component("GazeboServer"), cameras(0), motors1(0), laser1(0), encoders1(0), ptmotors1(0), ptmotors2(0), ptencoders1(0), ptencoders2(0), sonars1(0) {}
+			:jderobotice::Component("GazeboServer"), cameras(0), motors1(0), laser1(0), encoders1(0), ptmotors1(0), ptmotors2(0), ptencoders1(0), ptencoders2(0), sonars1(0), pose3dmotors1(0), pose3dmotors2(0), pose3dencoders1(0), pose3dencoders2(0) {}
 
 			virtual void start() {
 				//Cameras
@@ -1024,6 +1333,18 @@ namespace gazeboserver {
 					ptencoders1 = new PTEncodersI(0, objPrefix7, context());
 					context().createInterfaceWithString(ptencoders1,ptencodersName1);
 
+					std::string objPrefix10="pose3dmotors1";
+					std::string pose3dmotorsName1 = "pose3dmotors1";
+					context().tracer().info("Creating pose3dmotors1 " + pose3dmotorsName1);
+					pose3dmotors1 = new Pose3DMotorsI( 0, objPrefix10,context());
+					context().createInterfaceWithString(pose3dmotors1,pose3dmotorsName1);
+
+					std::string objPrefix11="pose3dencoders1";
+					std::string pose3dencodersName1 = "pose3dencoders1";
+					context().tracer().info("Creating pose3dencoders1 " + pose3dencodersName1);
+					pose3dencoders1 = new Pose3DEncodersI(0, objPrefix11, context());
+					context().createInterfaceWithString(pose3dencoders1,pose3dencodersName1);
+
 					if (nCameras==2) { // PTMotorsII y PTEncodersII
 						std::string objPrefix6="ptmotors2";
 						std::string ptmotorsName2 = "ptmotors2";
@@ -1036,14 +1357,26 @@ namespace gazeboserver {
 						context().tracer().info("Creating ptencoders2 " + ptencodersName2);
 						ptencoders2 = new PTEncodersII(1, objPrefix8, context());
 						context().createInterfaceWithString(ptencoders2,ptencodersName2);
+
+						std::string objPrefix12="pose3dmotors2";
+						std::string pose3dmotorsName2 = "pose3dmotors2";
+						context().tracer().info("Creating pose3dmotors2 " + pose3dmotorsName2);
+						pose3dmotors2 = new Pose3DMotorsII(1, objPrefix12, context());
+						context().createInterfaceWithString(pose3dmotors2,pose3dmotorsName2);
+
+						std::string objPrefix13="pose3dencoders2";
+						std::string pose3dencodersName2 = "pose3dencoders2";
+						context().tracer().info("Creating pose3dencoders2 " + pose3dencodersName2);
+						pose3dencoders2 = new Pose3DEncodersII(1, objPrefix13, context());
+						context().createInterfaceWithString(pose3dencoders2,pose3dencodersName2);
 					}
 				}
 
 				if (sonar) { // Sonars
-					std::string objPrefix7="sonars1";
+					std::string objPrefix9="sonars1";
 					std::string sonarsName = "sonars1";
 					context().tracer().info("Creating sonars1 " + sonarsName);
-					sonars1 = new SonarsI(objPrefix7,context());
+					sonars1 = new SonarsI(objPrefix9,context());
 					context().createInterfaceWithString(sonars1,sonarsName);
 				}
 			}
@@ -1060,6 +1393,10 @@ namespace gazeboserver {
 			Ice::ObjectPtr ptencoders1;
 			Ice::ObjectPtr ptencoders2;
 			Ice::ObjectPtr sonars1;
+			Ice::ObjectPtr pose3dmotors1;
+			Ice::ObjectPtr pose3dmotors2;
+			Ice::ObjectPtr pose3dencoders1;
+			Ice::ObjectPtr pose3dencoders2;
 	};
 } // end namespace
 
