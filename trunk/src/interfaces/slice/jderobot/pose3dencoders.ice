@@ -32,9 +32,13 @@ module jderobot{
 	*/
   class Pose3DEncodersData
   {
-  	float panAngle;
-	float tiltAngle;
-	int clock;
+		float x;
+		float y;
+		float z;
+  	float pan;
+		float tilt;
+		float roll;
+		int clock;
   };
 
 

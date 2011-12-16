@@ -31,10 +31,14 @@ module jderobot{
    */
 	class Pose3DMotorsData
 	{
-		float latitude;
-		float latitudeSpeed;
-		float longitude;
-		float longitudeSpeed;
+		float x;
+		float y;
+		float z;
+		float pan;
+		float tilt;
+		float roll;
+		float panSpeed;
+		float tiltSpeed;
 	};
 
 	/** 
@@ -42,12 +46,12 @@ module jderobot{
    */
 	class Pose3DMotorsParams
 	{
-		float maxLongitude;
-		float minLongitude;
-		float maxLatitude;
-		float minLatitude;
-		float maxLongitudeSpeed;
-		float maxLatitudeSpeed;
+		float maxPan;
+		float minPan;
+		float maxTilt;
+		float minTilt;
+		float maxPanSpeed;
+		float maxTiltSpeed;
 	};
 
 
