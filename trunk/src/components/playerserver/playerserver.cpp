@@ -216,12 +216,12 @@ namespace playerserver {
 				i=0;
 				j=offset;
 
-				/*Update laser values*
+				/*Update laser values*/
 				while(j<player_laser->scan_count && i<laser_num_readings){
 					laserData->distanceData[i]=(int)(player_laser->scan[(int)j][0]*1000);
 					j=j+jump;
 					i++;
-				}*/
+				}
 			};
 
 		private:
@@ -499,12 +499,12 @@ namespace playerserver {
 			Component():jderobotice::Component("PlayerServer"),
 			motors1(0), laser1(0), encoders1(0), ptmotors1(0), ptencoders1(0), sonars1(0) {}
 
-			virtual void start() {
+			virtual void start() {		
 				int avMotors, avLaser, avEncoders;
 				int avPTMotors, avPTEncoders, avSonars;
 
 				Ice::PropertiesPtr prop = context().properties();
-
+								
 				playerhost = prop->getPropertyWithDefault(context().tag() + ".Hostname","localhost");
 				playerport = prop->getPropertyAsIntWithDefault(context().tag() + ".Port",6665);
 
@@ -519,6 +519,7 @@ namespace playerserver {
 					context().createInterfaceWithString(motors1,motorsName);
 				}
 
+
 				//Laser
 				avLaser = prop->getPropertyAsInt(context().tag() + ".Laser");
 				if (avLaser == 1) {
@@ -529,6 +530,7 @@ namespace playerserver {
 					laser1 = new LaserI(objPrefix3,context());
 					context().createInterfaceWithString(laser1,laserName);
 				}
+				cout << "DEBUG: Salidos de laser" << endl;
 
 				//Encoders
 				avEncoders = prop->getPropertyAsInt(context().tag() + ".Encoders");
@@ -573,7 +575,7 @@ namespace playerserver {
 					sonars1 = new SonarsI(objPrefix7,context());
 					context().createInterfaceWithString(sonars1,sonarsName);
 				}
-
+				
 				//Get subclasses
 				MotorsI * motors = NULL;
 				LaserI * laser = NULL;
@@ -585,36 +587,36 @@ namespace playerserver {
 				if(avMotors)
 					motors = dynamic_cast<MotorsI*>(&(*motors1));
 				if(avLaser)
-					laser = dynamic_cast<LaserI*>(&(*laser1));
+				    laser = dynamic_cast<LaserI*>(&(*laser1));
 				if(avEncoders)
 					encoders = dynamic_cast<EncodersI*>(&(*encoders1));
 				//if(avPTMotors)
-				//	ptmotors = dynamic_cast<PTMotorsI*>(&(*ptmotors1));
+					//ptmotors = dynamic_cast<PTMotorsI*>(&(*ptmotors1));
 				if(avPTEncoders)
 					ptencoders = dynamic_cast<PTEncodersI*>(&(*ptencoders1));			
 				if(avSonars)
 					sonars = dynamic_cast<SonarsI*>(&(*sonars1));		
-
+					
 				//Update values
 				while(true) {
 					if(avMotors && motors)
 						  motors->update();
 
-					if(avLaser && laser)
+					if(avLaser && laser)    
 						  laser->update();
 
 					if(avEncoders && encoders)
 						  encoders->update();
 
-					/*if(avPTMotors && ptmotors)
-						  ptmotors->update();
+					//if(avPTMotors && ptmotors)
+						  //ptmotors->update();
 
-					if(avPTEncoders && ptencoders)
-						  ptencoders->update();*/
+					//if(avPTEncoders && ptencoders)
+						//  ptencoders->update();
 
 					if(avSonars && sonars)
 						  sonars->update();
-
+                    
 					usleep(ITERATION_TIME*1000);
 				}
 			}
@@ -631,8 +633,19 @@ namespace playerserver {
 	};
 }
 
+#include <signal.h>
+#include <stdio.h>
+
+void cat(int sig){
+    printf("Señal: %d atrapada!\n", sig);
+}
+
+
 int main(int argc, char** argv) {
+
+
 	playerserver::Component component;
+    signal(SIGINT, &cat); 
 	jderobotice::Application app(component);
 	return app.jderobotMain(argc,argv);
 }
