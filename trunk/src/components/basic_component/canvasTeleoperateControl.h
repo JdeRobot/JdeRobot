@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef MYCOMPONENT_CANVASTELEOPERATECONTROL_H
-#define MYCOMPONENT_CANVASTELEOPERATECONTROL_H
+#ifndef BASIC_COMPONENT_CANVASTELEOPERATECONTROL_H
+#define BASIC_COMPONENT_CANVASTELEOPERATECONTROL_H
 
 #include <string>
 #include <iostream>
@@ -33,7 +33,7 @@
 #include <libgnomecanvasmm.h>
 
 
-namespace mycomponent {
+namespace basic_component {
 	
 	class CanvasControl : public Gnome::Canvas::CanvasAA 
 		{
@@ -55,4 +55,4 @@ namespace mycomponent {
 
 } // namespace
 
-#endif /*MYCOMPONENT_CANVASTELEOPERATECONTROL_H*/
+#endif /*BASIC_COMPONENT_CANVASTELEOPERATECONTROL_H*/

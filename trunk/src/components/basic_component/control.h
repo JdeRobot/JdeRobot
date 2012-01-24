@@ -20,8 +20,8 @@
  */
 
 
-#ifndef MYCOMPONENT_CONTROL_H
-#define MYCOMPONENT_CONTROL_H
+#ifndef BASIC_COMPONENT_CONTROL_H
+#define BASIC_COMPONENT_CONTROL_H
 
 
 #include <iostream>
@@ -37,7 +37,7 @@
 #include <pthread.h>
 #include "API.h"
 
-namespace mycomponent {
+namespace basic_component {
     class Control {
 	public:
 	virtual ~Control();
@@ -60,4 +60,4 @@ namespace mycomponent {
      
     };//class
 } // namespace
-#endif /*MYCOMPONENT_Control_H*/
+#endif /*BASIC_COMPONENT_Control_H*/

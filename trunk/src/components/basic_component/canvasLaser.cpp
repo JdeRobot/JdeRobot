@@ -21,7 +21,7 @@
 
 #include "canvasLaser.h"
 
-namespace mycomponent {
+namespace basic_component {
 
 	class Control;
 	class Gui;

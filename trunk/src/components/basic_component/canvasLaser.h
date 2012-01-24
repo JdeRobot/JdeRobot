@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef MYCOMPONENT_CANVASLASER_H
-#define MYCOMPONENT_CANVASLASER_H
+#ifndef BASIC_COMPONENT_CANVASLASER_H
+#define BASIC_COMPONENT_CANVASLASER_H
 
 #include <string>
 #include <iostream>
@@ -34,7 +34,7 @@
 #include "gui.h"
 
 
-namespace mycomponent {
+namespace basic_component {
 	
 	class CanvasLaser : public Gnome::Canvas::CanvasAA 
 		{
@@ -66,4 +66,4 @@ namespace mycomponent {
 
 } // namespace
 
-#endif /*MYCOMPONENT_CANVASLASER_H*/
+#endif /*BASIC_COMPONENT_CANVASLASER_H*/

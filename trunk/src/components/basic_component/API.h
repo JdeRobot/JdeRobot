@@ -20,8 +20,8 @@
  */
 
 
-#ifndef MYCOMPONENT_API_H
-#define MYCOMPONENT_API_H
+#ifndef BASIC_COMPONENT_API_H
+#define BASIC_COMPONENT_API_H
 
 
 #include <iostream>
@@ -38,7 +38,7 @@
 
 
 
-namespace mycomponent {
+namespace basic_component {
     class Api {
 	public:
 	virtual ~Api();
@@ -103,4 +103,4 @@ namespace mycomponent {
      
     };//class
 } // namespace
-#endif /*MYCOMPONENT_Control_H*/
+#endif /*BASIC_COMPONENT_Control_H*/

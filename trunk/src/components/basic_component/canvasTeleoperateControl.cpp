@@ -21,7 +21,7 @@
 
 #include "canvasTeleoperateControl.h"
 
-namespace mycomponent {
+namespace basic_component {
 
 	
 

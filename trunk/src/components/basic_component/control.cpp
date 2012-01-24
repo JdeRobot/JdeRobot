@@ -21,7 +21,7 @@
 
 #include "control.h"
 
-namespace mycomponent{
+namespace basic_component{
 
 Control::~Control() {}   
 

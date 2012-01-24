@@ -21,7 +21,7 @@
 
 #include "canvasTeleoperateCameras.h"
 
-namespace mycomponent {
+namespace basic_component {
 
 	
 

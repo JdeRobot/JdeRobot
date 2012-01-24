@@ -21,7 +21,7 @@
 
 #include "gui.h"
 
-namespace mycomponent {
+namespace basic_component {
     Gui::Gui (Api *api): gtkmain(0,0) {
         this->yourCode_button_isPressed=false;
         press_stop_button=false;

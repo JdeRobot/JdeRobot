@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef MYCOMPONENT_CANVASTELEOPERATECAMERAS_H
-#define MYCOMPONENT_CANVASTELEOPERATECAMERAS_H
+#ifndef BASIC_COMPONENT_CANVASTELEOPERATECAMERAS_H
+#define BASIC_COMPONENT_CANVASTELEOPERATECAMERAS_H
 
 #include <string>
 #include <iostream>
@@ -33,7 +33,7 @@
 #include <libgnomecanvasmm.h>
 
 
-namespace mycomponent {
+namespace basic_component {
 
 	class CanvasControlCameras : public Gnome::Canvas::CanvasAA 
 		{
@@ -56,4 +56,4 @@ namespace mycomponent {
 
 } // namespace
 
-#endif /*MYCOMPONENT_CANVASTELEOPERATECAMERAS_H*/
+#endif /*BASIC_COMPONENT_CANVASTELEOPERATECAMERAS_H*/

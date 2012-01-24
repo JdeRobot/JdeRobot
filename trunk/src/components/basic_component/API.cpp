@@ -21,7 +21,7 @@
 
 #include "API.h"
 
-namespace mycomponent{
+namespace basic_component{
 
    double Api::getMotorV(){
       return this->motorVin;

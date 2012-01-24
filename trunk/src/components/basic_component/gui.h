@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef MYCOMPONENT_GUI_H
-#define MYCOMPONENT_GUI_H
+#ifndef BASIC_COMPONENT_GUI_H
+#define BASIC_COMPONENT_GUI_H
 
 #include <cv.h>
 #include <GL/gl.h>
@@ -44,7 +44,7 @@
 #include "canvasTeleoperateCameras.h"
 #include "canvasLaser.h"
 
-namespace mycomponent {
+namespace basic_component {
     class CanvasWin; 
     class CanvasControl;
     class CanvasControlCameras;
@@ -116,4 +116,4 @@ void resetAPI(Api *api);
 	    
     };//class
 }//namespace
-#endif //MYCOMPONENT_GUI_H
+#endif //BASIC_COMPONENT_GUI_H
