@@ -35,8 +35,8 @@ namespace mycomponent {
 	}
         Gnome::Canvas::init();
 	std::cout << "Loading glade\n";
-	this->gladepath=std::string("./mycomponent.glade");
-	refXml = Gnome::Glade::Xml::create("./mycomponent.glade");
+	this->gladepath=std::string("./basic_component.glade");
+	refXml = Gnome::Glade::Xml::create("./basic_component.glade");
 
 	//Get widgets       
         refXml->get_widget("secondarywindow", secondarywindow);
