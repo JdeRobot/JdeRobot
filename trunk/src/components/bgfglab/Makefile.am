@@ -10,7 +10,7 @@ bgfglab_SOURCES = controller.cpp \
 			viewtext.cpp
 
 bgfglab_CPPFLAGS = $(JDEROBOTICE_CPPFLAGS) $(JDEROBOTUTIL_CPPFLAGS) \
-			$(GTKMM_CPPFLAGS) $(COLORSPACESMM_CPPFLAGS) \
+			$(GTKMM_CPPFLAGS) $(COLORSPACESMM_CPPFLAGS) -I/usr/include/gearbox\
 			-DGLADE_DIR=\""$(gladedir)"\"
 bgfglab_LDFLAGS = $(JDEROBOTICE_LDFLAGS) $(JDEROBOTUTIL_LDFLAGS) $(GTKMM_LDFLAGS) $(COLORSPACESMM_LDFLAGS)
 bgfglab_LDADD = $(top_srcdir)/src/libs/colorspaces/libcolorspacesmm.la \
