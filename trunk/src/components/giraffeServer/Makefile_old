@@ -1,0 +1,40 @@
+all: jointmotorComp
+
+jointmotorComp: jointmotorComp.o
+	c++ jointmotorComp.o -lQtCore -o Driver
+
+jointmotorComp.o:
+	c++ -c -O2 -Wall jointmotorComp.cpp handler.h worker.h worker.cpp monitor.h monitor.cpp config.h dynamixel.h dynamixel.cpp JointMotor.h JointMotor.cpp jointmotorI.h jointmotorI.cpp servo.h servo.cpp q4serialport/q4serialport.h q4serialport/q4serialport.cpp rapplication/rapplication.h -I. -I/usr/include/qt4 -I/usr/include/qt4/QtCore -I/usr/include/qt4/QtGui
+
+
+# Link command:
+#Driver: Driver.o Motor.o Connection.o q4serialport.o Handler.o
+#	c++ Driver.o Motor.o Connection.o q4serialport.o Handler.o -lQtCore -o Driver
+    
+# Compilation commands:
+#Driver.o: Driver.cpp
+#	c++ -c Driver.cpp -I/usr/include/qt4 -I/usr/include/qt4/QtCore -o Driver.o
+
+#Motor.o: Motor.cpp Motor.h
+#	c++ -c Motor.cpp -o Motor.o
+
+#Connection.o: Connection.cpp Connection.h
+#	c++ -c Connection.cpp -o Connection.o
+
+#Handler.o: Handler.cpp Handler.h
+#	c++ -c Handler.cpp -I/usr/include/qt4 -I/usr/include/qt4/QtCore -o Handler.o
+
+#q4serialport.o: q4serialport.cpp q4serialport.h
+#	c++ -c q4serialport.cpp -I/usr/include/qt4 -I/usr/include/qt4/QtCore -o q4serialport.o
+
+
+
+#sudo aptitude install libqt4-dev
+
+#/usr/bin/qmake-qt4 -unix -o Makefile test.pro
+
+
+
+
+
+
