@@ -516,6 +516,10 @@ namespace playerserver {
 			: prefix(propertyPrefix),context(context),
 			ptEncodersData1(new jderobot::Pose3DEncodersData()) {
 				Ice::PropertiesPtr prop = context.properties();
+				
+				pan = 0.0;
+				tilt= 0.0;
+				
 			}
 
 			virtual ~Pose3DEncodersI(){};
@@ -523,13 +527,19 @@ namespace playerserver {
 			virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData(const Ice::Current&) {
 				//waiting for next gazebo camera update
 				gazeboPTZ1->Lock(1);
-				//ptEncodersData1->pan = gazeboPTZ1->data->pan * RADTODEG;
-				//ptEncodersData1->tilt = gazeboPTZ1->data->tilt * RADTODEG;
+				ptEncodersData1->pan = this->pan;
+				ptEncodersData1->tilt = this->tilt;
 				gazeboPTZ1->Unlock();
-
 				return ptEncodersData1; 
 			};
+			
+			void update(float pan, float tilt){
+			   this->pan = pan;
+			   this->tilt = tilt; 
+			}
 
+         float pan;
+         float tilt;
 			std::string prefix;
 			jderobotice::Context context;
 			jderobot::Pose3DEncodersDataPtr ptEncodersData1;
@@ -543,7 +553,9 @@ namespace playerserver {
 			: prefix(propertyPrefix),context(context),
 			ptEncodersData2(new jderobot::Pose3DEncodersData()) {
 				Ice::PropertiesPtr prop = context.properties();
-
+				
+				pan = 0.0;
+				tilt= 0.0;
 			}
 
 			virtual ~Pose3DEncodersII(){};
@@ -551,12 +563,20 @@ namespace playerserver {
 			virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData(const Ice::Current&) {
 				//waiting for next gazebo camera update
 				gazeboPTZ2->Lock(1);
-				//ptEncodersData2->pan = gazeboPTZ2->data->pan * RADTODEG;
-				//ptEncodersData2->tilt = gazeboPTZ2->data->tilt * RADTODEG;
+				ptEncodersData2->pan = this->pan;
+				ptEncodersData2->tilt = this->tilt;
 				gazeboPTZ2->Unlock();
 
 				return ptEncodersData2;
 			};
+			
+			void update(float pan, float tilt){
+			   this->pan = pan;
+			   this->tilt = tilt; 
+			}
+
+         float pan;
+         float tilt;
 
 			std::string prefix;
 			jderobotice::Context context;
@@ -877,6 +897,36 @@ namespace playerserver {
 						      break;
                      }
                   }
+                  
+                  std:: stringstream streamPose3DEncoders1;
+                  streamPose3DEncoders1 << robotName+":"+robotPort + ":Pose3DEncoders1:";
+                  std::string sPose3DEncoders1 = streamPose3DEncoders1.str();
+					   if(avPose3dencoders1 && pose3dencoders_1 && !strcmp(buff, sPose3DEncoders1.c_str())){
+					      //cout << "Encoders" << endl;
+                     float pan, tilt;
+                     fscanf (pFile, "%f", &pan);
+                     fscanf (pFile, "%f", &tilt);
+                     
+                     //std::cout << "pan" << pan << "tilt" << tilt << endl;
+                     pose3dencoders_1->update(pan, tilt);
+						   continue;
+                  }
+                  
+                  std:: stringstream streamPose3DEncoders2;
+                  streamPose3DEncoders2 << robotName+":"+robotPort + ":Pose3DEncoders1:";
+                  std::string sPose3DEncoders2 = streamPose3DEncoders2.str();
+					   if(avPose3dencoders2 && pose3dencoders_2 && !strcmp(buff, sPose3DEncoders2.c_str())){
+					      //cout << "Encoders" << endl;
+                     float pan, tilt;
+                     fscanf (pFile, "%f", &pan);
+                     fscanf (pFile, "%f", &tilt);
+                     
+                     //std::cout << "pan" << pan << "tilt" << tilt << endl;
+                     pose3dencoders_2->update(pan, tilt);
+						   continue;
+                  }
+                  
+                  
                   
                }
                

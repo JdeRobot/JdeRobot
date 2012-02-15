@@ -38,8 +38,8 @@ int main(int argc, char** argv){
    jderobot::CameraPrx cprx2;
    jderobot::PTEncodersPrx pteprx1;   
    jderobot::PTEncodersPrx pteprx2;
-	jderobot::Pose3DEncodersPtr pose3DEncoders1;
-	jderobot::Pose3DEncodersPtr pose3DEncoders2;
+	jderobot::Pose3DEncodersPrx pose3DEncoders1;
+	jderobot::Pose3DEncodersPrx pose3DEncoders2;
   
 
    //INTERFACE DATA
@@ -162,7 +162,7 @@ int main(int argc, char** argv){
          throw "Invalid proxy Recorder.PTEncoders2.Proxy";
       }
       
-     /*
+     
       ////pose3DEncoders1
       avPose3DEncoders1 = prop->getPropertyAsInt("Recorder.Pose3DEncoders1.bool");
       if(avPose3DEncoders1){
@@ -172,25 +172,25 @@ int main(int argc, char** argv){
             throw "Could not create proxy with encoders";
          
          // Cast to encoders
-         pose3DEncoders1 =jderobot::Pose3DEncodersPtr::checkedCast(pose3DEncodersIce1);
+         pose3DEncoders1 =jderobot::Pose3DEncodersPrx::checkedCast(pose3DEncodersIce1);
          if (0== pose3DEncoders1)
             throw "Invalid proxy Recorder.pose3DEncoders1.Proxy";
       }
       //pose3DEncoders2
-      avPose3DEncoders2 = prop->getPropertyAsInt("Recorder.pose3DEncoders2.bool");
+      avPose3DEncoders2 = prop->getPropertyAsInt("Recorder.Pose3DEncoders2.bool");
       if(avPose3DEncoders2){
          // Contact to pose3DEncoders interface
-         Ice::ObjectPrx pose3DEncodersIce2 = ic->propertyToProxy("Recorder.pose3DEncoders2.Proxy");
+         Ice::ObjectPrx pose3DEncodersIce2 = ic->propertyToProxy("Recorder.Pose3DEncoders2.Proxy");
          if (0==pose3DEncodersIce2)
             throw "Could not create proxy with encoders";
          
          // Cast to encoders
-         pose3DEncoders2 = jderobot::Pose3DEncodersPtr::checkedCast(pose3DEncodersIce2);
+         pose3DEncoders2 = jderobot::Pose3DEncodersPrx::checkedCast(pose3DEncodersIce2);
          if (0== pose3DEncoders2)
             throw "Invalid proxy Recorder.pose3DEncoders2.Proxy";
       }
       
-      */
+      
       
       //-----------------ICE----------------//
       
@@ -239,11 +239,15 @@ int main(int argc, char** argv){
          
          if(avPose3DEncoders1){
             pose3DEncodersData1 = pose3DEncoders1->getPose3DEncodersData();
-            std::cout << timeRelative << pose3DEncodersData1->pan << " tilt:" <<  pose3DEncodersData1->tilt << std::endl;
+            outfile << timeRelative <<" "<<robotName <<":"<<robotPort <<":Pose3DEncoders1: "<< pose3DEncodersData1->pan << " " <<  pose3DEncodersData1->tilt << std::endl;
+            //std::cout << timeRelative << " pan: " << pose3DEncodersData1->pan << " tilt:" <<  pose3DEncodersData1->tilt << std::endl;
          }
          
          if(avPose3DEncoders2){
             pose3DEncodersData2 = pose3DEncoders2->getPose3DEncodersData();
+            outfile << timeRelative <<" "<<robotName <<":"<<robotPort <<":Pose3DEncoders2: "<< pose3DEncodersData2->pan << " " <<  pose3DEncodersData2->tilt << std::endl;
+            
+            //std::cout << timeRelative << " pan: " << pose3DEncodersData2->pan << " tilt:" <<  pose3DEncodersData2->tilt << std::endl;
          }
          
          if(ptencoders){
