@@ -221,47 +221,6 @@ int main(int argc, char** argv){
          totala=a.tv_sec*1000000+a.tv_usec;
       
       
-         if(avEncoders){
-            ed = eprx->getEncodersData(); // cogemos informacion de los encoders
-		      //std::cout << timeRelative << " " << "x: " << ed->robotx << " y: " <<ed->roboty << " z: " << ed->robottheta << std::endl;
-            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Encoders:\t" << ed->robotx << "\t" <<ed->roboty << "\t" << ed->robottheta << std::endl;
-         }
-         
-         if(avLaser){
-            ld = lprx->getLaserData();
-            outfile << timeRelative <<" "+robotName +":"+robotPort + ":Laser: ";
-            for(int i = 0; i < muestrasLaser; i++){
-               outfile <<ld->distanceData[i] << "\t";
-            }
-               outfile << std::endl;
-            //std::cout << ld->distanceData[80] << std::endl;
-         }
-         
-         if(avPose3DEncoders1){
-            pose3DEncodersData1 = pose3DEncoders1->getPose3DEncodersData();
-            outfile << timeRelative <<" "<<robotName <<":"<<robotPort <<":Pose3DEncoders1: "<< pose3DEncodersData1->pan << " " <<  pose3DEncodersData1->tilt << std::endl;
-            //std::cout << timeRelative << " pan: " << pose3DEncodersData1->pan << " tilt:" <<  pose3DEncodersData1->tilt << std::endl;
-         }
-         
-         if(avPose3DEncoders2){
-            pose3DEncodersData2 = pose3DEncoders2->getPose3DEncodersData();
-            outfile << timeRelative <<" "<<robotName <<":"<<robotPort <<":Pose3DEncoders2: "<< pose3DEncodersData2->pan << " " <<  pose3DEncodersData2->tilt << std::endl;
-            
-            //std::cout << timeRelative << " pan: " << pose3DEncodersData2->pan << " tilt:" <<  pose3DEncodersData2->tilt << std::endl;
-         }
-         
-         if(ptencoders){
-            PTencodersData1 = pteprx1->getPTEncodersData();
-            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":PTEncoders1:\t";
-            outfile << PTencodersData1->panAngle <<"\t" << PTencodersData1->tiltAngle << std::endl; 
-         }
-         
-        if(ptencoders2){
-            PTencodersData2 = pteprx2->getPTEncodersData();
-            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":PTEncoders2:\t";
-            outfile << PTencodersData2->panAngle <<"\t" << PTencodersData2->tiltAngle << std::endl; 
-         }
-         
          if(avCamera1){
             imageData1 = cprx1->getImageData();
             colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(
@@ -299,8 +258,48 @@ int main(int argc, char** argv){
             cv::imwrite(buff, image2);
             outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Camera2:\t" << buff  << std::endl;
          }
-
-
+      
+         if(avEncoders){
+            ed = eprx->getEncodersData(); // cogemos informacion de los encoders
+		      //std::cout << timeRelative << " " << "x: " << ed->robotx << " y: " <<ed->roboty << " z: " << ed->robottheta << std::endl;
+            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Encoders:\t" << ed->robotx << "\t" <<ed->roboty << "\t" << ed->robottheta << std::endl;
+         }
+         
+         if(avLaser){
+            ld = lprx->getLaserData();
+            outfile << timeRelative <<" "+robotName +":"+robotPort + ":Laser: ";
+            for(int i = 0; i < muestrasLaser; i++){
+               outfile <<ld->distanceData[i] << "\t";
+            }
+               outfile << std::endl;
+            //std::cout << ld->distanceData[80] << std::endl;
+         }
+         
+         if(avPose3DEncoders1){
+            pose3DEncodersData1 = pose3DEncoders1->getPose3DEncodersData();
+            outfile << timeRelative <<" "<<robotName <<":"<<robotPort <<":Pose3DEncoders1: "<< pose3DEncodersData1->x << " " << pose3DEncodersData1->y << " " << pose3DEncodersData1->z << " "<< pose3DEncodersData1->pan << " " <<  pose3DEncodersData1->tilt << " " << pose3DEncodersData1->roll <<std::endl;
+            //std::cout << timeRelative << " pan: " << pose3DEncodersData1->pan << " tilt:" <<  pose3DEncodersData1->tilt << std::endl;
+         }
+         
+         if(avPose3DEncoders2){
+            pose3DEncodersData2 = pose3DEncoders2->getPose3DEncodersData();
+            outfile << timeRelative <<" "<<robotName <<":"<<robotPort <<":Pose3DEncoders2: "<< pose3DEncodersData2->x << " " << pose3DEncodersData2->y << " " << pose3DEncodersData2->z << " "<< pose3DEncodersData2->pan << " " <<  pose3DEncodersData2->tilt<< " " << pose3DEncodersData2->roll << std::endl;
+            
+            //std::cout << timeRelative << " pan: " << pose3DEncodersData2->pan << " tilt:" <<  pose3DEncodersData2->tilt << std::endl;
+         }
+         
+         if(ptencoders){
+            PTencodersData1 = pteprx1->getPTEncodersData();
+            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":PTEncoders1:\t";
+            outfile << PTencodersData1->panAngle <<"\t" << PTencodersData1->tiltAngle << std::endl; 
+         }
+         
+        if(ptencoders2){
+            PTencodersData2 = pteprx2->getPTEncodersData();
+            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":PTEncoders2:\t";
+            outfile << PTencodersData2->panAngle <<"\t" << PTencodersData2->tiltAngle << std::endl; 
+         }
+         
          gettimeofday(&b,NULL);
          totalb=b.tv_sec*1000000+b.tv_usec;
          std::cout << "Introrob takes " << (totalb-totala)/1000 << " ms" << std::endl;

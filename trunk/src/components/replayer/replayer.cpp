@@ -75,12 +75,18 @@ namespace playerserver {
 	public:
 		CameraI(std::string& propertyPrefix, const jderobotice::Context& context)
 		: prefix(propertyPrefix),context(context),
-		imageFmt(),
-		imageDescription(new jderobot::ImageDescription()),
-		cameraDescription(new jderobot::CameraDescription()),
 
 		replyTask() {
+		
+		   std::cout << "Constructor" << endl;
+		   
+		   imageDescription = (new jderobot::ImageDescription());
+		   cameraDescription = (new jderobot::CameraDescription());
+		
+			replyTask = new ReplyTask(this);
+		
          startThread = false;
+         fileName.clear();
 		}
 
 		std::string getName () {
@@ -121,9 +127,9 @@ namespace playerserver {
 		}
 		virtual void update(std::string s){
          fileName = s;
+         //std::cout << "update" << endl;
          
          if(!startThread){
-   			replyTask = new ReplyTask(this);
             startThread = true;
 			   replyTask->start(); // my own thread
 		   }
@@ -143,11 +149,6 @@ namespace playerserver {
 				}
 
 				virtual void walk(){
-				   
-				   while(mycamera->fileName.empty()){
-				      usleep(2000);
-				   }
-				   
                cv::Mat image = cv::imread(mycamera->fileName);
                mycamera->imageDescription->width = image.cols;
                mycamera->imageDescription->height = image.rows;
@@ -157,7 +158,7 @@ namespace playerserver {
 					jderobot::ImageDataPtr reply(new jderobot::ImageData);
 					reply->description = mycamera->imageDescription;
 					struct timeval a, b;
-					int cycle = 100;
+					int cycle = 50;
 					long totalb,totala;
 					long diff;
 
@@ -169,8 +170,6 @@ namespace playerserver {
 						IceUtil::Time t = IceUtil::Time::now();
 						reply->timeStamp.seconds = (long)t.toSeconds();
 						reply->timeStamp.useconds = (long)t.toMicroSeconds() - reply->timeStamp.seconds*1000000;
-						
-                  cv::Mat image = cv::imread(mycamera->fileName);
                   
 					   reply->pixelData.resize(image.rows*image.cols*3);
 
@@ -533,13 +532,18 @@ namespace playerserver {
 				return ptEncodersData1; 
 			};
 			
-			void update(float pan, float tilt){
+			void update(float x, float y, float z, float pan, float tilt, float roll){
+			   this->x = x;
+			   this->y = y;
+			   this->z = z;
 			   this->pan = pan;
-			   this->tilt = tilt; 
+			   this->tilt = tilt;
+			   this->roll = roll;  
 			}
-
+         float x, y, z;
          float pan;
          float tilt;
+         float roll;
 			std::string prefix;
 			jderobotice::Context context;
 			jderobot::Pose3DEncodersDataPtr ptEncodersData1;
@@ -570,14 +574,19 @@ namespace playerserver {
 				return ptEncodersData2;
 			};
 			
-			void update(float pan, float tilt){
+			void update(float x, float y, float z, float pan, float tilt, float roll){
+			   this->x = x;
+			   this->y = y;
+			   this->z = z;
 			   this->pan = pan;
-			   this->tilt = tilt; 
+			   this->tilt = tilt;
+			   this->roll = roll;  
 			}
-
+			
+         float x, y, z;
          float pan;
          float tilt;
-
+         float roll;
 			std::string prefix;
 			jderobotice::Context context;
 			jderobot::Pose3DEncodersDataPtr ptEncodersData2;
@@ -593,6 +602,20 @@ namespace playerserver {
 		public:
 			Component():jderobotice::Component("Replayer"),
 			laser1(0), encoders1(0) {}
+			
+			FILE* readLine(FILE* fp, int n){
+			   int i=0;   
+			   char* str;
+			   size_t nSize = 0;
+			   
+			   while(! feof(fp)){
+               getline(&str, &nSize, fp);
+               if(i==(n-1)) break;
+               i++;
+
+            }
+            return fp;
+			} 
 
 			virtual void start() {		
 				int avLaser, avEncoders, avMotors;
@@ -600,6 +623,8 @@ namespace playerserver {
 				int avPTEncodersI, avPTEncodersII;
 				int avPose3dmotors1, avPose3dmotors2;
 				int avPose3dencoders1, avPose3dencoders2;
+				
+				int Nread = 0;
 
 				Ice::PropertiesPtr prop = context().properties();
 								
@@ -611,7 +636,13 @@ namespace playerserver {
             cout << "........" << fileName << " ..... " << endl;
 
 				int nCameras = prop->getPropertyAsInt(context().tag() + ".NCameras");				
-				///cameras.resize(nCameras);
+				cameras.resize(nCameras);
+				for (int i=0; i<nCameras; i++) {//build camera objects
+				   cameras[i]=NULL;
+				}
+				
+            usleep(100*1000);  
+				
 				cout << "DEBUG: Entramos en camera con " << nCameras << " cameras" << endl;
 				//Camera
 				for (int i=0; i<nCameras; i++) {//build camera objects
@@ -628,10 +659,17 @@ namespace playerserver {
 					cout << "1" << endl;
 					context().tracer().info("Creating camera " + cameraName);
 				   cout << "2" << endl;
-					cameras.push_back(new CameraI(objPrefix,context()));
+				   cout << objPrefix << " " << context().tag() << endl; 
+				   CameraI* cam = new CameraI(objPrefix, context());
 				   cout << "3" << endl;
-					context().createInterfaceWithString(cameras[i],cameraName);
+               if(cam!=NULL){
+                  cout << "NULL " << i << endl;
+               }  
+					cameras[i] = cam;
 				   cout << "4" << endl;
+					context().createInterfaceWithString(cameras[i],cameraName);
+				   cout << "5" << endl;
+				   Nread++;
 				}
 				cout << "DEBUG: Salidos de camera" << endl;
 
@@ -644,6 +682,7 @@ namespace playerserver {
 					context().tracer().info("Creating laser1 " + laserName);
 					laser1 = new LaserI(objPrefix3,context());
 					context().createInterfaceWithString(laser1,laserName);
+					Nread++;
 				}
 				cout << "DEBUG: Salidos de laser" << endl;
 
@@ -656,6 +695,7 @@ namespace playerserver {
 					context().tracer().info("Creating encoders1 " + encodersName);
 					encoders1 = new EncodersI(objPrefix4,context());
 					context().createInterfaceWithString(encoders1,encodersName);
+					Nread++;
 				}
 				
 				//Motors (vacia)
@@ -710,7 +750,7 @@ namespace playerserver {
 				    context().createInterfaceWithString(ptencoders2,ptencodersName2);
 			    }
 			    
- 			    //PTEncodersII
+ 			    //PTMotorsI
              avPose3dmotors1 = prop->getPropertyAsInt(context().tag() + ".pose3dmotors1");
              if(avPose3dmotors1){
                   std::string objPrefix10="pose3dmotors1";
@@ -718,8 +758,9 @@ namespace playerserver {
                   context().tracer().info("Creating pose3dmotors1 " + pose3dmotorsName1);
                   pose3dmotors1 = new Pose3DMotorsI( 0, objPrefix10,context());
                   context().createInterfaceWithString(pose3dmotors1,pose3dmotorsName1);
+                  
 			    }	    
- 			    //PTEncodersII
+ 			    //PTMotorsII
              avPose3dmotors2 = prop->getPropertyAsInt(context().tag() + ".pose3dmotors2");
              if(avPose3dmotors2){
                   std::string objPrefix12="pose3dmotors2";
@@ -736,6 +777,7 @@ namespace playerserver {
 					   context().tracer().info("Creating pose3dencoders1 " + pose3dencodersName1);
 					   pose3dencoders1 = new Pose3DEncodersI(0, objPrefix11, context());
 					   context().createInterfaceWithString(pose3dencoders1,pose3dencodersName1);
+					   Nread++;
             }
 			    
 			    avPose3dencoders2 = prop->getPropertyAsInt(context().tag() + ".pose3dencoders2");
@@ -745,6 +787,7 @@ namespace playerserver {
 						context().tracer().info("Creating pose3dencoders2 " + pose3dencodersName2);
 						pose3dencoders2 = new Pose3DEncodersII(1, objPrefix13, context());
 						context().createInterfaceWithString(pose3dencoders2,pose3dencodersName2);
+						Nread++;
 				 }
 				 
 
@@ -875,7 +918,7 @@ namespace playerserver {
                      fscanf (pFile, "%f", &roboty);
                      fscanf (pFile, "%f", &robottheta);
                      
-                     //std::cout << robotx << " y: " << roboty << " z: " << robottheta << endl;
+                     std::cout << robotx << " y: " << roboty << " z: " << robottheta << endl;
                      
 						   encoders->update( robotx, roboty, robottheta);
 						   continue;
@@ -891,6 +934,13 @@ namespace playerserver {
 				         if(!strcmp(buff, s.c_str()) ){
 
                         fscanf (pFile, "%s", buff);
+                        
+                        FILE* fpImage = fopen(buff,"r");
+                        if(fpImage==NULL){
+                           cout << "No exite la imagen: Descartando odometría" << endl;
+                           pFile = readLine(pFile, Nread-i+1);
+                           break;
+                        }                     
 				            camera[i]->update(buff);
 				            //cout << "Dentro:" << i  << buff <<endl;
 						      //encoders->update( robotx, roboty, robottheta);
@@ -902,13 +952,15 @@ namespace playerserver {
                   streamPose3DEncoders1 << robotName+":"+robotPort + ":Pose3DEncoders1:";
                   std::string sPose3DEncoders1 = streamPose3DEncoders1.str();
 					   if(avPose3dencoders1 && pose3dencoders_1 && !strcmp(buff, sPose3DEncoders1.c_str())){
-					      //cout << "Encoders" << endl;
-                     float pan, tilt;
+                     float x, y, z, pan, tilt, roll;
+                     fscanf (pFile, "%f", &x);
+                     fscanf (pFile, "%f", &y);
+                     fscanf (pFile, "%f", &z);
                      fscanf (pFile, "%f", &pan);
                      fscanf (pFile, "%f", &tilt);
-                     
+                     fscanf (pFile, "%f", &roll);
                      //std::cout << "pan" << pan << "tilt" << tilt << endl;
-                     pose3dencoders_1->update(pan, tilt);
+                     pose3dencoders_2->update(x, y, z, pan, tilt, roll);
 						   continue;
                   }
                   
@@ -916,13 +968,15 @@ namespace playerserver {
                   streamPose3DEncoders2 << robotName+":"+robotPort + ":Pose3DEncoders1:";
                   std::string sPose3DEncoders2 = streamPose3DEncoders2.str();
 					   if(avPose3dencoders2 && pose3dencoders_2 && !strcmp(buff, sPose3DEncoders2.c_str())){
-					      //cout << "Encoders" << endl;
-                     float pan, tilt;
+                     float x, y, z, pan, tilt, roll;
+                     fscanf (pFile, "%f", &x);
+                     fscanf (pFile, "%f", &y);
+                     fscanf (pFile, "%f", &z);
                      fscanf (pFile, "%f", &pan);
                      fscanf (pFile, "%f", &tilt);
-                     
+                     fscanf (pFile, "%f", &roll);
                      //std::cout << "pan" << pan << "tilt" << tilt << endl;
-                     pose3dencoders_2->update(pan, tilt);
+                     pose3dencoders_2->update(x, y, z, pan, tilt, roll);
 						   continue;
                   }
                   
@@ -934,9 +988,9 @@ namespace playerserver {
                gettimeofday(&b,NULL);
                totalb=b.tv_sec*1000000+b.tv_usec;
                
-               std::cout << "Introrob takes " << (totalb-totala)/1000 << " ms" << std::endl;
+               //std::cout << "Introrob takes " << (totalb-totala)/1000 << " ms" << std::endl;
                
-               cout << "Time to sleep: " << (timeToSleep/speed)-(totalb-totala)/1000 << endl;
+               //cout << "Time to sleep: " << (timeToSleep/speed)-(totalb-totala)/1000 << endl;
                
                timeToSleep = (timeToSleep/speed)-(totalb-totala)/1000;
                
