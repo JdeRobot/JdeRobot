@@ -74,16 +74,12 @@ namespace playerserver {
 		class CameraI: virtual public jderobot::Camera {
 	public:
 		CameraI(std::string& propertyPrefix, const jderobotice::Context& context)
-		: prefix(propertyPrefix),context(context),
-
-		replyTask() {
+		: prefix(propertyPrefix),context(context) {
 		
 		   std::cout << "Constructor" << endl;
 		   
 		   imageDescription = (new jderobot::ImageDescription());
-		   cameraDescription = (new jderobot::CameraDescription());
-		
-			replyTask = new ReplyTask(this);
+		   //cameraDescription = (new jderobot::CameraDescription());
 		
          startThread = false;
          fileName.clear();
@@ -131,6 +127,7 @@ namespace playerserver {
          
          if(!startThread){
             startThread = true;
+            replyTask = new ReplyTask(this);
 			   replyTask->start(); // my own thread
 		   }
 	   }	
@@ -158,7 +155,7 @@ namespace playerserver {
 					jderobot::ImageDataPtr reply(new jderobot::ImageData);
 					reply->description = mycamera->imageDescription;
 					struct timeval a, b;
-					int cycle = 50;
+					int cycle = 48;
 					long totalb,totala;
 					long diff;
 
@@ -173,6 +170,7 @@ namespace playerserver {
                   
 					   reply->pixelData.resize(image.rows*image.cols*3);
 
+                  image = cv::imread(mycamera->fileName);
 					   memcpy( &(reply->pixelData[0]), (unsigned char *) image.data, image.rows*image.cols*3);
 
 					   { //critical region start
@@ -190,7 +188,7 @@ namespace playerserver {
 						diff = (totalb-totala)/1000;
 						diff = cycle-diff;
 
-						//sstd::cout << "Gazeboserver takes " << diff << " ms" << std::endl;
+						//std::cout << "Gazeboserver takes " << diff << " ms " << mycamera->fileName << std::endl;
 
 						if(diff < 33)
 							diff = 33;
@@ -660,12 +658,11 @@ namespace playerserver {
 					context().tracer().info("Creating camera " + cameraName);
 				   cout << "2" << endl;
 				   cout << objPrefix << " " << context().tag() << endl; 
-				   CameraI* cam = new CameraI(objPrefix, context());
+				   cameras[i] = new CameraI(objPrefix, context());
 				   cout << "3" << endl;
-               if(cam!=NULL){
+               if(cameras[i]!=NULL){
                   cout << "NULL " << i << endl;
-               }  
-					cameras[i] = cam;
+               }
 				   cout << "4" << endl;
 					context().createInterfaceWithString(cameras[i],cameraName);
 				   cout << "5" << endl;
