@@ -59,39 +59,25 @@ namespace visionLibrary {
 		  p->x = aux;
 	}
 
-	void geometry::get2DPosition(HPoint3D in, HPoint2D &res)
-	{
-		  this->get2DPosition(this->getCamera(), in, res);
-	}
-
 	void geometry::get2DPosition(TPinHoleCamera * camera, HPoint3D in, HPoint2D &res)
 	{
 		  HPoint2D p2d;
 
 		  project(in, &p2d, *camera);
-		  this->optical2Pixel(camera, &p2d);
+		  geometry::optical2Pixel(camera, &p2d);
 
 		  res.x=p2d.x;
 		  res.y=p2d.y;
 		  res.h=p2d.h;
 	}
 
-	void geometry::get3DPosition(HPoint3D &res, HPoint2D in)
-	{
-		  this->get3DPositionZ(res, in, 0.0);
-	}
 
 	void geometry::get3DPosition(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in)
 	{
-		  this->get3DPositionZ(camera, res, in, 0.0);
+		  geometry::get3DPositionZ(camera, res, in, 0.0);
 	}
 
-	void geometry::get3DPositionX(HPoint3D &res, HPoint2D in, float X = 0.0)
-	{
-		  this->get3DPositionX(this->getCamera(), res, in, X);
-	}
-
-	void geometry::get3DPositionX(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, float X = 0.0)
+	void geometry::get3DPositionX(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, float X)
 	{
 		  HPoint2D p2d;
 		  HPoint3D p3d;
@@ -106,7 +92,7 @@ namespace visionLibrary {
 		  p2d.y = in.y;
 		  p2d.h = in.h;
 
-		  this->pixel2Optical(camera, &p2d);
+		  geometry::pixel2Optical(camera, &p2d);
 		  backproject(&p3d, p2d, *camera);
 
 		  /*Check division by zero*/
@@ -127,12 +113,7 @@ namespace visionLibrary {
 		  res.H = 1.0;
 	}
 
-	void geometry::get3DPositionY(HPoint3D &res, HPoint2D in, float Y = 0.0)
-	{
-		  this->get3DPositionY(this->getCamera(), res, in, Y);
-	}
-
-	void geometry::get3DPositionY(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, float Y = 0.0)
+	void geometry::get3DPositionY(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, float Y)
 	{
 		  HPoint2D p2d;
 		  HPoint3D p3d;
@@ -147,7 +128,7 @@ namespace visionLibrary {
 		  p2d.y = in.y;
 		  p2d.h = in.h;
 
-		  this->pixel2Optical(camera, &p2d);
+		  geometry::pixel2Optical(camera, &p2d);
 		  backproject(&p3d, p2d, *camera);
 
 		  /*Check division by zero*/
@@ -168,12 +149,7 @@ namespace visionLibrary {
 		  res.H = 1.0;
 	}
 
-	void geometry::get3DPositionZ(HPoint3D &res, HPoint2D in, float Z = 0.0)
-	{
-		  this->get3DPositionZ(this->getCamera(), res, in, Z);
-	}
-
-	void geometry::get3DPositionZ(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, float Z = 0.0)
+	void geometry::get3DPositionZ(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, float Z)
 	{
 		  HPoint2D p2d;
 		  HPoint3D p3d;
@@ -192,7 +168,7 @@ namespace visionLibrary {
 		  p2d.h = in.h;
 		  //cerr<<"p2d: "<<in.x<<", "<<in.y<<", "<<in.h<<endl;
 
-		  this->pixel2Optical(camera, &p2d);
+		  geometry::pixel2Optical(camera, &p2d);
 		  backproject(&p3d, p2d, *camera);
 		  //cerr<<"p3d: "<<p3d.X<<", "<<p3d.Y<<", "<<p3d.Z<<endl;
 
