@@ -1,5 +1,5 @@
-#ifndef VISIONLIBRARY_H
-#define VISIONLIBRARY_H
+#ifndef VISIONLIB_H
+#define VISIONLIB_H
 
 #include <geometry.h>
 #include <cvfast.h>

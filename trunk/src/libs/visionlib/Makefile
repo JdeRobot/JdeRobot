@@ -6,12 +6,12 @@ LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotIce.so \
 	$(JDEROBOTDIR)/lib/jderobot/libJderobotInterfaces.so \
 	$(JDEROBOTDIR)/lib/jderobot/libprogeo.so
 
-all: visionlibrary.o geometry.o image.o linesDetection.o cvfast.o
-	ar r visionlibrary.a visionlibrary.o geometry.o image.o image.o cvfast.o
-	ranlib visionlibrary.a
+all: visionlib.o geometry.o image.o linesDetection.o cvfast.o
+	ar r visionlib.a visionlib.o geometry.o image.o image.o cvfast.o
+	ranlib visionlib.a
 
-visionlibrary.o: visionlibrary.h
-	g++ -c $(CXXFLAGS) visionlibrary.h -o visionlibrary.o
+visionlib.o: visionlib.h
+	g++ -c $(CXXFLAGS) visionlib.h -o visionlib.o
 
 geometry.o: geometry.cpp
 	g++ -c $(CXXFLAGS) geometry.cpp -o geometry.o
@@ -28,6 +28,6 @@ cvfast.o: cvfast.cpp
 #Clean
 
 clean:
-	rm visionlibrary.a *.o *.gch
+	rm visionlib.a *.o *.gch
 
 
