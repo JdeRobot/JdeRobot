@@ -48,8 +48,8 @@
 #include <jderobot/ptencoders.h>
 #include <jderobot/ptmotors.h>
 #include <jderobot/sonars.h>
-#include <jderobot/pose3dmotors.h>
-#include <jderobot/pose3dencoders.h>
+#include "pose3dmotors.h"
+#include "pose3dencoders.h"
 #include <math.h>
 #include <gazebo/gazebo.h>
 
@@ -1182,6 +1182,9 @@ namespace gazeboserver {
 				}
 
 				gazeboPTZ1->Lock(1);
+				ptEncodersData1->x = 215.;
+				ptEncodersData1->y = 110.;
+				ptEncodersData1->z = 254.;
 				ptEncodersData1->pan = gazeboPTZ1->data->pan * RADTODEG;
 				ptEncodersData1->tilt = gazeboPTZ1->data->tilt * RADTODEG;
 				gazeboPTZ1->Unlock();
@@ -1246,6 +1249,9 @@ namespace gazeboserver {
 					printf("Gazebo PTENCODERS model not opened\n");
 				}
 				gazeboPTZ2->Lock(1);
+				ptEncodersData2->x = 215.;
+				ptEncodersData2->y = -110.;
+				ptEncodersData2->z = 254.;
 				ptEncodersData2->pan = gazeboPTZ2->data->pan * RADTODEG;
 				ptEncodersData2->tilt = gazeboPTZ2->data->tilt * RADTODEG;
 				gazeboPTZ2->Unlock();
