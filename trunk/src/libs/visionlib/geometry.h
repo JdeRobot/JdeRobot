@@ -65,6 +65,8 @@ namespace visionLibrary {
 
 			/*Distance between two points in 2D in a concrete axis*/
 			static double calcDistanceAxis(double x1, double y1, double x2, double y2, double alpha);
+			static double calcDistanceAxis(HPoint2D p1, HPoint2D p2, double alpha);
+			static double calcDistanceAxis(HPoint2D p1, HPoint2D p2, double cosa, double sina);
 			static double calcDistanceAxis(HPoint3D p1, HPoint3D p2, double alpha);
 			static double calcDistanceAxis(HPoint3D p1, HPoint3D p2, double cosa, double sina);
 
@@ -106,7 +108,10 @@ namespace visionLibrary {
 			static void calIntersectionCircleVector(HPoint3D v, HPoint3D p_c, double r, HPoint3D &int1, HPoint3D &int2);
 
 			/*Return the intersection between two points (A and B) on 3D, and the ground*/
-			static void lineGroundIntersection (HPoint3D A, HPoint3D B, HPoint3D &intersectionPoint);	
+			static void lineGroundIntersection (HPoint3D A, HPoint3D B, HPoint3D &intersectionPoint);
+
+			/*Return true if two segments P1-P2 and P3-P4 intersect each other*/
+			static bool intersectSegments(double p1x, double p1y, double p2x, double p2y, double p3x, double p3y, double p4x, double p4y, HPoint2D& pres);
 
 			/*Try to merge two segments, return true if merged and update segment1.
 			Params: max parallel angle (rads), max horizontal distance (pixs), max perpendicular distance (pixs)*/

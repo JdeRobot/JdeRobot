@@ -219,6 +219,25 @@ namespace visionLibrary {
 		return fabs(dist);
 	}
 
+	double geometry::calcDistanceAxis(HPoint2D p1, HPoint2D p2, double alpha)
+	{
+		double dist;
+
+		dist = (p2.x - p1.x)*cos(alpha) + (p2.y - p1.y)*sin(alpha);
+
+		return fabs(dist);
+	}
+
+	double geometry::calcDistanceAxis(HPoint2D p1, HPoint2D p2, double cosa, double sina)
+	{
+		double dist;
+
+		dist = (p2.x - p1.x)*cosa + (p2.y - p1.y)*sina;
+
+		return fabs(dist);
+	}
+
+
 	double geometry::calcDistanceAxis(HPoint3D p1, HPoint3D p2, double alpha)
 	{
 		double dist;
@@ -533,6 +552,33 @@ namespace visionLibrary {
 		intersectionPoint.X = A.X + (t*v.X);
 		intersectionPoint.Y = A.Y + (t*v.Y);
 		intersectionPoint.H = 1.;
+	}
+
+	bool geometry::intersectSegments(double p1x, double p1y, double p2x, double p2y, double p3x, double p3y, double p4x, double p4y, HPoint2D& pres) {
+		HPoint3D v1, v2;
+		HPoint2D s1, s2, s3, s4;
+
+		s1.x = p1x; s1.y = p1y;
+		s2.x = p2x; s2.y = p2y;		
+		s3.x = p3x; s3.y = p3y;	
+		s4.x = p4x; s4.y = p4y;
+
+		/*Get vectors*/
+		geometry::calcVector2D(s1, s2, v1);
+		geometry::calcVector2D(s3, s4, v2);
+
+		/*Get intersection*/
+		geometry::calcIntersection2D(v1, v2, pres);
+
+		/*H is 0 if are parallel*/
+		if(pres.h == 0)
+			return false;
+
+		/*Check extremes*/
+		if(geometry::isPointInsideLine(pres, s1, s2) && geometry::isPointInsideLine(pres, s3, s4))
+			return true;
+
+		return false;
 	}
 
 	bool geometry::mergeSegments(Segment2D &segment1, Segment2D segment2, double max_parallel, double max_distance, double max_normal_distance) {
