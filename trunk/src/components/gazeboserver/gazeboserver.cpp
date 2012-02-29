@@ -48,8 +48,8 @@
 #include <jderobot/ptencoders.h>
 #include <jderobot/ptmotors.h>
 #include <jderobot/sonars.h>
-#include "pose3dmotors.h"
-#include "pose3dencoders.h"
+#include <jderobot/pose3dmotors.h>
+#include <jderobot/pose3dencoders.h>
 #include <math.h>
 #include <gazebo/gazebo.h>
 
@@ -1022,7 +1022,7 @@ namespace gazeboserver {
 
 				gazeboPTZ1->Lock(1);
 				gazeboPTZ1->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
-				gazeboPTZ1->data->cmd_pan = data->pan * DEGTORAD;
+				gazeboPTZ1->data->cmd_pan = -data->pan * DEGTORAD;
 				gazeboPTZ1->data->cmd_tilt = data->tilt * DEGTORAD;
 				gazeboPTZ1->data->cmd_pan_speed = data->panSpeed;
 				gazeboPTZ1->data->cmd_tilt_speed = data->tiltSpeed;
@@ -1107,7 +1107,7 @@ namespace gazeboserver {
 
 				gazeboPTZ2->Lock(1);
 				gazeboPTZ2->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
-				gazeboPTZ2->data->cmd_pan = data->pan * DEGTORAD;
+				gazeboPTZ2->data->cmd_pan = -data->pan * DEGTORAD;
 				gazeboPTZ2->data->cmd_tilt = data->tilt * DEGTORAD;
 				gazeboPTZ2->data->cmd_pan_speed = data->panSpeed;
 				gazeboPTZ2->data->cmd_tilt_speed = data->tiltSpeed;
@@ -1185,7 +1185,7 @@ namespace gazeboserver {
 				ptEncodersData1->x = 215.;
 				ptEncodersData1->y = 110.;
 				ptEncodersData1->z = 254.;
-				ptEncodersData1->pan = gazeboPTZ1->data->pan * RADTODEG;
+				ptEncodersData1->pan = -gazeboPTZ1->data->pan * RADTODEG;
 				ptEncodersData1->tilt = gazeboPTZ1->data->tilt * RADTODEG;
 				gazeboPTZ1->Unlock();
 
@@ -1252,7 +1252,7 @@ namespace gazeboserver {
 				ptEncodersData2->x = 215.;
 				ptEncodersData2->y = -110.;
 				ptEncodersData2->z = 254.;
-				ptEncodersData2->pan = gazeboPTZ2->data->pan * RADTODEG;
+				ptEncodersData2->pan = -gazeboPTZ2->data->pan * RADTODEG;
 				ptEncodersData2->tilt = gazeboPTZ2->data->tilt * RADTODEG;
 				gazeboPTZ2->Unlock();
 
