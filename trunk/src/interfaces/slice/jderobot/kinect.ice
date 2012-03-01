@@ -28,14 +28,14 @@
 
 module jderobot{
 
-    
+    enum KinectView { DepthRaw, DepthImageView, ImageRGB, ImageIR};
   /**
    * Kinect interface
    */
   interface Kinect extends Camera
   {
 
-	int changeCamera();
+	int changeCamera(KinectView v);
     
   };
 
