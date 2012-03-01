@@ -1,0 +1,22 @@
+#extrinsics, position
+positionX 1895
+positionY 4980
+positionZ 1050
+positionH 1.000000
+
+ #extrinsics, orientation
+FOApositionX 1905
+FOApositionY 800
+FOApositionZ 1240
+FOApositionH 1.000000
+roll 0
+
+ #intrinsics
+fx 520
+fy 520
+skew 0.000000
+u0 231
+v0 324
+columns 640
+rows 480
+
