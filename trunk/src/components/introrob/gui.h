@@ -80,7 +80,6 @@ namespace introrob {
 
 	    
 	private:
-
 		// CANVAS
 	    Gtk::DrawingArea *w_canvas_laser;
 	    Gtk::DrawingArea *w_canvas_teleoperate;

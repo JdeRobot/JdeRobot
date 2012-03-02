@@ -16,6 +16,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors : Maikel González <m.gonzalezbai@gmail.com>
+ *            Jose María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
@@ -35,12 +36,11 @@ namespace introrob {
 	this->previous_event_x=100;
 	this->previous_event_y=100;
 	this->previous_event_x_camera=100;
-	this->previous_event_y_camera=100;	
+	this->previous_event_y_camera=100;
 	//this->isFollowing = false;
 	laser_box=0;
 	cameras_box=0;
 	world_box=0;
-	
 	
 	    /*Init OpenGL*/
 	if(!Gtk::GL::init_check(NULL, NULL))	{
@@ -157,9 +157,12 @@ namespace introrob {
 	if(check_cameras){
 		pthread_mutex_lock(&api->controlGui);
 		this->updateCameras(api);
-		pthread_mutex_unlock(&api->controlGui);        
-		setCamara(*this->image1, 1);
-		setCamara(*this->image2, 2);
+		pthread_mutex_unlock(&api->controlGui);
+		  setCamara(*this->image1, 1);
+		  setCamara(*this->image2, 2);
+		  //setCamara(*api->image1, 1);
+		  //setCamara(*api->image2, 2);		  
+
 	}
     }
 
@@ -185,6 +188,7 @@ namespace introrob {
         if(!(this->yourCode_button_isPressed)){
 	    this->teleoperate();
             api->iterationControlActivated=false;
+	    
         }
         else{
             api->iterationControlActivated=true;
@@ -204,6 +208,8 @@ namespace introrob {
 	    check_world->set_active(false);	    
 	}
 
+
+	
 	
 	this->setDestino();
 	
@@ -213,7 +219,9 @@ namespace introrob {
 	if(check_cameras->get_active())
 	    this->teleoperateCameras();
 
-	
+	if(windowTeleoperate->is_visible()==false)
+		exit (0);	
+
         while (gtkmain.events_pending())
             gtkmain.iteration();	
 
@@ -406,7 +414,7 @@ namespace introrob {
         
         // Set image
         IplImage src; // conversión a IplImage
-        src = image;
+	src = image;
         colorspaces::ImageRGB8 img_rgb888(image); // conversion will happen if needed
 
         Glib::RefPtr<Gdk::Pixbuf> imgBuff = Gdk::Pixbuf::create_from_data((const guint8*)img_rgb888.data,
@@ -431,7 +439,7 @@ namespace introrob {
     }
     
     void Gui::yourCodeButton_clicked() {
-        
+
         yourCodeButton->hide();
         stopCodeButton->show();
         //canvas_control->hide();
@@ -451,6 +459,8 @@ namespace introrob {
     }
 
     void Gui::exitButton_clicked() {
+      cvDestroyWindow("mainWin");
+	api->guiVisible=false;
         windowTeleoperate->hide();
         exit (0);
     }
@@ -655,7 +665,8 @@ namespace introrob {
 	
 	    this->api->RunGraphicsAlgorithm();    
 	    
-	}    
+	}
+	
     
 } // namespace    
        

@@ -16,6 +16,7 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
  *  Authors : Maikel González <m.gonzalezbai@gmail.com>
+ *            Jose María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
@@ -29,12 +30,13 @@ Control::~Control() {}
    void Control::UpdateSensorsICE(Api *api){      
 
       api->motorVin=this->mprx->getV();
-      if(api->motorVin!=0)
-            printf("v: %.30lf\n",api->motorVin);
+//      if(api->motorVin!=0)
+//            std::cout << "v: " << this->mprx->getV() <<std::endl;
 
       api->motorWin=this->mprx->getW();
-     if(api->motorWin!=0)
-            printf("w: %.30lf\n",api->motorWin);
+//     if(api->motorWin!=0)
+//	   std::cout << "w: " << this->mprx->getW() <<std::endl;
+
 
       api->motorLin=this->mprx->getL();
       api->encodersData=this->eprx->getEncodersData();
@@ -53,13 +55,10 @@ Control::~Control() {}
 
    // Send the actuators info to Gazebo with ICE
    void Control::SetActuatorsICE(Api *api){
-      //if(api->motorWout!=0)
-        //    printf("w: %.30lf\n",api->motorWout);
+      
+      if(api->motorWout<5&&api->motorWout>-5)
+            this->mprx->setW(0.);
       this->mprx->setW(api->motorWout);
-      //if(api->motorVout!=0)
-        //    printf("v: %.30lf\n",api->motorVout);
-      this->mprx->setV(api->motorVout); 
-     
       this->mprx->setL(api->motorLout);
            
       api->Pose3DmotorsData1 = new jderobot::Pose3DMotorsData();
@@ -73,7 +72,7 @@ Control::~Control() {}
       
       this->p3dmprx2->setPose3DMotorsData(api->Pose3DmotorsData2);
       this->p3dmprx1->setPose3DMotorsData(api->Pose3DmotorsData1);
-
+      this->mprx->setV(api->motorVout); 
    }
 
 }

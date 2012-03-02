@@ -34,8 +34,7 @@
 #include <jderobot/encoders.h>
 #include <jderobot/ptencoders.h>
 #include <colorspaces/colorspacesmm.h>
-#include "pose3dmotors.h"
-#include "pose3dencoders.h"
+
 #include <pthread.h>
 #include "API.h"
 

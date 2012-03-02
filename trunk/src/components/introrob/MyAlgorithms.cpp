@@ -16,6 +16,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors : Maikel González <m.gonzalezbai@gmail.com>,
+ *            Jose María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
@@ -26,24 +27,24 @@ INTROROB API:
 ---------------------------------------------------------
 Métodos para obtener los datos de los sensores:
 
-this->getMotorV: Este método devuelve la velocidad lineal (mm./s.) del robot. 
+this->getMotorV: Este método devuelve la velocidad lineal (mm./s.) del robot.
 EJEMPLO: float v = this->getMotorV();
 
-this->getMotorW: Este método devuelve la velocidad rotacional (deg./s.) del robot. 
+this->getMotorW: Este método devuelve la velocidad rotacional (deg./s.) del robot.
 EJEMPLO: float w = this->getMotorW();
 
-this->getLaserData: Este método devuelve una estructura con dos campos, por un lado el número de lasers del robot (180) y por otro un vector de 180 posiciones en cada una de las cuales se almacena la distancia obtenida por el láser, estando relacionada cada posición del robot con el ángulo del láser. Ejemplo: jderobot::LaserDataPtr laser = this->getLaserData() || 
-USO: printf("laser[45]: %d\n", laser->distanceData[45]); || 
+this->getLaserData: Este método devuelve una estructura con dos campos, por un lado el número de lasers del robot (180) y por otro un vector de 180 posiciones en cada una de las cuales se almacena la distancia obtenida por el láser, estando relacionada cada posición del robot con el ángulo del láser. Ejemplo: jderobot::LaserDataPtr laser = this->getLaserData() ||
+USO: printf("laser[45]: %d\n", laser->distanceData[45]); ||
 USO: printf("numLasers: %d\n", laser->numLaser);
 
-this->getDistancesLaser: Este método devolvería únicamente el vector mencionado anteriormente. 
+this->getDistancesLaser: Este método devolvería únicamente el vector mencionado anteriormente.
 EJEMPLO: jderobot::IntSeq VectorDistances this->getDistancesLaser();
 
-this->getNumLasers: Este método devuelve el otro campo mencionado, el número de grados del láser. 
+this->getNumLasers: Este método devuelve el otro campo mencionado, el número de grados del láser.
 EJEMPLO: int numLasers = this->getNumLasers();
 
-this->getEncodersData: Este método devuelve una estructura con tres campos: robotx, roboty y robottheta, siendo la posición "x", "y" y su orientación "theta" respectivamente. 
-EJEMPLO: jderobot::EncodersDataPtr myPosition getEncodersData(); || 
+this->getEncodersData: Este método devuelve una estructura con tres campos: robotx, roboty y robottheta, siendo la posición "x", "y" y su orientación "theta" respectivamente.
+EJEMPLO: jderobot::EncodersDataPtr myPosition getEncodersData(); ||
 USO: printf("myPosition = [%f, %f]\n", myPosition->robotx, myPosition->roboty);
 
 this->getImageCamera1: Este método devuelve la imagen obtenida por la cámara izquierda del Pioneer. La imagen ya se encuentra en formato "colorspace" con lo que es posible de manipular por medio de OpenCV.
@@ -60,7 +61,7 @@ Métodos para manipular los actuadores:
 this->setMotorV(float V): Con este método definimos la velocidad lineal (mm./s.) del robot.
 EJEMPLO: this->setMotorV(40.)
 
-this->w=float W): Con este método definimos la velocidad rotacional (deg./s.) del robot.
+this->setMotorW(float W): Con este método definimos la velocidad rotacional (deg./s.) del robot.
 EJEMPLO: this->setMotorW(10.)
 
 
@@ -77,15 +78,15 @@ USO:
       bb.x=this->destino.x;
       bb.y=this->destino.y;
       bb.z=0.;
-      
+
       aa.x=encodersData->robotx;
       aa.y=encodersData->roboty;
       aa.z=0;
-      
+
       color.x = 1.; // Red
       color.y = 0.; // Green
       color.z = 0.; // Blue
-      this->pintaSegmento (aa, bb, color); 
+      this->pintaSegmento (aa, bb, color);
 
 drawProjectionLines: Traza líneas desde el origen de coordenadas a un punto seleccionado (click izquierdo) en una de las cámaras del robot.
 USO: this->drawProjectionLines();
@@ -105,7 +106,7 @@ USO:
 
 	aa.x=0.; aa.y=0.;
 	this->relativas2absolutas(aa,&a);
-	aa.x = 1000.; aa.y = -2000.;  // en mm.	     		
+	aa.x = 1000.; aa.y = -2000.;  // en mm.
 	this->relativas2absolutas(aa,&b);
 
 	**** PARA MAS INFO ACCEDER AL FICHERO API.CPP y API.H ****
@@ -117,16 +118,36 @@ namespace introrob{
       double v, w, l, pan, tilt;
       jderobot::LaserDataPtr laser;
       CvPoint2D32f dest;
+      int i,j;
       jderobot::EncodersDataPtr encoders;
-      
- 
+      int cont=0;
+
 	/*A PARTIR DE AQUÍ SE PUEDE AÑADIR EL CÓDIGO DE NAVEGACIÓN IMPLEMENTADO POR EL ESTUDIANTE*/
 
-	/*ALGUNOS EJEMPLOS*/      
+	/*ALGUNOS EJEMPLOS*/
       imageCameras2openCV();
       imageCamera1=getImageCamera1();
       imageCamera2=getImageCamera2();
       printf("myPosition = [%f, %f]\n", encodersData->robotx, encodersData->roboty);
+
+      /*Manipulando imágenes de las cámaras*/
+      /*En el siguiente ejemplo se filtra el color rojo de la cámara izquierda para repintar esos píxeles a negro. Para visualizar el resultado
+       simplemente hay que mostrar la interfaz de las cámaras con su botón de activación correspondiente y darle al PLAY*/
+
+	IplImage src =  *this->imageCamera1; 
+
+	for(i=0;i<src.width;i++){
+	    for(j=0;j<src.height;j++){
+		if(src.imageData[j*src.widthStep+i*src.nChannels]==-1&&src.imageData[j*src.widthStep+i*src.nChannels+1]!=-1&&src.imageData[j*src.widthStep+i*src.nChannels+2]!=-1){
+		    cont++;
+		    src.imageData[j*src.widthStep+i*src.nChannels]=0; //R
+		    src.imageData[j*src.widthStep+i*src.nChannels+1]=0; //G
+		    src.imageData[j*src.widthStep+i*src.nChannels+2]=0;  //B
+		    }
+	    }
+	}
+
+
 
 	/* EJEMPLO SENCILLO DE UN BUMP AND GO */
 
@@ -134,31 +155,31 @@ namespace introrob{
 	//Aqui tomamos el valor de los sensores para alojarlo en nuestras variables locales
       laser=getLaserData(); // Get the laser info
       printf("laser[45]: %d\n", laser->distanceData[45]);
-      
+
       v=this->getMotorV();
       w = this->getMotorW();
       l = this->getMotorL();
       printf("v: %f , w: %f , l: %f\n", v, w, l);
-      
+
       dest=this->getDestino();
       printf ("destPoint = [%f, %f]\n", dest.x, dest.y);
-      
+
       encoders=this->getEncodersData();
       printf("myPosition = [%f, %f]\n", encoders->robotx, encoders->roboty);
 	/* FIN TOMA DE SENSORES */
-	    
-	    v=0;
-	    w=100;
-	    //v=2000;
 
-	
-      
-      
-      /*
+	    //v=0;
+	    //w=0.;
+	    //v=2000.;
+
+
+
+
+/*
       switch(accion){
-              
+
               case 0:		// Robot hacia adelante
-                      
+
                       if(( laser->distanceData[45] < 1000.0) or ( laser->distanceData[90] < 1000.0) or ( laser->distanceData[135] < 1000.0)){
                               v=0.;
                               //if ((x_ant == myPoint.x) and (y_ant == myPoint.y) and (z_ant == myPoint.z)){
@@ -167,7 +188,7 @@ namespace introrob{
                               //}
                       }
                       else
-                        v=100;
+                        v=50;
                       break;
 
               case 1:		// Robot hacia atras
@@ -196,22 +217,27 @@ namespace introrob{
                               w=0.;
                               accion=0;
                               sentido = (1 + rand() % 40);
-                      }			
+                      }
 
                       break;
       }
-      */
+*/
       /*Comandar robot*/
       //Aqui enviamos los datos al robot
-      this->setMotorV(v);
+      	    w=0.;
       this->setMotorW(w);
+      this->setMotorV(v);
+
       this->setMotorL(l);
+      //cvReleaseImage(&imageCamera1);
+      //cvReleaseImage(&imageCamera2);
+ 
       //pan=0;
       //tilt=0;
       //this->setPTEncoders(pan,tilt,1); //Con el segundo parametro elegimos la camara a comandar (1 o 2)
-      
 
-      
+
+
     }
 
    void Api::RunGraphicsAlgorithm(){
@@ -220,23 +246,26 @@ namespace introrob{
       CvPoint3D32f a,b;
       CvPoint3D32f c,d;
       CvPoint3D32f color;
-      
+
       bb.x=this->destino.x;
       bb.y=this->destino.y;
       bb.z=0.;
-      
+
       aa.x=encodersData->robotx;
       aa.y=encodersData->roboty;
       aa.z=0;
-      
+
       color.x = 1.; // Red
       color.y = 0.; // Green
       color.z = 0.; // Blue
-      this->pintaSegmento (aa, bb, color); // ROJO
-      
-      
+      //this->pintaSegmento (aa, bb, color); // ROJO
+      this->pintaDestino (aa, bb, color); // ROJO
+  
+
+
+
       this->drawProjectionLines();
-      
+
    }
 
 }

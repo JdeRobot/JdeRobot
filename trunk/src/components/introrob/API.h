@@ -23,7 +23,8 @@
 #ifndef INTROROB_API_H
 #define INTROROB_API_H
 
-
+#include <cv.h>
+#include <highgui.h>
 #include <iostream>
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
@@ -39,6 +40,7 @@
 #include <pthread.h>
 #include "gui.h"
 
+
 #define MAX_LINES 200
 
 
@@ -47,14 +49,14 @@ namespace introrob {
     class Api {
 	public:
 	virtual ~Api();
-	
-	    pthread_mutex_t controlGui;	
-	
-	    //FUNCTIONS 
+
+	    pthread_mutex_t controlGui;
+
+	    //FUNCTIONS
 	    void RunNavigationAlgorithm();
 	    void RunGraphicsAlgorithm();
-
-	    // GETS	    
+	    void showMyImage();
+	    // GETS
 	    float getMotorV();
 	    float getMotorW();
 	    float getMotorL();
@@ -62,15 +64,15 @@ namespace introrob {
 	    int getNumLasers();
 	    jderobot::IntSeq getDistancesLaser();
 	    jderobot::EncodersDataPtr getEncodersData();
-	    colorspaces::Image* getImageCamera1();
-	    colorspaces::Image* getImageCamera2();
+	    IplImage* getImageCamera1();
+	    IplImage* getImageCamera2();
 
-	    //SETS	    
+	    //SETS
 	    void setMotorV(float motorV);
 	    void setMotorW(float motorW);
 	    void setMotorL(float motorL);
 	    void setPTEncoders(double pan, double tilt, int cameraId);
-        	    
+
 	    /*Shared Memory -- ignored by students*/
 	    float motorVout;
 	    float motorWout;
@@ -101,17 +103,20 @@ namespace introrob {
 	    //Variables used in NavigationAlgorithm
 	    CvPoint2D32f destino;
 	    CvPoint2D32f myPosition;
-	    int sentido; 
+	    int sentido;
 	    int accion;
 	    bool segmentoPintado;
 	    int numlines;
 	    float extra_lines[MAX_LINES][9];
-
-    
+	    IplImage* imageOnCamera;
+	    bool showImage;
 	private:
 	    //Variables used in NavigationAlgorithm
-	    colorspaces::Image* imageCamera1;
-	    colorspaces::Image* imageCamera2;
+	    IplImage* imageCamera1;
+	    IplImage* imageCamera2;
+	    
+	    
+	   
 	    double robotx;
 	    double roboty;
 	    double robottheta;
@@ -120,21 +125,22 @@ namespace introrob {
    	    void imageCameras2openCV();
 	    /* Formato estructura color RGB => color.x = R; color.y = G; color.z B) */
 	    int pintaSegmento (CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color);
+	    int pintaDestino (CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color);
 
-	    /* Calcula la posicion relativa respecto del robot de un punto absoluto. 
+	    /* Calcula la posicion relativa respecto del robot de un punto absoluto.
 	    El robot se encuentra en robotx, roboty con orientacion robotheta respecto
 	    al sistema de referencia absoluto */
 	    int absolutas2relativas(CvPoint3D32f in, CvPoint3D32f *out);
 
-	    /* Calcula la posicion absoluta de un punto expresado en el sistema de 
-	    coordenadas solidario al robot. El robot se encuentra en robotx, roboty 
+	    /* Calcula la posicion absoluta de un punto expresado en el sistema de
+	    coordenadas solidario al robot. El robot se encuentra en robotx, roboty
 	    con orientacion robottheta respecto al sistema de referencia absoluto */
 	    int relativas2absolutas(CvPoint3D32f in, CvPoint3D32f *out);
-	    
-	    void drawProjectionLines();                        
+
+	    void drawProjectionLines();
 	    CvPoint2D32f getDestino();
-	    
-     
+
+
     };//class
 } // namespace
 #endif /*INTROROB_Control_H*/

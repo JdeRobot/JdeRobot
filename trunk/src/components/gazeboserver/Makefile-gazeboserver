@@ -1,5 +1,5 @@
 JDEROBOTDIR = /usr/local
-CXXFLAGS = -I/usr/local/include/gazebo -I../../interfaces/cpp/jderobot -I$(JDEROBOTDIR)/include/jderobot -I$(JDEROBOTDIR)/include/jderobot/progeo -I/usr/include/gearbox `pkg-config --cflags opencv` `pkg-config --cflags gtkmm-2.4 libglademm-2.4 gthread-2.0` `pkg-config --cflags gtkglextmm-1.2`
+CXXFLAGS = -I/usr/local/include/gazebo -I../../interfaces/cpp/ -I$(JDEROBOTDIR)/include/jderobot -I$(JDEROBOTDIR)/include/jderobot/progeo -I/usr/include/gearbox `pkg-config --cflags opencv` `pkg-config --cflags gtkmm-2.4 libglademm-2.4 gthread-2.0` `pkg-config --cflags gtkglextmm-1.2`
 LDFLAGS = `pkg-config --libs gtkmm-2.4 libglademm-2.4 gthread-2.0` `pkg-config --libs opencv` -lgsl -lgslcblas `pkg-config --libs gtkglextmm-1.2` -lGL -lGLU -lglut -lgazebo
 LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotIce.la \
 	$(JDEROBOTDIR)/lib/jderobot/libJderobotUtil.la \
@@ -8,12 +8,15 @@ LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotIce.la \
 	$(JDEROBOTDIR)/lib/jderobot/libprogeo.la \
 	$(JDEROBOTDIR)/lib/jderobot/libpioneer.la
 
+
 gazeboserver: gazeboserver.o ../../interfaces/cpp/jderobot/pose3dmotors.o ../../interfaces/cpp/jderobot/pose3dencoders.o
 	libtool --mode=link g++ -g -O -o gazeboserver gazeboserver.o ../../interfaces/cpp/jderobot/pose3dencoders.o ../../interfaces/cpp/jderobot/pose3dmotors.o $(LDADD) $(LDFLAGS)
 
 ../../interfaces/cpp/jderobot/pose3dmotors.o: ../../interfaces/cpp/jderobot/pose3dmotors.cpp ../../interfaces/cpp/jderobot/pose3dmotors.h
 
 ../../interfaces/cpp/jderobot/pose3dencoders.o: ../../interfaces/cpp/jderobot/pose3dencoders.cpp ../../interfaces/cpp/jderobot/pose3dencoders.h
+
+
 
 
 

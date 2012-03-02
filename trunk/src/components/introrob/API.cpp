@@ -16,6 +16,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors : Maikel González <m.gonzalezbai@gmail.com>,
+ *  Jose María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
@@ -26,55 +27,63 @@ namespace introrob{
    float Api::getMotorV(){
       return this->motorVin;
    }
-   
+
    float Api::getMotorW(){
-      return this->motorWin;      
+      return this->motorWin;
    }
-   
+
    float Api::getMotorL(){
       return this->motorLin;
    }
-   
+
    jderobot::LaserDataPtr Api::getLaserData(){
       return this->laserData;
    }
-   
+
    int Api::getNumLasers(){
       return this->laserData->numLaser;
    }
-   
+
    jderobot::IntSeq Api::getDistancesLaser(){
       return this->laserData->distanceData;
    }
-   
+
    jderobot::EncodersDataPtr Api::getEncodersData(){
       return this->encodersData;
    }
-   
-   colorspaces::Image* Api::getImageCamera1(){
-      return this->image1;
+
+   IplImage* Api::getImageCamera1(){
+      IplImage src =  *this->image1;
+      IplImage* cvResultado = cvCreateImage(cvGetSize(&src), IPL_DEPTH_8U, 3);
+      cvCopy(&src, cvResultado);
+
+      return cvResultado;
    }
-   colorspaces::Image* Api::getImageCamera2(){
-      return this->image2;
+   IplImage* Api::getImageCamera2(){
+      IplImage src =  *this->image2;
+      IplImage* cvResultado = cvCreateImage(cvGetSize(&src), IPL_DEPTH_8U, 3);
+      cvCopy(&src, cvResultado);
+
+      return cvResultado;
    }
-   
+
    void Api::setMotorV(float motorV){
       this->motorVout=motorV;
    }
    void Api::setMotorW(float motorW){
       this->motorWout=motorW;
    }
-   
+
    void Api::setMotorL(float motorL){
       this->motorLout=motorL;
-      
+
    }
-/*   
+/*
    void Api::setPTEncoders(double pan, double tilt, int cameraId){
-   
+
       api->PTmotorsData1 = new jderobot::PTMotorsData ();
       api->PTmotorsData2 = new jderobot::PTMotorsData ();
-   
+
       if(cameraId==1){
 
          this->PTmotorsData1->latitude=pan;
@@ -85,11 +94,11 @@ namespace introrob{
          this->PTmotorsData2->longitude=tilt;
       }
    }
-*/ 
+*/
 
 
    void Api::imageCameras2openCV(){
-  
+      pthread_mutex_lock(&this->controlGui);
       colorspaces::Image::FormatPtr fmt1 = colorspaces::Image::Format::searchFormat(imageData1->description->format);
       if (!fmt1)
          throw "Format not supported";
@@ -99,18 +108,19 @@ namespace introrob{
       if (!fmt2)
          throw "Format not supported";
        image2 = new colorspaces::Image ( imageData2->description->width,  imageData2->description->height, fmt2, &( imageData2->pixelData[0])); // Prepare the image to use with openCV
+       pthread_mutex_unlock(&this->controlGui);
    }
 
-   
+
    int Api::absolutas2relativas(CvPoint3D32f in, CvPoint3D32f *out){
       if (out!=NULL) {
         CvPoint3D32f myPoint;
-        
+
         //this->controller->getPosition(&myPoint);
         this->robotx = encodersData->robotx;
         this->roboty = encodersData->roboty;
         this->robottheta = encodersData->robottheta;
-        
+
         (*out).x = in.x*cos(this->robottheta*DEGTORAD) + in.y*sin(this->robottheta*DEGTORAD) -
           this->robotx*cos(this->robottheta*DEGTORAD) - this->roboty*sin(this->robottheta*DEGTORAD);
         (*out).y = in.y*cos(this->robottheta*DEGTORAD) - in.x*sin(this->robottheta*DEGTORAD) -
@@ -118,17 +128,17 @@ namespace introrob{
         return 0;
       }
       return 1;
-   }     
-   
-   
+   }
+
+
    int Api::relativas2absolutas(CvPoint3D32f in, CvPoint3D32f *out){
       if (out!=NULL){
         CvPoint3D32f myPoint;
-        
+
         this->robotx = encodersData->robotx;
         this->roboty = encodersData->roboty;
         this->robottheta = encodersData->robottheta;
-        
+
         (*out).x = in.x*cos(this->robottheta*DEGTORAD) - in.y*sin(this->robottheta*DEGTORAD) + this->robotx;
         (*out).y = in.y*cos(this->robottheta*DEGTORAD) + in.x*sin(this->robottheta*DEGTORAD) + this->roboty;
         return 0;
@@ -137,10 +147,10 @@ namespace introrob{
    }
 
    int Api::pintaSegmento (CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color) {
-     /* OJO mundo de coordenadas OpenGL está en decímetros, por compatibilidad con la plantilla OpenGL 
+     /* OJO mundo de coordenadas OpenGL está en decímetros, por compatibilidad con la plantilla OpenGL
         del robotPioneer. El factor SCALE marca la relación entre las coordenadas en milímetros de a,b
         y los homólogos en el mundo OpenGL */
-       
+
            glColor3f(color.x, color.y, color.z);
            glLineWidth(2.0f);
            glBegin(GL_LINES);
@@ -150,8 +160,39 @@ namespace introrob{
            return 1;
    }
 
+   int Api::pintaDestino (CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color) {
+     /* OJO mundo de coordenadas OpenGL está en decímetros, por compatibilidad con la plantilla OpenGL
+        del robotPioneer. El factor SCALE marca la relación entre las coordenadas en milímetros de a,b
+        y los homólogos en el mundo OpenGL */
+
+       glColor3f(color.x, color.y, color.z);
+       glLineWidth(2.0f);
+
+       glBegin(GL_TRIANGLES);
+		   glVertex3f((b.x/SCALE), (b.y/SCALE)+3, b.z/SCALE);
+		   glVertex3f((b.x/SCALE)+1.5, (b.y/SCALE)+1.5, b.z/SCALE);
+		   glVertex3f((b.x/SCALE)-1.5, (b.y/SCALE)+1.5, b.z/SCALE);
+
+		   glVertex3f((b.x/SCALE)+3, (b.y/SCALE), b.z/SCALE);
+		   glVertex3f((b.x/SCALE)+1.5, (b.y/SCALE)+1.5, b.z/SCALE);
+		   glVertex3f((b.x/SCALE)+1.5, (b.y/SCALE)-1.5, b.z/SCALE);
+
+		   glVertex3f((b.x/SCALE), (b.y/SCALE)-3, b.z/SCALE);
+		   glVertex3f((b.x/SCALE)+1.5, (b.y/SCALE)-1.5, b.z/SCALE);
+		   glVertex3f((b.x/SCALE)-1.5, (b.y/SCALE)-1.5, b.z/SCALE);
+
+		   glVertex3f((b.x/SCALE)-3, (b.y/SCALE), b.z/SCALE);
+		   glVertex3f((b.x/SCALE)-1.5, (b.y/SCALE)+1.5, b.z/SCALE);
+		   glVertex3f((b.x/SCALE)-1.5, (b.y/SCALE)-1.5, b.z/SCALE);
+
+
+       glEnd();
+           return 1;
+   }
+
+
    void Api::drawProjectionLines(){
-           
+
            for(int i=0;i<numlines;i++) {
                    CvPoint3D32f a,b,aa,ba;
                    CvPoint3D32f color;
@@ -161,18 +202,26 @@ namespace introrob{
                    b.x=extra_lines[i][4];
                    b.y=extra_lines[i][5];
                    b.z=extra_lines[i][6];
-                   
+
                    if (extra_lines[i][8]==1){color.x = 1.;color.y = 0.;color.z = 0.;}else{color.x = 0.;color.y = 0.;color.z = 1.;}
                        this->pintaSegmento (a, b, color);
            }
-           
+
    }
-   
+
    CvPoint2D32f Api::getDestino(){
       return this->destino;
    }
 
-Api::~Api() {}   
+   void Api::showMyImage(){
+     
+      cvShowImage("mainWin", this->imageCamera1 );
+      
+   
+   
+   }
+
+Api::~Api() {}
 
 }
 
