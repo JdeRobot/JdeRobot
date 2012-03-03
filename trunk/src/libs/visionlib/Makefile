@@ -6,7 +6,7 @@ LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotIce.so \
 	$(JDEROBOTDIR)/lib/jderobot/libJderobotInterfaces.so \
 	$(JDEROBOTDIR)/lib/jderobot/libprogeo.so
 
-all: visionlib.o geometry.o image.o linesDetection.o cvfast.o
+all: visionlib.o geometry.o image.o linesDetection.o cvfast.o structs.o
 	ar r visionlib.a visionlib.o geometry.o linesDetection.o image.o cvfast.o structs.o
 	ranlib visionlib.a
 
