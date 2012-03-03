@@ -7,23 +7,26 @@ LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotIce.so \
 	$(JDEROBOTDIR)/lib/jderobot/libprogeo.so
 
 all: visionlib.o geometry.o image.o linesDetection.o cvfast.o
-	ar r visionlib.a visionlib.o geometry.o image.o image.o cvfast.o
+	ar r visionlib.a visionlib.o geometry.o linesDetection.o image.o cvfast.o structs.o
 	ranlib visionlib.a
 
 visionlib.o: visionlib.h
 	g++ -c $(CXXFLAGS) visionlib.h -o visionlib.o
 
-geometry.o: geometry.cpp
-	g++ -c $(CXXFLAGS) geometry.cpp -o geometry.o
+geometry.o: geometry.h geometry.cpp
+	g++ -c $(CXXFLAGS) geometry.h geometry.cpp
 
-image.o: image.cpp
-	g++ -c $(CXXFLAGS) image.cpp -o image.o
+image.o: image.h image.cpp
+	g++ -c $(CXXFLAGS) image.h image.cpp
 
-linesDetection.o: linesDetection.cpp
-	g++ -c $(CXXFLAGS) linesDetection.cpp -o linesDetection.o
+linesDetection.o: linesDetection.h linesDetection.cpp
+	g++ -c $(CXXFLAGS) linesDetection.h linesDetection.cpp
 
 cvfast.o: cvfast.cpp
 	g++ -c $(CXXFLAGS) cvfast.cpp -o cvfast.o
+
+structs.o: structs.h
+	g++ -c $(CXXFLAGS) structs.h -o structs.o
 
 #Clean
 
