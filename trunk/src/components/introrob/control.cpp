@@ -16,7 +16,6 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
  *  Authors : Maikel González <m.gonzalezbai@gmail.com>
- *            Jose María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 

@@ -16,7 +16,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors : Maikel González <m.gonzalezbai@gmail.com>,
- *            Jose María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
@@ -132,7 +131,7 @@ namespace introrob{
 
       /*Manipulando imágenes de las cámaras*/
       /*En el siguiente ejemplo se filtra el color rojo de la cámara izquierda para repintar esos píxeles a negro. Para visualizar el resultado
-       simplemente hay que mostrar la interfaz de las cámaras con su botón de activación correspondiente y darle al PLAY*/
+       debemos desplegar la ventana "WINDOW DEPURATE" y pulsar PLAY para hacer correr nuestro código*/
 
 	IplImage src =  *this->imageCamera1; 
 
@@ -167,12 +166,6 @@ namespace introrob{
       encoders=this->getEncodersData();
       printf("myPosition = [%f, %f]\n", encoders->robotx, encoders->roboty);
 	/* FIN TOMA DE SENSORES */
-
-	    //v=0;
-	    //w=0.;
-	    //v=2000.;
-
-
 
 
 /*
@@ -258,8 +251,8 @@ namespace introrob{
       color.x = 1.; // Red
       color.y = 0.; // Green
       color.z = 0.; // Blue
-      //this->pintaSegmento (aa, bb, color); // ROJO
-      this->pintaDestino (aa, bb, color); // ROJO
+      //this->pintaSegmento (aa, bb, color); // ROJO - Pinta un segmento desde el punto "aa" hasta el punto "bb"
+      this->pintaDestino (aa, bb, color); // ROJO - Marca con una estrella el destino seleccionado al hacer click con el botón central en el mundo 3D.
   
 
 

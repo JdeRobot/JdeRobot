@@ -101,7 +101,8 @@ namespace introrob {
 	    Gtk::Window * windowTeleoperate;
 	    Gtk::Window * windowLaser;
 	    Gtk::Window *secondarywindow;
-	    Gtk::Window *world_window;	    
+	    Gtk::Window *world_window;	
+	    Gtk::Window * depurate_window;
 	    
 		// Private Methods
 	    void initCameras();
@@ -128,6 +129,8 @@ namespace introrob {
 	    void button_cameras_clicked();
 	    void button_world_clicked();
 	    void button_laser_clicked();
+	    void button_windowDepurate_clicked();
+	    
 
 		// Buttons	
 	    bool showCanvasWin; 
@@ -146,6 +149,7 @@ namespace introrob {
 	    Gtk::CheckButton * check_cameras;
 	    Gtk::CheckButton * check_world;
 	    Gtk::CheckButton * check_laser;
+	    Gtk::CheckButton * check_windowDepurate;
 	    
 		// Events
 	    Gtk::EventBox * eventbox_left;
@@ -175,6 +179,7 @@ namespace introrob {
 	    bool laser_box;
 	    bool cameras_box;
 	    bool world_box;
+	    bool windowDepurate_box;
 	    
 	    bool isFollowing;
 	    

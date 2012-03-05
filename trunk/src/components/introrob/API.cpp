@@ -16,7 +16,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors : Maikel González <m.gonzalezbai@gmail.com>,
- *  Jose María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 

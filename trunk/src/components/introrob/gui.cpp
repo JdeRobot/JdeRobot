@@ -16,7 +16,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors : Maikel González <m.gonzalezbai@gmail.com>
- *            Jose María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
@@ -41,6 +40,7 @@ namespace introrob {
 	laser_box=0;
 	cameras_box=0;
 	world_box=0;
+	windowDepurate_box=0;
 	
 	    /*Init OpenGL*/
 	if(!Gtk::GL::init_check(NULL, NULL))	{
@@ -95,6 +95,7 @@ namespace introrob {
 	refXml->get_widget("check_cameras",check_cameras);
 	refXml->get_widget("check_world",check_world);
 	refXml->get_widget("check_laser",check_laser);
+	refXml->get_widget("check_windowDepurate",check_windowDepurate);
 	
 	// Events
 	yourCodeButton->signal_clicked().connect(sigc::mem_fun(this,&Gui::yourCodeButton_clicked));
@@ -106,6 +107,7 @@ namespace introrob {
 	check_cameras->signal_toggled().connect(sigc::mem_fun(this,&Gui::button_cameras_clicked));
         check_world->signal_toggled().connect(sigc::mem_fun(this,&Gui::button_world_clicked));
 	check_laser->signal_toggled().connect(sigc::mem_fun(this,&Gui::button_laser_clicked));
+	check_windowDepurate->signal_toggled().connect(sigc::mem_fun(this,&Gui::button_windowDepurate_clicked));
 	w_canvas_teleoperate->signal_event().connect(sigc::mem_fun(this,&Gui::on_button_press_canvas_teleoperate));
 	w_canvas_teleoperate_cameras->signal_event().connect(sigc::mem_fun(this,&Gui::on_button_press_canvas_teleoperate_cameras));
 
@@ -182,6 +184,7 @@ namespace introrob {
 
     void Gui::display(Api *api) {
 
+      	this->setDestino();
 	this->Encoders2world();
 	this->Laser2world();
 
@@ -195,7 +198,6 @@ namespace introrob {
         }
 	api->guiVisible=windowTeleoperate->is_visible();
 
-
 	if((!windowLaser->is_visible())&&(check_laser->get_active())){
 	    check_laser->set_active(false);	    
 	}
@@ -207,12 +209,9 @@ namespace introrob {
 	if((!world_window->is_visible())&&(check_world->get_active())){
 	    check_world->set_active(false);	    
 	}
+	
 
-
-	
-	
-	this->setDestino();
-	
+		
 	if(check_laser->get_active()){
 	    this->printLaser();
 	}
@@ -459,7 +458,7 @@ namespace introrob {
     }
 
     void Gui::exitButton_clicked() {
-      cvDestroyWindow("mainWin");
+     
 	api->guiVisible=false;
         windowTeleoperate->hide();
         exit (0);
@@ -542,6 +541,17 @@ namespace introrob {
 			    windowLaser->show();
 		    }
     }
+    
+    void Gui::button_windowDepurate_clicked(){
+	if(check_windowDepurate->get_active()){
+	    cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE);
+	    api->showImage=true;
+	}
+	else{
+	    api->showImage=false;
+	    cvDestroyWindow("mainWin");
+	}
+    }    
     
     void Gui::Encoders2world(){
 	this->world->roboty=this->api->encodersData->roboty;
