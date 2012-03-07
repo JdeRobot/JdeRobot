@@ -18,8 +18,8 @@
  *            Francisco Miguel Rivas Montero <fm.rivas@alumnos.urjc.es>	
  */
 
-/** \file kinectServer.cpp
- * \brief kinectServer component main file
+/** \file openniServer.cpp
+ * \brief openniServer component main file
  */
 
 #include <Ice/Ice.h>
@@ -565,7 +565,7 @@ class KinectLedsI: virtual public jderobot::KinectLeds {
 class Component: public jderobotice::Component{
 public:
 	Component()
-	:jderobotice::Component("kinectServer"), cameras(0) {}
+	:jderobotice::Component("openniServer"), cameras(0) {}
 
 	virtual void start(){
 		Ice::PropertiesPtr prop = context().properties();
@@ -608,7 +608,7 @@ public:
 			cameras[0] = new CameraRGB(g_context,objPrefix,context());
 			context().createInterfaceWithString(cameras[0],cameraName);
 			//test camera ok
-			std::cout<<"              -------- kinectServer: Component: CameraRGB created successfully   --------" << std::endl;
+			std::cout<<"              -------- openniServer: Component: CameraRGB created successfully   --------" << std::endl;
 		}
 		if (cameraD){
 			std::string objPrefix(context().tag() + ".CameraDEPTH.");
@@ -621,7 +621,7 @@ public:
 			cameras[1] = new CameraDEPTH(g_context,objPrefix,context());
 			context().createInterfaceWithString(cameras[1],cameraName);
 			//test camera ok
-			std::cout<<"              -------- kinectServer: Component: CameraDEPTH created successfully   --------" << std::endl;
+			std::cout<<"              -------- openniServer: Component: CameraDEPTH created successfully   --------" << std::endl;
 		}
 		
 		if (prop->getPropertyAsIntWithDefault(context().tag() + ".PTMotorsActive",0)){
@@ -630,7 +630,7 @@ public:
 			context().tracer().info("Creating ptmotors1 " + ptmotorsName);
 			ptmotors1 = new PTmotorsI(g_context,objPrefix4,context());
 			context().createInterfaceWithString(ptmotors1,ptmotorsName);
-			std::cout<<"              -------- kinectServer: Component: PTMotors created successfully   --------" << std::endl;
+			std::cout<<"              -------- openniServer: Component: PTMotors created successfully   --------" << std::endl;
 		}
 			
 		if (prop->getPropertyAsIntWithDefault(context().tag() + ".KinectLedsActive",0)){
@@ -639,7 +639,7 @@ public:
 			context().tracer().info("Creating kinectleds1 " + Name);
 			kinectleds1 = new KinectLedsI(g_context,objPrefix4,context());
 			context().createInterfaceWithString(kinectleds1,Name);
-			std::cout<<"              -------- kinectServer: Component: KinectLeds created successfully   --------" << std::endl;
+			std::cout<<"              -------- openniServer: Component: KinectLeds created successfully   --------" << std::endl;
 		}
 
     }

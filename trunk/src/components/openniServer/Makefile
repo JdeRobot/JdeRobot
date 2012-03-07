@@ -6,8 +6,8 @@ LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotIce.la \
         $(JDEROBOTDIR)/lib/jderobot/libJderobotInterfaces.la \
         $(JDEROBOTDIR)/lib/jderobot/libprogeo.la
 
-kinectServer: kinectServer.o
-	libtool --mode=link g++ -g -O -malign-double -O3 -fno-tree-pre -fno-strict-aliasing -DNDEBUG -msse3 -mssse3 -DUSE_GLUT -DXN_SSE -o kinectServer kinectServer.o $(LDADD) $(LDFLAGS)
+openniServer: openniServer.o
+	libtool --mode=link g++ -g -O -malign-double -O3 -fno-tree-pre -fno-strict-aliasing -DNDEBUG -msse3 -mssse3 -DUSE_GLUT -DXN_SSE -o openniServer openniServer.o $(LDADD) $(LDFLAGS)
 
 clean:
-	rm -rf *.o kinectServer *.gch
+	rm -rf *.o openniServer *.gch
