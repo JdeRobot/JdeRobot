@@ -16,7 +16,8 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
  *  Authors : Rubén González Barriada <ruben.gbarriada@gmail.com>
- *			  Alejandro Hernández Cordero <ahcorde@gmail.com> 
+ *	      Alejandro Hernández Cordero <ahcorde@gmail.com> 
+ *            Daniel Gómez Gómez <danigom@terra.es>
  *
  */
 
