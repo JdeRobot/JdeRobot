@@ -40,8 +40,9 @@
 #include <jderobot/camera.h>
 #include <jderobot/ptencoders.h>
 #include <jderobot/ptmotors.h>
-#include <jderobot/pose3dmotors.h>
-#include <jderobot/pose3dencoders.h>
+#include "pose3dmotors.h"
+#include "pose3dencoders.h"
+#include "kinect.h"
 #include <gazebo/gazebo.h>
 
 #include <colorspaces/colorspacesmm.h>
@@ -53,10 +54,12 @@
 #include <math.h>
 
 // opencv Libraries
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+//#include <opencv2/core/core.hpp>
+//#include <opencv2/highgui/highgui.hpp>
+//#include <opencv2/imgproc/imgproc.hpp>
 
+#include <cv.h>
+#include <highgui.h>
 
 // Constants
 #define DEGTORAD 0.01745327
@@ -71,7 +74,7 @@ string robotPort;
 
 namespace playerserver {
 
-		class CameraI: virtual public jderobot::Camera {
+	class CameraI: virtual public jderobot::Camera {
 	public:
 		CameraI(std::string& propertyPrefix, const jderobotice::Context& context)
 		: prefix(propertyPrefix),context(context) {
@@ -592,6 +595,42 @@ namespace playerserver {
 	};
 	
 	
+   class KinectI: virtual public jderobot::PuntosPCLInterface{
+   public:
+		KinectI (std::string& propertyPrefix, const jderobotice::Context& context):
+			prefix(propertyPrefix),context(context),KData(new jderobot::PuntosPCLData()) {
+				Ice::PropertiesPtr prop = context.properties();
+              v=NULL;
+              v  = new CloudViewer(this);
+              v->start();
+			}
+		
+		virtual jderobot::PuntosPCLDataPtr getKinectData(const Ice::Current&){
+				return KData;
+		};
+		
+		void update(jderobot::PuntosPCLDataPtr data){
+		   KData = data;
+		}
+	   
+	   private:
+	      class CloudViewer :public gbxiceutilacfr::SafeThread{ 
+            public: 
+            CloudViewer (KinectI* kinect) : gbxiceutilacfr::SafeThread(kinect->context.tracer()){}
+             
+             void walk(){ }
+           
+         };
+         typedef IceUtil::Handle<CloudViewer> CloudViewerPtr;
+         CloudViewerPtr v; 
+    	   std::string prefix;
+	      jderobotice::Context context;
+         jderobot::PuntosPCLDataPtr KData;
+
+     };
+
+	
+	
 	
 	//////////////////////////////////////////////////////////////////////////
 
@@ -621,6 +660,7 @@ namespace playerserver {
 				int avPTEncodersI, avPTEncodersII;
 				int avPose3dmotors1, avPose3dmotors2;
 				int avPose3dencoders1, avPose3dencoders2;
+				int avKinect;
 				
 				int Nread = 0;
 
@@ -787,8 +827,18 @@ namespace playerserver {
 						Nread++;
 				 }
 				 
-
-			
+ 			    avKinect = prop->getPropertyAsInt(context().tag() + ".kinect");
+ 			    std::cout <<"avKinect: " << avKinect<<  std::endl;
+			    if(avKinect){
+ 						std::string objPrefix13="kinect1";
+						std::string kinectName = "kinect1";
+						context().tracer().info("Creating kinect" + kinectName);
+						kinect = new KinectI(objPrefix13, context());
+						context().createInterfaceWithString(kinect , kinectName);
+						Nread++;
+				 }
+				
+							
 				//Get subclasses
 				MotorsI * motors = NULL;
 				LaserI * laser = NULL;
@@ -805,6 +855,7 @@ namespace playerserver {
 			   
 			   Pose3DEncodersI*  pose3dencoders_1 = NULL;
 			   Pose3DEncodersII* pose3dencoders_2 = NULL;
+			   KinectI* kinect_1 = NULL;
 			   
 			   std::vector<CameraI*> camera;
 
@@ -831,7 +882,11 @@ namespace playerserver {
 				   pose3dmotors_1 = dynamic_cast<Pose3DMotorsI*>(&(*pose3dmotors1));
 			   if(avPose3dmotors2)
 				   pose3dmotors_2 = dynamic_cast<Pose3DMotorsII*>(&(*pose3dmotors2));
-				   
+			   if(avKinect)
+               kinect_1 = dynamic_cast<KinectI*>(&(*kinect));
+               
+               				 std::cout << "k" << std::endl;
+               				   
 				camera.resize(nCameras);
             for(int i = 0; i< cameras.size(); i++){
                camera[i] = dynamic_cast<CameraI*>(&(*cameras[i]));	
@@ -874,8 +929,8 @@ namespace playerserver {
                      timeRelativeInicial = timeRelativeInicial0;
 					      cout << "FIN" <<endl;
 					   }
+
                   fscanf (pFile, "%ld", &timeRelative);
-                  //cout << "time:" <<  timeRelative <<endl;
                   
                   if(timeRelative - timeRelativeInicial > 0){
                      timeToSleep = timeRelative - timeRelativeInicial;
@@ -885,6 +940,8 @@ namespace playerserver {
                   }
                   
                   fscanf (pFile, "%s", buff);
+                  std::cout << buff << std::endl;
+                  
 
                   std:: stringstream streamLaser;
                   streamLaser << robotName+":"+robotPort + ":Laser:";
@@ -977,7 +1034,43 @@ namespace playerserver {
 						   continue;
                   }
                   
-                  
+                  std::stringstream streamKinect;
+                  streamKinect << robotName+":"+robotPort + ":KinectData:";
+                  std::string sKinect = streamKinect.str();
+                  if(avKinect && !strcmp(buff, sKinect.c_str())){
+                     int tam;
+                     fscanf(pFile, "%d", &tam);
+                     
+                     float x,y,z;
+                     float r,g,b;
+                     std::cout << "nube size: " << tam << std::endl;
+                     jderobot::PuntosPCLDataPtr KData = new jderobot::PuntosPCLData();
+                     KData->p.resize(tam);
+                     
+                     for(int i = 0; i < KData->p.size() ; i++){
+                        fscanf(pFile, "%f", &x);
+                        fscanf(pFile, "%f", &y);
+                        fscanf(pFile, "%f", &z);
+                        fscanf(pFile, "%f", &r);
+                        fscanf(pFile, "%f", &g);
+                        fscanf(pFile, "%f", &b);
+                        
+                        KData->p[i].x = x;
+                        KData->p[i].y = y;
+                        KData->p[i].z = z;
+                        KData->p[i].r = r;
+                        KData->p[i].g = g;
+                        KData->p[i].b = b; 
+                        
+                        if(i==1 || i==tam-1){
+                           std::cout << "X: " << x << " Y: " << y << " Z: " << z << " R: " << r << " G: " << g << "B: " << b  << std::endl;
+                        }
+                        
+                     }
+                     
+                     kinect_1->update(KData);
+
+                  }
                   
                }
                
@@ -985,7 +1078,7 @@ namespace playerserver {
                gettimeofday(&b,NULL);
                totalb=b.tv_sec*1000000+b.tv_usec;
                
-               //std::cout << "Introrob takes " << (totalb-totala)/1000 << " ms" << std::endl;
+               std::cout << "Introrob takes " << (totalb-totala)/1000 << " ms" << std::endl;
                
                //cout << "Time to sleep: " << (timeToSleep/speed)-(totalb-totala)/1000 << endl;
                
@@ -1026,6 +1119,9 @@ namespace playerserver {
 			
 				Ice::ObjectPtr pose3dencoders1;
 			   Ice::ObjectPtr pose3dencoders2;
+			   
+			   Ice::ObjectPtr kinect;
+			   
 	};
 }
 
