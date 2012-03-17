@@ -8,9 +8,9 @@
 // **********************************************************************
 
 // Ice version 3.3.1
-// Generated from file `kinect.ice'
+// Generated from file `cloudPoints.ice'
 
-#include "kinect.h"
+#include "cloudPoints.h"
 #include <Ice/LocalException.h>
 #include <Ice/ObjectFactory.h>
 #include <Ice/BasicStream.h>
@@ -29,16 +29,16 @@
 #   endif
 #endif
 
-static const ::std::string __jderobot__PuntosPCLInterface__getKinectData_name = "getKinectData";
+static const ::std::string __jderobot__CloudPointsInterface__getKinectData_name = "getKinectData";
 
-::Ice::Object* IceInternal::upCast(::jderobot::PuntosPCLData* p) { return p; }
-::IceProxy::Ice::Object* IceInternal::upCast(::IceProxy::jderobot::PuntosPCLData* p) { return p; }
+::Ice::Object* IceInternal::upCast(::jderobot::CloudPointsData* p) { return p; }
+::IceProxy::Ice::Object* IceInternal::upCast(::IceProxy::jderobot::CloudPointsData* p) { return p; }
 
-::Ice::Object* IceInternal::upCast(::jderobot::PuntosPCLInterface* p) { return p; }
-::IceProxy::Ice::Object* IceInternal::upCast(::IceProxy::jderobot::PuntosPCLInterface* p) { return p; }
+::Ice::Object* IceInternal::upCast(::jderobot::CloudPointsInterface* p) { return p; }
+::IceProxy::Ice::Object* IceInternal::upCast(::IceProxy::jderobot::CloudPointsInterface* p) { return p; }
 
 void
-jderobot::__read(::IceInternal::BasicStream* __is, ::jderobot::PuntosPCLDataPrx& v)
+jderobot::__read(::IceInternal::BasicStream* __is, ::jderobot::CloudPointsDataPrx& v)
 {
     ::Ice::ObjectPrx proxy;
     __is->read(proxy);
@@ -48,13 +48,13 @@ jderobot::__read(::IceInternal::BasicStream* __is, ::jderobot::PuntosPCLDataPrx&
     }
     else
     {
-        v = new ::IceProxy::jderobot::PuntosPCLData;
+        v = new ::IceProxy::jderobot::CloudPointsData;
         v->__copyFrom(proxy);
     }
 }
 
 void
-jderobot::__read(::IceInternal::BasicStream* __is, ::jderobot::PuntosPCLInterfacePrx& v)
+jderobot::__read(::IceInternal::BasicStream* __is, ::jderobot::CloudPointsInterfacePrx& v)
 {
     ::Ice::ObjectPrx proxy;
     __is->read(proxy);
@@ -64,13 +64,13 @@ jderobot::__read(::IceInternal::BasicStream* __is, ::jderobot::PuntosPCLInterfac
     }
     else
     {
-        v = new ::IceProxy::jderobot::PuntosPCLInterface;
+        v = new ::IceProxy::jderobot::CloudPointsInterface;
         v->__copyFrom(proxy);
     }
 }
 
 bool
-jderobot::Puntos::operator==(const Puntos& __rhs) const
+jderobot::Punto3DRGB::operator==(const Punto3DRGB& __rhs) const
 {
     if(this == &__rhs)
     {
@@ -104,7 +104,7 @@ jderobot::Puntos::operator==(const Puntos& __rhs) const
 }
 
 bool
-jderobot::Puntos::operator<(const Puntos& __rhs) const
+jderobot::Punto3DRGB::operator<(const Punto3DRGB& __rhs) const
 {
     if(this == &__rhs)
     {
@@ -162,7 +162,7 @@ jderobot::Puntos::operator<(const Puntos& __rhs) const
 }
 
 void
-jderobot::Puntos::__write(::IceInternal::BasicStream* __os) const
+jderobot::Punto3DRGB::__write(::IceInternal::BasicStream* __os) const
 {
     __os->write(x);
     __os->write(y);
@@ -173,7 +173,7 @@ jderobot::Puntos::__write(::IceInternal::BasicStream* __os) const
 }
 
 void
-jderobot::Puntos::__read(::IceInternal::BasicStream* __is)
+jderobot::Punto3DRGB::__read(::IceInternal::BasicStream* __is)
 {
     __is->read(x);
     __is->read(y);
@@ -184,7 +184,7 @@ jderobot::Puntos::__read(::IceInternal::BasicStream* __is)
 }
 
 void
-jderobot::__writePuntosPCL(::IceInternal::BasicStream* __os, const ::jderobot::Puntos* begin, const ::jderobot::Puntos* end)
+jderobot::__writeCloudPoints(::IceInternal::BasicStream* __os, const ::jderobot::Punto3DRGB* begin, const ::jderobot::Punto3DRGB* end)
 {
     ::Ice::Int size = static_cast< ::Ice::Int>(end - begin);
     __os->writeSize(size);
@@ -195,7 +195,7 @@ jderobot::__writePuntosPCL(::IceInternal::BasicStream* __os, const ::jderobot::P
 }
 
 void
-jderobot::__readPuntosPCL(::IceInternal::BasicStream* __is, ::jderobot::PuntosPCL& v)
+jderobot::__readCloudPoints(::IceInternal::BasicStream* __is, ::jderobot::CloudPoints& v)
 {
     ::Ice::Int sz;
     __is->readSize(sz);
@@ -208,31 +208,31 @@ jderobot::__readPuntosPCL(::IceInternal::BasicStream* __is, ::jderobot::PuntosPC
 }
 
 const ::std::string&
-IceProxy::jderobot::PuntosPCLData::ice_staticId()
+IceProxy::jderobot::CloudPointsData::ice_staticId()
 {
-    return ::jderobot::PuntosPCLData::ice_staticId();
+    return ::jderobot::CloudPointsData::ice_staticId();
 }
 
 ::IceInternal::Handle< ::IceDelegateM::Ice::Object>
-IceProxy::jderobot::PuntosPCLData::__createDelegateM()
+IceProxy::jderobot::CloudPointsData::__createDelegateM()
 {
-    return ::IceInternal::Handle< ::IceDelegateM::Ice::Object>(new ::IceDelegateM::jderobot::PuntosPCLData);
+    return ::IceInternal::Handle< ::IceDelegateM::Ice::Object>(new ::IceDelegateM::jderobot::CloudPointsData);
 }
 
 ::IceInternal::Handle< ::IceDelegateD::Ice::Object>
-IceProxy::jderobot::PuntosPCLData::__createDelegateD()
+IceProxy::jderobot::CloudPointsData::__createDelegateD()
 {
-    return ::IceInternal::Handle< ::IceDelegateD::Ice::Object>(new ::IceDelegateD::jderobot::PuntosPCLData);
+    return ::IceInternal::Handle< ::IceDelegateD::Ice::Object>(new ::IceDelegateD::jderobot::CloudPointsData);
 }
 
 ::IceProxy::Ice::Object*
-IceProxy::jderobot::PuntosPCLData::__newInstance() const
+IceProxy::jderobot::CloudPointsData::__newInstance() const
 {
-    return new PuntosPCLData;
+    return new CloudPointsData;
 }
 
-::jderobot::PuntosPCLDataPtr
-IceProxy::jderobot::PuntosPCLInterface::getKinectData(const ::Ice::Context* __ctx)
+::jderobot::CloudPointsDataPtr
+IceProxy::jderobot::CloudPointsInterface::getKinectData(const ::Ice::Context* __ctx)
 {
     int __cnt = 0;
     while(true)
@@ -243,9 +243,9 @@ IceProxy::jderobot::PuntosPCLInterface::getKinectData(const ::Ice::Context* __ct
 #if defined(__BCPLUSPLUS__) && (__BCPLUSPLUS__ >= 0x0600) // C++Builder 2009 compiler bug
             IceUtil::DummyBCC dummy;
 #endif
-            __checkTwowayOnly(__jderobot__PuntosPCLInterface__getKinectData_name);
+            __checkTwowayOnly(__jderobot__CloudPointsInterface__getKinectData_name);
             __delBase = __getDelegate(false);
-            ::IceDelegate::jderobot::PuntosPCLInterface* __del = dynamic_cast< ::IceDelegate::jderobot::PuntosPCLInterface*>(__delBase.get());
+            ::IceDelegate::jderobot::CloudPointsInterface* __del = dynamic_cast< ::IceDelegate::jderobot::CloudPointsInterface*>(__delBase.get());
             return __del->getKinectData(__ctx);
         }
         catch(const ::IceInternal::LocalExceptionWrapper& __ex)
@@ -260,35 +260,35 @@ IceProxy::jderobot::PuntosPCLInterface::getKinectData(const ::Ice::Context* __ct
 }
 
 const ::std::string&
-IceProxy::jderobot::PuntosPCLInterface::ice_staticId()
+IceProxy::jderobot::CloudPointsInterface::ice_staticId()
 {
-    return ::jderobot::PuntosPCLInterface::ice_staticId();
+    return ::jderobot::CloudPointsInterface::ice_staticId();
 }
 
 ::IceInternal::Handle< ::IceDelegateM::Ice::Object>
-IceProxy::jderobot::PuntosPCLInterface::__createDelegateM()
+IceProxy::jderobot::CloudPointsInterface::__createDelegateM()
 {
-    return ::IceInternal::Handle< ::IceDelegateM::Ice::Object>(new ::IceDelegateM::jderobot::PuntosPCLInterface);
+    return ::IceInternal::Handle< ::IceDelegateM::Ice::Object>(new ::IceDelegateM::jderobot::CloudPointsInterface);
 }
 
 ::IceInternal::Handle< ::IceDelegateD::Ice::Object>
-IceProxy::jderobot::PuntosPCLInterface::__createDelegateD()
+IceProxy::jderobot::CloudPointsInterface::__createDelegateD()
 {
-    return ::IceInternal::Handle< ::IceDelegateD::Ice::Object>(new ::IceDelegateD::jderobot::PuntosPCLInterface);
+    return ::IceInternal::Handle< ::IceDelegateD::Ice::Object>(new ::IceDelegateD::jderobot::CloudPointsInterface);
 }
 
 ::IceProxy::Ice::Object*
-IceProxy::jderobot::PuntosPCLInterface::__newInstance() const
+IceProxy::jderobot::CloudPointsInterface::__newInstance() const
 {
-    return new PuntosPCLInterface;
+    return new CloudPointsInterface;
 }
 
-::jderobot::PuntosPCLDataPtr
-IceDelegateM::jderobot::PuntosPCLInterface::getKinectData(const ::Ice::Context* __context)
+::jderobot::CloudPointsDataPtr
+IceDelegateM::jderobot::CloudPointsInterface::getKinectData(const ::Ice::Context* __context)
 {
-    ::IceInternal::Outgoing __og(__handler.get(), __jderobot__PuntosPCLInterface__getKinectData_name, ::Ice::Idempotent, __context);
+    ::IceInternal::Outgoing __og(__handler.get(), __jderobot__CloudPointsInterface__getKinectData_name, ::Ice::Idempotent, __context);
     bool __ok = __og.invoke();
-    ::jderobot::PuntosPCLDataPtr __ret;
+    ::jderobot::CloudPointsDataPtr __ret;
     try
     {
         if(!__ok)
@@ -305,7 +305,7 @@ IceDelegateM::jderobot::PuntosPCLInterface::getKinectData(const ::Ice::Context* 
         }
         ::IceInternal::BasicStream* __is = __og.is();
         __is->startReadEncaps();
-        __is->read(::jderobot::__patch__PuntosPCLDataPtr, &__ret);
+        __is->read(::jderobot::__patch__CloudPointsDataPtr, &__ret);
         __is->readPendingObjects();
         __is->endReadEncaps();
         return __ret;
@@ -316,14 +316,14 @@ IceDelegateM::jderobot::PuntosPCLInterface::getKinectData(const ::Ice::Context* 
     }
 }
 
-::jderobot::PuntosPCLDataPtr
-IceDelegateD::jderobot::PuntosPCLInterface::getKinectData(const ::Ice::Context* __context)
+::jderobot::CloudPointsDataPtr
+IceDelegateD::jderobot::CloudPointsInterface::getKinectData(const ::Ice::Context* __context)
 {
     class _DirectI : public ::IceInternal::Direct
     {
     public:
 
-        _DirectI(::jderobot::PuntosPCLDataPtr& __result, const ::Ice::Current& __current) : 
+        _DirectI(::jderobot::CloudPointsDataPtr& __result, const ::Ice::Current& __current) : 
             ::IceInternal::Direct(__current),
             _result(__result)
         {
@@ -332,7 +332,7 @@ IceDelegateD::jderobot::PuntosPCLInterface::getKinectData(const ::Ice::Context* 
         virtual ::Ice::DispatchStatus
         run(::Ice::Object* object)
         {
-            ::jderobot::PuntosPCLInterface* servant = dynamic_cast< ::jderobot::PuntosPCLInterface*>(object);
+            ::jderobot::CloudPointsInterface* servant = dynamic_cast< ::jderobot::CloudPointsInterface*>(object);
             if(!servant)
             {
                 throw ::Ice::OperationNotExistException(__FILE__, __LINE__, _current.id, _current.facet, _current.operation);
@@ -343,12 +343,12 @@ IceDelegateD::jderobot::PuntosPCLInterface::getKinectData(const ::Ice::Context* 
         
     private:
         
-        ::jderobot::PuntosPCLDataPtr& _result;
+        ::jderobot::CloudPointsDataPtr& _result;
     };
     
     ::Ice::Current __current;
-    __initCurrent(__current, __jderobot__PuntosPCLInterface__getKinectData_name, ::Ice::Idempotent, __context);
-    ::jderobot::PuntosPCLDataPtr __result;
+    __initCurrent(__current, __jderobot__CloudPointsInterface__getKinectData_name, ::Ice::Idempotent, __context);
+    ::jderobot::CloudPointsDataPtr __result;
     try
     {
         _DirectI __direct(__result, __current);
@@ -382,60 +382,60 @@ IceDelegateD::jderobot::PuntosPCLInterface::getKinectData(const ::Ice::Context* 
     return __result;
 }
 
-jderobot::PuntosPCLData::PuntosPCLData(const ::jderobot::PuntosPCL& __ice_p) :
-    p(__ice_p)
+jderobot::CloudPointsData::CloudPointsData(const ::jderobot::CloudPoints& __ice_points) :
+    points(__ice_points)
 {
 }
 
 ::Ice::ObjectPtr
-jderobot::PuntosPCLData::ice_clone() const
+jderobot::CloudPointsData::ice_clone() const
 {
-    ::jderobot::PuntosPCLDataPtr __p = new ::jderobot::PuntosPCLData(*this);
+    ::jderobot::CloudPointsDataPtr __p = new ::jderobot::CloudPointsData(*this);
     return __p;
 }
 
-static const ::std::string __jderobot__PuntosPCLData_ids[2] =
+static const ::std::string __jderobot__CloudPointsData_ids[2] =
 {
     "::Ice::Object",
-    "::jderobot::PuntosPCLData"
+    "::jderobot::CloudPointsData"
 };
 
 bool
-jderobot::PuntosPCLData::ice_isA(const ::std::string& _s, const ::Ice::Current&) const
+jderobot::CloudPointsData::ice_isA(const ::std::string& _s, const ::Ice::Current&) const
 {
-    return ::std::binary_search(__jderobot__PuntosPCLData_ids, __jderobot__PuntosPCLData_ids + 2, _s);
+    return ::std::binary_search(__jderobot__CloudPointsData_ids, __jderobot__CloudPointsData_ids + 2, _s);
 }
 
 ::std::vector< ::std::string>
-jderobot::PuntosPCLData::ice_ids(const ::Ice::Current&) const
+jderobot::CloudPointsData::ice_ids(const ::Ice::Current&) const
 {
-    return ::std::vector< ::std::string>(&__jderobot__PuntosPCLData_ids[0], &__jderobot__PuntosPCLData_ids[2]);
+    return ::std::vector< ::std::string>(&__jderobot__CloudPointsData_ids[0], &__jderobot__CloudPointsData_ids[2]);
 }
 
 const ::std::string&
-jderobot::PuntosPCLData::ice_id(const ::Ice::Current&) const
+jderobot::CloudPointsData::ice_id(const ::Ice::Current&) const
 {
-    return __jderobot__PuntosPCLData_ids[1];
+    return __jderobot__CloudPointsData_ids[1];
 }
 
 const ::std::string&
-jderobot::PuntosPCLData::ice_staticId()
+jderobot::CloudPointsData::ice_staticId()
 {
-    return __jderobot__PuntosPCLData_ids[1];
+    return __jderobot__CloudPointsData_ids[1];
 }
 
 void
-jderobot::PuntosPCLData::__write(::IceInternal::BasicStream* __os) const
+jderobot::CloudPointsData::__write(::IceInternal::BasicStream* __os) const
 {
     __os->writeTypeId(ice_staticId());
     __os->startWriteSlice();
-    if(p.size() == 0)
+    if(points.size() == 0)
     {
         __os->writeSize(0);
     }
     else
     {
-        ::jderobot::__writePuntosPCL(__os, &p[0], &p[0] + p.size());
+        ::jderobot::__writeCloudPoints(__os, &points[0], &points[0] + points.size());
     }
     __os->endWriteSlice();
 #if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
@@ -446,7 +446,7 @@ jderobot::PuntosPCLData::__write(::IceInternal::BasicStream* __os) const
 }
 
 void
-jderobot::PuntosPCLData::__read(::IceInternal::BasicStream* __is, bool __rid)
+jderobot::CloudPointsData::__read(::IceInternal::BasicStream* __is, bool __rid)
 {
     if(__rid)
     {
@@ -454,7 +454,7 @@ jderobot::PuntosPCLData::__read(::IceInternal::BasicStream* __is, bool __rid)
         __is->readTypeId(myId);
     }
     __is->startReadSlice();
-    ::jderobot::__readPuntosPCL(__is, p);
+    ::jderobot::__readCloudPoints(__is, points);
     __is->endReadSlice();
 #if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
     Object::__read(__is, true);
@@ -464,30 +464,30 @@ jderobot::PuntosPCLData::__read(::IceInternal::BasicStream* __is, bool __rid)
 }
 
 void
-jderobot::PuntosPCLData::__write(const ::Ice::OutputStreamPtr&) const
+jderobot::CloudPointsData::__write(const ::Ice::OutputStreamPtr&) const
 {
     Ice::MarshalException ex(__FILE__, __LINE__);
-    ex.reason = "type jderobot::PuntosPCLData was not generated with stream support";
+    ex.reason = "type jderobot::CloudPointsData was not generated with stream support";
     throw ex;
 }
 
 void
-jderobot::PuntosPCLData::__read(const ::Ice::InputStreamPtr&, bool)
+jderobot::CloudPointsData::__read(const ::Ice::InputStreamPtr&, bool)
 {
     Ice::MarshalException ex(__FILE__, __LINE__);
-    ex.reason = "type jderobot::PuntosPCLData was not generated with stream support";
+    ex.reason = "type jderobot::CloudPointsData was not generated with stream support";
     throw ex;
 }
 
-class __F__jderobot__PuntosPCLData : public ::Ice::ObjectFactory
+class __F__jderobot__CloudPointsData : public ::Ice::ObjectFactory
 {
 public:
 
     virtual ::Ice::ObjectPtr
     create(const ::std::string& type)
     {
-        assert(type == ::jderobot::PuntosPCLData::ice_staticId());
-        return new ::jderobot::PuntosPCLData;
+        assert(type == ::jderobot::CloudPointsData::ice_staticId());
+        return new ::jderobot::CloudPointsData;
     }
 
     virtual void
@@ -496,109 +496,109 @@ public:
     }
 };
 
-static ::Ice::ObjectFactoryPtr __F__jderobot__PuntosPCLData_Ptr = new __F__jderobot__PuntosPCLData;
+static ::Ice::ObjectFactoryPtr __F__jderobot__CloudPointsData_Ptr = new __F__jderobot__CloudPointsData;
 
 const ::Ice::ObjectFactoryPtr&
-jderobot::PuntosPCLData::ice_factory()
+jderobot::CloudPointsData::ice_factory()
 {
-    return __F__jderobot__PuntosPCLData_Ptr;
+    return __F__jderobot__CloudPointsData_Ptr;
 }
 
-class __F__jderobot__PuntosPCLData__Init
+class __F__jderobot__CloudPointsData__Init
 {
 public:
 
-    __F__jderobot__PuntosPCLData__Init()
+    __F__jderobot__CloudPointsData__Init()
     {
-        ::IceInternal::factoryTable->addObjectFactory(::jderobot::PuntosPCLData::ice_staticId(), ::jderobot::PuntosPCLData::ice_factory());
+        ::IceInternal::factoryTable->addObjectFactory(::jderobot::CloudPointsData::ice_staticId(), ::jderobot::CloudPointsData::ice_factory());
     }
 
-    ~__F__jderobot__PuntosPCLData__Init()
+    ~__F__jderobot__CloudPointsData__Init()
     {
-        ::IceInternal::factoryTable->removeObjectFactory(::jderobot::PuntosPCLData::ice_staticId());
+        ::IceInternal::factoryTable->removeObjectFactory(::jderobot::CloudPointsData::ice_staticId());
     }
 };
 
-static __F__jderobot__PuntosPCLData__Init __F__jderobot__PuntosPCLData__i;
+static __F__jderobot__CloudPointsData__Init __F__jderobot__CloudPointsData__i;
 
 #ifdef __APPLE__
-extern "C" { void __F__jderobot__PuntosPCLData__initializer() {} }
+extern "C" { void __F__jderobot__CloudPointsData__initializer() {} }
 #endif
 
 void 
-jderobot::__patch__PuntosPCLDataPtr(void* __addr, ::Ice::ObjectPtr& v)
+jderobot::__patch__CloudPointsDataPtr(void* __addr, ::Ice::ObjectPtr& v)
 {
-    ::jderobot::PuntosPCLDataPtr* p = static_cast< ::jderobot::PuntosPCLDataPtr*>(__addr);
+    ::jderobot::CloudPointsDataPtr* p = static_cast< ::jderobot::CloudPointsDataPtr*>(__addr);
     assert(p);
-    *p = ::jderobot::PuntosPCLDataPtr::dynamicCast(v);
+    *p = ::jderobot::CloudPointsDataPtr::dynamicCast(v);
     if(v && !*p)
     {
-        IceInternal::Ex::throwUOE(::jderobot::PuntosPCLData::ice_staticId(), v->ice_id());
+        IceInternal::Ex::throwUOE(::jderobot::CloudPointsData::ice_staticId(), v->ice_id());
     }
 }
 
 bool
-jderobot::operator==(const ::jderobot::PuntosPCLData& l, const ::jderobot::PuntosPCLData& r)
+jderobot::operator==(const ::jderobot::CloudPointsData& l, const ::jderobot::CloudPointsData& r)
 {
     return static_cast<const ::Ice::Object&>(l) == static_cast<const ::Ice::Object&>(r);
 }
 
 bool
-jderobot::operator<(const ::jderobot::PuntosPCLData& l, const ::jderobot::PuntosPCLData& r)
+jderobot::operator<(const ::jderobot::CloudPointsData& l, const ::jderobot::CloudPointsData& r)
 {
     return static_cast<const ::Ice::Object&>(l) < static_cast<const ::Ice::Object&>(r);
 }
 
 ::Ice::ObjectPtr
-jderobot::PuntosPCLInterface::ice_clone() const
+jderobot::CloudPointsInterface::ice_clone() const
 {
     throw ::Ice::CloneNotImplementedException(__FILE__, __LINE__);
     return 0; // to avoid a warning with some compilers
 }
 
-static const ::std::string __jderobot__PuntosPCLInterface_ids[2] =
+static const ::std::string __jderobot__CloudPointsInterface_ids[2] =
 {
     "::Ice::Object",
-    "::jderobot::PuntosPCLInterface"
+    "::jderobot::CloudPointsInterface"
 };
 
 bool
-jderobot::PuntosPCLInterface::ice_isA(const ::std::string& _s, const ::Ice::Current&) const
+jderobot::CloudPointsInterface::ice_isA(const ::std::string& _s, const ::Ice::Current&) const
 {
-    return ::std::binary_search(__jderobot__PuntosPCLInterface_ids, __jderobot__PuntosPCLInterface_ids + 2, _s);
+    return ::std::binary_search(__jderobot__CloudPointsInterface_ids, __jderobot__CloudPointsInterface_ids + 2, _s);
 }
 
 ::std::vector< ::std::string>
-jderobot::PuntosPCLInterface::ice_ids(const ::Ice::Current&) const
+jderobot::CloudPointsInterface::ice_ids(const ::Ice::Current&) const
 {
-    return ::std::vector< ::std::string>(&__jderobot__PuntosPCLInterface_ids[0], &__jderobot__PuntosPCLInterface_ids[2]);
+    return ::std::vector< ::std::string>(&__jderobot__CloudPointsInterface_ids[0], &__jderobot__CloudPointsInterface_ids[2]);
 }
 
 const ::std::string&
-jderobot::PuntosPCLInterface::ice_id(const ::Ice::Current&) const
+jderobot::CloudPointsInterface::ice_id(const ::Ice::Current&) const
 {
-    return __jderobot__PuntosPCLInterface_ids[1];
+    return __jderobot__CloudPointsInterface_ids[1];
 }
 
 const ::std::string&
-jderobot::PuntosPCLInterface::ice_staticId()
+jderobot::CloudPointsInterface::ice_staticId()
 {
-    return __jderobot__PuntosPCLInterface_ids[1];
+    return __jderobot__CloudPointsInterface_ids[1];
 }
 
 ::Ice::DispatchStatus
-jderobot::PuntosPCLInterface::___getKinectData(::IceInternal::Incoming& __inS, const ::Ice::Current& __current)
+jderobot::CloudPointsInterface::___getKinectData(::IceInternal::Incoming& __inS, const ::Ice::Current& __current)
 {
     __checkMode(::Ice::Idempotent, __current.mode);
     __inS.is()->skipEmptyEncaps();
     ::IceInternal::BasicStream* __os = __inS.os();
-    ::jderobot::PuntosPCLDataPtr __ret = getKinectData(__current);
+    ::jderobot::CloudPointsDataPtr __ret = getKinectData(__current);
     __os->write(::Ice::ObjectPtr(::IceInternal::upCast(__ret.get())));
     __os->writePendingObjects();
     return ::Ice::DispatchOK;
 }
 
-static ::std::string __jderobot__PuntosPCLInterface_all[] =
+static ::std::string __jderobot__CloudPointsInterface_all[] =
 {
     "getKinectData",
     "ice_id",
@@ -608,15 +608,15 @@ static ::std::string __jderobot__PuntosPCLInterface_all[] =
 };
 
 ::Ice::DispatchStatus
-jderobot::PuntosPCLInterface::__dispatch(::IceInternal::Incoming& in, const ::Ice::Current& current)
+jderobot::CloudPointsInterface::__dispatch(::IceInternal::Incoming& in, const ::Ice::Current& current)
 {
-    ::std::pair< ::std::string*, ::std::string*> r = ::std::equal_range(__jderobot__PuntosPCLInterface_all, __jderobot__PuntosPCLInterface_all + 5, current.operation);
+    ::std::pair< ::std::string*, ::std::string*> r = ::std::equal_range(__jderobot__CloudPointsInterface_all, __jderobot__CloudPointsInterface_all + 5, current.operation);
     if(r.first == r.second)
     {
         throw ::Ice::OperationNotExistException(__FILE__, __LINE__, current.id, current.facet, current.operation);
     }
 
-    switch(r.first - __jderobot__PuntosPCLInterface_all)
+    switch(r.first - __jderobot__CloudPointsInterface_all)
     {
         case 0:
         {
@@ -645,7 +645,7 @@ jderobot::PuntosPCLInterface::__dispatch(::IceInternal::Incoming& in, const ::Ic
 }
 
 void
-jderobot::PuntosPCLInterface::__write(::IceInternal::BasicStream* __os) const
+jderobot::CloudPointsInterface::__write(::IceInternal::BasicStream* __os) const
 {
     __os->writeTypeId(ice_staticId());
     __os->startWriteSlice();
@@ -658,7 +658,7 @@ jderobot::PuntosPCLInterface::__write(::IceInternal::BasicStream* __os) const
 }
 
 void
-jderobot::PuntosPCLInterface::__read(::IceInternal::BasicStream* __is, bool __rid)
+jderobot::CloudPointsInterface::__read(::IceInternal::BasicStream* __is, bool __rid)
 {
     if(__rid)
     {
@@ -675,41 +675,41 @@ jderobot::PuntosPCLInterface::__read(::IceInternal::BasicStream* __is, bool __ri
 }
 
 void
-jderobot::PuntosPCLInterface::__write(const ::Ice::OutputStreamPtr&) const
+jderobot::CloudPointsInterface::__write(const ::Ice::OutputStreamPtr&) const
 {
     Ice::MarshalException ex(__FILE__, __LINE__);
-    ex.reason = "type jderobot::PuntosPCLInterface was not generated with stream support";
+    ex.reason = "type jderobot::CloudPointsInterface was not generated with stream support";
     throw ex;
 }
 
 void
-jderobot::PuntosPCLInterface::__read(const ::Ice::InputStreamPtr&, bool)
+jderobot::CloudPointsInterface::__read(const ::Ice::InputStreamPtr&, bool)
 {
     Ice::MarshalException ex(__FILE__, __LINE__);
-    ex.reason = "type jderobot::PuntosPCLInterface was not generated with stream support";
+    ex.reason = "type jderobot::CloudPointsInterface was not generated with stream support";
     throw ex;
 }
 
 void 
-jderobot::__patch__PuntosPCLInterfacePtr(void* __addr, ::Ice::ObjectPtr& v)
+jderobot::__patch__CloudPointsInterfacePtr(void* __addr, ::Ice::ObjectPtr& v)
 {
-    ::jderobot::PuntosPCLInterfacePtr* p = static_cast< ::jderobot::PuntosPCLInterfacePtr*>(__addr);
+    ::jderobot::CloudPointsInterfacePtr* p = static_cast< ::jderobot::CloudPointsInterfacePtr*>(__addr);
     assert(p);
-    *p = ::jderobot::PuntosPCLInterfacePtr::dynamicCast(v);
+    *p = ::jderobot::CloudPointsInterfacePtr::dynamicCast(v);
     if(v && !*p)
     {
-        IceInternal::Ex::throwUOE(::jderobot::PuntosPCLInterface::ice_staticId(), v->ice_id());
+        IceInternal::Ex::throwUOE(::jderobot::CloudPointsInterface::ice_staticId(), v->ice_id());
     }
 }
 
 bool
-jderobot::operator==(const ::jderobot::PuntosPCLInterface& l, const ::jderobot::PuntosPCLInterface& r)
+jderobot::operator==(const ::jderobot::CloudPointsInterface& l, const ::jderobot::CloudPointsInterface& r)
 {
     return static_cast<const ::Ice::Object&>(l) == static_cast<const ::Ice::Object&>(r);
 }
 
 bool
-jderobot::operator<(const ::jderobot::PuntosPCLInterface& l, const ::jderobot::PuntosPCLInterface& r)
+jderobot::operator<(const ::jderobot::CloudPointsInterface& l, const ::jderobot::CloudPointsInterface& r)
 {
     return static_cast<const ::Ice::Object&>(l) < static_cast<const ::Ice::Object&>(r);
 }

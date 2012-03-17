@@ -8,8 +8,8 @@ LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotInterfaces.la \
 	     $(JDEROBOTDIR)/lib/jderobot/libJderobotUtil.la \
         $(JDEROBOTDIR)/lib/jderobot/libcolorspacesmm.la 
 
-introrob: recorder.o
-	libtool --mode=link g++ -g -O -o recorder recorder.o  $(LDADD) $(LDFLAGS)
+introrob: recorder.o cloudPoints.o
+	libtool --mode=link g++ -g -O -o recorder recorder.o cloudPoints.o  $(LDADD) $(LDFLAGS)
 
 clean:
 	rm -f *.o recorder

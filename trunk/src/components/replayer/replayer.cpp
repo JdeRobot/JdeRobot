@@ -42,7 +42,7 @@
 #include <jderobot/ptmotors.h>
 #include "pose3dmotors.h"
 #include "pose3dencoders.h"
-#include "kinect.h"
+#include "cloudPoints.h"
 #include <gazebo/gazebo.h>
 
 #include <colorspaces/colorspacesmm.h>
@@ -595,21 +595,21 @@ namespace playerserver {
 	};
 	
 	
-   class KinectI: virtual public jderobot::PuntosPCLInterface{
+   class KinectI: virtual public jderobot::CloudPointsInterface{
    public:
 		KinectI (std::string& propertyPrefix, const jderobotice::Context& context):
-			prefix(propertyPrefix),context(context),KData(new jderobot::PuntosPCLData()) {
+			prefix(propertyPrefix),context(context),KData(new jderobot::CloudPointsData()) {
 				Ice::PropertiesPtr prop = context.properties();
               v=NULL;
               v  = new CloudViewer(this);
               v->start();
 			}
 		
-		virtual jderobot::PuntosPCLDataPtr getKinectData(const Ice::Current&){
+		virtual jderobot::CloudPointsDataPtr getKinectData(const Ice::Current&){
 				return KData;
 		};
 		
-		void update(jderobot::PuntosPCLDataPtr data){
+		void update(jderobot::CloudPointsDataPtr data){
 		   KData = data;
 		}
 	   
@@ -625,7 +625,7 @@ namespace playerserver {
          CloudViewerPtr v; 
     	   std::string prefix;
 	      jderobotice::Context context;
-         jderobot::PuntosPCLDataPtr KData;
+         jderobot::CloudPointsDataPtr KData;
 
      };
 
@@ -1044,10 +1044,10 @@ namespace playerserver {
                      float x,y,z;
                      float r,g,b;
                      std::cout << "nube size: " << tam << std::endl;
-                     jderobot::PuntosPCLDataPtr KData = new jderobot::PuntosPCLData();
-                     KData->p.resize(tam);
+                     jderobot::CloudPointsDataPtr KData = new jderobot::CloudPointsData();
+                     KData->points.resize(tam);
                      
-                     for(int i = 0; i < KData->p.size() ; i++){
+                     for(int i = 0; i < KData->points.size() ; i++){
                         fscanf(pFile, "%f", &x);
                         fscanf(pFile, "%f", &y);
                         fscanf(pFile, "%f", &z);
@@ -1055,12 +1055,12 @@ namespace playerserver {
                         fscanf(pFile, "%f", &g);
                         fscanf(pFile, "%f", &b);
                         
-                        KData->p[i].x = x;
-                        KData->p[i].y = y;
-                        KData->p[i].z = z;
-                        KData->p[i].r = r;
-                        KData->p[i].g = g;
-                        KData->p[i].b = b; 
+                        KData->points[i].x = x;
+                        KData->points[i].y = y;
+                        KData->points[i].z = z;
+                        KData->points[i].r = r;
+                        KData->points[i].g = g;
+                        KData->points[i].b = b; 
                         
                         if(i==1 || i==tam-1){
                            std::cout << "X: " << x << " Y: " << y << " Z: " << z << " R: " << r << " G: " << g << "B: " << b  << std::endl;

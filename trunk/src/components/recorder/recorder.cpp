@@ -10,13 +10,17 @@
 #include <jderobot/laser.h>
 #include <jderobot/encoders.h>
 #include <jderobot/ptencoders.h>
-#include <jderobot/pose3dmotors.h>
-#include <jderobot/pose3dencoders.h>
+#include "pose3dmotors.h"
+#include "pose3dencoders.h"
+#include "cloudPoints.h"
 #include <colorspaces/colorspacesmm.h>
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+//#include <opencv2/core/core.hpp>
+//#include <opencv2/highgui/highgui.hpp>
+//#include <opencv2/imgproc/imgproc.hpp>
+
+#include <cv.h>
+#include <highgui.h>
 
 int main(int argc, char** argv){
 
@@ -40,6 +44,7 @@ int main(int argc, char** argv){
    jderobot::PTEncodersPrx pteprx2;
 	jderobot::Pose3DEncodersPrx pose3DEncoders1;
 	jderobot::Pose3DEncodersPrx pose3DEncoders2;
+   jderobot::CloudPointsInterfacePrx prx;
   
 
    //INTERFACE DATA
@@ -51,6 +56,7 @@ int main(int argc, char** argv){
    jderobot::PTEncodersDataPtr PTencodersData2;
 	jderobot::Pose3DEncodersDataPtr pose3DEncodersData1;
 	jderobot::Pose3DEncodersDataPtr pose3DEncodersData2;
+   jderobot::CloudPointsDataPtr kinectData; 
     
     int avEncoders = 0;
     int avLaser = 0;
@@ -60,8 +66,8 @@ int main(int argc, char** argv){
     int ptencoders2 = 0;
     int avPose3DEncoders1 = 0;
     int avPose3DEncoders2 = 0;
+    int avKinect = 0;
     
-   
     int Hz = 10;
     int muestrasLaser = 180;
     
@@ -190,6 +196,20 @@ int main(int argc, char** argv){
             throw "Invalid proxy Recorder.pose3DEncoders2.Proxy";
       }
       
+      avKinect = prop->getPropertyAsInt("Recorder.Kinect1.bool");
+      if(avKinect){
+         // Contact to KINECT interface
+         Ice::ObjectPrx kinect = ic->propertyToProxy("Recorder.Kinect1.Proxy");
+         if (0==kinect){
+         throw "Could not create proxy with Kinect1"; 
+         }
+         // Cast to KINECT
+         prx = jderobot::CloudPointsInterfacePrx::checkedCast(kinect);
+         if (0== prx){
+         throw std::string("Invalid proxy Recorder.Kinect1.Proxy");
+         }
+      }
+      
       
       
       //-----------------ICE----------------//
@@ -220,7 +240,7 @@ int main(int argc, char** argv){
          gettimeofday(&a,NULL);
          totala=a.tv_sec*1000000+a.tv_usec;
       
-      
+         /* CameraA */
          if(avCamera1){
             imageData1 = cprx1->getImageData();
             colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(
@@ -240,6 +260,7 @@ int main(int argc, char** argv){
             outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Camera1:\t" << buff  << std::endl;
          }
          
+         /* Camera B */
          if(avCamera2){
             imageData2 = cprx2->getImageData();
             colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(
@@ -259,12 +280,14 @@ int main(int argc, char** argv){
             outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Camera2:\t" << buff  << std::endl;
          }
       
+         /* Encoders */ 
          if(avEncoders){
             ed = eprx->getEncodersData(); // cogemos informacion de los encoders
 		      //std::cout << timeRelative << " " << "x: " << ed->robotx << " y: " <<ed->roboty << " z: " << ed->robottheta << std::endl;
             outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Encoders:\t" << ed->robotx << "\t" <<ed->roboty << "\t" << ed->robottheta << std::endl;
          }
          
+         /* Laser */
          if(avLaser){
             ld = lprx->getLaserData();
             outfile << timeRelative <<" "+robotName +":"+robotPort + ":Laser: ";
@@ -275,12 +298,14 @@ int main(int argc, char** argv){
             //std::cout << ld->distanceData[80] << std::endl;
          }
          
+         /* PTencoders A */
          if(avPose3DEncoders1){
             pose3DEncodersData1 = pose3DEncoders1->getPose3DEncodersData();
             outfile << timeRelative <<" "<<robotName <<":"<<robotPort <<":Pose3DEncoders1: "<< pose3DEncodersData1->x << " " << pose3DEncodersData1->y << " " << pose3DEncodersData1->z << " "<< pose3DEncodersData1->pan << " " <<  pose3DEncodersData1->tilt << " " << pose3DEncodersData1->roll <<std::endl;
             //std::cout << timeRelative << " pan: " << pose3DEncodersData1->pan << " tilt:" <<  pose3DEncodersData1->tilt << std::endl;
          }
          
+         /* PTencoders B */
          if(avPose3DEncoders2){
             pose3DEncodersData2 = pose3DEncoders2->getPose3DEncodersData();
             outfile << timeRelative <<" "<<robotName <<":"<<robotPort <<":Pose3DEncoders2: "<< pose3DEncodersData2->x << " " << pose3DEncodersData2->y << " " << pose3DEncodersData2->z << " "<< pose3DEncodersData2->pan << " " <<  pose3DEncodersData2->tilt<< " " << pose3DEncodersData2->roll << std::endl;
@@ -288,17 +313,31 @@ int main(int argc, char** argv){
             //std::cout << timeRelative << " pan: " << pose3DEncodersData2->pan << " tilt:" <<  pose3DEncodersData2->tilt << std::endl;
          }
          
+         /* PTencoders A deprecated?? */
          if(ptencoders){
             PTencodersData1 = pteprx1->getPTEncodersData();
             outfile << timeRelative << "\t"+robotName +":"+robotPort + ":PTEncoders1:\t";
             outfile << PTencodersData1->panAngle <<"\t" << PTencodersData1->tiltAngle << std::endl; 
          }
          
+      /* PTencoders B deprecated?? */
         if(ptencoders2){
             PTencodersData2 = pteprx2->getPTEncodersData();
             outfile << timeRelative << "\t"+robotName +":"+robotPort + ":PTEncoders2:\t";
             outfile << PTencodersData2->panAngle <<"\t" << PTencodersData2->tiltAngle << std::endl; 
          }
+         
+         
+         if(avKinect){
+            kinectData = prx->getKinectData();
+            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":KinectData:\t"<< kinectData->points.size() << "\t";
+            for(int i = 0; i < kinectData->points.size(); i++){
+               outfile << (float)kinectData->points[i].x <<"\t" << (float) kinectData->points[i].y <<"\t" << (float)kinectData->points[i].z <<"\t"<< (float)kinectData->points[i].r <<"\t"<< (float)kinectData->points[i].g <<"\t"<< (float)kinectData->points[i].b <<"\t";
+            }
+            outfile << std::endl;
+         }
+         
+         
          
          gettimeofday(&b,NULL);
          totalb=b.tv_sec*1000000+b.tv_usec;

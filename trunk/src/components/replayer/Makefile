@@ -7,5 +7,8 @@ LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotIce.la \
 	$(JDEROBOTDIR)/lib/jderobot/libcolorspacesmm.la \
 	$(JDEROBOTDIR)/lib/jderobot/libJderobotInterfaces.la 
 
-playerserver: replayer.o kinect.o 
-	libtool --mode=link g++ -g -O -o replayer replayer.o kinect.o  $(LDADD) $(LDFLAGS) 
+playerserver: replayer.o cloudPoints.o 
+	libtool --mode=link g++ -g -O -o replayer replayer.o cloudPoints.o  $(LDADD) $(LDFLAGS) 
+	
+clean:
+	rm -r *.o replayer
