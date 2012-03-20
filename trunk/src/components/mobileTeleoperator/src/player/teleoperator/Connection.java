@@ -5,14 +5,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import jderobot.LaserPrx;
 import jderobot.MotorsPrx;
+import bica.*;
 
 public final class Connection {
 	
 	public static void disconnect() {
 		if(communicator != null)
-			communicator.destroy();
-		
-		if(communicatorLaser != null)
 			communicator.destroy();
 	}
 	
@@ -20,121 +18,111 @@ public final class Connection {
 		communicator = c;
 	}
 	
-	public static void setTeleoperator(MotorsPrx t) {
-		mprx = t;
+	public static void setScheduler(SchedulerManagerPrx s) {
+		sprx = s;
 	}
 	
-	public static MotorsPrx getTeleoperator() {
-		return mprx;
+	public static SchedulerManagerPrx getScheduler() {
+		return sprx;
 	}
+	
+	public static void setBody(BodyMotionManagerPrx b) {
+		bprx = b;
+	}
+	
+	public static BodyMotionManagerPrx getBody() {
+		return bprx;
+	}
+	
+	public static void setMotors(MotorsPrx m) {
+		mprx = m;
+	}
+	
+	public static MotorsPrx getMotors() {
+		return mprx;
+	}	
 	
 	public static void setConnected(boolean status) {
 		connected = status;
+		
+		if(use_nao) {
+			if(status == true)
+				Connection.runBody();
+			else
+				Connection.stopBody();
+		}
+	}
+	
+	public static void setUseNao(boolean status) {
+		use_nao = status;
 	}
 	
 	public static boolean isConnected() {
 		return connected;
 	}
 	
-	//Laser functions	
-	public static void setLaserAvailable(boolean status) {
-		laserAvailable = status;
-	}
-	
 	public static boolean isLaserAvailable() {
-		return laserAvailable;
-	}
-	public static void setLaser(LaserPrx l) {
-		lprx = l;
-	}
-	
-	public static LaserPrx getLaser() {
-		return lprx;
-	}
-	
-	public static void setCommunicatorLaser(Ice.Communicator c) {
-		communicatorLaser = c;
+		return false;
 	}
 	
 	public static void setV(float v)  {
 		Connection.lock.lock();
-		Connection.getTeleoperator().setV(v);
-		Connection.v = v;
-		ltime = System.currentTimeMillis();
+		if(use_nao)
+			Connection.getBody().setVel(v, 0.0f, 0.0f);
+		else
+			Connection.getMotors().setV(v);
 		Connection.lock.unlock();
 	}
 	
 	public static void setW(float w) {
 		Connection.lock.lock();
-		Connection.getTeleoperator().setW(w);
-		Connection.w = w;
-		ltime = System.currentTimeMillis();
+		if(use_nao)
+			Connection.getBody().setVel(0.0f, w, 0.0f);
+		else
+			Connection.getMotors().setW(w);
 		Connection.lock.unlock();
 	}
 	
 	public static void setL(float l) {
 		Connection.lock.lock();
-		Connection.getTeleoperator().setL(l);
-		Connection.l = l;
-		ltime = System.currentTimeMillis();
+		if(use_nao)
+			Connection.getBody().setVel(0.0f, 0.0f, l);
+		else
+			Connection.getMotors().setL(l);
 		Connection.lock.unlock();
 	}
 	
-	public static void sendThread() {
-		// Create a thread to send the signal
-		thread = new Thread(new Runnable() {
-			public void run() {
-				long ctime;
-				boolean sendv = true;
-
-				try {
-					while (true) {
-						
-						if(Connection.isConnected()) {
-							Connection.lock.lock();
-							ctime = System.currentTimeMillis();
-							
-							if((ctime - ltime) > nsegs*1000) {
-								if(sendv)
-									Connection.getTeleoperator().setV(v);
-								else{
-									Connection.getTeleoperator().setW(w);
-									Connection.getTeleoperator().setL(l);
-								}
-					
-								
-
-								sendv = !sendv;
-								ltime = System.currentTimeMillis();
-							}	
-							Connection.lock.unlock();
-						}
-
-						Thread.sleep(500);
-					}
-				} catch (InterruptedException e) {
-				}
-			}
-		});
-
-		thread.start();
-		
-		
+	public static void kickLeft() {
+		if(use_nao)
+			Connection.getBody().doMove("LFOOT");
 	}
 	
-	private static float v;
-	private static float w;
-	private static float l;
-	private static long ltime=0;
-	private static long nsegs = 2;
-	private static Thread thread;
+	public static void kickRight() {
+		if(use_nao)
+			Connection.getBody().doMove("RFOOT");
+	}
+	
+	public static void runBody() {	
+		if(!bodyrunning) {
+			Connection.getScheduler().run("Body");
+			bodyrunning = true;
+		}
+	}
+	
+	public static void stopBody() {
+		if(bodyrunning) {
+			Connection.getScheduler().stop("Body");
+			bodyrunning = false;
+		}		
+	}
+		
 	private static Lock lock = new ReentrantLock();
-
 	private static Ice.Communicator communicator;
 	private static MotorsPrx mprx;
 	private static boolean connected;
-	
-	private static Ice.Communicator communicatorLaser;
-	private static LaserPrx lprx;
-	private static boolean laserAvailable;
+
+	private static BodyMotionManagerPrx bprx;
+	private static SchedulerManagerPrx sprx;
+	private static boolean bodyrunning = false;
+	private static boolean use_nao = false;
 }

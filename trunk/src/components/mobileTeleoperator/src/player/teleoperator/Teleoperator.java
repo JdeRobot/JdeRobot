@@ -73,7 +73,7 @@ public class Teleoperator extends Activity {
 	    this.setDisconnected();
 	    
 	    //Init send thread
-	    Connection.sendThread();
+	    //Connection.sendThread();
     }
     
 	@Override

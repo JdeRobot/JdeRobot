@@ -14,6 +14,8 @@
 <ImageButton android:layout_below="@+id/button_up" android:layout_width="wrap_content" android:id="@+id/button_stop" android:layout_height="wrap_content" android:layout_centerHorizontal="true" android:src="@drawable/stop"></ImageButton>
 <ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/button_left" android:id="@+id/button_side_right" android:src="@drawable/arrow_right" android:layout_toRightOf="@+id/button_right"></ImageButton>
 <ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/button_left" android:id="@+id/button_side_left" android:src="@drawable/arrow_left" android:layout_toLeftOf="@+id/button_left"></ImageButton>
+<ImageButton android:layout_height="wrap_content" android:id="@+id/button_kick_left" android:layout_below="@+id/text_title" android:layout_toLeftOf="@+id/button_left" android:layout_width="wrap_content" android:src="@drawable/left_kick"></ImageButton>
+<ImageButton android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/button_kick_right" android:layout_below="@+id/text_title" android:layout_toRightOf="@+id/button_right" android:src="@drawable/right_kick"></ImageButton>
 
 
 </RelativeLayout>

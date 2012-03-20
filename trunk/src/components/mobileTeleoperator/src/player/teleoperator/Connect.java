@@ -4,6 +4,7 @@ import jderobot.LaserPrx;
 import jderobot.LaserPrxHelper;
 import jderobot.MotorsPrx;
 import jderobot.MotorsPrxHelper;
+import bica.*;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -20,6 +21,8 @@ public class Connect extends Activity {
     private static final int ERROR_PORT = 2;
     private static final int ERROR_ICE = 3;
     private static final int MENU_BACK = Menu.FIRST;
+    
+    private static final boolean USE_NAO_ROBOT = false;
 	
 	private EditText text_ip;
 	private EditText text_port;
@@ -98,7 +101,7 @@ public class Connect extends Activity {
     public void tryConnection() {
     	String ip, sport;
     	int port;
-    	String proxy;
+    	String proxy_sch, proxy_body, proxy_motors;
     	
     	ip = this.text_ip.getText().toString();
     	sport = this.text_port.getText().toString();
@@ -116,35 +119,73 @@ public class Connect extends Activity {
     		return;
     	} else
     		my_port = sport;
-    		
-    	//Connect to teleoperator
+    	
+    	//Connect to player
     	try {
     		port = Integer.parseInt(sport);
-    		proxy = "motors1:tcp -h " + ip + " -p " + port;
-    		Log.d("Connect", "Connecting to: " + proxy);
+    		
+    		proxy_sch = "SchedulerManager:default -h " + ip + " -p " + port;
+    		proxy_body = "BodyMotionManager:default -h " + ip + " -p " + port;
+    		proxy_motors = "motors1:tcp -h " + ip + " -p " + port;
     		
     		//Initialize ICE with the IP and port selected
     		Ice.Communicator communicator = Ice.Util.initialize();
-    		Ice.ObjectPrx base = communicator.stringToProxy(proxy);
-	        if (base == null){
-	        	Log.e("Connect", "Ice error: Base is null");
-	            showDialog(ERROR_ICE);
-	            return;
-	        } 
-        	MotorsPrx mprx = MotorsPrxHelper.checkedCast(base);
-	        if (mprx == null){ 
-	        	Log.e("Connect", "Ice error: Cast is null");
-	            showDialog(ERROR_ICE);
-	            return;
-	        } 
-	        
-	        //Get laser
-	        Connection.setLaserAvailable(false);
-	        //this.getLaser(ip, port);
-	        
+    		
+    		/*Configure nao robot*/
+    		if(USE_NAO_ROBOT) {
+	    		Log.d("Scheduler", "Connecting to: " + proxy_sch);
+	    		Ice.ObjectPrx base = communicator.stringToProxy(proxy_sch);
+		        if (base == null){
+		        	Log.e("Scheduler", "No scheduler available");
+		            return;
+		        } 
+		        
+	        	SchedulerManagerPrx sprx = SchedulerManagerPrxHelper.checkedCast(base);
+		        if (sprx == null){ 
+		        	Log.e("Scheduler", "No scheduler available");
+		            return;
+		        } 
+		        
+	    		Log.d("Body", "Connecting to: " + proxy_body);
+		   		base = communicator.stringToProxy(proxy_body);
+		        if (base == null){
+		        	Log.e("Body", "No body available");
+		            return;
+		        } 
+		        
+	        	BodyMotionManagerPrx bprx = BodyMotionManagerPrxHelper.checkedCast(base);
+		        if (bprx == null){ 
+		        	Log.e("Body", "No body available");
+		            return;
+		        }
+		        
+		        /*Save proxy*/
+		        Connection.setScheduler(sprx);
+		        Connection.setBody(bprx);
+		        Connection.setUseNao(true);
+		        
+    		} else { /*Configure player*/
+    		
+	    		Log.d("Motors", "Connecting to: " + proxy_motors);
+	    		Ice.ObjectPrx base = communicator.stringToProxy(proxy_motors);
+		        if (base == null){
+		        	Log.e("Motors", "No motors available");
+		            return;
+		        } 
+		        
+	        	MotorsPrx mprx = MotorsPrxHelper.checkedCast(base);
+		        if (mprx == null){ 
+		        	Log.e("Body", "No body available");
+		            return;
+		        }
+		        
+		        /*Save proxy*/
+		        Connection.setMotors(mprx);
+		        Connection.setUseNao(false);
+    		}
+	                  
 	        //Save connection
 	        Connection.setCommunicator(communicator);
-	        Connection.setTeleoperator(mprx);
 	        Connection.setConnected(true);
     	} catch(NumberFormatException e) {
     		Log.e("Connect", "Ip is not a valid number");
@@ -159,38 +200,4 @@ public class Connect extends Activity {
 		setResult(RESULT_OK, null);
 		finish();
     }
-    
-    private void getLaser(String ip, int port) {
-    	String proxy;
-      	
-    	try {
-    		proxy = "laser1:tcp -h " + ip + " -p " + port;
-    		Log.d("Laser", "Connecting to: " + proxy);
-    		
-    		//Initialize ICE with the IP and port selected
-    		Ice.Communicator communicator = Ice.Util.initialize();
-    		Ice.ObjectPrx base = communicator.stringToProxy(proxy);
-	        if (base == null){
-	        	Log.e("Laser", "No laser available");
-	            Connection.setLaserAvailable(false);
-	            return;
-	        } 
-	        
-        	LaserPrx lprx = LaserPrxHelper.checkedCast(base);
-	        if (lprx == null){ 
-	        	Log.e("Laser", "No laser available");
-	        	Connection.setLaserAvailable(false);
-	            return;
-	        } 
-	        
-	        //Save laser
-	        Connection.setCommunicatorLaser(communicator);
-	        Connection.setLaser(lprx);
-	        Connection.setLaserAvailable(true);
-    	} catch(Exception e) {
-    		Log.e("Laser", "Ice error: unknown");
-    		return;
-    	}
-    }
-
 }

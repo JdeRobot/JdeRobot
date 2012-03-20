@@ -96,8 +96,8 @@ public class TeleoperatorAccel extends Activity {
 					buttonStop.setEnabled(false);
 
 					// Stop robot
-					//velv = 0.0f;
-					//velw = 0.0f;
+					velv = 0.0f;
+					velw = 0.0f;
 					if (lastv != velv || lastw != velw) {
 						if (velv != lastv)
 							updateVel(CHANGE_V);
@@ -144,28 +144,25 @@ public class TeleoperatorAccel extends Activity {
 							diffx = accReader.getX() - savedX;
 							diffy = accReader.getY() - savedY;
 
-							//Log.i("TEST", "diff es " + diffx + " " + diffy);
-
 							// Compare V, only when w is 0
-							//if(velw == 0.0) {
-							//velv=diffx;
+							if(velw == 0.0) {
 								if (diffx > thresholdx)
 									velv = -diffx*1.3f;
 								else if (diffx < -thresholdx)
-									velv = - diffx*1.3f;
+									velv = -diffx*1.3f;
 								else
 									velv = 0.0f;
-							//}
+							}
 
 							// Compare W, only when v is 0
-							//if(velv == 0.0) {
+							if(velv == 0.0) {
 								if (diffy > thresholdy)
-									velw = diffy*4;
+									velw = -diffy*4;
 								else if (diffy < -thresholdy)
-									velw = diffy*4;
+									velw = -diffy*4;
 								else
 									velw = 0.0f;
-							//}
+							}
 
 							// Update vel
 							if (velv != lastv || velw != lastw) {

@@ -18,11 +18,12 @@ public class TeleoperatorArrows extends Activity {
 	private ImageButton buttonUp, buttonDown;
 	private ImageButton buttonLeft, buttonRight;
 	private ImageButton buttonSideLeft, buttonSideRight;
+	private ImageButton buttonKickLeft, buttonKickRight;
 	private ImageButton buttonStop;
 	
-	private static final float V_VEL = 0.2f;
+	private static final float V_VEL = 0.4f;
 	private static final float W_VEL = 0.4f;
-	private static final float L_VEL = 1; 
+	private static final float L_VEL = 1.0f; 
 	
 	private static final int CHANGE_V = 0;
 	private static final int CHANGE_W = 1;
@@ -42,6 +43,8 @@ public class TeleoperatorArrows extends Activity {
 		this.buttonRight = (ImageButton) findViewById(R.id.button_right);
 		this.buttonSideLeft = (ImageButton) findViewById(R.id.button_side_left);
 		this.buttonSideRight = (ImageButton) findViewById(R.id.button_side_right);
+		this.buttonKickLeft = (ImageButton) findViewById(R.id.button_kick_left);
+		this.buttonKickRight = (ImageButton) findViewById(R.id.button_kick_right);
 		
 		this.buttonStop = (ImageButton) findViewById(R.id.button_stop);
 
@@ -76,6 +79,18 @@ public class TeleoperatorArrows extends Activity {
 		this.buttonSideRight.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v){
 					hadleButtonSideRight();
+			}
+		});
+		
+		this.buttonKickLeft.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v){
+					hadleButtonKickLeft();
+			}
+		});
+		
+		this.buttonKickRight.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v){
+					hadleButtonKickRight();
 			}
 		});
 		
@@ -132,48 +147,55 @@ public class TeleoperatorArrows extends Activity {
 	/* Handle button */
 	private void handleButtonUp() {
 		this.velv += V_VEL;
-
-		//if (this.velv > V_VEL)
-		//	this.velv = V_VEL;
-
+		
+		if(this.velv > 1.0)
+			this.velv = 1.0f;
 		this.updateVel(CHANGE_V);
 	}
 
 	private void handleButtonDown() {
 		this.velv -= V_VEL;
-
-		//if (this.velv < -V_VEL)
-		//	this.velv = -V_VEL;
-
+		if(this.velv < -1.0)
+			this.velv = -1.0f;
 		this.updateVel(CHANGE_V);
 	}
 
 	private void handleButtonLeft() {
 		this.velw += W_VEL;
-
-		//if (this.velw > W_VEL)
-		//	this.velw = W_VEL;
-
+		if(this.velw > 1.0)
+			this.velw = 1.0f;
 		this.updateVel(CHANGE_W);
 	}
 
 	private void handleButtonRight() {
 		this.velw -= W_VEL;
-
-		//if (this.velw < -W_VEL)
-		//	this.velw = -W_VEL;
-
+		if(this.velw < -1.0)
+			this.velv = -1.0f;
 		this.updateVel(CHANGE_W);
 	}
 	
 	private void hadleButtonSideLeft(){
-		this.vels -= L_VEL;
+		this.vels += L_VEL;
+		if(this.vels > 1.0)
+			this.vels = 1.0f;
 		this.updateSide();
 	}
 		
 	private void hadleButtonSideRight(){
-		this.vels += L_VEL;
+		this.vels -= L_VEL;
+		if(this.vels < -1.0)
+			this.vels = 1.0f;
 		this.updateSide();
+	}
+	
+	private void hadleButtonKickLeft(){
+		this.handleButtonStop();
+		Connection.kickLeft();
+	}
+	
+	private void hadleButtonKickRight(){
+		this.handleButtonStop();
+		Connection.kickRight();
 	}
 
 	private void handleButtonStop() {

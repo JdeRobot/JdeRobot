@@ -101,8 +101,8 @@ public class Simulation extends Activity {
         	return;
         }
     	
-        LaserData ld = Connection.getLaser().getLaserData();
+        /*LaserData ld = Connection.getLaser().getLaserData();
         if(this.renderer != null)
-        	this.renderer.setLaserData(ld);
+        	this.renderer.setLaserData(ld);*/
     }
  }
