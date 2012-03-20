@@ -213,8 +213,21 @@ namespace introrob{
    }
 
    void Api::showMyImage(){
-     
-      cvShowImage("mainWin", this->imageCamera1 );
+      int i,j;
+
+      IplImage src =  *this->imageCamera1;
+      IplImage* cvResultado = cvCreateImage(cvGetSize(&src), IPL_DEPTH_8U, 3);
+      cvCopy(&src, cvResultado);
+      for(i=0;i<cvResultado->width;i++){
+          for(j=0;j<cvResultado->height;j++){        
+            cvResultado->imageData[j*cvResultado->widthStep+i*cvResultado->nChannels]=this->imageCamera1->imageData[j*this->imageCamera1->widthStep+i*this->imageCamera1->nChannels+2]; //R
+            cvResultado->imageData[j*cvResultado->widthStep+i*cvResultado->nChannels+1]=this->imageCamera1->imageData[j*this->imageCamera1->widthStep+i*this->imageCamera1->nChannels+1]; //R
+            cvResultado->imageData[j*cvResultado->widthStep+i*cvResultado->nChannels+2]=this->imageCamera1->imageData[j*this->imageCamera1->widthStep+i*this->imageCamera1->nChannels]; //R
+            }
+          }
+            
+
+      cvShowImage("DebuggingWin", cvResultado );
       
    
    
@@ -223,4 +236,3 @@ namespace introrob{
 Api::~Api() {}
 
 }
-

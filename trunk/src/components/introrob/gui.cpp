@@ -544,12 +544,12 @@ namespace introrob {
     
     void Gui::button_windowDepurate_clicked(){
 	if(check_windowDepurate->get_active()){
-	    cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE);
+	    cvNamedWindow("DebuggingWin", CV_WINDOW_AUTOSIZE);
 	    api->showImage=true;
 	}
 	else{
 	    api->showImage=false;
-	    cvDestroyWindow("mainWin");
+	    cvDestroyWindow("DebuggingWin");
 	}
     }    
     
