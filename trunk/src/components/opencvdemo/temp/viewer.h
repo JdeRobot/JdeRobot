@@ -38,15 +38,13 @@ namespace opencvdemo{
         ~Viewer();
   
         // function that actually displays the images
-        //void display( const colorspaces::Image& image,const colorspaces::Image& image2 );    
-	void display( cv::Mat image, cv::Mat image2 );
+        void display( const colorspaces::Image& image,const colorspaces::Image& image2 );    
         bool isVisible(); 	
         bool on_clicked(GdkEventButton * event);
 
 		//Filters and Feature detectors
-		//void selection( const colorspaces::Image& image );	
-		void selection( cv::Mat image );
-		/*void canny( const colorspaces::Image& image );
+		void selection( const colorspaces::Image& image );	
+		void canny( const colorspaces::Image& image );
 		void sobel( const colorspaces::Image& image );
 		void laplace( const colorspaces::Image& image );
 		void hough( const colorspaces::Image& image );
@@ -57,20 +55,7 @@ namespace opencvdemo{
 		void color( const colorspaces::Image& image );	
 		void conv( const colorspaces::Image& image );	
 		void pyramid( const colorspaces::Image& image );	
-		int valuesOK(double H, double S, double V);*/
-		void canny( cv::Mat image );
-                void sobel( cv::Mat image );
-                void laplace( cv::Mat image );
-                void hough( cv::Mat image );
-                void hough_circles( cv::Mat image );
-                void harris( cv::Mat image );
-                void gray( cv::Mat image );
-                void flow( cv::Mat image );
-                void color( cv::Mat image );
-                void conv( cv::Mat image );
-                void pyramid( cv::Mat image );
-                int valuesOK(double H, double S, double V);
-
+		int valuesOK(double H, double S, double V);
 		
 	    double getH(double r, double g, double b);
         double getS(double r, double g, double b);
@@ -85,8 +70,7 @@ namespace opencvdemo{
         Gtk::Window* mainwindow;
         Gtk::Main gtkmain;
         
-        //IplImage* imagenO;
-	cv::Mat imagenO;
+        IplImage* imagenO;
     	pthread_mutex_t mutex;
 		
 		// Horizontal slidebars

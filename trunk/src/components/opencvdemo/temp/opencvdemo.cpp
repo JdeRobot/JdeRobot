@@ -49,45 +49,28 @@ int main(int argc, char** argv){
       if (!fmt)
 				throw "Format not supported";
 
-			 char * data1 = new char[data->description->width*data->description->height*3];
+			char * data1 = new char[data->description->width*data->description->height*3];
 
-			memcpy((unsigned char *)data1, &(data->pixelData[0]), data->description->width*data->description->height*3);
+			memcpy(data1, &(data->pixelData[0]), data->description->width*data->description->height*3);
 
 			// Get input image 
-      /*colorspaces::Image image(data->description->width,
+      colorspaces::Image image(data->description->width,
 			       data->description->height,
 			       fmt,
-			       &(data->pixelData[0]));*/
-	cv::Mat image (data->description->height, 
-		   data->description->width,
-		   CV_8UC3,
-		   &(data->pixelData[0]));
+			       &(data->pixelData[0]));
 	
 			// Get output image
-     /*colorspaces::Image image2(data->description->width,
+     colorspaces::Image image2(data->description->width,
 			       data->description->height,
 			       fmt,
-			       data1);*/
-
-      cv::Mat image2 (data->description->height,
-		 data->description->width,
-		 CV_8UC3,
-		 data1);
-
-			//std::cout << data->description->width << std::endl;
-			//std::cout << data->description->height << std::endl;
-			//cv::Size s=image2.size();
-			//std::cout << s.width << std::endl;
-			//std::cout << s.height << std::endl;
-			//std::cout << "El step de image es:\n";
-			//std::cout << image.step << std::endl;
-			//std::cout << image.data << std::endl;
+			       data1);
 
 			// Selecting the operation
 			viewer.selection(image2);
       
 			// Displaying the images
 			viewer.display(image,image2);
+
 			delete data1;
 	
     }
