@@ -994,6 +994,7 @@ void Viewer::harris( Mat image )
 				points[1], foundPoint, errors, sizeWindow, 5, 
 				criteria);
 
+				/*Esta funcion sirve para colorear los puntos encontrados. Reservado para depuración.*/
 				/*for(int k=0; k< numpoints; k++)	{
 					circle(src, points[0][k], 3, Scalar(0, 0, 255), -1); //Azul punto principio
 					circle(src, points[1][k], 3, Scalar(0, 255, 0), -1); // Verde punto final
