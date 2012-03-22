@@ -1,0 +1,5 @@
+  STRING(REGEX REPLACE ";" "\\\\;" contents "${contents}")
+  STRING(REGEX REPLACE "\n" ";" contents "${contents}")
+foreach(file ${contents})
+    add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/${file} ${CMAKE_CURRENT_SOURCE_DIR}/${file})
+endforeach()

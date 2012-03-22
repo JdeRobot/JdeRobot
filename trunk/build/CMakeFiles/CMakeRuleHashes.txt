@@ -1,0 +1,26 @@
+# Hashes of file build rules.
+67d47b0fc4b61d617f1c8c0d0821c9b5 ../src/interfaces/cpp/jderobot/body.cpp
+d9802d02c73d950d8c93497c4dddb296 ../src/interfaces/cpp/jderobot/bodyencoders.cpp
+43b2bae72439bc4c09ab1bc269fd1870 ../src/interfaces/cpp/jderobot/bodymotors.cpp
+6a3e16b419aecfa7c63cabb130aaa222 ../src/interfaces/cpp/jderobot/bodymovements.cpp
+1163f7a1c368e013f97183d7338baec9 ../src/interfaces/cpp/jderobot/camera.cpp
+be2f1346734180518c85e7fbeed0d251 ../src/interfaces/cpp/jderobot/cloudPoints.cpp
+233b562cdbc4606a0f7f92cd0974f3b9 ../src/interfaces/cpp/jderobot/common.cpp
+9640f60be0f1dba81137d39e01151e20 ../src/interfaces/cpp/jderobot/containers.cpp
+8743a0c1310a0f1e7ce4e0eab3b91f01 ../src/interfaces/cpp/jderobot/datetime.cpp
+75245273398ba67f1842fd1d99ac5b6e ../src/interfaces/cpp/jderobot/encoders.cpp
+7313a45c6daa08f5f93ce779c0a79104 ../src/interfaces/cpp/jderobot/exceptions.cpp
+349188822a3984ebb3c21f1e5d23890b ../src/interfaces/cpp/jderobot/image.cpp
+e2deaf49e7eb13a7b8cce1d0c9f7ced2 ../src/interfaces/cpp/jderobot/jcm.cpp
+bb3e80e90f1e517f36ccae5310148373 ../src/interfaces/cpp/jderobot/jointmotor.cpp
+9e96f92744fbb93e7da7de7024f14750 ../src/interfaces/cpp/jderobot/kinectleds.cpp
+d17ba1be9eaaf394b367262ddd627007 ../src/interfaces/cpp/jderobot/laser.cpp
+fc522c77997fbf1516686a2a7f95e237 ../src/interfaces/cpp/jderobot/motors.cpp
+ed5620aa2bc5aa9c96b5b518b3ca0065 ../src/interfaces/cpp/jderobot/pointcloud.cpp
+745eca34b83e3c52c27d9b4f3a918aef ../src/interfaces/cpp/jderobot/pose3dencoders.cpp
+b46bfcdffb1c8fe158141ebd5da1c556 ../src/interfaces/cpp/jderobot/pose3dmotors.cpp
+76c7969ca555825f29742ddaebb5b2e5 ../src/interfaces/cpp/jderobot/ptencoders.cpp
+2c3db86b08bdce5c40e6cca18c8f4562 ../src/interfaces/cpp/jderobot/ptmotors.cpp
+aba2ac3dba8ee4d9e922ac783ce7f2ad ../src/interfaces/cpp/jderobot/sonars.cpp
+dbeff955c052c1e0c15c4fca24b822f4 ../src/interfaces/cpp/jderobot/varcolor.cpp
+50635b194fa22263720681334189feb1 CMakeFiles/uninstall

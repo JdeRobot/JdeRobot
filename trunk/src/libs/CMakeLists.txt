@@ -1,0 +1,8 @@
+add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/jderobotutil ${CMAKE_CURRENT_SOURCE_DIR}/jderobotutil)
+add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/bgfgsegmentation ${CMAKE_CURRENT_SOURCE_DIR}/bgfgsegmentation)
+add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/jderobotice ${CMAKE_CURRENT_SOURCE_DIR}/jderobotice)
+add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/colorspaces ${CMAKE_CURRENT_SOURCE_DIR}/colorspaces)
+add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/progeo ${CMAKE_CURRENT_SOURCE_DIR}/progeo)
+add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/pioneer ${CMAKE_CURRENT_SOURCE_DIR}/pioneer)
+add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/fuzzylib ${CMAKE_CURRENT_SOURCE_DIR}/fuzzylib)
+add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/visionlib ${CMAKE_CURRENT_SOURCE_DIR}/visionlib)

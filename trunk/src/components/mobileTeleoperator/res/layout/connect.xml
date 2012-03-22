@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+<TextView  
+    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content" 
+    android:layout_gravity="center" 
+    android:textSize="18sp" 
+    android:textStyle="bold" android:text="@string/connect_head"/>
+ 
+   
+    
+<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/title_ip" style="@style/item_connect" android:text="@string/connect_title_ip"></TextView>
+<EditText android:layout_width="fill_parent" android:layout_height="32sp" android:textSize="12sp" android:id="@+id/text_ip" android:text="@string/connect_default_ip">
+</EditText><TextView  
+    android:layout_height="wrap_content" 
+    android:layout_width="wrap_content" 
+    android:layout_gravity="left"
+    style="@style/item_connect" android:id="@+id/title_port" android:text="@string/connect_title_port"/>
+
+<EditText 
+	android:layout_width="fill_parent" 
+	android:layout_height="32sp"
+	android:textSize="12sp" android:id="@+id/text_port" android:text="@string/connect_default_port">
+</EditText>
+    
+<ImageButton android:layout_height="wrap_content" android:id="@+id/button_connect" android:layout_width="wrap_content" android:src="@drawable/connect_icon" android:layout_gravity="center"></ImageButton>
+
+
+<TextView android:id="@+id/TextView01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="@string/connect_button_connect"></TextView>
+</LinearLayout>
