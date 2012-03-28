@@ -38,6 +38,8 @@ namespace cameraserver {
     size_t framerateD;
     //! video output format string
     colorspaces::Image::FormatPtr format;
+
+		bool invert;
   };
 
   extern int gst_init(int* argcp, char** argvp[]);

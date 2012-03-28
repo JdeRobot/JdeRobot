@@ -34,6 +34,7 @@
 #include <list>
 #include <string.h>
 #include <sstream>
+#include <stdlib.h>
 #include "gstpipeline.h"
 #include <stdlib.h>
 #include <inttypes.h>
@@ -85,6 +86,10 @@ namespace cameraserver{
       pipelineCfg.width = imageDescription->width;
       pipelineCfg.height = imageDescription->height;
       pipelineCfg.format = imageFmt;
+			if ((prop->getProperty(prefix+"Invert") == "True"))
+				pipelineCfg.invert = true;
+			else
+				pipelineCfg.invert = false;
 
       //pipelineCfg.validate();FIXME: validate cfg before to use it
 
@@ -307,6 +312,26 @@ namespace cameraserver{
 	  }
 	}
 
+	void invertImage (char *src, unsigned char *dest, int width, int heigth) {
+		int i, j;
+		int posI, posJ;
+		char temp[3];
+
+		for (i=0, j=(width*heigth)-1; i<j; i++, j--) {
+			posI = i*3;
+			posJ = j*3;
+			temp[0] = (unsigned char) src[posI];
+			temp[1] = (unsigned char) src[posI+1];
+			temp[2] = (unsigned char) src[posI+2];
+			dest[posI]=(unsigned char) src[posJ];
+			dest[posI+1]=(unsigned char) src[posJ+1];
+			dest[posI+2]=(unsigned char) src[posJ+2];
+			dest[posJ]=temp[0];
+			dest[posJ+1]=temp[1];
+			dest[posJ+2]=temp[2];
+		}
+	}
+
     	class ReplyTask: public gbxiceutilacfr::SafeThread{
     	public:
 	      ReplyTask(CameraI* camera)
@@ -360,24 +385,28 @@ namespace cameraserver{
 		    	reply->pixelData.resize(mycamera->imageDescription->width*mycamera->imageDescription->height*3);
 
 		    	if(mycamera->firewire_mode){
-			    dc1394_capture_enqueue (camera, frame);
+					  dc1394_capture_enqueue (camera, frame);
 
-			    if (mycamera->imageFmt == colorspaces::ImageRGB8::FORMAT_RGB8){
-				mycamera->uyvy2rgb((unsigned char*)frame->image,&(reply->pixelData[0]),frame->size[0]*frame->size[1]);
-			    }
-			    else{
-			    // Format colorspaces::ImageRGB8::FORMAT_YUYV
-				memmove( &(reply->pixelData[0]),frame->image, mycamera->imageDescription->size);
-			    }
+					  if (mycamera->imageFmt == colorspaces::ImageRGB8::FORMAT_RGB8){
+							mycamera->uyvy2rgb((unsigned char*)frame->image,&(reply->pixelData[0]),frame->size[0]*frame->size[1]);
+					  }
+					  else{
+					  // Format colorspaces::ImageRGB8::FORMAT_YUYV
+							memmove( &(reply->pixelData[0]),frame->image, mycamera->imageDescription->size);
+					  }
 		    	}
 		    	else{
-		    	    memmove( &(reply->pixelData[0]), (char*)buff->data, mycamera->imageDescription->size);//copy data to reply
+							if (mycamera->pipelineCfg.invert) {
+								mycamera->invertImage ((char*)buff->data, &(reply->pixelData[0]), mycamera->imageDescription->width, mycamera->imageDescription->height);
+							} else {  
+								memmove(&(reply->pixelData[0]), buff->data, mycamera->imageDescription->size);//copy data to reply
+							}
 		    	    gst_buffer_unref(buff);//release gstreamer buffer
 		    	}
 
 		    	// publish
 		    	if(mycamera->imageConsumer!=0){
-			    mycamera->imageConsumer->report(reply);
+			 	   mycamera->imageConsumer->report(reply);
 		    	}
 
 		    	// response to data petition
