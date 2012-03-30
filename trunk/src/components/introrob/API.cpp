@@ -14,12 +14,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
+ *g
  *  Authors : Maikel González <m.gonzalezbai@gmail.com>,
  *
  */
 
 #include "API.h"
+
+#define TWOPI 6.283185308
 
 namespace introrob{
 
@@ -124,6 +126,7 @@ namespace introrob{
           this->robotx*cos(this->robottheta*DEGTORAD) - this->roboty*sin(this->robottheta*DEGTORAD);
         (*out).y = in.y*cos(this->robottheta*DEGTORAD) - in.x*sin(this->robottheta*DEGTORAD) -
           this->roboty*cos(this->robottheta*DEGTORAD) + this->robotx*sin(this->robottheta*DEGTORAD);
+	(*out).z = in.z;
         return 0;
       }
       return 1;
@@ -140,6 +143,7 @@ namespace introrob{
 
         (*out).x = in.x*cos(this->robottheta*DEGTORAD) - in.y*sin(this->robottheta*DEGTORAD) + this->robotx;
         (*out).y = in.y*cos(this->robottheta*DEGTORAD) + in.x*sin(this->robottheta*DEGTORAD) + this->roboty;
+	(*out).z = in.z;
         return 0;
       }
       return 1;
@@ -158,6 +162,16 @@ namespace introrob{
            glEnd();
            return 1;
    }
+   
+     void Api::drawSphere(CvPoint3D32f a, CvPoint3D32f color)
+        {
+	    glColor3f(color.x, color.y, color.z);
+	    glPushMatrix();
+	    glTranslatef(a.x/SCALE, a.y/SCALE, a.z/SCALE);
+	    glutSolidSphere(1, 20, 20);
+	    glPopMatrix();
+	    glEnd();	  
+   }   
 
    int Api::pintaDestino (CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color) {
      /* OJO mundo de coordenadas OpenGL está en decímetros, por compatibilidad con la plantilla OpenGL
