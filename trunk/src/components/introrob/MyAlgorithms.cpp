@@ -90,6 +90,15 @@ USO:
 drawProjectionLines: Traza líneas desde el origen de coordenadas a un punto seleccionado (click izquierdo) en una de las cámaras del robot.
 USO: this->drawProjectionLines();
 
+
+drawSphere: Dibuja una esfera dado un punto y un color
+USO: this->drawSphere(bb, color);
+
+x_click_cameraleft: Almacena la coordenada x del punto donde se ha hecho click en la camara izquierda
+y_click_cameraleft: Almacena la coordenada y del punto donde se ha hecho click en la camara izquierda
+x_click_cameraright: Almacena la coordenada x del punto donde se ha hecho click en la camara derecha
+y_click_cameraright: Almacena la coordenada y del punto donde se ha hecho click en la camara derecha
+
 ---------------------------------------------------------
 
 Otros:
@@ -131,20 +140,32 @@ namespace introrob{
 
       /*Manipulando imágenes de las cámaras*/
       /*En el siguiente ejemplo se filtra el color rojo de la cámara izquierda para repintar esos píxeles a negro. Para visualizar el resultado
-       debemos desplegar la ventana "WINDOW DEPURATE" y pulsar PLAY para hacer correr nuestro código*/
+       debemos desplegar la ventana "WINDOW DEBUGGING" y pulsar PLAY para hacer correr nuestro código*/
 
 	IplImage src =  *this->imageCamera1; 
 
 	for(i=0;i<src.width;i++){
 	    for(j=0;j<src.height;j++){
-		if(src.imageData[j*src.widthStep+i*src.nChannels]==-1&&src.imageData[j*src.widthStep+i*src.nChannels+1]!=-1&&src.imageData[j*src.widthStep+i*src.nChannels+2]!=-1){
+	      if( ((int)(unsigned char)src.imageData[(j*src.width+i)*src.nChannels] > 120) &&
+		  ((int)(unsigned char)src.imageData[(j*src.width+i)*src.nChannels+1] < 70) &&
+		  ((int)(unsigned char)src.imageData[(j*src.width+i)*src.nChannels+2] < 70))
+		  {
 		    cont++;
-		    src.imageData[j*src.widthStep+i*src.nChannels]=0; //R
-		    src.imageData[j*src.widthStep+i*src.nChannels+1]=0; //G
-		    src.imageData[j*src.widthStep+i*src.nChannels+2]=0;  //B
-		    }
+		    src.imageData[(j*src.width+i)*src.nChannels]=255; //R
+		    src.imageData[(j*src.width+i)*src.nChannels+1]=255; //G
+		    src.imageData[(j*src.width+i)*src.nChannels+2]=0;  //B
+		  }
 	    }
 	}
+	
+	/* A continuacion se muestran las coordenadas de los puntos obtenidos tras hacer click en alguna de las camaras */
+	//std::cout << x_click_cameraleft << std::endl; // Coordenada x del punto donde se ha hecho click en la camara izquierda
+	//std::cout << y_click_cameraleft << std::endl; // Coordenada y del punto donde se ha hecho click en la camara izquierda
+	//std::cout << x_click_cameraright << std::endl; // Coordenada x del punto donde se ha hecho click en la camara derecha
+	//std::cout << y_click_cameraright << std::endl; // Coordenada y del punto donde se ha hecho click en la camara derecha
+	
+	
+	
 
 
 
@@ -251,13 +272,11 @@ namespace introrob{
       color.x = 1.; // Red
       color.y = 0.; // Green
       color.z = 0.; // Blue
-      //this->pintaSegmento (aa, bb, color); // ROJO - Pinta un segmento desde el punto "aa" hasta el punto "bb"
+      this->pintaSegmento (aa, bb, color); // ROJO - Pinta un segmento desde el punto "aa" hasta el punto "bb"
       this->pintaDestino (aa, bb, color); // ROJO - Marca con una estrella el destino seleccionado al hacer click con el botón central en el mundo 3D.
-  
+      this->drawSphere(bb, color);
 
-
-
-      this->drawProjectionLines();
+      /* this->drawProjectionLines();*/
 
    }
 
