@@ -2,8 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="generated"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry kind="lib" path="/home/frivas/eclipse/IceAndroid-0.1.1/java/lib/IceAndroid.jar"/>
-	<classpathentry kind="con" path="com.zeroc.Slice2JavaPlugin.ICE_FRAMEWORK"/>
+	<classpathentry exported="true" kind="lib" path="/users/eperdices/recibidos/IceAndroid-0.1.1/java/lib/IceAndroid.jar"/>
+	<classpathentry exported="true" kind="con" path="com.zeroc.Slice2JavaPlugin.ICE_FRAMEWORK"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="output" path="bin"/>

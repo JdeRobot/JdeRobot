@@ -9,4 +9,7 @@
 	<dimen name="ok_button_width">100sp</dimen>
 	<dimen name="ok_text_margin">5sp</dimen>
 	<dimen name="ok_button_margin">10sp</dimen>
+	
+	<dimen name="arrow_table_size">250sp</dimen>
+	<dimen name="arrow_button_size">65sp</dimen>
 </resources>

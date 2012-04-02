@@ -18,18 +18,23 @@ public class TeleoperatorArrows extends Activity {
 	private ImageButton buttonUp, buttonDown;
 	private ImageButton buttonLeft, buttonRight;
 	private ImageButton buttonSideLeft, buttonSideRight;
-	private ImageButton buttonKickLeft, buttonKickRight;
 	private ImageButton buttonStop;
+	private ImageButton buttonUph, buttonDownh;
+	private ImageButton buttonLefth, buttonRighth;
 	
 	private static final float V_VEL = 0.4f;
 	private static final float W_VEL = 0.4f;
 	private static final float L_VEL = 1.0f; 
+	
+	private static final float PAN_STEP = 0.2f;
+	private static final float TILT_STEP = 0.2f;
 	
 	private static final int CHANGE_V = 0;
 	private static final int CHANGE_W = 1;
 	private static final int CHANGE_BOTH = 2;
 
 	private float velv, velw, vels;
+	private float pan, tilt;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -43,10 +48,12 @@ public class TeleoperatorArrows extends Activity {
 		this.buttonRight = (ImageButton) findViewById(R.id.button_right);
 		this.buttonSideLeft = (ImageButton) findViewById(R.id.button_side_left);
 		this.buttonSideRight = (ImageButton) findViewById(R.id.button_side_right);
-		this.buttonKickLeft = (ImageButton) findViewById(R.id.button_kick_left);
-		this.buttonKickRight = (ImageButton) findViewById(R.id.button_kick_right);
-		
 		this.buttonStop = (ImageButton) findViewById(R.id.button_stop);
+		
+		this.buttonUph = (ImageButton) findViewById(R.id.button_uph);
+		this.buttonDownh = (ImageButton) findViewById(R.id.button_downh);
+		this.buttonLefth = (ImageButton) findViewById(R.id.button_lefth);
+		this.buttonRighth = (ImageButton) findViewById(R.id.button_righth);
 
 		// add a click listener to the buttons
 		this.buttonUp.setOnClickListener(new View.OnClickListener() {
@@ -82,21 +89,30 @@ public class TeleoperatorArrows extends Activity {
 			}
 		});
 		
-		this.buttonKickLeft.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v){
-					hadleButtonKickLeft();
-			}
-		});
-		
-		this.buttonKickRight.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v){
-					hadleButtonKickRight();
-			}
-		});
-		
 		this.buttonStop.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				handleButtonStop();
+			}
+		});
+		
+		this.buttonUph.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				handleButtonUph();
+			}
+		});
+		this.buttonDownh.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				handleButtonDownh();
+			}
+		});
+		this.buttonLefth.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				handleButtonLefth();
+			}
+		});
+		this.buttonRighth.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				handleButtonRighth();
 			}
 		});
 	}
@@ -188,16 +204,6 @@ public class TeleoperatorArrows extends Activity {
 		this.updateSide();
 	}
 	
-	private void hadleButtonKickLeft(){
-		this.handleButtonStop();
-		Connection.kickLeft();
-	}
-	
-	private void hadleButtonKickRight(){
-		this.handleButtonStop();
-		Connection.kickRight();
-	}
-
 	private void handleButtonStop() {
 		this.velv = 0.0f;
 		this.velw = 0.0f;
@@ -205,6 +211,26 @@ public class TeleoperatorArrows extends Activity {
 
 		this.updateVel(CHANGE_BOTH);
 		this.updateSide();
+	}
+	
+	private void handleButtonUph() {
+		this.tilt -= TILT_STEP;
+		Connection.setTilt(this.tilt);
+	}
+
+	private void handleButtonDownh() {
+		this.tilt += TILT_STEP;
+		Connection.setTilt(this.tilt);
+	}
+
+	private void handleButtonLefth() {
+		this.pan += PAN_STEP;
+		Connection.setPan(this.pan);
+	}
+
+	private void handleButtonRighth() {
+		this.pan -= PAN_STEP;
+		Connection.setPan(this.pan);
 	}
 
 	private void updateVel(int type) {

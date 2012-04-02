@@ -101,7 +101,7 @@ public class Connect extends Activity {
     public void tryConnection() {
     	String ip, sport;
     	int port;
-    	String proxy_sch, proxy_body, proxy_motors;
+    	String proxy_sch, proxy_body, proxy_head, proxy_motors;
     	
     	ip = this.text_ip.getText().toString();
     	sport = this.text_port.getText().toString();
@@ -126,6 +126,7 @@ public class Connect extends Activity {
     		
     		proxy_sch = "SchedulerManager:default -h " + ip + " -p " + port;
     		proxy_body = "BodyMotionManager:default -h " + ip + " -p " + port;
+    		proxy_head = "HeadMotionManager:default -h " + ip + " -p " + port;
     		proxy_motors = "motors1:tcp -h " + ip + " -p " + port;
     		
     		//Initialize ICE with the IP and port selected
@@ -159,9 +160,23 @@ public class Connect extends Activity {
 		            return;
 		        }
 		        
+	    		Log.d("Head", "Connecting to: " + proxy_head);
+		   		base = communicator.stringToProxy(proxy_head);
+		        if (base == null){
+		        	Log.e("Head", "No head available");
+		            return;
+		        } 
+		        
+	        	HeadMotionManagerPrx hprx = HeadMotionManagerPrxHelper.checkedCast(base);
+		        if (hprx == null){ 
+		        	Log.e("Head", "No head available");
+		            return;
+		        }
+		        
 		        /*Save proxy*/
 		        Connection.setScheduler(sprx);
 		        Connection.setBody(bprx);
+		        Connection.setHead(hprx);
 		        Connection.setUseNao(true);
 		        
     		} else { /*Configure player*/

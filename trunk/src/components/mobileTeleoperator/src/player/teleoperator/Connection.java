@@ -34,6 +34,14 @@ public final class Connection {
 		return bprx;
 	}
 	
+	public static void setHead(HeadMotionManagerPrx h) {
+		hprx = h;
+	}
+	
+	public static HeadMotionManagerPrx getHead() {
+		return hprx;
+	}
+	
 	public static void setMotors(MotorsPrx m) {
 		mprx = m;
 	}
@@ -46,10 +54,11 @@ public final class Connection {
 		connected = status;
 		
 		if(use_nao) {
-			if(status == true)
-				Connection.runBody();
-			else
-				Connection.stopBody();
+			if(status == true) {
+				Connection.runBica();
+			} else {
+				Connection.stopBica();
+			}
 		}
 	}
 	
@@ -92,37 +101,90 @@ public final class Connection {
 		Connection.lock.unlock();
 	}
 	
-	public static void kickLeft() {
+	public static void setPan(float pan)  {
+		Connection.lock.lock();
 		if(use_nao)
-			Connection.getBody().doMove("LFOOT");
+			Connection.getHead().setPanPos(pan, 1.0f);
+		Connection.lock.unlock();
 	}
 	
-	public static void kickRight() {
+	public static void setTilt(float tilt)  {
+		Connection.lock.lock();
 		if(use_nao)
-			Connection.getBody().doMove("RFOOT");
+			Connection.getHead().setTiltPos(tilt, 1.0f);
+		Connection.lock.unlock();
 	}
 	
-	public static void runBody() {	
-		if(!bodyrunning) {
+	public static void runBica() {	
+		if(!bicarunning) {
 			Connection.getScheduler().run("Body");
-			bodyrunning = true;
+			Connection.getScheduler().run("Head");
+			bicarunning = true;
 		}
 	}
 	
-	public static void stopBody() {
-		if(bodyrunning) {
+	public static void stopBica() {
+		if(bicarunning) {
 			Connection.getScheduler().stop("Body");
-			bodyrunning = false;
+			Connection.getScheduler().stop("Head");
+			bicarunning = false;
 		}		
 	}
+	
+
+	/*public static void sendThread() {
+		// Create a thread to send the signal
+		thread = new Thread(new Runnable() {
+			public void run() {
+				long ctime;
+				boolean sendv = true;
+
+				try {
+					while (true) {
+						
+						if(Connection.isConnected()) {
+							Connection.lock.lock();
+							ctime = System.currentTimeMillis();
+							
+							if((ctime - ltime) > nsegs*1000) {
+								if(sendv)
+									Connection.getTeleoperator().setV(v);
+								else{
+									Connection.getTeleoperator().setW(w);
+									Connection.getTeleoperator().setL(l);
+								}
+					
+								sendv = !sendv;
+								ltime = System.currentTimeMillis();
+							}	
+							Connection.lock.unlock();
+						}
+
+						Thread.sleep(500);
+					}
+				} catch (InterruptedException e) {
+				}
+			}
+		});
+
+		thread.start();
+	}
+	
+	private static float v;
+	private static float w;
+	private static float l;
+	private static long ltime=0;
+	private static long nsegs = 2;
+	private static Thread thread;*/
 		
 	private static Lock lock = new ReentrantLock();
 	private static Ice.Communicator communicator;
 	private static MotorsPrx mprx;
 	private static boolean connected;
 
+	private static HeadMotionManagerPrx hprx;
 	private static BodyMotionManagerPrx bprx;
 	private static SchedulerManagerPrx sprx;
-	private static boolean bodyrunning = false;
+	private static boolean bicarunning = false;
 	private static boolean use_nao = false;
 }

@@ -1,21 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
-<TextView
-	android:id="@+id/text_title"
-    android:layout_height="wrap_content" android:text="@string/main_title" style="@style/item_title" android:layout_width="wrap_content" android:layout_centerHorizontal="true" android:layout_marginBottom="@dimen/title_margin"/>
-<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/button_up" android:src="@drawable/arrow_up" android:layout_below="@+id/text_title" android:layout_centerHorizontal="true"></ImageButton>
-<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/button_up" android:id="@+id/button_left" android:src="@drawable/arrow_left" android:layout_toLeftOf="@+id/button_up"></ImageButton>
-<ImageButton android:layout_centerHorizontal="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/button_right" android:src="@drawable/arrow_right" android:layout_toRightOf="@+id/button_up" android:layout_below="@+id/button_up"></ImageButton>
-<ImageButton android:layout_centerHorizontal="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/button_right" android:id="@+id/button_down" android:src="@drawable/arrow_down"></ImageButton>
-<ImageButton android:layout_below="@+id/button_up" android:layout_width="wrap_content" android:id="@+id/button_stop" android:layout_height="wrap_content" android:layout_centerHorizontal="true" android:src="@drawable/stop"></ImageButton>
-<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/button_left" android:id="@+id/button_side_right" android:src="@drawable/arrow_right" android:layout_toRightOf="@+id/button_right"></ImageButton>
-<ImageButton android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_below="@+id/button_left" android:id="@+id/button_side_left" android:src="@drawable/arrow_left" android:layout_toLeftOf="@+id/button_left"></ImageButton>
-<ImageButton android:layout_height="wrap_content" android:id="@+id/button_kick_left" android:layout_below="@+id/text_title" android:layout_toLeftOf="@+id/button_left" android:layout_width="wrap_content" android:src="@drawable/left_kick"></ImageButton>
-<ImageButton android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/button_kick_right" android:layout_below="@+id/text_title" android:layout_toRightOf="@+id/button_right" android:src="@drawable/right_kick"></ImageButton>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+
+	<TextView android:id="@+id/text_title" android:layout_height="wrap_content"
+		android:text="@string/main_title" style="@style/item_title"
+		android:layout_width="wrap_content" android:layout_marginBottom="@dimen/title_margin"
+		android:layout_gravity="center" />
 
 
-</RelativeLayout>
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="fill_parent" android:layout_height="fill_parent" android:gravity="center">
+		<TableLayout android:layout_width="@dimen/arrow_table_size"
+			android:id="@+id/tableLayout1" android:layout_height="fill_parent">
+			<TableRow android:id="@+id/tableRow2" android:layout_width="wrap_content"
+				android:layout_height="wrap_content">
+				<TextView android:id="@+id/text_empty" android:text=""
+					android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size" />
+				<ImageButton android:id="@+id/button_up" android:src="@drawable/arrow_up"
+					android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size"></ImageButton>
+			</TableRow>
+			<TableRow android:id="@+id/tableRow3" android:layout_width="wrap_content"
+				android:layout_height="wrap_content">
+				<ImageButton android:src="@drawable/arrow_left"
+					android:id="@+id/button_left" android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size"></ImageButton>
+				<ImageButton android:src="@drawable/stop" android:id="@+id/button_stop"
+					android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size"></ImageButton>
+				<ImageButton android:src="@drawable/arrow_right"
+					android:id="@+id/button_right" android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size"></ImageButton>
+			</TableRow>
+			<TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content"
+				android:layout_height="wrap_content">
+				<ImageButton android:id="@+id/button_side_left"
+					android:src="@drawable/right_kick" android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size"></ImageButton>
+				<ImageButton android:src="@drawable/arrow_down"
+					android:id="@+id/button_down" android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size"></ImageButton>
+				<ImageButton android:src="@drawable/left_kick"
+					android:id="@+id/button_side_right" android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size"></ImageButton>
+			</TableRow>
+		</TableLayout>
+
+		<TableLayout android:layout_width="wrap_content"
+			android:id="@+id/tableLayout2" android:layout_height="fill_parent">
+			<TableRow android:id="@+id/tableRow2" android:layout_width="@dimen/arrow_table_size"
+				android:layout_height="wrap_content">
+				<TextView android:id="@+id/text_empty2" android:text=""
+					android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size" />
+				<ImageButton android:id="@+id/button_uph" android:src="@drawable/arrow_up"
+					android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size"></ImageButton>
+			</TableRow>
+			<TableRow android:id="@+id/tableRow3" android:layout_width="wrap_content"
+				android:layout_height="wrap_content">
+				<ImageButton android:src="@drawable/arrow_left"
+					android:id="@+id/button_lefth" android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size"></ImageButton>
+				<TextView android:id="@+id/text_empty3" android:text=""
+					android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size" />
+				<ImageButton android:src="@drawable/arrow_right"
+					android:id="@+id/button_righth" android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size"></ImageButton>
+			</TableRow>
+			<TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content"
+				android:layout_height="wrap_content">
+				<TextView android:id="@+id/text_empty4" android:text=""
+					android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size" />
+				<ImageButton android:src="@drawable/arrow_down"
+					android:id="@+id/button_downh" android:layout_width="@dimen/arrow_button_size"
+					android:layout_height="@dimen/arrow_button_size"></ImageButton>
+			</TableRow>
+		</TableLayout>
+
+	</LinearLayout>
+</LinearLayout>
+
+	<!--
+		<ImageButton android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:id="@+id/button_up"
+		android:src="@drawable/arrow_up"
+		android:layout_below="@+id/text_title"
+		android:layout_marginLeft="@dimen/arrow_margin_right"></ImageButton>
+		<ImageButton android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@+id/button_up" android:id="@+id/button_left"
+		android:src="@drawable/arrow_left"
+		android:layout_marginLeft="@dimen/arrow_margin_left2"></ImageButton>
+		<ImageButton android:layout_centerHorizontal="true"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:id="@+id/button_right"
+		android:src="@drawable/arrow_right"
+		android:layout_toRightOf="@+id/button_up"
+		android:layout_below="@+id/button_up"></ImageButton> <ImageButton
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@+id/button_right" android:id="@+id/button_down"
+		android:src="@drawable/arrow_down"
+		android:layout_marginLeft="@dimen/arrow_margin_left"></ImageButton>
+		<ImageButton android:layout_below="@+id/button_up"
+		android:layout_width="wrap_content" android:id="@+id/button_stop"
+		android:layout_height="wrap_content" android:src="@drawable/stop"
+		android:layout_marginLeft="@dimen/arrow_margin_left"></ImageButton>
+	-->
