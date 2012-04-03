@@ -1,0 +1,358 @@
+%%%%%%%%%%%%%%%%%%%%%%% file template.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is a general template file for the LaTeX package SVJour3
+% for Springer journals.          Springer Heidelberg 2010/09/16
+%
+% Copy it to a new file with a new name and use it as the basis
+% for your article. Delete % signs as needed.
+%
+% This template includes a few options for different layouts and
+% content for various journals. Please consult a previous issue of
+% your journal as needed.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\RequirePackage{fix-cm}
+%
+%\documentclass{svjour3}                     % onecolumn (standard format)
+%\documentclass[smallcondensed]{svjour3}     % onecolumn (ditto)
+%
+%\documentclass[smallextended]{svjour3}       % onecolumn (second format)
+\documentclass[twocolumn]{svjour3}          % twocolumn
+%
+\smartqed  % flush right qed marks, e.g. at end of proof
+%
+\usepackage{graphicx}
+\usepackage[spanish]{babel}
+% \usepackage{mathptmx}      % use Times fonts if available on your TeX system
+%
+% insert here the call for the packages your document requires
+%\usepackage{latexsym}
+% etc.
+%
+% please place your own definitions here and don't use \def but
+% \newcommand{}{}
+%
+% Insert the name of "your journal" with
+\journalname{Autonomous Robots}
+%
+\begin{document}
+
+\title{Jderobot open source middleware for robotic, computer vision and home automation applications
+%\thanks{Grants or other notes
+%about the article that should go on the front page should be
+%placed here. General acknowledgments should be placed at the end of the article.}
+}
+%\subtitle{Do you have a subtitle?\\ If so, write it here}
+
+%\titlerunning{Short form of title}        % if too long for running head
+
+\author{First Author         \and
+        Second Author %etc.
+}
+
+%\authorrunning{Short form of author list} % if too long for running head
+
+\institute{F. Author \at
+              first address \\
+              Tel.: +123-45-678910\\
+              Fax: +123-45-678910\\
+              \email{fauthor@example.com}           %  \\
+%             \emph{Present address:} of F. Author  %  if needed
+           \and
+           S. Author \at
+              second address
+}
+
+\date{Received: date / Accepted: date}
+% The correct dates will be entered by the editor
+
+
+\maketitle
+
+\begin{abstract}
+Insert your abstract here. Include keywords, PACS and mathematical
+subject classification numbers as needed.
+\keywords{First keyword \and Second keyword \and More}
+% \PACS{PACS code1 \and PACS code2 \and more}
+% \subclass{MSC code1 \and MSC code2 \and more}
+\end{abstract}
+
+\section{Introduction}
+\label{intro}
+
+JOSER, ieee chapter, autonomous robots special issue. Software enginering.
+
+
+Robot Software:
+\begin{itemize}
+\item Determina el comportamiento del robot
+\item No hay una manera universalmente aceptada de programarlos
+\item Lenguajes: ensamblador, C, C++
+\item {Heterogeneidad}
+\begin{itemize}
+\item Dispositivos hardware
+\item Encapsular funcionalidad
+\end{itemize}
+\item Empezar de cero con cada robot
+\item Requisitos específicos
+\item Sistemas operativos y plataformas
+\item Simuladores
+\end{itemize}
+
+Robotic software requirements:
+\begin{itemize}
+\item Vivacidad, agilidad (tiempo real)
+\item Multitarea (concurrencia, múltiples fuentes de actividad)
+\item Distribuido, comunicaciones
+\item Interfaz gráfica, depuración
+\item Expandible
+\item Hardware heterogéneo
+\end{itemize}
+
+¿Por qué software libre en robótica?
+\begin{itemize}
+\item Independencia de fabricantes
+\item Varios modelos de robots
+\item Libertad para modificar código fuente
+\item Aumentar la calidad del software
+\item ``Devolver el favor'': Player, Stage, Gazebo, Opencv, GTK,...
+\end{itemize}
+
+We proposed a robotic software platform, named Jderobot (http://jderobot.org).
+
+This paper is organized as follows.
+
+\section{Related works}
+\label{sec:relatedworks}
+
+%%david
+drivers, software platforms and applications.
+
+ROS, ORCA, Miro, RoboComp, Aria, PlayerStage \cite{Gerkey03,vaughan2007}.
+
+\section{Jderobot platform}
+\label{sec:jderobot}
+
+Some history. Keep away the cognitive ideas, focus on software architecture. Nace como implementación de arquitectura cognitiva, tesis doctoral. Evolucionó a una plataforma de programación para aplicaciones robóticas, domóticas y de visión computacional (sensores, actuadores, inteligencia).
+
+\begin{itemize}
+\item Orientada a componentes distribuidos y multilenguaje
+\item La mantiene un grupo de desarrolladores, es abierta
+\item {http://jderobot.org}, manuales, descarga, ejemplos
+\end{itemize}
+Software libre (licencia GPLv3), paquete debian
+
+
+Arquitectura cognitiva JDE:
+\begin{itemize}
+\item Comportamiento = {percepción} y {control}
+\item Fragmentación en unidades asíncronas concurrentes (esquemas)
+\begin{itemize}
+\item[-] de percepción elaboran estímulos
+\item[-] de actuación toman decisiones
+\end{itemize}
+\item La colección de esquemas se organiza en \textit{jerarquía} dinámica (JDE)
+\item Sigue el paradigma basado en comportamientos
+\end{itemize}
+
+Arquitectura cognitiva: Esquemas.
+Un {esquema} es un flujo de ejecución independiente, con un objetivo
+\begin{itemize}
+\item Funcionamiento continuo
+\item Se puede activar y desactivar a voluntad
+\item Modulable a través de parámetros
+\item Su funcionalidad se usa despertándolo y modulándolo
+\item {Perceptivos}: producen estímulos (piezas de información) y los mantienen actualizados. Lecturas sensoriales, transformaciones más elaboradas 
+\item {Actuación}: toman decisiones para conseguir o mantener un objetivo, comandos a los actuadores o la activación y modulación de otros 
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Software architecture design}
+
+Some history and lessons learnt: 4.3. 
+
+Threads. GUI specific interface. 
+
+\begin{itemize}
+\item Component oriented 
+\item Iterative execution
+\item Concurrent and optional visualization
+\item Processes better than threads
+\item ICE for communication
+\item Explicit standard interfaces
+\item Configuration files 
+\end{itemize}
+
+multilanguage, distributed intermachine, Android, efficient
+
+Reuse other open-source libraries: OpenCV, Gearbox, GTK, PCL, OpenGL, PlayerStage, Gazebo, GSL, Cwii.
+
+
+GUI thread separated from control thread.
+Iterative control, iterative perception. Component frequency.
+Standard interfaces for communication with other components.
+
+Modelo de programación: Componente
+\begin{itemize}
+\item Cada esquema se materializa en un {componente} software 
+\item El funcionamiento continuo como {ejecución iterativa}, iteraciones periódicas a cierto ritmo para percibir o para actuar
+\item Ofrece funcionalidad y usa la de otros a través de {interfaces} explícitos
+%el componente es la unidad básica
+\item Aplicación $=$ conjunto de componentes concurrentes que interoperan
+\item {Multimáquina} y {multilenguaje}: C, C++, python, Java... 
+\item Usa el middleware de comunicaciones ICE (zeroC)
+\end{itemize}
+
+Ejecución iterativa:
+\begin{itemize}
+\item Iteración de control o de percepción
+\item component\_cycle 
+\item \texttt{gettimeofday}
+\item \texttt{usleep}
+\item Espera condicional
+\item Patrón de diseño \textit{Algoritmo iterativo}
+\end{itemize}
+
+Interfaces tipados
+\begin{itemize}
+\item {Comunicación entre componentes}, conexión con otros 
+\item Fijan la estructura de los datos que el componente ofrece o necesita
+%\item Invocar funciones del interfaz
+\item Cada componente puede necesitar y ofrecer uno o varios interfaces 
+%espacio de nombres
+\item Se definen con \texttt{slice}
+\item Generación de código para múltiples lenguajes (C++, Java, Python...)
+\item Mecanismos de transmisión de datos eficientes
+\begin{itemize}
+\item transmisión síncrona o asíncrona
+\item publicación/subscripción
+\end{itemize}
+\end{itemize}
+
+
+Visualización
+\begin{itemize}
+\item {Modular} y {opcional}: cada componente tiene (o no) su propio GUI
+\item Cada componente incluye el código de su interfaz gráfica
+%\item Activable/desactivable a voluntad, cuando interesa
+\item Mostrar e interacción con humano 
+\item Depuración, útil en desarrollo
+\item GTK, XForms, OpenGL
+\item Patrón de diseño \textit{Modelo Vista Controlador}
+\item Se materializa en una {hebra adicional}
+\end{itemize}
+
+
+
+Ficheros de configuración:
+\begin{itemize}
+\item Cada componente puede tener el suyo 
+\item Ficheros de configuración ICE
+\item Especifican cuál es la fuente de cada interfaz (local o remota)
+\item Parámetros específicos
+\end{itemize}
+
+\subsection{Interfaces and drivers}
+
+
+Acceso a los dispositivos hardware
+\begin{itemize}
+\item Se da a través de {componentes drivers}
+\item Acceden localmente al sensor/actuador y ofrecen acceso (local o remoto) a otros a través de interfaces ICE
+\item No suelen tener GUI
+\item El mismo interfaz de datos lo puede proporcionar varios \textit{drivers}
+\begin{itemize}
+\item Mismo programa funciona sobre robot real o simulador
+\item Independencia de la fuente de imágenes
+\end{itemize}
+\end{itemize}
+
+
+Standard interfaces. 
+PlayerServer, GazeboServer for Gazebo Simulator \cite{koening2004}, NaoServer, KinectServer, OpenNIServer, giraffeServer, PTU, Hokuyo, Wiimote, CameraServer.
+
+Same interfaces for different robots.
+Applications run exactly the same on real robot than on simulator. 
+
+\subsection{Tools and libraries}
+
+\subsubsection{FuzzyLib}: control borroso
+\subsubsection{VisionLib}: geometría espacial, analisis de imágenes 
+\subsubsection{Progeo}: relacionar las imágenes con 3D, cámaras calibradas 
+\subsubsection{Colorspaces}: espacios de color para imágenes
+
+\subsubsection{Control template}
+Basic component for reactive controllers
+\subsubsection{VisualHFSM}
+\subsubsection{Calibrator}
+\subsubsection{ColorTuner}
+\subsubsection{Recorder and replayer}
+\subsubsection{MobileTeleoperator}
+
+Gazebo.
+
+\section{Research and Teaching}
+
+Nao, pioneer,
+
+Android mobileTeleoperator.
+What have we done using this platform.
+
+Navigation algorithms
+Selflocalization algorithms
+MonoSLAM
+Teaching, introrob
+
+% For two-column wide figures use
+\begin{figure*}
+% Use the relevant command to insert your figure file.
+% For example, with the graphicx package use
+  \includegraphics[width=7cm]{figs/programacion3.jpg}
+% figure caption is below the figure
+\caption{Please write your figure caption here}
+\label{fig:2}       % Give a unique label
+\end{figure*}
+
+
+\section{Conclusions}
+
+Jderobot, open source project
+\begin{itemize}
+\item Más de 60000 líneas de código
+\item Comunidad de usuarios y desarrolladores
+%\item Aumentar la calidad del software
+\item ¿Dónde conseguirla? ¿Cómo preguntar dudas? 
+\item Página web: {http://jderobot.org}
+\item Listas de correo: jde-users@gsyc.es y jde-developers@gsyc.es
+\item Svn, trac, blog, mediawiki
+\item Paquete debian: \texttt{apt-get install jderobot}
+\end{itemize}
+
+\begin{acknowledgements}
+Funding agencies. Alex, Maikel, Fran.
+\end{acknowledgements}
+
+% BibTeX users please use one of
+\bibliographystyle{spbasic}      % basic style, author-year citations
+%\bibliographystyle{spmpsci}      % mathematics and physical sciences
+%\bibliographystyle{spphys}       % APS-like style for physics
+\bibliography{bibliografia}   % name your BibTeX data base
+
+
+\end{document}
+
+
