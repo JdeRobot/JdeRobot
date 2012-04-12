@@ -39,7 +39,7 @@
 %
 \begin{document}
 
-\title{Jderobot open source middleware for robotic, computer vision and home automation applications
+\title{Jderobot open source framework for robotic, computer vision and home automation applications
 %\thanks{Grants or other notes
 %about the article that should go on the front page should be
 %placed here. General acknowledgments should be placed at the end of the article.}
@@ -82,47 +82,38 @@ subject classification numbers as needed.
 \section{Introduction}
 \label{intro}
 
-JOSER, ieee chapter, autonomous robots special issue. Software enginering.
+%software importance
+Most of robot intelligence lies on its software. Once the robot sensor and actuator devices are set, the robot behavior is fully caused by its software. There is no universally accepted way of programming robots.Regarging the language, there are robots programmed in assembler, in C and C++ or in Java. 
 
+The importance of good programming practices has increased in last years. Code reuse to avoid restart from scratch for every new robot. JOSER, ieee chapter, autonomous robots special issue. Software enginering.
 
-Robot Software:
-\begin{itemize}
-\item Determina el comportamiento del robot
-\item No hay una manera universalmente aceptada de programarlos
-\item Lenguajes: ensamblador, C, C++
-\item {Heterogeneidad}
-\begin{itemize}
-\item Dispositivos hardware
-\item Encapsular funcionalidad
-\end{itemize}
-\item Empezar de cero con cada robot
-\item Requisitos específicos
-\item Sistemas operativos y plataformas
-\item Simuladores
-\end{itemize}
+Encapsulating robot capabilities in functions is a slippery issue as behaviors usually don't fit into the functional abstraction where the caller invoques the function and stops it flow of execution until receives the function response or output.
 
-Robotic software requirements:
-\begin{itemize}
-\item Vivacidad, agilidad (tiempo real)
-\item Multitarea (concurrencia, múltiples fuentes de actividad)
-\item Distribuido, comunicaciones
-\item Interfaz gráfica, depuración
-\item Expandible
-\item Hardware heterogéneo
-\end{itemize}
+Simulators are useful tools in robotics.
 
-¿Por qué software libre en robótica?
-\begin{itemize}
-\item Independencia de fabricantes
-\item Varios modelos de robots
-\item Libertad para modificar código fuente
-\item Aumentar la calidad del software
-\item ``Devolver el favor'': Player, Stage, Gazebo, Opencv, GTK,...
-\end{itemize}
+Operating systems and robotic frameworks.
 
-We proposed a robotic software platform, named Jderobot (http://jderobot.org).
+% software requirements in robotics
+Compared with other computer science fields the development of robot applications exhibits some specific requirements. First, liveliness and real-time processing: software here has to take decisions with in a fast way, for instance in robot navigation or image processing. Second, robot software has to deal with multiple concurrent sources of activity, and so tends to be multitask. Third, computing power is usually distributed along several connected computers, and so the robotic software may be distributed. Fourth, the robotic software tipically deals with heterogeneous hardware. New sensor and actuator devices continually appears in the market and this makes maintenance and portability to new robots or devices more complex. Fifth, the robotic software usually includes a Graphical User Interface, mainly for debugging purposes. Sixth, the robotic software should be expansible for incremental addition of new functionality and code reuse.
 
-This paper is organized as follows.
+% robotic frameworks 
+Mobile robot programming has evolved significantly in recent years, and two approaches are currently found. On one hand, application programs for simple robots obtain readings from sensors and send commands to actuators by directly calling functions from the drivers provided by the seller. On the other hand, we have identified many common features across commercial and non-profit robotic frameworks SDKs.
+
+First, they offer a simple and more abstract access to sensors and actuators than the operating systems of simple robots. For example, in a Pioneer with a laser rangefinder, the applications can obtain readings using ARIA or directly through a serial port. Using ARIA, one need only invoke a method and ARIA will take charge of refreshing the variables. Using the operating system directly, the application must request and periodically read the data from the laser through the serial port, and must identify the protocol of the
+device to compose and analyze the low level messages correctly. The abstract access is also offered for actuators.
+
+Second, the software architecture of the SDK sets the way the application code obtains sensor data, commands the motors, or uses a developed functionality. There are many software options: calling to library functions, reading variables, invoking object methods, sending messages via the network to servers, etc.. Depending on the programming model the robot application can be considered an object collection, a set of modules talking through the network, an iterative process calling to functions, etc.
+
+Third, usually the SDK includes simple libraries, tools and common use functionality, such as robust techniques for perception or control, localization, safe local navigation, global navigation, social abilities, map construction, etc. The robot manufacturers sell them separately or include them as additional value with their own SDK. For example, ERSP includes three packages in the basic architecture: one for interaction, one for navigation and another for vision. There are several advantages of using the SDKs. First, they favor the portability of applications between different robots. Second, they promote code reuse, shortening the development time and reducing the programming effort needed to code the application as long as the programmer can build the program by reusing the common functionality, keeping herself focused in the specific aspects of her application. And third, the software architecture offers a way to organize code, allowing the handling of code complexity when the robot functionality increases.
+
+% our proposal
+We present our open-source robotic software framework, named Jderobot (http://jderobot.org), which is component oriented, uses ICE as communication middleware and includes several useful tools and libraries. Several sensor and actuator drivers have been programmed or reused from the open-source community. This framework has been widely used in our group for research and teaching for more than eight years. Jderobot has been designed for scenarios with sensors, actuators and intelligent software in betwween. The typical scenario is robotics, but also computer vision and home automation.
+
+% open source
+Why open-source in robotics? First, it provides independence of robot manufacturers and so it may support robots from different companies. Using open-source you are free to modify, debug, or improve the software, so the final software quality is high and does not depend on a company. One strong motivation is also the feeling of contributing to the robotics community and to return the favor. We have extensively used open-source libraries and tools in our research (OpenCV, Gazebo, GTK, etc.). Research algorithms can be replicated easily and compared with standard tools. The tools must be open in order to trust in them.
+
+% paper organization
+This paper is organized as follows. The state of the art in robotic frameworks fills section \ref{sec:relatedworks}, where other platforms are briefly presented. Section \ref{sec:jderobot} fully explains the proposed platform, the ideas behind its design, the set of standarized interfaces and developed drivers and the tools included for easing the development of new applications. In section \ref{sec:research} some succesfull examples using Jderobot are presented, both in research and in teaching. Finally conclusion section summarizes the main remarks.
 
 \section{Related works}
 \label{sec:relatedworks}
@@ -131,6 +122,8 @@ This paper is organized as follows.
 drivers, software platforms and applications.
 
 ROS, ORCA, Miro, RoboComp, Aria, PlayerStage \cite{Gerkey03,vaughan2007}.
+
+Microsoft Robotics Studio, Beesoft. ERSP.
 
 \section{Jderobot platform}
 \label{sec:jderobot}
@@ -315,6 +308,7 @@ This tools has been widely used to perform experiments with real robots, to try 
 Gazebo.
 
 \section{Research and Teaching}
+\label{ref:research}
 
 Nao, pioneer,
 
