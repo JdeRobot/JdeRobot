@@ -301,7 +301,16 @@ Basic component for reactive controllers
 \subsubsection{Calibrator}
 \subsubsection{ColorTuner}
 \subsubsection{Recorder and replayer}
-\subsubsection{MobileTeleoperator}
+
+When we use real robots, one of the greatest difficulties is repeating experiments with the same conditions, whether we want to compare different algorithms or to test several features of the same algorithm. It's almost impossible to reproduce the same environment conditions, since robot hardware behaves diversely, light conditions change if we use cameras, people or objects move or are located in different places, etc.
+
+To avoid all these matters, we have designed a new tool which records the current devices status and reproduces them whenever we want to. There are two components involved in this tool, the first one is the so-called "recorder", it saves in a file the status of all the devices of the robot, such as odometry, laser measures, image cameras, etc; we can configure which devices we want to track when we executes the components and it works with simulators, real Nao robots and real Pioneer robots.
+
+The second components is the "replayer" component, it reads the file saved by the "recorder" component and provides the same ICE interfaces that would provide the real devices. Thus, when an algorithm gets the current devices status, it can't tell if it's obtaining the current devices measures in real time or pre-recorded data.
+
+This tools has been widely used to perform experiments with real robots, to try different parameters and improve our algorithms.
+
+\subsubsection{Gazebo}
 
 Gazebo.
 
@@ -309,13 +318,36 @@ Gazebo.
 
 Nao, pioneer,
 
-Android mobileTeleoperator.
-What have we done using this platform.
+\subsection{Android mobileTeleoperator}
 
+Android operating system is increasing its market share every day, both with smartphones and tables. Once you develop an application for this platform, it may be used by students, other researchers or even companies. 
+
+We have created an application called "Mobile Teleoperator" to teleoperate either a Pioneer robot with playerserver or a Nao Robot with BICA architecture. Connection among the mobile device and the robots is made through ICE, the same way we do when we use a standard computer, so we don't need to change anything in Jderobot architecture.
+
+There are three ways to teleoperate the robots:
+- Arrows: After pressing a button, it sends the command to the robot and the robot keeps his behavior until the stop button is pressed.
+- Joystick: While a button is pressed, it send the command to the robot, but if the button is released it sends a stop command automatically.
+- Accelerometer: It uses the mobile accelerometers to command the robot depending on our device orientation. To use this behavior you must keep a "safety" button pressed, this button is used to calibrate the accelerometers when it is pressed the first time and to send a stop command automatically once this button is released.
+
+Mobile teleoperator has been used to create demonstrations and to let people who are not used to control robot to teleoperate robots in a easy way.
+
+\subsection{Navigation algorithms}
 Navigation algorithms
-Selflocalization algorithms
-MonoSLAM
-Teaching, introrob
+\subsection{Selflocalization algorithms}
+
+Self-localization is at the moment one of the most important challenges in robotics. Using robot sensors, such as cameras, laser sensors or ultrasonic sensors, our robot must be able to calculate its own localization inside an environment. Once the robot knows its position, it can adapt its behavior depending on where it is located. 
+ 
+However, robot self-localization has proven to be one the most complex task on mobile robots, since they must face unknown situations, such as occlusions, or being located inside a dynamic environment.
+
+With Jderobot, we have designed and implemented plenty of localization algorithm, since classical localization algorithms such as Monte Carlo particle filters or Kalman filters, to new and improved algorithms such as evolutionary algorithms or MonoSLAM.
+
+\subsubsection{MonoSLAM}
+
+Monocular Simultaneous Localization And Mapping (MonoSLAM) is a type of localization first presented by Andrew J. Davison in 2003 (ref). MonoSLAM is able to construct a point-based map of the environment with a single camera, and localizates the camera inside this environment in real time.
+
+We have developed our own MonoSLAM approach, based on Davison work, obtaining images from real cameras and simulators. We have implemented the point-based approach designed by Andrew Davison and afterwards we have designed our own implementations based on points and lines.
+
+This type of localization is more accurate than classical localization methods and is very useful when robot odometry is not available or is not reliable. On the other hand, it is not able to handle occlusions and needs a faster frame rate.
 
 % For two-column wide figures use
 \begin{figure*}
