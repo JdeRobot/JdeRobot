@@ -281,15 +281,30 @@ PlayerServer, GazeboServer for Gazebo Simulator \cite{koening2004}, NaoServer, K
 Same interfaces for different robots.
 Applications run exactly the same on real robot than on simulator. 
 
+Jderobot integrates two servers, named PlayerServer and GazeboServer, which are used to communicate Player and Gazebo simulators with other software components in the Jderobot platform. It's possible to retrieve information from several sensor devices, such us: laser, encoders, motors, cameras or sonars. And it also supports one or more cameras with their pantilt units (SonyVid30 model).
+
 \subsection{Tools and libraries}
 
 \subsubsection{FuzzyLib}: control borroso
-\subsubsection{VisionLib}: geometría espacial, analisis de imágenes 
-\subsubsection{Progeo}: relacionar las imágenes con 3D, cámaras calibradas 
+\subsubsection{VisionLib}
+
+geometría espacial, analisis de imágenes 
+
+Furthermore, lots of mathematical functions used on visual perception purposes can be found on another library: VisionLib. This vision library contains computer vision research code initially developed to support the RobotVision project. It has since been expanded to provide a range of software infrastructure for computer vision, geometry models and images mechanisms. The library builds on top of the OpenCV Computer Vision Library\footnote{http://opencv.willowgarage.com/wiki} and the GNU Scientific Library\footnote{http://www.gnu.org/software/gsl} (GSL). 
+
+\subsubsection{Progeo}
+
+relacionar las imágenes con 3D, cámaras calibradas 
+
+To facilitate the use of certain geometry functions, which are used in performing points and lines model configuration, Jderobot provides a library called ProGeo. It is useful to do camera operations such as: calibration, 2D to 3D transformation and viceversa and so on.
+
 \subsubsection{Colorspaces}: espacios de color para imágenes
 
 \subsubsection{Control template}
 Basic component for reactive controllers
+
+
+
 \subsubsection{VisualHFSM}
 \subsubsection{Calibrator}
 \subsubsection{ColorTuner}
@@ -303,45 +318,7 @@ The second components is the "replayer" component, it reads the file saved by th
 
 This tools has been widely used to perform experiments with real robots, to try different parameters and improve our algorithms.
 
-\subsubsection{Gazebo}
-
-Gazebo.
-
-\section{Research and Teaching}
-\label{ref:research}
-In an effort to stimulate young people to get involved with technology, robots seem a topic that attracts interest.
-
-When allowing students to design, build and program their own robots, they will get involved in many technical activities that also overlap with several other disciplines like Mathematics, Engineering, Electronics, Information Technology and Science in general.
-
-Also they will learn to work in teams and will be faced with many difficult technical decisions which enhance their management skills.
-
-\subsection{The lessons}
-
-When setting up lessons there always is a challenge about how complicated the lessons should be. Special Jderobot components have been developed for students, in which a number of pre-programmed instructions are used to let students construct their own applications.
-
-Such an approach eliminates the need to know a lot about gears, motors, using sensors, calibration and allows students to have a working robot within little over an hour.
-
-The most important issue with the project is of course to interest students to get involved with technology. So it must be made very simple and yet interesting. It is very important that students can get their first results quickly, so they learn that they can master working with robots. This approach seems to facilitate this.
-
-\subsection{Basic component}
-
-Starting with a basic component like Introrob is very stimulating. Once the enthusiasm has been generated, they still need to learn about motors, sensors, control issues and programming.
-
-So it becomes important to offer a migration path from this very simple starting level to an environment where more skills are required. The best way is to start with a simple level and have a programming environment, such as Jderobot, that supports working from the very simple to a slightly more advanced level.
-
-\subsection{Simulator and servers}
-
-Having an integrated simulator is very important, so the students may quickly test their experiments without the need for a robot for every student. Such an environment is provided by The Player Project\footnote{http://playerstage.sourceforge.net/index.html}. This Open Source software is capable of simulating a population of robots, sensors and objects, but does so in a three-dimensional world.
-
-Jderobot integrates two servers, named PlayerServer and GazeboServer, which are used to communicate Player and Gazebo simulators with other software components in the Jderobot platform. It's possible to retrieve information from several sensor devices, such us: laser, encoders, motors, cameras or sonars. And it also supports one or more cameras with their pantilt units (SonyVid30 model).
-
-\subsection{Libraries}
-
-To facilitate the use of certain geometry functions, which are used in performing points and lines model configuration, Jderobot provides a library called ProGeo. It is useful to do camera operations such as: calibration, 2D to 3D transformation and viceversa and so on.
-
-Furthermore, lots of mathematical functions used on visual perception purposes can be found on another library: VisionLib. This vision library contains computer vision research code initially developed to support the RobotVision project. It has since been expanded to provide a range of software infrastructure for computer vision, geometry models and images mechanisms. The library builds on top of the OpenCV Computer Vision Library\footnote{http://opencv.willowgarage.com/wiki} and the GNU Scientific Library\footnote{http://www.gnu.org/software/gsl} (GSL). 
-
-\subsection{Android mobileTeleoperator}
+\subsubsection{Android mobileTeleoperator}
 
 Android operating system is increasing its market share every day, both with smartphones and tables. Once you develop an application for this platform, it may be used by students, other researchers or even companies. 
 
@@ -354,9 +331,40 @@ There are three ways to teleoperate the robots:
 
 Mobile teleoperator has been used to create demonstrations and to let people who are not used to control robot to teleoperate robots in a easy way.
 
+\subsubsection{Gazebo}
+
+Gazebo.
+
+\section{Research and Teaching}
+\label{ref:research}
+
+\subsection{Teaching robotics with Jderobot}
+
+In an effort to stimulate young people to get involved with technology, robots seem a topic that attracts interest.
+
+When allowing students to design, build and program their own robots, they will get involved in many technical activities that also overlap with several other disciplines like Mathematics, Engineering, Electronics, Information Technology and Science in general.
+
+Also they will learn to work in teams and will be faced with many difficult technical decisions which enhance their management skills.
+
+When setting up lessons there always is a challenge about how complicated the lessons should be. Special Jderobot components have been developed for students, in which a number of pre-programmed instructions are used to let students construct their own applications.
+
+Such an approach eliminates the need to know a lot about gears, motors, using sensors, calibration and allows students to have a working robot within little over an hour.
+
+The most important issue with the project is of course to interest students to get involved with technology. So it must be made very simple and yet interesting. It is very important that students can get their first results quickly, so they learn that they can master working with robots. This approach seems to facilitate this.
+
+
+Starting with a basic component like Introrob is very stimulating. Once the enthusiasm has been generated, they still need to learn about motors, sensors, control issues and programming.
+
+So it becomes important to offer a migration path from this very simple starting level to an environment where more skills are required. The best way is to start with a simple level and have a programming environment, such as Jderobot, that supports working from the very simple to a slightly more advanced level.
+
+
+Having an integrated simulator is very important, so the students may quickly test their experiments without the need for a robot for every student. Such an environment is provided by The Player Project\footnote{http://playerstage.sourceforge.net/index.html}. This Open Source software is capable of simulating a population of robots, sensors and objects, but does so in a three-dimensional world.
+
+
 \subsection{Navigation algorithms}
 Navigation algorithms
-\subsection{Selflocalization algorithms}
+
+\subsection{Evolutive Selflocalization algorithms}
 
 Self-localization is at the moment one of the most important challenges in robotics. Using robot sensors, such as cameras, laser sensors or ultrasonic sensors, our robot must be able to calculate its own localization inside an environment. Once the robot knows its position, it can adapt its behavior depending on where it is located. 
  
@@ -364,7 +372,7 @@ However, robot self-localization has proven to be one the most complex task on m
 
 With Jderobot, we have designed and implemented plenty of localization algorithm, since classical localization algorithms such as Monte Carlo particle filters or Kalman filters, to new and improved algorithms such as evolutionary algorithms or MonoSLAM.
 
-\subsubsection{MonoSLAM}
+\subsection{MonoSLAM}
 
 Monocular Simultaneous Localization And Mapping (MonoSLAM) is a type of localization first presented by Andrew J. Davison in 2003 (ref). MonoSLAM is able to construct a point-based map of the environment with a single camera, and localizates the camera inside this environment in real time.
 
@@ -382,6 +390,7 @@ This type of localization is more accurate than classical localization methods a
 \label{fig:2}       % Give a unique label
 \end{figure*}
 
+\section{Jderobot as open-source project}
 
 \section{Conclusions}
 
