@@ -83,9 +83,12 @@ subject classification numbers as needed.
 \label{intro}
 
 %software importance
-Most of robot intelligence lies on its software. Once the robot sensor and actuator devices are set, the robot behavior is fully caused by its software. There is no universally accepted way of programming robots.Regarging the language, there are robots programmed in assembler, in C and C++ or in Java. 
+Most of robot intelligence lies on its software. Once the robot sensor
+and actuator devices are set, the robot behavior is fully caused by
+its software. There is no universally accepted way of programming
+robots. Regarding the language, there are robots programmed in assembler, in C and C++ or in Java. 
 
-The importance of good programming practices has increased in last years. Code reuse to avoid restart from scratch for every new robot. JOSER, ieee chapter, autonomous robots special issue. Software enginering.
+The importance of good programming practices has increased in last years. Code reuse to avoid restart from scratch for every new robot. JOSER, ieee chapter, autonomous robots special issue. Software engineering.
 
 Encapsulating robot capabilities in functions is a slippery issue as behaviors usually don't fit into the functional abstraction where the caller invoques the function and stops it flow of execution until receives the function response or output.
 
@@ -94,7 +97,7 @@ Simulators are useful tools in robotics.
 Operating systems and robotic frameworks.
 
 % software requirements in robotics
-Compared with other computer science fields the development of robot applications exhibits some specific requirements. First, liveliness and real-time processing: software here has to take decisions with in a fast way, for instance in robot navigation or image processing. Second, robot software has to deal with multiple concurrent sources of activity, and so tends to be multitask. Third, computing power is usually distributed along several connected computers, and so the robotic software may be distributed. Fourth, the robotic software tipically deals with heterogeneous hardware. New sensor and actuator devices continually appears in the market and this makes maintenance and portability to new robots or devices more complex. Fifth, the robotic software usually includes a Graphical User Interface, mainly for debugging purposes. Sixth, the robotic software should be expansible for incremental addition of new functionality and code reuse.
+Compared with other computer science fields the development of robot applications exhibits some specific requirements. First, liveliness and real-time processing: software here has to take decisions with in a fast way, for instance in robot navigation or image processing. Second, robot software has to deal with multiple concurrent sources of activity, and so tends to be multitask. Third, computing power is usually distributed along several connected computers, and so the robotic software may be distributed. Fourth, the robotic software typically deals with heterogeneous hardware. New sensor and actuator devices continually appears in the market and this makes maintenance and portability to new robots or devices more complex. Fifth, the robotic software usually includes a Graphical User Interface, mainly for debugging purposes. Sixth, the robotic software should be expansible for incremental addition of new functionality and code reuse.
 
 % robotic frameworks 
 Mobile robot programming has evolved significantly in recent years, and two approaches are currently found. On one hand, application programs for simple robots obtain readings from sensors and send commands to actuators by directly calling functions from the drivers provided by the seller. On the other hand, we have identified many common features across commercial and non-profit robotic frameworks SDKs.
@@ -107,28 +110,99 @@ Second, the software architecture of the SDK sets the way the application code o
 Third, usually the SDK includes simple libraries, tools and common use functionality, such as robust techniques for perception or control, localization, safe local navigation, global navigation, social abilities, map construction, etc. The robot manufacturers sell them separately or include them as additional value with their own SDK. For example, ERSP includes three packages in the basic architecture: one for interaction, one for navigation and another for vision. There are several advantages of using the SDKs. First, they favor the portability of applications between different robots. Second, they promote code reuse, shortening the development time and reducing the programming effort needed to code the application as long as the programmer can build the program by reusing the common functionality, keeping herself focused in the specific aspects of her application. And third, the software architecture offers a way to organize code, allowing the handling of code complexity when the robot functionality increases.
 
 % our proposal
-We present our open-source robotic software framework, named Jderobot (http://jderobot.org), which is component oriented, uses ICE as communication middleware and includes several useful tools and libraries. Several sensor and actuator drivers have been programmed or reused from the open-source community. This framework has been widely used in our group for research and teaching for more than eight years. Jderobot has been designed for scenarios with sensors, actuators and intelligent software in betwween. The typical scenario is robotics, but also computer vision and home automation.
+We present our open-source robotic software framework, named Jderobot (http://jderobot.org), which is component oriented, uses ICE as communication middleware and includes several useful tools and libraries. Several sensor and actuator drivers have been programmed or reused from the open-source community. This framework has been widely used in our group for research and teaching for more than eight years. Jderobot has been designed for scenarios with sensors, actuators and intelligent software in between. The typical scenario is robotics, but also computer vision and home automation.
 
 % open source
 Why open-source in robotics? First, it provides independence of robot manufacturers and so it may support robots from different companies. Using open-source you are free to modify, debug, or improve the software, so the final software quality is high and does not depend on a company. One strong motivation is also the feeling of contributing to the robotics community and to return the favor. We have extensively used open-source libraries and tools in our research (OpenCV, Gazebo, GTK, etc.). Research algorithms can be replicated easily and compared with standard tools. The tools must be open in order to trust in them.
 
 % paper organization
-This paper is organized as follows. The state of the art in robotic frameworks fills section \ref{sec:relatedworks}, where other platforms are briefly presented. Section \ref{sec:jderobot} fully explains the proposed platform, the ideas behind its design, the set of standarized interfaces and developed drivers and the tools included for easing the development of new applications. In section \ref{sec:research} some succesfull examples using Jderobot are presented, both in research and in teaching. Finally conclusion section summarizes the main remarks.
+This paper is organized as follows. The state of the art in robotic
+frameworks fills section \ref{sec:relatedworks}, where other platforms
+are briefly presented. Section \ref{sec:jderobot} fully explains the
+proposed platform, the ideas behind its design, the set of standarized
+interfaces and developed drivers and the tools included to make the
+development of new applications easier. In section \ref{sec:research} some successful examples using Jderobot are presented, both in research and in teaching. Finally conclusion section summarizes the main remarks.
 
 \section{Related works}
 \label{sec:relatedworks}
 
-%%david
-drivers, software platforms and applications.
+Robotic frameworks can be grouped in two main paradigms, those tighly
+coupled with a cognitive model in their designs and those designed
+just from a pure engineering criteria. The first ones \textit{force}
+the user to follow a set of rules in order to program certain robotic
+behavior, while the second ones are just a collection of tools that
+can flexibly be put toguether in several ways to acomplish the task.
 
-ROS, ORCA, Miro, RoboComp, Aria, PlayerStage \cite{Gerkey03,vaughan2007}.
+%cognitive frameworks
+Cognitive robotic frameworks were popular in the 90s and they were
+strogly influenced by the AI, where planning was one of the main
+keys. Indeed one of the strenghts of such frameworks were their
+planning modules built around a sensed reality. A good example of cognitive
+frameworks was Saphira \cite{konolige98} based on a behaviourist
+cognitive model. Some of its low-level functionality was rewriten as a
+C++ library called ARIA \cite{aria} that it's still suplied with the
+popular robotic platforms from MobileRobots/ActivMedia.
 
-Microsoft Robotics Studio, Beesoft. ERSP.
+%current frameworks
+Current robotic frameworks focus their designs on the requirements
+that robotics applications need and let the user (the programmer) to
+choose the organization that better fits with her specific
+application. Main requirements driving the designs are: multi-tasking, distributed, easy to
+use and code reusability. Another requirement, we belive it's a main
+key, it's the open source code, that creates a synergy between the use
+and the developer. Proof of this is the two most popular robotic
+frameworks in the last years: PlayerStage
+\cite{Gerkey03,collet05,vaughan2007} which has been the \textit{standard de
+facto} in most of the last decade and ROS \cite{quigley09} which is
+taking the place currently.
+
+%key achivements
+Key achivements of modern frameworks are the hardware abstraction, hiding the complexity of accesing heterogeneous hardware (sensors and
+actuators) under standard interfaces, the distributed capabilities
+that allows to run complex systems spread over a network of computers,
+the multi-platform and multi-language capabilities that enables the
+user to run her software in multiple architectures, and the existence
+of big communities of software that share code and ideas.
+
+%examples
+Main examples of modern frameworks are the aformentioned PlayerStage
+and ROS. The first has two main parts, Player, provides a network
+interface to the robot hardware through a collection of standard
+interfaces. This standard interfaces are implemented by drivers, one
+for each different hardware. This way a user only needs to know the
+standard way to use, let say, a laser ranger and not every different
+brand. The second part is Stage, a 2D simulator that allows the user
+to try in a simulated world before trying on a real platform. In
+addition to this, PlayeStage framework provides a variety of
+algorithms that are used with the same concept through standard
+interfaces. Other example is ROS that employs the same concept of
+standard interfaces with the addition of a middleware that greatly
+simplifies the network distribution. The core system of ROS comes with
+a collection of tools to help with tasks as project management, system
+debugging and centralized logging. Currently has a growing community
+and its site hosts a great collection of hardaware drivers, algorithms
+and other tools.
+
+Another important example is ORCA \cite{brooks05,brooks07} based on the
+same concepts mentioned, but with the idea of expending less effort
+building the underlying middleware elements . This way they chose to
+use Ice from ZeroC \cite{henning04}, a powerful object oriented middleware
+that allows them to focus in the robotic problems.
+
+%%CARMEN \cite{montemerlo03}
+%%ROS, ORCA, Miro, RoboComp, Aria, 
+%%Microsoft Robotics Studio, Beesoft. ERSP.
 
 \section{Jderobot platform}
 \label{sec:jderobot}
 
-Some history. Keep away the cognitive ideas, focus on software architecture. Nace como implementación de arquitectura cognitiva, tesis doctoral. Evolucionó a una plataforma de programación para aplicaciones robóticas, domóticas y de visión computacional (sensores, actuadores, inteligencia).
+Some history. Keep away the cognitive ideas, focus on software
+architecture. Nace como implementación de arquitectura cognitiva,
+tesis doctoral jdec \cite{canas02}. Evolucionó a una plataforma de programación para
+aplicaciones robóticas, domóticas y de visión computacional (sensores,
+actuadores, inteligencia).
+
+
 
 \begin{itemize}
 \item Orientada a componentes distribuidos y multilenguaje
@@ -160,17 +234,6 @@ Un {esquema} es un flujo de ejecución independiente, con un objetivo
 \item {Perceptivos}: producen estímulos (piezas de información) y los mantienen actualizados. Lecturas sensoriales, transformaciones más elaboradas 
 \item {Actuación}: toman decisiones para conseguir o mantener un objetivo, comandos a los actuadores o la activación y modulación de otros 
 \end{itemize}
-
-
-
-
-
-
-
-
-
-
-
 
 
 
