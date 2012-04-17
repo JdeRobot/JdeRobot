@@ -1,5 +1,8 @@
-#include <opencv/cv.h>
-#include <opencv/cxtypes.h>
+/*#include <opencv/cvaux.h>
+#include <opencv/cxtypes.h>*/
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <stdio.h>
 
 //Definitions for corner detectors.
@@ -150,7 +153,7 @@ cvCornerFast( const CvArr* input_image, int threshold, int N, int nonmax_suppres
 
 	CvMat stub, *src;
 
-    __BEGIN__;
+    __CV_BEGIN__;
 
 	if(!input_image)
         CV_ERROR( CV_StsNullPtr, "" );
@@ -195,7 +198,7 @@ cvCornerFast( const CvArr* input_image, int threshold, int N, int nonmax_suppres
 		free(corners);
 	}
 
-    __END__;
+    __CV_END__;
 }
 
 int icvFast9CornerScore(const unsigned char* p, const int pixel[], int bstart)

@@ -46,15 +46,6 @@ namespace visionLibrary {
 			geometry ();
 		  virtual ~geometry ();
 
-			/*Intersections*/
-			static void pixel2Optical(TPinHoleCamera * camera, HPoint2D * p);
-			static void optical2Pixel(TPinHoleCamera * camera, HPoint2D * p);
-			static void get2DPosition(TPinHoleCamera * camera, HPoint3D in, HPoint2D &res);
-			static void get3DPosition(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in);
-			static void get3DPositionX(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, float X = 0.0);
-			static void get3DPositionY(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, float Y = 0.0);
-			static void get3DPositionZ(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, float Z = 0.0);
-
 			/*Distance between two points in 2D*/
 			static double distanceBetweenPoints2D(int x1, int y1, int x2, int y2);
 			static double distanceBetweenPoints2D(double x1, double y1, double x2, double y2);
