@@ -394,6 +394,16 @@ There are three ways to teleoperate the robots:
 
 Mobile teleoperator has been used to create demonstrations and to let people who are not used to control robot to teleoperate robots in a easy way.
 
+
+\subsubsection{KinectServer, openniServer and kinectViewer}
+Kinect is one of the latest generation device more used in the last months. That is why jderobot icludes some components to support this device and allows to access to all the information that it provides. Through jderobot you can access to color, depth and IR values, and also to the tilt motor device and it leds.
+
+Jderobot has two kinect servers that give us the possibility to access the sensor: kinectServer and openniServer. The main difference between this two components is the way to access to the device. KinectServer use PCL to access the sensor using the opennni\_grabber integrated on this library, whereas openniServer uses OpenNi directly preserving all the functionality of this framework. 
+
+Although the servers access information in a different way both offer information using the same ICE interfaces so both components are completly compatible. 
+
+The third component, kinectViewer, is able to connect to one of the servers below and to analyse  the information. This component integrates some of the 3D tools that jderobot provides and can represent the 3D information and reconstruct the scenario in an OpenGL world. 
+
 \subsubsection{Gazebo}
 
 Gazebo.
