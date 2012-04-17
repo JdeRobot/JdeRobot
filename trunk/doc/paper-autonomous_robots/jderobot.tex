@@ -351,15 +351,30 @@ Jderobot integrates two servers, named PlayerServer and GazeboServer, which are 
 \subsubsection{FuzzyLib}: control borroso
 \subsubsection{VisionLib}
 
-geometría espacial, analisis de imágenes 
+Mathematical functions used on visual perception purposes can be found on this vision library. It contains computer vision research code initially developed to support the RobotVision project. It has since been expanded to provide a range of software infrastructure for computer vision, geometry models and images mechanisms. The library builds on top of the OpenCV Computer Vision Library\footnote{http://opencv.willowgarage.com/wiki} and the GNU Scientific Library\footnote{http://www.gnu.org/software/gsl} (GSL).
 
-Furthermore, lots of mathematical functions used on visual perception purposes can be found on another library: VisionLib. This vision library contains computer vision research code initially developed to support the RobotVision project. It has since been expanded to provide a range of software infrastructure for computer vision, geometry models and images mechanisms. The library builds on top of the OpenCV Computer Vision Library\footnote{http://opencv.willowgarage.com/wiki} and the GNU Scientific Library\footnote{http://www.gnu.org/software/gsl} (GSL). 
+The structure of this library is as follows:
+\begin{itemize} 
+\item \textit{Cvfast} class provides the functionality of the Image Corner Detector called FAST.
+\item \textit{Geometry} class contains implementations of different visual geometry purposes: intersections, distances, vector operations, segments operations, etcetera.
+\item \textit{Image} class includes operations such as: Multiply Fast Fourier Transform or Get Segments.
+\item \textit{LinesDetection} class provides the implementation of an Image Border Detector based on an article by A. Solis (\cite{solis09}).
+\item \textit{Structs.h} header contains different useful structs for computer vision purposes.
+\end{itemize}
 
 \subsubsection{Progeo}
 
-relacionar las imágenes con 3D, cámaras calibradas 
+In order to facilitate the use of pin-hole calibrated cameras (see Figure \ref{fig:pinholemodel}) as well as certain geometry functions used for the purposes of performing 2D and 3D images calculations (such as 2D to 3D transformation and viceversa), Jderobot provides a library called ProGeo.
 
-To facilitate the use of certain geometry functions, which are used in performing points and lines model configuration, Jderobot provides a library called ProGeo. It is useful to do camera operations such as: calibration, 2D to 3D transformation and viceversa and so on.
+\begin{figure}
+  \includegraphics[width=9cm]{figs/pinholemodel.png}
+\caption{Pin-hole model of a camera.}
+\label{fig:pinholemodel}
+\end{figure}
+
+Some of the data types provided by this library are: \textit{HPoint2D} (to store a 2D point that usually belongs to the image plane), \textit{HPoint3D} (data point structure that represents a point in the 3D space) or \textit{TPinholeCamera} (pin-hole camera model defined by its extrinsics and intrinsics parameters).
+
+And some of the functions which can be found are: \textit{project} (to project a 3D point on to the 2D image planer) and \textit{backproject} (to obtain the projection line that connects the camera with the focus and the 3D ray which is projected in a pixel of the image plane).
 
 \subsubsection{Colorspaces}: espacios de color para imágenes
 
@@ -435,7 +450,23 @@ Having an integrated simulator is very important, so the students may quickly te
 
 
 \subsection{Navigation algorithms}
-Navigation algorithms
+
+Obstacle avoidance is one of the key issues to successful applications of mobile robot systems. All mobile robots feature some kind of collision avoidance. It needs to steer the robot around the obstacle and proceed toward the original target.
+
+We have implemented two famous navigation algorithms: VFF, as a obstacle avoidance or local path planning mechanism; and GPP, as a global path planner algorithm.
+
+The Virtual Force Field (VFF) method is our earlier real-time obstacle avoidance method for our running robots. This technique allows for fast, continuous, and smooth motion of the controlled vehicle among unexpected obstacles, and does not require the vehicle to stop in front of obstacles.
+
+On the other hand, when a trap-situation is flagged, the robot slows down (and may come to a complete halt),
+while the VFF algorithm is temporarily suspended. The GPP algotirhm is then invoked to plan a new path based on the available information in the gradient field that represents the optimal (lowest-cost) path to the goal at every point in the workspace (see Figure {fig:gppNav}).
+
+\begin{figure}
+  \includegraphics[width=9cm]{figs/gppNav.png}
+\caption{Robot navigation using GPP and VFF algorithms.}
+\label{fig:gppNav}
+\end{figure}
+
+Both techniques, VFF and GPP, have been implemented under Jderobot and extensively tested on Player-Stage and Gazebo simulators and on-board an ActivMedia Pioneer mobile robot, equipped with a ring of 24 ultrasonic sensors, and also using laser sensors, such as Hokuyo or Sick laser.
 
 \subsection{Evolutive Selflocalization algorithms}
 
