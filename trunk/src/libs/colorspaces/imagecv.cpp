@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
-#include <highgui.h>
+#include <opencv2/highgui/highgui.hpp>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
