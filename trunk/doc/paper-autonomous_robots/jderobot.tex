@@ -48,9 +48,7 @@
 
 %\titlerunning{Short form of title}        % if too long for running head
 
-\author{First Author         \and
-        Second Author %etc.
-}
+\author{José M. Cañas \and David Lobato \and Roberto Calvo \and Julio Vega \and Eduardo Perdices \and Francisco Rivas}
 
 %\authorrunning{Short form of author list} % if too long for running head
 
@@ -72,9 +70,8 @@
 \maketitle
 
 \begin{abstract}
-Insert your abstract here. Include keywords, PACS and mathematical
-subject classification numbers as needed.
-\keywords{First keyword \and Second keyword \and More}
+For a given robot most of its intelligence lies on its software, the way it coordinates its sensing and actuation capabilities. In the last years several frameworks have appeared that simplify and speed up the development of robot applications. They favor the code reuse and take benefits from modern software engineering tecniques. This paper presents the open source robotics framework Jderobot, a distributed and component oriented platform. It uses explicit interfaces among components and ICE as communication middleware. It provides many tools for robot programming like a template for robot control components, visual HFSM creation, etc. Several examples of research and applications done with this framework are also described as experimental validation of it.
+\keywords{Robot software \and Second keyword \and More}
 % \PACS{PACS code1 \and PACS code2 \and more}
 % \subclass{MSC code1 \and MSC code2 \and more}
 \end{abstract}
@@ -419,9 +416,6 @@ Although the servers access information in a different way both offer informatio
 
 The third component, kinectViewer, is able to connect to one of the servers below and to analyse  the information. This component integrates some of the 3D tools that jderobot provides and can represent the 3D information and reconstruct the scenario in an OpenGL world. 
 
-\subsubsection{Gazebo}
-
-Gazebo.
 
 \section{Research and Teaching}
 \label{ref:research}
@@ -449,7 +443,7 @@ So it becomes important to offer a migration path from this very simple starting
 Having an integrated simulator is very important, so the students may quickly test their experiments without the need for a robot for every student. Such an environment is provided by The Player Project\footnote{http://playerstage.sourceforge.net/index.html}. This Open Source software is capable of simulating a population of robots, sensors and objects, but does so in a three-dimensional world.
 
 
-\subsection{Navigation algorithms}
+\subsection{Robot navigation}
 
 Obstacle avoidance is one of the key issues to successful applications of mobile robot systems. All mobile robots feature some kind of collision avoidance. It needs to steer the robot around the obstacle and proceed toward the original target.
 
@@ -467,6 +461,8 @@ while the VFF algorithm is temporarily suspended. The GPP algotirhm is then invo
 \end{figure}
 
 Both techniques, VFF and GPP, have been implemented under Jderobot and extensively tested on Player-Stage and Gazebo simulators and on-board an ActivMedia Pioneer mobile robot, equipped with a ring of 24 ultrasonic sensors, and also using laser sensors, such as Hokuyo or Sick laser.
+
+Follow person \cite{canas05d}.
 
 \subsection{Evolutive Selflocalization algorithms}
 
@@ -496,8 +492,11 @@ This type of localization is more accurate than classical localization methods a
 
 \section{Study about the Jderobot community}
 
+%history
+The Jderobot project started in 2003 as PhD thesis, as the software implementation of a cognitive architecture to develop autonomous behaviors in robots \cite{canas02,canas05e}. It provided access to robot camera, encoders, sonar sensors and motors using sockets between some drivers and the control application. The application was divided in \textit{schemas} implemented as concurrent threads. Its development was opened to a group of students. Several alternatives and expansions have been programmed \cite{canas07,canas07f}.
 
-Jderobot project has a total of 123.531 lines of source code.
+%current release
+A major revision was undergone in 2010, leaving out the cognitive aspects and focusing in jderobot as a software architecture for robot applications. The major design principles followed has been described in section \ref{sec:jderobot}. The most recent release is 5.0. Currently it has a total of 123.531 lines of source code.
 
 \begin{verbatim}
 SLOC    Directory       SLOC-by-Language 
@@ -534,6 +533,13 @@ python:          57 (0.05%)
 \label{fig:svn-topcommiters}
 \end{figure}
 
+%who is using Jderobot
+The users community includes the Robotics Group at Universidad Rey Juan Carlos, where it has been used in research and teaching. It also includes Universidad de Málaga, Universidad Carlos III and Politécnico Colombiano Jaime Cadavid.
+
+%lessons learnt
+High rotation in developers. Typically one student. Took a snapshot of Jderobot and developed its own extensions for her Final Degree Project. ---> Single repository. 2006. Web server, mediawiki for documentation.
+
+The opening of the development.
 
 \section{Conclusions}
 
