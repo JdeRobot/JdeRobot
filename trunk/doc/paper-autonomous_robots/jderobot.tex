@@ -455,7 +455,7 @@ On the other hand, when a trap-situation is flagged, the robot slows down (and m
 while the VFF algorithm is temporarily suspended. The GPP algotirhm is then invoked to plan a new path based on the available information in the gradient field that represents the optimal (lowest-cost) path to the goal at every point in the workspace (see Figure {fig:gppNav}).
 
 \begin{figure}
-  \includegraphics[width=9cm]{figs/gppNav.png}
+  \includegraphics[width=8cm]{figs/gppNav.png}
 \caption{Robot navigation using GPP and VFF algorithms.}
 \label{fig:gppNav}
 \end{figure}
@@ -464,7 +464,7 @@ Both techniques, VFF and GPP, have been implemented under Jderobot and extensive
 
 Follow person \cite{canas05d}.
 
-\subsection{Evolutive Selflocalization algorithms}
+\subsection{Evolutive localization}
 
 Self-localization is at the moment one of the most important challenges in robotics. Using robot sensors, such as cameras, laser sensors or ultrasonic sensors, our robot must be able to calculate its own localization inside an environment. Once the robot knows its position, it can adapt its behavior depending on where it is located. 
  
@@ -490,13 +490,28 @@ This type of localization is more accurate than classical localization methods a
 \label{fig:2}       % Give a unique label
 \end{figure*}
 
-\section{Study about the Jderobot community}
 
-%history
-The Jderobot project started in 2003 as PhD thesis, as the software implementation of a cognitive architecture to develop autonomous behaviors in robots \cite{canas02,canas05e}. It provided access to robot camera, encoders, sonar sensors and motors using sockets between some drivers and the control application. The application was divided in \textit{schemas} implemented as concurrent threads. Its development was opened to a group of students. Several alternatives and expansions have been programmed \cite{canas07,canas07f}.
+\subsection{Visual memory}
 
-%current release
-A major revision was undergone in 2010, leaving out the cognitive aspects and focusing in jderobot as a software architecture for robot applications. The major design principles followed has been described in section \ref{sec:jderobot}. The most recent release is 5.0. Currently it has a total of 123.531 lines of source code.
+\subsection{Surveillance}
+
+\subsection{ElderCare}
+
+\section{Jderobot as open-source project}
+
+Jderobot project has a web page (jderobot.org) where the framework can be downloaded and its documentation accessed. The official manual is there in a MediaWiki. We prefer this web manual better than classic static documents, as the web manual update is agile and can be easily done by users themselves. We use a svn repository, trac for bug tracking, a blog and one mailing list for developers an users.
+
+\subsection{Some history}
+
+The Jderobot project started at 2003 in a PhD thesis, as the software implementation of a cognitive architecture to develop autonomous behaviors in robots \cite{canas02,canas05e}. It provided access to robot camera, encoders, sonar sensors and motors using sockets between some drivers and the (maybe remote) control application. The application was divided in \textit{schemas} that were implemented as concurrent threads in C language and organized as hierarchy. Its development was opened to a group of students. Several alternatives and expansions have been programmed since then \cite{canas07,canas07f}. 
+
+A major revision was undergone in 2006. The design of schemas to be truly modular, they were programmed as dynamic libraries (plugins) which import and export symbols to other schemas. The XForms library for GUIs was replaced by GTK and OpenGL. In addition we started to use a common software repository and created a web page for the project. 
+
+A second major revision was undergone in late 2010, leaving out the cognitive aspects and focusing in Jderobot simply as a software architecture for robot applications. The major design principles followed in this revision have been described in section \ref{sec:jderobot}. The current release, jderobot-5.0, is mainly based on this revision.
+
+\subsection{Current release}
+%current release and snapshot
+Currently it has a total of 123.531 lines of source code, most of them in C and C++ language.
 
 \begin{verbatim}
 SLOC    Directory       SLOC-by-Language 
@@ -510,7 +525,7 @@ SLOC    Directory       SLOC-by-Language
 3       scripts         sh=3
 \end{verbatim}
 
-Totals grouped by language (current version of jderobot)
+Totals grouped by language
 \begin{verbatim}
 cpp:          69992 (56.66%)
 ansic:        27745 (22.46%)
@@ -520,12 +535,17 @@ sh:             430 (0.35%)
 python:          57 (0.05%)
 \end{verbatim}
 
+\subsection{Study of the Jderobot community}
+% jderobot community, who is using Jderobot
+The Jderobot community includes members of the Robotics Group at Universidad Rey Juan Carlos, the Universidad de Málaga, Universidad Carlos III and Politécnico Colombiano Jaime Isaza Cadavid. The last two have already developed new driver components for their specific robots: a worm type robot and an all-terrain wheeled one, respectively.
+% It is not very large
 
-\begin{figure}
-  \includegraphics[width=7cm]{figs/svn_activity.png}
-\caption{Activity of commits in the project}
-\label{fig:svn-activity}
-\end{figure}
+One user profile is a regular student of robotics courses at URJC. They don't have too much time to learn all the issues and power behind Jderobot, they just want to use it as soon as possible focusing on their robotic practices. To hide most of the complexity of robot programming and let the alumni to focus on the key aspects of robot control (not in GUI neither in communication middleware, etc) the Introrob component was developed. They just have to embbed their control algorithm in it. In a four month course (2 hours/week) they are able to use Jderobot and program a robot behavior with a Finite State Machine, a local navigation algorithm and a reactive visual control technique. 
+
+%\texttt{apt-get install jderobot}
+In addition, some years ago only the Jderobot source code was delivered to students and its installation was painful for them, with different library dependences, etc. The installation of the Jderobot teaching environment was greatly simplified when we developed debian software packages for Gazebo and Jderobot.
+
+A second user profile is a student from the URJC that use Jderobot for their Final Degree Project, Master or PhD thesis. They usually become developers and extend the framework in some area. This way, the developer team has frequently changed along years. Until 2006 these students typically took a snapshot of Jderobot software at the beginning of their project, extended it and maybe debugged for its own purposes. This was really a bad practice as improvements to the framework were not easily shared among students. Since 2006, with the Jderobot modular design and a single repository this was solved, forcing the students to always run their code with the latest Jderobot release, and debug only the official release if needed.
 
 \begin{figure}
   \includegraphics[width=7cm]{figs/svn_top-committers.png}
@@ -533,30 +553,31 @@ python:          57 (0.05%)
 \label{fig:svn-topcommiters}
 \end{figure}
 
-%who is using Jderobot
-The users community includes the Robotics Group at Universidad Rey Juan Carlos, where it has been used in research and teaching. It also includes Universidad de Málaga, Universidad Carlos III and Politécnico Colombiano Jaime Cadavid.
+Some long term students have contributed continuously for several years, as can be seen at Figure \ref{fig:svn-topcommiters}. They have formed a stable developer core group of 4 or 5 people, all of them in a volunteer basis. In the last years, instead of having a reduced team of developers, we have opened the write access on Jderobot repository to relatively new users. Due to the large software size and the high rotation in the small developer team this has been very beneficial. The maintenance of the framework has already started to be more distributed.
 
-%lessons learnt
-High rotation in developers. Typically one student. Took a snapshot of Jderobot and developed its own extensions for her Final Degree Project. ---> Single repository. 2006. Web server, mediawiki for documentation.
+\begin{figure}
+  \includegraphics[width=7cm]{figs/svn_activity.png}
+\caption{Activity of commits in the project}
+\label{fig:svn-activity}
+\end{figure}
 
-The opening of the development.
+Figure \ref{fig:svn-activity} shows the activity of software improvement as number of commits in the official repository. The high activity peaks are related with the release of a new Jderobot revision and its debugging period.
 
 \section{Conclusions}
 
-Jderobot, open source project
-\begin{itemize}
-\item Más de 60000 líneas de código
-\item Comunidad de usuarios y desarrolladores
-%\item Aumentar la calidad del software
-\item ¿Dónde conseguirla? ¿Cómo preguntar dudas? 
-\item Página web: {http://jderobot.org}
-\item Listas de correo: jde-users@gsyc.es y jde-developers@gsyc.es
-\item Svn, trac, blog, mediawiki
-\item Paquete debian: \texttt{apt-get install jderobot}
-\end{itemize}
+Modular design is good.
+
+Open-source is adventageous: PCL, Gazebo, Opencv, OpenGL...
+
+The use of svn and opening the development to several students was very beneficial.
+
+True reuse in drivers. Not so (yet) in robot functionality.
+
+Debian packages, easy the use of the platform in teaching, for newbie users that don't have time to fully understand the whole project.
+
 
 \begin{acknowledgements}
-Funding agencies. Alex, Maikel, Fran.
+This work has been supported by the project S2009/DPI-1559, RoboCity2030-II, from the Comunidad de Madrid and by the project 10/02567 from the Spanish Ministry of Science and Innovation. Authors want also to thank the contribution to Jderobot project to Alejandro Hernández, Maikel González and José Santos.
 \end{acknowledgements}
 
 % BibTeX users please use one of
