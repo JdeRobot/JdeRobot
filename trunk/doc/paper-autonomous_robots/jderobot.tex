@@ -70,7 +70,7 @@
 \maketitle
 
 \begin{abstract}
-For a given robot most of its intelligence lies on its software, the way it coordinates its sensing and actuation capabilities. In the last years several frameworks have appeared that simplify and speed up the development of robot applications. They favor the code reuse and take benefits from modern software engineering tecniques. This paper presents the open source robotics framework Jderobot, a distributed and component oriented platform. It uses explicit interfaces among components and ICE as communication middleware. It provides many tools for robot programming like a template for robot control components, visual HFSM creation, etc. Several examples of research and applications done with this framework are also described as experimental validation of it.
+For a given robot most of its intelligence lies on its software, the way it coordinates its sensing and actuation capabilities. In the last years several frameworks have appeared that simplify and speed up the development of robot applications. They favor the code reuse and take benefits from modern software engineering techniques. This paper presents the open source robotics framework Jderobot, a distributed and component oriented platform. It uses explicit interfaces among components and ICE as communication middleware. It provides many tools for robot programming like a template for robot control components, visual HFSM creation, etc. Several examples of research and applications done with this framework are also described as experimental validation of it.
 \keywords{Robot software \and Second keyword \and More}
 % \PACS{PACS code1 \and PACS code2 \and more}
 % \subclass{MSC code1 \and MSC code2 \and more}
@@ -87,7 +87,7 @@ robots. Regarding the language, there are robots programmed in assembler, in C a
 
 The importance of good programming practices has increased in last years. Code reuse to avoid restart from scratch for every new robot. JOSER, ieee chapter, autonomous robots special issue. Software engineering.
 
-Encapsulating robot capabilities in functions is a slippery issue as behaviors usually don't fit into the functional abstraction where the caller invoques the function and stops it flow of execution until receives the function response or output.
+Encapsulating robot capabilities in functions is a slippery issue as behaviors usually don't fit into the functional abstraction where the caller invokes the function and stops it flow of execution until receives the function response or output.
 
 Simulators are useful tools in robotics.
 
@@ -116,28 +116,28 @@ Why open-source in robotics? First, it provides independence of robot manufactur
 This paper is organized as follows. The state of the art in robotic
 frameworks fills section \ref{sec:relatedworks}, where other platforms
 are briefly presented. Section \ref{sec:jderobot} fully explains the
-proposed platform, the ideas behind its design, the set of standarized
+proposed platform, the ideas behind its design, the set of standardized
 interfaces and developed drivers and the tools included to make the
 development of new applications easier. In section \ref{sec:research} some successful examples using Jderobot are presented, both in research and in teaching. Finally conclusion section summarizes the main remarks.
 
 \section{Related works}
 \label{sec:relatedworks}
 
-Robotic frameworks can be grouped in two main paradigms, those tighly
+Robotic frameworks can be grouped in two main paradigms, those tightly
 coupled with a cognitive model in their designs and those designed
 just from a pure engineering criteria. The first ones \textit{force}
 the user to follow a set of rules in order to program certain robotic
 behavior, while the second ones are just a collection of tools that
-can flexibly be put toguether in several ways to acomplish the task.
+can flexibly be put together in several ways to accomplish the task.
 
 %cognitive frameworks
 Cognitive robotic frameworks were popular in the 90s and they were
-strogly influenced by the AI, where planning was one of the main
-keys. Indeed one of the strenghts of such frameworks were their
+strongly influenced by the AI, where planning was one of the main
+keys. Indeed one of the strengths of such frameworks were their
 planning modules built around a sensed reality. A good example of cognitive
 frameworks was Saphira \cite{konolige98} based on a behaviourist
-cognitive model. Some of its low-level functionality was rewriten as a
-C++ library called ARIA \cite{aria} that it's still suplied with the
+cognitive model. Some of its low-level functionality was rewritten as a
+C++ library called ARIA \cite{aria} that it's still supplied with the
 popular robotic platforms from MobileRobots/ActivMedia.
 
 %current frameworks
@@ -145,7 +145,7 @@ Current robotic frameworks focus their designs on the requirements
 that robotics applications need and let the user (the programmer) to
 choose the organization that better fits with her specific
 application. Main requirements driving the designs are: multi-tasking, distributed, easy to
-use and code reusability. Another requirement, we belive it's a main
+use and code reusability. Another requirement, we believe it's a main
 key, it's the open source code, that creates a synergy between the use
 and the developer. Proof of this is the two most popular robotic
 frameworks in the last years: PlayerStage
@@ -153,8 +153,8 @@ frameworks in the last years: PlayerStage
 facto} in most of the last decade and ROS \cite{quigley09} which is
 taking the place currently.
 
-%key achivements
-Key achivements of modern frameworks are the hardware abstraction, hiding the complexity of accesing heterogeneous hardware (sensors and
+%key achievements
+Key achievements of modern frameworks are the hardware abstraction, hiding the complexity of accessing heterogeneous hardware (sensors and
 actuators) under standard interfaces, the distributed capabilities
 that allows to run complex systems spread over a network of computers,
 the multi-platform and multi-language capabilities that enables the
@@ -162,7 +162,7 @@ user to run her software in multiple architectures, and the existence
 of big communities of software that share code and ideas.
 
 %examples
-Main examples of modern frameworks are the aformentioned PlayerStage
+Main examples of modern frameworks are the aforementioned PlayerStage
 and ROS. The first has two main parts, Player, provides a network
 interface to the robot hardware through a collection of standard
 interfaces. This standard interfaces are implemented by drivers, one
@@ -177,7 +177,7 @@ standard interfaces with the addition of a middleware that greatly
 simplifies the network distribution. The core system of ROS comes with
 a collection of tools to help with tasks as project management, system
 debugging and centralized logging. Currently has a growing community
-and its site hosts a great collection of hardaware drivers, algorithms
+and its site hosts a great collection of hardware drivers, algorithms
 and other tools.
 
 Another important example is ORCA \cite{brooks05,brooks07} based on the
@@ -346,6 +346,12 @@ Applications run exactly the same on real robot than on simulator.
 
 Jderobot integrates two servers, named PlayerServer and GazeboServer, which are used to communicate Player and Gazebo simulators (\cite{koening2004}) with other software components in the Jderobot platform. It's possible to retrieve information from several sensor devices, such us: laser, encoders, motors, cameras or sonars. And it also supports one or more cameras with their pantilt units (SonyVid30 model).
 
+\subsubsection{NaoServer}
+
+Nao robots include an internal Framework called ''Naoqi'', which provides an API to command and read the robot's motors and sensors. This API can't be directly deployed by other Jderobot components, since its functions are ad-hoc designed to Nao robots.
+
+We have created an application called NaoServer, that runs inside the Nao robots and provides several standard ICE interfaces which may be used by other Jderobot components. NaoServer receives through ICE interfaces commands from other components and translates these commands to Naoqi.
+
 \subsection{Tools and libraries}
 
 \subsubsection{FuzzyLib}: control borroso
@@ -392,9 +398,9 @@ Basic component for reactive controllers
 
 When we use real robots, one of the greatest difficulties is repeating experiments with the same conditions, whether we want to compare different algorithms or to test several features of the same algorithm. It's almost impossible to reproduce the same environment conditions, since robot hardware behaves diversely, light conditions change if we use cameras, people or objects move or are located in different places, etc.
 
-To avoid all these matters, we have designed a new tool which records the current devices status and reproduces them whenever we want to. There are two components involved in this tool, the first one is the so-called "recorder", it saves in a file the status of all the devices of the robot, such as odometry, laser measures, image cameras, etc; we can configure which devices we want to track when we executes the components and it works with simulators, real Nao robots and real Pioneer robots.
+To avoid all these matters, we have designed a new tool which records the current devices status and reproduces them whenever we want to. There are two components involved in this tool, the first one is the so-called ''recorder'', it saves in a file the status of all the devices of the robot, such as odometry, laser measures, image cameras, etc; we can configure which devices we want to track when we executes the components and it works with simulators, real Nao robots and real Pioneer robots.
 
-The second components is the "replayer" component, it reads the file saved by the "recorder" component and provides the same ICE interfaces that would provide the real devices. Thus, when an algorithm gets the current devices status, it can't tell if it's obtaining the current devices measures in real time or pre-recorded data.
+The second components is the ''replayer'' component, it reads the file saved by the ''recorder'' component and provides the same ICE interfaces that would provide the real devices. Thus, when an algorithm gets the current devices status, it can't tell if it's obtaining the current devices measures in real time or pre-recorded data.
 
 This tools has been widely used to perform experiments with real robots, to try different parameters and improve our algorithms.
 
@@ -402,24 +408,24 @@ This tools has been widely used to perform experiments with real robots, to try 
 
 Android operating system is increasing its market share every day, both with smartphones and tables. Once you develop an application for this platform, it may be used by students, other researchers or even companies. 
 
-We have created an application called "Mobile Teleoperator" to teleoperate either a Pioneer robot with playerserver or a Nao Robot with BICA architecture. Connection among the mobile device and the robots is made through ICE, the same way we do when we use a standard computer, so we don't need to change anything in Jderobot architecture.
+We have created an application called ''Mobile Teleoperator'' to teleoperate either a Pioneer robot with playerserver or a Nao Robot with BICA architecture. Connection among the mobile device and the robots is made through ICE, the same way we do when we use a standard computer, so we don't need to change anything in Jderobot architecture.
 
 There are three ways to teleoperate the robots:
 - Arrows: After pressing a button, it sends the command to the robot and the robot keeps his behavior until the stop button is pressed.
 - Joystick: While a button is pressed, it send the command to the robot, but if the button is released it sends a stop command automatically.
-- Accelerometer: It uses the mobile accelerometers to command the robot depending on our device orientation. To use this behavior you must keep a "safety" button pressed, this button is used to calibrate the accelerometers when it is pressed the first time and to send a stop command automatically once this button is released.
+- Accelerometer: It uses the mobile accelerometers to command the robot depending on our device orientation. To use this behavior you must keep a ''safety'' button pressed, this button is used to calibrate the accelerometers when it is pressed the first time and to send a stop command automatically once this button is released.
 
 Mobile teleoperator has been used to create demonstrations and to let people who are not used to control robot to teleoperate robots in a easy way.
 
 
 \subsubsection{KinectServer, openniServer and kinectViewer}
-Kinect is one of the latest generation device more used in the last months. That is why jderobot icludes some components to support this device and allows to access to all the information that it provides. Through jderobot you can access to color, depth and IR values, and also to the tilt motor device and it leds.
+Kinect is one of the latest generation device more used in the last months. That is why jderobot icludes some components to support this device and allows to access to all the information that it provides. Through Jderobot you can access to color, depth and IR values, and also to the tilt motor device and it leds.
 
 Jderobot has two kinect servers that give us the possibility to access the sensor: kinectServer and openniServer. The main difference between this two components is the way to access to the device. KinectServer use PCL to access the sensor using the opennni\_grabber integrated on this library, whereas openniServer uses OpenNi directly preserving all the functionality of this framework. 
 
-Although the servers access information in a different way both offer information using the same ICE interfaces so both components are completly compatible. 
+Although the servers access information in a different way both offer information using the same ICE interfaces so both components are completely compatible. 
 
-The third component, kinectViewer, is able to connect to one of the servers below and to analyse  the information. This component integrates some of the 3D tools that jderobot provides and can represent the 3D information and reconstruct the scenario in an OpenGL world. 
+The third component, kinectViewer, is able to connect to one of the servers below and to analyze  the information. This component integrates some of the 3D tools that Jderobot provides and can represent the 3D information and reconstruct the scenario in an OpenGL world. 
 
 
 \section{Research and Teaching}
@@ -448,7 +454,7 @@ We have implemented two famous navigation algorithms: VFF, as a obstacle avoidan
 The Virtual Force Field (VFF) method is our earlier real-time obstacle avoidance method for our running robots. This technique allows for fast, continuous, and smooth motion of the controlled vehicle among unexpected obstacles, and does not require the vehicle to stop in front of obstacles.
 
 On the other hand, when a trap-situation is flagged, the robot slows down (and may come to a complete halt),
-while the VFF algorithm is temporarily suspended. The GPP algotirhm is then invoked to plan a new path based on the available information in the gradient field that represents the optimal (lowest-cost) path to the goal at every point in the workspace (see Figure {fig:gppNav}).
+while the VFF algorithm is temporarily suspended. The GPP algotithm is then invoked to plan a new path based on the available information in the gradient field that represents the optimal (lowest-cost) path to the goal at every point in the workspace (see Figure {fig:gppNav}).
 
 \begin{figure}[h!]
   \includegraphics[width=8.5cm]{figs/gppNav.png}
@@ -460,13 +466,15 @@ Both techniques, VFF and GPP, have been implemented under Jderobot and extensive
 
 Follow person \cite{canas05d}.
 
-\subsection{Evolutive localization}
+\subsection{Evolutionary localization}
 
 Self-localization is at the moment one of the most important challenges in robotics. Using robot sensors, such as cameras, laser sensors or ultrasonic sensors, our robot must be able to calculate its own localization inside an environment. Once the robot knows its position, it can adapt its behavior depending on where it is located. 
  
 However, robot self-localization has proven to be one the most complex task on mobile robots, since they must face unknown situations, such as occlusions, or being located inside a dynamic environment.
 
-With Jderobot, we have designed and implemented plenty of localization algorithm, since classical localization algorithms such as Monte Carlo particle filters or Kalman filters, to new and improved algorithms such as evolutionary algorithms or MonoSLAM.
+With Jderobot, we have designed and implemented an evolutionary localization algorithm, a type of meta-heuristic optimization algorithm that is inspired by the biological evolution. In this kind of algorithms, candidate solutions evolve over time using genetic operators, such as mutation or crossover. 
+
+The algorithm keeps several candidate solutions competing among each other in different positions. Thus, the evolutionary algorithm is able to handle several solutions at the same time, which is of great advantage when robots are located in symmetric environments.  
 
 \subsection{MonoSLAM}
 
@@ -575,7 +583,7 @@ Figure \ref{fig:svn-activity} shows the activity of software improvement as numb
 
 Modular design is good.
 
-Open-source is adventageous: PCL, Gazebo, Opencv, OpenGL...
+Open-source is advantageous: PCL, Gazebo, Opencv, OpenGL...
 
 The use of svn and opening the development to several students was very beneficial.
 
