@@ -126,7 +126,11 @@ planning modules built around a sensed reality. A good example of cognitive
 frameworks was Saphira \cite{konolige98} based on a behaviourist
 cognitive model. Some of its low-level functionality was rewritten as a
 C++ library called ARIA \cite{aria} that it's still supplied with the
-popular robotic platforms from MobileRobots/ActivMedia.
+popular robotic platforms from MobileRobots/ActivMedia.Even though
+the underliying cognitive model usually is a good practice guide for
+programming robots, this hardwired coupling often leads the user to
+problems difficult to solve when trying to do something the framework
+isn't desing to do.
 
 %current frameworks
 Current robotic frameworks focus their designs on the requirements
@@ -135,11 +139,7 @@ choose the organization that better fits with her specific
 application. Main requirements driving the designs are: multi-tasking, distributed, easy to
 use and code reusability. Another requirement, we believe it's a main
 key, it's the open source code, that creates a synergy between the use
-and the developer. Proof of this is the two most popular robotic
-frameworks in the last years: PlayerStage
-\cite{Gerkey03,collet05,vaughan2007} which has been the \textit{standard de
-facto} in most of the last decade and ROS \cite{quigley09} which is
-taking the place currently.
+and the developer. 
 
 %key achievements
 Key achievements of modern frameworks are the hardware abstraction, hiding the complexity of accessing heterogeneous hardware (sensors and
@@ -149,30 +149,62 @@ the multi-platform and multi-language capabilities that enables the
 user to run her software in multiple architectures, and the existence
 of big communities of software that share code and ideas.
 
-%examples
-Main examples of modern frameworks are the aforementioned PlayerStage
-and ROS. The first has two main parts, Player, provides a network
-interface to the robot hardware through a collection of standard
-interfaces. This standard interfaces are implemented by drivers, one
+%open source
+As said before, we believe that open source plays a mayor role in the
+developement of modern robotic frameworks. Proof of this is the two most popular robotic
+frameworks in the last years: Player/Stage
+\cite{Gerkey03,collet05,vaughan2007} which has been the \textit{standard de
+facto} in most of the last decade and ROS \cite{quigley09} which is
+taking the place currently. As seen in other mayor software projects
+as GNU/Linux kernel or the Apache web server, to name but a few, the
+creation of communities that interact and share code and ideas, could
+be a great benefict to the robotic community. Main examples of open
+source modern frameworks are the aformentioned PlayerStage and
+ROS. Another important example is ORCA \cite{brooks05,brooks07}. We
+brefly describe them.
+
+\subsection{Player/Stage}
+Player/Stage framework provides the Player robot device server and the
+Stage multiple robot simulator, plus several tools and libraries to support the
+development of robotic applications. Player/Stage has been the most
+popular framework in the last decade and it has a big community that
+has create a great collection of drivers and algorithms around it. It has a platform independent implementation and it has support for the most common programming languages, like C/C++, Python, Java,...
+
+Player provides a network interface to the robot hardware through a collection of standard
+interfaces that provides a hardware abstraction layer. This standard interfaces are implemented by drivers, one
 for each different hardware. This way a user only needs to know the
 standard way to use, let say, a laser ranger and not every different
-brand. The second part is Stage, a 2D simulator that allows the user
-to try in a simulated world before trying on a real platform. In
-addition to this, PlayeStage framework provides a variety of
-algorithms that are used with the same concept through standard
-interfaces. Other example is ROS that employs the same concept of
-standard interfaces with the addition of a middleware that greatly
-simplifies the network distribution. The core system of ROS comes with
-a collection of tools to help with tasks as project management, system
-debugging and centralized logging. Currently has a growing community
-and its site hosts a great collection of hardware drivers, algorithms
-and other tools.
+brand. Player exports its devices through a standard TCP network
+connection  (other transport layers are available as well)
+enabling the user to build distributed systems across a network of
+computers. Even though, Player wasn't desinged as component based software, its architecture employs many component based
+ideas. In addition to hardware drivers, Player has a collection of algorithms
+like local navigation algorithms, vision related algorithms or
+localization algorithms. 
 
-Another important example is ORCA \cite{brooks05,brooks07} based on the
-same concepts mentioned, but with the idea of expending less effort
-building the underlying middleware elements . This way they chose to
-use Ice from ZeroC \cite{henning04}, a powerful object oriented middleware
-that allows them to focus in the robotic problems.
+Stage is a 2.5D multiple robot simulator that can provide its
+simulated devices through a Player server. There's a big variety of
+devices Stage can simulate, like laser ragers, robotic platforms and
+cameras, to name a few.
+
+The typical organization of a robotic application written in Player/Stage is one or more client programms subscribed to a Player server set to serve the robot hardware. Clients send and receive the data using the known interfaces. So, we can say Player/Stage has a centralized architecture, where Player server plays the main role. To run code on the server side, a user can write a driver that implements an interface, but this task it's usually a bit harder that the client side programms and some advanced knoledge of Player/Stage is required.
+
+\subsection{ROS}
+ROS is another important example of robotic frameworks. It was founded by Willow Garage as an open source initiative. Currently has a growing community
+and its site hosts a great collection of hardware drivers, algorithms
+and other tools. It is a multi platform and multi language framework.
+
+Tha main idea behind ROS is a extremly easy to use hibrid (message passing and RPCs) middleware that allows to connect several components, implementing the robotic behavior, in a distributed fashion over a network of computers. Message passing of typed messages allows components to share information in a deoupled way, where you don't know which component send you a message, and viceversa, you don't know which component or components will receive your message. RPC mechanisms are available as well. Resources can be reached through a well defined naming policy.
+
+The ROS core libraries implement the communication mechanisms and a set of tools to help with tasks as project management (cmake based), system
+debugging and centralized logging. A set of official libraries implement standard messages (sensors, geometry, action,...), well known robotic algorithms for navigation or sensor analisys, and powerful tools as the rviz 3d visualization environment for robots. A simulation enviroment is provided through the Gazebo 3D simulator, that started as a part of the Player/Stage project, but now is supported by Willow Garage.
+
+A typical application written in ROS is a collection of components interacting with each other (no server/client model) distributed among a network of computational nodes. Often a user can just use some of the components found in the ROS repositories, tweak some parameters and make them interact with his own coded components.
+
+\subsection{ORCA}
+Another important example is ORCA, a component based framework released several years before ROS. ORCA is multi platform and multi language as well. The aim of its developers was to increase the software reuse amonth the robotic community, so they create a component repository for robotics applications and they provide some of the needed \textit{glue} to connect them. In a previous version, they code the middleware that enabled components to communicate. Later they realized that programming a middleware was out of the range of their interests, besides being a complex and time consuming task, so they replaced it with the professional grade middleware Ice from ZeroC \cite{henning04} that allowed them to focus in the robotic problems. ORCA has play a mayor source of inspiration for the Jderobot framework and some of its core components are closely related to this framework.
+
+As a component based framework, a typical application written in ORCA has an architecture similar to the one described for ROS.
 
 %%CARMEN \cite{montemerlo03}
 %%ROS, ORCA, Miro, RoboComp, Aria, 
@@ -180,45 +212,38 @@ that allows them to focus in the robotic problems.
 
 \section{Jderobot platform}
 \label{sec:jderobot}
+%intro
+The Jderobot platform is the result of the knoledge adquired through
+the development of several projects. The root comes from the doctoral
+thesis \cite{canas02} where the underlying cognitive architecture JDE (acronym in Spanish for Dynamic
+Schema Hierarchy) is
+described. An initial implementation called \textit{jdec} was provided
+where the main idea of organizing the
+software in an intelligent way was developed. Through the years many
+applications have been developed, not only in 
+the robotics field, but in domotic and computer vision fields.
 
-Some history. Keep away the cognitive ideas, focus on software
-architecture. Nace como implementación de arquitectura cognitiva,
-tesis doctoral jdec \cite{canas02}. Evolucionó a una plataforma de programación para
-aplicaciones robóticas, domóticas y de visión computacional (sensores,
-actuadores, inteligencia).
+%main characteristics
+The Jderobot platform is a component based framework that uses the powerful object oriented middleware Ice from ZeroC as \textit{glue} between its parts. This important design decission allows Jderobot to run in multiple platforms and to be programmed with the most common programming languages (all the languages supported by Ice indeed). Jderobot components can also be distributed over a network of computational nodes and by extension use all the mechanisms provided by Ice as secure communications, redundancy mechanisms or naming services. The platform is supported by a community of developers and its code is open source, released under a GPLv3 licence. A user community is available at \textit{http://jderobot.org}, where users can find documentation, downloads and examples.
 
-
+%brief description of the underlaying cognitive architecture
+The Jderobot platform was developed under the influence of the JDE cognitive architecture. In early releases, the user was \textit{forced} to follow the main lines of JDE. Currently the underlaying conceptual architecture is just a good practices guide and the user can choose to follow them or not. Briefly, the main lines of the JDE cognitive architecture are as follows:
 
 \begin{itemize}
-\item Orientada a componentes distribuidos y multilenguaje
-\item La mantiene un grupo de desarrolladores, es abierta
-\item {http://jderobot.org}, manuales, descarga, ejemplos
-\end{itemize}
-Software libre (licencia GPLv3), paquete debian
-
-
-Arquitectura cognitiva JDE:
+\item Behavior = {perception} and {control}
+\item Divide and conquer: behavior is fragmented is smaller parts called \textit{schemas}
 \begin{itemize}
-\item Comportamiento = {percepción} y {control}
-\item Fragmentación en unidades asíncronas concurrentes (esquemas)
-\begin{itemize}
-\item[-] de percepción elaboran estímulos
-\item[-] de actuación toman decisiones
+\item[-] Perceptive schemas elaborate estimuli
+\item[-] Motor schemas generate control
 \end{itemize}
-\item La colección de esquemas se organiza en \textit{jerarquía} dinámica (JDE)
-\item Sigue el paradigma basado en comportamientos
+\item A collection of schemas is organized as a dynamic hierarchy
+\item Behaviorist aproach
 \end{itemize}
 
-Arquitectura cognitiva: Esquemas.
-Un {esquema} es un flujo de ejecución independiente, con un objetivo
-\begin{itemize}
-\item Funcionamiento continuo
-\item Se puede activar y desactivar a voluntad
-\item Modulable a través de parámetros
-\item Su funcionalidad se usa despertándolo y modulándolo
-\item {Perceptivos}: producen estímulos (piezas de información) y los mantienen actualizados. Lecturas sensoriales, transformaciones más elaboradas 
-\item {Actuación}: toman decisiones para conseguir o mantener un objetivo, comandos a los actuadores o la activación y modulación de otros 
-\end{itemize}
+The main unit is the schema. A schema is a continous and independent execution flow with some target. It activation state can be activated and deactivated at will, and its parameters can be modulated.
+
+%component = schema
+The definition of schema has big similarities with the definition of component (from a software enginiering point of view), and this is the main link between the Jderobot framework and the underlaying cognitive architecture. A behavior is fragmented in smaller parts (schemas) and then implemented as components.
 
 
 
