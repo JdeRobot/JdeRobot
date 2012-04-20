@@ -524,6 +524,65 @@ Each 3D visible object already stored in memory is projected on the current imag
 
 \subsection{Surveillance}
 
+Surveillance is a final application created using jderobot
+framework. The goal of this application is built a surveillance
+distributed system that can be controlled using an smartphone
+device. Thanks to jderobot framework it is possible simplify the design
+and development of this kind of complex applications.
+
+The system consists in some webcams and pc scattered around the house
+to watch over and detect any intruders or warning situations. Also, the
+system can be controlled using an intelligent mobile (smartphone). As
+you can see in the figure~\ref{fig:surveillance1} each important
+feature of the system is implemented as a jderobot components. For each
+webcam in the system it is mandatory have an instance of \emph{Recorder} and
+\emph{CameraServer} components. The \emph{Recorder} component is
+responsible for recording the video streaming in the hard disk. The
+\emph{RecordingManager} component makes the configuration to
+{Recorders} component and decides when and how a recording is
+made. The \emph{CameraServer} component is a core component of
+jderobot framework an is responsible for provide the video streaming as
+RTSP format or image format to analyze movement in the scene. The \emph{Motion
+  Detector} component make a movement detection analysis of the
+scene. If a movement is detected by \emph{Motion Detector} component, it
+sends a message to \emph{Surveillance} component that has all the logic of
+the security system. The \emph{Surveillance} component is the responsible to
+enable the \emph{Recording Manager} component and send messages to
+start a recording when a movement is detected in the scene. Last, the
+\emph{SecurityApp} component executes in an Android device and
+exchanges information with \emph{RecordingManager} and
+\emph{CameraServer} to show recordings, alarms or video streaming live.
+
+\begin{figure*}
+\includegraphics[width=6cm]{figs/surveillance-img1.png}
+\caption{Global schema using jderobot components}
+\label{fig:surveillance1}
+\end{figure*}
+
+The mobile application is very simple thanks to the abstraction of the
+jderobot components because you do not spend time in communication
+protocolos and other complex task. You only have to worry about the
+functionality of the surveillance application. For example, you can
+see in the figure~\ref{fig:surveillance2} the list of alarms that the
+\emph{Recording Manager} component have stored. Also, it is possible
+see the recordings associated with the alarms. The \emph{CameraServer}
+component provides a video streaming live of the system webcams. You
+can see in the figure~\ref{fig:surveillance3} how it is possible show
+two video streamings live of the same room.
+
+\begin{figure*}
+\includegraphics[width=6cm]{figs/surveillance-android.png}
+\caption{Alarms list in the smartphone}
+\label{fig:surveillance2}
+\end{figure*}
+
+\begin{figure*}
+\includegraphics[width=6cm]{figs/surveillance-streaming2-recording.png}
+\caption{Two video streaming of a room}
+\label{fig:surveillance3}
+\end{figure*}
+
+
 \subsection{ElderCare}
 
 \section{Jderobot as open-source project}
