@@ -44,13 +44,13 @@ namespace visionLibrary {
 		  virtual ~image ();
 
 			/*Get segments from the image src. Return corners*/
-			static std::vector<HPoint2D> * getSegments(IplImage * src, std::vector<Segment2D> * segments, double threshold_fast = 50.0, double threshold_sobel = 100.0);
+			static std::vector<HPoint2D> * getSegments(cv::Mat &src, std::vector<Segment2D> * segments, double threshold_fast = 50.0, double threshold_sobel = 100.0);
 
 			/*Multiply fast fourier transform*/
-			static int multiplyFFT (const CvArr* srcAarr, const CvArr* srcBarr, CvArr* dstarr);
+			//static int multiplyFFT (const CvArr* srcAarr, const CvArr* srcBarr, CvArr* dstarr);
 
 			/*Debug function*/
-			static void getSegmentsDebug(IplImage * src);
+			static void getSegmentsDebug(cv::Mat &src);
 		
 		private:
 
@@ -73,7 +73,7 @@ namespace visionLibrary {
 			/*Check if a corner is unique*/
 			static bool is_unique_corner(int x, int y, int score);
 
-			static IplImage * current_src;
+			static cv::Mat *current_src;
 			static double sobel_threshold;
 			static bool * calThreshold;
 			static bool * thresholds;

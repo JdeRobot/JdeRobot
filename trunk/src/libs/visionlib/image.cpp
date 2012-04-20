@@ -32,7 +32,7 @@ namespace visionLibrary {
 	const double image::MIN_PERCENTAGE_VALID = 0.95;
 	const double image::MIN_DISTANCE_UNIQUE_CORNERS = 15.0;
 
-	IplImage * image::current_src = NULL;
+	cv::Mat *image::current_src = NULL;
 	double image::sobel_threshold = 0.0;
 	bool * image::calThreshold = new bool[IMAGE_WIDTH*IMAGE_HEIGHT];
 	bool * image::thresholds = new bool[IMAGE_WIDTH*IMAGE_HEIGHT];
@@ -44,14 +44,14 @@ namespace visionLibrary {
 
 	image::~image () {}
 
-	std::vector<HPoint2D> * image::getSegments(IplImage * src, std::vector<Segment2D> * segments, double threshold_fast, double threshold_sobel) {
+	std::vector<HPoint2D> * image::getSegments(cv::Mat &src, std::vector<Segment2D> * segments, double threshold_fast, double threshold_sobel) {
 		CvPoint * corners;
 		Segment2D segment;
 		HPoint2D new_corner;
 		int * scores;
 		int numCorners;
 
-		image::current_src = src;
+		image::current_src = &src;
 		image::sobel_threshold = threshold_sobel;
 
 		/*Reset parameters*/
@@ -107,7 +107,7 @@ namespace visionLibrary {
 		return image::unique_corners;
 	}
 
-	int image::multiplyFFT (const CvArr* srcAarr, const CvArr* srcBarr, CvArr* dstarr) {
+/*	int image::multiplyFFT (const CvArr* srcAarr, const CvArr* srcBarr, CvArr* dstarr) {
 		CvMat *srcA = (CvMat*)srcAarr;
 		CvMat *srcB = (CvMat*)srcBarr;
 		CvMat *dst = (CvMat*)dstarr;
@@ -129,7 +129,7 @@ namespace visionLibrary {
 		}
 
 		return 1;
-	}
+	}*/
 
 	bool image::isLineFast(int x1, int y1, int x2, int y2) {
 		HPoint2D v;
@@ -294,12 +294,12 @@ namespace visionLibrary {
 		Gx = 	-2	0	+2		Gy = 	0		0		0
 					-1	0	+1					-1	-2	-1*/
 
-		gx = 	-(unsigned int)image::current_src->imageData[posc1-1] + (unsigned int)image::current_src->imageData[posc1+1] +
-					-2*(unsigned int)image::current_src->imageData[posc2-1] + 2*(unsigned int)image::current_src->imageData[posc2+1] +
-					-(unsigned int)image::current_src->imageData[posc3-1] + (int)image::current_src->imageData[posc3+1];
+		gx = 	-(unsigned int)image::current_src->data[posc1-1] + (unsigned int)image::current_src->data[posc1+1] +
+					-2*(unsigned int)image::current_src->data[posc2-1] + 2*(unsigned int)image::current_src->data[posc2+1] +
+					-(unsigned int)image::current_src->data[posc3-1] + (int)image::current_src->data[posc3+1];
 
-		gy = 	1*(unsigned int)image::current_src->imageData[posc1-1] + 2*(unsigned int)image::current_src->imageData[posc1] + 1*(unsigned int)image::current_src->imageData[posc1+1] +
-					-1*(unsigned int)image::current_src->imageData[posc3-1] + -2*(unsigned int)image::current_src->imageData[posc3] + -1*(unsigned int)image::current_src->imageData[posc3+1];
+		gy = 	1*(unsigned int)image::current_src->data[posc1-1] + 2*(unsigned int)image::current_src->data[posc1] + 1*(unsigned int)image::current_src->data[posc1+1] +
+					-1*(unsigned int)image::current_src->data[posc3-1] + -2*(unsigned int)image::current_src->data[posc3] + -1*(unsigned int)image::current_src->data[posc3+1];
 
 		sum = abs(gx) + abs(gy);
 		
@@ -314,7 +314,7 @@ namespace visionLibrary {
 			
 	}
 
-	void image::getSegmentsDebug(IplImage * src) {
+	void image::getSegmentsDebug(cv::Mat &src) {
 
 		for(int ti=0;ti<IMAGE_WIDTH;ti++)
 			for(int tj=0;tj<IMAGE_HEIGHT;tj++)
@@ -324,9 +324,9 @@ namespace visionLibrary {
 			for(int tj=0;tj<IMAGE_HEIGHT;tj++) {
 				int pos = tj*IMAGE_WIDTH + ti;
 				if(image::thresholds[pos])
-					src->imageData[pos] = 255;
+					src.data[pos] = 255;
 				else
-					src->imageData[pos] = 0;
+					src.data[pos] = 0;
 			}
 	}
 

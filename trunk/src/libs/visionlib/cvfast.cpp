@@ -1,5 +1,4 @@
-/*#include <opencv/cvaux.h>
-#include <opencv/cxtypes.h>*/
+#include <opencv/cvaux.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -140,7 +139,7 @@ CvPoint* icvFastNonmaxSuppression(const CvPoint* corners, const int* scores, int
 
 
 CVAPI(void)
-cvCornerFast( const CvArr* input_image, int threshold, int N, int nonmax_suppression, int* ret_number_of_corners, CvPoint** ret_corners, int ** scores)
+cvCornerFast(cv::Mat &src, int threshold, int N, int nonmax_suppression, int* ret_number_of_corners, CvPoint** ret_corners, int ** scores)
 {
 	CV_FUNCNAME( "cvCornerFast" );
 
@@ -151,12 +150,12 @@ cvCornerFast( const CvArr* input_image, int threshold, int N, int nonmax_suppres
 	int num_corners=0, num_nonmax=0;
 	*scores=0;
 
-	CvMat stub, *src;
+	CvMat stub;
 
     __CV_BEGIN__;
 
-	if(!input_image)
-        CV_ERROR( CV_StsNullPtr, "" );
+	//if(!input_image)
+  //      CV_ERROR( CV_StsNullPtr, "" );
 
 	if(!ret_number_of_corners)
         CV_ERROR( CV_StsNullPtr, "" );
@@ -167,16 +166,16 @@ cvCornerFast( const CvArr* input_image, int threshold, int N, int nonmax_suppres
 	
 	/* Make sure the input is unsigned char */
 	/* In principle, FAST can work on any type, but trees are only included for unsigned char */
-    src = (CvMat*)input_image;
-    CV_CALL( src = cvGetMat( input_image, &stub, NULL, 0 ));
+//    src = (CvMat*)input_image;
+//    CV_CALL( src = cvGetMat( input_image, &stub, NULL, 0 ));
 
-    if( CV_MAT_TYPE(src->type) != CV_8UC1 )
-        CV_ERROR( CV_StsUnsupportedFormat, "Input must be 8uC1." );
+//    if( CV_MAT_TYPE(src->type) != CV_8UC1 )
+//        CV_ERROR( CV_StsUnsupportedFormat, "Input must be 8uC1." );
 
-	rows = src->rows;
-	cols = src->cols;
-	stride = src->step;
-	data = src->data.ptr;
+	rows = src.rows;
+	cols = src.cols;
+	stride = src.step;
+	data = src.data;
 	
 	/*Detect corners*/
 	corners = icvFast9Detect(data, cols, rows, stride, threshold, &num_corners);
