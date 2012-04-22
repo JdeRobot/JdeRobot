@@ -289,29 +289,23 @@ In addition to Ice, Jderobot uses other open source libraries like OpenCV, Gearb
 
 \subsection{Interfaces and drivers}
 
+Beyond previous design principles, the Jderobot framework includes several components that manage different sensors and actuators and provide the applications with standard interfaces for accessing to those devices. Using ICE the access can be local or remote from a different computer. There is no one-to-one relationship between components and interfaces. One driver component may offer several interfaces at the same time, and the same interface may be implemented by several drivers.
 
-Acceso a los dispositivos hardware
-\begin{itemize}
-\item Se da a través de {componentes drivers}
-\item Acceden localmente al sensor/actuador y ofrecen acceso (local o remoto) a otros a través de interfaces ICE
-\item No suelen tener GUI
-\item El mismo interfaz de datos lo puede proporcionar varios \textit{drivers}
-\begin{itemize}
-\item Mismo programa funciona sobre robot real o simulador
-\item Independencia de la fuente de imágenes
-\end{itemize}
-\end{itemize}
+% interfaces
+There are interfaces for laser devices (laser), for Pioneer base control (motors), for RGB-Depth sensors like kinect, pantilt units (pose3Dmotors, pose3Dencoders), for image sources (camera interface), for home automation devices (x10), etc.. These interfaces together draw a Hardware Abstraction Layer to be used from the application code. 
 
+Some interfaces are offered for different robots, favoring the applications portability. For instance, the \texttt{motor} interface includes translation velocity (V), rotation velocity (W) and side velocity (L). It is supported by the driver used with the Pioneer wheeled robot and by the driver used with the legged Nao robot.
 
-Standard interfaces. 
+The same interfaces are also provided by drivers connected to the real devices and drivers connected to simulators like Gazebo, allowing the applications to run exactly the same on real robot than on simulator. 
+
+% driver component
 PlayerServer, GazeboServer for Gazebo Simulator , NaoServer, KinectServer, OpenNIServer, giraffeServer, PTU, Hokuyo, Wiimote, CameraServer.
-
-Same interfaces for different robots.
-Applications run exactly the same on real robot than on simulator. 
 
 \subsubsection{CameraServer}
 
-\subsubsection{PlayerServer and GazeboServer}
+\subsubsection{PlayerServer}
+
+\subsubsection{GazeboServer}
 \label{subsec:gazeboserver}
 
 Jderobot integrates two servers, named PlayerServer and GazeboServer, which are used to communicate Player and Gazebo simulators (\cite{koening2004}) with other software components in the Jderobot platform. It's possible to retrieve information from several sensor devices, such us: laser, encoders, motors, cameras or sonars. And it also supports one or more cameras with their pantilt units (SonyVid30 model).
@@ -323,6 +317,7 @@ Nao robots include an internal Framework called ''Naoqi'', which provides an API
 We have created an application called NaoServer, that runs inside the Nao robots and provides several standard ICE interfaces which may be used by other Jderobot components. NaoServer receives through ICE interfaces commands from other components and translates these commands to Naoqi.
 
 \subsubsection{KinectServer and openniServer}
+
 Kinect is one of the latest generation device more used in the last months. That is why jderobot icludes some components to support this device and allows to access to all the information that it provides. Through Jderobot you can access to color, depth and IR values, and also to the tilt motor device and it leds.
 
 Jderobot has two kinect servers that give us the possibility to access the sensor: kinectServer and openniServer. The main difference between this two components is the way to access to the device. KinectServer use PCL to access the sensor using the opennni\_grabber integrated on this library, whereas openniServer uses OpenNi directly preserving all the functionality of this framework. 
@@ -335,12 +330,15 @@ Home automation.
 
 + wiimote.
 
+\subsubsection{GiraffeServer}
 
 \subsection{Tools and libraries}
 
 \subsubsection{FuzzyLib}
 
-To design and program fuzzy controllers. The control rules are written in a file. The fuzzy labels are also described in such file, and attached in the software to input and output variables. The controller automatically fuzzyfies the input variables, rules applied and defuzzified following the Center of Mass combination.
+Fuzzylib is a library to design and program fuzzy controllers. The control rules are written in a file with simple rules like: IF ( left\_obstacle\_distance = small ) AND ( translation\_speed = high ) THEN ( rotation\_speed = right\_high ). 
+%AND and OR fuzzy operators are supported in rules. 
+The fuzzy labels and variables are also described in such file following a trapezoidal pattern and they are attached in the software to input and output variables of the control program. The controller automatically fuzzyfies the input variables, apply the rules and defuzzifies the output following a Center of Mass combination.
 
 \subsubsection{VisionLib}
 \label{subsec:visionlib}
@@ -374,13 +372,40 @@ And some of the functions which can be found are: \textit{project} (to project a
 \subsubsection{Colorspaces}: espacios de color para imágenes
 
 \subsubsection{Control template}
-Basic component for reactive controllers
 
-
+A basic component is included as a template for reactive controllers. It has two different threads, one for computation and a second one for visualization. Both threads run in continuous iterations at a given configurable rate, not more to avoid excesive CPU consumption. In case of heavy computations or overload of the CPU the system degrades gracefully running at the highest rate possible. This basic component has also been used for perceptive, localization and image processing algorithms.
 
 \subsubsection{VisualHFSM}
+
+There are many ways to organize the control and perception code on board a mobile robot. One succesful way are the Finite State Machines. With them the robot behavior is defined by a set of states, each of which performs a particular task. The robot can switch from one state to another through transitions (conditions of stay or change), depending on certain events or conditions, internal or external. A tool has been developed and included in Jderobot to graphically design hierarchies of FSM, insert the specific code of states and transitions, and automatically generate the component source code in C++.
+
+\begin{figure}[h!]
+  \includegraphics[width=8.5cm]{figs/ratonGatoAutoEjec.jpg}
+\caption{Tool for visual HFSM design}
+\label{fig:visualHFSM}
+\end{figure}
+
 \subsubsection{Calibrator}
+
+The calibrator tool is used to calibrate external (position and orientation) and internal parameters (focal distance, optical center...) of any camera. It allows a manual calibration where the user provides a 3D description of the camera surroundings, the calibrator draws what the image should be with a certain parameter set over the really observed image. The user then modify parameters until finds a correct matching (Figure \ref{fig:calibrator}). It also includes a fully automatic calibration based on DLT and a 3D pattern. It generates a file with the camera calibration parameter values and it is fully integrated with progeo library.
+
+\begin{figure}[h!]
+  \includegraphics[width=8.5cm]{figs/calibratorGUI.png}
+\caption{Calibrator in manual mode}
+\label{fig:calibrator}
+\end{figure}
+
 \subsubsection{ColorTuner}
+
+The colorTuner tool is used to adjust color filter in different colorspaces, like HSV, YUV, RGB, etc. For instance, the HS color disc is shown (Figure \ref{fig:colortuner}) and the color filter current thresholds are also displayed as a sector. It can be easily modified there, using sliders or clicking in sample pixels in current image.
+
+\begin{figure}[h!]
+  \includegraphics[width=8.5cm]{figs/colorTunerHSV.png}
+\caption{ColorTuner tool for adjusting HSV color filters}
+\label{fig:colortuner}
+\end{figure}
+
+
 \subsubsection{Recorder and replayer}
 
 When we use real robots, one of the greatest difficulties is repeating experiments with the same conditions, whether we want to compare different algorithms or to test several features of the same algorithm. It's almost impossible to reproduce the same environment conditions, since robot hardware behaves diversely, light conditions change if we use cameras, people or objects move or are located in different places, etc.
@@ -424,7 +449,7 @@ Such an approach eliminates the need to know a lot about gears, motors, using se
 
 \begin{figure}[h!]
   \includegraphics[width=8.5cm]{figs/introrob.jpg}
-\caption{Introrob component interface.}
+\caption{Introrob component Graphical interface.}
 \label{fig:introrob}
 \end{figure}
 
@@ -552,7 +577,7 @@ Jderobot project has a web page (jderobot.org) where the framework source code c
 
 \subsection{Some history}
 
-The Jderobot project started at 2003 in a PhD thesis, as the software implementation of a cognitive architecture to develop autonomous behaviors in robots \cite{canas02,canas05e}. It provided access to robot camera, encoders, sonar sensors and motors using sockets between some drivers and the (maybe remote) control application. The application was divided in \textit{schemas} that were implemented as concurrent threads in C language and organized as hierarchy. Its development was opened to a group of students. Several alternatives and expansions have been programmed since then \cite{canas07,canas07f}. 
+The Jderobot project started at 2002 in a PhD thesis, as the software implementation of a cognitive architecture to develop autonomous behaviors in robots \cite{canas02,canas05e}. It provided access to robot camera, encoders, sonar sensors and motors using sockets between some drivers and the (maybe remote) control application. The application was divided in \textit{schemas} that were implemented as concurrent threads in C language and organized as hierarchy. Its development was opened to a group of students. Several alternatives and expansions have been programmed since then \cite{canas07,canas07f}. 
 
 A major revision was undergone in 2006. The design of schemas to be truly modular, they were programmed as dynamic libraries (plugins) which import and export symbols to other schemas. The XForms library for GUIs was replaced by GTK and OpenGL. In addition we started to use a common software repository and created a web page for the project. 
 
@@ -615,27 +640,28 @@ Figure \ref{fig:svn-activity} shows the activity of software improvement as numb
 \section{Conclusions}
 
 %what have we presented in this paper
-We have presented the Jderobot open-source framework for developing robotic applications and research. This is a long term effort with ten years of experience. It provides several drivers for accessing different sensors, robots and actuators like kinect, Nao humanoid, Pioneer robot, cameras, pantilt units, etc.. It also includes a powerful set of tools and libraries that speed up the creation of new robotic applications, like one for visual programming of hierarchical FSM, one for camera calibration, record of log files with sensor data and replay them, etc. Several successful applications developed using the framework have been also presented as experimental validation of its usefulness.
+We have presented the Jderobot open-source framework for developing robotic applications and research. This is a long term effort with ten years of experience. It provides several drivers for accessing different sensors, robots and actuators like kinect, Nao humanoid, Pioneer robot, cameras, pantilt units, etc.. It also includes a powerful set of tools and libraries that speed up the creation of new robotic applications, like one for visual programming of hierarchical FSM, one for camera calibration, record of log files with sensor data and replay them, viewers and teleoperators, etc. Several successful applications and research developed using the framework have been also presented as experimental validation of its usefulness.
 
 %balance of design principles
-The framework's main software architecture principle is the modular design of applications in concurrent components that interact among them through explicit standard interfaces. Each component is a software process, maybe with several threads, with a target. This modular design has proben to be easier to maintain and expand than previous monolithic releases of the framework. Only components relevant for a given application needs to be installed and new functionality may appear as new components.
+The framework's main software architecture principle is the modular design of applications in concurrent components that interact among them through explicit standard interfaces. Each component is a software process, maybe with several threads, with a target. This modular design has proben to be easier to maintain and expand than previous monolithic and centralized releases of the framework. Only components relevant for a given application needs to be installed and new functionality may appear as new components.
 
-The standard interfaces have proben very advantageous for research. For instance, the same localization algorithm can be tested seemlessly with the real cameras, simulated ones, images from a video or from a log file as these image sources strictly follow the same interface. The portability between different robot platforms are also favored by standard interfaces. For example, experiments with the visual memory research component have been performed both in a wheeled Pioneer robot and a humanoid Nao robot without changing the source code, just providing the different robot geometry through a configuration file, taking benefit of the same interfaces offered in both robot platforms (camera, pose3Dencoders, pose3Dmotors and encoders).
+The standard interfaces have proben very advantageous for research. For instance, the same localization algorithm can be tested seemlessly with the real cameras, simulated ones, images from a video or from a log file as these image sources strictly follow the same interface. The portability between different robot platforms are also favored by standard interfaces. For example, experiments with the visual memory research component have been performed both in a wheeled Pioneer robot and a humanoid Nao robot without changing the source code, just providing the different robot geometry through configuration files, taking benefit of the same interfaces offered in both robot platforms.
+% (camera, pose3Dencoders, pose3Dmotors and encoders)
 
-The use of communication middleware like ICE provides Jderobot with multiplatform and multilanguage support, as components can be writen in C, C++, Java, Python, etc.. It also provides with distribution as the components can run in the same machine or different ones, even with different operating systems. For instance, a teleoperator has been presented with a component running in a smartphone interacting with the NaoServer in the Linux computer onboard the humanoid robot. Another advantage of using ICE is that we haven't taken much care of communications, focusing on robotics aspects of the components.
+The use of communication middleware like ICE provides Jderobot with multiplatform and multilanguage support, as components can be writen in C, C++, Java, Python, etc.. It also provides with distribution as the components can run in the same machine or different ones, even with different operating systems. For instance, a teleoperator has been presented with a component running in a smartphone interacting with the NaoServer in the Linux computer onboard the humanoid robot. Another advantage of using ICE is that we haven't taken much care of communications, focusing our efforts on robotics aspects of the components.
 
 Iterative execution of components is recommended in Jderobot and it has proben good for reactive controllers, Bayesian estimators, localization algorithms or image processing applications. In addition, the programming of component GUI in a separate thread and its optional nature are also suggested, and they have shown to be advantageous as fully decouple the processing from the visualization, which can be switched on and off at run time at will without disturbing the robotic processing.
 
-The intensive use of open-source tools and libraries has proben to be a good decision. They have allowed us to reach good functionality and results with a reduced set of developers, because we lie as much as possible on existing open-source community software like PCL, Gazebo, Opencv, OpenGL, etc. Software sharing speeds up and widen the project development. This belief has also motivated us to open the source code of Jderobot.
+The intensive use of open-source tools and libraries has shown to be a good decision. They have allowed us to reach interesting functionality and results with a reduced set of developers, because we lie as much as possible on existing open-source community software like PCL, Gazebo, Opencv, OpenGL, GSL, etc. Software sharing speeds up and widen the project development. This belief has also motivated us to open the source code of Jderobot.
 
-Two Jderobot's tools, the recorder and replayer components, are very useful in research. They allow, for instance the fair comparison of different localization algorithms with exactly the same input data, those stored in the log file. A MonteCarlo localization algorithm has been so compared to our evolutive localization algorithm. In the same way, using our CameraServer from filed images our MonoSLAM algorithm can be tested with the same video images as the original Davison's MonoSLAM algorithm.
+Two Jderobot's tools, the recorder and replayer components, are very useful in research. They allow, for instance, the fair comparison of different localization algorithms with exactly the same input data, those stored in the log file. A MonteCarlo localization algorithm has been so compared to our evolutive localization algorithm. In the same way, using our CameraServer from filed images our MonoSLAM algorithm have been tested with the same video images as the original Davison's MonoSLAM algorithm.
 
 % more lessons 
-We think Jderobot already has reached a good level of software reuse, but mainly for hardware abstraction level. The same driver components and basic interfaces to access sensors and robots are used in different applications. This software reuse has not scaled yet to more complex robot functionality, maybe because the behavior abstraction is more slippery than traditional function invokation. We are working on this, focusing on reusable localization and local navigation components. The Jderobot tools have been also reused in different scenarios. For instance the same calibration tool has been used to calibrate the cameras in ElderCare application, for the Nao humanoid camera or for the simulated cameras in Gazebo in the robotics course.
+We think Jderobot already has reached a good level of software reuse, but mainly for hardware abstraction layer. The same driver components and basic interfaces to access sensors and robots are used in different applications. This software reuse has not scaled yet to more complex robot functionality, maybe because the behavior abstraction is more slippery than traditional function invokation. We are working on this, focusing on reusable localization and local navigation components. The Jderobot tools have also been reused in different scenarios. For instance, the same calibration tool has been used to calibrate the cameras in ElderCare application, for the Nao humanoid camera or for the simulated cameras in Gazebo in the robotics course.
 
-The developer team under Jderobot is small and with high rotation. One lesson learnt is that opening Jderobot development to several students, even new ones, is beneficial. Typical contribution is that of a new student becoming responsible for a single component, its development or updating. The modular design of Jderobot makes it possible. Another good decision has been to recommend students that their applications should work always with the latest Jderobot release at the repository. This way bugs are solved in the official repository for everyone, and so everybody take benefit of their solution.
+The developer team under Jderobot is small and with high rotation. One lesson learnt is that opening Jderobot development to several students, even new ones, is beneficial. Typical contribution is that of a new student becoming responsible of a single component, its development or updating. The modular design of Jderobot makes it possible. Another good decision has been to recommend our students that their applications should work always with the latest Jderobot release at the repository. This way bugs are solved in the official repository for everyone, everybody take benefit of their solution and there are no several co-existing branches at the same time.
 
-The creation of debian packages made easier the use of the platform in teaching, for newbie users that don't have time to fully understand the whole project in two weeks.
+The creation of debian packages made easier the use of the platform in teaching, for newbie users that don't have time to fully learn the whole platforms in two weeks. In addition the specific IntroRob component hides some of the platform complexity, and so the students take shorter time to start using jderobot. The platform is just an instrument to learn robotics, not the goal.
 
 %why not using ROS?
 The use of communication middleware like ICE has allowed the programming of Jderobot components in smartphones easily interacting with other components in laptop or personal computers. This flexibility is a key difference between Jderobot and ROS. 
