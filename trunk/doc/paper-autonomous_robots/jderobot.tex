@@ -291,49 +291,50 @@ In addition to Ice, Jderobot uses other open source libraries like OpenCV, Gearb
 Other two minor requirements were present in the design process. First, Graphical user interfaces are especially useful for debugging purpouses or for human interaction. Previous releases of Jderobot needed ad-hoc approches because of the multi-threaded design, some wrappers where needed to make the share access to the screen easier. Nowadays, Jderobot doesn't make any special assumption on this subject, each component is a separate process, the user must choose the approach that better fits in each context. Some guidelines and examples are provided though, though design patters as MVC or implementations using popular graphic frameworks as GTK+. A Jderobot component usually will run a service thread with the graphical user interface computations. Second, schemas ara parametrized and its implementation counterpart requires any means to get this parameters. A simple approach is to use configuration files. Ice has native support for parsing simple text files with a format closely related to Java property files. Using this files components can get their specific parameters or the location of resources (files, other components,...). Ice provides a parameter server that could be used as a central configuration repository.
 
 \subsection{Interfaces and drivers}
+\label{sec:drivers}
 
 Beyond previous design principles, the Jderobot framework includes several components that manage different sensors and actuators and provide the applications with standard interfaces for accessing to those devices. Using ICE the access can be local or remote from a different computer. There is no one-to-one relationship between components and interfaces. One driver component may offer several interfaces at the same time, and the same interface may be implemented by several drivers.
 
 % interfaces
-There are interfaces for laser devices (laser), for Pioneer base control (motors), for RGB-Depth sensors like kinect, pantilt units (pose3Dmotors, pose3Dencoders), for image sources (camera interface), for home automation devices (x10), etc.. These interfaces together draw a Hardware Abstraction Layer to be used from the application code. 
+There are interfaces for laser devices (\texttt{laser}), for Pioneer base control (\texttt{motors}), for RGB-Depth sensors like kinect, pantilt units (\texttt{pose3Dmotors}, \texttt{pose3Dencoders}), for image sources (\texttt{camera}), for home automation devices (\texttt{x10}), etc.. These interfaces together draw a Hardware Abstraction Layer to be used from the application code. 
 
 Some interfaces are offered for different robots, favoring the applications portability. For instance, the \texttt{motor} interface includes translation velocity (V), rotation velocity (W) and side velocity (L). It is supported by the driver used with the Pioneer wheeled robot and by the driver used with the legged Nao robot.
 
 The same interfaces are also provided by drivers connected to the real devices and drivers connected to simulators like Gazebo, allowing the applications to run exactly the same on real robot than on simulator. 
 
 % driver component
-PlayerServer, GazeboServer for Gazebo Simulator , NaoServer, KinectServer, OpenNIServer, giraffeServer, PTU, Hokuyo, Wiimote, CameraServer.
+%PlayerServer, GazeboServer for Gazebo Simulator , NaoServer, KinectServer, OpenNIServer, giraffeServer, PTU, Hokuyo, Wiimote, CameraServer.
 
 \subsubsection{CameraServer}
 
 
 \subsubsection{PlayerServer}
 
+Jderobot uses Player to access the Pioneer robot sensors and actuators (laser, odometry, motors, etc.). A \texttt{PlayerServer} component wraps the Player software and provides respective ICE standard interfaces. It works both for the real robot or the robot inside the Stage simulator.
+
 \subsubsection{GazeboServer}
 \label{subsec:gazeboserver}
 
-Jderobot integrates two servers, named PlayerServer and GazeboServer, which are used to communicate Player and Gazebo simulators (\cite{koening2004}) with other software components in the Jderobot platform. It's possible to retrieve information from several sensor devices, such us: laser, encoders, motors, cameras or sonars. And it also supports one or more cameras with their pantilt units (SonyVid30 model).
+Gazebo is the preferred simulator in Jderobot framework. It is a 3D open source simulator (http://gazebosim.org) which offers a rich environment to quickly test multirobot systems and which simulates several robots and cameras in a realistic way. It was born inside the Player/Stage/Gazebo project and recently WillowGarage centralized its development as an auxiliar tool for ROS. Jderobot includes \texttt{GazeboServer} to communicate applications with devices and robots in Gazebo simulator (\cite{koening2004}). Wrapping the original \texttt{libgazebo} library it's possible to retrieve information from several sensor devices like: laser, encoders, motors, cameras or sonars. It also supports one or more cameras with their corresponding pantilt units (SonyVid30 model).
+
+\begin{figure}[h!]
+  \includegraphics[width=4cm]{figs/nao_piel.png}
+  \includegraphics[width=4cm]{figs/nao_sinPiel.png}
+\caption{Developed Nao support for Gazebo.}
+\label{fig:naogazebo}
+\end{figure}
+
+The work in \texttt{GazeboServer} has been extended to simulate the Nao humanoid robot inside Gazebo (Figure \ref{fig:naogazebo} and offer access to its devices through standard ICE interfaces like \texttt{camera}, \texttt{pose3Dmotors} for its neck, \texttt{motors} for its general movement, etc.
 
 \subsubsection{NaoServer}
 
-Nao robots include an internal Framework called ''Naoqi'', which provides an API to command and read the robot's motors and sensors. This API can't be directly deployed by other Jderobot components, since its functions are ad-hoc designed to Nao robots.
-
-We have created an application called NaoServer, that runs inside the Nao robots and provides several standard ICE interfaces which may be used by other Jderobot components. NaoServer receives through ICE interfaces commands from other components and translates these commands to Naoqi.
+Nao robots include the manufacturer framework called Naoqi, which provides an API to command and read the robot's motors and sensors. This API can't be directly deployed by other Jderobot components, since its functions are ad-hoc designed to Nao robots. We have created a component named \texttt{NaoServer}, that runs inside the Nao robots and provides several standard ICE interfaces which may be used by other Jderobot components. NaoServer receives through ICE interfaces commands from other components and translates these commands to Naoqi.
 
 \subsubsection{KinectServer and openniServer}
 
-Kinect is one of the latest generation device more used in the last months. That is why jderobot icludes two drivers to support this device and allows to access to all the information that it provides. Through Jderobot you can access to color, depth and IR values, and also to the tilt motor device and it leds.
+Kinect is one latest generation devices since it appeared in late 2010. It measures distance to obstacles in 3D using infrared technology. Jderobot includes two drivers, \texttt{kinectServer} and \texttt{openniServer}, to allow access to all the information it provides. Through them applications can access to color, depth and IR values, and also to the tilt motor device and it leds. They provide RGB and depth images as conventional \texttt{camera} interfaces, so these sensors can be used with any Jderobot application following such standard interface.
 
-These two kinect servers are standardized to provide RGB and depth images as conventional cameras, so these sensors can be used with any jderobot application that uses the standard interface for cameras.
-To work with the cloud of points obtained from the kinect  depth sensor jderobot  is supported by Point Cloud Library (PCL). This framework includes a large number of features for point cloud processing such as filters, model fitting and segmentation. 
-
-Both servers use the OpenNi driver developed by PrimeSense. OpenNi is a framework aimed to develop applications that use natural interaction by offering access to low-level devices and also Middleware functions for visual tracking using computer vision. 
-
-KinectServer accesses to the device through the openni\_grabber that PCL includes. This grabber is a very simplified version of the PrimeSense framework and only supports the RGB camera and depth sensor.
-
-To access the device, openniServer uses directly the OpenNi framework. This driver supports all the kinect components (tilt motor, leds, RGB/IR camera and depth sensor). In this way it keep all the functionality of the middleware that offers subjects detection and tracking, user position, hands tracking...
-
-Although the servers access information in a different way, both offer information using the same ICE interfaces so both components are completely compatible. 
+Both servers use the OpenNi driver developed by PrimeSense. OpenNi is a framework aimed to develop applications that use natural interaction by offering access to low-level devices and also middleware functions for visual tracking using computer vision. \texttt{KinectServer} accesses to the device through the openni\_grabber that PCL includes. This grabber is a very simplified version of the PrimeSense framework and only supports the RGB camera and depth sensor. The \texttt{openniServer} directly uses the OpenNi framework. This driver supports all the kinect components (tilt motor, leds, RGB/IR camera and depth sensor). In this way it keeps all the functionality of the middleware that offers people detection and tracking, user position, hands tracking... Although the servers access information in a different way, both offer information using the same ICE interfaces so both components are completely compatible. 
 
 \subsubsection{X10Server}
 
@@ -341,9 +342,12 @@ Home automation.
 
 + wiimote.
 
-\subsubsection{GiraffeServer}
+\subsubsection{Pantilt units}
+
+Two driver components have been developed to provide support for different Pantilt units, one for Directed Perception (PTU-46-17.5) and another for a hand-made one. They provide two interfaces \texttt{pose3Dmotors} to command position movement orders and \texttt{pose3Dencoders} to read the unit pan and tilt position from its internal encoders.
 
 \subsection{Tools and libraries}
+\label{sec:tools}
 
 \subsubsection{FuzzyLib}
 
@@ -421,31 +425,28 @@ The colorTuner tool is used to adjust color filter in different colorspaces, lik
 
 When we use real robots, one of the greatest difficulties is repeating experiments with the same conditions, whether we want to compare different algorithms or to test several features of the same algorithm. It's almost impossible to reproduce the same environment conditions, since robot hardware behaves diversely, light conditions change if we use cameras, people or objects move or are located in different places, etc.
 
-To avoid all these matters, we have designed a new tool which records the current devices status and reproduces them whenever we want to. There are two components involved in this tool, the first one is the so-called ''recorder'', it saves in a file the status of all the devices of the robot, such as odometry, laser measures, image cameras, etc; we can configure which devices we want to track when we executes the components and it works with simulators, real Nao robots and real Pioneer robots.
+To avoid all these matters, we have designed two tools which record the current sensor readings and reproduce them whenever we want to. The first one is the so-called \texttt{recorder}, it saves in a file the status of all the devices of the robot, such as odometry readings, laser measures, images from cameras, etc. It is generic, when we execute this tool we can configure which devices we want to track, at which frequency we want to sample the sensor data, etc. It works with simulators, real Nao robots and real Pioneer robots. The log file includes timestamps and follows a give syntax that is expansible to new sensor types.
 
-The second components is the ''replayer'' component, it reads the file saved by the ''recorder'' component and provides the same ICE interfaces that would provide the real devices. Thus, when an algorithm gets the current devices status, it can't tell if it's obtaining the current devices measures in real time or pre-recorded data.
-
-This tools has been widely used to perform experiments with real robots, to try different parameters and improve our algorithms.
-
-Genérico, configurable qué sensores se graban y/o reproducen.
+The second components is \texttt{replayer}, it reads the file saved by the \texttt{recorder} component and provides the same ICE interfaces that would provide the drivers with real devices. Thus, when an algorithm gets the current devices status, it can't tell if it's obtaining the current devices measures in real time or pre-recorded data. These two tools have been widely used to perform experiments with real robots, to try different parameters and improve our algorithms.
 
 \subsubsection{Android mobileTeleoperator}
 
 Android operating system is increasing its market share every day, both with smartphones and tables. Once you develop an application for this platform, it may be used by students, other researchers or even companies. 
 
-We have created an application called ''Mobile Teleoperator'' to teleoperate either a Pioneer robot with playerserver or a Nao Robot with BICA architecture. Connection among the mobile device and the robots is made through ICE, the same way we do when we use a standard computer, so we don't need to change anything in Jderobot architecture.
+We have created an application called \texttt{MobileTeleoperator} to teleoperate either a Pioneer robot through \texttt{playerserver} or a Nao Robot through the \texttt{NaoServer}. Connection among the mobile device and the robots is made through ICE, the same way we do when we use a standard computer, so we don't need to change anything in Jderobot architecture.
 
 There are three ways to teleoperate the robots:
 - Arrows: After pressing a button, it sends the command to the robot and the robot keeps his behavior until the stop button is pressed.
 - Joystick: While a button is pressed, it send the command to the robot, but if the button is released it sends a stop command automatically.
 - Accelerometer: It uses the mobile accelerometers to command the robot depending on our device orientation. To use this behavior you must keep a ''safety'' button pressed, this button is used to calibrate the accelerometers when it is pressed the first time and to send a stop command automatically once this button is released.
 
-Mobile teleoperator has been used to create demonstrations and to let people who are not used to control robot to teleoperate robots in a easy way.
+\texttt{MobileTeleoperator} has been used to create demonstrations and to let people who are not used to control robot to teleoperate robots in a easy way.
 
 \subsubsection{KinectViewer}
 
-KinectViewer is able to connect to one of the kinects servers described  in the drivers section. Basically is a graphical interface witch represents the kinect information in two different ways: it can display directly the images (RGB and DEPTH) that it gets on streaming from the server or it can reconstruct an scene from the point cloud in an OpenGL world. This component also includes some of the 3D tools that jderobot provides to improve the data analysis. 
+\texttt{KinectViewer} component is able to connect to one of the kinects servers described in section \ref{sec:drivers}. Basically is a graphical interface witch represents the kinect information in two different ways: it can display directly the images (RGB and DEPTH) that it gets on streaming from the server or it can reconstruct a 3D scene from the point cloud in an OpenGL world. This component also includes some of the 3D tools that jderobot provides to improve the data analysis. 
 
+To work with the cloud of points obtained from the kinect depth sensor Jderobot uses Point Cloud Library (PCL). This library includes a large number of features for point cloud processing such as filters, model fitting and segmentation. 
 
 \section{Research, teaching and applications}
 \label{sec:applications}
