@@ -318,11 +318,18 @@ We have created an application called NaoServer, that runs inside the Nao robots
 
 \subsubsection{KinectServer and openniServer}
 
-Kinect is one of the latest generation device more used in the last months. That is why jderobot icludes some components to support this device and allows to access to all the information that it provides. Through Jderobot you can access to color, depth and IR values, and also to the tilt motor device and it leds.
+Kinect is one of the latest generation device more used in the last months. That is why jderobot icludes two drivers to support this device and allows to access to all the information that it provides. Through Jderobot you can access to color, depth and IR values, and also to the tilt motor device and it leds.
 
-Jderobot has two kinect servers that give us the possibility to access the sensor: kinectServer and openniServer. The main difference between this two components is the way to access to the device. KinectServer use PCL to access the sensor using the opennni\_grabber integrated on this library, whereas openniServer uses OpenNi directly preserving all the functionality of this framework. 
+These two kinect servers are standardized to provide RGB and depth images as conventional cameras, so these sensors can be used with any jderobot application that uses the standard interface for cameras.
+To work with the cloud of points obtained from the kinect  depth sensor jderobot  is supported by Point Cloud Library (PCL). This framework includes a large number of features for point cloud processing such as filters, model fitting and segmentation. 
 
-Although the servers access information in a different way both offer information using the same ICE interfaces so both components are completely compatible. 
+Both servers use the OpenNi driver developed by PrimeSense. OpenNi is a framework aimed to develop applications that use natural interaction by offering access to low-level devices and also Middleware functions for visual tracking using computer vision. 
+
+KinectServer accesses to the device through the openni\_grabber that PCL includes. This grabber is a very simplified version of the PrimeSense framework and only supports the RGB camera and depth sensor.
+
+To access the device, openniServer uses directly the OpenNi framework. This driver supports all the kinect components (tilt motor, leds, RGB/IR camera and depth sensor). In this way it keep all the functionality of the middleware that offers subjects detection and tracking, user position, hands tracking...
+
+Although the servers access information in a different way, both offer information using the same ICE interfaces so both components are completely compatible. 
 
 \subsubsection{X10Server}
 
@@ -433,7 +440,7 @@ Mobile teleoperator has been used to create demonstrations and to let people who
 
 \subsubsection{KinectViewer}
 
-The third component, kinectViewer, is able to connect to one of the servers below and to analyze  the information. This component integrates some of the 3D tools that Jderobot provides and can represent the 3D information and reconstruct the scenario in an OpenGL world. 
+KinectViewer is able to connect to one of the kinects servers described  in the drivers section. Basically is a graphical interface witch represents the kinect information in two different ways: it can display directly the images (RGB and DEPTH) that it gets on streaming from the server or it can reconstruct an scene from the point cloud in an OpenGL world. This component also includes some of the 3D tools that jderobot provides to improve the data analysis. 
 
 
 \section{Research, teaching and applications}
@@ -570,6 +577,13 @@ two video streamings live of the same room.
 
 
 \subsection{ElderCare}
+Eldercare is a telecare-oriented application for elderly people living alone. The system is able to detect falls autonomously using only conventional cameras. Once a fall is detected the system automatically sends an alert to indicated medical personnel so that significantly reduces the waiting time in assistance occur.
+
+The system does not require any action by the patient, do not need to wear any device over or any type of special  garment. It is a fully autonomous and non-intrusive system.
+
+Eldercare can handle all alarms on a mobile phone. When a fall is detected, Eldercare can notify us the situation on a mobile phone and even allows us to watch the scene in real time through streaming images.
+
+A new advance in the latest versions of eldercare is that the system has been complemented using Kinects devices, these devices are able to work as conventional cameras but have the main advantage of the on-board depth sensor. These devices work perfectly even without light, so the subject would be monitored in virtually any situation. 
 
 \section{Jderobot as open-source project}
 
