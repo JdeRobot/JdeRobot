@@ -286,7 +286,7 @@ Ice provides several communication mechanisms, from syncronous and asyncronous s
 Jderobot components communicate through interfaces. They define the minimum communication unit between components. Jderobot components implements these interfaces to provide functionality and use them to use the functionality from other components. Interfaces are defined with \textit{slice}, the interface definition language used by Ice, that describe their data structures and operations. This slice definitions are then used to generate code for the desired programming languages.
 
 %open source & software reuse
-In addition to Ice, Jderobot uses other open source libraries like OpenCV, Gearbox, OpenGL, Player/Stage or GSL, to name but a few, for the same reasons exposed above: we want to focus our efforts to design and program robotic related software. In return, we release all our code as open source and we encourage our community to follow these ideas.
+In addition to Ice, Jderobot uses other open source libraries like OpenCV, GStreamer, OpenGL, Player/Stage or GSL, to name but a few, for the same reasons exposed above: we want to focus our efforts to design and program robotic related software. In return, we release all our code as open source and we encourage our community to follow these ideas.
 
 %gui & config files
 Other two minor requirements were present in the design process. First, Graphical user interfaces are especially useful for debugging purpouses or for human interaction. Previous releases of Jderobot needed ad-hoc approches because of the multi-threaded design, some wrappers where needed to make the share access to the screen easier. Nowadays, Jderobot doesn't make any special assumption on this subject, each component is a separate process, the user must choose the approach that better fits in each context. Some guidelines and examples are provided though, though design patters as MVC or implementations using popular graphic frameworks as GTK+. A Jderobot component usually will run a service thread with the graphical user interface computations. Second, schemas ara parametrized and its implementation counterpart requires any means to get this parameters. A simple approach is to use configuration files. Ice has native support for parsing simple text files with a format closely related to Java property files. Using this files components can get their specific parameters or the location of resources (files, other components,...). Ice provides a parameter server that could be used as a central configuration repository.
@@ -307,7 +307,7 @@ The same interfaces are also provided by drivers connected to the real devices a
 %PlayerServer, GazeboServer for Gazebo Simulator , NaoServer, KinectServer, OpenNIServer, giraffeServer, PTU, Hokuyo, Wiimote, CameraServer.
 
 \subsubsection{CameraServer}
-
+CameraServer is a component included with Jderobot that can serve images from several sources. The underlaying access to images is performed through GStreamer pipelines, and so CameraServer support all the devices supported by GStreamer, e.g  usb cameras, video files, video streaming or static images. In addition to that, CameraServer offers its resources through RPCs and subscription services.
 
 \subsubsection{PlayerServer}
 
@@ -385,7 +385,9 @@ Some of the data types provided by this library are: \textit{HPoint2D} (to store
 
 And some of the functions which can be found are: \textit{project} (to project a 3D point on to the 2D image planer) and \textit{backproject} (to obtain the projection line that connects the camera with the focus and the 3D ray which is projected in a pixel of the image plane).
 
-\subsubsection{Colorspaces}: espacios de color para imágenes
+\subsubsection{Colorspaces}
+\label{subsec:colorspaces}
+Colorspaces is a library that provides several routines to handle color space transformations. It has a C implementation for several trasforms that was implemented before OpenCV became mainstream. After adopting OpenCV as the main library to handle images, a C++ implementation was developed. It has a wrapper class for \textit{cv::Image} that can handle color spaces transformations in a transparent way for the user. It is one of the main utility libraries used by Jderobot project.
 
 \subsubsection{Control template}
 
