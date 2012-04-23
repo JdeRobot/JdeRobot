@@ -136,7 +136,7 @@ popular robotic platforms from MobileRobots/ActivMedia. Even though
 the underliying cognitive model usually is a good practice guide for
 programming robots, this hardwired coupling often leads the user to
 problems difficult to solve when trying to do something the framework
-isn't desing to do.
+isn't designed to do.
 
 %current frameworks
 Current robotic frameworks focus their designs on the requirements
@@ -150,7 +150,7 @@ and the developer.
 %key achievements
 Key achievements of modern frameworks are the hardware abstraction, hiding the complexity of accessing heterogeneous hardware (sensors and
 actuators) under standard interfaces, the distributed capabilities
-that allows to run complex systems spread over a network of computers,
+that allow to run complex systems spread over a network of computers,
 the multi-platform and multi-language capabilities that enables the
 user to run her software in multiple architectures, and the existence
 of big communities of software that share code and ideas.
@@ -180,7 +180,7 @@ Player/Stage framework provides the Player robot device server and the
 Stage multiple robot simulator, plus several tools and libraries to support the
 development of robotic applications. Player/Stage has been the most
 popular framework in the last decade and it has a big community that
-has create a great collection of drivers and algorithms around it. It has a platform independent implementation and it has support for the most common programming languages, like C/C++, Python, Java,...
+has created a great collection of drivers and algorithms around it. It has a platform independent implementation and it has support for the most common programming languages, like C/C++, Python, Java,...
 
 Player provides a network interface to the robot hardware through a collection of standard
 interfaces that provides a hardware abstraction layer. This standard interfaces are implemented by drivers, one
@@ -189,7 +189,7 @@ standard way to use, let say, a laser ranger and not every different
 brand. Player exports its devices through a standard TCP network
 connection  (other transport layers are available as well)
 enabling the user to build distributed systems across a network of
-computers. Even though, Player wasn't desinged as component based software, its architecture employs many component based
+computers. Even though, Player wasn't designed as component based software, its architecture employs many component based
 ideas. In addition to hardware drivers, Player has a collection of algorithms
 like local navigation algorithms, vision related algorithms or
 localization algorithms. 
@@ -206,7 +206,7 @@ ROS is another important example of robotic frameworks. It was founded by Willow
 and its site hosts a great collection of hardware drivers, algorithms
 and other tools. It is a multi platform and multi language framework.
 
-Tha main idea behind ROS is a extremly easy to use hibrid (message passing and RPCs) middleware that allows to connect several components, implementing the robotic behavior, in a distributed fashion over a network of computers. Message passing of typed messages allows components to share information in a deoupled way, where you don't know which component send you a message, and viceversa, you don't know which component or components will receive your message. RPC mechanisms are available as well. Resources can be reached through a well defined naming policy.
+Tha main idea behind ROS is a extremely easy to use hybrid (message passing and RPCs) middleware that allows to connect several components, implementing the robotic behavior, in a distributed fashion over a network of computers. Message passing of typed messages allows components to share information in a decoupled way, where you don't know which component send you a message, and viceversa, you don't know which component or components will receive your message. RPC mechanisms are available as well. Resources can be reached through a well defined naming policy.
 
 The ROS core libraries implement the communication mechanisms and a set of tools to help with tasks as project management (cmake based), system
 debugging and centralized logging. A set of official libraries implement standard messages (sensors, geometry, action,...), well known robotic algorithms for navigation or sensor analisys, and powerful tools as the rviz 3d visualization environment for robots. A simulation enviroment is provided through the Gazebo 3D simulator, that started as a part of the Player/Stage project, but now is supported by Willow Garage.
@@ -214,7 +214,7 @@ debugging and centralized logging. A set of official libraries implement standar
 A typical application written in ROS is a collection of components interacting with each other (no server/client model) distributed among a network of computational nodes. Often a user can just use some of the components found in the ROS repositories, tweak some parameters and make them interact with his own coded components.
 
 \subsection{ORCA}
-Another important example is ORCA, a component based framework released several years before ROS. ORCA is multi platform and multi language as well. The aim of its developers was to increase the software reuse among the robotic community, so they create a component repository for robotics applications and they provide some of the needed \textit{glue} to connect them. In a previous version, they code the middleware that enabled components to communicate. Later they realized that programming a middleware was out of the range of their interests, besides being a complex and time consuming task, so they replaced it with the professional grade middleware Ice from ZeroC \cite{henning04} that allowed them to focus in the robotic problems. ORCA has play a mayor source of inspiration for the Jderobot framework and some of its core components are closely related to this framework.
+Another important example is ORCA, a component based framework released several years before ROS. ORCA is multi platform and multi language as well. The aim of its developers was to increase the software reuse among the robotic community, so they create a component repository for robotics applications and they provide some of the needed \textit{glue} to connect them. In a previous version, they coded the middleware that enabled components to communicate. Later they realized that programming a middleware was out of the range of their interests, besides being a complex and time consuming task, so they replaced it with the professional grade middleware Ice from ZeroC \cite{henning04} that allowed them to focus in the robotic problems. ORCA has play a mayor source of inspiration for the Jderobot framework and some of its core components are closely related to this framework.
 
 As a component based framework, a typical application written in ORCA has an architecture similar to the one described for ROS.
 
@@ -255,7 +255,8 @@ The main unit is the schema. A schema is a continous and independent execution f
 %component = schema
 The definition of schema has big similarities with the definition of component (from a software enginiering point of view), and this is the main link between the Jderobot framework and the underlaying cognitive architecture. A behavior is fragmented in smaller parts (schemas) and then implemented as components.
 
-\subsection{Software architecture design}
+\subsection{Software architecture design and principles}
+
 The first official release of Jderobot was 4.3. The core functionality was a collection of shared variables that represented the state of the sensors and actuators attached. A collection of schemas, implemented as a collection of threads, read and wrote these shared variables in order to achieve their goals. There wasn't a explicit API to write or read values from these variables, but just an agreement between writters and readers about the meaning of such variables. Some basic distributed mechanisms where implemented, bat mainly as ad-hoc solutions.
 
 This design worked well for small projects, but as soon as we start implementing more complex systems some important drawbacks arose, like access sincronization, divergencies in the semantics of shared variables among schemas, or the poor distribution solution. All this feedback was very valuable and we chose to completely redesign the Jderobot framework, applying all the lessons learnt.
@@ -388,7 +389,7 @@ And some of the functions which can be found are: \textit{project} (to project a
 
 \subsubsection{Control template}
 
-A basic component is included as a template for reactive controllers. It has two different threads, one for computation and a second one for visualization. Both threads run in continuous iterations at a given configurable rate, not more to avoid excesive CPU consumption. In case of heavy computations or overload of the CPU the system degrades gracefully running at the highest rate possible. This basic component has also been used for perceptive, localization and image processing algorithms.
+A \texttt{BasicComponent} is included as a template for reactive controllers. It has two different threads, one for computation and a second one for visualization. Both threads run in continuous iterations at a given configurable rate, not more to avoid excesive CPU consumption. In case of heavy computations or overload of the CPU the system degrades gracefully running at the highest rate possible. This basic component has also been used for perceptive, localization and image processing algorithms.
 
 \subsubsection{VisualHFSM}
 
@@ -425,13 +426,13 @@ The colorTuner tool is used to adjust color filter in different colorspaces, lik
 
 When we use real robots, one of the greatest difficulties is repeating experiments with the same conditions, whether we want to compare different algorithms or to test several features of the same algorithm. It's almost impossible to reproduce the same environment conditions, since robot hardware behaves diversely, light conditions change if we use cameras, people or objects move or are located in different places, etc.
 
-To avoid all these matters, we have designed two tools which record the current sensor readings and reproduce them whenever we want to. The first one is the so-called \texttt{recorder}, it saves in a file the status of all the devices of the robot, such as odometry readings, laser measures, images from cameras, etc. It is generic, when we execute this tool we can configure which devices we want to track, at which frequency we want to sample the sensor data, etc. It works with simulators, real Nao robots and real Pioneer robots. The log file includes timestamps and follows a give syntax that is expansible to new sensor types.
+To avoid all these matters, we have designed two tools which record the current sensor readings and reproduce them whenever we want to. The first one is the \texttt{recorder} component, it periodically saves in a file the status of all the devices of the robot, such as odometry readings, laser measurements, images from cameras, etc. It is generic, when we execute this tool we can configure which devices we want to track, at which frequency we want to sample the sensor data, etc. It works with simulators, real Nao robots and real Pioneer robots. The log file includes timestamps and follows a given syntax that is expansible to new sensor types.
 
-The second components is \texttt{replayer}, it reads the file saved by the \texttt{recorder} component and provides the same ICE interfaces that would provide the drivers with real devices. Thus, when an algorithm gets the current devices status, it can't tell if it's obtaining the current devices measures in real time or pre-recorded data. These two tools have been widely used to perform experiments with real robots, to try different parameters and improve our algorithms.
+The second component is \texttt{replayer} server, it reads the file saved by the \texttt{recorder} component and provides the same ICE interfaces that would provide the drivers with real devices. Thus, when an algorithm gets the current devices status, it can't tell if it's obtaining the current devices measures in real time or pre-recorded data. These two tools have been widely used to perform experiments with real robots, to try different parameters and improve our algorithms.
 
 \subsubsection{Android mobileTeleoperator}
 
-Android operating system is increasing its market share every day, both with smartphones and tables. Once you develop an application for this platform, it may be used by students, other researchers or even companies. 
+Android operating system is increasing its market share every day, both with smartphones and tablets. Once you develop an application for this platform, it may be used by students, other researchers or even companies. 
 
 We have created an application called \texttt{MobileTeleoperator} to teleoperate either a Pioneer robot through \texttt{playerserver} or a Nao Robot through the \texttt{NaoServer}. Connection among the mobile device and the robots is made through ICE, the same way we do when we use a standard computer, so we don't need to change anything in Jderobot architecture.
 
@@ -455,9 +456,7 @@ Once the main software components and design principles of Jderobot have been pr
 
 \subsection{Teaching robotics with Jderobot}
 
-Special Jderobot component, such as Introrob, has been developed for students, in which a number of pre-programmed instructions are used to let students construct their own applications.
-
-Such an approach eliminates the need to know a lot about gears, motors, using sensors, calibration and allows students to have a working robot within little over an hour. And then, a migration path from this very simple starting level to an environment where more skills are required. The best way is to start with a simple level and have a programming environment, such as Jderobot, that supports working from the very simple to a slightly more advanced level.
+A component named \texttt{Introrob} has been developed for students to simplify the development of robot control applications in their practices inside several robotics courses at Universidad Rey Juan Carlos. It connects to the Gazebo simulator using \texttt{GazeboServer}, where a Pioneer robot is ready inside a given 3D scenario. Having an integrated simulator is very important, so the students may quickly test their experiments without the need for a robot for every one. \texttt{Introrob} wraps the ICE interface access and provides a very simple local API with functions to get the sensor reading and set the motor commands.\texttt{Introrob} also shows a GUI with the images from the stereo pair (Figure \ref{fig:introrob}), the laser measurements and a 3D visualization of the scene around the robot. 
 
 \begin{figure}[h!]
   \includegraphics[width=8.5cm]{figs/introrob.jpg}
@@ -465,7 +464,9 @@ Such an approach eliminates the need to know a lot about gears, motors, using se
 \label{fig:introrob}
 \end{figure}
 
-Having an integrated simulator is very important, so the students may quickly test their experiments without the need for a robot for every student. Such an environment is provided by The Player Project\footnote{http://playerstage.sourceforge.net/index.html} (see Section {subsec:gazeboserver}). This Open Source software is capable of simulating a population of robots, sensors and objects, but does so in a three-dimensional world.
+The processing is organized as in the \texttt{BasicComponent}, with a control thread running iterations periodically (once every 100ms). Students are required to embbed their control software in such iteration code, calling the needed API functions. This way most of the complexity of using Jderobot is hidden and there is no need to know much about gears, motors, using sensors, calibration, etc.. This allows students to have a working robot within little over an hour. 
+
+Some of the practices done with this framework are: visual control of a robot following a red line in the floor using a single camera, 3D reconstruction using a stereo pair, local navigation using Virtual Force Field and a cat robot pursuing a mouse (teleoperated) robot using only vision as main sensor.
 
 \subsection{Robot navigation}
 
@@ -488,6 +489,20 @@ Both techniques, VFF and GPP, have been implemented under Jderobot and extensive
 
 Follow person \cite{canas05d}.
 
+\subsection{Visual memory}
+
+The goal of our visual memory is to do a visual tracking of the various basic objects in the scene surrounding the robot. It must detect new objects, track them updating its relative position to the robot and remove them from the memory once they have disappeared.
+
+The first stage of the system is a 2D analysis, in which 2D segments in the current image are detected using the Solis algorithm \cite{solis09} (see Section \ref{subsec:visionlib}). Then the system puts these objects in 3D space according to the \textit{ground-hypothesis}, assuming they all are flat on the floor, and stores them in memory maybe merging with already existing 3D segments. 
+
+\begin{figure}[h!]
+\includegraphics[width=8.5cm]{figs/experimentoReal.jpg}
+\caption{Visual memory with 3D segments coming from four images of robot surroundings}
+\label{fig:memory}
+\end{figure}
+
+Each 3D visible object already stored in memory is projected on the current image plane (using Progeo, see Section \ref{subsec:progeo}. The system refutes/corroborates such predicted segments, comparing them with those extracted from current image. This comparison leads to three sets of segments. First, in case of matching the features of the stored 3D segment are updated taking into account the new observation. Second, if a segment is identified in the current image but does not match any prediction, the system creates a new one in 3D. Before inclusion in the 3D memory some post-processing is needed to avoid duplicates due to noise in the images, for instance comparing the relative position between segments, as well as its orientation and proximity. And third, for predicted segments not really observed in current image their quality goes down and eventually will be removed from memory.
+
 \subsection{Evolutionary localization}
 
 Self-localization is at the moment one of the most important challenges in robotics. Using robot sensors, such as cameras, laser sensors or ultrasonic sensors, our robot must be able to calculate its own localization inside an environment. Once the robot knows its position, it can adapt its behavior depending on where it is located. 
@@ -498,6 +513,8 @@ With Jderobot, we have designed and implemented an evolutionary localization alg
 
 The algorithm keeps several candidate solutions competing among each other in different positions. Thus, the evolutionary algorithm is able to handle several solutions at the same time, which is of great advantage when robots are located in symmetric environments.  
 
+This research component has been tested both directly using as input images from \texttt{cameraServer} and using as input the visual memory built by the previous \texttt{VisualMemory} component. An specific ICE interface has been defined to this data communication.
+
 \subsection{MonoSLAM}
 
 Monocular Simultaneous Localization And Mapping (MonoSLAM) is a type of localization first presented by Andrew J. Davison in 2003 (ref). MonoSLAM is able to construct a point-based map of the environment with a single camera, and localizates the camera inside this environment in real time.
@@ -505,20 +522,6 @@ Monocular Simultaneous Localization And Mapping (MonoSLAM) is a type of localiza
 We have developed our own MonoSLAM approach, based on Davison work, obtaining images from real cameras and simulators. We have implemented the point-based approach designed by Andrew Davison and afterwards we have designed our own implementations based on points and lines.
 
 This type of localization is more accurate than classical localization methods and is very useful when robot odometry is not available or is not reliable. On the other hand, it is not able to handle occlusions and needs a faster frame rate.
-
-\subsection{Visual memory}
-
-The goal of our visual memory is to do a visual tracking of the various basic objects in the scene surrounding the robot. It must detect new objects, track them updating its relative position to the robot and remove them from the memory once they have disappeared.
-
-The first stage of the system is a 2D analysis, in which 2D segments in the current image are detected using the Solis algorithm \cite{solis09} (see Section \label{subsec:visionlib}). Then the system puts these objects in 3D space according to the \textit{ground-hypothesis}, assuming they all are flat on the floor, and stores them in memory maybe merging with already existing 3D segments. 
-
-\begin{figure}[h!]
-\includegraphics[width=8.5cm]{figs/experimentoReal.jpg}
-\caption{Visual memory with 3D segments coming from four images of robot surroundings}
-\label{fig:memory}
-\end{figure}
-
-Each 3D visible object already stored in memory is projected on the current image plane (using Progeo, see Section \label{subsec:progeo}. The system refutes/corroborates such predicted segments, comparing them with those extracted from current image. This comparison leads to three sets of segments. First, in case of matching the features of the stored 3D segment are updated taking into account the new observation. Second, if a segment is identified in the current image but does not match any prediction, the system creates a new one in 3D. Before inclusion in the 3D memory some post-processing is needed to avoid duplicates due to noise in the images, for instance comparing the relative position between segments, as well as its orientation and proximity. And third, for predicted segments not really observed in current image their quality goes down and eventually will be removed from memory.
 
 \subsection{Surveillance}
 
@@ -533,23 +536,22 @@ to watch over and detect any intruders or warning situations. Also, the
 system can be controlled using an intelligent mobile (smartphone). As
 you can see in the figure~\ref{fig:surveillance1} each important
 feature of the system is implemented as a jderobot components. For each
-webcam in the system it is mandatory have an instance of \emph{Recorder} and
-\emph{CameraServer} components. The \emph{Recorder} component is
+webcam in the system it is mandatory have an instance of \texttt{Recorder} and
+\texttt{CameraServer} components. The \texttt{Recorder} component is
 responsible for recording the video streaming in the hard disk. The
-\emph{RecordingManager} component makes the configuration to
+\texttt{RecordingManager} component makes the configuration to
 {Recorders} component and decides when and how a recording is
-made. The \emph{CameraServer} component is a core component of
-jderobot framework an is responsible for provide the video streaming as
-RTSP format or image format to analyze movement in the scene. The \emph{Motion
+made. The \texttt{CameraServer} component in Jderobot was expanded to provide the video streaming as
+RTSP format or image format to analyze movement in the scene. The \texttt{Motion
   Detector} component make a movement detection analysis of the
-scene. If a movement is detected by \emph{Motion Detector} component, it
-sends a message to \emph{Surveillance} component that has all the logic of
-the security system. The \emph{Surveillance} component is the responsible to
-enable the \emph{Recording Manager} component and send messages to
+scene. If a movement is detected by \texttt{Motion Detector} component, it
+sends a message to \texttt{Surveillance} component that has all the logic of
+the security system. The \texttt{Surveillance} component is the responsible to
+enable the \texttt{Recording Manager} component and send messages to
 start a recording when a movement is detected in the scene. Last, the
-\emph{SecurityApp} component executes in an Android device and
-exchanges information with \emph{RecordingManager} and
-\emph{CameraServer} to show recordings, alarms or video streaming live.
+\texttt{SecurityApp} component executes in an Android device and
+exchanges information with \texttt{RecordingManager} and
+\texttt{CameraServer} to show recordings, alarms or video streaming live.
 
 \begin{figure*}
 \includegraphics[width=6cm]{figs/surveillance-img1.png}
@@ -560,13 +562,11 @@ exchanges information with \emph{RecordingManager} and
 The mobile application is very simple thanks to the abstraction of the
 jderobot components because you do not spend time in communication
 protocolos and other complex task. You only have to worry about the
-functionality of the surveillance application. For example, you can
-see in the figure~\ref{fig:surveillance2} the list of alarms that the
-\emph{Recording Manager} component have stored. Also, it is possible
-see the recordings associated with the alarms. The \emph{CameraServer}
-component provides a video streaming live of the system webcams. You
-can see in the figure~\ref{fig:surveillance3} how it is possible show
-two video streamings live of the same room.
+functionality of the surveillance application. 
+%For example, you can see in the figure~\ref{fig:surveillance2} the list of alarms that the \texttt{Recording Manager} component have stored. 
+Also, it is possible see the recordings associated with the alarms. The \texttt{CameraServer} component provides a video streaming live of the system webcams.
+
+% You can see in the figure~\ref{fig:surveillance3} how it is possible show two video streamings live of the same room.
 
 \begin{figure*}
 \includegraphics[width=6cm]{figs/surveillance-android.png}
@@ -582,13 +582,18 @@ two video streamings live of the same room.
 
 
 \subsection{ElderCare}
-Eldercare is a telecare-oriented application for elderly people living alone. The system is able to detect falls autonomously using only conventional cameras. Once a fall is detected the system automatically sends an alert to indicated medical personnel so that significantly reduces the waiting time in assistance occur.
 
-The system does not require any action by the patient, do not need to wear any device over or any type of special  garment. It is a fully autonomous and non-intrusive system.
+Eldercare is a healthcare-oriented application for elderly people living alone. The system is able to detect falls autonomously using only conventional cameras. It uses one or several \texttt{CameraServer} components depending on which computers the cameras are attached to. An evolutive 3D tracking algorithm has been developed \cite{canas2011}.
 
-Eldercare can handle all alarms on a mobile phone. When a fall is detected, Eldercare can notify us the situation on a mobile phone and even allows us to watch the scene in real time through streaming images.
+Once a fall is detected the system automatically sends an alert to indicated medical personnel so that significantly reduces the waiting time in assistance occur. The system does not require any action by the patient, do not need to wear any device over or any type of special garment. It is a fully autonomous and non-intrusive system. Eldercare can handle all alarms on a mobile phone. When a fall is detected, it notifies the situation on a mobile phone and even allows to watch the scene in real time through streaming.
 
-A new advance in the latest versions of eldercare is that the system has been complemented using Kinects devices, these devices are able to work as conventional cameras but have the main advantage of the on-board depth sensor. These devices work perfectly even without light, so the subject would be monitored in virtually any situation. 
+\begin{figure*}
+\includegraphics[width=8.5cm]{figs/eldercare.png}
+\caption{Eldercare tracks 3D people position using cameras}
+\label{fig:eldercare}
+\end{figure*}
+
+Currently we are doing research improving the 3D tracking algorithm to use Kinect devices. They are able to work as conventional cameras but have the main advantage of the on-board depth sensor. These devices work perfectly even without light, so the subject would be monitored in virtually any situation. Access to them is provided by \texttt{kinectServer} component.
 
 \section{Jderobot as open-source project}
 
