@@ -132,7 +132,7 @@ planning modules built around a sensed reality. A good example of cognitive
 frameworks was Saphira \cite{konolige98} based on a behaviourist
 cognitive model. Some of its low-level functionality was rewritten as a
 C++ library called ARIA \cite{aria} that it's still supplied with the
-popular robotic platforms from MobileRobots/ActivMedia.Even though
+popular robotic platforms from MobileRobots/ActivMedia. Even though
 the underliying cognitive model usually is a good practice guide for
 programming robots, this hardwired coupling often leads the user to
 problems difficult to solve when trying to do something the framework
@@ -168,6 +168,12 @@ be a great benefict to the robotic community. Main examples of open
 source modern frameworks are the aformentioned PlayerStage and
 ROS. Another important example is ORCA \cite{brooks05,brooks07}. We
 brefly describe them.
+
+%%CARMEN \cite{montemerlo03}
+There are other open source frameworks that have had some impact on current the state of the art, like CARMEN \cite{montemerlo03} by Carnegie Mellon or Miro \cite{Kraetzschmar02} by University of Ulm. Both use some component based approach to organize robotic software using IPC and CORBA, respectively to communicate their modules.
+
+%Non-open source solutions
+We can find non open source solutions as well, like Microsoft Robotics Studio or ERSP by Evolution Robotics. 
 
 \subsection{Player/Stage}
 Player/Stage framework provides the Player robot device server and the
@@ -208,32 +214,30 @@ debugging and centralized logging. A set of official libraries implement standar
 A typical application written in ROS is a collection of components interacting with each other (no server/client model) distributed among a network of computational nodes. Often a user can just use some of the components found in the ROS repositories, tweak some parameters and make them interact with his own coded components.
 
 \subsection{ORCA}
-Another important example is ORCA, a component based framework released several years before ROS. ORCA is multi platform and multi language as well. The aim of its developers was to increase the software reuse amonth the robotic community, so they create a component repository for robotics applications and they provide some of the needed \textit{glue} to connect them. In a previous version, they code the middleware that enabled components to communicate. Later they realized that programming a middleware was out of the range of their interests, besides being a complex and time consuming task, so they replaced it with the professional grade middleware Ice from ZeroC \cite{henning04} that allowed them to focus in the robotic problems. ORCA has play a mayor source of inspiration for the Jderobot framework and some of its core components are closely related to this framework.
+Another important example is ORCA, a component based framework released several years before ROS. ORCA is multi platform and multi language as well. The aim of its developers was to increase the software reuse among the robotic community, so they create a component repository for robotics applications and they provide some of the needed \textit{glue} to connect them. In a previous version, they code the middleware that enabled components to communicate. Later they realized that programming a middleware was out of the range of their interests, besides being a complex and time consuming task, so they replaced it with the professional grade middleware Ice from ZeroC \cite{henning04} that allowed them to focus in the robotic problems. ORCA has play a mayor source of inspiration for the Jderobot framework and some of its core components are closely related to this framework.
 
 As a component based framework, a typical application written in ORCA has an architecture similar to the one described for ROS.
 
-%%CARMEN \cite{montemerlo03}
-%%ROS, ORCA, Miro, RoboComp, Aria, 
-%%Microsoft Robotics Studio, Beesoft. ERSP.
-
 \section{Jderobot platform}
 \label{sec:jderobot}
-%intro
-The Jderobot platform is the result of the knoledge adquired through
-the development of several projects. The root comes from the doctoral
-thesis \cite{canas02} where the underlying cognitive architecture JDE (acronym in Spanish for Dynamic
-Schema Hierarchy) is
-described. An initial implementation called \textit{jdec} was provided
-where the main idea of organizing the
-software in an intelligent way was developed. Through the years many
-applications have been developed, not only in 
-the robotics field, but in domotic and computer vision fields.
+%intro: ya se cuenta en subseccion ``some history''
+%The Jderobot platform is the result of the knoledge adquired through
+%the development of several projects. The root comes from the doctoral
+%thesis \cite{canas02} where the underlying cognitive architecture JDE (acronym in Spanish for Dynamic
+%Schema Hierarchy) is
+%described. An initial implementation called \textit{jdec} was provided
+%where the main idea of organizing the
+%software in an intelligent way was developed. Through the years many
+%applications have been developed, not only in 
+%the robotics field, but in domotic and computer vision fields.
 
 %main characteristics
-The Jderobot platform is a component based framework that uses the powerful object oriented middleware Ice from ZeroC as \textit{glue} between its parts. This important design decission allows Jderobot to run in multiple platforms and to be programmed with the most common programming languages (all the languages supported by Ice indeed). Jderobot components can also be distributed over a network of computational nodes and by extension use all the mechanisms provided by Ice as secure communications, redundancy mechanisms or naming services. The platform is supported by a community of developers and its code is open source, released under a GPLv3 licence. A user community is available at \textit{http://jderobot.org}, where users can find documentation, downloads and examples.
+The Jderobot platform is a component based framework that uses the powerful object oriented middleware Ice from ZeroC as \textit{glue} between its parts. This important design decission allows Jderobot to run in multiple platforms and to be programmed with the most common programming languages (all the languages supported by Ice indeed). Jderobot components can also be distributed over a network of computational nodes and by extension use all the mechanisms provided by Ice as secure communications, redundancy mechanisms or naming services. 
+
+%The platform is supported by a community of developers and its code is open source, released under a GPLv3 licence. A user community is available at \textit{http://jderobot.org}, where users can find documentation, downloads and examples. %%ya se cuenta en seccion jderobot as opensource
 
 %brief description of the underlaying cognitive architecture
-The Jderobot platform was developed under the influence of the JDE cognitive architecture. In early releases, the user was \textit{forced} to follow the main lines of JDE. Currently the underlaying conceptual architecture is just a good practices guide and the user can choose to follow it or not. Briefly, the main lines of the JDE cognitive architecture are as follows:
+The Jderobot platform was developed under the influence of the JDE cognitive architecture \cite{canas02,canas05e}. In early releases, the user was \textit{forced} to follow the main lines of JDE. Currently the underlaying conceptual architecture is just a good practices guide and the user can choose to follow it or not. Briefly, the main lines of the JDE cognitive architecture are as follows:
 
 \begin{itemize}
 \item Behavior = {perception} and {control}
@@ -246,7 +250,7 @@ The Jderobot platform was developed under the influence of the JDE cognitive arc
 \item Behaviorist aproach
 \end{itemize}
 
-The main unit is the schema. A schema is a continous and independent execution flow with some goal. It activation state can be activated and deactivated at will, and its parameters can be modulated.
+The main unit is the schema. A schema is a continous and independent execution flow with some goal. Its activation state can be activated and deactivated at will, and its parameters can be modulated.
 
 %component = schema
 The definition of schema has big similarities with the definition of component (from a software enginiering point of view), and this is the main link between the Jderobot framework and the underlaying cognitive architecture. A behavior is fragmented in smaller parts (schemas) and then implemented as components.
@@ -266,26 +270,25 @@ Following current trends in robotic software engineering we aim to design a fram
 \end{itemize}
 
 %why Ice
-The selection of Ice as the middleware for Jderobot was the most important design decission. This way we could use more efforts to design and program robotic related software and less to deal with problems already solved by Ice where we are no experts. Ice allows Jderobot to interoperate between multiple platforms (Windows, GNU/Linux, MacOS, Android, ...), to support multiple programming languages (C++,Python, Java, PHP,...) and to be distributed over a network of computers. Ice is the main building block of Jderobot.
+Systems with some of these requirements are often hard to build. Because of this, we decided to find an existing middleware that coud cope with our requirements. The selection of Ice as the middleware for Jderobot was the most important design decission. This way we could use more efforts to design and program robotic related software and less to deal with problems already solved by Ice where we are no experts. Ice is the main building block of Jderobot.
 
-%programming model -> components
-The programming model is based on components. A typical Jderobot application is a set of components running concurrently. They communicate sharing messages between them, cooperating to achive the desired behavior. Components are the basic unit in Jderobot.
+%component based
+The programming model is based on components. A typical Jderobot application is a set of components running concurrently, as different operating system processes. They communicate sharing messages between them, cooperating to achive the desired behavior. Components are the basic unit in Jderobot. A Jderobot component is usually implemented around the \textit{Ice::Application} class running on the main thread of a process, and optionally other service threads performing optional tasks. This main thread execute the component main task, that usually has the form of an iterative task running continously at a specific rate. This iterative task includes the communications task, that sends or receive data. This model is opposed to the one used in previous releases of Jderobot, where basic units were implemented using threads. It's straightforward to see that the use of processes as the basic unit will make easier the approact to the remaining design requirements.
 
-A Jderobot component is usually implemented around the \textit{Ice::Application} class running on a main thread, and optionally other service threads performing optional tasks. This main thread execute the component main task, that usually has the form of an iterative task running continously at a specific rate. This iterative task includes the communications task, that sends or receive data.
+%multi-platform & multi-language
+Jderobot is able to interoperate between multiple platforms (Windows, GNU/Linux, MacOS, Android, ...) and it has support for multiple programming languages (C++,Python, Java, PHP,...), as Ice has support for main architectures and for most popular programming languages.
+
+%distributed
+Ice provides several communication mechanisms, from syncronous and asyncronous standard RPCs to subscription mechanisms, where multiple publishers and subscribers can interact. This allows Jderobot to provide a rich set of options to provide communication between its components, allowing those components to be distributed over a network of computers. Moreover, Ice has several tools that allows to provide redundant and/or failsafe services.
 
 %interfaces
 Jderobot components communicate through interfaces. They define the minimum communication unit between components. Jderobot components implements these interfaces to provide functionality and use them to use the functionality from other components. Interfaces are defined with \textit{slice}, the interface definition language used by Ice, that describe their data structures and operations. This slice definitions are then used to generate code for the desired programming languages.
 
-Ice provides several communication mechanisms, from syncronous and asyncronous standard RPCs to subscription mechanisms, where multiple publishers and subscribers can interact. This allows Jderobot to provide a rich set of options to provide communication between its components in different contexts. Moreover, Ice has several tools that allows to provide redundant and/or failsafe services.
+%open source & software reuse
+In addition to Ice, Jderobot uses other open source libraries like OpenCV, Gearbox, OpenGL, Player/Stage or GSL, to name but a few, for the same reasons exposed above: we want to focus our efforts to design and program robotic related software. In return, we release all our code as open source and we encourage our community to follow these ideas.
 
-%gui
-Graphical user interfaces are especially useful for debugging purpouses or for human interaction. Jderobot doesn't make any special assumption on this subject, the user must choose the approach that better fits in each context. Some guidelines and examples are provided though, though design patters as MVC or implementations using popular graphic frameworks as GTK+. A Jderobot component usually will run a service thread with the graphical user interface computations.
-
-%configuration files
-Configuration files are used to provide parameters to Jderobot components. They are simple text files with a format closely related to Java property files. Ice has native support for parsing this files. Using this files components can get their specific parameters or the location of resources (files, other components,...). Ice provides a parameter server that could be use as a central configuration repository.
-
-%software reuse
-In addition to Ice, Jderobot uses other open source libraries like OpenCV, Gearbox, OpenGL, Player/Stage or GSL, to name but a few.
+%gui & config files
+Other two minor requirements were present in the design process. First, Graphical user interfaces are especially useful for debugging purpouses or for human interaction. Previous releases of Jderobot needed ad-hoc approches because of the multi-threaded design, some wrappers where needed to make the share access to the screen easier. Nowadays, Jderobot doesn't make any special assumption on this subject, each component is a separate process, the user must choose the approach that better fits in each context. Some guidelines and examples are provided though, though design patters as MVC or implementations using popular graphic frameworks as GTK+. A Jderobot component usually will run a service thread with the graphical user interface computations. Second, schemas ara parametrized and its implementation counterpart requires any means to get this parameters. A simple approach is to use configuration files. Ice has native support for parsing simple text files with a format closely related to Java property files. Using this files components can get their specific parameters or the location of resources (files, other components,...). Ice provides a parameter server that could be used as a central configuration repository.
 
 \subsection{Interfaces and drivers}
 
@@ -302,6 +305,7 @@ The same interfaces are also provided by drivers connected to the real devices a
 PlayerServer, GazeboServer for Gazebo Simulator , NaoServer, KinectServer, OpenNIServer, giraffeServer, PTU, Hokuyo, Wiimote, CameraServer.
 
 \subsubsection{CameraServer}
+
 
 \subsubsection{PlayerServer}
 
