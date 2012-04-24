@@ -1,10 +1,9 @@
 package player.teleoperator;
 
-import jderobot.LaserPrx;
-import jderobot.LaserPrxHelper;
 import jderobot.MotorsPrx;
 import jderobot.MotorsPrxHelper;
-import bica.*;
+import jderobot.Pose3DMotorsPrx;
+import jderobot.Pose3DMotorsPrxHelper;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -101,7 +100,7 @@ public class Connect extends Activity {
     public void tryConnection() {
     	String ip, sport;
     	int port;
-    	String proxy_sch, proxy_body, proxy_head, proxy_motors;
+    	String proxy_motors_nao, proxy_head_nao, proxy_motors;
     	
     	ip = this.text_ip.getText().toString();
     	sport = this.text_port.getText().toString();
@@ -124,59 +123,44 @@ public class Connect extends Activity {
     	try {
     		port = Integer.parseInt(sport);
     		
-    		proxy_sch = "SchedulerManager:default -h " + ip + " -p " + port;
-    		proxy_body = "BodyMotionManager:default -h " + ip + " -p " + port;
-    		proxy_head = "HeadMotionManager:default -h " + ip + " -p " + port;
-    		proxy_motors = "motors1:tcp -h " + ip + " -p " + port;
+     		proxy_motors = "motors1:tcp -h " + ip + " -p " + port;
+    		proxy_motors_nao = "Motors:tcp -h " + ip + " -p " + port;
+    		proxy_head_nao = "Pose3DMotors:tcp -h " + ip + " -p " + port;
     		
     		//Initialize ICE with the IP and port selected
     		Ice.Communicator communicator = Ice.Util.initialize();
     		
     		/*Configure nao robot*/
     		if(USE_NAO_ROBOT) {
-	    		Log.d("Scheduler", "Connecting to: " + proxy_sch);
-	    		Ice.ObjectPrx base = communicator.stringToProxy(proxy_sch);
+	    		Log.d("Motors Nao", "Connecting to: " + proxy_motors_nao);
+	    		Ice.ObjectPrx base = communicator.stringToProxy(proxy_motors_nao);
 		        if (base == null){
-		        	Log.e("Scheduler", "No scheduler available");
+		        	Log.e("Motors Nao", "No Motors Nao available");
 		            return;
 		        } 
 		        
-	        	SchedulerManagerPrx sprx = SchedulerManagerPrxHelper.checkedCast(base);
-		        if (sprx == null){ 
-		        	Log.e("Scheduler", "No scheduler available");
-		            return;
-		        } 
-		        
-	    		Log.d("Body", "Connecting to: " + proxy_body);
-		   		base = communicator.stringToProxy(proxy_body);
-		        if (base == null){
-		        	Log.e("Body", "No body available");
-		            return;
-		        } 
-		        
-	        	BodyMotionManagerPrx bprx = BodyMotionManagerPrxHelper.checkedCast(base);
-		        if (bprx == null){ 
-		        	Log.e("Body", "No body available");
+	        	MotorsPrx mprx = MotorsPrxHelper.checkedCast(base);
+		        if (mprx == null){ 
+		        	Log.e("Motors Nao", "No Motors Nao available");
 		            return;
 		        }
-		        
-	    		Log.d("Head", "Connecting to: " + proxy_head);
-		   		base = communicator.stringToProxy(proxy_head);
+
+		        /*Log.d("Head", "Connecting to: " + proxy_head_nao);
+		   		base = communicator.stringToProxy(proxy_head_nao);
 		        if (base == null){
 		        	Log.e("Head", "No head available");
 		            return;
 		        } 
 		        
-	        	HeadMotionManagerPrx hprx = HeadMotionManagerPrxHelper.checkedCast(base);
+	        	Pose3DMotorsPrx hprx = Pose3DMotorsPrxHelper.checkedCast(base);
 		        if (hprx == null){ 
 		        	Log.e("Head", "No head available");
 		            return;
-		        }
+		        }*/
 		        
 		        /*Save proxy*/
-		        Connection.setScheduler(sprx);
-		        Connection.setBody(bprx);
-		        Connection.setHead(hprx);
+		        Connection.setMotors(mprx);
+		        //Connection.setHead(hprx);
 		        Connection.setUseNao(true);
 		        
     		} else { /*Configure player*/
@@ -190,7 +174,7 @@ public class Connect extends Activity {
 		        
 	        	MotorsPrx mprx = MotorsPrxHelper.checkedCast(base);
 		        if (mprx == null){ 
-		        	Log.e("Body", "No body available");
+		        	Log.e("Motors", "No motors available");
 		            return;
 		        }
 		        

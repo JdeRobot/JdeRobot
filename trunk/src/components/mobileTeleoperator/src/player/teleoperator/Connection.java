@@ -5,6 +5,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import jderobot.LaserPrx;
 import jderobot.MotorsPrx;
+import jderobot.Pose3DMotorsPrx;
 import bica.*;
 
 public final class Connection {
@@ -18,27 +19,11 @@ public final class Connection {
 		communicator = c;
 	}
 	
-	public static void setScheduler(SchedulerManagerPrx s) {
-		sprx = s;
-	}
-	
-	public static SchedulerManagerPrx getScheduler() {
-		return sprx;
-	}
-	
-	public static void setBody(BodyMotionManagerPrx b) {
-		bprx = b;
-	}
-	
-	public static BodyMotionManagerPrx getBody() {
-		return bprx;
-	}
-	
-	public static void setHead(HeadMotionManagerPrx h) {
+	public static void setHead(Pose3DMotorsPrx h) {
 		hprx = h;
 	}
 	
-	public static HeadMotionManagerPrx getHead() {
+	public static Pose3DMotorsPrx getHead() {
 		return hprx;
 	}
 	
@@ -52,14 +37,6 @@ public final class Connection {
 	
 	public static void setConnected(boolean status) {
 		connected = status;
-		
-		if(use_nao) {
-			if(status == true) {
-				Connection.runBica();
-			} else {
-				Connection.stopBica();
-			}
-		}
 	}
 	
 	public static void setUseNao(boolean status) {
@@ -76,59 +53,34 @@ public final class Connection {
 	
 	public static void setV(float v)  {
 		Connection.lock.lock();
-		if(use_nao)
-			Connection.getBody().setVel(v, 0.0f, 0.0f);
-		else
-			Connection.getMotors().setV(v);
+		Connection.getMotors().setV(v);
 		Connection.lock.unlock();
 	}
 	
 	public static void setW(float w) {
 		Connection.lock.lock();
-		if(use_nao)
-			Connection.getBody().setVel(0.0f, w, 0.0f);
-		else
-			Connection.getMotors().setW(w);
+		Connection.getMotors().setW(w);
 		Connection.lock.unlock();
 	}
 	
 	public static void setL(float l) {
 		Connection.lock.lock();
-		if(use_nao)
-			Connection.getBody().setVel(0.0f, 0.0f, l);
-		else
-			Connection.getMotors().setL(l);
+		Connection.getMotors().setL(l);
 		Connection.lock.unlock();
 	}
 	
 	public static void setPan(float pan)  {
 		Connection.lock.lock();
-		if(use_nao)
-			Connection.getHead().setPanPos(pan, 1.0f);
+		//if(use_nao)
+		//	Connection.getHead().setPose3DMotorsData(data);
 		Connection.lock.unlock();
 	}
 	
 	public static void setTilt(float tilt)  {
 		Connection.lock.lock();
-		if(use_nao)
-			Connection.getHead().setTiltPos(tilt, 1.0f);
+		//if(use_nao)
+		//	Connection.getHead().setPose3DMotorsData(data);
 		Connection.lock.unlock();
-	}
-	
-	public static void runBica() {	
-		if(!bicarunning) {
-			Connection.getScheduler().run("Body");
-			Connection.getScheduler().run("Head");
-			bicarunning = true;
-		}
-	}
-	
-	public static void stopBica() {
-		if(bicarunning) {
-			Connection.getScheduler().stop("Body");
-			Connection.getScheduler().stop("Head");
-			bicarunning = false;
-		}		
 	}
 	
 
@@ -179,12 +131,11 @@ public final class Connection {
 		
 	private static Lock lock = new ReentrantLock();
 	private static Ice.Communicator communicator;
-	private static MotorsPrx mprx;
+
 	private static boolean connected;
 
-	private static HeadMotionManagerPrx hprx;
-	private static BodyMotionManagerPrx bprx;
-	private static SchedulerManagerPrx sprx;
+	private static MotorsPrx mprx;
+	private static Pose3DMotorsPrx hprx;
 	private static boolean bicarunning = false;
 	private static boolean use_nao = false;
 }
