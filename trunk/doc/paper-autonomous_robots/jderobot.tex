@@ -600,18 +600,22 @@ A second major revision was undergone in late 2010, leaving out the cognitive as
 
 \subsection{Current release}
 %current release and snapshot
-Currently it has a total of 123.531 lines of source code, most of them in C and C++ language.
+Currently it has a total of 123.531 lines of source code, most of them
+in C and C++ language. The SLOCCount tool can automatically identify
+and measure a lot of languages of programming. Also, it includes
+heuristics to detect type files and it estimates effort, time and
+money about the development of the software.
 
 \begin{verbatim}
-SLOC    Directory       SLOC-by-Language 
-60707   src_components  cpp=32504,ansic=26370,
-                        java=1355,xml=332,
-                        sh=89,python=57
-27509   src_interfaces  cpp=27509
-23620   share           xml=23620
-11354   src_libs        cpp=9979,ansic=1375
-338     debian          sh=338
-3       scripts         sh=3
+SLOC    Directory        SLOC-by-Language 
+60707   components (30)  cpp=32504,ansic=26370,
+                         java=1355,xml=332,
+                         sh=89,python=57
+27509   interfaces (24)  cpp=27509
+23620   share            xml=23620
+11354   src_libs         cpp=9979,ansic=1375
+338     debian           sh=338
+3       scripts          sh=3
 \end{verbatim}
 
 Totals grouped by language
