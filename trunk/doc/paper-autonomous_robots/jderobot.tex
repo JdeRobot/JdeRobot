@@ -52,15 +52,27 @@
 
 %\authorrunning{Short form of author list} % if too long for running head
 
-\institute{F. Author \at
-              first address \\
-              Tel.: +123-45-678910\\
-              Fax: +123-45-678910\\
-              \email{fauthor@example.com}           %  \\
+\institute{José M. Ca\~nas, Roberto Calvo, Julio Vega, Eduardo Perdices, Francisco Rivas \at
+              Universidad Rey Juan Carlos \\
+%              Tel.: +123-45-678910\\
+%              Fax: +123-45-678910\\
+              \email{jmplaza@gsyc.es}           %  \\
 %             \emph{Present address:} of F. Author  %  if needed
            \and
-           S. Author \at
-              second address
+           David Lobato \at
+             Universidad do Algarve
+%% \and
+%%            Roberto Calvo \at
+%%               Universidad Rey Juan Carlos
+%% \and
+%%            Julio Vega \at
+%%               Universidad Rey Juan Carlos
+%% \and
+%%            Eduardo Perdices \at
+%%               Universidad Rey Juan Carlos
+%% \and
+%%            Francisco Rivas \at
+%%               Universidad Rey Juan Carlos
 }
 
 \date{Received: date / Accepted: date}
@@ -363,7 +375,14 @@ Two driver components have been developed to provide support for different Panti
 
 \subsubsection{FuzzyLib}
 
-Fuzzylib is a library to design and program fuzzy controllers. The control rules are written in a file with simple rules like:\texttt{ IF ( left\_obstacle\_distance = small ) AND ( translation\_speed = high ) THEN ( rotation\_speed = right\_high )}. 
+Fuzzylib is a library to design and program fuzzy controllers. The control rules are written in a file with simple rules like:
+
+\begin{verbatim}
+IF ( left\_obstacle\_distance = small ) 
+    AND ( translation\_speed = high ) 
+THEN ( rotation\_speed = right\_high )
+\end{verbatim}
+
 %AND and OR fuzzy operators are supported in rules. 
 The fuzzy labels and variables are also described in such file following a trapezoidal pattern and they are linked in the software to input and output variables of the control program. The controller automatically fuzzyfies the input variables, apply the rules and defuzzifies the output following a Center of Mass combination.
 
@@ -384,13 +403,14 @@ This library builds on top of the OpenCV Computer Vision Library\footnote{http:/
 \subsubsection{Progeo}
 \label{subsec:progeo}
 
-This Projective Geometry library helps in the use of pin-hole calibrated cameras (Figure \ref{fig:pinholemodel}), the relationships between the pixels and the points in 3D space. Some of the data types provided are: \textit{HPoint2D} to store a 2D point that usually belongs to the image plane, \textit{HPoint3D} to represent a point in the 3D space in homogeneous coordinates, and \textit{TPinholeCamera} to store the camera model defined by its extrinsics and intrinsics parameters. It provides the \textit{project} function to project a 3D point on to the 2D image plane, and the \textit{backproject} function to obtain the 3D ray with all 3D points that project in a given pixel inside the image plane.
+This Projective Geometry library helps in the use of pin-hole calibrated cameras% (Figure \ref{fig:pinholemodel})
+, the relationships between the pixels and the points in 3D space. Some of the data types provided are: \textit{HPoint2D} to store a 2D point that usually belongs to the image plane, \textit{HPoint3D} to represent a point in the 3D space in homogeneous coordinates, and \textit{TPinholeCamera} to store the camera model defined by its extrinsics and intrinsics parameters. It provides the \textit{project} function to project a 3D point on to the 2D image plane, and the \textit{backproject} function to obtain the 3D ray with all 3D points that project in a given pixel inside the image plane.
 
-\begin{figure}[h!]
-  \includegraphics[width=8.5cm]{figs/pinholemodel.png}
-\caption{Pin-hole model of a camera.}
-\label{fig:pinholemodel}
-\end{figure}
+%% \begin{figure}[h!]
+%%   \includegraphics[width=8cm]{figs/pinholemodel.png}
+%% \caption{Pin-hole model of a camera.}
+%% \label{fig:pinholemodel}
+%% \end{figure}
 
 
 \subsubsection{Colorspaces}
@@ -406,7 +426,7 @@ A \texttt{BasicComponent} is included in Jderobot as a template for reactive con
 There are many ways to organize the control and perception code on board a mobile robot. One succesful way are the Finite State Machines. With them the robot behavior is defined by a set of states, each of which performs a particular task. The robot can switch from one state to another through transitions (conditions of stay or change), depending on certain events or conditions, internal or external. A tool has been developed and included in Jderobot to graphically design hierarchies of FSM, insert the specific code of states and transitions, and automatically generate the component source code in C++.
 
 \begin{figure}[h!]
-  \includegraphics[width=8.5cm]{figs/ratonGatoAutoEjec.jpg}
+  \includegraphics[width=8cm]{figs/ratonGatoAutoEjec.jpg}
 \caption{Tool for visual HFSM design}
 \label{fig:visualHFSM}
 \end{figure}
@@ -416,7 +436,7 @@ There are many ways to organize the control and perception code on board a mobil
 The calibrator tool is used to calibrate external (position and orientation) and internal parameters (focal distance, optical center...) of any camera. It allows a manual calibration where the user provides a 3D description of the camera surroundings, the calibrator draws what the image should be with a certain parameter set over the really observed image. The user then modify parameters until finds a correct matching (Figure \ref{fig:calibrator}). It also includes a fully automatic calibration based on DLT and a 3D pattern. It generates a file with the camera calibration parameter values and it is fully integrated with Progeo library.
 
 \begin{figure}[h!]
-  \includegraphics[width=8.5cm]{figs/calibratorGUI.png}
+  \includegraphics[width=8cm]{figs/calibratorGUI.png}
 \caption{Calibrator in manual mode}
 \label{fig:calibrator}
 \end{figure}
@@ -426,7 +446,7 @@ The calibrator tool is used to calibrate external (position and orientation) and
 The colorTuner tool is used to adjust color filters in different colorspaces, like HSV, YUV, RGB, etc. For instance, the HS color disc is shown (Figure \ref{fig:colortuner}) and the current color filter thresholds are also displayed as a sector. They can be easily modified there, using sliders or clicking in sample pixels in current image.
 
 \begin{figure}[h!]
-  \includegraphics[width=8.5cm]{figs/colorTunerHSV.png}
+  \includegraphics[width=8cm]{figs/colorTunerHSV.png}
 \caption{ColorTuner tool for adjusting HSV color filters}
 \label{fig:colortuner}
 \end{figure}
@@ -447,7 +467,7 @@ Android operating system is increasing its market share every day, both with sma
 We have created an application called \texttt{MobileTeleoperator} to teleoperate either a Pioneer robot through \texttt{playerserver} or a Nao Robot through the \texttt{NaoServer} (Figure \ref{fig:nao-teleoperator}. Connection between the mobile device and the robots is made through ICE, the same way we do when we use a standard computer, so we don't need to change anything in Jderobot architecture.
 
 \begin{figure}[h!]
-  \includegraphics[width=8.5cm]{figs/teleoperator-nao.png}
+  \includegraphics[width=8cm]{figs/teleoperator-nao.png}
 \caption{Nao robot teleoperated from a smartphone}
 \label{fig:nao-teleoperator}
 \end{figure}
@@ -476,7 +496,7 @@ Once the main software components and design principles of Jderobot have been pr
 A component named \texttt{Introrob} has been developed for students to simplify the development of robot control applications in their practices inside several robotics courses at Universidad Rey Juan Carlos. It connects to the Gazebo simulator using \texttt{GazeboServer}, where a Pioneer robot is ready inside a given 3D scenario. Having an integrated simulator is very important, so the students may quickly test their experiments without the need of a robot for everyone. \texttt{Introrob} wraps the ICE interface access and provides a very simple local API with functions to get the sensor readings and set the motor commands. \texttt{Introrob} also shows a GUI with the images from the stereo pair (Figure \ref{fig:introrob}), the laser measurements and a 3D visualization of the scene around the robot. 
 
 \begin{figure}[h!]
-  \includegraphics[width=8.5cm]{figs/introrob.jpg}
+  \includegraphics[width=8cm]{figs/introrob.png}
 \caption{Introrob component Graphical interface.}
 \label{fig:introrob}
 \end{figure}
@@ -500,10 +520,10 @@ When commanded to a position target our hybrid navigation method detects trap si
 
 \subsection{Visual memory research}
 
-The \texttt{VisualMemory} research component does a visual tracking of the various basic objects in the scene surrounding the robot to improve its navigation decisions. It detects new objects, tracks them updating their relative position to the robot and remove them from the memory once they have disappeared. An example of this visual memory contents is shown at Figure \ref{fig:memory} around a humanoid robot, built from several images of the camera on its mobile head.
+The \texttt{VisualMemory} research component does a visual tracking of the various basic objects in the scene surrounding the robot to improve its navigation decisions \cite{canas2012}. It detects new objects, tracks them updating their relative position to the robot and remove them from the memory once they have disappeared. An example of this visual memory contents is shown at Figure \ref{fig:memory} around a humanoid robot, built from several images of the camera on its mobile head.
 
 \begin{figure}[h!]
-\includegraphics[width=8.5cm]{figs/experimentoReal.jpg}
+\includegraphics[width=8cm]{figs/experimentoReal.jpg}
 \caption{Visual memory with 3D segments coming from four images of robot surroundings}
 \label{fig:memory}
 \end{figure}
@@ -512,17 +532,27 @@ The first stage of the system is a 2D analysis, in which segments in the current
 
 \subsection{Evolutionary localization research}
 
-Continuous and robust self-localization is at the moment one active research challenge in robotics. Using sensors such as cameras, laser or ultrasonic sensors, our robot must be able to calculate its own localization inside an environment. Once the robot knows its position, it can adapt its behavior depending on where it is located. However localization is a complex task on mobile robots, since they must face unknown situations, such as occlusions or dynamism of the environment. 
+Continuous and robust self-localization is one active research challenge in robotics. Using sensors such as cameras, laser or ultrasonic sensors, our robot must be able to calculate its own localization inside an environment. Once the robot knows its position, it can adapt its behavior depending on where it is located. However localization is a complex task on mobile robots, since they must face unknown situations, such as occlusions or dynamism of the environment. 
 
-With Jderobot, we have designed and implemented an evolutionary localization algorithm, a meta-heuristic optimization algorithm that is inspired by the biological evolution. It manages a set of candidate positions that evolve over time using genetic operators, such as mutation or crossover. Several candidate solutions compete among each other in different positions. Thus, the evolutionary algorithm is able to handle several solutions at the same time, which is of great advantage when robots are located in symmetric environments.  
+With Jderobot, we have designed and implemented an evolutionary localization algorithm \cite{canas2012} in the \texttt{evolutionaryLoc} component. It is a meta-heuristic optimization algorithm that is inspired by the biological evolution. It provides a set of candidate positions that evolve over time using genetic operators, such as mutation, elitism or crossover. Such evolution depends on the fitness of each candidate position. A fitness function compares several visual features (like straight lines, corners, etc.) in the current observed image and in the predicted one from the position candidate. In likely positions they would be similar, and those position candidate would have high fitness. Only the candidates with high fitness create new child candidates for next generation. This way several solutions compete among each other and the candidate population converges towards the real camera 3D location. 
+
+It has been tested in the RoboCup and in office real environments. This evolutionary algorithm has proben to be robust to occlusions and also is able to handle several solutions at the same time, which is of great advantage when robots are located in symmetric environments.  
 
 This research component has been tested both directly using as input images from \texttt{cameraServer} and using as input the visual memory built by the previous \texttt{VisualMemory} component. An specific ICE interface has been defined to this data communication between these two components.
 
 \subsection{MonoSLAM research}
 
-Monocular Simultaneous Localization And Mapping (MonoSLAM) is a type of localization first presented by Andrew J. Davison \cite{ref}. MonoSLAM is able to construct a point-based map of the environment with a single camera, and localizates the camera inside this environment in real time. We have developed our own MonoSLAM approach, based on Davison's work, obtaining images from real cameras or simulators. We first implemented the point-based approach designed by Andrew Davison and afterwards we have designed our own extensions that uses both relevant points and lines in the image flow.
+Monocular Simultaneous Localization And Mapping (MonoSLAM) is a type of localization first presented by Andrew J. Davison \cite{davison2007}. It is able to construct a point-based map of the environment with a single camera, and localizates the camera inside this environment in real time. We have developed our own MonoSLAM approach in the \texttt{monoslam} component (Figure \ref{fig:monoslam}), based on Davison's work. We first implemented the point-based approach designed by Andrew Davison and afterwards we have designed our own extensions that uses both relevant points and lines in the image flow.
 
-This type of localization is more accurate than classical localization methods and is very useful when robot odometry is not available or is not reliable. On the other hand, it is not able to handle occlusions and needs a faster frame rate.
+\begin{figure}
+\begin{center}
+\includegraphics[width=8cm]{figs/monoslam.png}
+\caption{\texttt{Monoslam} component for research in real time localization}
+\end{center}
+\label{fig:monoslam}
+\end{figure}
+
+This type of localization is more accurate than classical localization methods and is very useful when robot odometry is not available or is not reliable. On the other hand, it is not able to handle occlusions and needs a faster frame rate. It has been tested with images from real and simulated cameras using \texttt{cameraServer}.
 
 \subsection{Surveillance}
 
@@ -532,21 +562,16 @@ webcam in the system there is an instance of \texttt{SrvRecorder} and
 \texttt{RecordingManager} component makes the configuration to
 {SrvRecorder} components and decides when and how a recording is
 made. The \texttt{CameraServer} component in Jderobot was expanded to provide the video streaming as
-RTSP format or image format to analyze movement in the scene. The \texttt{Motion
-  Detector} component makes a movement detection analysis of the
-scene. If a movement is detected, it
-sends a message to \texttt{Surveillance} component that has all the logic of
-the security system. This component enables the \texttt{Recording Manager} component and sends messages to
-start a recording when a movement is detected in the scene. Last, the
-\texttt{SecurityApp} component executes in an Android device and
-exchanges information with \texttt{RecordingManager} and
+RTSP format or image format to analyze movement in the scene. The \texttt{Motion Detector} component makes a movement detection analysis of the scene. If a movement is detected, it sends a message to \texttt{Surveillance} component that has all the logic of the security system. This component enables the \texttt{Recording Manager} component and sends messages to start a recording when a movement is detected in the scene. Last, the \texttt{SecurityApp} component executes in an Android device and exchanges information with \texttt{RecordingManager} and
 \texttt{CameraServer} to show recordings, alarms or video streaming live. It is also possible to see the recordings associated with the alarms. 
 
-\begin{figure*}
-\includegraphics[width=6cm]{figs/surveillance-img1.png}
+\begin{figure}
+\begin{center}
+\includegraphics[width=8cm]{figs/surveillance-img1.png}
 \caption{Jderobot components of Surveillance application}
+\end{center}
 \label{fig:surveillance1}
-\end{figure*}
+\end{figure}
 
 The mobile application is very simple thanks to the abstraction of the
 jderobot components because you do not spend time in communication
@@ -578,17 +603,32 @@ Once a fall is detected the system automatically sends an alert to indicated med
 %It is a fully autonomous and non-intrusive system. Eldercare can handle all alarms on a mobile phone. 
 When a fall is detected, it notifies the situation on a mobile phone and even allows to watch the scene in real time through streaming.
 
-\begin{figure*}
-\includegraphics[width=8.5cm]{figs/eldercare.png}
+\begin{figure}
+\begin{center}
+\includegraphics[width=8cm]{figs/eldercare.png}
 \caption{Eldercare tracks 3D people position using cameras}
+\end{center}
 \label{fig:eldercare}
-\end{figure*}
+\end{figure}
 
 Currently we are doing research improving the 3D tracking algorithm to use Kinect devices. They are able to work as conventional cameras but have the main advantage of the on-board depth sensor. These devices work perfectly even without light, so the subject would be monitored in virtually any situation. Access to them is provided by \texttt{kinectServer} component.
 
 \section{Jderobot as open-source project}
 
+% página web
 Jderobot project has a web page (jderobot.org) where the framework source code can be downloaded and its documentation accessed. The official manual is there in a MediaWiki. We prefer this web manual better than classic static documents, as the web manual update is agile and can be easily done by users themselves. We use a svn repository, trac for bug tracking, a blog and one mailing list for developers an users.
+
+The Figure \ref{fig:svn-wiki} shows the number of web accesses to the project homepage in the last year, with more than 9 million accesses in total. They have been measured using Webalizer tool (Version 2.01).
+
+\begin{figure}
+\begin{center}
+  \includegraphics[width=8cm]{figs/usage-jderobot-wiki.png}
+\caption{Analysis of accesses to http://jderobot.org}
+\end{center}
+\label{fig:svn-wiki}
+\end{figure}
+
+In addition to the general framework, the source code of some Jderobot research components (like \texttt{monoslam}, \texttt{visualmemory}, \texttt{evolutionaryloc}) is available for public access \footnote{http://svn.jderobot.org/robotvision}. The same repository also includes several files with the recorded sensor data that we use for experiments, as mentioned in the \texttt{recorder}-\texttt{replayer} section.
 
 \subsection{Some history}
 
@@ -596,15 +636,12 @@ The Jderobot project started at 2002 in a PhD thesis, as the software implementa
 
 Its development was opened to a group of students. Several alternatives and expansions have been programmed since then \cite{canas07,canas07f}. A major revision was undergone in 2006 (jderobot-4.3). The design of schemas to be truly modular, they were programmed as dynamic libraries (plugins) which import and export symbols to other schemas. The XForms library for GUIs was replaced by GTK and OpenGL. In addition we started to use a common software repository and created a web page for the project. 
 
-A second major revision was undergone in late 2010, leaving out the cognitive aspects and focusing in Jderobot simply as a software architecture for robot applications. The major design principles followed in this revision have been described in section \ref{sec:jderobot}. The current release, jderobot-5.0, is mainly based on this revision.
+A second major revision (jderobot-5.0) was undergone in late 2010, leaving out the cognitive aspects and focusing in Jderobot simply as a software architecture for robot applications. The major design principles followed in this revision have been described in section \ref{sec:jderobot}. The current release is mainly based on this revision.
+
 
 \subsection{Current release}
 %current release and snapshot
-Currently it has a total of 123.531 lines of source code, most of them
-in C and C++ language. The SLOCCount tool can automatically identify
-and measure a lot of languages of programming. Also, it includes
-heuristics to detect type files and it estimates effort, time and
-money about the development of the software.
+Current Jderobot release (5.1-beta), has a total of 123.531 lines of source code, most of them in C and C++ language. The SLOCCount tool automatically identifies and measures contributions in a lot of programming languages. It has been used to analyze Jderobot repository. It also includes heuristics to detect type files and estimates efforts, time and money costs of the development of the project.
 
 \begin{verbatim}
 SLOC    Directory        SLOC-by-Language 
@@ -641,32 +678,25 @@ Some years ago only the Jderobot source code tarball was delivered to students a
 A second user profile is a student from the URJC who uses Jderobot for their Final Degree Project, Master or PhD thesis. They usually become developers and extend the framework in some area. This way, the developer team has frequently changed along years. Until 2006 these students typically took a snapshot of Jderobot software at the beginning of their project, extended it and maybe debugged for its own purposes. This was really a bad practice as improvements to the framework were not easily shared among students. Since 2006, with the Jderobot modular design and a single repository this was solved, forcing the students to always run their code with the latest Jderobot release, and debug only the official release if needed.
 
 \begin{figure}
-  \includegraphics[width=7cm]{figs/svn_top-committers.png}
+\begin{center}
+  \includegraphics[width=8cm]{figs/svn_top-committers.png}
 \caption{Top committers of Jderobot project}
+\end{center}
 \label{fig:svn-topcommiters}
 \end{figure}
 
 Some long term students have continuously contributed for several years, as can be seen at Figure \ref{fig:svn-topcommiters}. They have formed a stable developer core group of 4 or 5 people, all of them in a volunteer basis. In the last years we have opened the write access on Jderobot repository to relatively new users. Due to the large software size and the high rotation in the small developer team this has been very beneficial. The maintenance of the framework has already started to be more distributed.
 
 \begin{figure}
-  \includegraphics[width=7cm]{figs/svn_activity.png}
+\begin{center}
+  \includegraphics[width=8cm]{figs/svn_activity.png}
 \caption{Activity of commits in the project}
+\end{center}
 \label{fig:svn-activity}
 \end{figure}
 
-Figure \ref{fig:svn-activity} shows the activity of software
-improvement as number of commits in the official repository. The high
-activity peaks are related with the release of a new Jderobot revision
-and its debugging period.
-
-All the graphics and metrics have been obtained by
-CVSAnalY\footnote{http://projects.libresoft.es/projects/cvsanaly/wiki
-}. CVSAnalY is a tool that extracts information out of
-source code repository logs and stores it into a database. This FLOSS
-project is developed by
-GSyC/LibreSoft\footnote{http://www.libresoft.es}
- of Universidad Rey Juan Carlos.
-
+Figure \ref{fig:svn-activity} shows the activity of software improvement as number of commits in the official repository. The high activity peaks are related with the release of a new Jderobot revision and its debugging period. All these graphics and metrics have been obtained by CVSAnalY\footnote{http://projects.libresoft.es/projects/cvsanaly/wiki}. CVSAnalY is a tool that extracts information out of source code repository logs and stores it into a database. It has been developed by GSyC/LibreSoft\footnote{http://www.libresoft.es} at Universidad Rey Juan Carlos.
+%This FLOSS project is
 
 \section{Conclusions}
 
@@ -692,26 +722,25 @@ We think Jderobot already has reached a good level of software reuse, but mainly
 
 The developer team under Jderobot is small and with high rotation. One lesson learnt is that opening Jderobot development to several students, even new ones, is beneficial. Typical contribution is that of a new student becoming responsible of a single component, its development or updating. The modular design of Jderobot makes it possible. Another good decision has been to recommend our students that their applications should work always with the latest Jderobot release at the repository. This way bugs are solved in the official repository for everyone, everybody take benefit of their solution and there are no several co-existing branches at the same time.
 
-The creation of Debian packages made easier the use of the platform in teaching, for newbie users that don't have time to fully learn the whole platforms in two weeks. In addition the specific IntroRob component hides some of the platform complexity, and so the students take shorter time to start using jderobot. 
-The platform is just an instrument to learn robotics, not the goal.
+The creation of Debian packages made easier the use of the platform in teaching, for newbie users that don't have time to fully learn the whole platform in two weeks. In addition the specific \texttt{IntroRob} component hides some of the platform complexity, and so the students take shorter time to start using Jderobot. The platform is just an instrument to learn robotics, not the goal.
 
 %why not using ROS?
-The use of communication middleware like ICE has allowed the programming of Jderobot components in smartphones easily interacting with other components in laptop or personal computers. This flexibility is a key difference between Jderobot and ROS. 
-
-ROS set of drivers is larger than ours.
-
-Tiene ROS un replay-recorder?.
+Our migration to ROS framework, a larger and more powerful project, is periodically subject of debate in our group and we find pros and cons. The use of communication middleware like ICE has allowed the programming of Jderobot components in smartphones that easily interact with other components running in laptop or personal computers. This flexibility is one difference between Jderobot and ROS. ROS set of drivers is by far larger than ours and its Bags tools is similar to our \texttt{recorder}-\texttt{replayer} components. We haven't found any tool similar to our \texttt{visualHFSM} for Hierarchy of Finite State Machines. Jderobot doesn't have such broad scope and has been good enough for our needs. 
 
 %future lines
-- Improved use of ICE advanced capabilities like Icestorm and Icebox.
-- Wrappers to use drivers from other platforms wider than ours.
+% Wrappers to use drivers from other platforms wider than ours.
+We are currently working in several lines to extend Jderobot. First, on improving the use of ICE advanced capabilities like Icestorm and Icebox to take benefit of them. Second, we want Jderobot applications to easily interact with regular web browsers and other frameworks. This way humans users could easily modulate the applications on real time or see their processing outputs, even in embedded and screenless installations. In addition, Jderobot applications could easily be integrated with other existing frameworks. We are exploring new generation webservices like API-REST for this. 
+%Nevertheless these extensions, the framework is now stable and with enough functionality. The main efforts will be devoted to use it for research more than expanding it.
+
+
 
 \begin{acknowledgements}
-This work has been supported by the project S2009/DPI-1559, RoboCity2030-II, from the Comunidad de Madrid and by the project 10/02567 from the Spanish Ministry of Science and Innovation. Authors want also to thank the contribution to Jderobot project to all developers, in particular Alejandro Hernández and Maikel González.
+This work has been supported by the project S2009/DPI-1559, RoboCity2030-II, from the Comunidad de Madrid and by the project 10/02567 from the Spanish Ministry of Science and Innovation. Authors want also to thank the contribution to Jderobot project to all developers, specially to Alejandro Hernández and Maikel González.
 \end{acknowledgements}
 
 % BibTeX users please use one of
-\bibliographystyle{spbasic}      % basic style, author-year citations
+\bibliographystyle{plain}  
+%%\bibliographystyle{spbasic}      % basic style, author-year citations
 %\bibliographystyle{spmpsci}      % mathematics and physical sciences
 %\bibliographystyle{spphys}       % APS-like style for physics
 \bibliography{bibliografia}   % name your BibTeX data base
