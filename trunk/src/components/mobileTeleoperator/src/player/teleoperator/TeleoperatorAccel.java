@@ -24,8 +24,8 @@ public class TeleoperatorAccel extends Activity {
 	private ImageButton buttonStop;
 	private ImageButton buttonPress;
 
-	private static final float V_VEL = 0.2f;
-	private static final float W_VEL = 0.4f;
+	private static final float V_VEL = 1.0f;
+	private static final float W_VEL = 1.0f;
 
 	private static final int CHANGE_V = 0;
 	private static final int CHANGE_W = 1;
@@ -147,9 +147,9 @@ public class TeleoperatorAccel extends Activity {
 							// Compare V, only when w is 0
 							if(velw == 0.0) {
 								if (diffx > thresholdx)
-									velv = -diffx*1.3f;
+									velv = -V_VEL;
 								else if (diffx < -thresholdx)
-									velv = -diffx*1.3f;
+									velv = V_VEL;
 								else
 									velv = 0.0f;
 							}
@@ -157,9 +157,9 @@ public class TeleoperatorAccel extends Activity {
 							// Compare W, only when v is 0
 							if(velv == 0.0) {
 								if (diffy > thresholdy)
-									velw = -diffy*4;
+									velw = -W_VEL;
 								else if (diffy < -thresholdy)
-									velw = -diffy*4;
+									velw = W_VEL;
 								else
 									velw = 0.0f;
 							}

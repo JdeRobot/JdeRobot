@@ -22,19 +22,19 @@ public class TeleoperatorArrows extends Activity {
 	private ImageButton buttonUph, buttonDownh;
 	private ImageButton buttonLefth, buttonRighth;
 	
-	private static final float V_VEL = 0.4f;
-	private static final float W_VEL = 0.4f;
+	private static final float V_VEL = 1.0f;
+	private static final float W_VEL = 1.0f;
 	private static final float L_VEL = 1.0f; 
 	
-	private static final float PAN_STEP = 0.2f;
-	private static final float TILT_STEP = 0.2f;
+	private static final float PAN_STEP = 10.0f;
+	private static final float TILT_STEP = 2.0f;
 	
 	private static final int CHANGE_V = 0;
 	private static final int CHANGE_W = 1;
 	private static final int CHANGE_BOTH = 2;
 
-	private float velv, velw, vels;
-	private float pan, tilt;
+	private float velv = 0.0f, velw = 0.0f, vels = 0.0f;
+	private float pan = 0.0f, tilt = 0.0f;
 
 	/** Called when the activity is first created. */
 	@Override

@@ -22,8 +22,8 @@ public class TeleoperatorJoystick extends Activity {
 	private ImageButton buttonLeft, buttonRight;
 	private ImageButton buttonStop;
 
-	private static final float V_VEL = 0.2f;
-	private static final float W_VEL = 0.4f;
+	private static final float V_VEL = 1.0f;
+	private static final float W_VEL = 1.0f;
 
 	private static final int CHANGE_V = 0;
 	private static final int CHANGE_W = 1;

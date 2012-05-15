@@ -21,7 +21,7 @@ public class Connect extends Activity {
     private static final int ERROR_ICE = 3;
     private static final int MENU_BACK = Menu.FIRST;
     
-    private static final boolean USE_NAO_ROBOT = false;
+    private static final boolean USE_NAO_ROBOT = true;
 	
 	private EditText text_ip;
 	private EditText text_port;
@@ -145,7 +145,7 @@ public class Connect extends Activity {
 		            return;
 		        }
 
-		        /*Log.d("Head", "Connecting to: " + proxy_head_nao);
+		        Log.d("Head", "Connecting to: " + proxy_head_nao);
 		   		base = communicator.stringToProxy(proxy_head_nao);
 		        if (base == null){
 		        	Log.e("Head", "No head available");
@@ -156,11 +156,11 @@ public class Connect extends Activity {
 		        if (hprx == null){ 
 		        	Log.e("Head", "No head available");
 		            return;
-		        }*/
+		        }
 		        
 		        /*Save proxy*/
 		        Connection.setMotors(mprx);
-		        //Connection.setHead(hprx);
+		        Connection.setHead(hprx);
 		        Connection.setUseNao(true);
 		        
     		} else { /*Configure player*/

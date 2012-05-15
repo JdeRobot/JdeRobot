@@ -5,6 +5,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import jderobot.LaserPrx;
 import jderobot.MotorsPrx;
+import jderobot.Pose3DMotorsData;
 import jderobot.Pose3DMotorsPrx;
 import bica.*;
 
@@ -21,6 +22,7 @@ public final class Connection {
 	
 	public static void setHead(Pose3DMotorsPrx h) {
 		hprx = h;
+		Connection.initHead();
 	}
 	
 	public static Pose3DMotorsPrx getHead() {
@@ -29,6 +31,7 @@ public final class Connection {
 	
 	public static void setMotors(MotorsPrx m) {
 		mprx = m;
+		Connection.initMotors();
 	}
 	
 	public static MotorsPrx getMotors() {
@@ -71,16 +74,43 @@ public final class Connection {
 	
 	public static void setPan(float pan)  {
 		Connection.lock.lock();
-		//if(use_nao)
-		//	Connection.getHead().setPose3DMotorsData(data);
+		if(use_nao) {
+			Pose3DMotorsData data = new Pose3DMotorsData ();
+			data.tilt = last_tilt;
+			data.pan = pan;
+			Connection.last_pan = pan;
+			Connection.getHead().setPose3DMotorsData(data);
+		}
 		Connection.lock.unlock();
 	}
 	
 	public static void setTilt(float tilt)  {
 		Connection.lock.lock();
-		//if(use_nao)
-		//	Connection.getHead().setPose3DMotorsData(data);
+		if(use_nao) {
+			Pose3DMotorsData data = new Pose3DMotorsData ();
+			data.tilt = tilt;
+			data.pan = last_pan;
+			Connection.last_tilt = tilt;
+			Connection.getHead().setPose3DMotorsData(data);
+		}
 		Connection.lock.unlock();
+	}
+	
+	public static void initMotors() {
+		Connection.lock.lock();
+		Connection.getMotors().setV(0.0f);
+		Connection.getMotors().setW(0.0f);
+		Connection.getMotors().setL(0.0f);
+		Connection.lock.unlock();		
+	}
+	
+	public static void initHead() {
+		Connection.lock.lock();
+		Pose3DMotorsData data = new Pose3DMotorsData ();
+		data.tilt = last_tilt;
+		data.pan = last_pan;
+		Connection.getHead().setPose3DMotorsData(data);
+		Connection.lock.unlock();	
 	}
 	
 
@@ -136,6 +166,7 @@ public final class Connection {
 
 	private static MotorsPrx mprx;
 	private static Pose3DMotorsPrx hprx;
-	private static boolean bicarunning = false;
 	private static boolean use_nao = false;
+	private static float last_pan = 0.0f;
+	private static float last_tilt = 0.0f;
 }
