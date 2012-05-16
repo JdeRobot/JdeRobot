@@ -61,6 +61,7 @@
 #define MIN_PAN -54 /** gazebo pantilt min pan, degrees.*/
 #define MAX_TILT 44 /** gazebo pantilt max tilt, degrees.*/
 #define MIN_TILT -44 /** gazebo pantilt min tilt, degrees.*/
+#define GAZEBOSERVER_2PI 6.28318531
 
 namespace gazeboserver {
 	class CameraI: virtual public jderobot::Camera {
@@ -365,8 +366,7 @@ namespace gazeboserver {
 				gazeboPosition->Unlock();
 
 				gazeboPosition->Lock(1);
-				// jderobot trabaja con mm/s, gazebo con m/s
-				gazeboPositionData->cmdVelocity.pos.x = (v/1000);
+				gazeboPositionData->cmdVelocity.pos.x = v;
 				gazeboPosition->Unlock();
 
 				return 0;
@@ -385,7 +385,7 @@ namespace gazeboserver {
 				gazeboPosition->Unlock();
 
 				gazeboPosition->Lock(1);
-				gazeboPositionData->cmdVelocity.yaw=w*(3.14159265/180);
+				gazeboPositionData->cmdVelocity.yaw=w;
 				gazeboPosition->Unlock();
 				return 0;
 			};
@@ -532,9 +532,9 @@ namespace gazeboserver {
 					exit (-1);
 				}
 
-				correcting_x = 0.; /* mm */
-				correcting_y = 0.; /* mm */
-				correcting_theta = 0.; /* deg */
+				correcting_x = 0.; /* m */
+				correcting_y = 0.; /* m */
+				correcting_theta = 0.; /* rad */
 			}
 
 			virtual ~EncodersI(){};
@@ -547,24 +547,20 @@ namespace gazeboserver {
 				}
 
 				Ice::PropertiesPtr prop = context.properties();
-                std::string myRobot = "pioneer2dx_" + prop->getProperty(context.tag()+".RobotName");
+				std::string myRobot = "pioneer2dx_" + prop->getProperty(context.tag()+".RobotName");
 
 				gazebo::Pose myPose;
 				gazeboEncodersSim->GetPose3d(myRobot.data(), myPose);
 
 				float robotx, roboty, robottheta;
 				gazeboPosition->Lock(1);
-				encodersData->robotx =
-				(myPose.pos.x) * 1000 * (float) cos (DEGTORAD * correcting_theta) -
-				(myPose.pos.y) * 1000 * (float) sin (DEGTORAD * correcting_theta) +
-				correcting_x;
-				encodersData->roboty =
-				(myPose.pos.y) * 1000 * (float) cos (DEGTORAD * correcting_theta) +
-				(myPose.pos.x) * 1000 * (float) sin (DEGTORAD * correcting_theta) +
-				correcting_y;
-				encodersData->robottheta = (myPose.yaw * RADTODEG) + correcting_theta;
-				if (encodersData->robottheta <= 0) encodersData->robottheta = encodersData->robottheta + 360;
-				else if (encodersData->robottheta > 360) encodersData->robottheta = encodersData->robottheta - 360;
+				encodersData->robotx = (myPose.pos.x) * (float) cos (correcting_theta) - (myPose.pos.y) * (float) sin (correcting_theta) + correcting_x;
+				encodersData->roboty = (myPose.pos.y) * (float) cos (correcting_theta) + (myPose.pos.x) * (float) sin (correcting_theta) + correcting_y;
+				encodersData->robottheta = (myPose.yaw) + correcting_theta;
+				if (encodersData->robottheta <= 0)
+					encodersData->robottheta = encodersData->robottheta + GAZEBOSERVER_2PI;
+				else if (encodersData->robottheta > GAZEBOSERVER_2PI)
+					encodersData->robottheta = encodersData->robottheta - GAZEBOSERVER_2PI;
 				gazeboPosition->Unlock();
 
 				encodersData->robotcos=cos(myPose.yaw);
@@ -582,9 +578,9 @@ namespace gazeboserver {
 			int gazeboclient_id;
 			gazebo::PositionIface *gazeboPosition;
 			/* Variables put to 0.0 and no change during the execution */
-			float correcting_x; /* mm */
-			float correcting_y; /* mm */
-			float correcting_theta; /* deg */
+			float correcting_x; /* m */
+			float correcting_y; /* m */
+			float correcting_theta; /* rad */
 			gazebo::SimulationIface *gazeboEncodersSim;
 	};
 
@@ -647,8 +643,8 @@ namespace gazeboserver {
 
 				gazeboPTZ1->Lock(1);
 				gazeboPTZ1->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
-				gazeboPTZ1->data->cmd_pan = data->longitude * DEGTORAD;
-				gazeboPTZ1->data->cmd_tilt = data->latitude * DEGTORAD;
+				gazeboPTZ1->data->cmd_pan = data->longitude;
+				gazeboPTZ1->data->cmd_tilt = data->latitude;
 				gazeboPTZ1->data->cmd_pan_speed = data->longitudeSpeed;
 				gazeboPTZ1->data->cmd_tilt_speed = data->latitudeSpeed;
 				gazeboPTZ1->Unlock();
@@ -732,8 +728,8 @@ namespace gazeboserver {
 
 				gazeboPTZ2->Lock(1);
 				gazeboPTZ2->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
-				gazeboPTZ2->data->cmd_pan = data->longitude * DEGTORAD;
-				gazeboPTZ2->data->cmd_tilt = data->latitude * DEGTORAD;
+				gazeboPTZ2->data->cmd_pan = data->longitude;
+				gazeboPTZ2->data->cmd_tilt = data->latitude;
 				gazeboPTZ2->data->cmd_pan_speed = data->longitudeSpeed;
 				gazeboPTZ2->data->cmd_tilt_speed = data->latitudeSpeed;
 				gazeboPTZ2->Unlock();
@@ -807,8 +803,8 @@ namespace gazeboserver {
 				}
 
 				gazeboPTZ1->Lock(1);
-				ptEncodersData1->panAngle = gazeboPTZ1->data->pan * RADTODEG;
-				ptEncodersData1->tiltAngle = gazeboPTZ1->data->tilt * RADTODEG;
+				ptEncodersData1->panAngle = gazeboPTZ1->data->pan;
+				ptEncodersData1->tiltAngle = gazeboPTZ1->data->tilt;
 				gazeboPTZ1->Unlock();
 
 				return ptEncodersData1; 
@@ -871,8 +867,8 @@ namespace gazeboserver {
 					printf("Gazebo PTENCODERS model not opened\n");
 				}
 				gazeboPTZ2->Lock(1);
-				ptEncodersData2->panAngle = gazeboPTZ2->data->pan * RADTODEG;
-				ptEncodersData2->tiltAngle = gazeboPTZ2->data->tilt * RADTODEG;
+				ptEncodersData2->panAngle = gazeboPTZ2->data->pan;
+				ptEncodersData2->tiltAngle = gazeboPTZ2->data->tilt;
 				gazeboPTZ2->Unlock();
 
 				return ptEncodersData2;
@@ -1022,8 +1018,8 @@ namespace gazeboserver {
 
 				gazeboPTZ1->Lock(1);
 				gazeboPTZ1->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
-				gazeboPTZ1->data->cmd_pan = -data->pan * DEGTORAD;
-				gazeboPTZ1->data->cmd_tilt = data->tilt * DEGTORAD;
+				gazeboPTZ1->data->cmd_pan = -data->pan;
+				gazeboPTZ1->data->cmd_tilt = data->tilt;
 				gazeboPTZ1->data->cmd_pan_speed = data->panSpeed;
 				gazeboPTZ1->data->cmd_tilt_speed = data->tiltSpeed;
 				gazeboPTZ1->Unlock();
@@ -1107,8 +1103,8 @@ namespace gazeboserver {
 
 				gazeboPTZ2->Lock(1);
 				gazeboPTZ2->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
-				gazeboPTZ2->data->cmd_pan = -data->pan * DEGTORAD;
-				gazeboPTZ2->data->cmd_tilt = data->tilt * DEGTORAD;
+				gazeboPTZ2->data->cmd_pan = -data->pan;
+				gazeboPTZ2->data->cmd_tilt = data->tilt;
 				gazeboPTZ2->data->cmd_pan_speed = data->panSpeed;
 				gazeboPTZ2->data->cmd_tilt_speed = data->tiltSpeed;
 				gazeboPTZ2->Unlock();
@@ -1182,11 +1178,11 @@ namespace gazeboserver {
 				}
 
 				gazeboPTZ1->Lock(1);
-				ptEncodersData1->x = 215.;
-				ptEncodersData1->y = 110.;
-				ptEncodersData1->z = 254.;
-				ptEncodersData1->pan = -gazeboPTZ1->data->pan * RADTODEG;
-				ptEncodersData1->tilt = gazeboPTZ1->data->tilt * RADTODEG;
+				ptEncodersData1->x = 0.215;
+				ptEncodersData1->y = 0.110;
+				ptEncodersData1->z = 0.254;
+				ptEncodersData1->pan = -gazeboPTZ1->data->pan;
+				ptEncodersData1->tilt = gazeboPTZ1->data->tilt;
 				gazeboPTZ1->Unlock();
 
 				return ptEncodersData1; 
@@ -1249,11 +1245,11 @@ namespace gazeboserver {
 					printf("Gazebo PTENCODERS model not opened\n");
 				}
 				gazeboPTZ2->Lock(1);
-				ptEncodersData2->x = 215.;
-				ptEncodersData2->y = -110.;
-				ptEncodersData2->z = 254.;
-				ptEncodersData2->pan = -gazeboPTZ2->data->pan * RADTODEG;
-				ptEncodersData2->tilt = gazeboPTZ2->data->tilt * RADTODEG;
+				ptEncodersData2->x = 0.215;
+				ptEncodersData2->y = -0.110;
+				ptEncodersData2->z = 0.254;
+				ptEncodersData2->pan = -gazeboPTZ2->data->pan;
+				ptEncodersData2->tilt = gazeboPTZ2->data->tilt;
 				gazeboPTZ2->Unlock();
 
 				return ptEncodersData2;
