@@ -58,6 +58,7 @@
 #define MAX_PAN 160.0
 #define MIN_TILT 40.0
 #define MAX_TILT 120.0
+#define PLAYERSERVER_2PI 6.28318531
 #define ITERATION_TIME 75 //ms
 
 /*Laser configuration*/
@@ -264,9 +265,9 @@ namespace playerserver {
 				}
 				playerc_position2d_enable(player_position,1);
 
-				correcting_x = prop->getPropertyAsIntWithDefault("PlayerServer.Initial_position.X", 0); /* mm */
-				correcting_y = prop->getPropertyAsIntWithDefault("PlayerServer.Initial_position.Y", 0); /* mm */
-				correcting_theta = prop->getPropertyAsIntWithDefault("PlayerServer.Initial_position.Theta", 0); /* deg */
+				correcting_x = prop->getPropertyAsIntWithDefault("PlayerServer.Initial_position.X", 0); /* m */
+				correcting_y = prop->getPropertyAsIntWithDefault("PlayerServer.Initial_position.Y", 0); /* m */
+				correcting_theta = prop->getPropertyAsIntWithDefault("PlayerServer.Initial_position.Theta", 0); /* rad */
 			}
 
 			virtual ~EncodersI(){};
@@ -283,13 +284,13 @@ namespace playerserver {
 					cout << "ERROR: Reading from Player Server" << endl;
 				}
 
-				robotx = (player_position->px)*1000*(float)cos(DEGTORAD*correcting_theta) - (player_position->py)*1000*(float)sin(DEGTORAD*correcting_theta) + correcting_x;
-				roboty = (player_position->py)*1000*(float)cos(DEGTORAD*correcting_theta) + (player_position->px)*1000*(float)sin(DEGTORAD*correcting_theta) + correcting_y;
-				robottheta = (player_position->pa*RADTODEG) + correcting_theta;
+				robotx = (player_position->px)*(float)cos(correcting_theta) - (player_position->py)*(float)sin(correcting_theta) + correcting_x;
+				roboty = (player_position->py)*(float)cos(correcting_theta) + (player_position->px)*(float)sin(correcting_theta) + correcting_y;
+				robottheta = (player_position->pa) + correcting_theta;
 				if (robottheta<=0) 
-					robottheta = robottheta + 360;
-				else if (robottheta > 360) 
-					robottheta = robottheta - 360;
+					robottheta = robottheta + PLAYERSERVER_2PI;
+				else if (robottheta > PLAYERSERVER_2PI) 
+					robottheta = robottheta - PLAYERSERVER_2PI;
 
 				encodersData->robotx = robotx;
 				encodersData->roboty = roboty;
@@ -306,9 +307,9 @@ namespace playerserver {
 			int playerserver_id;
 			int playerclient_id;
 			playerc_position2d_t *player_position;
-			float correcting_x; /* mm */
-			float correcting_y; /* mm */
-			float correcting_theta; /* deg */
+			float correcting_x; /* m */
+			float correcting_y; /* m */
+			float correcting_theta; /* rad */
 	};
 
 
@@ -349,16 +350,16 @@ namespace playerserver {
 
 				//player_ptz_lock (player_ptz, 1);
 				player_ptz->pan = data->longitude;
-				if (data->longitude > MAX_PAN)
-				player_ptz->pan = MAX_PAN;
-				else if (data->longitude < -54)
-				player_ptz->pan = MIN_PAN;
+				if (data->longitude > MAX_PAN*DEGTORAD)
+				player_ptz->pan = MAX_PAN*DEGTORAD;
+				else if (data->longitude < MIN_PAN*DEGTORAD)
+				player_ptz->pan = MIN_PAN*DEGTORAD;
 
 				player_ptz->tilt = data->latitude;
-				if (data->latitude > MAX_TILT)
-				player_ptz->tilt = MAX_TILT;
-				else if (data->latitude < MIN_TILT)
-				player_ptz->tilt = MIN_TILT;
+				if (data->latitude > MAX_TILT*DEGTORAD)
+				player_ptz->tilt = MAX_TILT*DEGTORAD;
+				else if (data->latitude < MIN_TILT*DEGTORAD)
+				player_ptz->tilt = MIN_TILT*DEGTORAD;
 				//player_ptz_unlock (player_ptz);
 
 				return 0;
@@ -410,8 +411,8 @@ namespace playerserver {
 				}
 
 				//player_ptz_lock (player_ptz, 1);
-				ptEncodersData->panAngle = -1 * player_ptz->pan * RADTODEG;
-				ptEncodersData->tiltAngle = -1 * player_ptz->tilt * RADTODEG;
+				ptEncodersData->panAngle = -1 * player_ptz->pan;
+				ptEncodersData->tiltAngle = -1 * player_ptz->tilt;
 				//player_ptz_unlock (player_ptz);
 
 				return ptEncodersData; 
