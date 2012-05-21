@@ -26,8 +26,8 @@ public class TeleoperatorArrows extends Activity {
 	private static final float W_VEL = 1.0f;
 	private static final float L_VEL = 1.0f; 
 	
-	private static final float PAN_STEP = 10.0f;
-	private static final float TILT_STEP = 2.0f;
+	private static final float PAN_STEP = 15.0f;
+	private static final float TILT_STEP = 10.0f;
 	
 	private static final int CHANGE_V = 0;
 	private static final int CHANGE_W = 1;
