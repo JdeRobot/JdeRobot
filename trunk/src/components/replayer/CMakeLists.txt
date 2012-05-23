@@ -1,6 +1,6 @@
 set( CMAKE_CXX_FLAGS "-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo" ) # Opciones para el compilador
 
-SET( SOURCE_FILES  kinect.cpp replayer.cpp)
+SET( SOURCE_FILES replayer.cpp)
 
 
 include_directories(

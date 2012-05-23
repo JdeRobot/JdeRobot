@@ -15,12 +15,9 @@
 #include <jderobot/cloudPoints.h>
 #include <colorspaces/colorspacesmm.h>
 
-//#include <opencv2/core/core.hpp>
-//#include <opencv2/highgui/highgui.hpp>
-//#include <opencv2/imgproc/imgproc.hpp>
-
-#include <cv.h>
-#include <highgui.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 int main(int argc, char** argv){
 
@@ -42,8 +39,8 @@ int main(int argc, char** argv){
    jderobot::CameraPrx cprx2;
    jderobot::PTEncodersPrx pteprx1;   
    jderobot::PTEncodersPrx pteprx2;
-	jderobot::Pose3DEncodersPrx pose3DEncoders1;
-	jderobot::Pose3DEncodersPrx pose3DEncoders2;
+   jderobot::Pose3DEncodersPrx pose3DEncoders1;
+   jderobot::Pose3DEncodersPrx pose3DEncoders2;
    jderobot::CloudPointsInterfacePrx prx;
   
 
@@ -55,7 +52,7 @@ int main(int argc, char** argv){
    jderobot::PTEncodersDataPtr PTencodersData1;
    jderobot::PTEncodersDataPtr PTencodersData2;
 	jderobot::Pose3DEncodersDataPtr pose3DEncodersData1;
-	jderobot::Pose3DEncodersDataPtr pose3DEncodersData2;
+    jderobot::Pose3DEncodersDataPtr pose3DEncodersData2;
    jderobot::CloudPointsDataPtr kinectData; 
     
     int avEncoders = 0;
@@ -332,7 +329,15 @@ int main(int argc, char** argv){
             kinectData = prx->getKinectData();
             outfile << timeRelative << "\t"+robotName +":"+robotPort + ":KinectData:\t"<< kinectData->points.size() << "\t";
             for(int i = 0; i < kinectData->points.size(); i++){
-               outfile << (float)kinectData->points[i].x <<"\t" << (float) kinectData->points[i].y <<"\t" << (float)kinectData->points[i].z <<"\t"<< (float)kinectData->points[i].r <<"\t"<< (float)kinectData->points[i].g <<"\t"<< (float)kinectData->points[i].b <<"\t";
+               float x,y,z;
+               float r,g,b;
+               x = kinectData->points[i].x;
+               y = kinectData->points[i].y;
+               z = kinectData->points[i].z;
+               r = kinectData->points[i].r;
+               g = kinectData->points[i].g;
+               b = kinectData->points[i].b;
+               outfile << x << "\t" << y << "\t" << z << "\t" << r << "\t" << g << "\t" << b << "\t" ;
             }
             outfile << std::endl;
          }
