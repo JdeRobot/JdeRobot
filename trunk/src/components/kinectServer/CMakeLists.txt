@@ -1,5 +1,5 @@
 IF(with_pcl)
-      SET( SOURCE_FILES cloudPoints.cpp kinectServer.cpp)
+      SET( SOURCE_FILES kinectServer.cpp)
 
       set( CMAKE_CXX_FLAGS "-Wno-deprecated -lGL -lGLU -lglut -lgazebo -lpcl_visualization -lpcl_surface -lpcl_registration -lpcl_segmentation -lpcl_filters -lpcl_sample_consensus -lpcl_io -lm -lpcl_octree -lOpenNI -lusb-1.0 -lpcl_features -lpcl_kdtree -lpcl_common " ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
 
