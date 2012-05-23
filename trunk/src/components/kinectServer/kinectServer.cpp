@@ -7,7 +7,7 @@
 #include <jderobotice/component.h>
 #include <jderobotice/application.h>
 
-#include "cloudPoints.h"
+#include <jderobot/cloudPoints.h>
 #include <jderobot/camera.h>
 
 #include <boost/thread/thread.hpp>
@@ -27,12 +27,12 @@
 #include <pthread.h>
 
 // opencv Libraries
-//#include <opencv2/core/core.hpp>
-//#include <opencv2/highgui/highgui.hpp>
-//#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
-#include <cv.h>
-#include <highgui.h>
+//#include <cv.h>
+//#include <highgui.h>
 
 #define NUM_THREADS     5
 #define MAX_DEPTH 10000
