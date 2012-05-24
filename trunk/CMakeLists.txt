@@ -12,6 +12,7 @@ SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libs)
 link_directories(${LIBS_DIR})
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice)
 SET( COMPONENTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/components)
+SET( LIBS_NEEDED   bgfgsegmentation jderobotice colorspaces jderobotutil progeo pioneer fuzzylib visionlib ) 
 
 ###################
 #                 #
