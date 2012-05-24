@@ -1,6 +1,0 @@
-<resources>
-	<color name="show_divider">#FF909090</color>
-	<color name="button_selected">#00FF8000</color>
-	<color name="button_not_selected">#FF000000</color>
-	<color name="button_transparent">#00000000</color>
-</resources>
