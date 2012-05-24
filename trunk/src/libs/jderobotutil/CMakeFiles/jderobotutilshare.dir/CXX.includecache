@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/jderobotutil/observer.cpp
+observer.h
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/jderobotutil/observer.h
+algorithm
+-
+
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/jderobotutil/observer.h
+list
+-
+tr1/memory
+-
+
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/jderobotutil/paramdict.cpp
+paramdict.h
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/jderobotutil/paramdict.h
+sstream
+-
+
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/jderobotutil/paramdict.h
+map
+-
+string
+-
+
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/jderobotutil/time.cpp
+time.h
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/jderobotutil/time.h
+
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/jderobotutil/time.h
+sys/time.h
+-
+

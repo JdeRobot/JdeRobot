@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/pioneer/pioneer.c
+pioneer.h
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/pioneer/pioneer.h
+math.h
+-
+
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/pioneer/pioneer.h
+

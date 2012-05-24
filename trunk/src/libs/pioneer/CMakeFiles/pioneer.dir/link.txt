@@ -1,0 +1,2 @@
+/usr/bin/ar cr libpioneer.a  CMakeFiles/pioneer.dir/pioneer.c.o
+/usr/bin/ranlib libpioneer.a

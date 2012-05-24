@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC   -shared -Wl,-soname,libcolorspacesmm.so -o libcolorspacesmm.so CMakeFiles/colorspacesmmshare.dir/imagecv.cpp.o -L/home/mikel/Escritorio/respository/test_repository/trunk/src/components/introrob/../../libs -L/usr/local/lib -L/usr/lib/gearbox -L/usr/local/lib/gearbox 

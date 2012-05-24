@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/colorspaces/colorspaces.h
+
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/colorspaces/rgb2hsv.c
+stdio.h
+-
+stdlib.h
+-
+math.h
+-
+pthread.h
+-
+colorspaces.h
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/colorspaces/colorspaces.h
+
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/colorspaces/rgb2yuv.c
+stdio.h
+-
+stdlib.h
+-
+math.h
+-
+pthread.h
+-
+colorspaces.h
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/colorspaces/colorspaces.h
+

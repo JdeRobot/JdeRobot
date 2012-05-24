@@ -1,0 +1,2 @@
+/usr/bin/ar cr libprogeo.a  CMakeFiles/progeo.dir/progeo.c.o
+/usr/bin/ranlib libprogeo.a

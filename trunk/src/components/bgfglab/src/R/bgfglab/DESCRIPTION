@@ -1,0 +1,11 @@
+Package: bgfglab
+Type: Package
+Title: bg/fg algorithms analysis
+Version: 1.0
+Date: 2010-09-16
+Author: David Lobato <dav.lobato@gmail.com>
+Maintainer: David Lobato <dav.lobato@gmail.com>
+Description: Functions to analyze fg/bg detection algorithms
+License: See jderobot.org
+LazyLoad: yes
+Depends: bigmemory, biganalytics, multicore, foreach, doMC, flexclust

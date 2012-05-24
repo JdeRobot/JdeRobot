@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/progeo/progeo.c
+progeo.h
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/progeo/progeo.h
+math.h
+-
+stdio.h
+-
+
+/home/mikel/Escritorio/respository/test_repository/trunk/src/libs/progeo/progeo.h
+

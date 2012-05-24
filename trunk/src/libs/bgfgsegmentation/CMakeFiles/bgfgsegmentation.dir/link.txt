@@ -1,0 +1,2 @@
+/usr/bin/ar cr libbgfgsegmentation.a  CMakeFiles/bgfgsegmentation.dir/bgfg_codebook.cpp.o CMakeFiles/bgfgsegmentation.dir/bgfg_common.cpp.o CMakeFiles/bgfgsegmentation.dir/bgfg_exp.cpp.o CMakeFiles/bgfgsegmentation.dir/bgfg_fixed.cpp.o CMakeFiles/bgfgsegmentation.dir/bgfg_mean.cpp.o CMakeFiles/bgfgsegmentation.dir/bgfg_mode.cpp.o CMakeFiles/bgfgsegmentation.dir/bgmodelfactory.cpp.o
+/usr/bin/ranlib libbgfgsegmentation.a
