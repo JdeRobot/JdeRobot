@@ -1,1 +1,0 @@
-/usr/bin/gcc  -fPIC   -shared -Wl,-soname,libprogeo.so -o libprogeo.so CMakeFiles/progeoshare.dir/progeo.c.o -L/home/mikel/Escritorio/respository/test_repository/trunk/src/components/introrob/../../libs -L/usr/local/lib -L/usr/lib/gearbox -L/usr/local/lib/gearbox 

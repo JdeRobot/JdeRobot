@@ -1,1 +1,0 @@
-/usr/bin/gcc  -fPIC   -shared -Wl,-soname,libpioneer.so -o libpioneer.so CMakeFiles/pioneershare.dir/pioneer.c.o -L/home/mikel/Escritorio/respository/test_repository/trunk/src/components/introrob/../../libs -L/usr/local/lib -L/usr/lib/gearbox -L/usr/local/lib/gearbox 
