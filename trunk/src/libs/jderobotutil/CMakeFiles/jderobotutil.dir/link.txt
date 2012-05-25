@@ -1,2 +1,0 @@
-/usr/bin/ar cr libjderobotutil.a  CMakeFiles/jderobotutil.dir/observer.cpp.o CMakeFiles/jderobotutil.dir/paramdict.cpp.o CMakeFiles/jderobotutil.dir/time.cpp.o
-/usr/bin/ranlib libjderobotutil.a

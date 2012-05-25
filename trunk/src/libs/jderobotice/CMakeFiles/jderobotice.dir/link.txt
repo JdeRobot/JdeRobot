@@ -1,2 +1,0 @@
-/usr/bin/ar cr libjderobotice.a  CMakeFiles/jderobotice.dir/component.cpp.o CMakeFiles/jderobotice.dir/context.cpp.o CMakeFiles/jderobotice.dir/application.cpp.o CMakeFiles/jderobotice.dir/componentthread.cpp.o CMakeFiles/jderobotice.dir/catchutils.cpp.o CMakeFiles/jderobotice.dir/subsystemthread.cpp.o CMakeFiles/jderobotice.dir/interfaceconnect.cpp.o
-/usr/bin/ranlib libjderobotice.a

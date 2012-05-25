@@ -1,2 +1,0 @@
-/usr/bin/ar cr libfuzzylib.a  CMakeFiles/fuzzylib.dir/fuzzylib.c.o
-/usr/bin/ranlib libfuzzylib.a

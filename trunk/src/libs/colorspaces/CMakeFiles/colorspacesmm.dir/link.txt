@@ -1,2 +1,0 @@
-/usr/bin/ar cr libcolorspacesmm.a  CMakeFiles/colorspacesmm.dir/imagecv.cpp.o
-/usr/bin/ranlib libcolorspacesmm.a

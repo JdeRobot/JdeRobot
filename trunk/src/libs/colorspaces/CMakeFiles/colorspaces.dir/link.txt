@@ -1,2 +1,0 @@
-/usr/bin/ar cr libcolorspaces.a  CMakeFiles/colorspaces.dir/rgb2hsv.c.o CMakeFiles/colorspaces.dir/rgb2yuv.c.o
-/usr/bin/ranlib libcolorspaces.a
