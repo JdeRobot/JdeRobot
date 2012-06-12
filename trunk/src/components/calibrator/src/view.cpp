@@ -22,361 +22,541 @@
 
 #include "view.h"
 
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <list>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
+
+
+
 namespace calibrator {
 
-	View::View(Controller * controller): gtkmain(0,0) {
+/*
+Comentarios de procedimiento
+*/
 
-		/*Create controller*/
-		this->controller = controller;
+	View::View(Glib::RefPtr<Gtk::ListStore> m_refTreeModel, Module_DLT * module_dlt, Module_Extrinsics * module_extrinsics, Module_Rectifier * module_rectifier): gtkmain(0,0) {
 
+		/*Init OpenGL*/
+		if(!Gtk::GL::init_check(NULL, NULL))	{
+			std::cerr << "Couldn't initialize GL\n";
+			std::exit(1);
+		}
+		active_camera = 0;
 		std::cout << "Loading glade\n";
-		refXml = Gnome::Glade::Xml::create(this->controller->getGladePath());
+		refXml = Gnome::Glade::Xml::create(std::string(GLADE_DIR) + std::string("/calibrator.glade"));
 
-		/*Get widgets*/
-        refXml->get_widget("mainwindow",mainwindow);
-		refXml->get_widget("pos_x",vscale_pos_x);
-		refXml->get_widget("pos_y",vscale_pos_y);
-		refXml->get_widget("pos_z",vscale_pos_z);
-		refXml->get_widget("foa_x",vscale_foa_x);
-		refXml->get_widget("foa_y",vscale_foa_y);
-		refXml->get_widget("foa_z",vscale_foa_z);
-		refXml->get_widget("fx",vscale_fx);
-		refXml->get_widget("fy",vscale_fy);
-		refXml->get_widget("u0",vscale_u0);
-		refXml->get_widget("v0",vscale_v0);
-		refXml->get_widget("roll",vscale_roll);
-        refXml->get_widget("image",gtk_image);	
-        refXml->get_widget("button_center",button_center);	
-        refXml->get_widget("button_save",button_save);	
-        refXml->get_widget("button_load",button_Load);		
-        
-		/*Set default config*/
-		vscale_pos_x->set_value((double)this->controller->getPos()->X);
-		vscale_pos_y->set_value((double)this->controller->getPos()->Y);
-		vscale_pos_z->set_value((double)this->controller->getPos()->Z);
-		vscale_foa_x->set_value((double)this->controller->getFoa()->X);
-		vscale_foa_y->set_value((double)this->controller->getFoa()->Y);
-		vscale_foa_z->set_value((double)this->controller->getFoa()->Z);		
-		vscale_fx->set_value((double)this->controller->getFdistX());
-		vscale_fy->set_value((double)this->controller->getFdistY());
-		vscale_u0->set_value((double)this->controller->getU0());
-		vscale_v0->set_value((double)this->controller->getV0());
-		vscale_roll->set_value((double)this->controller->getRoll());
+
+
+		/*Get widgets Panels*/
+		refXml->get_widget("mainwindow",mainwindow);
+		refXml->get_widget("image_patron",gtk_patron);
+		refXml->get_widget("calibrator",mode[0]);
+		refXml->get_widget("extrinsics",mode[1]);
+		refXml->get_widget("rectifier",mode[2]);
+		refXml->get_widget("estereo",mode[3]);
+		refXml->get_widget("dlt_panel",dlt_panel);
+		refXml->get_widget("extrinsics_panel",extrinsics_panel);
+		refXml->get_widget("rectifier_panel",rectifier_panel);
+		refXml->get_widget("estereo_panel",estereo_panel);
+
+
+		/*Get matrix*/
+		for(int i=1; i<4;i++){
+			for(int j=1; j<5;j++){
+				std::stringstream labelString;
+				labelString << "c1k"<< int(i) << int(j);
+				refXml->get_widget(labelString.str(),k[(i-1)*4+j-1]);
+
+
+			}
+		}
+
+		for(int i=1; i<5;i++){
+			for(int j=1; j<5;j++){
+				std::stringstream labelString;
+				labelString << "c1rt"<< int(i) << int(j);
+				refXml->get_widget(labelString.str(),rt[(i-1)*4+j-1]);
+
+
+			}
+		}
+
+		/* OpenGL World */
+		refXml->get_widget_derived("gl_world",world);
+		refXml->get_widget("button_load_world",button_Load_world);
+		button_Load_world->signal_clicked().connect(sigc::mem_fun(this,&View::button_Load_word_clicked));
 		
-		/*Create callbacks*/
-		vscale_pos_x->signal_value_changed().connect(sigc::mem_fun(this,&View::pos_x_changed));
-		vscale_pos_y->signal_value_changed().connect(sigc::mem_fun(this,&View::pos_y_changed));
-		vscale_pos_z->signal_value_changed().connect(sigc::mem_fun(this,&View::pos_z_changed));
-		vscale_foa_x->signal_value_changed().connect(sigc::mem_fun(this,&View::foa_x_changed));
-		vscale_foa_y->signal_value_changed().connect(sigc::mem_fun(this,&View::foa_y_changed));
-		vscale_foa_z->signal_value_changed().connect(sigc::mem_fun(this,&View::foa_z_changed));
-		vscale_fx->signal_value_changed().connect(sigc::mem_fun(this,&View::fx_changed));
-		vscale_fy->signal_value_changed().connect(sigc::mem_fun(this,&View::fy_changed));
-		vscale_u0->signal_value_changed().connect(sigc::mem_fun(this,&View::u0_changed));
-		vscale_v0->signal_value_changed().connect(sigc::mem_fun(this,&View::v0_changed));
-		vscale_roll->signal_value_changed().connect(sigc::mem_fun(this,&View::roll_changed));
-		button_center->signal_clicked().connect(sigc::mem_fun(this,&View::button_center_clicked));
-	    button_save->signal_clicked().connect(sigc::mem_fun(this,&View::button_save_clicked));
-	    button_Load->signal_clicked().connect(sigc::mem_fun(this,&View::button_Load_clicked));	    
-	    
-      m_table.resize(10,10);
-      window = NULL;
-      
 
-    if(window!=NULL)
-        delete window;
+		/* Update World OpenGl*/
+		world->setToCamera1();
+		
 
-    window = new Gtk::Window();
-    window->set_visible(true);
-    window->set_title("KRT");
-	button_KRT_clicked();
+		mode[0]->signal_toggled().connect(sigc::mem_fun(this,&View::on_toggled_calibrator));
+		mode[1]->signal_toggled().connect(sigc::mem_fun(this,&View::on_toggled_extrinsics));
+		mode[2]->signal_toggled().connect(sigc::mem_fun(this,&View::on_toggled_rectifier));
+		mode[3]->signal_toggled().connect(sigc::mem_fun(this,&View::on_toggled_estereo));
+
+		/* Get cameras and load camera combo */
+		refXml->get_widget("camera_combo",camera_set);
+		camera_set->set_model(m_refTreeModel);
+
+
+		camera_set->set_active(0);
+		camera_set->signal_changed().connect(sigc::mem_fun(this,&View::on_changed_camera_set));
+
+		active_panel  = 0;
+
+/* Calibrator */
+
+		/*Create module_dlt*/
+		this->module_dlt = module_dlt;
+		this->module_dlt->get_widgets(refXml);
+
+/* Extrinsics */
+		this->module_extrinsics = module_extrinsics;
+		this->module_extrinsics->get_widgets(refXml);
+		this->module_extrinsics->set_mainwindow(mainwindow);
+		
+
+/* Module_Rectifier*/      
+
+		this->module_rectifier = module_rectifier;
+		this->module_rectifier->get_widgets(refXml);
+
+
+
+		mainwindow->show();
+/*
+		xmlReader(&camera, "/home/caupolican/robotica/newnewnew/trunk/src/components/calibrator/calibration.xml");
+		display_camerainfo(camera);
+		xmlWriter(camera, "/home/caupolican/robotica/newnewnew/trunk/src/components/calibrator/calibration2.xml");
+*/
 	}
 
 	View::~View() {
-		delete this->controller;
+		delete this->module_dlt;
+		delete this->module_extrinsics;
+		delete this->module_rectifier;
 	}
 
-  bool View::isVisible(){
-    return mainwindow->is_visible();
-  }
+	void View::read_matrix() {
 
-  void View::display(const colorspaces::Image& image)
-  {
-		/*Change button*/
+ try
+   {
+      xercesc::XMLPlatformUtils::Initialize();  // Initialize Xerces infrastructure
+   }
+   catch( xercesc::XMLException& e )
+   {
+      char* message = xercesc::XMLString::transcode( e.getMessage() );
+      cerr << "XML toolkit initialization error: " << message << endl;
+      xercesc::XMLString::release( &message );
+      // throw exception here to return ERROR_XERCES_INIT
+   }
 
-		/*Manage image*/
-		this->controller->drawWorld(image);
+   xercesc::XercesDOMParser * m_ConfigFileParser = new xercesc::XercesDOMParser;
 
-		/*Set image*/
-		colorspaces::ImageRGB8 img_rgb8(image);//conversion will happen if needed
-		Glib::RefPtr<Gdk::Pixbuf> imgBuff = Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8.data,
+		std::string configFile = "/home/caupolican/robotica/newnewnew/trunk/src/components/calibrator/calibration.xml";
+
+		xercesc::DOMDocument* xmlDoc = NULL;
+
+		// Test to see if the file is ok.
+		struct stat fileStatus;
+
+		int iretStat = stat(configFile.c_str(), &fileStatus);
+	
+		if( iretStat == ENOENT )
+			throw ( std::runtime_error("Path file_name does not exist, or path is an empty string.") );
+		else if( iretStat == ENOTDIR )
+			throw ( std::runtime_error("A component of the path is not a directory."));
+		else if( iretStat == ELOOP )
+			throw ( std::runtime_error("Too many symbolic links encountered while traversing the path."));
+		else if( iretStat == EACCES )
+			throw ( std::runtime_error("Permission denied."));
+		else if( iretStat == ENAMETOOLONG )
+			throw ( std::runtime_error("File can not be read\n"));
+
+		// Configure DOM parser.
+		m_ConfigFileParser->setValidationScheme( xercesc::XercesDOMParser::Val_Never );
+		m_ConfigFileParser->setDoNamespaces( false );
+		m_ConfigFileParser->setDoSchema( false );
+		m_ConfigFileParser->setLoadExternalDTD( false );
+
+
+		try {
+			m_ConfigFileParser->parse( configFile.c_str() );
+
+			// no need to free this pointer - owned by the parent parser object
+			xmlDoc = m_ConfigFileParser->getDocument();
+
+			// Get the top-level element: NAme is "root". No attributes for "root"
+			xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
+			if( !elementRoot ) throw(std::runtime_error( "empty XML document" ));
+
+			// Parse XML file for tags of interest: "ApplicationSettings"
+			// Look one level nested within "root". (child of root)
+			xercesc::DOMNodeList*      children = elementRoot->getChildNodes();
+			const  XMLSize_t nodeCount = children->getLength();
+
+
+			// For all nodes, children of "root" in the XML tree.
+			for( XMLSize_t xx = 0; xx < nodeCount; ++xx )
+			{
+				std::cout << "Camera: " << xx << std::endl;	
+				xercesc::DOMNode* currentNode = children->item(xx);
+
+				if( currentNode->getNodeType() &&  // true is not NULL
+				currentNode->getNodeType() == xercesc::DOMNode::ELEMENT_NODE ) // is element 
+				{
+					std::cout << "Node " << xercesc::XMLString::transcode(currentNode->getNodeName()) << std::endl;
+
+					xercesc::DOMNodeList*      children_level2 = currentNode->getChildNodes();
+					const  XMLSize_t nodeCount_level2 = children_level2->getLength();
+					for( XMLSize_t yy = 0; yy < nodeCount_level2; ++yy )
+					{			
+						xercesc::DOMNode* currentNode_level2 = children_level2->item(yy);
+						std::cout << "Level 2 " << xercesc::XMLString::transcode(currentNode_level2->getNodeName()) << std::endl;
+
+					}
+
+				}
+			}
+		}
+		catch( xercesc::XMLException& e )
+		{
+			char* message = xercesc::XMLString::transcode( e.getMessage() );
+			ostringstream errBuf;
+			errBuf << "Error parsing file: " << message << flush;
+			xercesc::XMLString::release( &message );
+		}
+	}
+
+
+	bool View::isVisible(){
+		return mainwindow->is_visible();
+	}
+
+	void View::display(const colorspaces::Image& image)
+	{
+
+		colorspaces::ImageRGB8 image_rgb8(image);//conversion will happen if needed
+		Glib::RefPtr<Gdk::Pixbuf> imgBuff_rgb8 = Gdk::Pixbuf::create_from_data((const guint8*)image_rgb8.data,
+			Gdk::COLORSPACE_RGB,
+			false,
+			8,
+			image_rgb8.width,
+			image_rgb8.height,
+			image_rgb8.step); 
+		gtk_patron->clear();
+		gtk_patron->set(imgBuff_rgb8);
+
+
+		// Execute selected module
+		colorspaces::ImageRGB8 image_dlt = image_rgb8.clone();
+		colorspaces::ImageRGB8 image_extrinsics = image_rgb8.clone();
+		colorspaces::ImageRGB8 image_rectifier = image_rgb8.clone();
+
+
+		switch (active_panel)
+		{
+		case 0:
+
+		/* Calibrator */
+				/*Manage image*/
+				//		this->module_dlt->drawWorld(image);
+				/*Set image */
+				
+				this->module_dlt->display(image_dlt);
+				camera = this->module_dlt->getCam();
+		break;
+		case 1:
+		/* Extrinsics */
+				/*Set image*/
+				this->module_extrinsics->display(image_extrinsics);
+				camera = this->module_extrinsics->getCam();
+		break;
+		default:
+		/* Module_Rectifier*/
+				
+				this->module_rectifier->display(image_rectifier);
+		}
+
+		
+		/* Update information matrix */
+		std::stringstream labelString;
+		labelString << camera.k11;
+		k[0]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.k12;
+		k[1]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.k13;
+		k[2]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.k14;
+		k[3]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.k21;
+		k[4]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.k22;
+		k[5]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.k23;
+		k[6]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.k24;
+		k[7]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.k31;
+		k[8]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.k32;
+		k[9]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.k33;
+		k[10]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.k34;
+		k[11]->set_label(labelString.str());
+
+
+		labelString.str(""); labelString << camera.rt11;
+		rt[0]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt12;
+		rt[1]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt13;
+		rt[2]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt14;
+		rt[3]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt21;
+		rt[4]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt22;
+		rt[5]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt23;
+		rt[6]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt24;
+		rt[7]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt31;
+		rt[8]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt32;
+		rt[9]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt33;
+		rt[10]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt34;
+		rt[11]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt41;
+		rt[12]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt42;
+		rt[13]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt43;
+		rt[14]->set_label(labelString.str());
+		labelString.str(""); labelString << camera.rt44;
+		rt[15]->set_label(labelString.str());
+
+		/* Draw Camera */
+		world->draw_camera(10, 20, 1);
+
+		while (gtkmain.events_pending())
+			gtkmain.iteration();
+
+
+/* Module_Rectifier 
+
+		colorspaces::ImageRGB8 img_rgb84(image);//conversion will happen if needed
+		Glib::RefPtr<Gdk::Pixbuf> imgBuff4 = 
+		Gdk::Pixbuf::create_from_data((const guint8*)img_rgb84.data,
+			Gdk::COLORSPACE_RGB,
+			false,
+			8,
+			img_rgb84.width,
+			img_rgb84.height,
+			img_rgb84.step);
+
+		this->module_rectifier->gtkimage_notrectified->clear();
+		this->module_rectifier->gtkimage_notrectified->set(imgBuff3);
+
+
+		/* Image 
+		gtkimage_notrectified->clear(); 
+		gtkimage_notrectified->set(imgBuff4);
+		mybuffer_notrectified = imgBuff4->get_pixels();
+	
+		/* Rectified Image 
+		imgRectifiedBuff = imgBuff4->copy();
+		gtkimage_rectified->clear(); 
+		gtkimage_rectified->set(imgRectifiedBuff);
+		mybuffer_rectified = imgRectifiedBuff->get_pixels();
+
+
+		/* if the user have selected 4 points on each image the application rectify the second image 
+		if ((counter_points_image == NUM_POINTS_RECTIFIER) and (counter_points_image_rectified == NUM_POINTS_RECTIFIER)){
+
+			/* Calculate the solution matrix 
+			if (flag_resolved == false){
+				solve_equation_system();
+				flag_resolved = true;
+			}
+	  
+			/* Build the rectified image 
+			build_rectified_image(mybuffer_notrectified, mybuffer_rectified);
+
+		}
+
+		/* Draw selected points 
+		drawSelectedPoints(counter_points_image, points_image, mybuffer_notrectified);
+		drawSelectedPoints(counter_points_image_rectified, points_image_rectified, mybuffer_rectified);
+
+		/*Manage image
+		this->module_extrinsics2->drawWorld(image4);
+
+		/*Set image
+		colorspaces::ImageRGB8 img_rgb84(image4);//conversion will happen if needed
+		Glib::RefPtr<Gdk::Pixbuf> imgBuff4 = Gdk::Pixbuf::create_from_data((const guint8*)img_rgb84.data,
 				    Gdk::COLORSPACE_RGB,
 				    false,
 				    8,
-				    img_rgb8.width,
-				    img_rgb8.height,
-				    img_rgb8.step); 
-    gtk_image->clear();
-    gtk_image->set(imgBuff);
+				    img_rgb84.width,
+				    img_rgb84.height,
+				    img_rgb84.step); 
+		gtk_image22->clear();
+		gtk_image22->set(imgBuff4);
+*/
+		/*Show window
+		this->module_dlt->displayFrameRate(fpslabel);
+		*/
+/*
 
-		/*Show window*/
-    mainwindow->resize(1,1);
-    while (gtkmain.events_pending())
-      gtkmain.iteration();
-  }
+CvPoint pt1,pt2;
+			if (1){
+				colorspaces::ImageRGB8 img_rgb888(image);//conversion will happen if needed
+				Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) img_rgb888.data,Gdk::COLORSPACE_RGB,false,8,img_rgb888.width,img_rgb888.height,img_rgb888.step);    
+	    		gtk_image->clear();
 
-	void View::pos_x_changed(){
-		this->controller->setPos((float)vscale_pos_x->get_value(), (float)vscale_pos_y->get_value(), (float)vscale_pos_z->get_value()); 
-		vscale_foa_x->set_value((double)this->controller->getFoa()->X);
-		vscale_foa_y->set_value((double)this->controller->getFoa()->Y);
-		vscale_foa_z->set_value((double)this->controller->getFoa()->Z);
-		button_KRT_clicked();
-  }
+				/*si queremos pintar las lineas
+bool lines_rgb_active = true;
+				if (lines_rgb_active){
+					IplImage* src = cvCreateImage(cvSize(img_rgb888.width,img_rgb888.height), IPL_DEPTH_8U, 3);
+					memcpy((unsigned char *) src->imageData, &(img_rgb888.data[0]),img_rgb888.width*img_rgb888.height * 3);
+util->draw_room(src,0, world->lines, world->numlines);
+					memmove(&(img_rgb888.data[0]),(unsigned char *) src->imageData,img_rgb888.width*img_rgb888.height * 3);
+					
+				}
+gtk_image->set(imgBuff);
+//	    		displayFrameRate();
+	    		while (gtkmain.events_pending())
+	      		gtkmain.iteration();
+			}
 
-	void View::pos_y_changed(){
-		this->controller->setPos((float)vscale_pos_x->get_value(), (float)vscale_pos_y->get_value(), (float)vscale_pos_z->get_value()); 
-		vscale_foa_x->set_value((double)this->controller->getFoa()->X);
-		vscale_foa_y->set_value((double)this->controller->getFoa()->Y);
-		vscale_foa_z->set_value((double)this->controller->getFoa()->Z);
-		button_KRT_clicked();
-  }
+			if (1){
+	
+//				colorspaces::ImageRGB8 img_rgb888(imageDEPTH);//conversion will happen if needed
+colorspaces::ImageRGB8 img_rgb888(image);//conversion will happen if needed
+				Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) img_rgb888.data,Gdk::COLORSPACE_RGB,false,8,img_rgb888.width,img_rgb888.height,img_rgb888.step);    
+//	    		w_imageDEPTH->clear();
+gtk_patron->clear();
+bool lines_depth_active = true;
+				if (lines_depth_active){
+					IplImage* src = cvCreateImage(cvSize(img_rgb888.width,img_rgb888.height), IPL_DEPTH_8U, 3);
+					memcpy((unsigned char *) src->imageData, &(img_rgb888.data[0]),img_rgb888.width*img_rgb888.height * 3);
+					util->draw_room(src,1, world->lines, world->numlines);
+					memmove(&(img_rgb888.data[0]),(unsigned char *) src->imageData,img_rgb888.width*img_rgb888.height * 3);
+					
+				}
+//	    		w_imageDEPTH->set(imgBuff);
+gtk_patron->set(imgBuff);
+//	    		displayFrameRate();
+*/
+	    		while (gtkmain.events_pending())
+	      		gtkmain.iteration();
+/*
+			}
 
-	void View::pos_z_changed(){
-		this->controller->setPos((float)vscale_pos_x->get_value(), (float)vscale_pos_y->get_value(), (float)vscale_pos_z->get_value());
-		vscale_foa_x->set_value((double)this->controller->getFoa()->X);
-		vscale_foa_y->set_value((double)this->controller->getFoa()->Y);
-		vscale_foa_z->set_value((double)this->controller->getFoa()->Z); 
-		button_KRT_clicked();
-  }
+bool reconstruct_depth_activate = true;
+			if (reconstruct_depth_activate){
+				add_depth_points(imageDEPTH, imageRGB);
+				//reconstruct_depth_activate=false;
+			}
+*/
 
-	void View::foa_x_changed(){
-		this->controller->setFoa((float)vscale_foa_x->get_value(), (float)vscale_foa_y->get_value(), (float)vscale_foa_z->get_value());
-		button_KRT_clicked(); 
-  }
 
-	void View::foa_y_changed(){
-		this->controller->setFoa((float)vscale_foa_x->get_value(), (float)vscale_foa_y->get_value(), (float)vscale_foa_z->get_value()); 
-        button_KRT_clicked();
-  }
 
-	void View::foa_z_changed(){
-		this->controller->setFoa((float)vscale_foa_x->get_value(), (float)vscale_foa_y->get_value(), (float)vscale_foa_z->get_value()); 
-        button_KRT_clicked();
-  }
+		//mainwindow->resize(1,1);
+	}
 
-	void View::fx_changed(){
-		this->controller->setFdistX((float)vscale_fx->get_value()); 
-		button_KRT_clicked();
-  }
+int View::get_active_camera(){
+	return active_camera;
+}
 
-	void View::fy_changed(){
-		this->controller->setFdistY((float)vscale_fy->get_value()); 
-		button_KRT_clicked();
-  }
+/* Common Events */
 
-	void View::u0_changed(){
-		this->controller->setU0((float)vscale_u0->get_value()); 
-		button_KRT_clicked();
-  }
+	void View::on_toggled_calibrator(){
+		active_panel = 0;
+		std::cout << " Calibrator " << std::endl;
+		dlt_panel->set_visible(true);
+		extrinsics_panel->set_visible(false);
+		rectifier_panel->set_visible(false);
+		estereo_panel->set_visible(false);
+	}
+	void View::on_toggled_extrinsics(){
+		active_panel = 1;
+		std::cout << " Extrinsics " << std::endl;
+		extrinsics_panel->set_visible(true);
+		dlt_panel->set_visible(false);
+		rectifier_panel->set_visible(false);
+		estereo_panel->set_visible(false);
+	}
+	void View::on_toggled_rectifier(){
+		active_panel = 2;
+		std::cout << " rectifier " << std::endl;
+		dlt_panel->set_visible(false);
+		extrinsics_panel->set_visible(false);
+		rectifier_panel->set_visible(true);
+		estereo_panel->set_visible(false);
+	}
+	void View::on_toggled_estereo(){
+		active_panel = 3;
+		std::cout << " estereo " << std::endl;
+		dlt_panel->set_visible(false);
+		extrinsics_panel->set_visible(false);
+		rectifier_panel->set_visible(false);
+		estereo_panel->set_visible(true);
+	}
 
-	void View::v0_changed(){
-		this->controller->setV0((float)vscale_v0->get_value()); 
-		button_KRT_clicked();
-  }
+	void View::on_changed_camera_set(){
+		active_camera = camera_set->get_active_row_number();
+		std::cout << "Camara activa " << active_camera << std::endl;
+	}
 
-	void View::roll_changed(){
-		this->controller->setRoll((float)vscale_roll->get_value()); 
-		button_KRT_clicked();
-  }
+	void View::button_Load_word_clicked()
+	{
 
-	void View::button_center_clicked(){
-		this->controller->changeDrawCenter();
-  }
-  
-  void View::button_save_clicked()
-  {
-      Gtk::FileChooserDialog dialog("Please choose a folder", Gtk::FILE_CHOOSER_ACTION_OPEN);
-      dialog.set_transient_for(*mainwindow);
-
-      //Add response buttons the the dialog:
-      dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-      dialog.add_button("Select", Gtk::RESPONSE_OK);
-
-      int result = dialog.run();
-
-      //Handle the response:
-      switch(result){
-        case(Gtk::RESPONSE_OK):
-        {
-          //std::cout << "Select clicked." << std::endl;
-          std::cout << "Folder selected: " << dialog.get_filename() << std::endl;
-          this->controller->saveParameters(dialog.get_filename().data());
-          break;
-        }
-        case(Gtk::RESPONSE_CANCEL):
-        {
-          std::cout << "Cancel clicked." << std::endl;
-          break;
-        }
-        default:
-        {
-          std::cout << "Unexpected button clicked." << std::endl;
-          break;
-        }
-      }
-  }
-  
-    void View::button_Load_clicked()
-    {
-    
 		int i=0;
 		FILE *worldconfig;
-		
-        Gtk::FileChooserDialog dialog("Please choose a folder", Gtk::FILE_CHOOSER_ACTION_OPEN);
-        dialog.set_transient_for(*mainwindow);
-		
-        //Add response buttons the the dialog:
-        dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-        dialog.add_button("Select", Gtk::RESPONSE_OK);
 
-        int result = dialog.run();
+		Gtk::FileChooserDialog dialog("Please choose a folder", Gtk::FILE_CHOOSER_ACTION_OPEN);
+		dialog.set_transient_for(*mainwindow);
 
-        //Handle the response:
-        switch(result){
-            case(Gtk::RESPONSE_OK):{
-              //std::cout << "Select clicked." << std::endl;
-              std::cout << "Folder selected: " << dialog.get_filename() << std::endl;
-                worldconfig=fopen(dialog.get_filename().data(),"r");
-                
-                if(worldconfig==NULL){
-                    cerr << "Calibrator: World configuration configuration file error: " << dialog.get_filename().data() << endl;
-                }else{
-                    this->controller->resetLines();
-                    do{
-                        i=this->controller->load_world_line(worldconfig);
-                    } while(i!=EOF);
-                fclose(worldconfig);
-                }
+		//Add response buttons the the dialog:
+		dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+		dialog.add_button("Select", Gtk::RESPONSE_OK);
 
-                this->controller->load_world();
-              break;
-            }
-            case(Gtk::RESPONSE_CANCEL):{
-              std::cout << "Cancel clicked." << std::endl;
-              break;
-            }
-            default:{
-              std::cout << "Unexpected button clicked." << std::endl;
-              break;
-            }
-        }
-    }
-  
-    void View::button_KRT_clicked(){
-        
+		int result = dialog.run();
 
-        TPinHoleCamera camera = this->controller->getCam();
-        gchar *str;
+		//Handle the response:
+		switch(result){
+			case(Gtk::RESPONSE_OK):{
 
-        
-        str = g_strdup_printf ("|\t%.1lf", camera.k11);
-        labelK[0].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf", camera.k12);
-        labelK[1].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf", camera.k13);
-        labelK[2].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf\t|", camera.k14);
-        labelK[3].set_text(str); g_free (str);
-        str = g_strdup_printf ("|\t%.1lf", camera.k21);
-        labelK[4].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf", camera.k22);
-        labelK[5].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf", camera.k23);
-        labelK[6].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf\t|", camera.k24);
-        labelK[7].set_text(str); g_free (str);
-        str = g_strdup_printf ("|\t%.1lf", camera.k31);
-        labelK[8].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf", camera.k32);
-        labelK[9].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf", camera.k33);
-        labelK[10].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf\t|", camera.k34);
-        labelK[11].set_text(str); g_free (str);
-        labelK[12].set_text("K Matrix");
+				this->module_extrinsics->button_Load_clicked(dialog.get_filename().data());
+				world->readFile(dialog.get_filename());
+				break;
+			}
 
-        m_table.attach(labelK[12],1 ,2 ,0, 1 );
-        m_table.attach(labelK[0] ,1 ,2 ,1, 2 );
-        m_table.attach(labelK[1] ,2 ,3 ,1, 2 );
-        m_table.attach(labelK[2] ,3 ,4 ,1, 2 );
-        m_table.attach(labelK[3] ,4 ,5 ,1, 2 );
+			case(Gtk::RESPONSE_CANCEL):{
+				std::cout << "Cancel clicked." << std::endl;
+				break;
+			}
 
-        m_table.attach(labelK[4] ,1 ,2 ,2 , 3 );
-        m_table.attach(labelK[5] ,2 ,3 ,2 , 3 );
-        m_table.attach(labelK[6] ,3 ,4 ,2 , 3 );
-        m_table.attach(labelK[7] ,4 ,5 ,2 , 3 );
+			default:{
+				std::cout << "Unexpected button clicked." << std::endl;
+				break;
+			}
+		}
+	}
 
-        m_table.attach(labelK[8] ,1 ,2 ,3 , 4 );
-        m_table.attach(labelK[9] ,2 ,3 ,3 , 4 );
-        m_table.attach(labelK[10] ,3 ,4 ,3 , 4 );
-        m_table.attach(labelK[11] ,4 ,5 ,3 , 4 );
-
-
-        str = g_strdup_printf ("|\t%.1lf", camera.rt11);
-        labelRT[0].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf", camera.rt12);
-        labelRT[1].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf", camera.rt13);
-        labelRT[2].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf\t|", camera.rt14);
-        labelRT[3].set_text(str); g_free (str);
-        str = g_strdup_printf ("|\t%.1lf", camera.rt21);
-        labelRT[4].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf", camera.rt22);
-        labelRT[5].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf", camera.rt23);
-        labelRT[6].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf\t|", camera.rt24);
-        labelRT[7].set_text(str); g_free (str);
-        str = g_strdup_printf ("|\t%.1lf", camera.rt31);
-        labelRT[8].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf", camera.rt32);
-        labelRT[9].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf", camera.rt33);
-        labelRT[10].set_text(str); g_free (str);
-        str = g_strdup_printf ("%.1lf\t|", camera.rt34);
-        labelRT[11].set_text(str); g_free (str);
-        labelRT[12].set_text("RT Matrix");
-
-        m_table.attach(labelRT[12],1 ,2 ,4, 5 );
-        m_table.attach(labelRT[0] ,1 ,2 ,5, 6 );
-        m_table.attach(labelRT[1] ,2 ,3 ,5, 6 );
-        m_table.attach(labelRT[2] ,3 ,4 ,5, 6 );
-        m_table.attach(labelRT[3] ,4 ,5 ,5, 6 );
-
-        m_table.attach(labelRT[4] ,1 ,2 ,6 , 7 );
-        m_table.attach(labelRT[5] ,2 ,3 ,6 , 7 );
-        m_table.attach(labelRT[6] ,3 ,4 ,6 , 7 );
-        m_table.attach(labelRT[7] ,4 ,5 ,6 , 7 );
-
-        m_table.attach(labelRT[8] ,1 ,2 ,7 , 8 );
-        m_table.attach(labelRT[9] ,2 ,3 ,7 , 8 );
-        m_table.attach(labelRT[10] ,3 ,4 ,7 , 8 );
-        m_table.attach(labelRT[11],4 ,5 ,7 , 8 );
-        
-        window->add(m_table);
-        window->show_all_children();
-        
-        printf("\tK Matrix:\n\t| %.1f\t%.1f\t%.1f\t%.1f\t|\n",camera.k11,camera.k12,camera.k13,camera.k14);
-        printf("\t| %.1f\t%.1f\t%.1f\t%.1f\t|\n",camera.k21,camera.k22,camera.k23,camera.k24);
-        printf("\t| %.1f\t%.1f\t%.1f\t%.1f\t|\n\n",camera.k31,camera.k32,camera.k33,camera.k34);
-        printf("\tR&T Matrix:\n\t| %.1f\t%.1f\t%.1f\t%.1f\t|\n",camera.rt11,camera.rt12,camera.rt13,camera.rt14);
-        printf("\t| %.1f\t%.1f\t%.1f\t%.1f\t|\n",camera.rt21,camera.rt22,camera.rt23,camera.rt24);
-        printf("\t| %.1f\t%.1f\t%.1f\t%.1f\t|\n",camera.rt31,camera.rt32,camera.rt33,camera.rt34);
-        printf("\t| %.1f\t%.1f\t%.1f\t%.1f\t|\n\n",camera.rt41,camera.rt42,camera.rt43,camera.rt44);
-        
-       
-    }
-
-  
 }//namespace

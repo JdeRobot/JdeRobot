@@ -24,11 +24,562 @@
 #include <math.h>
 #include <stdio.h>
 
+#include <stdlib.h>
+#include <errno.h>
+/*xml*/
+#include <libxml/parser.h>
+#include <libxml/xmlreader.h>
+#include <libxml/xpath.h>
+#include <libxml/tree.h>
+
 #define PI 3.141592654
 #define BIGNUM 1.0e4
 
 int debug=0;
 
+TPinHoleCamera xmlReader(TPinHoleCamera* camera, const char *docname)
+{
+	xmlDocPtr doc;
+	xmlNodePtr cur, curAux, curAux_child;
+	doc = xmlParseFile(docname);
+	if (doc == NULL ) {
+		fprintf(stderr,"Document not parsed successfully. \n");
+	return;
+	}
+	cur = xmlDocGetRootElement(doc);
+	if (cur == NULL) {
+		fprintf(stderr,"empty document\n");
+		xmlFreeDoc(doc);
+		return;
+	}
+	if (xmlStrcmp(cur->name, (const xmlChar *) "calibration_camera")) {
+		fprintf(stderr,"document of the wrong type, root node != calibration_camera");
+		xmlFreeDoc(doc);
+		return;
+	}
+	while (cur != NULL) {
+		if ((!xmlStrcmp(cur->name, (const xmlChar *)"calibration_camera"))){
+
+			xmlChar *key;
+			curAux = cur->xmlChildrenNode;
+
+			while (curAux != NULL) {
+				/*
+				if ((!xmlStrcmp(curAux->name, (const xmlChar *)"name"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					
+					char a[((string)key).size()+1];
+					a[key.size()]=0;
+					memcpy(a,key.c_str(),s.size());
+
+					camera->name = a;
+					xmlFree(key);
+				}else */if ((!xmlStrcmp(curAux->name, (const xmlChar *)"roll"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					camera->roll = atof(key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"fdistx"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					camera->fdistx = atof(key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"fdisty"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					camera->fdisty = atof(key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"u0"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					camera->u0 = atof(key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"v0"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					camera->v0 = atof(key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"skew"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					camera->skew = atof(key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"rows"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					camera->rows = atof(key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"columns"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					camera->columns = atof(key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"position"))) {
+					curAux_child = curAux->xmlChildrenNode;
+					
+					while (curAux_child != NULL) {
+						if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"x"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->position.X = atof(key);
+							xmlFree(key);
+							fprintf(stderr,"\n Hemos leído X \n");
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"y"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->position.Y = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"z"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->position.Z = atof(key);
+							xmlFree(key);
+
+						}
+						curAux_child = curAux_child->next;
+					}
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"foa"))) {
+					curAux_child = curAux->xmlChildrenNode;
+					
+					while (curAux_child != NULL) {
+						if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"x"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->foa.X = atof(key);
+							xmlFree(key);
+							fprintf(stderr,"\n Hemos leído X \n");
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"y"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->foa.Y = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"z"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->foa.Z = atof(key);
+							xmlFree(key);
+
+						}
+						curAux_child = curAux_child->next;
+					}
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"k_matrix"))) {
+					curAux_child = curAux->xmlChildrenNode;
+					
+					while (curAux_child != NULL) {
+						if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k11"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->k11 = atof(key);
+							xmlFree(key);
+							fprintf(stderr,"\n Hemos leído X \n");
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k12"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->k12 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k13"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->k13 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k14"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->k14 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k14"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->k14 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k21"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->k21 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k22"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->k22 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k23"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->k23 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k24"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->k24 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k31"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->k31 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k32"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->k32 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k33"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->k33 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k34"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->k34 = atof(key);
+							xmlFree(key);
+
+						}
+						curAux_child = curAux_child->next;
+					}
+				} else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"rt_matrix"))) {
+					curAux_child = curAux->xmlChildrenNode;
+					
+					while (curAux_child != NULL) {
+						if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt11"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt11 = atof(key);
+							xmlFree(key);
+							fprintf(stderr,"\n Hemos leído X \n");
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt12"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt12 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt13"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt13 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt14"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt14 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt14"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt14 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt21"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt21 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt22"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt22 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt23"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt23 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt24"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt24 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt31"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt31 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt32"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt32 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt33"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt33 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt34"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt34 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt41"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt41 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt42"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt42 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt43"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt43 = atof(key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt44"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							camera->rt44 = atof(key);
+							xmlFree(key);
+
+						}
+						curAux_child = curAux_child->next;
+					}
+				}
+				curAux = curAux->next;
+			}
+		}
+		cur = cur->next;
+	}
+
+	xmlFreeDoc(doc);
+	return;
+}
+	
+void xmlWriter(TPinHoleCamera camera, const char *filename){
+	xmlDocPtr doc = NULL;       /* document pointer */
+	xmlNodePtr root_node = NULL, node_position = NULL, node_foa = NULL, node_k_matrix = NULL, node_rt_matrix = NULL;/* node pointers */
+	char buff[256];
+	int i, j;
+
+	LIBXML_TEST_VERSION;
+
+	doc = xmlNewDoc(BAD_CAST "1.0");
+	root_node = xmlNewNode(NULL, BAD_CAST "calibration_camera");
+	node_position = xmlNewChild(root_node, NULL, BAD_CAST "position", NULL);
+	node_foa = xmlNewChild(root_node, NULL, BAD_CAST "foa", NULL);
+	node_k_matrix = xmlNewChild(root_node, NULL, BAD_CAST "k_matrix", NULL);
+	node_rt_matrix = xmlNewChild(root_node, NULL, BAD_CAST "rt_matrix", NULL);
+
+	xmlDocSetRootElement(doc, root_node);
+
+
+	unsigned char vOut[32];
+
+	sprintf(vOut, "%f", camera.position.X);
+	xmlNewChild(node_position, NULL, BAD_CAST "x", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.position.Y);
+	xmlNewChild(node_position, NULL, BAD_CAST "y", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.position.X);
+	xmlNewChild(node_position, NULL, BAD_CAST "Z", BAD_CAST vOut);
+
+	sprintf(vOut, "%f", camera.foa.X);
+	xmlNewChild(node_foa, NULL, BAD_CAST "x", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.foa.Y);
+	xmlNewChild(node_foa, NULL, BAD_CAST "y", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.foa.X);
+	xmlNewChild(node_foa, NULL, BAD_CAST "Z", BAD_CAST vOut);
+
+
+	sprintf(vOut, "%f", camera.roll);
+	xmlNewChild(root_node, NULL, BAD_CAST "roll", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.fdistx);
+	xmlNewChild(root_node, NULL, BAD_CAST "fdistx", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.fdisty);
+	xmlNewChild(root_node, NULL, BAD_CAST "fdisty", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.u0);
+	xmlNewChild(root_node, NULL, BAD_CAST "u0", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.v0);
+	xmlNewChild(root_node, NULL, BAD_CAST "v0", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.skew);
+	xmlNewChild(root_node, NULL, BAD_CAST "skew", BAD_CAST vOut);
+	sprintf(vOut, "%d", camera.rows);
+	xmlNewChild(root_node, NULL, BAD_CAST "rows", BAD_CAST vOut);
+	sprintf(vOut, "%d", camera.columns);
+	xmlNewChild(root_node, NULL, BAD_CAST "columns", BAD_CAST vOut);
+
+	sprintf(vOut, "%f", camera.k11);
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k11", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.k12);
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k12", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.k13);
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k13", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.k14);
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k14", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.k21);
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k21", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.k22);
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k22", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.k23);
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k23", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.k24);
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k24", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.k31);
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k31", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.k32);
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k32", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.k33);
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k33", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.k34);
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k34", BAD_CAST vOut);
+
+
+	sprintf(vOut, "%f", camera.rt11);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt11", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt12);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt12", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt13);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt13", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt14);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt14", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt21);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt21", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt22);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt22", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt23);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt23", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt24);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt24", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt31);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt31", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt32);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt32", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt33);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt33", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt34);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt34", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt31);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt31", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt32);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt32", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt33);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt33", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt34);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt34", BAD_CAST vOut);
+
+	xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
+
+	xmlFreeDoc(doc);
+
+	xmlCleanupParser();
+
+}
+
+
+void reverse_update_camera_matrix(TPinHoleCamera *camera)
+{
+
+
+	camera->foa.H=1.;
+	camera->position.H=1;
+
+	/* intrinsics parameters */
+		/*Default values for camera parameters*/
+		camera->fdistx = 300.0;
+		camera->fdisty = 300.0;
+		camera->skew = 0.0;
+
+		/* K matrix*/
+		camera->k11=camera->fdistx;
+		camera->k12=camera->skew*camera->fdisty;
+		camera->k13=camera->u0;
+		camera->k14=0.;
+		camera->k21=0.;
+		camera->k22=camera->fdisty;
+		camera->k23=camera->v0;
+		camera->k24=0.;
+		camera->k31=0.;
+		camera->k32=0.;
+		camera->k33=1.;
+		camera->k34=0.;
+
+
+	/* extrinsics parameters */
+
+	int s;
+	gsl_matrix *M;
+	gsl_vector* x;	
+
+	/* para invertir las matriz M,Q,R */
+	gsl_permutation* p = gsl_permutation_alloc (3);
+  
+	/* para resolver el centro de la camara usando Mx=C 
+	donde C es el verctor p4 de la matriz P */
+	gsl_vector* p4 = gsl_vector_alloc(3);
+	x =gsl_vector_alloc(3);
+	
+	M = gsl_matrix_alloc(3,3);
+
+	/* Copiamos la submatriz 3x3 Izq de la solucion P a la matriz M */
+	gsl_matrix_set(M,0,0,camera->rt11);
+	gsl_matrix_set(M,0,1,camera->rt12);
+	gsl_matrix_set(M,0,2,camera->rt13);
+
+	gsl_matrix_set(M,1,0,camera->rt21);
+	gsl_matrix_set(M,1,1,camera->rt22);
+	gsl_matrix_set(M,1,2,camera->rt23);
+
+	gsl_matrix_set(M,2,0,camera->rt31);
+	gsl_matrix_set(M,2,1,camera->rt32);
+	gsl_matrix_set(M,2,2,camera->rt33);
+
+	/* Copiamos el vector p4 */
+	gsl_vector_set(p4,0,camera->rt14);
+	gsl_vector_set(p4,1,camera->rt24);
+	gsl_vector_set(p4,2,camera->rt34);
+
+	/* invertimos la matriz M */
+	gsl_linalg_LU_decomp (M, p, &s);
+	gsl_linalg_LU_solve(M,p,p4,x);
+
+
+	printf("Posicion\n");
+	  camera->position.X = -gsl_vector_get(x,0);
+	  camera->position.Y = -gsl_vector_get(x,1);
+	  camera->position.Z = -gsl_vector_get(x,2);
+
+
+
+	/*
+	El foa se puede sacar desde la KRT
+	utilizando backproject, retroproyectas el centro óptico y lo unes con la
+	posición de la cámara, coges cualquier punto de esa recta en 3D que esté
+	delante de la cámara y listo.
+	*/
+	HPoint3D out;
+	HPoint2D in;
+	in.x = 0;
+	in.y = 0;
+	in.h = 0;
+
+	backproject(&out, in, camera);
+
+	camera->foa.X = out.X;
+	camera->foa.Y = out.Y;
+	camera->foa.Z = out.Z;
+
+
+	/*
+ 	Roll: The angle between a line in RT matrix and RT matrix without roll
+
+	1- Backproject para estar seguro de que no queda fuera el punto
+	--2- Project el punto con la matriz RT parcial
+	3- Project el punto con la matriz RT total
+	4- Producto escalar de ambos vectores
+	5- Paso a radianes
+
+	*/
+
+	HPoint3D p3;
+	HPoint2D p2_rt_parcial;
+	HPoint2D p2_rt_complete;
+	p2_rt_complete.x = 1;
+	p2_rt_complete.y = 1;
+	p2_rt_complete.h = 0;
+
+	backproject(&p3, p2_rt_complete, camera);
+
+	TPinHoleCamera cameraAux; 
+	cameraAux = *camera;
+
+	update_camera_matrix(&cameraAux);
+	
+	project(p3, &p2_rt_parcial, cameraAux);
+
+	camera->roll = 
+		(float)acos ( 
+			(p2_rt_parcial.x*p2_rt_complete.x + p2_rt_parcial.y*p2_rt_complete.y) 
+			/ 
+			(sqrt((double)p2_rt_parcial.x*p2_rt_parcial.x + p2_rt_parcial.y*p2_rt_parcial.y) 
+				* sqrt((double)p2_rt_complete.x*p2_rt_complete.x + p2_rt_complete.y*p2_rt_complete.y)
+			) 
+		); 
+
+		
+}
 void update_camera_matrix(TPinHoleCamera *camera)
 {
   float rc11,rc12,rc13,rc21,rc22,rc23,rc31,rc32,rc33;

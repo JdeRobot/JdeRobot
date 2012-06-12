@@ -20,8 +20,12 @@
  *             Alejandro Hernández Cordero <ahcorde@gmail.com>
  */
 
-#ifndef GIRAFFECLIENT_VIEW_H
-#define GIRAFFECLIENT_VIEW_H
+#ifndef CALIBRATOR_VIEW_H
+#define CALIBRATOR_VIEW_H
+
+#include "module_dlt.h"
+#include "module_extrinsics.h"
+#include "module_rectifier.h"
 
 #include <string>
 #include <iostream>
@@ -29,67 +33,86 @@
 #include <libglademm.h>
 #include <IceUtil/Thread.h>
 #include <IceUtil/Time.h>
-#include "controller.h"
 #include <colorspaces/colorspacesmm.h>
 #include <progeo/progeo.h>
 
-namespace calibrator {
-  class View {
-  public:
+/** OpenGL */
+#include <GL/gl.h>              
+#include <GL/glx.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
 
-    View(Controller * controller);
-    virtual ~View();
+namespace calibrator {
+
+class ModelColumns : public Gtk::TreeModel::ColumnRecord
+
+{
+	public:
+		ModelColumns()
+		{ add(m_col_id); add(m_col_name); }
+
+		Gtk::TreeModelColumn<Glib::ustring> m_col_id; //The data to choose - this must be text.
+		Gtk::TreeModelColumn<Glib::ustring> m_col_name;
+
+	};
+
+
+	class View {
+		public:
+		//    View(Controller * controller);
+		View(Glib::RefPtr<Gtk::ListStore> m_refTreeModel, Module_DLT * controllerCamera1, Module_Extrinsics * controller2, Module_Rectifier * module_rectifier);
+		virtual ~View();
 
 		/*Return true if the windows is visible*/
-    bool isVisible();
+		bool isVisible();
 
-    /*Display window*/
-    void display(const colorspaces::Image& image);
+		/*Display window*/
+		void display(const colorspaces::Image& image);
 
-  private:
+		int get_active_camera();
 
-		void button_center_clicked();
-		void button_save_clicked();
-		void button_KRT_clicked();
-		void button_Load_clicked();
-		void pos_x_changed();
-		void pos_y_changed();
-		void pos_z_changed();
-		void foa_x_changed();
-		void foa_y_changed();
-		void foa_z_changed();
-		void fx_changed();
-		void fy_changed();
-		void u0_changed();
-		void v0_changed();
-		void roll_changed();
+		/** Calibrator **/
+		int capture_on;
 
-        Glib::RefPtr<Gnome::Glade::Xml> refXml;
-        Gtk::Main gtkmain;
-        Gtk::Window* mainwindow;
-        Gtk::VScale *vscale_pos_x;
-        Gtk::VScale *vscale_pos_y;
-        Gtk::VScale *vscale_pos_z;
-        Gtk::VScale *vscale_foa_x;
-        Gtk::VScale *vscale_foa_y;
-        Gtk::VScale *vscale_foa_z;
-        Gtk::VScale *vscale_fx;
-        Gtk::VScale *vscale_fy;
-        Gtk::VScale *vscale_u0;
-        Gtk::VScale *vscale_v0;
-        Gtk::VScale *vscale_roll;
-        Gtk::Image *gtk_image;
-        Gtk::Button* button_center;
-        Gtk::Button* button_save;
-        Gtk::Button* button_Load;
+/* Delete xerces */ 
+	void read_matrix();
 
-        Controller * controller;
-        
-        Gtk::Window* window;
-        Gtk::Label labelK[13];
-        Gtk::Label labelRT[13];
-        Gtk::Table m_table;
-  };
-}//namespace
 
-#endif /*GIRAFFECLIENT_VIEW_H*/
+	private:
+		Glib::RefPtr<Gnome::Glade::Xml> refXml;
+		Gtk::Main gtkmain;
+		Gtk::Window* mainwindow;
+		Gtk::Image *gtk_patron;
+
+		Gtk::RadioButton* mode[4];
+		Gtk::Table* dlt_panel;
+		Gtk::Table* extrinsics_panel;
+		Gtk::Table* rectifier_panel;
+		Gtk::Table* estereo_panel;
+		Gtk::ComboBox* camera_set;
+		Gtk::Button* button_Load_world;
+
+		int active_camera;
+
+		int active_panel;
+		TPinHoleCamera camera;
+		Gtk::Label* k[12];
+		Gtk::Label* rt[16];
+
+		DrawArea* world;
+
+		void on_toggled_calibrator();
+		void on_toggled_extrinsics();
+		void on_toggled_rectifier();
+		void on_toggled_estereo();
+		void on_changed_camera_set();
+		void button_Load_word_clicked();
+
+		Module_DLT * module_dlt;
+		Module_Extrinsics * module_extrinsics;
+		Module_Rectifier * module_rectifier;
+
+	};
+};
+
+#endif /*CALIBRATOR_H*/

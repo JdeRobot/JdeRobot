@@ -22,6 +22,10 @@
 #ifndef PROGEO_H
 #define PROGEO_H
 
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_multifit.h>
+
+
 /* geometric distances */
 #define DIST2D(p1,p2) sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y))
 #define DIST3D(p1,p2) sqrt((p1.X-p2.X)*(p1.X-p2.X)+(p1.Y-p2.Y)*(p1.Y-p2.Y)+(p1.Z-p2.Z)*(p1.Z-p2.Z))
@@ -81,7 +85,10 @@ typedef struct {
 
 #ifdef __cplusplus
 extern "C" {
+	TPinHoleCamera xmlReader(TPinHoleCamera* camera, const char *filename);
+	void xmlWriter(TPinHoleCamera camera, const char *filename);
 	void update_camera_matrix(TPinHoleCamera *camera);
+	void reverse_update_camera_matrix(TPinHoleCamera *camera);
 	void update_stereocamera_matrix(TPinHoleStereocamera *stereo);
 	int project(HPoint3D in, HPoint2D *out, TPinHoleCamera camera);
 	int backproject(HPoint3D *out, HPoint2D in, TPinHoleCamera camera);
