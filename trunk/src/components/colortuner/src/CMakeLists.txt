@@ -24,5 +24,6 @@ TARGET_LINK_LIBRARIES(colortuner
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/colorspaces/libcolorspaces.so
     ${LIBS_DIR}/progeo/libprogeo.so
+    ${gsl_LIBRARIES}
 )
 

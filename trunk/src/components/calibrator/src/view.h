@@ -74,10 +74,6 @@ class ModelColumns : public Gtk::TreeModel::ColumnRecord
 		/** Calibrator **/
 		int capture_on;
 
-/* Delete xerces */ 
-	void read_matrix();
-
-
 	private:
 		Glib::RefPtr<Gnome::Glade::Xml> refXml;
 		Gtk::Main gtkmain;
