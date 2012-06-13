@@ -5,6 +5,8 @@ PKG_CHECK_MODULES(gstreamer REQUIRED gstreamer-0.10) # REQUIRED=Fallará si no l
 PKG_CHECK_MODULES(gstreamerapp REQUIRED gstreamer-app-0.10) # REQUIRED=Fallará si no lo encuentra
 add_definitions(-DGLADE_DIR="${gladedir}")
 
+set( CMAKE_CXX_FLAGS " -lraw1394 -ldc1394 -lGbxUtilAcfr -lGbxIceUtilAcfr -lIceUtil -lIce -lIceStorm")
+
 include_directories(
     ${INTERFACES_CPP_DIR}
     ${LIBS_DIR}

@@ -40,7 +40,7 @@ namespace jderobotutil{
      * \param params initialization values
      */
     ParamDict(const std::string keyprefix = "", 
-	      const std::map<std::string, std::string>& params = std::map<std::string, std::string>::map());
+	      const std::map<std::string, std::string>& params = std::map<std::string, std::string>());
     
     /**
      * Get param indexed by paramkey or empty string
