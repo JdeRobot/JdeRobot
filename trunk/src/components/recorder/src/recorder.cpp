@@ -12,12 +12,19 @@
 #include <jderobot/ptencoders.h>
 #include <jderobot/pose3dmotors.h>
 #include <jderobot/pose3dencoders.h>
-#include <jderobot/cloudPoints.h>
+#include <jderobot/pointcloud.h>
 #include <colorspaces/colorspacesmm.h>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <string.h>
 
 int main(int argc, char** argv){
 
@@ -35,38 +42,50 @@ int main(int argc, char** argv){
    jderobot::MotorsPrx mprx;
    jderobot::EncodersPrx eprx;
    jderobot::LaserPrx lprx;
-   jderobot::CameraPrx cprx1;
-   jderobot::CameraPrx cprx2;
+  std::vector<jderobot::CameraPrx> cprx;
+	
    jderobot::PTEncodersPrx pteprx1;   
    jderobot::PTEncodersPrx pteprx2;
    jderobot::Pose3DEncodersPrx pose3DEncoders1;
    jderobot::Pose3DEncodersPrx pose3DEncoders2;
-   jderobot::CloudPointsInterfacePrx prx;
+   std::vector <jderobot::pointCloudPrx> prx;
   
 
    //INTERFACE DATA
    jderobot::EncodersDataPtr ed;
    jderobot::LaserDataPtr ld;   
+
+	jderobot::ImageDataPtr imageData;
+
+
    jderobot::ImageDataPtr imageData1;
    jderobot::ImageDataPtr imageData2;
+   jderobot::ImageDataPtr imageData3;
+   jderobot::ImageDataPtr imageData4;
    jderobot::PTEncodersDataPtr PTencodersData1;
    jderobot::PTEncodersDataPtr PTencodersData2;
 	jderobot::Pose3DEncodersDataPtr pose3DEncodersData1;
     jderobot::Pose3DEncodersDataPtr pose3DEncodersData2;
-   jderobot::CloudPointsDataPtr kinectData; 
-    
+   jderobot::pointCloudDataPtr kinectData;
+
     int avEncoders = 0;
     int avLaser = 0;
     int avCamera1 = 0;
     int avCamera2 = 0;
+int avCamera3 = 0;
+int avCamera4 = 0;
     int ptencoders = 0;
     int ptencoders2 = 0;
     int avPose3DEncoders1 = 0;
     int avPose3DEncoders2 = 0;
-    int avKinect = 0;
+    int avKinect1 = 0;
+	int avKinect2 = 0;
     
     int Hz = 10;
     int muestrasLaser = 180;
+
+	int nCameras=0;
+	int nDepthSensors=0;
     
    
    //---------------- INPUT ARGUMENTS ---------------//
@@ -113,32 +132,30 @@ int main(int argc, char** argv){
          if (0== lprx)
             throw "Invalid proxy Mycomponent.Laser.Proxy";
       }
-      
-      avCamera1 = prop->getPropertyAsInt("Recorder.Camera1.bool");
-      if(avCamera1==1){
-         // Get driver camera
-         Ice::ObjectPrx camara1 = ic->propertyToProxy("Recorder.Camera1.Proxy");
-         if (0==camara1)
-            throw "Could not create proxy to camera1 server";
-         
-         // cast to CameraPrx
-         cprx1 = jderobot::CameraPrx::checkedCast(camara1);
-         if (0== cprx1)
-            throw "Invalid proxy";
-      }  
-      
-      avCamera2 = prop->getPropertyAsInt("Recorder.Camera2.bool");
-      if(avCamera2==1){
-         // Get driver camera
-         Ice::ObjectPrx camara2 = ic->propertyToProxy("Recorder.Camera2.Proxy");
-         if (0==camara2)
-            throw "Could not create proxy to camera1 server";
-         
-         // cast to CameraPrx
-         cprx2 = jderobot::CameraPrx::checkedCast(camara2);
-         if (0== cprx2)
-            throw "Invalid proxy";
-      }  
+     nCameras = prop->getPropertyAsIntWithDefault("Recorder.nCameras",0);
+	if (nCameras > 0 ){
+					struct stat buf;
+					char dire[]="./images/";
+					if( stat( dire, &buf ) == -1 )
+					{
+						system("mkdir images");
+					}
+	}
+	for (int i=0; i< nCameras; i++){
+		std::stringstream sProxy;
+	         // Get driver camera
+			sProxy << "Recorder.Camera" << i+1 << ".Proxy";
+	         Ice::ObjectPrx camara = ic->propertyToProxy(sProxy.str());
+	         if (0==camara)
+	            throw "Could not create proxy to camera1 server";
+	         // cast to CameraPrx
+	         jderobot::CameraPrx cprxAux = jderobot::CameraPrx::checkedCast(camara);
+	         if (0== cprxAux)
+	            throw "Invalid proxy";
+			else
+				cprx.push_back(cprxAux);
+      }
+
       ptencoders = prop->getPropertyAsInt("Recorder.PTEncoders1.bool");
       if(ptencoders){
          // Contact to PTENCODERS interface
@@ -192,21 +209,24 @@ int main(int argc, char** argv){
          if (0== pose3DEncoders2)
             throw "Invalid proxy Recorder.pose3DEncoders2.Proxy";
       }
-      
-      avKinect = prop->getPropertyAsInt("Recorder.Kinect1.bool");
-      if(avKinect){
-         // Contact to KINECT interface
-         Ice::ObjectPrx kinect = ic->propertyToProxy("Recorder.Kinect1.Proxy");
+      nDepthSensors = prop->getPropertyAsIntWithDefault("Recorder.nDethSensors",0);
+	 for (int i=0; i< nDepthSensors; i++){
+		std::stringstream sProxy;
+	         // Get driver camera
+			sProxy << "Recorder.DepthSensor" << i+1 << ".Proxy";
+		
+		 Ice::ObjectPrx kinect = ic->propertyToProxy(sProxy.str());
          if (0==kinect){
          throw "Could not create proxy with Kinect1"; 
          }
          // Cast to KINECT
-         prx = jderobot::CloudPointsInterfacePrx::checkedCast(kinect);
-         if (0== prx){
-         throw std::string("Invalid proxy Recorder.Kinect1.Proxy");
+         jderobot::pointCloudPrx prxAux = jderobot::pointCloudPrx::checkedCast(kinect);
+         if (0== prxAux){
+         	throw std::string("Invalid proxy Recorder.Kinect1.Proxy");
          }
-      }
-      
+		else
+			prx.push_back(prxAux);
+	}
       
       
       //-----------------ICE----------------//
@@ -237,46 +257,21 @@ int main(int argc, char** argv){
          gettimeofday(&a,NULL);
          totala=a.tv_sec*1000000+a.tv_usec;
       
-         /* CameraA */
-         if(avCamera1){
-            imageData1 = cprx1->getImageData();
-            colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(
-                                          imageData1->description->format);
 
-            if (!fmt)
-               throw "Format not supported";
+		/*cameras*/
+		for (int i=0; i<nCameras ; i++){
+			imageData = cprx[i]->getImageData();
+			colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(imageData->description->format);
+			cv::Mat image;
+            	image.create(cv::Size(imageData->description->width, imageData->description->height), CV_8UC3);
 
-            cv::Mat image1;
-            image1.create(cv::Size(imageData1->description->width, imageData1->description->height), CV_8UC3);
-
-            memcpy((unsigned char *) image1.data ,&(imageData1->pixelData[0]), image1.cols*image1.rows * 3);
+            	memcpy((unsigned char *) image.data ,&(imageData->pixelData[0]), image.cols*image.rows * 3);
             
-            char buff[30]; // enough to hold all numbers up to 64-bits
-            sprintf(buff, "images/camera1_%ld.jpg", timeRelative);
-            cv::imwrite(buff, image1);
-            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Camera1:\t" << buff  << std::endl;
-         }
-         
-         /* Camera B */
-         if(avCamera2){
-            imageData2 = cprx2->getImageData();
-            colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(
-                                          imageData2->description->format);
-
-            if (!fmt)
-               throw "Format not supported";
-
-            cv::Mat image2;
-            image2.create(cv::Size(imageData2->description->width, imageData2->description->height), CV_8UC3);
-
-            memcpy((unsigned char *) image2.data ,&(imageData2->pixelData[0]), image2.cols*image2.rows * 3);
-            
-            char buff[30]; // enough to hold all numbers up to 64-bits
-            sprintf(buff, "images/camera2_%ld.jpg", timeRelative);
-            cv::imwrite(buff, image2);
-            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Camera2:\t" << buff  << std::endl;
-         }
-      
+            	char buff[30]; // enough to hold all numbers up to 64-bits
+            	sprintf(buff, "images/camera%d_%ld.jpg", i+1, timeRelative);
+            	cv::imwrite(buff, image);
+            	outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Camera" << i+1 << ":\t" << buff  << std::endl;
+		} 
          /* Encoders */ 
          if(avEncoders){
             ed = eprx->getEncodersData(); // cogemos informacion de los encoders
@@ -324,26 +319,25 @@ int main(int argc, char** argv){
             outfile << PTencodersData2->panAngle <<"\t" << PTencodersData2->tiltAngle << std::endl; 
          }
          
-         
-         if(avKinect){
-            kinectData = prx->getKinectData();
-            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":KinectData:\t"<< kinectData->points.size() << "\t";
-            for(int i = 0; i < kinectData->points.size(); i++){
+
+		/* DepthSensors */
+		for (int j=0; j< nDepthSensors ; j++){
+            kinectData = prx[j]->getCloudData();
+            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":KinectData" << j+1 << ":\t"<< kinectData->p.size() << "\t";
+            for(int i = 0; i < kinectData->p.size(); i++){
                float x,y,z;
                float r,g,b;
-               x = kinectData->points[i].x;
-               y = kinectData->points[i].y;
-               z = kinectData->points[i].z;
-               r = kinectData->points[i].r;
-               g = kinectData->points[i].g;
-               b = kinectData->points[i].b;
+               x = kinectData->p[i].x;
+               y = kinectData->p[i].y;
+               z = kinectData->p[i].z;
+               r = kinectData->p[i].r;
+               g = kinectData->p[i].g;
+               b = kinectData->p[i].b;
                outfile << x << "\t" << y << "\t" << z << "\t" << r << "\t" << g << "\t" << b << "\t" ;
             }
             outfile << std::endl;
-         }
-         
-         
-         
+		} 
+     
          gettimeofday(&b,NULL);
          totalb=b.tv_sec*1000000+b.tv_usec;
          std::cout << "Introrob takes " << (totalb-totala)/1000 << " ms" << std::endl;
