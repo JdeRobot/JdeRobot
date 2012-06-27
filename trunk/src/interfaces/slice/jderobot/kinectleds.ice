@@ -24,7 +24,7 @@
 
 module jderobot{  
 
-	enum KinectLedsAvailable { OFF, GREEN, RED, YELLOW, BLINKGREEN, BLINKREDYELLOW};
+	enum KinectLedsAvailable { OFF, GREEN, RED, YELLOW, BLINKGREEN, BLINKYELLOW, BLINKRED};
 
 	/** 
    * Interface to the Kinect LEDS.

@@ -99,6 +99,15 @@ IF(NOT with_player)
     MESSAGE ("*** Player libraries not found. Are needed to PlayerServer component")
 endif()
 
+
+# CHECK OPENNI
+FIND_LIBRARY(with_openni
+    NAMES OpenNI
+    PATHS /usr/lib /usr/local/lib)
+IF(NOT with_openni)
+    MESSAGE ("*** OpenNi libraries not found. Are needed to openniServer component")
+endif()
+
 file(READ ${CMAKE_CURRENT_SOURCE_DIR}/jderobot.cfg contents)
 
 # START RECURSIVE
