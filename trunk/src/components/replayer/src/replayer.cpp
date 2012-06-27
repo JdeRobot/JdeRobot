@@ -42,10 +42,13 @@
 #include <jderobot/ptmotors.h>
 #include <jderobot/pose3dmotors.h>
 #include <jderobot/pose3dencoders.h>
-#include <jderobot/cloudPoints.h>
+#include <jderobot/pointcloud.h>
 #include <gazebo/gazebo.h>
 
 #include <colorspaces/colorspacesmm.h>
+
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/point_types.h>
 
 #include <iostream>
 #include <fstream>
@@ -73,6 +76,7 @@ string robotName;
 string robotPort;
 
 namespace playerserver {
+
 
 	class CameraI: virtual public jderobot::Camera {
 	public:
@@ -443,13 +447,13 @@ namespace playerserver {
 			virtual Ice::Int setPose3DMotorsData(const jderobot::Pose3DMotorsDataPtr & data, const Ice::Current&) {
 				//waiting for next gazebo camera update
 				gazeboPTZ1->Lock(1);
-				/*
-				gazeboPTZ1->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
+				
+				/*gazeboPTZ1->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
 				gazeboPTZ1->data->cmd_pan = data->pan * DEGTORAD;
 				gazeboPTZ1->data->cmd_tilt = data->tilt * DEGTORAD;
 				gazeboPTZ1->data->cmd_pan_speed = data->panSpeed;
-				gazeboPTZ1->data->cmd_tilt_speed = data->tiltSpeed;
-				*/
+				gazeboPTZ1->data->cmd_tilt_speed = data->tiltSpeed;*/
+				
 				gazeboPTZ1->Unlock();
 
 				return 0; 
@@ -483,13 +487,13 @@ namespace playerserver {
 				//waiting for next gazebo camera update
 
 				gazeboPTZ2->Lock(1);
-				/*
-				gazeboPTZ2->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
+				
+				/*gazeboPTZ2->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
 				gazeboPTZ2->data->cmd_pan = data->pan * DEGTORAD;
 				gazeboPTZ2->data->cmd_tilt = data->tilt * DEGTORAD;
 				gazeboPTZ2->data->cmd_pan_speed = data->panSpeed;
-				gazeboPTZ2->data->cmd_tilt_speed = data->tiltSpeed;
-            */
+				gazeboPTZ2->data->cmd_tilt_speed = data->tiltSpeed;*/
+            
 				gazeboPTZ2->Unlock();
 
 				return 0; 
@@ -517,9 +521,12 @@ namespace playerserver {
 			ptEncodersData1(new jderobot::Pose3DEncodersData()) {
 				Ice::PropertiesPtr prop = context.properties();
 				
-				pan = 0.0;
-				tilt= 0.0;
-				
+				this->pan = 0.0;
+				this->tilt= 0.0;
+				this->roll = 0.0;
+				this->x = 0.0;
+				this->y = 0.0;
+				this->z = 0.0;
 			}
 
 			virtual ~Pose3DEncodersI(){};
@@ -529,6 +536,10 @@ namespace playerserver {
 				gazeboPTZ1->Lock(1);
 				ptEncodersData1->pan = this->pan;
 				ptEncodersData1->tilt = this->tilt;
+				ptEncodersData1->roll = this->roll;
+				ptEncodersData1->x = this->x;
+				ptEncodersData1->y = this->y;
+				ptEncodersData1->z = this->z;
 				gazeboPTZ1->Unlock();
 				return ptEncodersData1; 
 			};
@@ -541,10 +552,10 @@ namespace playerserver {
 			   this->tilt = tilt;
 			   this->roll = roll;  
 			}
-         float x, y, z;
-         float pan;
-         float tilt;
-         float roll;
+		        float x, y, z;
+ 			float pan;
+		        float tilt;
+        		float roll;
 			std::string prefix;
 			jderobotice::Context context;
 			jderobot::Pose3DEncodersDataPtr ptEncodersData1;
@@ -559,8 +570,12 @@ namespace playerserver {
 			ptEncodersData2(new jderobot::Pose3DEncodersData()) {
 				Ice::PropertiesPtr prop = context.properties();
 				
-				pan = 0.0;
-				tilt= 0.0;
+				this->pan = 0.0;
+				this->tilt= 0.0;
+				this->roll = 0.0;
+				this->x = 0.0;
+				this->y = 0.0;
+				this->z = 0.0;
 			}
 
 			virtual ~Pose3DEncodersII(){};
@@ -570,6 +585,10 @@ namespace playerserver {
 				gazeboPTZ2->Lock(1);
 				ptEncodersData2->pan = this->pan;
 				ptEncodersData2->tilt = this->tilt;
+				ptEncodersData2->roll = this->roll;
+				ptEncodersData2->x = this->x;
+				ptEncodersData2->y = this->y;
+				ptEncodersData2->z = this->z;
 				gazeboPTZ2->Unlock();
 
 				return ptEncodersData2;
@@ -584,10 +603,10 @@ namespace playerserver {
 			   this->roll = roll;  
 			}
 			
-         float x, y, z;
-         float pan;
-         float tilt;
-         float roll;
+		        float x, y, z;
+		        float pan;
+		        float tilt;
+		        float roll;
 			std::string prefix;
 			jderobotice::Context context;
 			jderobot::Pose3DEncodersDataPtr ptEncodersData2;
@@ -595,21 +614,21 @@ namespace playerserver {
 	};
 	
 	
-   class KinectI: virtual public jderobot::CloudPointsInterface{
+   class KinectI: virtual public jderobot::pointCloud{
    public:
 		KinectI (std::string& propertyPrefix, const jderobotice::Context& context):
-			prefix(propertyPrefix),context(context),KData(new jderobot::CloudPointsData()) {
+			prefix(propertyPrefix),context(context),KData(new jderobot::pointCloudData()) {
 				Ice::PropertiesPtr prop = context.properties();
               v=NULL;
               v  = new CloudViewer(this);
               v->start();
 			}
 		
-		virtual jderobot::CloudPointsDataPtr getKinectData(const Ice::Current&){
+		virtual jderobot::pointCloudDataPtr getCloudData(const Ice::Current&){
 				return KData;
 		};
 		
-		void update(jderobot::CloudPointsDataPtr data){
+		void update(jderobot::pointCloudDataPtr data){
 		   KData = data;
 		}
 	   
@@ -625,7 +644,7 @@ namespace playerserver {
          CloudViewerPtr v; 
     	   std::string prefix;
 	      jderobotice::Context context;
-         jderobot::CloudPointsDataPtr KData;
+         jderobot::pointCloudDataPtr KData;
 
      };
 
@@ -660,7 +679,6 @@ namespace playerserver {
 				int avPTEncodersI, avPTEncodersII;
 				int avPose3dmotors1, avPose3dmotors2;
 				int avPose3dencoders1, avPose3dencoders2;
-				int avKinect;
 				
 				int Nread = 0;
 
@@ -668,12 +686,9 @@ namespace playerserver {
 								
 				robotName = prop->getPropertyWithDefault(context().tag() + ".Hostname","localhost");
 				robotPort = prop->getPropertyWithDefault(context().tag() + ".Port","9999");
-            
-            std::string fileName;
-            fileName = prop->getProperty(context().tag() + ".FileName");
-            cout << "........" << fileName << " ..... " << endl;
 
-				int nCameras = prop->getPropertyAsInt(context().tag() + ".NCameras");				
+
+				int nCameras = prop->getPropertyAsIntWithDefault(context().tag() + ".NCameras",0);			
 				cameras.resize(nCameras);
 				for (int i=0; i<nCameras; i++) {//build camera objects
 				   cameras[i]=NULL;
@@ -694,18 +709,18 @@ namespace playerserver {
 						cameraName = "camera" + objId;
 						prop->setProperty(objPrefix + "Name",cameraName);//set the value
 					}
-					cout << "1" << endl;
+
 					context().tracer().info("Creating camera " + cameraName);
-				   cout << "2" << endl;
+
 				   cout << objPrefix << " " << context().tag() << endl; 
 				   cameras[i] = new CameraI(objPrefix, context());
-				   cout << "3" << endl;
+
                if(cameras[i]!=NULL){
                   cout << "NULL " << i << endl;
                }
-				   cout << "4" << endl;
+
 					context().createInterfaceWithString(cameras[i],cameraName);
-				   cout << "5" << endl;
+
 				   Nread++;
 				}
 				cout << "DEBUG: Salidos de camera" << endl;
@@ -795,7 +810,7 @@ namespace playerserver {
                   context().tracer().info("Creating pose3dmotors1 " + pose3dmotorsName1);
                   pose3dmotors1 = new Pose3DMotorsI( 0, objPrefix10,context());
                   context().createInterfaceWithString(pose3dmotors1,pose3dmotorsName1);
-                  
+                  cout << "DEBUG: Creating pose3dMotors1" << std::endl;
 			    }	    
  			    //PTMotorsII
              avPose3dmotors2 = prop->getPropertyAsInt(context().tag() + ".pose3dmotors2");
@@ -805,7 +820,8 @@ namespace playerserver {
 						context().tracer().info("Creating pose3dmotors2 " + pose3dmotorsName2);
 						pose3dmotors2 = new Pose3DMotorsII(1, objPrefix12, context());
 						context().createInterfaceWithString(pose3dmotors2,pose3dmotorsName2);
-			    }
+	cout << "DEBUG: Creating pose3dMotors2" << std::endl;		    
+		}
 			    
  				 avPose3dencoders1 = prop->getPropertyAsInt(context().tag() + ".pose3dencoders1");
 				 if(avPose3dencoders1){
@@ -826,17 +842,17 @@ namespace playerserver {
 						context().createInterfaceWithString(pose3dencoders2,pose3dencodersName2);
 						Nread++;
 				 }
-				 
- 			    avKinect = prop->getPropertyAsInt(context().tag() + ".kinect");
- 			    std::cout <<"avKinect: " << avKinect<<  std::endl;
-			    if(avKinect){
- 						std::string objPrefix13="kinect1";
-						std::string kinectName = "kinect1";
-						context().tracer().info("Creating kinect" + kinectName);
-						kinect = new KinectI(objPrefix13, context());
-						context().createInterfaceWithString(kinect , kinectName);
-						Nread++;
-				 }
+				int nDepthSensors = prop->getPropertyAsIntWithDefault(context().tag() + ".NDepthSensors",0);
+				depthSensors.resize(nDepthSensors);
+				for (int k=0; k< nDepthSensors; k++){
+					std::stringstream objIdS;
+					objIdS << "pointcloud" << k+1;
+					context().tracer().info("Creating pointcloud" + objIdS.str());
+					std::string s=objIdS.str();
+					depthSensors[k] = new KinectI(s, context());
+					context().createInterfaceWithString(depthSensors[k] , s);
+					Nread++;
+				}
 				
 							
 				//Get subclasses
@@ -855,9 +871,10 @@ namespace playerserver {
 			   
 			   Pose3DEncodersI*  pose3dencoders_1 = NULL;
 			   Pose3DEncodersII* pose3dencoders_2 = NULL;
-			   KinectI* kinect_1 = NULL;
+
 			   
 			   std::vector<CameraI*> camera;
+				std::vector<KinectI*> depthSensor;
 
 
             if(avMotors)
@@ -882,10 +899,11 @@ namespace playerserver {
 				   pose3dmotors_1 = dynamic_cast<Pose3DMotorsI*>(&(*pose3dmotors1));
 			   if(avPose3dmotors2)
 				   pose3dmotors_2 = dynamic_cast<Pose3DMotorsII*>(&(*pose3dmotors2));
-			   if(avKinect)
-               kinect_1 = dynamic_cast<KinectI*>(&(*kinect));
-               
-               				 std::cout << "k" << std::endl;
+
+				depthSensor.resize(nDepthSensors);
+				for (int k=0; k< nDepthSensors; k++){
+					depthSensor[k] = dynamic_cast<KinectI*>(&(*depthSensors[k]));
+				}
                				   
 				camera.resize(nCameras);
             for(int i = 0; i< cameras.size(); i++){
@@ -898,12 +916,20 @@ namespace playerserver {
             long totalb,totala;
             long diff;
             
-            int speed = prop->getPropertyAsInt(context().tag() + ".Speed");;   
+            //int speed = prop->getPropertyAsInt(context().tag() + ".Speed");;   
+            
+            float speed = prop->getPropertyAsInt(context().tag() + ".Speed");;   
             
             std::string fileSensors;
             fileSensors = prop->getProperty(context().tag() + ".Sensors");
             cout << "........" << fileSensors << " ..... " << endl;
+
             
+            std::string fileName;
+            fileName = prop->getProperty(context().tag() + ".FileName");
+            cout << "........" << fileName << " ..... " << endl;            
+
+
             FILE * pFile;
             pFile = fopen (fileSensors.c_str() ,"r");
             if (pFile == NULL)
@@ -985,21 +1011,28 @@ namespace playerserver {
                      std::string s = stream.str();
 			            //cout << s << "  " << buff <<endl;
 			            
-				         if(!strcmp(buff, s.c_str()) ){
+	         if(!strcmp(buff, s.c_str()) ){
 
                         fscanf (pFile, "%s", buff);
+
+                        std:: stringstream streamBuffer;
+			streamBuffer << fileName << "/" << buff;
                         
-                        FILE* fpImage = fopen(buff,"r");
+                        FILE* fpImage = fopen(streamBuffer.str().c_str(),"r");
                         if(fpImage==NULL){
                            cout << "No exite la imagen: Descartando odometría" << endl;
                            pFile = readLine(pFile, Nread-i+1);
                            break;
-                        }                     
-				            camera[i]->update(buff);
-				            //cout << "Dentro:" << i  << buff <<endl;
-						      //encoders->update( robotx, roboty, robottheta);
-						      break;
-                     }
+                        }
+                        fclose(fpImage);        
+
+
+             
+		   	camera[i]->update(streamBuffer.str().c_str());
+			//cout << "Dentro:" << i  << streamBuffer <<endl;
+			//encoders->update( robotx, roboty, robottheta);
+		        break;
+			}
                   }
                   
                   std:: stringstream streamPose3DEncoders1;
@@ -1033,44 +1066,67 @@ namespace playerserver {
                      pose3dencoders_2->update(x, y, z, pan, tilt, roll);
 						   continue;
                   }
-                  
-                  std::stringstream streamKinect;
-                  streamKinect << robotName+":"+robotPort + ":KinectData:";
-                  std::string sKinect = streamKinect.str();
-                  if(avKinect && !strcmp(buff, sKinect.c_str())){
-                     int tam;
-                     fscanf(pFile, "%d", &tam);
-                     
-                     float x,y,z;
-                     float r,g,b;
-                     std::cout << "nube size: " << tam << std::endl;
-                     jderobot::CloudPointsDataPtr KData = new jderobot::CloudPointsData();
-                     KData->points.resize(tam);
-                     
-                     for(int i = 0; i < KData->points.size() ; i++){
-                        fscanf(pFile, "%f", &x);
-                        fscanf(pFile, "%f", &y);
-                        fscanf(pFile, "%f", &z);
-                        fscanf(pFile, "%f", &r);
-                        fscanf(pFile, "%f", &g);
-                        fscanf(pFile, "%f", &b);
-                        
-                        KData->points[i].x = x;
-                        KData->points[i].y = y;
-                        KData->points[i].z = z;
-                        KData->points[i].r = r;
-                        KData->points[i].g = g;
-                        KData->points[i].b = b; 
-                        
-                        if(i==1 || i==tam-1){
-                           std::cout << "X: " << x << " Y: " << y << " Z: " << z << " R: " << r << " G: " << g << "B: " << b  << std::endl;
-                        }
-                        
-                     }
-                     
-                     kinect_1->update(KData);
 
-                  }
+				for (int k=0; k<nDepthSensors; k++){
+			   		std::stringstream streamKinect;
+					int idK=k+1;
+	                  	streamKinect << robotName << ":" << robotPort << ":KinectData" << idK << ":";
+					
+	                  std::string sKinect = streamKinect.str();
+					std::cout << sKinect <<std::endl;
+
+				        if(!strcmp(buff, sKinect.c_str())){
+				           int tam;
+				           fscanf(pFile, "%d", &tam);
+				           
+				            printf("tam: %d \n", tam);
+
+				           float x,y,z;
+				           float r,g,b;
+
+				           jderobot::pointCloudDataPtr KData = new jderobot::pointCloudData();
+				           KData->p.resize(tam);
+				           
+				           pcl::PointCloud<pcl::PointXYZRGB>::Ptr frame (new pcl::PointCloud<pcl::PointXYZRGB>);
+				           frame->points.resize(tam);
+				           
+				           for(int i = 0; i < KData->p.size() ; i++){
+				              fscanf(pFile, "%f", &x);
+				              fscanf(pFile, "%f", &y);
+				              fscanf(pFile, "%f", &z);
+				              fscanf(pFile, "%f", &r);
+				              fscanf(pFile, "%f", &g);
+				              fscanf(pFile, "%f", &b);
+				              
+				              //printf("x:%f y:%f z:%f r:%f g:%f b:%f \n", x, y, z, r, g, b);
+
+				              frame->points[i].x = x;
+				              frame->points[i].y = y;
+				              frame->points[i].z = z;
+				              frame->points[i].r = r;
+				              frame->points[i].g = g;
+				              frame->points[i].b = b; 
+				          }
+				          
+				          pcl::VoxelGrid<pcl::PointXYZRGB> downsample_filter;
+				          downsample_filter.setLeafSize (0.2, 0.2, 0.2);
+				          downsample_filter.setInputCloud (frame);
+				          downsample_filter.filter (*frame);
+				          
+				          KData->p.resize(frame->points.size());
+				          
+				          for(int i = 0; i < frame->points.size() ; i++){   
+				              KData->p[i].x = frame->points[i].x;
+				              KData->p[i].y = frame->points[i].y;
+				              KData->p[i].z = frame->points[i].z;
+				              KData->p[i].r = frame->points[i].r;
+				              KData->p[i].g = frame->points[i].g;
+				              KData->p[i].b = frame->points[i].b; 
+				           }
+				           std::cout << "cloudPoints size: " << KData->p.size() << std::endl;
+				           depthSensor[k]->update(KData);
+				        }
+				}
                   
                }
                
@@ -1078,7 +1134,7 @@ namespace playerserver {
                gettimeofday(&b,NULL);
                totalb=b.tv_sec*1000000+b.tv_usec;
                
-               std::cout << "Introrob takes " << (totalb-totala)/1000 << " ms" << std::endl;
+               std::cout << "Replayer takes " << (totalb-totala)/1000 << " ms" << std::endl;
                
                //cout << "Time to sleep: " << (timeToSleep/speed)-(totalb-totala)/1000 << endl;
                
@@ -1119,8 +1175,8 @@ namespace playerserver {
 			
 				Ice::ObjectPtr pose3dencoders1;
 			   Ice::ObjectPtr pose3dencoders2;
-			   
-			   Ice::ObjectPtr kinect;
+			   std::vector<Ice::ObjectPtr> depthSensors;
+
 			   
 	};
 }
