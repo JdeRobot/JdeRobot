@@ -1,0 +1,25 @@
+#!/bin/sh
+
+mivar=`du -a | grep cmake_install.cmake | awk '{print $2}'`
+
+mv ./doc/paper-autonomous_robots/Makefile /tmp
+
+for file in $mivar; do
+	rm $file	
+done
+
+mivar=`du -a | grep Makefile$ | awk '{print $2}'`
+
+
+for file in $mivar; do
+	rm $file	
+done
+
+mivar=`du -a | grep CMakeFiles | awk '{print $2}'`
+
+
+for file in $mivar; do
+	rm -r $file	
+done
+
+mv /tmp/Makefile ./doc/paper-autonomous_robots
