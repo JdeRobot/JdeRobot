@@ -1,4 +1,4 @@
-# Install script for directory: /home/mikel/Escritorio/respository/test_repository/trunk/src/components/gazeboserver/src
+# Install script for directory: /home/mikel/Escritorio/PFC/repository_JDErobot/official_repository/trunk/src/components/gazeboserver/src
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)

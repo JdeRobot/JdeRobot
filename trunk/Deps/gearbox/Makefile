@@ -36,10 +36,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/mikel/Escritorio/PFC/repository_JDErobot/official_repository/trunk/src/components/gazeboserver
+CMAKE_SOURCE_DIR = /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/src/components/introrob/build
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/mikel/Escritorio/PFC/repository_JDErobot/official_repository/trunk/src/components/gazeboserver/build
+CMAKE_BINARY_DIR = /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/src/components/introrob/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -66,14 +66,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mikel/Escritorio/PFC/repository_JDErobot/official_repository/trunk/src/components/gazeboserver/build/CMakeFiles /home/mikel/Escritorio/PFC/repository_JDErobot/official_repository/trunk/src/components/gazeboserver/build/CMakeFiles/progress.marks
-	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mikel/Escritorio/PFC/repository_JDErobot/official_repository/trunk/src/components/gazeboserver/build/CMakeFiles 0
+	cd /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/src/components/introrob/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/src/components/introrob/build/CMakeFiles /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/Deps/gearbox/CMakeFiles/progress.marks
+	cd /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/src/components/introrob/build && $(MAKE) -f CMakeFiles/Makefile2 /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/Deps/gearbox/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/src/components/introrob/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	$(MAKE) -f CMakeFiles/Makefile2 clean
+	cd /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/src/components/introrob/build && $(MAKE) -f CMakeFiles/Makefile2 /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/Deps/gearbox/clean
 .PHONY : clean
 
 # The main clean target
@@ -82,31 +82,18 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/src/components/introrob/build && $(MAKE) -f CMakeFiles/Makefile2 /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/Deps/gearbox/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/src/components/introrob/build && $(MAKE) -f CMakeFiles/Makefile2 /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/Deps/gearbox/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/src/components/introrob/build && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
-
-#=============================================================================
-# Target rules for targets named gazeboserver
-
-# Build rule for target.
-gazeboserver: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 gazeboserver
-.PHONY : gazeboserver
-
-# fast build rule for target.
-gazeboserver/fast:
-	$(MAKE) -f ../src/CMakeFiles/gazeboserver.dir/build.make ../src/CMakeFiles/gazeboserver.dir/build
-.PHONY : gazeboserver/fast
 
 # Help Target
 help:
@@ -116,7 +103,6 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... gazeboserver"
 .PHONY : help
 
 
@@ -128,6 +114,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/mikel/Escritorio/PFC/repository_JDErobot/CurrentVersion/trunk/src/components/introrob/build && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
