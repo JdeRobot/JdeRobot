@@ -22,4 +22,13 @@ for file in $mivar; do
 	rm -r $file	
 done
 
+mivar=`du -a | grep CMakeCache.txt | awk '{print $2}'`
+
+
+for file in $mivar; do
+	rm -r $file	
+done
+
+
+
 mv /tmp/Makefile ./doc/paper-autonomous_robots
