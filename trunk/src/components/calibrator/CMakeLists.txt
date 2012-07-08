@@ -26,5 +26,5 @@ TARGET_LINK_LIBRARIES( calibrator
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
     ${LIBS_DIR}/progeo/libprogeo.so
--lxerces-c
+    #-lxerces-c
 )

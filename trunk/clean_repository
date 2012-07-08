@@ -29,6 +29,8 @@ for file in $mivar; do
 	rm -r $file	
 done
 
+rm src/interfaces/cpp/jderobot/*
+
 
 
 mv /tmp/Makefile ./doc/paper-autonomous_robots

@@ -58,6 +58,10 @@ PKG_CHECK_MODULES(gtkglextmm REQUIRED gtkglextmm-1.2)
 include_directories(${gtkglextmm_INCLUDE_DIRS})
 link_directories(${gtkglextmm_LIBRARY_DIRS})
 
+PKG_CHECK_MODULES(gsl REQUIRED gsl)
+include_directories(${gsl_INCLUDE_DIRS})
+link_directories(${gsl_LIBRARIES_DIRS})
+
 
 
   # FIND AND CHECK OTHER DEPENDENCES
@@ -65,6 +69,7 @@ include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/fireware/CMakeLists.txt)
 include(${DEPS_DIR}/pcl/CMakeLists.txt)
 include(${DEPS_DIR}/player/CMakeLists.txt)
+include(${DEPS_DIR}/xerces/CMakeLists.txt)
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
 

@@ -11,3 +11,5 @@ rm -r *
 mv ../temp/CMakeLists.txt .
 mv ../temp/clean.sh .
 rm -r ../temp
+cd ../../../../
+./clean_repository 
