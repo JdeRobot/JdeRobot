@@ -2,17 +2,16 @@ project (JDEROBOT)
 
 cmake_minimum_required(VERSION 2.8)
 
-    # ENV VARS
+# ENV VARS
 SET(gladedir ./)
 
-SET( INTERFACES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/cpp)
-SET( INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libs)
-include_directories(${INCLUDE_DIR}) 
-SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libs)
-link_directories(${LIBS_DIR})
-SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice)
-SET( COMPONENTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/components)
-SET( LIBS_NEEDED   bgfgsegmentation jderobotice colorspaces jderobotutil progeo pioneer fuzzylib visionlib ) 
+SET( INTERFACES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/cpp) # Directorio con las interfaces ICE en C++
+SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libs) # Directorio donde se encuentran las librerias propias de jderobot
+SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice) # Directorio donde se encuentran las interfaces ICE
+SET( LIBS_NEEDED   bgfgsegmentation jderobotice colorspaces jderobotutil progeo pioneer fuzzylib visionlib ) # Librerias de las que depende el componente
+SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Deps) # Directorio donde se encuentran las dependencias
+
+
 
 ###################
 #                 #
@@ -63,50 +62,16 @@ PKG_CHECK_MODULES(gsl REQUIRED gsl)
 include_directories(${gsl_INCLUDE_DIRS})
 link_directories(${gsl_LIBRARIES_DIRS})
 
-# CHECK GEARBOX
-FIND_LIBRARY(with_gearbox
-    NAMES GbxGarminAcfr GbxIceUtilAcfr
-    PATHS /usr/lib/gearbox /usr/local/lib/gearbox)
-IF(NOT with_gearbox)
-    MESSAGE (FATAL_ERROR "*** Gearbox libraries: GbxUtilAcfr or GbxIceUtilAcfr not found") 
-ENDIF()
-include_directories(/usr/include/gearbox)
-link_directories(/usr/lib/gearbox)
-
-# CHECK FIREWARE 
-FIND_LIBRARY(with_fireware
-    NAMES  dc1394 raw1394
-    PATHS /usr/lib)
-IF(NOT with_fireware)
-    MESSAGE ("*** Fireware libraries: dc1394 or raw1394 not found") 
-ENDIF()
 
 
-# CHECK PCL
-FIND_LIBRARY(with_pcl
-    NAMES pcl_surface pcl_registration pcl_segmentation pcl_filters pcl_sample_consensus pcl_io pcl_octree pcl_features pcl_kdtree pcl_common
-    PATHS /usr/lib)
-IF(NOT with_pcl)
-    MESSAGE ("*** PCL libraries not found. Are needed to KinectServer component")
-endif()
+  # FIND AND CHECK OTHER DEPENDENCES
+include(${DEPS_DIR}/gearbox/CMakeLists.txt)
+include(${DEPS_DIR}/fireware/CMakeLists.txt)
+include(${DEPS_DIR}/pcl/CMakeLists.txt)
+include(${DEPS_DIR}/player/CMakeLists.txt)
+include(${DEPS_DIR}/xerces/CMakeLists.txt)
+#include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
-# CHECK Player
-FIND_LIBRARY(with_player
-    NAMES playerc
-    PATHS /usr/local/lib)
-
-IF(NOT with_player)
-    MESSAGE ("*** Player libraries not found. Are needed to PlayerServer component")
-endif()
-
-
-# CHECK OPENNI
-FIND_LIBRARY(with_openni
-    NAMES OpenNI
-    PATHS /usr/lib /usr/local/lib)
-IF(NOT with_openni)
-    MESSAGE ("*** OpenNi libraries not found. Are needed to openniServer component")
-endif()
 
 file(READ ${CMAKE_CURRENT_SOURCE_DIR}/jderobot.cfg contents)
 
