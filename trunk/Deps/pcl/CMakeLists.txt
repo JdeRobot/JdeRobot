@@ -5,6 +5,10 @@ FIND_LIBRARY(with_pcl
 IF(NOT with_pcl)
     MESSAGE ("*** PCL libraries not found. Are needed to KinectServer component")
 endif()
+IF(NOT with_pcl)
+    MESSAGE ("*** PCL OK")
+endif()
+
 
 include_directories(/usr/include)
 link_directories(/usr/lib)

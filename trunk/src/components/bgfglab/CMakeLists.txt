@@ -13,7 +13,7 @@ include_directories(
 
 add_executable (bgfglab ${SOURCE_FILES})
 
-TARGET_LINK_LIBRARIES( bgfglab 
+TARGET_LINK_LIBRARIES( bgfglab
     ${opencv_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}

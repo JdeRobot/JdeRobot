@@ -5,6 +5,9 @@ FIND_LIBRARY(with_openni
 IF(NOT with_openni)
     MESSAGE ("*** OpenNi libraries not found. Are needed to openniServer component")
 endif()
+IF(with_openni)
+    MESSAGE ("*** OpenNi OK")
+endif()
 
 include_directories(/usr/include/openni)
 

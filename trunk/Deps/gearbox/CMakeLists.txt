@@ -5,6 +5,9 @@ FIND_LIBRARY(with_gearbox
 IF(NOT with_gearbox)
     MESSAGE (FATAL_ERROR "*** Gearbox libraries: GbxUtilAcfr or GbxIceUtilAcfr not found") 
 ENDIF()
+IF(with_gearbox)
+    MESSAGE ("*** Gearbox OK") 
+ENDIF()
 
 
 

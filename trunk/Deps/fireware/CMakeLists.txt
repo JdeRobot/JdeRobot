@@ -5,6 +5,10 @@ FIND_LIBRARY(with_fireware
 IF(NOT with_fireware)
     MESSAGE ("*** Fireware libraries: dc1394 or raw1394 not found") 
 ENDIF()
+IF(with_fireware)
+    MESSAGE ("*** Fireware OK:") 
+ENDIF()
+
 
 include_directories(/usr/include)
 link_directories(/usr/lib)

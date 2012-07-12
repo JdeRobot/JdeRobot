@@ -31,6 +31,17 @@ done
 
 rm src/interfaces/cpp/jderobot/*
 
+mivar=`du -a | grep "cmake_uninstall.cmake$" | awk '{print $2}'`
+
+for file in $mivar; do
+	rm -r $file	
+done
+
+mivar=`svn status | grep ? | awk '{print $2}'`
+
+for file in $mivar; do
+	svn add $file	
+done
 
 
 mv /tmp/Makefile ./doc/paper-autonomous_robots

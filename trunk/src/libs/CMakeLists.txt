@@ -6,15 +6,13 @@
 ##add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/pioneer ${CMAKE_CURRENT_SOURCE_DIR}/pioneer)
 ##add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/fuzzylib ${CMAKE_CURRENT_SOURCE_DIR}/fuzzylib)
 ##add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/visionlib ${CMAKE_CURRENT_SOURCE_DIR}/visionlib)
-
 foreach(file ${LIBS_NEEDED})
     SET (fileAux fileAux-NOTFOUND)
     find_file(fileAux NAMES lib${file}.so PATHS ${CMAKE_CURRENT_SOURCE_DIR}/${file})
     string(COMPARE EQUAL ${fileAux} "fileAux-NOTFOUND" result)
     #MESSAGE ( "COMARE ${fileAux} fileAux-NOTFOUND")
-    IF(result)
-    add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/${file} ${CMAKE_CURRENT_SOURCE_DIR}/${file})
-	MESSAGE ( "*** Creating ${file} library") 
+    IF(result)	    
+	    add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/${file} ${CMAKE_CURRENT_SOURCE_DIR}/${file})
     ENDIF()    
 
     
