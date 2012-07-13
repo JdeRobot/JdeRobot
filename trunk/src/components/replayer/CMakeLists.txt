@@ -1,3 +1,7 @@
+IF(with_pcl)
+
+
+
 set( CMAKE_CXX_FLAGS "-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo -lpcl_features -lpcl_kdtree -lpcl_common -lpcl_visualization -lpcl_surface -lpcl_registration -lpcl_segmentation -lpcl_filters -lpcl_sample_consensus -lpcl_io" ) # Opciones para el compilador
 
 SET( SOURCE_FILES replayer.cpp)
@@ -14,7 +18,7 @@ include_directories(
 add_executable (replayer ${SOURCE_FILES})
 
 
-TARGET_LINK_LIBRARIES(replayer 
+TARGET_LINK_LIBRARIES(replayer
     ${opencv_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
@@ -27,4 +31,4 @@ TARGET_LINK_LIBRARIES(replayer
     ${LIBS_DIR}/jderobotice/libjderobotice.so
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
 )
-
+endif()

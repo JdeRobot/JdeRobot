@@ -22,35 +22,35 @@ SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Deps) # Directorio donde se encuentran
   # FIND & CHECK PRINCIPAL LIBRARIES
 
 include(FindPkgConfig)
-PKG_CHECK_MODULES(opencv REQUIRED opencv) 
+PKG_CHECK_MODULES(opencv REQUIRED opencv)
 include_directories(${opencv_INCLUDE_DIRS})
 link_directories(${opencv_LIBRARY_DIRS})
 
-PKG_CHECK_MODULES(gtk20 REQUIRED gtk+-2.0) 
+PKG_CHECK_MODULES(gtk20 REQUIRED gtk+-2.0)
 include_directories(${gtk20_INCLUDE_DIRS})
 link_directories(${gtk20_LIBRARY_DIRS})
 
-PKG_CHECK_MODULES(gtkgl20 REQUIRED gtkgl-2.0) 
+PKG_CHECK_MODULES(gtkgl20 REQUIRED gtkgl-2.0)
 include_directories(${gtkgl20_INCLUDE_DIRS})
 link_directories(${gtkgl20_LIBRARY_DIRS})
 
-PKG_CHECK_MODULES(gtkmm REQUIRED gtkmm-2.4) 
+PKG_CHECK_MODULES(gtkmm REQUIRED gtkmm-2.4)
 include_directories(${gtkmm_INCLUDE_DIRS})
 link_directories(${gtkmm_LIBRARY_DIRS})
 
-PKG_CHECK_MODULES(libglademm REQUIRED libglademm-2.4) 
+PKG_CHECK_MODULES(libglademm REQUIRED libglademm-2.4)
 include_directories(${libglademm_INCLUDE_DIRS})
 link_directories(${libglademm_LIBRARY_DIRS})
 
-PKG_CHECK_MODULES(gthread REQUIRED gthread-2.0) 
+PKG_CHECK_MODULES(gthread REQUIRED gthread-2.0)
 include_directories(${gthread_INCLUDE_DIRS})
 link_directories(${gthread_LIBRARY_DIRS})
 
-PKG_CHECK_MODULES(libgnomecanvas REQUIRED libgnomecanvas-2.0) 
+PKG_CHECK_MODULES(libgnomecanvas REQUIRED libgnomecanvas-2.0)
 include_directories(${libgnomecanvas_INCLUDE_DIRS})
 link_directories(${libgnomecanvas_LIBRARY_DIRS})
 
-PKG_CHECK_MODULES(libgnomecanvasmm REQUIRED libgnomecanvasmm-2.6) 
+PKG_CHECK_MODULES(libgnomecanvasmm REQUIRED libgnomecanvasmm-2.6)
 include_directories(${libgnomecanvasmm_INCLUDE_DIRS})
 link_directories(${libgnomecanvasmm_LIBRARY_DIRS})
 
@@ -99,15 +99,30 @@ ENDFOREACH(currentSourceFile)
 # Install Executables
 FILE(GLOB_RECURSE BIN_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/components/*cfg)
 FOREACH(currentSourceFile ${BIN_FILES})
+
 	string(REGEX REPLACE ".*/(.*)/.*.cfg" "\\1" new_source1 ${currentSourceFile})
-	list(APPEND new_list ${new_source1})
+  SET(EXIST EXIST-NOTFOUND)
+
+      find_file(EXIST NAMES ${new_source1} PATH ${CMAKE_CURRENT_SOURCE_DIR}/src/components/${new_source1} NO_DEFAULT_PATH)
+      SET(AUX ${CMAKE_CURRENT_SOURCE_DIR}/src/components/${new_source1}/${new_source1})
+MESSAGE("${CMAKE_CURRENT_SOURCE_DIR}/src/components/${new_source1}/")
+MESSAGE("${new_source1}")
+MESSAGE("${EXIST}")
+      string(COMPARE EQUAL ${EXIST} "EXIST-NOTFOUND"  EXISTE)
+IF (EXISTE)
+  list(APPEND new_list ${new_source1})
+ENDIF()
+
+
 ENDFOREACH(currentSourceFile)
+
+
 
 list(REMOVE_DUPLICATES new_list)
 list(REMOVE_ITEM new_list opencvdemo2.3.1 motiondetection alarmgenerator kinectViewer config openniServer giraffeServer naobody playerserver teleoperator colortuner2.3.1)
 
 FOREACH(currentBinFile ${new_list})
-    INSTALL (FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/components/${currentBinFile}/${currentBinFile} DESTINATION /usr/local/bin PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE) 
+    INSTALL (FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/components/${currentBinFile}/${currentBinFile} DESTINATION /usr/local/bin PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
 ENDFOREACH(currentBinFile)
 
 # Install interfaces headers
@@ -118,11 +133,11 @@ INSTALL (FILES ${HEADER_INTERFACE_FILES} DESTINATION /usr/local/include/jderobot
 FILE(GLOB SLICE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice/jderobot/*.ice)
 INSTALL (FILES ${SLICE_FILES} DESTINATION /usr/local/include/jderobot/slice)
 
-# Install CONF 
+# Install CONF
 FILE(GLOB_RECURSE CONF_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/components/*.cfg)
 INSTALL (FILES ${CONF_FILES} DESTINATION /usr/local/share/jderobot/conf)
 
-# Install Glade 
+# Install Glade
 FILE(GLOB_RECURSE GLADE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/components/*.glade)
 INSTALL (FILES ${GLADE_FILES} DESTINATION /usr/local/share/jderobot/glade)
 
