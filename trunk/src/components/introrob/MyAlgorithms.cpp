@@ -71,21 +71,21 @@ Métodos gráficos (mundo 3D)
 
 pintaSegmento: Traza una línea entre dos puntos dados a partir de un color dado.
 USO:
-      CvPoint3D32f aa,bb;
-      CvPoint3D32f color;
+CvPoint3D32f aa,bb;
+CvPoint3D32f color;
 
-      bb.x=this->destino.x;
-      bb.y=this->destino.y;
-      bb.z=0.;
+bb.x=this->destino.x;
+bb.y=this->destino.y;
+bb.z=0.;
 
-      aa.x=encodersData->robotx;
-      aa.y=encodersData->roboty;
-      aa.z=0;
+aa.x=encodersData->robotx;
+aa.y=encodersData->roboty;
+aa.z=0;
 
-      color.x = 1.; // Red
-      color.y = 0.; // Green
-      color.z = 0.; // Blue
-      this->pintaSegmento (aa, bb, color);
+color.x = 1.; // Red
+color.y = 0.; // Green
+color.z = 0.; // Blue
+this->pintaSegmento (aa, bb, color);
 
 drawProjectionLines: Traza líneas desde el origen de coordenadas a un punto seleccionado (click izquierdo) en una de las cámaras del robot.
 USO: this->drawProjectionLines();
@@ -110,183 +110,183 @@ absolutas2relativas: Método que calcula la posicion relativa respecto del robot
 
 relativas2absolutas: Método que calcula la posicion absoluta de un punto expresado en el sistema de coordenadas solidario al robot. El robot se encuentra en robotx, roboty con orientacion robotheta respecto al sistema de referencia absoluto.
 USO:
-        CvPoint3D32f aa,a,b;
+CvPoint3D32f aa,a,b;
 
-	aa.x=0.; aa.y=0.;
-	this->relativas2absolutas(aa,&a);
-	aa.x = 1000.; aa.y = -2000.;  // en mm.
-	this->relativas2absolutas(aa,&b);
+aa.x=0.; aa.y=0.;
+this->relativas2absolutas(aa,&a);
+aa.x = 1000.; aa.y = -2000.;  // en mm.
+this->relativas2absolutas(aa,&b);
 
-	**** PARA MAS INFO ACCEDER AL FICHERO API.CPP y API.H ****
+ **** PARA MAS INFO ACCEDER AL FICHERO API.CPP y API.H ****
 
-*/
+ */
 
-namespace introrob{
-    void Api::RunNavigationAlgorithm(){
-      double v, w, l, pan, tilt;
-      jderobot::LaserDataPtr laser;
-      CvPoint2D32f dest;
-      int i,j;
-      jderobot::EncodersDataPtr encoders;
-      int cont=0;
+namespace introrob {
 
-	/*A PARTIR DE AQUÍ SE PUEDE AÑADIR EL CÓDIGO DE NAVEGACIÓN IMPLEMENTADO POR EL ESTUDIANTE*/
+    void Api::RunNavigationAlgorithm() {
+        double v, w, l, pan, tilt;
+        jderobot::LaserDataPtr laser;
+        CvPoint2D32f dest;
+        int i, j;
+        jderobot::EncodersDataPtr encoders;
+        int cont = 0;
 
-	/*ALGUNOS EJEMPLOS*/
-      imageCameras2openCV();
-      imageCamera1=getImageCamera1();
-      imageCamera2=getImageCamera2();
-      printf("myPosition = [%f, %f]\n", encodersData->robotx, encodersData->roboty);
+        /*A PARTIR DE AQUÍ SE PUEDE AÑADIR EL CÓDIGO DE NAVEGACIÓN IMPLEMENTADO POR EL ESTUDIANTE*/
 
-      /*Manipulando imágenes de las cámaras*/
-      /*En el siguiente ejemplo se filtra el color rojo de la cámara izquierda para repintar esos píxeles a negro. Para visualizar el resultado
-       debemos desplegar la ventana "WINDOW DEBUGGING" y pulsar PLAY para hacer correr nuestro código*/
+        /*ALGUNOS EJEMPLOS*/
+        imageCameras2openCV();
+        imageCamera1 = getImageCamera1();
+        imageCamera2 = getImageCamera2();
+        printf("myPosition = [%f, %f]\n", encodersData->robotx, encodersData->roboty);
 
-	IplImage src =  *this->imageCamera1; 
+        /*Manipulando imágenes de las cámaras*/
+        /*En el siguiente ejemplo se filtra el color rojo de la cámara izquierda para repintar esos píxeles a negro. Para visualizar el resultado
+        debemos desplegar la ventana "WINDOW DEBUGGING" y pulsar PLAY para hacer correr nuestro código*/
 
-	for(i=0;i<src.width;i++){
-	    for(j=0;j<src.height;j++){
-	      if( ((int)(unsigned char)src.imageData[(j*src.width+i)*src.nChannels] > 120) &&
-		  ((int)(unsigned char)src.imageData[(j*src.width+i)*src.nChannels+1] < 70) &&
-		  ((int)(unsigned char)src.imageData[(j*src.width+i)*src.nChannels+2] < 70))
-		  {
-		    cont++;
-		    src.imageData[(j*src.width+i)*src.nChannels]=255; //R
-		    src.imageData[(j*src.width+i)*src.nChannels+1]=255; //G
-		    src.imageData[(j*src.width+i)*src.nChannels+2]=0;  //B
-		  }
-	    }
-	}
-	
-	/* A continuacion se muestran las coordenadas de los puntos obtenidos tras hacer click en alguna de las camaras */
-	//std::cout << x_click_cameraleft << std::endl; // Coordenada x del punto donde se ha hecho click en la camara izquierda
-	//std::cout << y_click_cameraleft << std::endl; // Coordenada y del punto donde se ha hecho click en la camara izquierda
-	//std::cout << x_click_cameraright << std::endl; // Coordenada x del punto donde se ha hecho click en la camara derecha
-	//std::cout << y_click_cameraright << std::endl; // Coordenada y del punto donde se ha hecho click en la camara derecha
-	
-	
-	
+        IplImage src = *this->imageCamera1;
+
+        for (i = 0; i < src.width; i++) {
+            for (j = 0; j < src.height; j++) {
+                if (((int) (unsigned char) src.imageData[(j * src.width + i) * src.nChannels] > 120) &&
+                        ((int) (unsigned char) src.imageData[(j * src.width + i) * src.nChannels + 1] < 70) &&
+                        ((int) (unsigned char) src.imageData[(j * src.width + i) * src.nChannels + 2] < 70)) {
+                    cont++;
+                    src.imageData[(j * src.width + i) * src.nChannels] = 255; //R
+                    src.imageData[(j * src.width + i) * src.nChannels + 1] = 255; //G
+                    src.imageData[(j * src.width + i) * src.nChannels + 2] = 0; //B
+                }
+            }
+        }
+
+        /* A continuacion se muestran las coordenadas de los puntos obtenidos tras hacer click en alguna de las camaras */
+        //std::cout << x_click_cameraleft << std::endl; // Coordenada x del punto donde se ha hecho click en la camara izquierda
+        //std::cout << y_click_cameraleft << std::endl; // Coordenada y del punto donde se ha hecho click en la camara izquierda
+        //std::cout << x_click_cameraright << std::endl; // Coordenada x del punto donde se ha hecho click en la camara derecha
+        //std::cout << y_click_cameraright << std::endl; // Coordenada y del punto donde se ha hecho click en la camara derecha
 
 
 
-	/* EJEMPLO SENCILLO DE UN BUMP AND GO */
-
-	/* TOMA DE SENSORES */
-	//Aqui tomamos el valor de los sensores para alojarlo en nuestras variables locales
-      laser=getLaserData(); // Get the laser info
-      printf("laser[45]: %d\n", laser->distanceData[45]);
-
-      v=this->getMotorV();
-      w = this->getMotorW();
-      l = this->getMotorL();
-      printf("v: %f , w: %f , l: %f\n", v, w, l);
-
-      dest=this->getDestino();
-      printf ("destPoint = [%f, %f]\n", dest.x, dest.y);
-
-      encoders=this->getEncodersData();
-      printf("myPosition = [%f, %f]\n", encoders->robotx, encoders->roboty);
-	/* FIN TOMA DE SENSORES */
 
 
-/*
-      switch(accion){
 
-              case 0:		// Robot hacia adelante
+        /* EJEMPLO SENCILLO DE UN BUMP AND GO */
 
-                      if(( laser->distanceData[45] < 1000.0) or ( laser->distanceData[90] < 1000.0) or ( laser->distanceData[135] < 1000.0)){
-                              v=0.;
-                              //if ((x_ant == myPoint.x) and (y_ant == myPoint.y) and (z_ant == myPoint.z)){
-                              accion=1;
-                              printf("### Activado hacia Atras\n");
-                              //}
-                      }
-                      else
-                        v=50;
-                      break;
+        /* TOMA DE SENSORES */
+        //Aqui tomamos el valor de los sensores para alojarlo en nuestras variables locales
+        laser = getLaserData(); // Get the laser info
+        //printf("laser[45]: %d\n", laser->distanceData[45]);
 
-              case 1:		// Robot hacia atras
-                      if ((laser->distanceData[45] < 1100) or (laser->distanceData[90] < 1100) or (laser->distanceData[135] < 1100)){
-                              v=-50.;
-                              printf("### Llendo hacia atras\n");
-                      }
-                      else{
-                              v=0.;
-                              accion=2;
-                      }
-                      break;
+        v = this->getMotorV();
+        w = this->getMotorW();
+        l = this->getMotorL();
+        printf("v: %f , w: %f , l: %f\n", v, w, l);
+
+        //dest = this->getDestino();
+        //printf("destPoint = [%f, %f]\n", dest.x, dest.y);
+
+        //encoders = this->getEncodersData();
+        //printf("myPosition = [%f, %f]\n", encoders->robotx, encoders->roboty);
+        /* FIN TOMA DE SENSORES */
 
 
-              case 2:		// Robot girando.
-                      if((laser->distanceData[45] < 1300) or (laser->distanceData[90] < 1300) or (laser->distanceData[135] < 1300)){
-                              if(sentido%2==0){
-                                      w=50.;
-                              }
-                              else{
-                                      w=50.*(-1);
-                              }
-                              printf("### Girando: %d \n", sentido);
-                      }
-                      else{
-                              w=0.;
-                              accion=0;
-                              sentido = (1 + rand() % 40);
-                      }
+        /*
+        switch(accion){
 
-                      break;
-      }
-*/
-      /*Comandar robot*/
-      //Aqui enviamos los datos al robot
-      	    w=0.;
-      this->setMotorW(w);
-      this->setMotorV(v);
+        case 0:		// Robot hacia adelante
 
-      this->setMotorL(l);
-      //cvReleaseImage(&imageCamera1);
-      //cvReleaseImage(&imageCamera2);
- 
-      //pan=0;
-      //tilt=0;
-      //this->setPTEncoders(pan,tilt,1); //Con el segundo parametro elegimos la camara a comandar (1 o 2)
+        if(( laser->distanceData[45] < 1000.0) or ( laser->distanceData[90] < 1000.0) or ( laser->distanceData[135] < 1000.0)){
+        v=0.;
+        //if ((x_ant == myPoint.x) and (y_ant == myPoint.y) and (z_ant == myPoint.z)){
+        accion=1;
+        printf("### Activado hacia Atras\n");
+        //}
+        }
+        else
+        v=50;
+        break;
+
+        case 1:		// Robot hacia atras
+        if ((laser->distanceData[45] < 1100) or (laser->distanceData[90] < 1100) or (laser->distanceData[135] < 1100)){
+        v=-50.;
+        printf("### Llendo hacia atras\n");
+        }
+        else{
+        v=0.;
+        accion=2;
+        }
+        break;
+
+
+        case 2:		// Robot girando.
+        if((laser->distanceData[45] < 1300) or (laser->distanceData[90] < 1300) or (laser->distanceData[135] < 1300)){
+        if(sentido%2==0){
+        w=50.;
+        }
+        else{
+        w=50.*(-1);
+        }
+        printf("### Girando: %d \n", sentido);
+        }
+        else{
+        w=0.;
+        accion=0;
+        sentido = (1 + rand() % 40);
+        }
+
+        break;
+        }
+         */
+        /*Comandar robot*/
+        //Aqui enviamos los datos al robot
+        //w = 0.;
+        this->setMotorW(3);
+        this->setMotorV(0);
+
+        this->setMotorL(0);
+        //cvReleaseImage(&imageCamera1);
+        //cvReleaseImage(&imageCamera2);
+
+        //pan=0;
+        //tilt=0;
+        //this->setPTEncoders(pan,tilt,1); //Con el segundo parametro elegimos la camara a comandar (1 o 2)
 
 
 
     }
 
-   void Api::RunGraphicsAlgorithm(){
-      /* TODO: ADD YOUR GRAPHIC CODE HERE */
-      CvPoint3D32f aa,bb;
-      CvPoint3D32f a,b;
-      CvPoint3D32f c,d;
-      CvPoint3D32f color;
-      
-      // Init camera 1
-      camera *mycameraA = new camera("cameras/calibA");
-      myCamA= mycameraA->readConfig();
+    void Api::RunGraphicsAlgorithm() {
+        /* TODO: ADD YOUR GRAPHIC CODE HERE */
+        CvPoint3D32f aa, bb;
+        CvPoint3D32f a, b;
+        CvPoint3D32f c, d;
+        CvPoint3D32f color;
 
-      // Init camera 2
-      camera *mycameraB = new camera("cameras/calibB");
-      myCamB= mycameraB->readConfig();
+        // Init camera 1
+        camera *mycameraA = new camera("cameras/calibA");
+        myCamA = mycameraA->readConfig();
+
+        // Init camera 2
+        camera *mycameraB = new camera("cameras/calibB");
+        myCamB = mycameraB->readConfig();
 
 
-      bb.x=this->destino.x;
-      bb.y=this->destino.y;
-      bb.z=0.;
+        bb.x = this->destino.x;
+        bb.y = this->destino.y;
+        bb.z = 0.;
 
-      aa.x=encodersData->robotx;
-      aa.y=encodersData->roboty;
-      aa.z=0;
+        aa.x = encodersData->robotx;
+        aa.y = encodersData->roboty;
+        aa.z = 0;
 
-      color.x = 1.; // Red
-      color.y = 0.; // Green
-      color.z = 0.; // Blue
-      this->pintaSegmento (aa, bb, color); // ROJO - Pinta un segmento desde el punto "aa" hasta el punto "bb"
-      this->pintaDestino (aa, bb, color); // ROJO - Marca con una estrella el destino seleccionado al hacer click con el botón central en el mundo 3D.
-      this->drawSphere(bb, color);
+        color.x = 1.; // Red
+        color.y = 0.; // Green
+        color.z = 0.; // Blue
+        this->pintaSegmento(aa, bb, color); // ROJO - Pinta un segmento desde el punto "aa" hasta el punto "bb"
+        this->pintaDestino(aa, bb, color); // ROJO - Marca con una estrella el destino seleccionado al hacer click con el botón central en el mundo 3D.
+        this->drawSphere(bb, color);
 
-      /* this->drawProjectionLines();*/
+        /* this->drawProjectionLines();*/
 
-   }
+    }
 
 }

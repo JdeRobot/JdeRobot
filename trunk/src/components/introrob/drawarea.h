@@ -49,75 +49,76 @@
 #define IMAGE_HEIGHT 240
 
 typedef struct SoRtype {
-  struct SoRtype *father;
-  float posx;
-  float posy;
-  float posz;
-  float foax;
-  float foay;
-  float foaz;
-  float roll;
+    struct SoRtype *father;
+    float posx;
+    float posy;
+    float posz;
+    float foax;
+    float foay;
+    float foaz;
+    float roll;
 } SofReference;
 
 namespace introrob {
-        class Gui;
-	class DrawArea : public Gtk::DrawingArea, public Gtk::GL::Widget<DrawArea> {
-            //private:
-            public:
-                DrawArea(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml>& builder);
-		void setToPioneerCamera (double robottheta);
-                
-                virtual ~DrawArea();
-                float robotx;
-                float roboty;
-                float robottheta;
-                
-                int numLasers;
-                std::vector <float> distanceData;
-                
-		void getDestino ();                
-		CvPoint2D32f destino;
-                
-		introrob::Gui *gui;
-                //const float MAXWORLD;
-                //const float PI;
+    class Gui;
 
-                
-            protected:
-                virtual bool on_expose_event(GdkEventExpose* event);
-                virtual bool on_motion_notify(GdkEventMotion* event);
-                virtual	bool on_button_press(GdkEventButton* event);
-                virtual bool on_drawarea_scroll(GdkEventScroll * event);
-		
-                
-		bool on_timeout();                
+    class DrawArea : public Gtk::DrawingArea, public Gtk::GL::Widget<DrawArea> {
+        //private:
+    public:
+        DrawArea(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml>& builder);
+        void setToPioneerCamera(double robottheta);
 
-		void InitOGL (int w, int h);
-                void drawScene();
-                void draw_world();
-                               
-                SofReference mypioneer;
-                int refresh_time;
-                HPoint3D glcam_pos;
-                HPoint3D glcam_foa;
-                HPoint3D cam_pos;
-                
-                //float scale;
-                float radius;
-                float lati;
-                float longi;
-                float old_x;
-                float old_y; 
-                
-            private:
-                void linePlaneIntersection (HPoint3D A, HPoint3D B, HPoint3D *intersectionPoint);                
-                
-                
-                
-            //protected:
-                
+        virtual ~DrawArea();
+        float robotx;
+        float roboty;
+        float robottheta;
 
-        };
+        int numLasers;
+        std::vector <float> distanceData;
+
+        void getDestino();
+        CvPoint2D32f destino;
+
+        introrob::Gui *gui;
+        //const float MAXWORLD;
+        //const float PI;
+
+
+    protected:
+        virtual bool on_expose_event(GdkEventExpose* event);
+        virtual bool on_motion_notify(GdkEventMotion* event);
+        virtual bool on_button_press(GdkEventButton* event);
+        virtual bool on_drawarea_scroll(GdkEventScroll * event);
+
+
+        bool on_timeout();
+
+        void InitOGL(int w, int h);
+        void drawScene();
+        void draw_world();
+
+        SofReference mypioneer;
+        int refresh_time;
+        HPoint3D glcam_pos;
+        HPoint3D glcam_foa;
+        HPoint3D cam_pos;
+
+        //float scale;
+        float radius;
+        float lati;
+        float longi;
+        float old_x;
+        float old_y;
+
+    private:
+        void linePlaneIntersection(HPoint3D A, HPoint3D B, HPoint3D *intersectionPoint);
+
+
+
+        //protected:
+
+
+    };
 } // namespace
 
 #endif /*INTROROB_DRAWAREA_H*/

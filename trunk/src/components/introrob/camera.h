@@ -19,70 +19,68 @@
  * 			   Jose María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
- 
+
 #ifndef CAMERA_H_
 #define CAMERA_H_
 
 /**
-	\class camera
-	\brief This class implement a camera instance  
-	\autor Roberto Calvo <rocapal@gsyc.es>
-	\date  17/05/2008
-**/
+\class camera
+\brief This class implement a camera instance  
+\autor Roberto Calvo <rocapal@gsyc.es>
+\date  17/05/2008
+ **/
 
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_multifit.h>
 
-extern "C"
-{
+extern "C" {
 #include "progeo/progeo.h"
 }
 
-class camera
-{
-	public:
-		/// \brief Constructor
-		camera (char* configFile);
-		
-		/// \brief Destructor
-		~camera();
-		
-		/// \brief Reaf file config and fill the matrix R and K
-		TPinHoleCamera& readConfig();
-		
-		/// \brief Return a progeo camera with configurated matrix
-		TPinHoleCamera& getProgeoCam();
-		
-		/// \brief Do test of cams
-		void test();
+class camera {
+public:
+    /// \brief Constructor
+    camera(char* configFile);
 
-	private:
-	
-		/// \brief Update Matrix
-		void updateMatrix();
-		
-		/// \brief 
-		//TPinHoleCamera m_progeoCam;
-		TPinHoleCamera cam;
-		/// \brief name file
-		char* m_nameFile;
-		
-		/// \brief R Matrix
-		gsl_matrix	*m_R; 
+    /// \brief Destructor
+    ~camera();
 
-		/// \brief aux Matrix
-		gsl_matrix	*m_RES; 
+    /// \brief Reaf file config and fill the matrix R and K
+    TPinHoleCamera& readConfig();
 
-		/// \brief RT Matrix
-		gsl_matrix	*m_RT;
+    /// \brief Return a progeo camera with configurated matrix
+    TPinHoleCamera& getProgeoCam();
 
-		/// \brief T Matrix
-		gsl_matrix	*m_T;
+    /// \brief Do test of cams
+    void test();
 
-		/// \brief K Matrix
-		gsl_matrix	*m_K;
-	
-		/// \brief Position vector of cam (x,y,z) 
-		gsl_vector *m_pos;
+private:
+
+    /// \brief Update Matrix
+    void updateMatrix();
+
+    /// \brief 
+    //TPinHoleCamera m_progeoCam;
+    TPinHoleCamera cam;
+    /// \brief name file
+    char* m_nameFile;
+
+    /// \brief R Matrix
+    gsl_matrix *m_R;
+
+    /// \brief aux Matrix
+    gsl_matrix *m_RES;
+
+    /// \brief RT Matrix
+    gsl_matrix *m_RT;
+
+    /// \brief T Matrix
+    gsl_matrix *m_T;
+
+    /// \brief K Matrix
+    gsl_matrix *m_K;
+
+    /// \brief Position vector of cam (x,y,z) 
+    gsl_vector *m_pos;
 };
 #endif /*CAMERA_H_*/

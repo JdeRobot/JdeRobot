@@ -39,32 +39,33 @@
 #include "API.h"
 
 namespace introrob {
+
     class Control {
-	public:
-	virtual ~Control();
-	
-	    //FUNCTIONS 
-	    void updateCameras(Api *api);
-	    void UpdateSensorsICE(Api *api);
-	    void SetActuatorsICE(Api *api);
-    
-	    // ICE INTERFACES
-	    jderobot::MotorsPrx mprx;
-	    jderobot::EncodersPrx eprx;
-	    jderobot::LaserPrx lprx;
-	    jderobot::CameraPrx cprx1;
-	    jderobot::CameraPrx cprx2;	    
-	    jderobot::PTMotorsPrx ptmprx1;
-	    jderobot::PTEncodersPrx pteprx1;
-	    jderobot::PTMotorsPrx ptmprx2;
-	    jderobot::PTEncodersPrx pteprx2;
-	    jderobot::Pose3DEncodersPrx p3deprx1;
-	    jderobot::Pose3DEncodersPrx p3deprx2;
-	    jderobot::Pose3DMotorsPrx p3dmprx1;
-	    jderobot::Pose3DMotorsPrx p3dmprx2;
-	    
-     
-     
-    };//class
+    public:
+        virtual ~Control();
+
+        //FUNCTIONS 
+        void updateCameras(Api *api);
+        void UpdateSensorsICE(Api *api);
+        void SetActuatorsICE(Api *api);
+
+        // ICE INTERFACES
+        jderobot::MotorsPrx mprx;
+        jderobot::EncodersPrx eprx;
+        jderobot::LaserPrx lprx;
+        jderobot::CameraPrx cprx1;
+        jderobot::CameraPrx cprx2;
+        jderobot::PTMotorsPrx ptmprx1;
+        jderobot::PTEncodersPrx pteprx1;
+        jderobot::PTMotorsPrx ptmprx2;
+        jderobot::PTEncodersPrx pteprx2;
+        jderobot::Pose3DEncodersPrx p3deprx1;
+        jderobot::Pose3DEncodersPrx p3deprx2;
+        jderobot::Pose3DMotorsPrx p3dmprx1;
+        jderobot::Pose3DMotorsPrx p3dmprx2;
+
+
+
+    }; //class
 } // namespace
 #endif /*INTROROB_Control_H*/

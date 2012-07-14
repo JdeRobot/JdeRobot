@@ -23,228 +23,237 @@
 
 #define TWOPI 6.283185308
 
-namespace introrob{
+namespace introrob {
 
-   float Api::getMotorV(){
-      return this->motorVin;
-   }
+    float Api::getMotorV() {
+        return this->motorVin;
+    }
 
-   float Api::getMotorW(){
-      return this->motorWin;
-   }
+    float Api::getMotorW() {
+        return this->motorWin;
+    }
 
-   float Api::getMotorL(){
-      return this->motorLin;
-   }
+    float Api::getMotorL() {
+        return this->motorLin;
+    }
 
-   jderobot::LaserDataPtr Api::getLaserData(){
-      return this->laserData;
-   }
+    jderobot::LaserDataPtr Api::getLaserData() {
+        return this->laserData;
+    }
 
-   int Api::getNumLasers(){
-      return this->laserData->numLaser;
-   }
+    int Api::getNumLasers() {
+        return this->laserData->numLaser;
+    }
 
-   jderobot::IntSeq Api::getDistancesLaser(){
-      return this->laserData->distanceData;
-   }
+    jderobot::IntSeq Api::getDistancesLaser() {
+        return this->laserData->distanceData;
+    }
 
-   jderobot::EncodersDataPtr Api::getEncodersData(){
-      return this->encodersData;
-   }
+    jderobot::EncodersDataPtr Api::getEncodersData() {
+        return this->encodersData;
+    }
 
-   IplImage* Api::getImageCamera1(){
-      IplImage src =  *this->image1;
-      IplImage* cvResultado = cvCreateImage(cvGetSize(&src), IPL_DEPTH_8U, 3);
-      cvCopy(&src, cvResultado);
+    IplImage* Api::getImageCamera1() {
+        IplImage src = *this->image1;
+        IplImage* cvResultado = cvCreateImage(cvGetSize(&src), IPL_DEPTH_8U, 3);
+        cvCopy(&src, cvResultado);
 
-      return cvResultado;
-   }
-   IplImage* Api::getImageCamera2(){
-      IplImage src =  *this->image2;
-      IplImage* cvResultado = cvCreateImage(cvGetSize(&src), IPL_DEPTH_8U, 3);
-      cvCopy(&src, cvResultado);
+        return cvResultado;
+    }
 
-      return cvResultado;
-   }
+    IplImage* Api::getImageCamera2() {
+        IplImage src = *this->image2;
+        IplImage* cvResultado = cvCreateImage(cvGetSize(&src), IPL_DEPTH_8U, 3);
+        cvCopy(&src, cvResultado);
 
-   void Api::setMotorV(float motorV){
-      this->motorVout=motorV;
-   }
-   void Api::setMotorW(float motorW){
-      this->motorWout=motorW;
-   }
+        return cvResultado;
+    }
 
-   void Api::setMotorL(float motorL){
-      this->motorLout=motorL;
+    void Api::setMotorV(float motorV) {
+        this->motorVout = motorV;
+    }
 
-   }
-/*
-   void Api::setPTEncoders(double pan, double tilt, int cameraId){
+    void Api::setMotorW(float motorW) {
+        this->motorWout = motorW;
+    }
 
-      api->PTmotorsData1 = new jderobot::PTMotorsData ();
-      api->PTmotorsData2 = new jderobot::PTMotorsData ();
+    void Api::setMotorL(float motorL) {
+        this->motorLout = motorL;
 
-      if(cameraId==1){
+    }
 
-         this->PTmotorsData1->latitude=pan;
-         this->PTmotorsData1->longitude=tilt;
-      }
-      else{
-         this->PTmotorsData2->latitude=pan;
-         this->PTmotorsData2->longitude=tilt;
-      }
-   }
-*/
+    /*
+    void Api::setPTEncoders(double pan, double tilt, int cameraId){
 
+    api->PTmotorsData1 = new jderobot::PTMotorsData ();
+    api->PTmotorsData2 = new jderobot::PTMotorsData ();
 
-   void Api::imageCameras2openCV(){
-      pthread_mutex_lock(&this->controlGui);
-      colorspaces::Image::FormatPtr fmt1 = colorspaces::Image::Format::searchFormat(imageData1->description->format);
-      if (!fmt1)
-         throw "Format not supported";
-       image1 = new colorspaces::Image (imageData1->description->width, imageData1->description->height, fmt1, &(imageData1->pixelData[0])); // Prepare the image to use with openCV
+    if(cameraId==1){
 
-      colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat( imageData2->description->format);
-      if (!fmt2)
-         throw "Format not supported";
-       image2 = new colorspaces::Image ( imageData2->description->width,  imageData2->description->height, fmt2, &( imageData2->pixelData[0])); // Prepare the image to use with openCV
-       pthread_mutex_unlock(&this->controlGui);
-   }
+    this->PTmotorsData1->latitude=pan;
+    this->PTmotorsData1->longitude=tilt;
+    }
+    else{
+    this->PTmotorsData2->latitude=pan;
+    this->PTmotorsData2->longitude=tilt;
+    }
+    }
+     */
 
 
-   int Api::absolutas2relativas(CvPoint3D32f in, CvPoint3D32f *out){
-      if (out!=NULL) {
-        CvPoint3D32f myPoint;
+    void Api::imageCameras2openCV() {
+        pthread_mutex_lock(&this->controlGui);
+        colorspaces::Image::FormatPtr fmt1 = colorspaces::Image::Format::searchFormat(imageData1->description->format);
+        if (!fmt1)
+            throw "Format not supported";
+        image1 = new colorspaces::Image(imageData1->description->width, imageData1->description->height, fmt1, &(imageData1->pixelData[0])); // Prepare the image to use with openCV
 
-        //this->controller->getPosition(&myPoint);
-        this->robotx = encodersData->robotx;
-        this->roboty = encodersData->roboty;
-        this->robottheta = encodersData->robottheta;
+        colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(imageData2->description->format);
+        if (!fmt2)
+            throw "Format not supported";
+        image2 = new colorspaces::Image(imageData2->description->width, imageData2->description->height, fmt2, &(imageData2->pixelData[0])); // Prepare the image to use with openCV
+        pthread_mutex_unlock(&this->controlGui);
+    }
 
-        (*out).x = in.x*cos(this->robottheta*DEGTORAD) + in.y*sin(this->robottheta*DEGTORAD) -
-          this->robotx*cos(this->robottheta*DEGTORAD) - this->roboty*sin(this->robottheta*DEGTORAD);
-        (*out).y = in.y*cos(this->robottheta*DEGTORAD) - in.x*sin(this->robottheta*DEGTORAD) -
-          this->roboty*cos(this->robottheta*DEGTORAD) + this->robotx*sin(this->robottheta*DEGTORAD);
-        return 0;
-      }
-      return 1;
-   }
+    int Api::absolutas2relativas(CvPoint3D32f in, CvPoint3D32f *out) {
+        if (out != NULL) {
+            CvPoint3D32f myPoint;
 
+            //this->controller->getPosition(&myPoint);
+            this->robotx = encodersData->robotx;
+            this->roboty = encodersData->roboty;
+            this->robottheta = encodersData->robottheta;
 
-   int Api::relativas2absolutas(CvPoint3D32f in, CvPoint3D32f *out){
-      if (out!=NULL){
-        CvPoint3D32f myPoint;
+            (*out).x = in.x * cos(this->robottheta * DEGTORAD) + in.y * sin(this->robottheta * DEGTORAD) -
+                    this->robotx * cos(this->robottheta * DEGTORAD) - this->roboty * sin(this->robottheta * DEGTORAD);
+            (*out).y = in.y * cos(this->robottheta * DEGTORAD) - in.x * sin(this->robottheta * DEGTORAD) -
+                    this->roboty * cos(this->robottheta * DEGTORAD) + this->robotx * sin(this->robottheta * DEGTORAD);
+            return 0;
+        }
+        return 1;
+    }
 
-        this->robotx = encodersData->robotx;
-        this->roboty = encodersData->roboty;
-        this->robottheta = encodersData->robottheta;
+    int Api::relativas2absolutas(CvPoint3D32f in, CvPoint3D32f *out) {
+        if (out != NULL) {
+            CvPoint3D32f myPoint;
 
-        (*out).x = in.x*cos(this->robottheta*DEGTORAD) - in.y*sin(this->robottheta*DEGTORAD) + this->robotx;
-        (*out).y = in.y*cos(this->robottheta*DEGTORAD) + in.x*sin(this->robottheta*DEGTORAD) + this->roboty;
-        return 0;
-      }
-      return 1;
-   }
+            this->robotx = encodersData->robotx;
+            this->roboty = encodersData->roboty;
+            this->robottheta = encodersData->robottheta;
 
-   int Api::pintaSegmento (CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color) {
-     /* OJO mundo de coordenadas OpenGL está en decímetros, por compatibilidad con la plantilla OpenGL
+            (*out).x = in.x * cos(this->robottheta * DEGTORAD) - in.y * sin(this->robottheta * DEGTORAD) + this->robotx;
+            (*out).y = in.y * cos(this->robottheta * DEGTORAD) + in.x * sin(this->robottheta * DEGTORAD) + this->roboty;
+            (*out).z = in.z;
+            return 0;
+        }
+        return 1;
+    }
+
+    int Api::pintaSegmento(CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color) {
+        /* OJO mundo de coordenadas OpenGL está en decímetros, por compatibilidad con la plantilla OpenGL
         del robotPioneer. El factor SCALE marca la relación entre las coordenadas en milímetros de a,b
         y los homólogos en el mundo OpenGL */
 
-           glColor3f(color.x, color.y, color.z);
-           glLineWidth(2.0f);
-           glBegin(GL_LINES);
-                   v3f(a.x/SCALE, a.y/SCALE, a.z/SCALE);
-                   v3f(b.x/SCALE, b.y/SCALE, b.z/SCALE);
-           glEnd();
-           return 1;
-   }
-   
-     void Api::drawSphere(CvPoint3D32f a, CvPoint3D32f color)
-        {
-	    glColor3f(color.x, color.y, color.z);
-	    glPushMatrix();
-	    glTranslatef(a.x/SCALE, a.y/SCALE, a.z/SCALE);
-	    glutSolidSphere(1, 20, 20);
-	    glPopMatrix();
-	    glEnd();	  
-   }   
+        glColor3f(color.x, color.y, color.z);
+        glLineWidth(2.0f);
+        glBegin(GL_LINES);
+        v3f(a.x / SCALE, a.y / SCALE, a.z / SCALE);
+        v3f(b.x / SCALE, b.y / SCALE, b.z / SCALE);
+        glEnd();
+        return 1;
+    }
 
-   int Api::pintaDestino (CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color) {
-     /* OJO mundo de coordenadas OpenGL está en decímetros, por compatibilidad con la plantilla OpenGL
+    void Api::drawSphere(CvPoint3D32f a, CvPoint3D32f color) {
+        glColor3f(color.x, color.y, color.z);
+        glPushMatrix();
+        glTranslatef(a.x / SCALE, a.y / SCALE, a.z / SCALE);
+        glutSolidSphere(1, 20, 20);
+        glPopMatrix();
+        glEnd();
+    }
+
+    int Api::pintaDestino(CvPoint3D32f a, CvPoint3D32f b, CvPoint3D32f color) {
+        /* OJO mundo de coordenadas OpenGL está en decímetros, por compatibilidad con la plantilla OpenGL
         del robotPioneer. El factor SCALE marca la relación entre las coordenadas en milímetros de a,b
         y los homólogos en el mundo OpenGL */
 
-       glColor3f(color.x, color.y, color.z);
-       glLineWidth(2.0f);
+        glColor3f(color.x, color.y, color.z);
+        glLineWidth(2.0f);
 
-       glBegin(GL_TRIANGLES);
-		   glVertex3f((b.x/SCALE), (b.y/SCALE)+3, b.z/SCALE);
-		   glVertex3f((b.x/SCALE)+1.5, (b.y/SCALE)+1.5, b.z/SCALE);
-		   glVertex3f((b.x/SCALE)-1.5, (b.y/SCALE)+1.5, b.z/SCALE);
+        glBegin(GL_TRIANGLES);
+        glVertex3f((b.x / SCALE), (b.y / SCALE) + 3, b.z / SCALE);
+        glVertex3f((b.x / SCALE) + 1.5, (b.y / SCALE) + 1.5, b.z / SCALE);
+        glVertex3f((b.x / SCALE) - 1.5, (b.y / SCALE) + 1.5, b.z / SCALE);
 
-		   glVertex3f((b.x/SCALE)+3, (b.y/SCALE), b.z/SCALE);
-		   glVertex3f((b.x/SCALE)+1.5, (b.y/SCALE)+1.5, b.z/SCALE);
-		   glVertex3f((b.x/SCALE)+1.5, (b.y/SCALE)-1.5, b.z/SCALE);
+        glVertex3f((b.x / SCALE) + 3, (b.y / SCALE), b.z / SCALE);
+        glVertex3f((b.x / SCALE) + 1.5, (b.y / SCALE) + 1.5, b.z / SCALE);
+        glVertex3f((b.x / SCALE) + 1.5, (b.y / SCALE) - 1.5, b.z / SCALE);
 
-		   glVertex3f((b.x/SCALE), (b.y/SCALE)-3, b.z/SCALE);
-		   glVertex3f((b.x/SCALE)+1.5, (b.y/SCALE)-1.5, b.z/SCALE);
-		   glVertex3f((b.x/SCALE)-1.5, (b.y/SCALE)-1.5, b.z/SCALE);
+        glVertex3f((b.x / SCALE), (b.y / SCALE) - 3, b.z / SCALE);
+        glVertex3f((b.x / SCALE) + 1.5, (b.y / SCALE) - 1.5, b.z / SCALE);
+        glVertex3f((b.x / SCALE) - 1.5, (b.y / SCALE) - 1.5, b.z / SCALE);
 
-		   glVertex3f((b.x/SCALE)-3, (b.y/SCALE), b.z/SCALE);
-		   glVertex3f((b.x/SCALE)-1.5, (b.y/SCALE)+1.5, b.z/SCALE);
-		   glVertex3f((b.x/SCALE)-1.5, (b.y/SCALE)-1.5, b.z/SCALE);
-
-
-       glEnd();
-           return 1;
-   }
+        glVertex3f((b.x / SCALE) - 3, (b.y / SCALE), b.z / SCALE);
+        glVertex3f((b.x / SCALE) - 1.5, (b.y / SCALE) + 1.5, b.z / SCALE);
+        glVertex3f((b.x / SCALE) - 1.5, (b.y / SCALE) - 1.5, b.z / SCALE);
 
 
-   void Api::drawProjectionLines(){
+        glEnd();
+        return 1;
+    }
 
-           for(int i=0;i<numlines;i++) {
-                   CvPoint3D32f a,b,aa,ba;
-                   CvPoint3D32f color;
-                   a.x=extra_lines[i][0];
-                   a.y=extra_lines[i][1];
-                   a.z=extra_lines[i][2];
-                   b.x=extra_lines[i][4];
-                   b.y=extra_lines[i][5];
-                   b.z=extra_lines[i][6];
+    void Api::drawProjectionLines() {
 
-                   if (extra_lines[i][8]==1){color.x = 1.;color.y = 0.;color.z = 0.;}else{color.x = 0.;color.y = 0.;color.z = 1.;}
-                       this->pintaSegmento (a, b, color);
-           }
+        for (int i = 0; i < numlines; i++) {
+            CvPoint3D32f a, b, aa, ba;
+            CvPoint3D32f color;
+            a.x = extra_lines[i][0];
+            a.y = extra_lines[i][1];
+            a.z = extra_lines[i][2];
+            b.x = extra_lines[i][4];
+            b.y = extra_lines[i][5];
+            b.z = extra_lines[i][6];
 
-   }
-
-   CvPoint2D32f Api::getDestino(){
-      return this->destino;
-   }
-
-   void Api::showMyImage(){
-      int i,j;
-
-      IplImage src =  *this->imageCamera1;
-      IplImage* cvResultado = cvCreateImage(cvGetSize(&src), IPL_DEPTH_8U, 3);
-      cvCopy(&src, cvResultado);
-      for(i=0;i<cvResultado->width;i++){
-          for(j=0;j<cvResultado->height;j++){        
-            cvResultado->imageData[j*cvResultado->widthStep+i*cvResultado->nChannels]=this->imageCamera1->imageData[j*this->imageCamera1->widthStep+i*this->imageCamera1->nChannels+2]; //R
-            cvResultado->imageData[j*cvResultado->widthStep+i*cvResultado->nChannels+1]=this->imageCamera1->imageData[j*this->imageCamera1->widthStep+i*this->imageCamera1->nChannels+1]; //R
-            cvResultado->imageData[j*cvResultado->widthStep+i*cvResultado->nChannels+2]=this->imageCamera1->imageData[j*this->imageCamera1->widthStep+i*this->imageCamera1->nChannels]; //R
+            if (extra_lines[i][8] == 1) {
+                color.x = 1.;
+                color.y = 0.;
+                color.z = 0.;
+            } else {
+                color.x = 0.;
+                color.y = 0.;
+                color.z = 1.;
             }
-          }
-            
+            this->pintaSegmento(a, b, color);
+        }
 
-      cvShowImage("DebuggingWin", cvResultado );
-      
-   
-   
-   }
+    }
 
-Api::~Api() {}
+    CvPoint2D32f Api::getDestino() {
+        return this->destino;
+    }
+
+    void Api::showMyImage() {
+        int i, j;
+
+        IplImage src = *this->imageCamera1;
+        IplImage* cvResultado = cvCreateImage(cvGetSize(&src), IPL_DEPTH_8U, 3);
+        cvCopy(&src, cvResultado);
+        for (i = 0; i < cvResultado->width; i++) {
+            for (j = 0; j < cvResultado->height; j++) {
+                cvResultado->imageData[j * cvResultado->widthStep + i * cvResultado->nChannels] = this->imageCamera1->imageData[j * this->imageCamera1->widthStep + i * this->imageCamera1->nChannels + 2]; //R
+                cvResultado->imageData[j * cvResultado->widthStep + i * cvResultado->nChannels + 1] = this->imageCamera1->imageData[j * this->imageCamera1->widthStep + i * this->imageCamera1->nChannels + 1]; //R
+                cvResultado->imageData[j * cvResultado->widthStep + i * cvResultado->nChannels + 2] = this->imageCamera1->imageData[j * this->imageCamera1->widthStep + i * this->imageCamera1->nChannels]; //R
+            }
+        }
+
+
+        cvShowImage("DebuggingWin", cvResultado);
+
+
+
+    }
+
+    Api::~Api() {
+    }
 
 }
