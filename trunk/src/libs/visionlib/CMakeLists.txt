@@ -12,7 +12,7 @@ include_directories(
 add_library (visionlib  SHARED ${SOURCE_FILES})
 
 
-TARGET_LINK_LIBRARIES(visionlib 
+TARGET_LINK_LIBRARIES(visionlib
     ${opencv_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
