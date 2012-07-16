@@ -1,4 +1,5 @@
 IF(with_openni)
+    IF(with_nite)
 	SET( SOURCE_FILES openniServer.cpp myprogeo.cpp )
 	add_definitions(-DGLADE_DIR="${gladedir}")
 
@@ -18,7 +19,7 @@ IF(with_openni)
 	add_executable (openniServer ${SOURCE_FILES})
 
 
-TARGET_LINK_LIBRARIES(openniServer 
+TARGET_LINK_LIBRARIES(openniServer
     	${opencv_LIBRARIES}
     	${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
@@ -33,4 +34,5 @@ TARGET_LINK_LIBRARIES(openniServer
     ${LIBS_DIR}/progeo/libprogeo.so
     ${LIBS_DIR}/pioneer/libpioneer.so
 )
+    ENDIF()
 ENDIF()
