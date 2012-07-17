@@ -61,7 +61,7 @@ link_directories(${gtkglextmm_LIBRARY_DIRS})
 
   # FIND AND CHECK OTHER DEPENDENCES
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
-
+include(${DEPS_DIR}/ice/CMakeLists.txt)
 
 
 # START RECURSIVE

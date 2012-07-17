@@ -66,7 +66,7 @@ link_directories(${gsl_LIBRARIES_DIRS})
 
   # FIND AND CHECK OTHER DEPENDENCES
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
-
+include(${DEPS_DIR}/ice/CMakeLists.txt)
 
 # START RECURSIVE
 add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/../../.. ${CMAKE_CURRENT_SOURCE_DIR}/../../..)

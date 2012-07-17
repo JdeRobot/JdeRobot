@@ -67,6 +67,7 @@ link_directories(${gsl_LIBRARIES_DIRS})
   # FIND AND CHECK OTHER DEPENDENCES
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/xerces/CMakeLists.txt)
+include(${DEPS_DIR}/ice/CMakeLists.txt)
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
 

@@ -70,6 +70,7 @@ include(${DEPS_DIR}/fireware/CMakeLists.txt)
 include(${DEPS_DIR}/pcl/CMakeLists.txt)
 include(${DEPS_DIR}/player/CMakeLists.txt)
 include(${DEPS_DIR}/xerces/CMakeLists.txt)
+include(${DEPS_DIR}/ice/CMakeLists.txt)
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
 
