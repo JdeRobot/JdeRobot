@@ -27,10 +27,27 @@
 module jderobot{
 
 	/* Wiimote information */
-  class WiimoteData
+  class AccelerometerData
   {
-    //IntSeq distanceData;
+        IntSeq accelerometer;
+	
+  };
+
+  class InfraredData{
+	
+	IntSeq infrared1;
+	IntSeq infrared2;
+	IntSeq infrared3;
+	int sourceDetected;
+
+  };
+
+  class NunchukData{
+
 	int button;
+	IntSeq stick;
+	IntSeq acc;
+
   };
   
 
@@ -38,10 +55,19 @@ module jderobot{
    * Interface to the Wiimote interaction.
    */
     interface wiiMote {
-        int saludar ();
-        int despedir();
-        int getValue();
+	//SET DIFFERENT MODES
         int setValue(int Value);
+        int changeRumbleMode();
+        int changeIrMode();
+        int changeAccMode();
+        int changeButtonMode();
+
+	//GET DATA
+        int getButtonData();
+
+	idempotent NunchukData getNunchukData();	
+	idempotent AccelerometerData getAccData();
+	idempotent InfraredData getIrData();
     };
 
 }; //module
