@@ -61,6 +61,7 @@ module jderobot{
         int changeIrMode();
         int changeAccMode();
         int changeButtonMode();
+	int changeNunchukMode();
 
 	//GET DATA
         int getButtonData();
@@ -68,6 +69,7 @@ module jderobot{
 	idempotent NunchukData getNunchukData();	
 	idempotent AccelerometerData getAccData();
 	idempotent InfraredData getIrData();
+	int getBatteryStatus();
     };
 
 }; //module

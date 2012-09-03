@@ -1,3 +1,4 @@
+// <editor-fold defaultstate="collapsed" desc="comment">
 /*
  *  Copyright (C) 1997-2010 JDE Developers Team
  *
@@ -17,7 +18,7 @@
  *
  *  Authors : Jose María Cañas <jmplaza@gsyc.es>
  *            Maikel González Baile <m.gonzalezbai@gmail.com>
- *  		 
+ *
  */
 
 #include <jderobot/wiimote.h>
@@ -68,20 +69,16 @@ namespace wiimoteServer {
 
             cwiid_set_err(err);
 
-
-
             this->mesg = 0;
             this->led_state = 0;
             this->rumbleM = 0;
             this->exit = 0;
 
-
             //Connect to address given on command-line, if present
             bdaddr = *BDADDR_ANY;
-
             usleep(100);
             cout << endl;
-            //Connect to the wiimote 
+            //Connect to the wiimote
             cout << "*******************************************************" << endl;
             printf("* Put Wiimote in discoverable mode now (press 1+2)... *\n");
             cout << "*******************************************************" << endl;
@@ -92,6 +89,11 @@ namespace wiimoteServer {
             if (cwiid_set_mesg_callback(wiimote, cwiid_callback)) {
                 fprintf(stderr, "Unable to set message callback\n");
             }
+
+
+            //            Allow show the wiimote status
+            toggle_bit(rpt_mode, CWIID_RPT_STATUS);
+            set_rpt_mode(wiimote, rpt_mode);
 
             //SET IN MODE PRINT
             if (cwiid_enable(wiimote, CWIID_FLAG_MESG_IFC)) {
@@ -114,16 +116,13 @@ namespace wiimoteServer {
         int sourceDetected;
         int rumbleM;
         unsigned char rpt_mode;
-        cwiid_wiimote_t *wiimote; // wiimote handle 
-        struct cwiid_state state; // wiimote state  
-
+        cwiid_wiimote_t *wiimote; // wiimote handlez
 
     private:
 
         bdaddr_t bdaddr; // bluetooth device address
         unsigned char mesg; // data obtained by wiimote sensors
         unsigned char led_state; // activate/desactivate the leds
-
         int exit;
 
     };
@@ -139,58 +138,22 @@ namespace wiimoteServer {
 
         for (i = 0; i < mesg_count; i++) {
             switch (mesg[i].type) {
-                case CWIID_MESG_STATUS:
-                    printf("Status Report: battery=%d extension=",
-                            mesg[i].status_mesg.battery);
-                    switch (mesg[i].status_mesg.ext_type) {
-                        case CWIID_EXT_NONE:
-                            printf("none");
-                            break;
-                        case CWIID_EXT_NUNCHUK:
-                            printf("Nunchuk");
-                            break;
-                        case CWIID_EXT_CLASSIC:
-                            printf("Classic Controller");
-                            break;
-                        case CWIID_EXT_BALANCE:
-                            printf("Balance Board");
-                            break;
-                        case CWIID_EXT_MOTIONPLUS:
-                            printf("MotionPlus");
-                            break;
-                        default:
-                            printf("Unknown Extension");
-                            break;
-                    }
-                    printf("\n");
-                    break;
                 case CWIID_MESG_BTN:
-                    //printf("Button Report: %.4X\n", mesg[i].btn_mesg.buttons);
                     if (mesg[i].btn_mesg.buttons != 0) {
                         api->buttonApi = mesg[i].btn_mesg.buttons;
                         cout << api->buttonApi << endl;
                     }
                     break;
                 case CWIID_MESG_ACC:
-                    /*
-                    printf("Acc Report: x=%d, y=%d, z=%d\n",
-                            mesg[i].acc_mesg.acc[CWIID_X],
-                            mesg[i].acc_mesg.acc[CWIID_Y],
-                            mesg[i].acc_mesg.acc[CWIID_Z]);
-                     */
                     api->accApi[0] = mesg[i].acc_mesg.acc[CWIID_X];
                     api->accApi[1] = mesg[i].acc_mesg.acc[CWIID_Y];
                     api->accApi[2] = mesg[i].acc_mesg.acc[CWIID_Z];
                     break;
                 case CWIID_MESG_IR:
-                    //printf("IR Report: ");
                     valid_source = 0;
                     for (j = 0; j < CWIID_IR_SRC_COUNT; j++) {
                         if (mesg[i].ir_mesg.src[j].valid) {
                             valid_source = 1;
-
-                            printf("(%d,%d) ", mesg[i].ir_mesg.src[j].pos[CWIID_X],
-                                    mesg[i].ir_mesg.src[j].pos[CWIID_Y]);
                             if (j == 0) {
                                 api->irApi1[0] = mesg[i].ir_mesg.src[j].pos[CWIID_X];
                                 api->irApi1[1] = mesg[i].ir_mesg.src[j].pos[CWIID_Y];
@@ -211,50 +174,22 @@ namespace wiimoteServer {
                     if (!valid_source) {
                         api->sourceDetected = 0;
                     }
-                    printf("\n");
                     break;
                 case CWIID_MESG_NUNCHUK:
-                    //                    printf("Nunchuk Report: btns=%.2X stick=(%d,%d) acc.x=%d acc.y=%d "
-                    //                            "acc.z=%d\n", mesg[i].nunchuk_mesg.buttons,
-                    //                            mesg[i].nunchuk_mesg.stick[CWIID_X],
-                    //                            mesg[i].nunchuk_mesg.stick[CWIID_Y],
-                    //                            mesg[i].nunchuk_mesg.acc[CWIID_X],
-                    //                            mesg[i].nunchuk_mesg.acc[CWIID_Y],
-                    //                            mesg[i].nunchuk_mesg.acc[CWIID_Z]);
 
-                    api->nunchukAccApi[0] = mesg[i].nunchuk_mesg.stick[CWIID_X];
-                    api->nunchukAccApi[1] = mesg[i].nunchuk_mesg.stick[CWIID_Y];
-                    api->nunchukAccApi[2] = mesg[i].nunchuk_mesg.stick[CWIID_Z];
+                    api->nunchukAccApi[0] = mesg[i].nunchuk_mesg.acc[CWIID_X];
+                    api->nunchukAccApi[1] = mesg[i].nunchuk_mesg.acc[CWIID_Y];
+                    api->nunchukAccApi[2] = mesg[i].nunchuk_mesg.acc[CWIID_Z];
                     api->nunchukStickApi[0] = mesg[i].nunchuk_mesg.stick[CWIID_X];
                     api->nunchukStickApi[1] = mesg[i].nunchuk_mesg.stick[CWIID_Y];
                     api->nunchukButtonApi = mesg[i].nunchuk_mesg.buttons;
 
-                    break;
-                case CWIID_MESG_CLASSIC:
-                    printf("Classic Report: btns=%.4X l_stick=(%d,%d) r_stick=(%d,%d) "
-                            "l=%d r=%d\n", mesg[i].classic_mesg.buttons,
-                            mesg[i].classic_mesg.l_stick[CWIID_X],
-                            mesg[i].classic_mesg.l_stick[CWIID_Y],
-                            mesg[i].classic_mesg.r_stick[CWIID_X],
-                            mesg[i].classic_mesg.r_stick[CWIID_Y],
-                            mesg[i].classic_mesg.l, mesg[i].classic_mesg.r);
-                    break;
-                case CWIID_MESG_BALANCE:
-                    printf("Balance Report: right_top=%d right_bottom=%d "
-                            "left_top=%d left_bottom=%d\n",
-                            mesg[i].balance_mesg.right_top,
-                            mesg[i].balance_mesg.right_bottom,
-                            mesg[i].balance_mesg.left_top,
-                            mesg[i].balance_mesg.left_bottom);
                     break;
                 case CWIID_MESG_MOTIONPLUS:
                     printf("MotionPlus Report: angle_rate=(%d,%d,%d) low_speed=(%d,%d,%d)\n",
                             mesg[i].motionplus_mesg.angle_rate[0],
                             mesg[i].motionplus_mesg.angle_rate[1],
                             mesg[i].motionplus_mesg.angle_rate[2]);
-                    //			       mesg[i].motionplus_mesg.low_speed[0],
-                    //			       mesg[i].motionplus_mesg.low_speed[1],
-                    //			       mesg[i].motionplus_mesg.low_speed[2]);
                     break;
                 case CWIID_MESG_ERROR:
                     if (cwiid_close(wiimote)) {
@@ -297,20 +232,6 @@ namespace wiimoteServer {
             irData->infrared3.resize(sizeof (int) *2);
             chuckData->stick.resize(sizeof (int) *2);
             chuckData->acc.resize(sizeof (int) *3);
-
-        }
-
-        virtual Ice::Int saludar(const Ice::Current&) {
-            cout << "¡Hola Mundo!" << endl;
-            cout << api->buttonApi << endl;
-            //printf("Hola Mundo");
-            return 0;
-        }
-
-        virtual Ice::Int despedir(const Ice::Current&) {
-            cout << "!Adios Mundo!" << endl;
-            //printf("Hola Mundo");
-            return 0;
         }
 
         virtual Ice::Int getButtonData(const Ice::Current&) {
@@ -383,11 +304,28 @@ namespace wiimoteServer {
             return 1;
         }
 
+        virtual Ice::Int changeNunchukMode(const Ice::Current&) {
+            toggle_bit(api->rpt_mode, CWIID_RPT_EXT);
+            set_rpt_mode(api->wiimote, api->rpt_mode);
+
+            return 1;
+        }
+
+        virtual Ice::Int getBatteryStatus(const Ice::Current&) {
+            struct cwiid_state state; // wiimote state
+            if (cwiid_get_state(api->wiimote, &state)) {
+                fprintf(stderr, "Error getting state\n");
+            }
+
+            return (int) (100.0 * state.battery / CWIID_BATTERY_MAX);
+        }
+
+
+
     private:
         jderobot::AccelerometerDataPtr accData;
         jderobot::InfraredDataPtr irData;
         jderobot::NunchukDataPtr chuckData;
-
     };
 
     //Component: Here is established the connection between the server and clients through ICE
@@ -424,4 +362,4 @@ int main(int argc, char** argv) {
     wiimoteServer::Component component;
     jderobotice::Application app(component);
     return app.jderobotMain(argc, argv);
-}
+}// </editor-fold>
