@@ -139,10 +139,10 @@ namespace wiimoteServer {
         for (i = 0; i < mesg_count; i++) {
             switch (mesg[i].type) {
                 case CWIID_MESG_BTN:
-                    if (mesg[i].btn_mesg.buttons != 0) {
+                    //if (mesg[i].btn_mesg.buttons != 0) {
                         api->buttonApi = mesg[i].btn_mesg.buttons;
                         cout << api->buttonApi << endl;
-                    }
+                    //}
                     break;
                 case CWIID_MESG_ACC:
                     api->accApi[0] = mesg[i].acc_mesg.acc[CWIID_X];

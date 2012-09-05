@@ -1,4 +1,4 @@
-project (JDEROBOT_GAZEBOSERVER)
+project (JDEROBOT_WIIMOTESERVER)
 
 cmake_minimum_required(VERSION 2.8)
 

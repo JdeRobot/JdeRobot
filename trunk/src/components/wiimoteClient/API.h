@@ -19,6 +19,24 @@
  *                 Jose María Cañas Plaza <jmplaza@gsyc.es>
  */
 
+#include <math.h>
+#include <cv.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+#include <string>
+#include <iostream>
+#include <gtkmm.h>
+#include <gtkglmm.h>
+#include <gdkglmm.h>
+#include <libglademm.h>
+#include <IceUtil/Thread.h>
+#include <IceUtil/Time.h>
+#include <pthread.h>
+#include <gtkmm/drawingarea.h>
+#include <gdkmm/pixbuf.h>
+#include <libgnomecanvasmm.h> 
+
 #ifndef WIIMOTECLIENT_API_H
 #define WIIMOTECLIENT_API_H
 

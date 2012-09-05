@@ -31,7 +31,7 @@
 #include "API.h"
 
 namespace wiimoteClient {
-
+    
     class Control {
     public:
         virtual ~Control();

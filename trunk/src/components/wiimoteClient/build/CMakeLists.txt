@@ -1,12 +1,14 @@
-project (JDEROBOT_WIIMOTE)
+project (JDEROBOT_WIIMOTECLIENT)
 
 cmake_minimum_required(VERSION 2.8)
 
 # ENV VARS
+SET(gladedir ./)
+
 SET( INTERFACES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../interfaces/cpp) # Directorio con las interfaces ICE en C++
 SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs) # Directorio donde se encuentran las librerias propias de jderobot
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../interfaces/slice) # Directorio donde se encuentran las interfaces ICE
-SET( LIBS_NEEDED jderobotice   ) # Librerias de las que depende el componente
+SET( LIBS_NEEDED jderobotice jderobotutil) # Librerias de las que depende el componente
 SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../Deps) # Directorio donde se encuentran las dependencias
 
 
@@ -61,9 +63,14 @@ include_directories(${gsl_INCLUDE_DIRS})
 link_directories(${gsl_LIBRARIES_DIRS})
 
 
+PKG_CHECK_MODULES(cwiid REQUIRED cwiid)
+include_directories(${cwiid_INCLUDE_DIRS})
+link_directories(${cwiid_LIBRARY_DIRS})
+
 
   # FIND AND CHECK OTHER DEPENDENCES
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
+include(${DEPS_DIR}/ice/CMakeLists.txt)
 
 
 # START RECURSIVE

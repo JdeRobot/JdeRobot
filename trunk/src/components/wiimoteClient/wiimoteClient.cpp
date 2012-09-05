@@ -1,14 +1,28 @@
-#include <Ice/Application.h>
-#include <jderobot/wiimote.h>
-#include <Ice/Application.h>
+#include <math.h>
+#include <cv.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glut.h>
+#include <string>
+#include <iostream>
+#include <gtkmm.h>
+#include <gtkglmm.h>
+#include <gdkglmm.h>
+#include <libglademm.h>
+#include <IceUtil/Thread.h>
+#include <IceUtil/Time.h>
+#include <pthread.h>
+#include <gtkmm/drawingarea.h>
+#include <gdkmm/pixbuf.h>
+#include <libgnomecanvasmm.h> 
 #include "control.h"
 #include "API.h"
 #include "gui.h"
 
 
 
-using namespace std;
-using namespace jderobot;
+//using namespace std;
+//using namespace jderobot;
 
 #define cycle_control 50//miliseconds
 #define cycle_gui 100//miliseconds
@@ -90,6 +104,7 @@ void *showGui(void*) {
         totala = a.tv_sec * 1000000 + a.tv_usec;
 
         //LLAMAMOS A LA FUNCION QUE MUETRA EL GUI
+        gui->run(api);
 
         //Sleep Algorithm
         gettimeofday(&b, NULL);
@@ -124,7 +139,7 @@ int main(int argc, char *argv[]) {
 
     api = new wiimoteClient::Api();
 
-    control = new introrob::Control();
+    control = new wiimoteClient::Control();
 
     try {
 
@@ -137,23 +152,30 @@ int main(int argc, char *argv[]) {
         if (0 == baseWiimote)
             throw "Could not create proxy with Wiimote";
         // Cast to wiimote
-        control->wiiprx = wiiMotePrx::checkedCast(baseWiimote);
+        control->wiiprx = jderobot::wiiMotePrx::checkedCast(baseWiimote);
         if (0 == control->wiiprx)
             throw "Invalid proxy wiimoteClient.Wiimote.Proxy";
 
         //-----------------END ICE----------------//
 
+        
+        control->wiiprx->changeButtonMode();
+        control->wiiprx->changeAccMode();
+        
+        
         control->updateData(api);
 
         pthread_create(&thr_gui, NULL, &showGui, NULL);
 
-        while (api->guiVisible) {
+        while (1) {
 
             gettimeofday(&a, NULL);
             totala = a.tv_sec * 1000000 + a.tv_usec;
 
             control->updateData(api);
-
+            
+            
+            
             //Sleep Algorithm
             gettimeofday(&b, NULL);
             totalb = b.tv_sec * 1000000 + b.tv_usec;
