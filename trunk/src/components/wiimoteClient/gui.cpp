@@ -24,6 +24,21 @@
 
 namespace wiimoteClient {
 
+    std::string Gui::int2str(int num) {
+
+
+
+        std::string Result; // string which will contain the result
+
+        std::ostringstream convert; // stream used for the conversion
+
+        convert << num; // insert the textual representation of 'Number' in the characters in the stream
+
+        Result = convert.str(); // set 'Result' to the contents of the stream
+
+        return Result;
+    }
+
     Gui::Gui(Api* api) : gtkmain(0, 0) {
 
         this->acc[0] = api->acc[0];
@@ -110,27 +125,53 @@ namespace wiimoteClient {
         this->nunchukStick[0] = api->nunchukStick[0];
         this->nunchukStick[1] = api->nunchukStick[1];
 
-        if (this->button == 1) {
-            this->buttonA->activate();
+        switch (this->button) {
+            case 2048:
+                this->buttonUp->activate();
+                break;
+            case 256:
+                this->buttonLeft->activate();
+                break;
+            case 512:
+                this->buttonRight->activate();
+                break;
+            case 1024:
+                this->buttonDown->activate();
+                break;
+            case 4:
+                this->buttonB->activate();
+                break;
+            case 8:
+                this->buttonA->activate();
+                break;
+            case 16:
+                this->buttonMenos->activate();
+                break;
+            case 128:
+                this->buttonHome->activate();
+                break;
+            case 4096:
+                this->buttonMas->activate();
+                break;
+            case 2:
+                this->buttonUno->activate();
+                break;
+            case 1:
+                this->buttonDos->activate();
+                break;
+            default:
+                //std::cout << "Unknown button" << std::endl;
+                break;
         }
-                
-int Number = this->acc[0];       // number to be converted to a string
 
-std::string Result;          // string which will contain the result
+        this->accX->set_text(int2str(this->acc[0]));
+        this->accY->set_text(int2str(this->acc[1]));
+        this->accZ->set_text(int2str(this->acc[2]));
 
-std::ostringstream convert;   // stream used for the conversion
-
-convert << Number;      // insert the textual representation of 'Number' in the characters in the stream
-
-Result = convert.str(); // set 'Result' to the contents of the stream
-        this->accX->set_text(Result);
-        //this->accY->set_text(this->acc[1]);
-        //this->accZ->set_text(this->acc[2]);
-        
         while (gtkmain.events_pending())
             gtkmain.iteration();
     }
-    
+
     Gui::~Gui() {
     }
 

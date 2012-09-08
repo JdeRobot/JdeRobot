@@ -82,6 +82,9 @@ namespace wiimoteClient{
         std::string gladepath;
         
         
+        //Functions
+        std::string int2str(int num);
+        
         
     };//class
     
