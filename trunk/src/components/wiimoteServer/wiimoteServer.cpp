@@ -90,7 +90,8 @@ namespace wiimoteServer {
                 fprintf(stderr, "Unable to set message callback\n");
             }
 
-
+			toggle_bit(rpt_mode, CWIID_RPT_EXT);
+			set_rpt_mode(wiimote, rpt_mode);
             //            Allow show the wiimote status
             toggle_bit(rpt_mode, CWIID_RPT_STATUS);
             set_rpt_mode(wiimote, rpt_mode);
@@ -99,6 +100,9 @@ namespace wiimoteServer {
             if (cwiid_enable(wiimote, CWIID_FLAG_MESG_IFC)) {
                 fprintf(stderr, "Error enabling messages\n");
             }
+            
+
+            
 
             cout << endl;
             cout << "Info: wiimote ready to use" << endl;
@@ -144,6 +148,19 @@ namespace wiimoteServer {
                         cout << api->buttonApi << endl;
                     //}
                     break;
+  		case CWIID_MESG_NUNCHUK:
+			       
+                   api->nunchukButtonApi = mesg[i].nunchuk_mesg.buttons;
+			       api->nunchukStickApi[0] = mesg[i].nunchuk_mesg.stick[CWIID_X];
+			       api->nunchukStickApi[1] = mesg[i].nunchuk_mesg.stick[CWIID_Y];
+			       api->nunchukAccApi[0] = mesg[i].nunchuk_mesg.acc[CWIID_X];
+			       api->nunchukAccApi[1] =  mesg[i].nunchuk_mesg.acc[CWIID_Y];
+			       api->nunchukAccApi[2] =  mesg[i].nunchuk_mesg.acc[CWIID_Z];
+			       
+			       cout << api->nunchukStickApi[0] << endl;
+			       			       cout << api->nunchukStickApi[1] << endl;
+
+			break;                  
                 case CWIID_MESG_ACC:
                     api->accApi[0] = mesg[i].acc_mesg.acc[CWIID_X];
                     api->accApi[1] = mesg[i].acc_mesg.acc[CWIID_Y];
@@ -175,16 +192,7 @@ namespace wiimoteServer {
                         api->sourceDetected = 0;
                     }
                     break;
-                case CWIID_MESG_NUNCHUK:
 
-                    api->nunchukAccApi[0] = mesg[i].nunchuk_mesg.acc[CWIID_X];
-                    api->nunchukAccApi[1] = mesg[i].nunchuk_mesg.acc[CWIID_Y];
-                    api->nunchukAccApi[2] = mesg[i].nunchuk_mesg.acc[CWIID_Z];
-                    api->nunchukStickApi[0] = mesg[i].nunchuk_mesg.stick[CWIID_X];
-                    api->nunchukStickApi[1] = mesg[i].nunchuk_mesg.stick[CWIID_Y];
-                    api->nunchukButtonApi = mesg[i].nunchuk_mesg.buttons;
-
-                    break;
                 case CWIID_MESG_MOTIONPLUS:
                     printf("MotionPlus Report: angle_rate=(%d,%d,%d) low_speed=(%d,%d,%d)\n",
                             mesg[i].motionplus_mesg.angle_rate[0],
@@ -306,7 +314,7 @@ namespace wiimoteServer {
 
         virtual Ice::Int changeNunchukMode(const Ice::Current&) {
             toggle_bit(api->rpt_mode, CWIID_RPT_EXT);
-            set_rpt_mode(api->wiimote, api->rpt_mode);
+			set_rpt_mode(api->wiimote, api->rpt_mode);
 
             return 1;
         }

@@ -75,7 +75,6 @@ namespace wiimoteClient {
 
         //Get Buttons
         refXml->get_widget("buttonUp", buttonUp);
-        //refXml->get_widget("buttonUp", this->buttonUp);
         refXml->get_widget("buttonLeft", this->buttonLeft);
         refXml->get_widget("buttonRight", this->buttonRight);
         refXml->get_widget("buttonDown", this->buttonDown);
@@ -86,7 +85,13 @@ namespace wiimoteClient {
         refXml->get_widget("button_a", this->buttonA);
         refXml->get_widget("button_1", this->buttonUno);
         refXml->get_widget("button_2", this->buttonDos);
+        refXml->get_widget("ncButtonC", this->ncButtonC);
+        refXml->get_widget("ncButtonZ", this->ncButtonZ);
+        refXml->get_widget("buttonExit", this->buttonExit);
 
+        //Get Canvas
+        refXml->get_widget("canvasStick", this->canvasStick);
+        
         //Get Labels
         refXml->get_widget("lblIR1x", ir1x);
         refXml->get_widget("lblIR1y", ir1y);
@@ -98,11 +103,31 @@ namespace wiimoteClient {
         refXml->get_widget("lblACCx", accX);
         refXml->get_widget("lblACCy", accY);
         refXml->get_widget("lblACCz", accZ);
+        
+        refXml->get_widget("ncAccX", ncAccX);
+        refXml->get_widget("ncAccY", ncAccY);
+        refXml->get_widget("ncAccZ", ncAccZ);
 
+        //Create events
+        buttonExit->signal_clicked().connect(sigc::mem_fun(this, &Gui::exitButton_clicked));
+        
         //Show the window
         mainWindow->show();
-
-
+        
+        canvasStick->signal_unrealize();
+        canvasStick->signal_realize();
+        canvasStick->set_child_visible(true);
+        
+        gc_canvasStick = Gdk::GC::create(canvasStick->get_window());
+        
+        colormap = canvasStick->get_colormap();
+        color_white = Gdk::Color("#");
+        color_black = Gdk::Color("#000000");
+        color_red = Gdk::Color("#FF0000");
+        colormap->alloc_color(color_white);
+        colormap->alloc_color(color_black);
+        colormap->alloc_color(color_red);
+        
     }
 
     void Gui::run(Api* api) {
@@ -163,13 +188,63 @@ namespace wiimoteClient {
                 //std::cout << "Unknown button" << std::endl;
                 break;
         }
-
+        
+        switch(this->nunchukButton){
+            case 1:
+                this->ncButtonZ->activate();
+                break;
+            case 2:
+                this->ncButtonC->activate();
+                break;
+            default:
+                break;
+        }
+        
+//        if(this->nunchukButton==1)
+//            this->ncButtonZ->activate();
+//        if(this->nunchukButton==2)
+//            this->ncButtonC->activate();
+//        std::cout << this->nunchukButton << std::endl;
         this->accX->set_text(int2str(this->acc[0]));
         this->accY->set_text(int2str(this->acc[1]));
         this->accZ->set_text(int2str(this->acc[2]));
 
+        this->ncAccX->set_text(int2str(this->nunchukAcc[0]));
+        this->ncAccY->set_text(int2str(this->nunchukAcc[1]));
+        this->ncAccZ->set_text(int2str(this->nunchukAcc[2]));
+        
+        
+        
+        this->ir1x->set_text(int2str(this->ir1[0]));
+        this->ir1y->set_text(int2str(this->ir1[1]));
+        this->ir2x->set_text(int2str(this->ir2[0]));
+        this->ir2y->set_text(int2str(this->ir2[1]));
+        this->ir3x->set_text(int2str(this->ir3[0]));
+        this->ir3y->set_text(int2str(this->ir3[1]));
+        
+        gc_canvasStick->set_foreground(color_black);
+        canvasStick->get_window()->draw_rectangle(gc_canvasStick, true, 0, 0, 177, 131);
+        
+        gc_canvasStick->set_foreground(color_red);
+        canvasStick->get_window()->draw_line(gc_canvasStick, 0, -this->nunchukStick[1]+180,177, -this->nunchukStick[1]+180);
+        canvasStick->get_window()->draw_line(gc_canvasStick, this->nunchukStick[0]-35, 0, this->nunchukStick[0]-35, 131);
+
+        
+
+        gc_canvasStick->set_foreground(color_white);
+        canvasStick->get_window()->draw_line(gc_canvasStick, 100, 0, 100, 200);
+        canvasStick->get_window()->draw_line(gc_canvasStick, 0, 100, 200, 100);
+        
+
+        
+
         while (gtkmain.events_pending())
             gtkmain.iteration();
+    }
+    
+    void Gui::exitButton_clicked(){
+        this->mainWindow->hide();
+        exit(0);
     }
 
     Gui::~Gui() {

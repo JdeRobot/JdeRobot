@@ -45,19 +45,26 @@ namespace wiimoteClient {
 
         api->ir3[0] = dataIr->infrared3[0];
         api->ir3[1] = dataIr->infrared3[1];
-
-        api->button = wiiprx->getButtonData();
         
-        std::cout << api->button << std::endl;
-
         api->nunchukAcc[0] = dataNunchuk->acc[0];
         api->nunchukAcc[1] = dataNunchuk->acc[1];
         api->nunchukAcc[2] = dataNunchuk->acc[2];
+        
+        api->nunchukButton = dataNunchuk->button;
 
+        api->button = wiiprx->getButtonData();
+        
+        //std::cout << api->button << std::endl;
+        //std::cout << api->nunchukAcc[0] << std::endl;
+
+//        api->nunchukAcc[0] = dataNunchuk->acc[0];
+//        api->nunchukAcc[1] = dataNunchuk->acc[1];
+//        api->nunchukAcc[2] = dataNunchuk->acc[2];
+//
         api->nunchukStick[0] = dataNunchuk->stick[0];
         api->nunchukStick[1] = dataNunchuk->stick[1];
-
-        api->nunchukButton = dataNunchuk->button;
+//
+//        api->nunchukButton = dataNunchuk->button;
 
 
 

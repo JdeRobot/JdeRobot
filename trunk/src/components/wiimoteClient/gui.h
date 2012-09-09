@@ -51,6 +51,14 @@ namespace wiimoteClient{
         // Window
         Gtk::Window * mainWindow;
         
+        //Canvas
+        Gtk::DrawingArea *canvasStick;
+        Glib::RefPtr<Gdk::GC> gc_canvasStick;
+        Gdk::Color color_white;
+        Gdk::Color color_black;
+        Gdk::Color color_red;
+        Glib::RefPtr<Gdk::Colormap> colormap;       
+        
         //Buttons
         Gtk::Button *buttonUp;
         Gtk::Button *buttonLeft;
@@ -64,6 +72,11 @@ namespace wiimoteClient{
         Gtk::Button *buttonUno;
         Gtk::Button *buttonDos;
         
+        //Nunchuk Buttons
+        Gtk::Button *ncButtonC;
+        Gtk::Button *ncButtonZ;
+        Gtk::Button *buttonExit;
+        
         //Labels
         Gtk::Label *ir1x;
         Gtk::Label *ir1y;
@@ -75,6 +88,14 @@ namespace wiimoteClient{
         Gtk::Label *accX;
         Gtk::Label *accY;
         Gtk::Label *accZ;
+        
+        //Events
+        void exitButton_clicked();
+        
+        //Nunchuk Labels
+        Gtk::Label *ncAccX;
+        Gtk::Label *ncAccY;
+        Gtk::Label *ncAccZ;
         
         // Others			    
         Gtk::Main gtkmain;

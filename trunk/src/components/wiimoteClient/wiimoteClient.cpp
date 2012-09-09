@@ -161,7 +161,8 @@ int main(int argc, char *argv[]) {
         
         control->wiiprx->changeButtonMode();
         control->wiiprx->changeAccMode();
-        
+        control->wiiprx->changeIrMode();
+        //control->wiiprx->changeNunchukMode();
         
         control->updateData(api);
 
