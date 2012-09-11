@@ -7,7 +7,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-set( CMAKE_CXX_FLAGS "-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo -lIce -lIceUtil" ) # Opciones para el compilador
+set( CMAKE_CXX_FLAGS "-lgsl -lgslcblas -lGL -lGLU -lglut  -lIce -lIceUtil" ) # Opciones para el compilador
 
 add_executable (wiimoteServer ${SOURCE_FILES})
 

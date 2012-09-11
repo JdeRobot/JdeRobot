@@ -24,7 +24,7 @@
 #define IMAGE_ICE
 
 #include <jderobot/common.ice>
-#include <IceStorm/IceStorm.ice>
+
 
 module jderobot{  
 
