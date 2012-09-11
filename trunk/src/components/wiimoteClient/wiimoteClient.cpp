@@ -116,9 +116,9 @@ void *showGui(void*) {
             diff = cycle_gui - diff;
 
         /*Sleep Algorithm*/
-        usleep(diff * 1000);
-        if (diff < 33)
-            usleep(33 * 1000);
+        usleep(diff * 500);
+       if (diff < 33)
+            usleep(33 * 500);
         //printf("GUI %.30lf seconds elapsed, %d\n", diff, cont);
         cont++;
 
@@ -158,10 +158,11 @@ int main(int argc, char *argv[]) {
 
         //-----------------END ICE----------------//
 
-        
+        control->wiiprx->changeIrMode();
         control->wiiprx->changeButtonMode();
         control->wiiprx->changeAccMode();
-        control->wiiprx->changeIrMode();
+        //control->wiiprx->activateLed(1);
+        
         //control->wiiprx->changeNunchukMode();
         
         control->updateData(api);
@@ -175,6 +176,25 @@ int main(int argc, char *argv[]) {
 
             control->updateData(api);
             
+            if(api->change_state_LED1){
+                api->change_state_LED1=false;
+                control->wiiprx->activateLed(1);                
+            }
+
+            if(api->change_state_LED2){
+                api->change_state_LED2=false;
+                control->wiiprx->activateLed(2);                
+            }
+
+            if(api->change_state_LED3){
+                api->change_state_LED3=false;
+                control->wiiprx->activateLed(3);                
+            }
+
+            if(api->change_state_LED4){
+                api->change_state_LED4=false;
+                control->wiiprx->activateLed(4);                
+            }
             
             
             //Sleep Algorithm
@@ -185,9 +205,9 @@ int main(int argc, char *argv[]) {
                 diff = cycle_control;
             else
                 diff = cycle_control - diff;
-            usleep(diff * 1000);
+            usleep(diff * 500);
             if (diff < 33)
-                usleep(33 * 1000);
+                usleep(33 * 500);
             //printf("CONTROL %.15lf seconds elapsed\n", diff);            
 
 

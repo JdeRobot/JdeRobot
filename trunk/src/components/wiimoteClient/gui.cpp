@@ -23,7 +23,7 @@
 #include "API.h"
 
 namespace wiimoteClient {
-
+    
     std::string Gui::int2str(int num) {
 
 
@@ -40,7 +40,12 @@ namespace wiimoteClient {
     }
 
     Gui::Gui(Api* api) : gtkmain(0, 0) {
-
+        
+        this->api = api;
+        api->change_state_LED1=false;
+        api->change_state_LED2=false;
+        api->change_state_LED3=false;
+        api->change_state_LED4=false;
         this->acc[0] = api->acc[0];
         this->acc[1] = api->acc[1];
         this->acc[2] = api->acc[2];
@@ -51,6 +56,8 @@ namespace wiimoteClient {
         this->ir2[1] = api->ir2[1];
         this->ir3[0] = api->ir3[0];
         this->ir3[1] = api->ir3[1];
+        this->ir4[0] = api->ir4[0];
+        this->ir4[1] = api->ir4[1];        
 
         this->nunchukAcc[0] = api->nunchukAcc[0];
         this->nunchukAcc[1] = api->nunchukAcc[1];
@@ -99,6 +106,8 @@ namespace wiimoteClient {
         refXml->get_widget("lblIR2y", ir2y);
         refXml->get_widget("lblIR3x", ir3x);
         refXml->get_widget("lblIR3y", ir3y);
+        refXml->get_widget("lblIR4x", ir4x);
+        refXml->get_widget("lblIR4y", ir4y);
 
         refXml->get_widget("lblACCx", accX);
         refXml->get_widget("lblACCy", accY);
@@ -108,8 +117,18 @@ namespace wiimoteClient {
         refXml->get_widget("ncAccY", ncAccY);
         refXml->get_widget("ncAccZ", ncAccZ);
 
+        //Check buttons
+        refXml->get_widget("led1", this->led1);
+        refXml->get_widget("led2", this->led2);
+        refXml->get_widget("led3", this->led3);
+        refXml->get_widget("led4", this->led4);
+        
         //Create events
         buttonExit->signal_clicked().connect(sigc::mem_fun(this, &Gui::exitButton_clicked));
+        led1->signal_toggled().connect(sigc::mem_fun(this, &Gui::led1_clicked));
+        led2->signal_toggled().connect(sigc::mem_fun(this, &Gui::led2_clicked));
+        led3->signal_toggled().connect(sigc::mem_fun(this, &Gui::led3_clicked));
+        led4->signal_toggled().connect(sigc::mem_fun(this, &Gui::led4_clicked));
         
         //Show the window
         mainWindow->show();
@@ -142,6 +161,8 @@ namespace wiimoteClient {
         this->ir2[1] = api->ir2[1];
         this->ir3[0] = api->ir3[0];
         this->ir3[1] = api->ir3[1];
+        this->ir4[0] = api->ir4[0];
+        this->ir4[1] = api->ir4[1];
 
         this->nunchukAcc[0] = api->nunchukAcc[0];
         this->nunchukAcc[1] = api->nunchukAcc[1];
@@ -199,6 +220,16 @@ namespace wiimoteClient {
             default:
                 break;
         }
+
+//        if (led1->get_active())
+//            api->change_state_LED1 = true;
+//        if (led2->get_active())
+//            api->change_state_LED2 = true;
+//        if (led3->get_active())
+//            api->change_state_LED3 = true;
+//        if (led4->get_active())
+//            api->change_state_LED4 = true;
+        
         
 //        if(this->nunchukButton==1)
 //            this->ncButtonZ->activate();
@@ -221,6 +252,8 @@ namespace wiimoteClient {
         this->ir2y->set_text(int2str(this->ir2[1]));
         this->ir3x->set_text(int2str(this->ir3[0]));
         this->ir3y->set_text(int2str(this->ir3[1]));
+        this->ir4x->set_text(int2str(this->ir4[0]));
+        this->ir4y->set_text(int2str(this->ir4[1]));        
         
         gc_canvasStick->set_foreground(color_black);
         canvasStick->get_window()->draw_rectangle(gc_canvasStick, true, 0, 0, 177, 131);
@@ -241,10 +274,26 @@ namespace wiimoteClient {
         while (gtkmain.events_pending())
             gtkmain.iteration();
     }
-    
-    void Gui::exitButton_clicked(){
+
+    void Gui::exitButton_clicked() {
         this->mainWindow->hide();
         exit(0);
+    }
+
+    void Gui::led1_clicked() {
+        this->api->change_state_LED1 = true;
+    }
+
+    void Gui::led2_clicked() {
+        this->api->change_state_LED2 = true;
+    }
+
+    void Gui::led3_clicked() {
+        this->api->change_state_LED3 = true;
+    }
+
+    void Gui::led4_clicked() {
+        this->api->change_state_LED4 = true;
     }
 
     Gui::~Gui() {

@@ -25,7 +25,6 @@
 #define WIIMOTECLIENT_GUI_H
 
 namespace wiimoteClient{
-    
     class Gui{
         
     public:
@@ -37,12 +36,15 @@ namespace wiimoteClient{
         
     private:
         
+        Api* api;
+        
         //SENSORS DATA
         int acc[3];
         int button;
         int ir1[2];
         int ir2[2];
         int ir3[2];
+        int ir4[2];
         int nunchukAcc[3];
         int nunchukStick[2];
         int nunchukButton;
@@ -84,10 +86,18 @@ namespace wiimoteClient{
         Gtk::Label *ir2y;
         Gtk::Label *ir3x;
         Gtk::Label *ir3y;
+        Gtk::Label *ir4x;
+        Gtk::Label *ir4y;        
         
         Gtk::Label *accX;
         Gtk::Label *accY;
         Gtk::Label *accZ;
+        
+        //Check Buttons
+        Gtk::CheckButton * led1;
+        Gtk::CheckButton * led2;
+        Gtk::CheckButton * led3;
+        Gtk::CheckButton * led4;
         
         //Events
         void exitButton_clicked();
@@ -105,6 +115,10 @@ namespace wiimoteClient{
         
         //Functions
         std::string int2str(int num);
+        void led1_clicked();
+        void led2_clicked();
+        void led3_clicked();
+        void led4_clicked();
         
         
     };//class

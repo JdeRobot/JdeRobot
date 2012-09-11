@@ -54,10 +54,15 @@ namespace wiimoteClient{
         int ir1[2];
         int ir2[2];
         int ir3[2];
+        int ir4[2];
         int nunchukAcc[3];
         int nunchukStick[2];
         int nunchukButton;
         bool guiVisible;
+        bool change_state_LED1;
+        bool change_state_LED2;
+        bool change_state_LED3;
+        bool change_state_LED4;
         
     };//class
     

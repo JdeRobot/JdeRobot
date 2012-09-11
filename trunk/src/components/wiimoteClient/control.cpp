@@ -45,6 +45,11 @@ namespace wiimoteClient {
 
         api->ir3[0] = dataIr->infrared3[0];
         api->ir3[1] = dataIr->infrared3[1];
+
+        api->ir4[0] = dataIr->infrared4[0];
+        api->ir4[1] = dataIr->infrared4[1];        
+        
+        //std::cout << dataIr->infrared1[0] << std::endl;
         
         api->nunchukAcc[0] = dataNunchuk->acc[0];
         api->nunchukAcc[1] = dataNunchuk->acc[1];

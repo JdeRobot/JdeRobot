@@ -57,6 +57,8 @@ namespace wiimoteServer {
     //cwiid_callback: manages data received by the wiimote's sensors
     void cwiid_callback(cwiid_wiimote_t *wiimote, int mesg_count,
             union cwiid_mesg mesg[], struct timespec *timestamp);
+    //Activates leds on wiimote
+    void set_led_state(cwiid_wiimote_t *wiimote, unsigned char led_state);
 
     //ApiMote: Middleware to communicate the WiiMoteI class with Component class.
 
@@ -114,19 +116,21 @@ namespace wiimoteServer {
         int irApi1[2];
         int irApi2[2];
         int irApi3[2];
+        int irApi4[2];
         int nunchukAccApi[3];
         int nunchukStickApi[2];
         int nunchukButtonApi;
         int sourceDetected;
         int rumbleM;
         unsigned char rpt_mode;
+        unsigned char led_state;
         cwiid_wiimote_t *wiimote; // wiimote handlez
 
     private:
 
         bdaddr_t bdaddr; // bluetooth device address
         unsigned char mesg; // data obtained by wiimote sensors
-        unsigned char led_state; // activate/desactivate the leds
+        //unsigned char led_state; // activate/desactivate the leds
         int exit;
 
     };
@@ -145,7 +149,7 @@ namespace wiimoteServer {
                 case CWIID_MESG_BTN:
                     //if (mesg[i].btn_mesg.buttons != 0) {
                         api->buttonApi = mesg[i].btn_mesg.buttons;
-                        cout << api->buttonApi << endl;
+                        //cout << api->buttonApi << endl;
                     //}
                     break;
   		case CWIID_MESG_NUNCHUK:
@@ -157,8 +161,8 @@ namespace wiimoteServer {
 			       api->nunchukAccApi[1] =  mesg[i].nunchuk_mesg.acc[CWIID_Y];
 			       api->nunchukAccApi[2] =  mesg[i].nunchuk_mesg.acc[CWIID_Z];
 			       
-			       cout << api->nunchukStickApi[0] << endl;
-			       			       cout << api->nunchukStickApi[1] << endl;
+			       //cout << api->nunchukStickApi[0] << endl;
+			       //			       cout << api->nunchukStickApi[1] << endl;
 
 			break;                  
                 case CWIID_MESG_ACC:
@@ -185,6 +189,12 @@ namespace wiimoteServer {
                                 api->irApi3[0] = mesg[i].ir_mesg.src[j].pos[CWIID_X];
                                 api->irApi3[1] = mesg[i].ir_mesg.src[j].pos[CWIID_Y];
                                 api->sourceDetected = 1;
+                            }
+                            if (j == 3){
+                                api->irApi4[0] = mesg[i].ir_mesg.src[j].pos[CWIID_X];
+                                api->irApi4[1] = mesg[i].ir_mesg.src[j].pos[CWIID_Y];
+                                api->sourceDetected = 1;
+
                             }
                         }
                     }
@@ -226,6 +236,13 @@ namespace wiimoteServer {
             fprintf(stderr, "Error setting report mode\n");
         }
     }
+    
+    void set_led_state(cwiid_wiimote_t *wiimote, unsigned char led_state)
+{
+	if (cwiid_set_led(wiimote, led_state)) {
+		fprintf(stderr, "Error setting LEDs \n");
+	}
+}
 
     //WiiMoteI: Defines the methods declared in wiimote.ice to communicate it with other clients.
 
@@ -238,6 +255,7 @@ namespace wiimoteServer {
             irData->infrared1.resize(sizeof (int) *2);
             irData->infrared2.resize(sizeof (int) *2);
             irData->infrared3.resize(sizeof (int) *2);
+            irData->infrared4.resize(sizeof (int) *2);
             chuckData->stick.resize(sizeof (int) *2);
             chuckData->acc.resize(sizeof (int) *3);
         }
@@ -261,6 +279,9 @@ namespace wiimoteServer {
             irData->infrared2[1] = api->irApi2[1];
             irData->infrared3[0] = api->irApi3[0];
             irData->infrared3[1] = api->irApi3[1];
+            irData->infrared4[0] = api->irApi4[0];
+            irData->infrared4[1] = api->irApi4[1];
+
             irData->sourceDetected = api->sourceDetected;
             return irData;
         }
@@ -328,6 +349,35 @@ namespace wiimoteServer {
             return (int) (100.0 * state.battery / CWIID_BATTERY_MAX);
         }
 
+        virtual Ice::Int activateLed(Ice::Int led, const Ice::Current&) {
+            switch(led){
+                case 1:
+                    toggle_bit(api->led_state, CWIID_LED1_ON);
+                    set_led_state(api->wiimote, api->led_state);                    
+                    break;
+                case 2:
+                    toggle_bit(api->led_state, CWIID_LED2_ON);
+                    set_led_state(api->wiimote, api->led_state);                    
+                    break;
+                case 3:
+                    toggle_bit(api->led_state, CWIID_LED3_ON);
+                    set_led_state(api->wiimote, api->led_state);                    
+                    break;
+                case 4:
+                    toggle_bit(api->led_state, CWIID_LED4_ON);
+                    set_led_state(api->wiimote, api->led_state);                    
+                    break;
+                default:
+                    break;
+                    
+            }
+
+
+            toggle_bit(api->rpt_mode, CWIID_RPT_EXT);
+			set_rpt_mode(api->wiimote, api->rpt_mode);
+
+            return 1;
+        }
 
 
     private:
