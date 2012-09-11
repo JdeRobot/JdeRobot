@@ -38,6 +38,7 @@ module jderobot{
 	IntSeq infrared1;
 	IntSeq infrared2;
 	IntSeq infrared3;
+	IntSeq infrared4;
 	int sourceDetected;
 
   };
@@ -61,7 +62,8 @@ module jderobot{
         int changeIrMode();
         int changeAccMode();
         int changeButtonMode();
-	int changeNunchukMode();
+	    int changeNunchukMode();
+	    int activateLed(int led);
 
 	//GET DATA
         int getButtonData();
