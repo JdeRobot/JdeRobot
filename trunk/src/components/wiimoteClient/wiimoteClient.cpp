@@ -158,13 +158,19 @@ int main(int argc, char *argv[]) {
 
         //-----------------END ICE----------------//
 
-        control->wiiprx->changeIrMode();
-        control->wiiprx->changeButtonMode();
-        control->wiiprx->changeAccMode();
+        
+	//usleep(1000);
+        //
+	//usleep(1000);
+        
         //control->wiiprx->activateLed(1);
+        //usleep(50000000);
         
-        //control->wiiprx->changeNunchukMode();
         
+        control->wiiprx->changeNunchukMode();
+        control->wiiprx->changeAccMode();     
+        control->wiiprx->changeButtonMode();
+        control->wiiprx->changeIrMode();
         control->updateData(api);
 
         pthread_create(&thr_gui, NULL, &showGui, NULL);
