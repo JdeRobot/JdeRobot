@@ -1,3 +1,26 @@
+// <editor-fold defaultstate="collapsed" desc="comment">
+/*
+ *  Copyright (C) 1997-2010 JDE Developers Team
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundationfile:///home/mikel/Escritorio/PFC/repository_JDErobot/Workspace/trunk/src/components/wiimoteClient/wiimoteClient.cpp
+, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see http://www.gnu.org/licenses/.
+ *
+ *  Authors : Jose María Cañas <jmplaza@gsyc.es>
+ *            Maikel González Baile <m.gonzalezbai@gmail.com>
+ *
+ */
+
 #include <math.h>
 #include <cv.h>
 #include <GL/gl.h>
@@ -21,7 +44,7 @@
 
 
 
-//using namespace std;
+using namespace std;
 //using namespace jderobot;
 
 #define cycle_control 50//miliseconds
@@ -158,19 +181,13 @@ int main(int argc, char *argv[]) {
 
         //-----------------END ICE----------------//
 
-        
-	//usleep(1000);
-        //
-	//usleep(1000);
-        
-        //control->wiiprx->activateLed(1);
-        //usleep(50000000);
-        
-        
+        //Set on mode activated wiimote sensors. NOTE: DON'T CHANGE THE CALLS ORDER!!
         control->wiiprx->changeNunchukMode();
         control->wiiprx->changeAccMode();     
         control->wiiprx->changeButtonMode();
         control->wiiprx->changeIrMode();
+        
+        //Update sensors data
         control->updateData(api);
 
         pthread_create(&thr_gui, NULL, &showGui, NULL);
@@ -214,8 +231,6 @@ int main(int argc, char *argv[]) {
             usleep(diff * 500);
             if (diff < 33)
                 usleep(33 * 500);
-            //printf("CONTROL %.15lf seconds elapsed\n", diff);            
-
 
         }
 

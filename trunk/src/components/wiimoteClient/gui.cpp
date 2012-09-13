@@ -259,8 +259,22 @@ namespace wiimoteClient {
         canvasStick->get_window()->draw_rectangle(gc_canvasStick, true, 0, 0, 177, 131);
         
         gc_canvasStick->set_foreground(color_red);
-        canvasStick->get_window()->draw_line(gc_canvasStick, 0, -this->nunchukStick[1]+180,177, -this->nunchukStick[1]+180);
-        canvasStick->get_window()->draw_line(gc_canvasStick, this->nunchukStick[0]-35, 0, this->nunchukStick[0]-35, 131);
+        if(this->nunchukStick[0]-33<0){
+            this->nunchukStick[0] = 33;
+        }
+        if(this->nunchukStick[0]-33>177){
+            this->nunchukStick[0] = 209;
+        }        
+        if(-this->nunchukStick[1]+190<0){
+           this->nunchukStick[1] = 190;
+        }
+
+        if(-this->nunchukStick[1]+190>131){
+           this->nunchukStick[1] = 60;
+        }
+        
+        canvasStick->get_window()->draw_line(gc_canvasStick, 0, -this->nunchukStick[1]+190,177, -this->nunchukStick[1]+190);
+        canvasStick->get_window()->draw_line(gc_canvasStick, this->nunchukStick[0]-33, 0, this->nunchukStick[0]-33, 131);
 
         
 

@@ -51,7 +51,7 @@ using namespace std;
     cwiid_wiimote_t *wiimote = NULL;
     cwiid_mesg_callback_t cwiid_callback;
     bdaddr_t bdaddr;
-    struct acc_cal wm_cal;
+    struct acc_cal nc_cal;
 
 namespace wiimoteServer {
 
@@ -77,7 +77,7 @@ namespace wiimoteServer {
         
         void runWiimote() {
 
-            cwiid_set_err(err);
+            //cwiid_set_err(err);
             
             unsigned char mesg;
             
@@ -106,7 +106,7 @@ namespace wiimoteServer {
             if (cwiid_set_mesg_callback(wiimote, &cwiid_callback)) {
                 fprintf(stderr, "Unable to set message callback\n");
             }else{
-                cwiid_get_acc_cal(wiimote, CWIID_EXT_NONE, &wm_cal);
+                cwiid_get_acc_cal(wiimote, CWIID_EXT_NONE, &nc_cal);
             }
             
             uint8_t rpt_mode;
@@ -131,16 +131,9 @@ namespace wiimoteServer {
         int nunchukButtonApi;
         int sourceDetected;
         int rumbleM;
-
-        
         unsigned char led_state;
-         // wiimote handlez
 
     private:
-
-         // bluetooth device address
-         // data obtained by wiimote sensors
-        //unsigned char led_state; // activate/desactivate the leds
         int exit;
 
     };
@@ -153,14 +146,12 @@ namespace wiimoteServer {
             union cwiid_mesg mesg[], struct timespec *timestamp) {
         int i, j;
         int valid_source;
+        double a_x, a_y, a_z;
 
         for (i = 0; i < mesg_count; i++) {
             switch (mesg[i].type) {
-                case CWIID_MESG_BTN:
-                    //if (mesg[i].btn_mesg.buttons != 0) {
+                case CWIID_MESG_BTN:                    
                         api->buttonApi = mesg[i].btn_mesg.buttons;
-                        //cout << api->buttonApi << endl;
-                    //}
                     break;
                 case CWIID_MESG_ACC:
                     api->accApi[0] = mesg->acc_mesg.acc[CWIID_X];
@@ -237,19 +228,6 @@ namespace wiimoteServer {
             }
         }
 
-    }
-
-    void err(cwiid_wiimote_t *wiimote, const char *s, va_list ap) {
-        if (wiimote) printf("%d:", cwiid_get_id(wiimote));
-        else printf("-1:");
-        vprintf(s, ap);
-        printf("\n");
-    }
-
-    void set_rpt_mode(cwiid_wiimote_t *wiimote, unsigned char rpt_mode) {
-        if (cwiid_set_rpt_mode(wiimote, rpt_mode)) {
-            fprintf(stderr, "Error setting report mode\n");
-        }
     }
     
     void set_led_state(cwiid_wiimote_t *wiimote, unsigned char led_state)
@@ -329,7 +307,7 @@ namespace wiimoteServer {
         virtual Ice::Int changeIrMode(const Ice::Current&) {
             uint8_t rpt_mode;
             //rpt_mode = CWIID_RPT_STATUS | CWIID_RPT_BTN;
-            rpt_mode |= CWIID_RPT_IR | CWIID_RPT_ACC | CWIID_RPT_NUNCHUK | CWIID_RPT_BTN; // | CWIID_RPT_BTN | CWIID_RPT_ACC | CWIID_RPT_NUNCHUK;
+            rpt_mode |= CWIID_RPT_IR | CWIID_RPT_ACC | CWIID_RPT_NUNCHUK | CWIID_RPT_BTN;
             if(cwiid_set_rpt_mode(wiimote, rpt_mode)){
                 std::cout << "error setting report mode" << std::endl;
             }
@@ -402,10 +380,6 @@ namespace wiimoteServer {
                     
             }
 
-/*
-            toggle_bit(api->rpt_mode, CWIID_RPT_EXT);
-			set_rpt_mode(api->wiimote, api->rpt_mode);*/
-
             return 1;
         }
 
@@ -450,4 +424,4 @@ int main(int argc, char** argv) {
     wiimoteServer::Component component;
     jderobotice::Application app(component);
     return app.jderobotMain(argc, argv);
-}// </editor-fold>
+}
