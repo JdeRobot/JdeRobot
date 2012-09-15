@@ -23,6 +23,7 @@
 #include <iostream>
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
+#include <IceStorm/IceStorm.h>
 #include <jderobot/camera.h>
 #include <jderobot/image.h>
 #include <colorspaces/colorspacesmm.h>
