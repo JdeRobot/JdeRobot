@@ -22,6 +22,10 @@
 #include "API.h"
 
 #define TWOPI 6.283185308
+#define GRAPHIC_TO_OPTICAL_X(x,y) (SIFNTSC_ROWS-1-y)
+#define GRAPHIC_TO_OPTICAL_Y(x,y) (x)    
+#define OPTICAL_TO_GRAPHIC_X(x,y) (y)
+#define OPTICAL_TO_GRAPHIC_Y(x,y) (SIFNTSC_ROWS-1-x)
 
 namespace introrob {
 
@@ -100,6 +104,25 @@ namespace introrob {
     }
      */
 
+    int Api::graficas2opticas(int pointX, int pointY, HPoint2D *punto2D) {
+ 
+     HPoint2D punto2Daux;
+
+
+     punto2Daux.x=GRAPHIC_TO_OPTICAL_X(pointX,pointY);
+     punto2Daux.y=GRAPHIC_TO_OPTICAL_Y(pointX,pointY);
+     punto2Daux.h=1.0000;
+
+    return 0;
+}
+    
+    int Api::opticas2graficas(HPoint2D punto2D, int *pointX, int *pointY){
+        
+        *pointX = OPTICAL_TO_GRAPHIC_X(punto2D.x, punto2D.y);
+        *pointY = OPTICAL_TO_GRAPHIC_Y(punto2D.x, punto2D.y);
+        
+        return 0;
+    }
 
     void Api::imageCameras2openCV() {
         pthread_mutex_lock(&this->controlGui);

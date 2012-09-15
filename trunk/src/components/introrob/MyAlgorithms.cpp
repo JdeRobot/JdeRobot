@@ -99,6 +99,25 @@ y_click_cameraleft: Almacena la coordenada y del punto donde se ha hecho click e
 x_click_cameraright: Almacena la coordenada x del punto donde se ha hecho click en la camara derecha
 y_click_cameraright: Almacena la coordenada y del punto donde se ha hecho click en la camara derecha
 
+graficas2opticas: Transforma un punto (pointX,pointY) a su equivalente en el sistema de referencia usado por las camaras (progeo)
+USO: 
+ * int pointX; -> Podemos usar el punto obtenido al hacer click en una camara de la GUI  x_click_cameraleft
+ * int pointY; -> Podemos usar el punto obtenido al hacer click en una camara de la GUI  y_click_cameraleft
+ * HPoint2D Point2DCam -> punto en el sistema de referencia de la camara
+ * this->graficas2opticas(pointX,pointY,&Point2DCam);
+ * De tal forma que: 
+ *      + Point2DCam.x -> contiene la coordenada "x"
+ *      + Point2DCam.y -> contiene la coordenada "y"
+ * 
+ opticas2graficas: Transforma un punto 2D (Point2DCam) en el sistema de refercia de las camaras a su equivalente en el sistema de referencia de las imagenes que se muestran en el interfaz grafico
+USO: 
+ * int pointX; 
+ * int pointY; 
+ * HPoint2D Point2DCam -> punto en el sistema de referencia de la camara
+ * this->opticas2graficas(&pointX,&pointY,Point2DCam);
+ * De tal forma que: 
+ *      + pointX -> contiene la coordenada "x"
+ *      + pointY -> contiene la coordenada "y"
 ---------------------------------------------------------
 
 Otros:
