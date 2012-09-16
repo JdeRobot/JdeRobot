@@ -25,5 +25,7 @@ TARGET_LINK_LIBRARIES(giraffeclient
     ${LIBS_DIR}/jderobotice/libjderobotice.so
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/progeo/libprogeo.so
+    ${Gearbox_LIBRARIES}
+    ${ZeroCIce_LIBRARIES}
 )
 

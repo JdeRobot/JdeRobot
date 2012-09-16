@@ -1,3 +1,6 @@
+IF (with_cwiid)
+
+
 SET( SOURCE_FILES wiimoteServer.cpp)
 
 
@@ -18,3 +21,4 @@ TARGET_LINK_LIBRARIES(wiimoteServer
     ${cwiid_LIBRARIES}
 )
 
+ENDIF(with_cwiid)

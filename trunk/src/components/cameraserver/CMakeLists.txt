@@ -6,7 +6,7 @@ IF(with_fireware)
     PKG_CHECK_MODULES(gstreamerapp REQUIRED gstreamer-app-0.10) # REQUIRED=Fallará si no lo encuentra
     add_definitions(-DGLADE_DIR="${gladedir}")
 
-      set( CMAKE_CXX_FLAGS " -lraw1394 -ldc1394 -lGbxUtilAcfr -lGbxIceUtilAcfr -lIceUtil -lIce -lIceStorm")
+      set( CMAKE_CXX_FLAGS " -lraw1394 -ldc1394 ")
 
 
     include_directories(
@@ -43,5 +43,8 @@ IF(with_fireware)
 	${LIBS_DIR}/jderobotutil/libjderobotutil.so
 	${LIBS_DIR}/colorspaces/libcolorspacesmm.so
 	${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
+        ${Gearbox_LIBRARIES}
+	${ZeroCIce_LIBRARIES}
+
     )
 ENDIF()

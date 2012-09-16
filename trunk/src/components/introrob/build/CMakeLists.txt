@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 
 # ENV VARS
 SET(gladedir ./)
-
+SET (COMPONENT introrob)
 SET( INTERFACES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../interfaces/cpp) # Directorio con las interfaces ICE en C++
 SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs) # Directorio donde se encuentran las librerias propias de jderobot
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../interfaces/slice) # Directorio donde se encuentran las interfaces ICE

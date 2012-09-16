@@ -25,5 +25,8 @@ TARGET_LINK_LIBRARIES(colortuner
     ${LIBS_DIR}/colorspaces/libcolorspaces.so
     ${LIBS_DIR}/progeo/libprogeo.so
     ${gsl_LIBRARIES}
+    ${Gearbox_LIBRARIES}
+    ${ZeroCIce_LIBRARIES}
+
 )
 

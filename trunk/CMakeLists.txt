@@ -10,7 +10,17 @@ SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libs) # Directorio donde se encuen
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice) # Directorio donde se encuentran las interfaces ICE
 SET( LIBS_NEEDED   bgfgsegmentation jderobotice colorspaces jderobotutil progeo pioneer fuzzylib visionlib ) # Librerias de las que depende el componente
 SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Deps) # Directorio donde se encuentran las dependencias
-
+SET( COMPONENTS naooperator         basic_component
+		gazeboserver         
+		bgfglab              giraffeclient       opencvdemo
+		calibrator                               openniServer
+		cameraserver         introrob            playerserver
+		cameraview           kinectServer        recorder
+		cameraview_icestorm  kinectViewer        replayer
+		wiimoteClient
+		wiimoteServer       colortuner
+		
+) #Componentes que forman JDErobot
 
 
 ###################
@@ -71,10 +81,11 @@ include(${DEPS_DIR}/pcl/CMakeLists.txt)
 include(${DEPS_DIR}/player/CMakeLists.txt)
 include(${DEPS_DIR}/xerces/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
+include(${DEPS_DIR}/cwiid/CMakeLists.txt)
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
 
-file(READ ${CMAKE_CURRENT_SOURCE_DIR}/jderobot.cfg contents)
+#file(READ ${CMAKE_CURRENT_SOURCE_DIR}/jderobot.cfg contents)
 
 # START RECURSIVE
 add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -98,33 +109,14 @@ FOREACH(currentSourceFile ${HEADERS_FILES})
 ENDFOREACH(currentSourceFile)
 
 # Install Executables
-FILE(GLOB_RECURSE BIN_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/components/*cfg)
-FOREACH(currentSourceFile ${BIN_FILES})
-
-	string(REGEX REPLACE ".*/(.*)/.*.cfg" "\\1" new_source1 ${currentSourceFile})
-  SET(EXIST EXIST-NOTFOUND)
-
-      find_file(EXIST NAMES ${new_source1} PATH ${CMAKE_CURRENT_SOURCE_DIR}/src/components/${new_source1} NO_DEFAULT_PATH)
-      SET(AUX ${CMAKE_CURRENT_SOURCE_DIR}/src/components/${new_source1}/${new_source1})
-#MESSAGE("${CMAKE_CURRENT_SOURCE_DIR}/src/components/${new_source1}/")
-#MESSAGE("${new_source1}")
-#MESSAGE("${EXIST}")
-      string(COMPARE EQUAL ${EXIST} "EXIST-NOTFOUND"  EXISTE)
-IF (EXISTE)
-  list(APPEND new_list ${new_source1})
-ENDIF()
-
-
-ENDFOREACH(currentSourceFile)
-
-
-
-list(REMOVE_DUPLICATES new_list)
-list(REMOVE_ITEM new_list opencvdemo2.3.1 motiondetection alarmgenerator kinectViewer config openniServer giraffeServer naobody playerserver teleoperator colortuner2.3.1)
-
-FOREACH(currentBinFile ${new_list})
-    INSTALL (FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/components/${currentBinFile}/${currentBinFile} DESTINATION /usr/local/bin PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
-ENDFOREACH(currentBinFile)
+FOREACH (currentBin ${COMPONENTS})
+    SET(EXIST EXIST-NOTFOUND)
+    find_file(EXIST NAMES ${currentBin} PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src/components/${currentBin})
+    IF (EXIST)
+	INSTALL (FILES ${EXIST} DESTINATION /usr/local/bin PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+    ENDIF(EXIST)
+    #MESSAGE("${EXIST}")
+ENDFOREACH(currentBin)
 
 # Install interfaces headers
 FILE(GLOB HEADER_INTERFACE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/cpp/jderobot/*.h)

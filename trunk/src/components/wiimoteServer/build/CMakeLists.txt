@@ -63,14 +63,15 @@ include_directories(${gsl_INCLUDE_DIRS})
 link_directories(${gsl_LIBRARIES_DIRS})
 
 
-PKG_CHECK_MODULES(cwiid REQUIRED cwiid)
-include_directories(${cwiid_INCLUDE_DIRS})
-link_directories(${cwiid_LIBRARY_DIRS})
+#PKG_CHECK_MODULES(cwiid REQUIRED cwiid)
+#include_directories(${cwiid_INCLUDE_DIRS})
+#link_directories(${cwiid_LIBRARY_DIRS})
 
 
   # FIND AND CHECK OTHER DEPENDENCES
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
+include(${DEPS_DIR}/cwiid/CMakeLists.txt)
 
 
 # START RECURSIVE

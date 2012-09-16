@@ -32,6 +32,9 @@ IF( with_player)
 	  ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
 	  ${LIBS_DIR}/jderobotice/libjderobotice.so
 	  ${LIBS_DIR}/jderobotutil/libjderobotutil.so
+          ${Gearbox_LIBRARIES}
+          ${ZeroCIce_LIBRARIES}
+ 
 	  
       )
 ENDIF()
