@@ -61,8 +61,8 @@ namespace introrob {
         void RunGraphicsAlgorithm();
         void showMyImage();
 
-        int graficas2opticas(int pointX, int pointY, HPoint2D *punto2D);
-        int opticas2graficas(HPoint2D punto2D, int *pointX, int *pointY);
+        int graficas2opticas(double pointX, double pointY, HPoint2D *punto2D);
+        int opticas2graficas(HPoint2D punto2D, double *pointX, double *pointY);
         // GETS
         float getMotorV();
         float getMotorW();

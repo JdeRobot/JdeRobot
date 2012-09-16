@@ -102,21 +102,23 @@ namespace introrob {
     this->PTmotorsData2->longitude=tilt;
     }
     }
-     */
+    */
 
-    int Api::graficas2opticas(int pointX, int pointY, HPoint2D *punto2D) {
+    int Api::graficas2opticas(double pointX, double pointY, HPoint2D *punto2D) {
  
-     HPoint2D punto2Daux;
+     
 
 
-     punto2Daux.x=GRAPHIC_TO_OPTICAL_X(pointX,pointY);
-     punto2Daux.y=GRAPHIC_TO_OPTICAL_Y(pointX,pointY);
-     punto2Daux.h=1.0000;
+     punto2D->x=GRAPHIC_TO_OPTICAL_X(pointX,pointY);
+     punto2D->y=GRAPHIC_TO_OPTICAL_Y(pointX,pointY);
+     punto2D->h=1.0000;
+     
+     
 
     return 0;
 }
     
-    int Api::opticas2graficas(HPoint2D punto2D, int *pointX, int *pointY){
+    int Api::opticas2graficas(HPoint2D punto2D, double *pointX, double *pointY){
         
         *pointX = OPTICAL_TO_GRAPHIC_X(punto2D.x, punto2D.y);
         *pointY = OPTICAL_TO_GRAPHIC_Y(punto2D.x, punto2D.y);

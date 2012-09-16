@@ -20,6 +20,7 @@ TARGET_LINK_LIBRARIES( calibrator
  ${libgnomecanvas_LIBRARIES}
  ${libgnomecanvasmm_LIBRARIES}
  ${gtkglextmm_LIBRARIES}
+ ${ZeroCIce_LIBRARIES}
  ${gsl_LIBRARIES}
     ${LIBS_DIR}/jderobotice/libjderobotice.so
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so

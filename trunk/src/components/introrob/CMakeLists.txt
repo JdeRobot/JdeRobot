@@ -7,6 +7,7 @@ include_directories(
     ${LIBS_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/cameras
+    ${CMAKE_CURRENT_SOURCE_DIR}/../calibrator
 )
 
 set( CMAKE_CXX_FLAGS "-lglut -lgsl -lgslcblas -lIce -lIceUtil" ) # Opciones para el compilador

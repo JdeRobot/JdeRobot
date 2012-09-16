@@ -156,7 +156,7 @@ namespace introrob {
         imageCameras2openCV();
         imageCamera1 = getImageCamera1();
         imageCamera2 = getImageCamera2();
-        printf("myPosition = [%f, %f]\n", encodersData->robotx, encodersData->roboty);
+//        printf("myPosition = [%f, %f]\n", encodersData->robotx, encodersData->roboty);
 
         /*Manipulando imágenes de las cámaras*/
         /*En el siguiente ejemplo se filtra el color rojo de la cámara izquierda para repintar esos píxeles a negro. Para visualizar el resultado
@@ -198,7 +198,7 @@ namespace introrob {
         v = this->getMotorV();
         w = this->getMotorW();
         l = this->getMotorL();
-        printf("v: %f , w: %f , l: %f\n", v, w, l);
+//        printf("v: %f , w: %f , l: %f\n", v, w, l);
 
         //dest = this->getDestino();
         //printf("destPoint = [%f, %f]\n", dest.x, dest.y);
@@ -280,15 +280,35 @@ namespace introrob {
         CvPoint3D32f c, d;
         CvPoint3D32f color;
 
-        // Init camera 1
-        camera *mycameraA = new camera("cameras/calibA");
-        myCamA = mycameraA->readConfig();
+//        // Init camera 1
+//        camera *mycameraA = new camera("cameras/calibA");
+//        myCamA = mycameraA->readConfig();
+//
+//        // Init camera 2
+//        camera *mycameraB = new camera("cameras/calibB");
+//        myCamB = mycameraB->readConfig();
 
-        // Init camera 2
-        camera *mycameraB = new camera("cameras/calibB");
-        myCamB = mycameraB->readConfig();
-
-
+//        ///////////// EJEMPLO DE USO DE OPTICAS2GRAFICAS y GRAFICAS2OPTICAS ////////////////////
+//        HPoint2D punto2Daux; //punto 2D (graficas)
+//        HPoint3D punto3Daux; //punto 3D (opticas)
+//        double x;
+//        double y;
+//        
+//        
+//        this->graficas2opticas(punto2D1.x,punto2D1.y,&punto2Daux); // 
+//        
+//        backproject(&punto3D1, punto2Daux, myCamA);
+//
+//
+//	click1.x=punto3D1.X; 
+//	click1.y=punto3D1.Y;
+//	click1.z=punto3D1.Z;  
+//
+//        this->opticas2graficas(punto2Daux, &x, &y);
+//        std::cout << "Xafter: " <<  x << "Yafter: " << y << std::endl;
+//        
+//        ///////////// FIN EJEMPLO DE USO DE OPTICAS2GRAFICAS y GRAFICAS2OPTICAS ////////////////////
+        
         bb.x = this->destino.x;
         bb.y = this->destino.y;
         bb.z = 0.;
@@ -296,7 +316,7 @@ namespace introrob {
         aa.x = encodersData->robotx;
         aa.y = encodersData->roboty;
         aa.z = 0;
-
+        
         color.x = 1.; // Red
         color.y = 0.; // Green
         color.z = 0.; // Blue
