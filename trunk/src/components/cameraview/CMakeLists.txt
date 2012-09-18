@@ -25,6 +25,7 @@ add_executable (cameraview ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(cameraview 
     ${gstreamerapp_LIBRARIES}
+    ${OpenCV_LIBRARIES}
     ${gstreamer_LIBRARIES}
     ${opencv_LIBRARIES}
     ${gtkmm_LIBRARIES}

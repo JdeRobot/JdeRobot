@@ -18,6 +18,7 @@ TARGET_LINK_LIBRARIES(cameraview_icestorm
     ${libgnomecanvas_LIBRARIES}
     ${libgnomecanvasmm_LIBRARIES}
     ${gtkglextmm_LIBRARIES}
+    ${OpenCV_LIBRARIES}
     ${ZeroCIceCore_LIBRARY}
     ${ZeroCIceStorm_LIBRARY}
     ${ZeroCIce_LIBRARIES}

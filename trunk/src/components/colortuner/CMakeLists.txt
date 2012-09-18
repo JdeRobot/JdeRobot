@@ -12,6 +12,7 @@ add_executable (colortuner ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(colortuner 
     ${opencv_LIBRARIES}
+    ${OpenCV_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
     ${gthread_LIBRARIES}

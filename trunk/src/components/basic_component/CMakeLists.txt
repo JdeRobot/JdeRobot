@@ -32,6 +32,7 @@ TARGET_LINK_LIBRARIES(basic_component
     ${libgnomecanvasmm_LIBRARIES}
     ${gtkglextmm_LIBRARIES}
     ${ZeroCIce_LIBRARIES}
+    ${OpenCV_LIBRARIES}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
     ${LIBS_DIR}/jderobotice/libjderobotice.so

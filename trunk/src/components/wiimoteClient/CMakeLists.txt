@@ -18,6 +18,7 @@ TARGET_LINK_LIBRARIES(wiimoteClient
     ${gthread_LIBRARIES}
     ${libgnomecanvas_LIBRARIES}
     ${libgnomecanvasmm_LIBRARIES}
+    ${OpenCV_LIBRARIES}
     ${gtkglextmm_LIBRARIES}
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
     ${LIBS_DIR}/jderobotice/libjderobotice.so

@@ -21,6 +21,7 @@ TARGET_LINK_LIBRARIES( bgfglab
     ${libgnomecanvas_LIBRARIES}
     ${libgnomecanvasmm_LIBRARIES}
     ${gtkglextmm_LIBRARIES}
+    ${OpenCV_LIBRARIES}
     ${LIBS_DIR}/jderobotice/libjderobotice.so
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so

@@ -35,7 +35,8 @@ include(FindPkgConfig)
 PKG_CHECK_MODULES(opencv REQUIRED opencv)
 include_directories(${opencv_INCLUDE_DIRS})
 link_directories(${opencv_LIBRARY_DIRS})
-
+MESSAGE("${opencv_LIBRARY_DIRS}")
+MESSAGE("${opencv_INCLUDE_DIRS}")
 PKG_CHECK_MODULES(gtk20 REQUIRED gtk+-2.0)
 include_directories(${gtk20_INCLUDE_DIRS})
 link_directories(${gtk20_LIBRARY_DIRS})
@@ -82,6 +83,7 @@ include(${DEPS_DIR}/player/CMakeLists.txt)
 include(${DEPS_DIR}/xerces/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
 include(${DEPS_DIR}/cwiid/CMakeLists.txt)
+include(${DEPS_DIR}/opencv/CMakeLists.txt)
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
 
