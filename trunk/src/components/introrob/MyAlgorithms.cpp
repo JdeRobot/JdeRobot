@@ -283,11 +283,12 @@ namespace introrob {
 //        // Init camera 1
 //        camera *mycameraA = new camera("cameras/calibA");
 //        myCamA = mycameraA->readConfig();
+          xmlReader (&myCamA,"cameras/calibA.xml");
 //
 //        // Init camera 2
 //        camera *mycameraB = new camera("cameras/calibB");
 //        myCamB = mycameraB->readConfig();
-
+          xmlReader (&myCamB,"cameras/calibB.xml");
 //        ///////////// EJEMPLO DE USO DE OPTICAS2GRAFICAS y GRAFICAS2OPTICAS ////////////////////
 //        HPoint2D punto2Daux; //punto 2D (graficas)
 //        HPoint3D punto3Daux; //punto 3D (opticas)

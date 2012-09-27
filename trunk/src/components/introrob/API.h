@@ -25,7 +25,8 @@
 
 
 
-#include "camera.h"
+//#include "camera.h"
+#include <progeo.h>
 #include <cv.h>
 #include <highgui.h>
 #include <iostream>

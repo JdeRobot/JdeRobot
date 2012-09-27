@@ -1,5 +1,5 @@
 
-SET( SOURCE_FILES API.cpp camera.h camera.cpp control.cpp drawarea.cpp gui.cpp introrob.cpp MyAlgorithms.cpp pioneer.c pioneeropengl.c)
+SET( SOURCE_FILES API.cpp  control.cpp drawarea.cpp gui.cpp introrob.cpp MyAlgorithms.cpp pioneer.c pioneeropengl.c)
 
 
 include_directories(

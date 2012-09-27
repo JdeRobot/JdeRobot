@@ -63,6 +63,7 @@ link_directories(${gtkglextmm_LIBRARY_DIRS})
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
 
+include_directories(${LIBS_DIR}/progeo)
 
   # START RECURSIVE
 add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/../../.. ${CMAKE_CURRENT_SOURCE_DIR}/../../..)

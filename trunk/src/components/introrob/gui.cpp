@@ -595,13 +595,15 @@ namespace introrob {
     }
 
     void Gui::initCameras() {
-        // Init camera 1		
-        camera *mycameraA = new camera("cameras/calibA");
-        myCamA = mycameraA->readConfig();
+        // Init camera 1
+        xmlReader (&myCamA,"cameras/calibA.xml");
+//        camera *mycameraA = new camera("cameras/calibA");
+//        myCamA = mycameraA->readConfig();
 
         // Init camera 2
-        camera *mycameraB = new camera("cameras/calibB");
-        myCamB = mycameraB->readConfig();
+//        camera *mycameraB = new camera("cameras/calibB");
+//        myCamB = mycameraB->readConfig();
+                xmlReader (&myCamB,"cameras/calibB.xml");
     }
 
     void Gui::get3DPositionZ(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, float Z = 0.0) {
