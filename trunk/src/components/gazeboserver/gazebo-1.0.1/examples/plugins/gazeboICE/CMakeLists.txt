@@ -7,7 +7,7 @@ include_directories(${GAZEBO_INCLUDE_DIRS})
 link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-#SET(DEPS_DIR /home/mikel/workSpace/jderobot/trunk/Deps)
+SET(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../../Deps)
 
 set(CMAKE_CXX_FLAGS "-lIce -lIceUtil")
 
