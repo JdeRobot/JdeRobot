@@ -25,10 +25,6 @@ using namespace std;
 using namespace Demo;
 // using namespace Ice;
 
-
-
-
-
 void *showGui(void*) {
 
     Ice::CommunicatorPtr ic;
