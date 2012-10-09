@@ -10,8 +10,7 @@ SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libs) # Directorio donde se encuen
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice) # Directorio donde se encuentran las interfaces ICE
 SET( LIBS_NEEDED   bgfgsegmentation jderobotice colorspaces jderobotutil progeo pioneer fuzzylib visionlib ) # Librerias de las que depende el componente
 SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Deps) # Directorio donde se encuentran las dependencias
-SET( COMPONENTS naooperator         basic_component
-		gazeboserver         
+SET( COMPONENTS naooperator         basic_component		         
 		bgfglab              giraffeclient       opencvdemo
 		calibrator                               openniServer
 		cameraserver         introrob            playerserver
@@ -73,7 +72,7 @@ PKG_CHECK_MODULES(gsl REQUIRED gsl)
 include_directories(${gsl_INCLUDE_DIRS})
 link_directories(${gsl_LIBRARIES_DIRS})
 
-
+include_directories(${LIBS_DIR}/progeo)
 
   # FIND AND CHECK OTHER DEPENDENCES
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
