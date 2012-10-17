@@ -28,6 +28,8 @@ namespace jderobotice {
   /*destructor defined where PImpl is complete, so auto_ptr doesn't 
     bother with incomplete type warnings*/
   Context::~Context() {};
+  
+  Context::Context() {};
 
   void Context::setTag( const std::string& t ) { tag_ = t; };
 

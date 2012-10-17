@@ -67,6 +67,8 @@ namespace jderobotice
     Context(const std::string& tag,
 	    std::tr1::shared_ptr<gbxutilacfr::Tracer> tracer,
 	    std::tr1::shared_ptr<gbxutilacfr::Status> status);
+	
+	Context();
 
     /**
      * Destructor
