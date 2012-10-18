@@ -99,7 +99,7 @@ namespace gazebo {
             count++;
             std::string name = this->model->GetName();
             std::cout << "GetName() " << name << std::endl;
-            nameMotors = std::string("--Ice.Config=Motors.cfg");
+            nameMotors = std::string("--Ice.Config=" + name +"Motors.cfg");
             pthread_t thr_gui;
             pthread_create(&thr_gui, NULL, &motorsICE, (void*) this);
         }
@@ -174,7 +174,7 @@ namespace gazebo {
         virtual Ice::Int setW(Ice::Float _w, const Ice::Current&) {
             pthread_mutex_lock(&pose->mutexMotor);
             //pose->w = _w;
-            pose->robotMotors.w = _w;
+            pose->robotMotors.w = -_w;
             pthread_mutex_unlock(&pose->mutexMotor);
             return 0;
         };

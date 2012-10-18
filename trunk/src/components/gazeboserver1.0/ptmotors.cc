@@ -64,7 +64,8 @@ namespace gazebo {
         
         if (count == 0) {
             count++;
-            namePTMotors = std::string("--Ice.Config=PTMotors.cfg");
+            std::string name = this->model->GetName();
+            namePTMotors = std::string("--Ice.Config=" + name + ".cfg");
             pthread_t thr_gui;
             //pthread_create(&thr_gui, NULL, &ptencodersICE, (void*) this);
         }
@@ -82,7 +83,7 @@ namespace gazebo {
         if (this->cameraLeft.degreesZ < 0) {
             this->cameraLeft.degreesZ = 360 + this->cameraLeft.degreesZ;
         }
-        std::cout << this->cameraLeft.degreesX << std::endl;
+        //std::cout << this->cameraLeft.degreesX << std::endl;
 
 
         //GET PTEncoders data from right_camera

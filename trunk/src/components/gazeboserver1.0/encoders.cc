@@ -25,8 +25,8 @@ namespace gazebo {
         if (count == 0) {
             count++;
             std::string name = this->model->GetName();
-            std::cout << "GetName() encoders" << name << std::endl;
-            nameEncoders = std::string("--Ice.Config=Encoders.cfg");
+            std::cout << "GetName() encoders: " << name << std::endl;
+            nameEncoders = std::string("--Ice.Config=" + name + "Encoders.cfg");
             pthread_t thr_gui;
             pthread_create(&thr_gui, NULL, &encodersICE, (void*) this);
         }
