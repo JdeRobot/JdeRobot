@@ -1,0 +1,228 @@
+<?xml version="1.0"?>
+<glade-interface>
+  <!-- interface-requires gtk+ 2.6 -->
+  <!-- interface-naming-policy toplevel-contextual -->
+  <widget class="GtkWindow" id="mainwindow">
+    <property name="title" translatable="yes">INTROROB</property>
+    <child>
+      <widget class="GtkFixed" id="fixed1">
+        <property name="visible">True</property>
+        <child>
+          <widget class="GtkDrawingArea" id="world">
+            <property name="width_request">994</property>
+            <property name="height_request">450</property>
+            <property name="visible">True</property>
+          </widget>
+          <packing>
+            <property name="x">1</property>
+            <property name="y">1</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="rightButton">
+            <property name="width_request">35</property>
+            <property name="height_request">35</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <child>
+              <widget class="GtkImage" id="image3">
+                <property name="visible">True</property>
+                <property name="stock">gtk-go-forward</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">70</property>
+            <property name="y">532</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="upButton">
+            <property name="width_request">35</property>
+            <property name="height_request">35</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <child>
+              <widget class="GtkImage" id="image4">
+                <property name="visible">True</property>
+                <property name="stock">gtk-go-up</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">36</property>
+            <property name="y">497</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="downButton">
+            <property name="width_request">35</property>
+            <property name="height_request">35</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image_position">right</property>
+            <child>
+              <widget class="GtkImage" id="image5">
+                <property name="visible">True</property>
+                <property name="stock">gtk-go-down</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">35</property>
+            <property name="y">568</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="leftButton">
+            <property name="width_request">35</property>
+            <property name="height_request">35</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <child>
+              <widget class="GtkImage" id="image6">
+                <property name="visible">True</property>
+                <property name="stock">gtk-go-back</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">2</property>
+            <property name="y">532</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="stopButton">
+            <property name="width_request">35</property>
+            <property name="height_request">35</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <child>
+              <widget class="GtkImage" id="image7">
+                <property name="visible">True</property>
+                <property name="stock">gtk-media-stop</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">36</property>
+            <property name="y">532</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="camera1Button">
+            <property name="label" translatable="yes">View Point 1</property>
+            <property name="width_request">89</property>
+            <property name="height_request">45</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </widget>
+          <packing>
+            <property name="x">1</property>
+            <property name="y">452</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="camera2Button">
+            <property name="label" translatable="yes">View Point 2</property>
+            <property name="width_request">89</property>
+            <property name="height_request">45</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </widget>
+          <packing>
+            <property name="x">89</property>
+            <property name="y">452</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="camera3Button">
+            <property name="label" translatable="yes">View Point 3</property>
+            <property name="width_request">89</property>
+            <property name="height_request">45</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </widget>
+          <packing>
+            <property name="x">177</property>
+            <property name="y">452</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="camera4Button">
+            <property name="label" translatable="yes">View Point 4</property>
+            <property name="width_request">89</property>
+            <property name="height_request">45</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </widget>
+          <packing>
+            <property name="x">265</property>
+            <property name="y">452</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkEventBox" id="eventbox_left">
+            <property name="width_request">320</property>
+            <property name="height_request">240</property>
+            <property name="visible">True</property>
+            <child>
+              <widget class="GtkImage" id="image1">
+                <property name="width_request">320</property>
+                <property name="height_request">240</property>
+                <property name="visible">True</property>
+                <property name="stock">gtk-missing-image</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">353</property>
+            <property name="y">454</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkEventBox" id="eventbox_right">
+            <property name="width_request">320</property>
+            <property name="height_request">240</property>
+            <property name="visible">True</property>
+            <child>
+              <widget class="GtkImage" id="image2">
+                <property name="width_request">320</property>
+                <property name="height_request">240</property>
+                <property name="visible">True</property>
+                <property name="stock">gtk-missing-image</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">675</property>
+            <property name="y">454</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="pioneerCameraButton">
+            <property name="label" translatable="yes">Pioneer View Point</property>
+            <property name="width_request">139</property>
+            <property name="height_request">45</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </widget>
+          <packing>
+            <property name="x">215</property>
+            <property name="y">498</property>
+          </packing>
+        </child>
+      </widget>
+    </child>
+  </widget>
+</glade-interface>
