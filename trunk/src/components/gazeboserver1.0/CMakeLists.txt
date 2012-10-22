@@ -48,8 +48,8 @@ target_link_libraries(camera_dump ${GAZEBO_libraries}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so)
     
-add_library(ptencoders SHARED ptencoders.cc)
-target_link_libraries(ptencoders ${GAZEBO_libraries} 	 	
+add_library(pose3dencoders SHARED pose3dencoders.cc)
+target_link_libraries(pose3dencoders ${GAZEBO_libraries} 	 	
 	${GAZEBO_libraries} 
     ${opencv_LIBRARIES}	
 	${ZeroCIce_LIBRARIES} 
@@ -57,44 +57,3 @@ target_link_libraries(ptencoders ${GAZEBO_libraries}
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so)
-    
-add_library(ptmotors SHARED ptmotors.cc)
-target_link_libraries(ptmotors ${GAZEBO_libraries} 	 	
-	${GAZEBO_libraries} 
-    ${opencv_LIBRARIES}	
-	${ZeroCIce_LIBRARIES} 
-    ${LIBS_DIR}/jderobotice/libjderobotice.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
-    ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so)      
-
-add_executable(clientLaser clientLaser.cpp)
-target_link_libraries(clientLaser 	
-	${GAZEBO_libraries} 
-    ${opencv_LIBRARIES}	
-	${ZeroCIce_LIBRARIES} 
-    ${LIBS_DIR}/jderobotice/libjderobotice.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
-    ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so) 
-
-add_executable(clientEncoders clientEncoders.cpp)
-target_link_libraries(clientEncoders 
-	${GAZEBO_libraries} 
-    ${opencv_LIBRARIES}	
-	${ZeroCIce_LIBRARIES} 
-    ${LIBS_DIR}/jderobotice/libjderobotice.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
-    ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so) 
-
-
-add_executable(clientMotor clientMotor.cpp)
-target_link_libraries(clientMotor 
-	${GAZEBO_libraries} 
-    ${opencv_LIBRARIES}	
-	${ZeroCIce_LIBRARIES} 
-    ${LIBS_DIR}/jderobotice/libjderobotice.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
-    ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so) 
