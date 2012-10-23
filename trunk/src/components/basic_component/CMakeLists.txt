@@ -2,7 +2,7 @@
 
 set( CMAKE_CXX_FLAGS "-lgsl -lgslcblas" ) # Opciones para el compilador -lgslcblas -lGL -lGLU -lglut -lgazebo
 
-SET( SOURCE_FILES  control.cpp camera.cpp basic_component.cpp API.cpp gui.cpp canvasTeleoperateCameras.cpp canvasTeleoperateControl.cpp canvasLaser.cpp)
+SET( SOURCE_FILES  control.cpp camera.cpp basic_component.cpp API.cpp gui.cpp)
 
 
 include_directories(

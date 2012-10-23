@@ -40,9 +40,7 @@
 #include "API.h"
 #include "camera.h"
 #include <libgnomecanvasmm.h> 
-#include "canvasTeleoperateControl.h" 
-#include "canvasTeleoperateCameras.h"
-#include "canvasLaser.h"
+
 
 namespace basic_component {
     class CanvasWin; 
@@ -67,10 +65,7 @@ namespace basic_component {
             void updateCameras(Api *api);
 void resetAPI(Api *api);
 	    
-		// Canvas
-	    CanvasControl* canvas_control;
-	    CanvasControlCameras* canvas_control_cameras;
-	    CanvasLaser* canvas_laser;
+
 	    colorspaces::Image* image1;	// Image camera1 processed to manipulate with openCV
 	    colorspaces::Image* image2; // Image camera2 processed to manipulate with openCV
 

@@ -89,7 +89,8 @@ int main(int argc, char** argv){
       
       //-----------------ICE----------------//
       ic = Ice::initialize(argc,argv);
-      
+
+/*      
       // Contact to MOTORS interface
       Ice::ObjectPrx baseMotors = ic->propertyToProxy("basic_component.Motors.Proxy");
       if (0==baseMotors)
@@ -98,7 +99,7 @@ int main(int argc, char** argv){
       control->mprx = jderobot::MotorsPrx::checkedCast(baseMotors);
       if (0== control->mprx)
          throw "Invalid proxy basic_component.Motors.Proxy";
-      
+*/      
       // Get driver camera
       Ice::ObjectPrx camara1 = ic->propertyToProxy("basic_component.Camera1.Proxy");
       if (0==camara1)
@@ -108,7 +109,7 @@ int main(int argc, char** argv){
       control->cprx1 = jderobot::CameraPrx::checkedCast(camara1);      
       if (0== control->cprx1)
          throw "Invalid proxy";
-      
+/*
       // Get driver camera
       Ice::ObjectPrx camara2 = ic->propertyToProxy("basic_component.Camera2.Proxy");
       if (0==camara2)
@@ -117,8 +118,8 @@ int main(int argc, char** argv){
       // cast to CameraPrx
       control->cprx2 = jderobot::CameraPrx::checkedCast(camara2);
       if (0== control->cprx2)
-         throw "Invalid proxy";
-      
+         throw "Invalid proxy";*/      
+/*      
       // Contact to ENCODERS interface
       Ice::ObjectPrx baseEncoders = ic->propertyToProxy("basic_component.Encoders.Proxy");
       if (0==baseEncoders)
@@ -178,13 +179,11 @@ int main(int argc, char** argv){
       control->pteprx2 = jderobot::PTEncodersPrx::checkedCast(ptencoders2);
       if (0== control->pteprx2)
          throw "Invalid proxy basic_component.PTEncoders2.Proxy";
-      
+*/      
       //-----------------END ICE----------------//
   
       //****************************** Processing the Control ******************************///
    api->guiVisible=true;
-   api->sentido=10;
-   api->accion=0;
    control->UpdateSensorsICE(api); 
 
    if(guiActivated){
@@ -196,11 +195,7 @@ int main(int argc, char** argv){
                totala=a.tv_sec*1000000+a.tv_usec;
                
                
-               control->UpdateSensorsICE(api); // Update sensors
-               if(controlActivated||api->iterationControlActivated)
-                  api->RunNavigationAlgorithm();
-               
-               control->SetActuatorsICE(api); // Set actuators
+               control->UpdateSensorsICE(api); // Update sensors               
                
                //Sleep Algorithm
                gettimeofday(&b,NULL);

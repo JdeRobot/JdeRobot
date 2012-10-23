@@ -27,16 +27,16 @@ Control::~Control() {}
 
 
    void Control::UpdateSensorsICE(Api *api){      
-
+/*
       api->motorVin=this->mprx->getV();
       api->motorWin=this->mprx->getW();
       api->motorLin=this->mprx->getL();
       api->encodersData=this->eprx->getEncodersData();
       api->laserData=this->lprx->getLaserData();
-      
+*/      
       pthread_mutex_lock(&api->controlGui);            
       api->imageData1 = this->cprx1->getImageData();
-      api->imageData2 = this->cprx2->getImageData();
+      //api->imageData2 = this->cprx2->getImageData();
       pthread_mutex_unlock(&api->controlGui);      
 
       
@@ -47,7 +47,7 @@ Control::~Control() {}
 
    // Send the actuators info to Gazebo with ICE
    void Control::SetActuatorsICE(Api *api){
-      
+  /*    
       this->mprx->setV(api->motorVout); 
       this->mprx->setW(api->motorWout);
       this->mprx->setL(api->motorLout);
@@ -62,7 +62,7 @@ Control::~Control() {}
       
       this->ptmprx1->setPTMotorsData(api->PTmotorsData1);
       this->ptmprx2->setPTMotorsData(api->PTmotorsData2);
-
+*/
    }
 
 }
