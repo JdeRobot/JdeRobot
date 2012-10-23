@@ -2,7 +2,7 @@
   <model name="pioneer2dx" static="0">
     <link name="chassis">
       <origin pose="0.0 0.0 0.16 0 0 0"/>
-      <inertial mass="5.0">        
+      <inertial mass="10.0">        
         <inertia ixx='0.01' ixy='0' ixz='0' iyy='0.01' iyz='0' izz='0.01'/>
       </inertial> 
       <collision name="collision">
@@ -23,7 +23,7 @@
         </geometry>
         <surface>
           <friction>
-            <ode mu="0" mu2="0" slip1="1.0" slip2="1.0"/>
+            <ode mu="2" mu2="2" slip1="1.0" slip2="1.0"/>
           </friction>
         </surface>
       </collision>
@@ -179,6 +179,16 @@
 
         <material script='Gazebo/Black'/>
 	  </visual>
+
+	        <sensor name='cam_sensor_right' type='camera' always_on='1' update_rate='20'>
+		<origin pose="0 0 0 1.57 3.15 0"/>
+	          <camera>
+	            <horizontal_fov angle='1.57'/>
+	            <image width='640' height='480' format='R8G8B8'/>
+	            <clip near='0.5' far='5'/>
+	          </camera>
+            <plugin name='camera_dump' filename='libcamera_dump.so'/>
+	        </sensor>
       </link>
 
       <link name="camera_top_body_left">
@@ -193,6 +203,16 @@
 
         <material script='Gazebo/Black'/>
 	  </visual>
+
+	        <sensor name='cam_sensor_left' type='camera' always_on='1' update_rate='20'>
+		<origin pose="0 0 0 1.57 3.15 0"/>
+	          <camera>
+	            <horizontal_fov angle='1.57'/>
+	            <image width='640' height='480' format='R8G8B8'/>
+	            <clip near='0.5' far='5'/>
+	          </camera>
+            <plugin name='camera_dump' filename='libcamera_dump.so'/>
+	        </sensor>
       </link>
 
     <joint type="revolute" name="left_wheel_hinge">
