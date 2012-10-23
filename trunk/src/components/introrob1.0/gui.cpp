@@ -159,7 +159,7 @@ namespace introrob {
     void Gui::ShowImages(Api *api) {
         if (check_cameras) {
             pthread_mutex_lock(&api->controlGui);
-            //this->updateCameras(api);
+            this->updateCameras(api);
             pthread_mutex_unlock(&api->controlGui);
             setCamara(*this->image1, 1);
             setCamara(*this->image2, 2);
@@ -371,10 +371,6 @@ namespace introrob {
 
         pan = api->Pose3Dencoders1->pan;
         tilt = api->Pose3Dencoders1->tilt;
-        
-        std::cout << "pan: " << pan << std::endl;
-        std::cout << "tilt: " << tilt << std::endl;        
-        
         gc_teleoperate_cameras->set_foreground(color_red);
 
 
@@ -601,13 +597,13 @@ namespace introrob {
     void Gui::initCameras() {
         // Init camera 1
         xmlReader (&myCamA,"cameras/calibA.xml");
-        //camera *mycameraA = new camera("cameras/calibA");
-        //myCamA = mycameraA->readConfig();
+//        camera *mycameraA = new camera("cameras/calibA");
+//        myCamA = mycameraA->readConfig();
 
         // Init camera 2
-        //camera *mycameraB = new camera("cameras/calibB");
-        //myCamB = mycameraB->readConfig();
-        xmlReader (&myCamB,"cameras/calibB.xml");
+//        camera *mycameraB = new camera("cameras/calibB");
+//        myCamB = mycameraB->readConfig();
+                xmlReader (&myCamB,"cameras/calibB.xml");
     }
 
     void Gui::get3DPositionZ(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, float Z = 0.0) {

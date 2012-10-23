@@ -23,7 +23,7 @@ void *showGui(void*) {
         gettimeofday(&a, NULL);
         totala = a.tv_sec * 1000000 + a.tv_usec;
 
-        //gui->ShowImages(api);
+        gui->ShowImages(api);
         gui->display(api);
 
 
@@ -108,25 +108,25 @@ int main(int argc, char** argv) {
         if (0 == control->mprx)
             throw "Invalid proxy introrob.Motors.Proxy";
 
-//        // Get driver camera
-//        Ice::ObjectPrx camara1 = ic->propertyToProxy("introrob.Camera1.Proxy");
-//        if (0 == camara1)
-//            throw "Could not create proxy to camera1 server";
+        // Get driver camera
+        Ice::ObjectPrx camara1 = ic->propertyToProxy("introrob.Camera1.Proxy");
+        if (0 == camara1)
+            throw "Could not create proxy to camera1 server";
 
-//        // cast to CameraPrx
-//        control->cprx1 = jderobot::CameraPrx::checkedCast(camara1);
-//        if (0 == control->cprx1)
-//            throw "Invalid proxy";
+        // cast to CameraPrx
+        control->cprx1 = jderobot::CameraPrx::checkedCast(camara1);
+        if (0 == control->cprx1)
+            throw "Invalid proxy";
 
-//        // Get driver camera
-//        Ice::ObjectPrx camara2 = ic->propertyToProxy("introrob.Camera2.Proxy");
-//        if (0 == camara2)
-//            throw "Could not create proxy to camera2 server";
+        // Get driver camera
+        Ice::ObjectPrx camara2 = ic->propertyToProxy("introrob.Camera2.Proxy");
+        if (0 == camara2)
+            throw "Could not create proxy to camera2 server";
 
-//        // cast to CameraPrx
-//        control->cprx2 = jderobot::CameraPrx::checkedCast(camara2);
-//        if (0 == control->cprx2)
-//            throw "Invalid proxy";
+        // cast to CameraPrx
+        control->cprx2 = jderobot::CameraPrx::checkedCast(camara2);
+        if (0 == control->cprx2)
+            throw "Invalid proxy";
 
         // Contact to ENCODERS interface
         Ice::ObjectPrx baseEncoders = ic->propertyToProxy("introrob.Encoders.Proxy");
