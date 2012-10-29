@@ -159,10 +159,10 @@ namespace introrob {
     void Gui::ShowImages(Api *api) {
         if (check_cameras) {
             pthread_mutex_lock(&api->controlGui);
-            this->updateCameras(api);
+            //this->updateCameras(api);
             pthread_mutex_unlock(&api->controlGui);
-            setCamara(*this->image1, 1);
-            setCamara(*this->image2, 2);
+            //setCamara(*this->image1, 1); 
+            //setCamara(*this->image2, 2);
             //setCamara(*api->image1, 1);
             //setCamara(*api->image2, 2);		  
 

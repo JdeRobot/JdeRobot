@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
         control->mprx = jderobot::MotorsPrx::checkedCast(baseMotors);
         if (0 == control->mprx)
             throw "Invalid proxy introrob.Motors.Proxy";
-
+/*
         // Get driver camera
         Ice::ObjectPrx camara1 = ic->propertyToProxy("introrob.Camera1.Proxy");
         if (0 == camara1)
@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
         control->cprx2 = jderobot::CameraPrx::checkedCast(camara2);
         if (0 == control->cprx2)
             throw "Invalid proxy";
-
+*/
         // Contact to ENCODERS interface
         Ice::ObjectPrx baseEncoders = ic->propertyToProxy("introrob.Encoders.Proxy");
         if (0 == baseEncoders)
@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
         control->lprx = jderobot::LaserPrx::checkedCast(baseLaser);
         if (0 == control->lprx)
             throw "Invalid proxy introrob.Laser.Proxy";
-
+/*
         // Contact to PTMOTORS interface
         Ice::ObjectPrx ptmotors1 = ic->propertyToProxy("introrob.PTMotors1.Proxy");
         if (0 == ptmotors1)
@@ -187,7 +187,7 @@ int main(int argc, char** argv) {
         control->pteprx2 = jderobot::PTEncodersPrx::checkedCast(ptencoders2);
         if (0 == control->pteprx2)
             throw "Invalid proxy introrob.PTEncoders2.Proxy";
-
+*/
         // Contact to Pose3dEncoders interface
         Ice::ObjectPrx pose3dencoders2 = ic->propertyToProxy("introrob.Pose3Dencoders2.Proxy");
         if (0 == pose3dencoders2)

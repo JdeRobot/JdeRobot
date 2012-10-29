@@ -41,12 +41,12 @@ namespace introrob {
         api->encodersData = this->eprx->getEncodersData();
 
         api->laserData = this->lprx->getLaserData();
-
+/*
         pthread_mutex_lock(&api->controlGui);
         api->imageData1 = this->cprx1->getImageData();
         api->imageData2 = this->cprx2->getImageData();
         pthread_mutex_unlock(&api->controlGui);
-
+*/
         api->Pose3Dencoders1 = this->p3deprx1->getPose3DEncodersData();
 
 
