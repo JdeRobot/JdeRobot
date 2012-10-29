@@ -1,0 +1,300 @@
+<gazebo version='1.0'>
+  <model name="pioneer2dx" static="0">
+    <link name="chassis">
+      <origin pose="0.0 0.0 0.16 0 0 0"/>
+      <inertial mass="5.0">        
+        <inertia ixx='0.01' ixy='0' ixz='0' iyy='0.01' iyz='0' izz='0.01'/>
+      </inertial> 
+      <collision name="collision">
+        <geometry>
+          <box size="0.445 0.277 0.17"/>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <origin pose="0 0 0.04 0 0 0"/>
+        <geometry>
+          <mesh filename="pioneer2dx/chassis.dae"/>
+        </geometry>
+      </visual>
+      <collision name="castor_collision">
+        <origin pose="-0.200 0 -0.12 0 0 0"/>
+        <geometry>
+          <sphere radius="0.04"/>
+        </geometry>
+        <surface>
+          <friction>
+            <ode mu="0" mu2="0" slip1="1.0" slip2="1.0"/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="castor_visual">
+        <origin pose="-0.200 0 -0.12 0 0 0"/>
+        <geometry>
+          <sphere radius="0.04"/>
+        </geometry>
+        <material script="Gazebo/FlatBlack"/>
+      </visual>
+    </link>
+
+    
+    <link name="right_wheel">
+      <origin pose="0.1 -.17 0.11 0 1.5707 1.5707"/>
+      <inertial mass="0.5">
+        <inertia ixx='0.001' ixy='0.0' ixz='0'
+                 iyy='0.001' iyz='0.0'
+                 izz='0.001'/>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <cylinder radius="0.11" length="0.05"/>
+        </geometry>
+        <surface>
+          <friction>
+            <ode mu="100000.0" mu2="100000.0" slip1="0.0" slip2="0.0"/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <cylinder radius="0.11" length="0.05"/>
+        </geometry>
+        <material script="Gazebo/FlatBlack"/>
+      </visual>
+    </link>
+
+
+    <link name="left_wheel">
+      <origin pose="0.1 .17 0.11 0 1.5707 1.5707"/>
+  
+      <inertial mass="0.5">
+        <inertia ixx='0.001' ixy='0.0' ixz='0'
+                 iyy='0.001' iyz='0.0'
+                 izz='0.001'/>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <cylinder radius="0.11" length="0.05"/>
+        </geometry>
+        <surface>
+          <friction>
+            <ode mu="100000.0" mu2="100000.0" slip1="0.0" slip2="0.0"/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <cylinder radius="0.11" length="0.05"/>
+        </geometry>
+        <material script="Gazebo/FlatBlack"/>
+      </visual>
+    </link>
+
+
+	<link name="laser">
+		<inertial mass="0.5">
+		</inertial>
+		<visual name="visual">
+			<geometry>
+				  <mesh filename="hokuyo/hokuyo.dae"/>
+			</geometry>
+		</visual>
+		<origin pose='0.16 0 0.3 0 0 -1.57'/>
+		<sensor name='laser' type='ray' always_on='1' update_rate='30' visualize='true'>
+			<ray>
+				<scan>
+					<horizontal samples='180' resolution='1' min_angle='3.14' max_angle='0'/>
+				</scan>
+				<range min='0.080000000000000002' max='8' resolution='0.01'/>
+			</ray>
+			<plugin name='laser' filename='liblaser.so'/>
+		</sensor>
+	</link>
+
+      <link name="camera_column_body_left">
+      	<origin pose="0.12 0.1 0.31 1.57 3.15 0"/>
+        <inertial mass="0.5">
+
+        </inertial>
+
+	  <visual name="visual">
+	    <geometry>
+	      <mesh filename="sonyvid30/sonyvid30_mid.dae" scale="0.0125 0.0275 0.0275"/>
+	    </geometry>
+
+        <material script='Gazebo/Blue'/>
+	  </visual>
+
+    <collision name="castor_collision">
+        <geometry>
+          <box size="0.1 0.1 0.1"/>
+        </geometry> 
+       <surface>
+          <friction>
+            <ode mu="10000" mu2="10000" slip1="0.0" slip2="0.0"/>
+          </friction>
+        </surface>
+      </collision>
+
+      </link>
+
+
+      <link name="camera_column_body_right">
+      	<origin pose="0.12 -0.1 0.31 1.57 3.15 0"/>
+        <inertial mass="0.5">
+        <inertia ixx='0.001' ixy='0.0' ixz='0'
+                 iyy='0.001' iyz='0.0'
+                 izz='0.001'/>
+        </inertial>
+
+	  <visual name="visual">
+	    <geometry>
+	      <mesh filename="sonyvid30/sonyvid30_mid.dae" scale="0.0125 0.0275 0.0275"/>
+	    </geometry>
+
+        <material script='Gazebo/Blue'/>
+	  </visual>
+
+    <collision name="castor_collision">
+        <geometry>
+          <box size="0.1 0.1 0.1"/>
+        </geometry> 
+       <surface>
+          <friction>
+            <ode mu="10000" mu2="10000" slip1="0.0" slip2="0.0"/>
+          </friction>
+        </surface>
+      </collision>
+
+      </link>
+
+      <link name="camera_top_body_right">
+      	<origin pose="0.1 -0.1 0.31 1.57 3.15 0"/>
+        <inertial mass="1.0">
+        </inertial>
+
+	  <visual name="visual">
+	    <geometry>
+	      <mesh filename="sonyvid30/sonyvid30_top.dae"  scale="0.04 0.04 0.03"/>
+	    </geometry>
+
+        <material script='Gazebo/Black'/>
+	  </visual>
+
+	        <sensor name='cam_sensor_right' type='camera' always_on='1' update_rate='20'>
+		<origin pose="0 0 0 1.57 3.15 0"/>
+	          <camera>
+	            <horizontal_fov angle='1.57'/>
+	            <image width='640' height='480' format='R8G8B8'/>
+	            <clip near='0.5' far='5'/>
+	          </camera>
+            <plugin name='camera_dump' filename='libcamera_dump.so'/>
+	        </sensor>
+      </link>
+
+      <link name="camera_top_body_left">
+      	<origin pose="0.1 0.1 0.31 1.57 3.15 0"/>
+        <inertial mass="1.0">
+        </inertial>
+
+	  <visual name="visual">
+	    <geometry>
+	      <mesh filename="sonyvid30/sonyvid30_top.dae"  scale="0.04 0.04 0.03"/>
+	    </geometry>
+
+        <material script='Gazebo/Black'/>
+	  </visual>
+
+	        <sensor name='cam_sensor_left' type='camera' always_on='1' update_rate='20'>
+		<origin pose="0 0 0 1.57 3.15 0"/>
+	          <camera>
+	            <horizontal_fov angle='1.57'/>
+	            <image width='640' height='480' format='R8G8B8'/>
+	            <clip near='0.5' far='5'/>
+	          </camera>
+            <plugin name='camera_dump' filename='libcamera_dump.so'/>
+	        </sensor>
+      </link>
+
+    <joint type="revolute" name="left_wheel_hinge">
+      <origin pose="0 0 -0.03 0 0 0"/>
+      <child link="left_wheel"/>
+      <parent link="chassis"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+
+    <joint type="revolute" name="right_wheel_hinge">
+      <origin pose="0 0 0.03 0 0 0"/>
+      <child link="right_wheel"/>
+      <parent link="chassis"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+
+    <joint type="revolute" name="laser_joint">
+      <origin pose="0.2 0 0.2 0 0 0"/>
+      <child link="laser"/>
+      <parent link="chassis"/>
+      <axis xyz="0 0 0">
+	  	<limit  lower="0" upper="0"/>
+	  </axis>
+    </joint>
+
+		<joint type="revolute" name="pan_joint_right">
+      	  <origin pose="0 0 0 0 0 0"/>
+		  <child link="camera_column_body_right"/>
+		  <parent link="chassis"/>
+		  <axis xyz="0 0 1">
+        	<limit lower='-1.57' upper='1.57'/>
+		  </axis>
+		</joint>
+
+		<joint type="revolute" name="tilt_joint_right">
+      	  <origin pose="0 0 0 0 0 0"/>
+		  <child link="camera_top_body_right"/>
+		  <parent link="camera_column_body_right"/>
+		  <axis xyz="0 1 0">
+        	<limit lower='-0.4' upper='0.7'/>
+		  </axis>
+		</joint>
+
+		<joint type="revolute" name="pan_joint_left">
+      	  <origin pose="0 0 0 0 0 0"/>
+		  <child link="camera_column_body_left"/>
+		  <parent link="chassis"/>
+		  <axis xyz="0 0 1">
+        	<limit lower='-1.57' upper='1.57'/>
+		  </axis>
+		</joint>
+
+		<joint type="revolute" name="tilt_joint_left">
+      	  <origin pose="0 0 0 0 0 0"/>
+		  <child link="camera_top_body_left"/>
+		  <parent link="camera_column_body_left"/>
+		  <axis xyz="0 1 0">
+        	<limit lower='-0.4' upper='0.7'/>
+		  </axis>
+		</joint>
+
+    <plugin filename="libmotors.so" name="motors">
+      <left_joint>left_wheel_hinge</left_joint>
+      <right_joint>right_wheel_hinge</right_joint>
+      <torque>5</torque>
+    </plugin>
+
+    <plugin filename="libpose3dencoders.so" name="pose3dencoders">
+      <left_joint_pose3dencoders_pan>pan_joint_right</left_joint_pose3dencoders_pan>
+      <left_joint_pose3dencoders_tilt>tilt_joint_right</left_joint_pose3dencoders_tilt>
+      <right_joint_pose3dencoders_pan>pan_joint_left</right_joint_pose3dencoders_pan>
+      <right_joint_pose3dencoders_tilt>tilt_joint_left</right_joint_pose3dencoders_tilt>
+	  <torque>5</torque>
+    </plugin>
+<!--
+    <plugin filename="libpose3dmotors.so" name="pose3dmotors">
+      <left_joint_pose3dmotors>camera_joint_left</left_joint_pose3dmotors>
+      <right_joint_pose3dmotors>camera_joint_right</right_joint_pose3dmotors>
+	  <torque>5</torque>
+    </plugin>
+-->
+	<plugin filename="libencoders.so" name="encoders"/>
+
+  </model>
+</gazebo>

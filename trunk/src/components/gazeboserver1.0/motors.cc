@@ -55,15 +55,9 @@ namespace gazebo {
             gzerr << "Unable to find right joint["
                 << _sdf->GetElement("right_joint")->GetValueString() << "]\n";
 
-
-
-        // Listen to the update event. This event is broadcast every
-        // simulation iteration.
         this->updateConnection = event::Events::ConnectWorldUpdateStart(
                 boost::bind(&Motors::OnUpdate, this));
     }
-
-    // Called by the world update start event
 
     void Motors::Init() {
         this->wheelSeparation = this->leftJoint->GetAnchor(0).Distance(this->rightJoint->GetAnchor(0));
@@ -76,25 +70,12 @@ namespace gazebo {
         std::cout << "Wheel Diameter:" << this->wheelRadius * 2 << std::endl;
     }
 
-    /*
-    void Motors::OnVelMsg(ConstPosePtr& _msg) {
-
-        double vr, va;
-
-        vr = _msg->position().x() + 5;
-        std::cout << "vr:" << vr << std::endl;
-        va = msgs::Convert(_msg->orientation()).GetAsEuler().z + 3;
-
-        this->wheelSpeed[LEFT] = vr + va * this->wheelSeparation / 2.0;
-        this->wheelSpeed[RIGHT] = vr - va * this->wheelSeparation / 2.0;
-
-
-
-    }
-    */
-    
     void Motors::OnUpdate() {
 
+                gettimeofday(&a, NULL);
+        totala = a.tv_sec * 1000000 + a.tv_usec;             
+        cycle = 50;
+        
         if (count == 0) {
             count++;
             std::string name = this->model->GetName();
@@ -107,27 +88,39 @@ namespace gazebo {
         double vr, va; //vr -> velocidad lineal; va -> velocidad angular
 
         pthread_mutex_lock(&mutex);
-
-        vr = robotMotors.v;
-        //std::cout << "vr:" << vr << std::endl;
-        va = robotMotors.w;
+        vr = robotMotors.v; //
+        va = robotMotors.w; //
         pthread_mutex_unlock(&mutex);
 
-        //            //std::cout << pose << std::endl;
-        //            this->model->SetLinearVel(v);
-        //            this->model->SetAngularVel(math::Vector3(0, 0, w));
-
+        
+        
         this->wheelSpeed[LEFT] = vr + va * this->wheelSeparation / 2.0;
         this->wheelSpeed[RIGHT] = vr - va * this->wheelSeparation / 2.0;
 
         double leftVelDesired = (this->wheelSpeed[LEFT] / this->wheelRadius);
         double rightVelDesired = (this->wheelSpeed[RIGHT] / this->wheelRadius);
 
-        this->leftJoint->SetVelocity(0, leftVelDesired);
-        this->rightJoint->SetVelocity(0, rightVelDesired);
+        this->leftJoint->SetVelocity(0, leftVelDesired/2);
+        this->rightJoint->SetVelocity(0, rightVelDesired/2);
+        
+        
+        this->leftJoint->SetMaxForce(0, 1.4); //this->leftJoint->SetMaxForce(0, this->torque);
+        this->rightJoint->SetMaxForce(0, 1.4); //this->rightJoint->SetMaxForce(0, this->torque);
+        //this->leftJoint->SetForce(0,1.5);
+        //        this->rightJoint->SetForce(0,1.5);
 
-        this->leftJoint->SetMaxForce(0, this->torque);
-        this->rightJoint->SetMaxForce(0, this->torque);
+        gettimeofday(&b, NULL);
+        totalb = b.tv_sec * 1000000 + b.tv_usec;
+        
+        diff = (totalb - totala) / 1000;
+        diff = cycle - diff;
+        
+        if (diff < 10)
+            diff = 10;
+        
+        //usleep(diff*1000);
+        sleep(diff/1000);        
+        
     }
 
     class MotorsI : virtual public jderobot::Motors {
@@ -143,19 +136,17 @@ namespace gazebo {
         virtual float getV(const Ice::Current&) {
 
             float v_return;
-            pthread_mutex_lock(&pose->mutexMotor);
-            //v_return = pose->vel;
+            pthread_mutex_lock(&pose->mutex);
             v_return = pose->robotMotors.v;
-            pthread_mutex_unlock(&pose->mutexMotor);
+            pthread_mutex_unlock(&pose->mutex);
             return v_return;
         };
 
         virtual float getW(const Ice::Current&) {
             float w_return;
-            pthread_mutex_lock(&pose->mutexMotor);
-            //w_return = pose->w;
+            pthread_mutex_lock(&pose->mutex);
             w_return = pose->robotMotors.w;
-            pthread_mutex_unlock(&pose->mutexMotor);
+            pthread_mutex_unlock(&pose->mutex);
             return w_return;
         };
 
@@ -164,18 +155,16 @@ namespace gazebo {
         };
 
         virtual Ice::Int setV(Ice::Float v, const Ice::Current&) {
-            pthread_mutex_lock(&pose->mutexMotor);
-            //pose->vel = v;
-            pose->robotMotors.v = v;
-            pthread_mutex_unlock(&pose->mutexMotor);
+            pthread_mutex_lock(&pose->mutex);
+            pose->robotMotors.v = v/1000;
+            pthread_mutex_unlock(&pose->mutex);
             return 0;
         };
 
         virtual Ice::Int setW(Ice::Float _w, const Ice::Current&) {
-            pthread_mutex_lock(&pose->mutexMotor);
-            //pose->w = _w;
-            pose->robotMotors.w = -_w;
-            pthread_mutex_unlock(&pose->mutexMotor);
+            pthread_mutex_lock(&pose->mutex);
+            pose->robotMotors.w = -_w/10;
+            pthread_mutex_unlock(&pose->mutex);
             return 0;
         };
 

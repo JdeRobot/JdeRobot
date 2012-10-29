@@ -5,7 +5,7 @@
     <include filename="ground_plane.model"/>
 
     <!-- Pioneer2dx model -->
-    <include filename="pioneer2dx.model"/>
+    <include filename="pioneer2dxJde.model"/>
 
     <!-- A global light source -->
     <include filename="sun.light"/>

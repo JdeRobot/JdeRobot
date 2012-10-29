@@ -1,6 +1,7 @@
 #include "pose3dencoders.h"
 //#include "pose3dmotors.h"
 
+#define RADTODEG 57.29582790
 
 
 namespace gazebo {
@@ -83,6 +84,10 @@ namespace gazebo {
 
     void Pose3DEncoders::OnUpdate() {
 
+        gettimeofday(&a, NULL);
+        totala = a.tv_sec * 1000000 + a.tv_usec;
+        cycle = 50;
+        
         if (count == 0) {
             count++;
             namePose3DEncoders = std::string("--Ice.Config=pose3dencoders.cfg");
@@ -92,32 +97,32 @@ namespace gazebo {
 
         //          ----------ENCODERS----------
         //GET pose3dencoders data from left_camera (PAN&TILT)
-        this->cameraLeft.encoder.pan = this->cameraLeft.camera_link_pan->GetRelativePose().rot.GetAsEuler().z * 180.0 / M_PI;
-        if (this->cameraLeft.encoder.pan > 0) {
-            this->cameraLeft.encoder.pan = 180 - this->cameraLeft.encoder.pan;
+        
+        if(this->cameraLeft.camera_link_pan->GetRelativePose().rot.GetAsEuler().z < 0){
+            this->cameraLeft.encoder.pan = -(3.14146 + this->cameraLeft.camera_link_pan->GetRelativePose().rot.GetAsEuler().z) ;
+        }else{
+            this->cameraLeft.encoder.pan = 3.14146 - this->cameraLeft.camera_link_pan->GetRelativePose().rot.GetAsEuler().z ;
         }
-        if (this->cameraLeft.encoder.pan < 0) {
-            this->cameraLeft.encoder.pan = -(180 + this->cameraLeft.encoder.pan);
-        }
+        
+        
 
         //std::cout << this->cameraLeft.encoder.pan << std::endl;
-        this->cameraLeft.encoder.tilt = this->cameraLeft.camera_link_tilt->GetRelativePose().rot.GetAsEuler().y * 180.0 / M_PI;
+        
+        this->cameraLeft.encoder.tilt = this->cameraLeft.camera_link_tilt->GetRelativePose().rot.GetAsEuler().y ;
         //std::cout << this->cameraLeft.encoder.tilt << std::endl;
 
 
         //GET pose3dencoders data from left_camera (PAN&TILT)
-
-        this->cameraRight.encoder.pan = this->cameraRight.camera_link_pan->GetRelativePose().rot.GetAsEuler().z * 180.0 / M_PI;
-        if (this->cameraRight.encoder.pan > 0) {
-            this->cameraRight.encoder.pan = 180 - this->cameraRight.encoder.pan;
+        if(this->cameraRight.camera_link_pan->GetRelativePose().rot.GetAsEuler().z < 0){
+            this->cameraRight.encoder.pan = -(3.14146 + this->cameraRight.camera_link_pan->GetRelativePose().rot.GetAsEuler().z) ;
+        }else{
+            this->cameraRight.encoder.pan = 3.14146 - this->cameraRight.camera_link_pan->GetRelativePose().rot.GetAsEuler().z ;
         }
-        if (this->cameraRight.encoder.pan < 0) {
-            this->cameraRight.encoder.pan = -(180 + this->cameraRight.encoder.pan);
-        }
+        
 
-        //std::cout << this->cameraRight.pan << std::endl;
-        this->cameraRight.encoder.tilt = this->cameraRight.camera_link_tilt->GetRelativePose().rot.GetAsEuler().y * 180.0 / M_PI;
-        //std::cout << this->cameraRight.encoder.tilt << std::endl;
+        std::cout << this->cameraRight.encoder.pan << std::endl;
+        this->cameraRight.encoder.tilt = this->cameraRight.camera_link_tilt->GetRelativePose().rot.GetAsEuler().y ;
+        std::cout << this->cameraRight.encoder.tilt << std::endl;
 
         double setPanRight = -50;
         double setPanLeft = -50;
@@ -206,8 +211,17 @@ namespace gazebo {
         }        
         
 
-
-
+        gettimeofday(&b, NULL);
+        totalb = b.tv_sec * 1000000 + b.tv_usec;
+        
+        diff = (totalb - totala) / 1000;
+        diff = cycle - diff;
+        
+        if (diff < 10)
+            diff = 10;
+        
+        //usleep(diff*1000);
+        sleep(diff/1000);
 
     }
 
@@ -226,7 +240,7 @@ namespace gazebo {
 
         virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData(const Ice::Current&) {
 
-            pthread_mutex_lock(&pose->mutex);
+            //pthread_mutex_lock(&pose->mutex);
             pose3DEncodersData->x = 0;
             pose3DEncodersData->y = 0;
             pose3DEncodersData->z = 0;
@@ -234,7 +248,7 @@ namespace gazebo {
             pose3DEncodersData->tilt = pose->cameraLeft.encoder.tilt;
             pose3DEncodersData->clock = 0;
             pose3DEncodersData->roll = 0;
-            pthread_mutex_unlock(&pose->mutex);
+            //pthread_mutex_unlock(&pose->mutex);
 
             return pose3DEncodersData;
 
@@ -262,7 +276,7 @@ namespace gazebo {
 
         virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData(const Ice::Current&) {
 
-            pthread_mutex_lock(&pose->mutex);
+            //pthread_mutex_lock(&pose->mutex);
             pose3DEncodersData->x = 0;
             pose3DEncodersData->y = 0;
             pose3DEncodersData->z = 0;
@@ -270,7 +284,7 @@ namespace gazebo {
             pose3DEncodersData->tilt = pose->cameraRight.encoder.tilt;
             pose3DEncodersData->clock = 0;
             pose3DEncodersData->roll = 0;
-            pthread_mutex_unlock(&pose->mutex);
+            //pthread_mutex_unlock(&pose->mutex);
 
             return pose3DEncodersData;
 
@@ -299,7 +313,7 @@ namespace gazebo {
         
         virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData(const Ice::Current&){
             
-            pthread_mutex_lock(&pose->mutex);
+            //pthread_mutex_lock(&pose->mutex);
             pose3DMotorsData->x = 0;
             pose3DMotorsData->y = 0;
             pose3DMotorsData->z = 0;
@@ -308,7 +322,7 @@ namespace gazebo {
             pose3DMotorsData->roll = 0;
             pose3DMotorsData->panSpeed = 0;
             pose3DMotorsData->tiltSpeed = 0;
-            pthread_mutex_unlock(&pose->mutex);
+            //pthread_mutex_unlock(&pose->mutex);
 
             return pose3DMotorsData;
             
@@ -316,20 +330,20 @@ namespace gazebo {
         }
         
         virtual jderobot::Pose3DMotorsParamsPtr getPose3DMotorsParams(const Ice::Current&) {
-            pthread_mutex_lock(&pose->mutex);
+            //pthread_mutex_lock(&pose->mutex);
             pose3DMotorsParams->maxPan = 0;
             pose3DMotorsParams->minPan = 0;
             pose3DMotorsParams->maxTilt = 0;
             pose3DMotorsParams->minTilt = 0;
             pose3DMotorsParams->maxPanSpeed = 0;
             pose3DMotorsParams->maxTiltSpeed = 0;
-            pthread_mutex_unlock(&pose->mutex);
+            //pthread_mutex_unlock(&pose->mutex);
 
             return pose3DMotorsParams;
         }
         
         virtual Ice::Int setPose3DMotorsData(const jderobot::Pose3DMotorsDataPtr & data, const Ice::Current&) {
-            pthread_mutex_lock(&pose->mutex);
+            //pthread_mutex_lock(&pose->mutex);
             pose->cameraLeft.motor.x = data->x;
             pose->cameraLeft.motor.y = data->y;
             pose->cameraLeft.motor.z = data->z;
@@ -338,7 +352,7 @@ namespace gazebo {
             pose->cameraLeft.motor.roll = data->roll;
             pose->cameraLeft.motor.panSpeed = data->panSpeed;
             pose->cameraLeft.motor.tiltSpeed = data->tiltSpeed;            
-            pthread_mutex_unlock(&pose->mutex);
+            //pthread_mutex_unlock(&pose->mutex);
 
         }        
         
@@ -367,7 +381,7 @@ namespace gazebo {
         
         virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData(const Ice::Current&){
             
-            pthread_mutex_lock(&pose->mutex);
+            //pthread_mutex_lock(&pose->mutex);
             pose3DMotorsData->x = 0;
             pose3DMotorsData->y = 0;
             pose3DMotorsData->z = 0;
@@ -376,7 +390,7 @@ namespace gazebo {
             pose3DMotorsData->roll = 0;
             pose3DMotorsData->panSpeed = 0;
             pose3DMotorsData->tiltSpeed = 0;
-            pthread_mutex_unlock(&pose->mutex);
+            //pthread_mutex_unlock(&pose->mutex);
 
             return pose3DMotorsData;
             
@@ -384,20 +398,20 @@ namespace gazebo {
         }
         
         virtual jderobot::Pose3DMotorsParamsPtr getPose3DMotorsParams(const Ice::Current&) {
-            pthread_mutex_lock(&pose->mutex);
+            //pthread_mutex_lock(&pose->mutex);
             pose3DMotorsParams->maxPan = 0;
             pose3DMotorsParams->minPan = 0;
             pose3DMotorsParams->maxTilt = 0;
             pose3DMotorsParams->minTilt = 0;
             pose3DMotorsParams->maxPanSpeed = 0;
             pose3DMotorsParams->maxTiltSpeed = 0;
-            pthread_mutex_unlock(&pose->mutex);
+            //pthread_mutex_unlock(&pose->mutex);
 
             return pose3DMotorsParams;
         }
         
         virtual Ice::Int setPose3DMotorsData(const jderobot::Pose3DMotorsDataPtr & data, const Ice::Current&) {
-            pthread_mutex_lock(&pose->mutex);
+            //pthread_mutex_lock(&pose->mutex);
             pose->cameraRight.motor.x = data->x;
             pose->cameraRight.motor.y = data->y;
             pose->cameraRight.motor.z = data->z;
@@ -406,7 +420,7 @@ namespace gazebo {
             pose->cameraRight.motor.roll = data->roll;
             pose->cameraRight.motor.panSpeed = data->panSpeed;
             pose->cameraRight.motor.tiltSpeed = data->tiltSpeed;            
-            pthread_mutex_unlock(&pose->mutex);
+            //pthread_mutex_unlock(&pose->mutex);
 
         }        
         

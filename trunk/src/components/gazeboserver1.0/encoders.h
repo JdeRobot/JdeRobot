@@ -47,7 +47,9 @@ namespace gazebo {
         physics::ModelPtr model;
         math::Pose position;
         event::ConnectionPtr updateConnection;
-        
+        int cycle;
+        long totalb, totala, diff;
+        struct timeval a, b;        
         
     };
     
