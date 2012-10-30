@@ -120,9 +120,9 @@ namespace gazebo {
         }
         
 
-        std::cout << this->cameraRight.encoder.pan << std::endl;
+        //std::cout << this->cameraRight.encoder.pan << std::endl;
         this->cameraRight.encoder.tilt = this->cameraRight.camera_link_tilt->GetRelativePose().rot.GetAsEuler().y ;
-        std::cout << this->cameraRight.encoder.tilt << std::endl;
+        //std::cout << this->cameraRight.encoder.tilt << std::endl;
 
         double setPanRight = -50;
         double setPanLeft = -50;

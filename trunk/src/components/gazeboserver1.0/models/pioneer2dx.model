@@ -29,7 +29,7 @@
         </geometry>
         <surface>
           <friction>
-            <ode mu="0" mu2="0" slip1="0.0" slip2="0.0"/>
+            <ode mu="100000" mu2="0" slip1="10.0" slip2="10.0"/>
           </friction>
         </surface>
       </collision>
@@ -147,7 +147,7 @@
         </geometry>
         <surface>
           <friction>
-            <ode mu="100000.0" mu2="100000.0" slip1="0.0" slip2="0.0"/>
+            <ode mu="100000.0" mu2="100000.0" slip1="100000.0" slip2="100000.0"/>
           </friction>
         </surface>
       </collision>
@@ -175,7 +175,7 @@
         </geometry>
         <surface>
           <friction>
-            <ode mu="100000.0" mu2="100000.0" slip1="0.0" slip2="0.0"/>
+            <ode mu="100000.0" mu2="100000.0" slip1="100000.0" slip2="100000.0"/>
           </friction>
         </surface>
       </collision>
