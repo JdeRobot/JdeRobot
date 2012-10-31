@@ -27,6 +27,7 @@ TARGET_LINK_LIBRARIES(openniServer
     ${libgnomecanvas_LIBRARIES}
     ${libgnomecanvasmm_LIBRARIES}
     ${gtkglextmm_LIBRARIES}
+    ${Gearbox_LIBRARIES}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
     ${LIBS_DIR}/jderobotice/libjderobotice.so

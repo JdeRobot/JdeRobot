@@ -1,14 +1,14 @@
 IF(with_pcl)
       SET( SOURCE_FILES kinectServer.cpp)
 
-      set( CMAKE_CXX_FLAGS "-Wno-deprecated -lGL -lGLU -lglut -lgazebo -lpcl_visualization -lpcl_surface -lpcl_registration -lpcl_segmentation -lpcl_filters -lpcl_sample_consensus -lpcl_io -lm -lpcl_octree -lOpenNI -lusb-1.0 -lpcl_features -lpcl_kdtree -lpcl_common -lgsl -lgslcblas" ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
+      set( CMAKE_CXX_FLAGS "-Wno-deprecated -lGL -lGLU -lglut -lpcl_visualization -lpcl_surface -lpcl_registration -lpcl_segmentation -lpcl_filters -lpcl_sample_consensus -lpcl_io -lm -lpcl_octree -lOpenNI -lusb-1.0 -lpcl_features -lpcl_kdtree -lpcl_common -lgsl -lgslcblas" ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
 
       include_directories(
 	  ${SLICE_DIR}
 	  ${INTERFACES_CPP_DIR}
 	  ${LIBS_DIR}
 	  ${CMAKE_CURRENT_SOURCE_DIR}
-	  /usr/include/pcl-1.5 
+	  /usr/include/pcl-1.6 
 	  /usr/include/openni
 	  /usr/include/libusb-1.0
 	  /usr/include/cminpack-1 
@@ -28,6 +28,7 @@ IF(with_pcl)
 	  ${libgnomecanvas_LIBRARIES}
 	  ${libgnomecanvasmm_LIBRARIES}
 	  ${gtkglextmm_LIBRARIES}
+	  ${Gearbox_LIBRARIES}
 	  ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
 	  ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
 	  ${LIBS_DIR}/jderobotice/libjderobotice.so
