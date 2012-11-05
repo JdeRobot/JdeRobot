@@ -1,0 +1,123 @@
+<?xml version ='1.0'?>
+<gazebo version ='1.0'>
+<world name='default'>
+  <include filename='ground_plane.model'/>
+  <model name='pioneer2dx' static='0'>
+
+     <origin pose='10.000000 -15.000000 0.160000 0.000000 -0.000000 0.000000'/>      
+    <link name='kinect' gravity='0' self_collide='0' kinematic='0'>
+
+
+	   <inertial mass='0.100000' density='1.000000'/>
+
+      <origin pose='00.000000 0.000000 0.160000 0.000000 -0.000000 0.000000'/>
+      <visual name='visual' cast_shadows='1' laser_retro='0.000000' transparency='0.000000'>
+        <origin pose='0.000000 0.000000 0.040000 0.000000 -0.000000 0.000000'/>
+        <geometry>
+          <mesh filename='kinect/kinect.dae' scale='1.000000 1.000000 1.000000'/>
+        </geometry>
+      </visual>
+      <sensor name='kinect' type='depth' always_on='1' update_rate='30.000000' visualize='1'>
+        <camera>
+            <horizontal_fov angle="1.04719755"/>
+          <image width='640' height='480' format='R8G8B8'/>
+          <clip near='0.100000' far='10.000000'/>
+        </camera>
+        <plugin name='depth_camera_plugin' filename='libkinectPlugin.so'>
+			<point_cloud_topic_name>points</point_cloud_topic_name>
+			<camera_info_topic_name>camera_info</camera_info_topic_name>
+			<cameraName>depth_cam</cameraName>
+			<frameName>/base_link</frameName>
+			<point_cloud_cutoff>0.001</point_cloud_cutoff>
+			<distortionK1>0.00000001</distortionK1>
+			<distortionK2>0.00000001</distortionK2>
+			<distortionK3>0.00000001</distortionK3>
+			<distortionT1>0.00000001</distortionT1>
+			<distortionT2>0.00000001</distortionT2>
+		</plugin>
+      </sensor>
+      <damping/>
+    </link>
+  </model>
+  <include filename='sun.light'/>
+  <physics type='ode' update_rate='0.000000'/>
+  <scene/>
+  <state world_name='default' time='2249 146000000'>
+    <model name='plane1_model'>
+      <pose>0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000</pose>
+      <link name='body'>
+        <pose>0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000</pose>
+        <velocity>0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000</velocity>
+      </link>
+    </model>
+    <model name='pioneer2dx'>
+      <pose>0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000</pose>
+      <link name='kinect'>
+        <pose>0.000000 0.000000 0.160000 0.000000 -0.000000 0.000000</pose>
+        <velocity>0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000</velocity>
+      </link>
+    </model>
+    <model name='custom_user_box1_model'>
+      <pose>1.500000 0.499998 0.499997 0.000003 0.000000 -0.000000</pose>
+      <link name='link'>
+        <pose>0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000</pose>
+        <velocity>0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000</velocity>
+      </link>
+    </model>
+  </state>
+
+    <actor name="actor1" static="true">
+      <origin pose="0 0 0 0 0 0"/>
+      <skin filename="sub_16.dae" scale="1.0"/>
+      <animation name="stand" filename="stand.dae" scale="1.0" interpolate_x="false"/>
+      <animation name="walking" filename="walk.dae" scale="1.0" interpolate_x="true"/>
+      
+      <script loop="true" delay_start="0.0" auto_start="true">
+        
+        <!--trajectory id="0" type="stand">
+          <waypoint time="0.0" pose="0 1 0 0 0 0"/> 
+          <waypoint time="10.0" pose="0 1 0 0 0 0"/>
+        </trajectory-->
+
+        <trajectory id="4" type="walking">
+          <waypoint time="0.0" pose="0 1 0 0 0 0"/>
+          <waypoint time="0.5" pose="0.19509 0.980785 0 0 0 -0.19635"/>
+          <waypoint time="1.0" pose="0.382683 0.92388 0 0 0 -0.392699"/>
+          <waypoint time="1.5" pose="0.55557 0.83147 0 0 0 -0.589049"/>
+          <waypoint time="2.0" pose="0.707107 0.707107 0 0 -0 -0.785398"/>
+          <waypoint time="2.5" pose="0.83147 0.55557 0 0 0 -0.981748"/>
+          <waypoint time="3.0" pose="0.92388 0.382683 0 0 0 -1.1781"/>
+          <waypoint time="3.5" pose="0.980785 0.19509 0 0 0 -1.37445"/>
+          <waypoint time="4.0" pose="1 0 0 0 0 -1.5708"/>
+          <waypoint time="4.5" pose="0.980785 -0.19509 0 0 0 -1.76715"/>
+          <waypoint time="5.0" pose="0.92388 -0.382683 0 0 0 -1.9635"/>
+          <waypoint time="5.5" pose="0.83147 -0.55557 0 0 0 -2.15984"/>
+          <waypoint time="6.0" pose="0.707107 -0.707107 0 0 0 -2.35619"/>
+          <waypoint time="6.5" pose="0.55557 -0.83147 0 0 0 -2.55254"/>
+          <waypoint time="7.0" pose="0.382683 -0.92388 0 0 0 -2.74889"/>
+          <waypoint time="7.5" pose="0.19509 -0.980785 0 0 0 -2.94524"/>
+          <waypoint time="8.0" pose="0 -1 0 0 0 -3.14159"/>
+          <waypoint time="8.5" pose="-0.19509 -0.980785 0 0 0 -3.33794"/>
+          <waypoint time="9.0" pose="-0.382683 -0.92388 0 0 0 -3.53429"/>
+          <waypoint time="9.5" pose="-0.55557 -0.83147 0 0 0 -3.73064"/>
+          <waypoint time="10.0" pose="-0.707107 -0.707107 0 0 0 -3.92699"/>
+          <waypoint time="10.5" pose="-0.83147 -0.55557 0 0 0 -4.12334"/>
+          <waypoint time="11.0" pose="-0.92388 -0.382683 0 0 0 -4.31969"/>
+          <waypoint time="11.5" pose="-0.980785 -0.19509 0 0 0 -4.51604"/>
+          <waypoint time="12.0" pose="-1 0 0 0 0 -4.71239"/>
+          <waypoint time="12.5" pose="-0.980785 0.19509 0 0 0 -4.90874"/>
+          <waypoint time="13.0" pose="-0.92388 0.382683 0 0 0 -5.10509"/>
+          <waypoint time="13.5" pose="-0.83147 0.55557 0 0 0 -5.30144"/>
+          <waypoint time="14.0" pose="-0.707107 0.707107 0 0 0 -5.49779"/>
+          <waypoint time="14.5" pose="-0.55557 0.83147 0 0 0 -5.69414"/>
+          <waypoint time="15.0" pose="-0.382683 0.92388 0 0 0 -5.89049"/>
+          <waypoint time="15.5" pose="-0.19509 0.980785 0 0 0 -6.08684"/>
+        </trajectory>
+        
+      </script>
+    
+    </actor>
+
+
+</world>
+</gazebo>
