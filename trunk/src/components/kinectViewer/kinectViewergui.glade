@@ -10,7 +10,6 @@
         <child>
           <widget class="GtkMenuBar" id="menubar2">
             <property name="visible">True</property>
-            <property name="ubuntu_local">True</property>
             <child>
               <widget class="GtkMenuItem" id="menuitem5">
                 <property name="visible">True</property>
@@ -19,7 +18,6 @@
                 <child>
                   <widget class="GtkMenu" id="menu4">
                     <property name="visible">True</property>
-                    <property name="ubuntu_local">True</property>
                     <child>
                       <widget class="GtkImageMenuItem" id="imagemenuitem11">
                         <property name="label">gtk-new</property>
@@ -77,7 +75,6 @@
                 <child>
                   <widget class="GtkMenu" id="menu5">
                     <property name="visible">True</property>
-                    <property name="ubuntu_local">True</property>
                     <child>
                       <widget class="GtkImageMenuItem" id="imagemenuitem16">
                         <property name="label">gtk-cut</property>
@@ -122,7 +119,6 @@
                 <child>
                   <widget class="GtkMenu" id="menu7">
                     <property name="visible">True</property>
-                    <property name="ubuntu_local">True</property>
                     <child>
                       <widget class="GtkImageMenuItem" id="view_controller">
                         <property name="label" translatable="yes">Controller</property>
@@ -148,7 +144,6 @@
                 <child>
                   <widget class="GtkMenu" id="menu6">
                     <property name="visible">True</property>
-                    <property name="ubuntu_local">True</property>
                     <child>
                       <widget class="GtkImageMenuItem" id="imagemenuitem20">
                         <property name="label">gtk-about</property>

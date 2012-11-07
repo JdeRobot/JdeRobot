@@ -327,13 +327,15 @@ int avCamera4 = 0;
             for(int i = 0; i < kinectData->p.size(); i++){
                float x,y,z;
                float r,g,b;
+			   float id;
                x = kinectData->p[i].x;
                y = kinectData->p[i].y;
                z = kinectData->p[i].z;
                r = kinectData->p[i].r;
                g = kinectData->p[i].g;
                b = kinectData->p[i].b;
-               outfile << x << "\t" << y << "\t" << z << "\t" << r << "\t" << g << "\t" << b << "\t" ;
+			   id = (float)kinectData->p[i].id;
+               outfile << x << "\t" << y << "\t" << z << "\t" << r << "\t" << g << "\t" << b << "\t" << id <<"\t" ;
             }
             outfile << std::endl;
 		} 

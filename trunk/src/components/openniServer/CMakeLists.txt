@@ -3,7 +3,7 @@ IF(with_openni)
 	SET( SOURCE_FILES openniServer.cpp myprogeo.cpp )
 	add_definitions(-DGLADE_DIR="${gladedir}")
 
-	set( CMAKE_CXX_FLAGS "-Wno-deprecated -lgsl -lgslcblas -lOpenNI" ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
+	set( CMAKE_CXX_FLAGS "-Wno-deprecated -lgsl -lgslcblas" ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
 
 
 	include_directories(
@@ -11,8 +11,8 @@ IF(with_openni)
     ${LIBS_DIR}/
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/cameras
-	/usr/include/ni/
-	/usr/include/nite/
+	${nite_INCLUDE_DIR}
+	${ni_INCLUDE_DIR}
 )
 
 
@@ -34,6 +34,10 @@ TARGET_LINK_LIBRARIES(openniServer
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/progeo/libprogeo.so
     ${LIBS_DIR}/pioneer/libpioneer.so
+	${ZeroCIce_LIBRARIES}
+	${pcl_LIBRARIES}
+	${gsl_LIBRARIES}
+	${OpenNi_LIBRARY}
 )
     ENDIF()
 ENDIF()

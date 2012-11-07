@@ -10,7 +10,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../calibrator
 )
 
-set( CMAKE_CXX_FLAGS "-lglut -lgsl -lgslcblas -lIce -lIceUtil" ) # Opciones para el compilador
+set( CMAKE_CXX_FLAGS "-lglut" ) # Opciones para el compilador
 
 add_executable (introrob  ${SOURCE_FILES})
 
@@ -29,5 +29,8 @@ TARGET_LINK_LIBRARIES(introrob
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/progeo/libprogeo.so
     ${LIBS_DIR}/pioneer/libpioneer.so
+	${gsl_LIBRARIES}
+	${ZeroCIce_LIBRARIES}
+	
 )
 

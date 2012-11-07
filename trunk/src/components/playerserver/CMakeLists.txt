@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
   SET( SOURCE_FILES playerserver4.cpp)
-	SET( LIBS_DIR /usr/local/lib/jderobot/)
+	#SET( LIBS_DIR /usr/local/lib/jderobot/)
 
   include_directories(
+	${LIBS_DIR}/
   /usr/local/include/jderobot/
   /usr/local/include/player-3.0
   /usr/local/include/gearbox

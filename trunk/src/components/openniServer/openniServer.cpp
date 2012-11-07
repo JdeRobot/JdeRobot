@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1997-2010 JDE Developers Team
+ *  Copyright (C) 1997-2012 JDE Developers Teameldercare.camRGB
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,7 +15,8 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/.
  *
  *  Authors : Jose María Cañas <jmplaza@gsyc.es>
- *            Francisco Miguel Rivas Montero <fm.rivas@alumnos.urjc.es>	
+			Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
+			
  */
 
 /** \file openniServer.cpp
@@ -96,6 +97,8 @@ std::vector<int> distances;
 IplImage* srcRGB=NULL;
 int colors[10][3];
 int userGeneratorActive=0;
+/*OJO solo funciona con imágenes de 640x480, no con imágenes redimensionadas, si valdría con tamaños fijados con configuración openni, pero no hemos conseguido que funcione variar la resolución por configuración*/
+int pixelsID[640*480];
 
 
 struct KinectDevice
@@ -106,9 +109,9 @@ struct KinectDevice
         xn::DepthMetaData depthMD;
         xn::ImageGenerator image;
         xn::ImageMetaData imageMD;
-		xn::SceneMetaData sceneMD;
-		xn::UserGenerator g_UserGenerator;
-	   std::string creation_info;
+	xn::SceneMetaData sceneMD;
+	xn::UserGenerator g_UserGenerator;
+	std::string creation_info;
         std::string camera_type;
         std::string serial;
         std::string vendor;
@@ -209,11 +212,11 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationComplete(xn::SkeletonCapability
 	{
 		// Calibration failed
 		printf("%d Calibration failed for user %d\n", epochTime, nId);
-        /*if(eStatus==XN_CALIBRATION_STATUS_MANUAL_ABORT)
+        if(eStatus==9)
         {
             printf("Manual abort occured, stop attempting to calibrate!");
             return;
-        }*/
+        }
 		if (g_bNeedPose)
 		{
 			sensors[SELCAM].g_UserGenerator.GetPoseDetectionCap().StartPoseDetection(g_strPose, nId);
@@ -225,8 +228,96 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationComplete(xn::SkeletonCapability
 	}
 }
 
+std::map<XnUInt32, std::pair<XnCalibrationStatus, XnPoseDetectionStatus> > m_Errors;
+void XN_CALLBACK_TYPE MyCalibrationInProgress(xn::SkeletonCapability& /*capability*/, XnUserID id, XnCalibrationStatus calibrationError, void* /*pCookie*/)
+{
+	m_Errors[id].first = calibrationError;
+}
+void XN_CALLBACK_TYPE MyPoseInProgress(xn::PoseDetectionCapability& /*capability*/, const XnChar* /*strPose*/, XnUserID id, XnPoseDetectionStatus poseError, void* /*pCookie*/)
+{
+	m_Errors[id].second = poseError;
+}
 
 
+
+//test function to draw joint on image
+void DrawJoint(XnUserID player, XnSkeletonJoint eJoint)
+{
+	if (!sensors[SELCAM].g_UserGenerator.GetSkeletonCap().IsTracking(player))
+	{
+		printf("not tracked!\n");
+		return;
+	}
+
+	if (!sensors[SELCAM].g_UserGenerator.GetSkeletonCap().IsJointActive(eJoint))
+	{
+		return;
+	}
+
+	XnSkeletonJointPosition joint;
+	sensors[SELCAM].g_UserGenerator.GetSkeletonCap().GetSkeletonJointPosition(player, eJoint, joint);
+
+	if (joint.fConfidence < 0.5)
+	{
+		return;
+	}
+
+	XnPoint3D pt;
+	pt = joint.position;
+
+	sensors[SELCAM].depth.ConvertRealWorldToProjective(1, &pt, &pt);
+
+	//drawCircle(pt.X, pt.Y, 2);
+	int x= pt.X;
+	int y= pt.Y;
+	srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 0] = 255;
+	srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 1] = 0;
+	srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 2] = 0;
+}
+
+
+void CalculateJoints(){
+	XnUserID aUsers[15];
+	XnUInt16 nUsers = 15;
+	sensors[SELCAM].g_UserGenerator.GetUsers(aUsers, nUsers);
+	for (int i = 0; i < nUsers; ++i)
+	{
+		// Draw Joints
+		//if (g_bMarkJoints)
+		if (sensors[SELCAM].g_UserGenerator.GetSkeletonCap().IsTracking(aUsers[i]))
+		{
+			// Try to draw all joints
+			DrawJoint(aUsers[i], XN_SKEL_HEAD);
+			DrawJoint(aUsers[i], XN_SKEL_NECK);
+			DrawJoint(aUsers[i], XN_SKEL_TORSO);
+			DrawJoint(aUsers[i], XN_SKEL_WAIST);
+
+			DrawJoint(aUsers[i], XN_SKEL_LEFT_COLLAR);
+			DrawJoint(aUsers[i], XN_SKEL_LEFT_SHOULDER);
+			DrawJoint(aUsers[i], XN_SKEL_LEFT_ELBOW);
+			DrawJoint(aUsers[i], XN_SKEL_LEFT_WRIST);
+			DrawJoint(aUsers[i], XN_SKEL_LEFT_HAND);
+			DrawJoint(aUsers[i], XN_SKEL_LEFT_FINGERTIP);
+
+			DrawJoint(aUsers[i], XN_SKEL_RIGHT_COLLAR);
+			DrawJoint(aUsers[i], XN_SKEL_RIGHT_SHOULDER);
+			DrawJoint(aUsers[i], XN_SKEL_RIGHT_ELBOW);
+			DrawJoint(aUsers[i], XN_SKEL_RIGHT_WRIST);
+			DrawJoint(aUsers[i], XN_SKEL_RIGHT_HAND);
+			DrawJoint(aUsers[i], XN_SKEL_RIGHT_FINGERTIP);
+
+			DrawJoint(aUsers[i], XN_SKEL_LEFT_HIP);
+			DrawJoint(aUsers[i], XN_SKEL_LEFT_KNEE);
+			DrawJoint(aUsers[i], XN_SKEL_LEFT_ANKLE);
+			DrawJoint(aUsers[i], XN_SKEL_LEFT_FOOT);
+
+			DrawJoint(aUsers[i], XN_SKEL_RIGHT_HIP);
+			DrawJoint(aUsers[i], XN_SKEL_RIGHT_KNEE);
+			DrawJoint(aUsers[i], XN_SKEL_RIGHT_ANKLE);
+			DrawJoint(aUsers[i], XN_SKEL_RIGHT_FOOT);
+		}
+	}
+}
 
 
 
@@ -366,9 +457,10 @@ private:
 				for (XnUInt x = 0; x < sensors[SELCAM].imageMD.XRes(); ++x, ++pImage, ++pTex)
 				{
 					if (segmentation){
+						pixelsID[(y*sensors[SELCAM].imageMD.XRes() + x)]= *pLabels;
 						if (*pLabels!=0)
-		                    {
-		                         srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 0] = colors[*pLabels][0];
+		                {
+		                    srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 0] = colors[*pLabels][0];
 							srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 1] = colors[*pLabels][1];
 							srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 2] = colors[*pLabels][2];
 						}
@@ -384,10 +476,17 @@ private:
 						srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 1] = pImage->nGreen;
 						srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 2] = pImage->nBlue;
 					}
+					if ((userGeneratorActive)&&(!(segmentation))){
+						pixelsID[(y*sensors[SELCAM].imageMD.XRes() + x)]= *pLabels;
+						++pLabels;
+					}
 				}
 				pImageRow += sensors[SELCAM].imageMD.XRes();
 				pTexRow += g_nTexMapX;
 			}	
+
+			//test
+			CalculateJoints();
 
 			
 			//cvFlip(srcRGB, NULL, 1);
@@ -414,7 +513,9 @@ private:
 			if ((totalb-totala) > cycle ){
 				std::cout<<"-------- openniServer: WARNING- RGB timeout-" << std::endl; 
 			}
-			usleep(cycle - (totalb-totala));
+			else{
+				usleep(cycle - (totalb-totala));
+			}
 		}
 	}
 	
@@ -663,7 +764,9 @@ private:
 			if ((totalb-totala) > cycle ){
 				std::cout<<"-------- openniServer: WARNING- RGB timeout-" << std::endl; 
 			}
-			usleep(cycle - (totalb-totala));
+			else{
+				usleep(cycle - (totalb-totala));
+			}
 		}
 	}
 	
@@ -703,9 +806,11 @@ private:
 				prefix(propertyPrefix),context(context),data(new jderobot::pointCloudData()) {
 					Ice::PropertiesPtr prop = context.properties();
 
-					
-		         replyCloud = new ReplyCloud(this,prop->getProperty("openniServer.calibration"));
-		         replyCloud->start();
+					int playerdetection = prop->getPropertyAsIntWithDefault("openniServer.PlayerDetection",0);
+					if (!(userGeneratorActive))
+						playerdetection=0;
+					   replyCloud = new ReplyCloud(this,prop->getProperty("openniServer.calibration"), playerdetection);
+					   replyCloud->start();
 				}
 		
 
@@ -717,9 +822,10 @@ private:
 		   private:
 			 class ReplyCloud :public gbxiceutilacfr::SafeThread{ 
 		       public: 
-		       	ReplyCloud (pointCloudI* pcloud, std::string filepath) : gbxiceutilacfr::SafeThread(pcloud->context.tracer()), data(new jderobot::pointCloudData()), data2(new jderobot::pointCloudData())
+		       	ReplyCloud (pointCloudI* pcloud, std::string filepath,  int playerDetection) : gbxiceutilacfr::SafeThread(pcloud->context.tracer()), data(new jderobot::pointCloudData()), data2(new jderobot::pointCloudData())
 		        	{
 					path=filepath;
+					segmentation=playerDetection;
 				}
 		       
 		        void walk()
@@ -771,22 +877,18 @@ private:
 									auxP.x=t*ux + camx;
 									auxP.y=t*uy+ camy;
 									auxP.z=t*uz + camz;
+									if ( segmentation){
+										auxP.id=pixelsID[i];
+									}
 									auxP.r=(float)(int) (unsigned char)srcRGB->imageData[3*i];
 									auxP.g=(float)(int) (unsigned char)srcRGB->imageData[3*i+1];
 									auxP.b=(float)(int) (unsigned char)srcRGB->imageData[3*i+2];
-									/*auxP.r=0;
-									auxP.g=0;
-									auxP.b=0;*/
-									/*if ((i> 109*640+50)&& (i< 109*640+55)) {
-										std::cout << (int) srcRGB->imageData[3*i] << ", " << (int) srcRGB->imageData[3*i+1] << ", " << (int) srcRGB->imageData[3*i+2] << std::endl;
-										std::cout << " ---" <<  auxP.r << ", " << auxP.g << ", " << auxP.b << std::endl;
-									}*/
 									data2->p.push_back(auxP);
 								}
 							//}
 						}
 					pthread_mutex_unlock(&mutex);
-					usleep(1000);
+					usleep(5000);
 				}
 		        }
 		        myprogeo *mypro;
@@ -795,6 +897,7 @@ private:
 				jderobot::pointCloudDataPtr data, data2;
 				jderobot::RGBPoint auxP;
 				std::string path;
+				int segmentation;
 		        
 		       jderobot::pointCloudDataPtr getCloud()
 		       {
@@ -1145,6 +1248,25 @@ public:
 						rc = sensors[i].g_UserGenerator.GetSkeletonCap().RegisterToCalibrationComplete(UserCalibration_CalibrationComplete, NULL, hCalibrationComplete);
 						CHECK_RC(rc, "Register to calibration complete");
 						userGeneratorActive=1;
+						if (sensors[i].g_UserGenerator.GetSkeletonCap().NeedPoseForCalibration())
+						{
+							g_bNeedPose = TRUE;
+							if (!sensors[i].g_UserGenerator.IsCapabilitySupported(XN_CAPABILITY_POSE_DETECTION))
+							{
+								std::cout << "Pose required, but not supported" << std::endl;
+							}
+							rc = sensors[i].g_UserGenerator.GetPoseDetectionCap().RegisterToPoseDetected(UserPose_PoseDetected, NULL, hPoseDetected);
+							CHECK_RC(rc, "Register to Pose Detected");
+							sensors[i].g_UserGenerator.GetSkeletonCap().GetCalibrationPose(g_strPose);
+
+							rc = sensors[i].g_UserGenerator.GetPoseDetectionCap().RegisterToPoseInProgress(MyPoseInProgress, NULL, hPoseInProgress);
+							CHECK_RC(rc, "Register to pose in progress");
+						}
+
+						sensors[i].g_UserGenerator.GetSkeletonCap().SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
+
+						rc = sensors[i].g_UserGenerator.GetSkeletonCap().RegisterToCalibrationInProgress(MyCalibrationInProgress, NULL, hCalibrationInProgress);
+						CHECK_RC(rc, "Register to calibration in progress");
 					}
 				}
 			}

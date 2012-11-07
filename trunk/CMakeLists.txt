@@ -10,11 +10,10 @@ SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libs) # Directorio donde se encuen
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice) # Directorio donde se encuentran las interfaces ICE
 SET( LIBS_NEEDED   bgfgsegmentation jderobotice colorspaces jderobotutil progeo pioneer fuzzylib visionlib ) # Librerias de las que depende el componente
 SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Deps) # Directorio donde se encuentran las dependencias
-SET( COMPONENTS naooperator         basic_component		         
+SET( COMPONENTS calibrator  openniServer naooperator         basic_component		         
 		bgfglab              giraffeclient       opencvdemo
-		calibrator                               openniServer
-		cameraserver         introrob            playerserver
-		cameraview           kinectServer        recorder
+					cameraserver         introrob            
+		cameraview			recorder
 		cameraview_icestorm  kinectViewer        replayer
 		wiimoteClient
 		wiimoteServer       colortuner
@@ -78,6 +77,8 @@ include_directories(${LIBS_DIR}/progeo)
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/fireware/CMakeLists.txt)
 include(${DEPS_DIR}/pcl/CMakeLists.txt)
+include(${DEPS_DIR}/openni/CMakeLists.txt)
+include(${DEPS_DIR}/nite/CMakeLists.txt)
 include(${DEPS_DIR}/player/CMakeLists.txt)
 include(${DEPS_DIR}/xerces/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)

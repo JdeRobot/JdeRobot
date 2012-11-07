@@ -43,7 +43,7 @@
 #include <jderobot/pose3dmotors.h>
 #include <jderobot/pose3dencoders.h>
 #include <jderobot/pointcloud.h>
-#include <gazebo/gazebo.h>
+//#include <gazebo/gazebo.h>
 
 #include <colorspaces/colorspacesmm.h>
 
@@ -446,15 +446,15 @@ namespace playerserver {
 
 			virtual Ice::Int setPose3DMotorsData(const jderobot::Pose3DMotorsDataPtr & data, const Ice::Current&) {
 				//waiting for next gazebo camera update
-				gazeboPTZ1->Lock(1);
-				
-				/*gazeboPTZ1->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
+				//gazeboPTZ1->Lock(1);
+				/*
+				gazeboPTZ1->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
 				gazeboPTZ1->data->cmd_pan = data->pan * DEGTORAD;
 				gazeboPTZ1->data->cmd_tilt = data->tilt * DEGTORAD;
 				gazeboPTZ1->data->cmd_pan_speed = data->panSpeed;
-				gazeboPTZ1->data->cmd_tilt_speed = data->tiltSpeed;*/
-				
-				gazeboPTZ1->Unlock();
+				gazeboPTZ1->data->cmd_tilt_speed = data->tiltSpeed;
+				*/
+				//gazeboPTZ1->Unlock();
 
 				return 0; 
 			};
@@ -469,7 +469,7 @@ namespace playerserver {
 
 			std::string prefix;
 			jderobotice::Context context;
-			gazebo::PTZIface * gazeboPTZ1;
+			//gazebo::PTZIface * gazeboPTZ1;
 
 	};
 
@@ -486,15 +486,15 @@ namespace playerserver {
 			virtual Ice::Int setPose3DMotorsData(const jderobot::Pose3DMotorsDataPtr & data, const Ice::Current&) {
 				//waiting for next gazebo camera update
 
-				gazeboPTZ2->Lock(1);
-				
-				/*gazeboPTZ2->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
+				//gazeboPTZ2->Lock(1);
+				/*
+				gazeboPTZ2->data->control_mode = GAZEBO_PTZ_POSITION_CONTROL;
 				gazeboPTZ2->data->cmd_pan = data->pan * DEGTORAD;
 				gazeboPTZ2->data->cmd_tilt = data->tilt * DEGTORAD;
 				gazeboPTZ2->data->cmd_pan_speed = data->panSpeed;
-				gazeboPTZ2->data->cmd_tilt_speed = data->tiltSpeed;*/
-            
-				gazeboPTZ2->Unlock();
+				gazeboPTZ2->data->cmd_tilt_speed = data->tiltSpeed;
+            */
+				//gazeboPTZ2->Unlock();
 
 				return 0; 
 			};
@@ -509,7 +509,7 @@ namespace playerserver {
 
 			std::string prefix;
 			jderobotice::Context context;
-			gazebo::PTZIface * gazeboPTZ2;
+			//gazebo::PTZIface * gazeboPTZ2;
 
 	};
 
@@ -533,14 +533,14 @@ namespace playerserver {
 
 			virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData(const Ice::Current&) {
 				//waiting for next gazebo camera update
-				gazeboPTZ1->Lock(1);
+				//gazeboPTZ1->Lock(1);
 				ptEncodersData1->pan = this->pan;
 				ptEncodersData1->tilt = this->tilt;
 				ptEncodersData1->roll = this->roll;
 				ptEncodersData1->x = this->x;
 				ptEncodersData1->y = this->y;
 				ptEncodersData1->z = this->z;
-				gazeboPTZ1->Unlock();
+				//gazeboPTZ1->Unlock();
 				return ptEncodersData1; 
 			};
 			
@@ -559,7 +559,7 @@ namespace playerserver {
 			std::string prefix;
 			jderobotice::Context context;
 			jderobot::Pose3DEncodersDataPtr ptEncodersData1;
-			gazebo::PTZIface * gazeboPTZ1;
+			//gazebo::PTZIface * gazeboPTZ1;
 	};
 
 	//POSEENCODERSII
@@ -582,14 +582,14 @@ namespace playerserver {
 
 			virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData(const Ice::Current&) {
 				//waiting for next gazebo camera update
-				gazeboPTZ2->Lock(1);
+				//gazeboPTZ2->Lock(1);
 				ptEncodersData2->pan = this->pan;
 				ptEncodersData2->tilt = this->tilt;
 				ptEncodersData2->roll = this->roll;
 				ptEncodersData2->x = this->x;
 				ptEncodersData2->y = this->y;
 				ptEncodersData2->z = this->z;
-				gazeboPTZ2->Unlock();
+				//gazeboPTZ2->Unlock();
 
 				return ptEncodersData2;
 			};
@@ -610,7 +610,7 @@ namespace playerserver {
 			std::string prefix;
 			jderobotice::Context context;
 			jderobot::Pose3DEncodersDataPtr ptEncodersData2;
-			gazebo::PTZIface * gazeboPTZ2;
+			//gazebo::PTZIface * gazeboPTZ2;
 	};
 	
 	
@@ -1083,13 +1083,17 @@ namespace playerserver {
 
 				           float x,y,z;
 				           float r,g,b;
+					   std::vector<int> idVector;
+						float id;
 
 				           jderobot::pointCloudDataPtr KData = new jderobot::pointCloudData();
 				           KData->p.resize(tam);
+							idVector.resize(tam);
 				           
 				           pcl::PointCloud<pcl::PointXYZRGB>::Ptr frame (new pcl::PointCloud<pcl::PointXYZRGB>);
 				           frame->points.resize(tam);
 				           
+							int counter=0;
 				           for(int i = 0; i < KData->p.size() ; i++){
 				              fscanf(pFile, "%f", &x);
 				              fscanf(pFile, "%f", &y);
@@ -1097,21 +1101,25 @@ namespace playerserver {
 				              fscanf(pFile, "%f", &r);
 				              fscanf(pFile, "%f", &g);
 				              fscanf(pFile, "%f", &b);
+							  fscanf(pFile, "%f", &id);
 				              
-				              //printf("x:%f y:%f z:%f r:%f g:%f b:%f \n", x, y, z, r, g, b);
-
+				              //printf("x:%f y:%f z:%f r:%f g:%f b:%f id: %d \n", x, y, z, r, g, b, id);
+							  if (id!=0){
+									counter++;
+								}
 				              frame->points[i].x = x;
 				              frame->points[i].y = y;
 				              frame->points[i].z = z;
 				              frame->points[i].r = r;
 				              frame->points[i].g = g;
 				              frame->points[i].b = b; 
+					          idVector[i]=id;
 				          }
 				          
-				          pcl::VoxelGrid<pcl::PointXYZRGB> downsample_filter;
+				          /*pcl::VoxelGrid<pcl::PointXYZRGB> downsample_filter;
 				          downsample_filter.setLeafSize (0.2, 0.2, 0.2);
 				          downsample_filter.setInputCloud (frame);
-				          downsample_filter.filter (*frame);
+				          downsample_filter.filter (*frame);*/
 				          
 				          KData->p.resize(frame->points.size());
 				          
@@ -1122,6 +1130,8 @@ namespace playerserver {
 				              KData->p[i].r = frame->points[i].r;
 				              KData->p[i].g = frame->points[i].g;
 				              KData->p[i].b = frame->points[i].b; 
+							  KData->p[i].id = idVector[i];
+							  //std::cout << idVector[i] << std::endl;
 				           }
 				           std::cout << "cloudPoints size: " << KData->p.size() << std::endl;
 				           depthSensor[k]->update(KData);
