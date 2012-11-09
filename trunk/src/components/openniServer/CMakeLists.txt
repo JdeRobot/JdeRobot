@@ -21,12 +21,8 @@ IF(with_openni)
 
 TARGET_LINK_LIBRARIES(openniServer
     	${opencv_LIBRARIES}
-    	${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
     ${gthread_LIBRARIES}
-    ${libgnomecanvas_LIBRARIES}
-    ${libgnomecanvasmm_LIBRARIES}
-    ${gtkglextmm_LIBRARIES}
     ${Gearbox_LIBRARIES}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so

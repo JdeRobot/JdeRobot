@@ -114,7 +114,6 @@ TPinHoleCamera xmlReader(TPinHoleCamera* camera, const char *docname)
 							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
 							camera->position.X = atof(key);
 							xmlFree(key);
-							fprintf(stderr,"\n Hemos leído X \n");
 
 						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"y"))) {
 							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
@@ -137,7 +136,6 @@ TPinHoleCamera xmlReader(TPinHoleCamera* camera, const char *docname)
 							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
 							camera->foa.X = atof(key);
 							xmlFree(key);
-							fprintf(stderr,"\n Hemos leído X \n");
 
 						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"y"))) {
 							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
@@ -160,7 +158,6 @@ TPinHoleCamera xmlReader(TPinHoleCamera* camera, const char *docname)
 							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
 							camera->k11 = atof(key);
 							xmlFree(key);
-							fprintf(stderr,"\n Hemos leído X \n");
 
 						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k12"))) {
 							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
@@ -233,7 +230,6 @@ TPinHoleCamera xmlReader(TPinHoleCamera* camera, const char *docname)
 							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
 							camera->rt11 = atof(key);
 							xmlFree(key);
-							fprintf(stderr,"\n Hemos leído X \n");
 
 						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt12"))) {
 							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
@@ -353,15 +349,15 @@ void xmlWriter(TPinHoleCamera camera, const char *filename){
 	xmlNewChild(node_position, NULL, BAD_CAST "x", BAD_CAST vOut);
 	sprintf(vOut, "%f", camera.position.Y);
 	xmlNewChild(node_position, NULL, BAD_CAST "y", BAD_CAST vOut);
-	sprintf(vOut, "%f", camera.position.X);
-	xmlNewChild(node_position, NULL, BAD_CAST "Z", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.position.Z);
+	xmlNewChild(node_position, NULL, BAD_CAST "z", BAD_CAST vOut);
 
 	sprintf(vOut, "%f", camera.foa.X);
 	xmlNewChild(node_foa, NULL, BAD_CAST "x", BAD_CAST vOut);
 	sprintf(vOut, "%f", camera.foa.Y);
 	xmlNewChild(node_foa, NULL, BAD_CAST "y", BAD_CAST vOut);
-	sprintf(vOut, "%f", camera.foa.X);
-	xmlNewChild(node_foa, NULL, BAD_CAST "Z", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.foa.Z);
+	xmlNewChild(node_foa, NULL, BAD_CAST "z", BAD_CAST vOut);
 
 
 	sprintf(vOut, "%f", camera.roll);
