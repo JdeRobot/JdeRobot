@@ -8,13 +8,13 @@ endif()
 SET( INTERFACES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../interfaces/cpp) # Directorio con las interfaces ICE en C++
 SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs) # Directorio donde se encuentran las librerias propias de jderobot
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../interfaces/slice) # Directorio donde se encuentran las interfaces ICE
-SET( LIBS_NEEDED   bgfgsegmentation jderobotice colorspaces jderobotutil progeo pioneer fuzzylib visionlib ) # Librerias de las que depende el componente
+SET( LIBS_NEEDED   jderobotice colorspaces jderobotutil) # Librerias de las que depende el componente
 SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../Deps) # Directorio donde se encuentran las dependencias
 
 include(FindPkgConfig)
-PKG_CHECK_MODULES(opencv REQUIRED opencv)
-include_directories(${opencv_INCLUDE_DIRS})
-link_directories(${opencv_LIBRARY_DIRS})
+#PKG_CHECK_MODULES(opencv REQUIRED opencv)
+#include_directories(${opencv_INCLUDE_DIRS})
+#link_directories(${opencv_LIBRARY_DIRS})
 
 PKG_CHECK_MODULES(gtk20 REQUIRED gtk+-2.0)
 include_directories(${gtk20_INCLUDE_DIRS})

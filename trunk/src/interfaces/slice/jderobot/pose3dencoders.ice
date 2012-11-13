@@ -35,10 +35,14 @@ module jderobot{
 		float x;
 		float y;
 		float z;
-  	float pan;
+  		float pan;
 		float tilt;
 		float roll;
 		int clock;
+		float maxPan;
+		float maxTilt;
+		float minPan;
+		float minTilt;
   };
 
 
