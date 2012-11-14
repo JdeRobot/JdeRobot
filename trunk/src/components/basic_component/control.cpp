@@ -21,49 +21,24 @@
 
 #include "control.h"
 
-namespace basic_component{
+namespace basic_component {
 
-Control::~Control() {}   
+    Control::~Control() {
+    }
 
+    void Control::UpdateSensorsICE(Api *api) {
 
-   void Control::UpdateSensorsICE(Api *api){      
-/*
-      api->motorVin=this->mprx->getV();
-      api->motorWin=this->mprx->getW();
-      api->motorLin=this->mprx->getL();
-      api->encodersData=this->eprx->getEncodersData();
-      api->laserData=this->lprx->getLaserData();
-*/      
-      pthread_mutex_lock(&api->controlGui);            
-      api->imageData1 = this->cprx1->getImageData();
-      //api->imageData2 = this->cprx2->getImageData();
-      pthread_mutex_unlock(&api->controlGui);      
+        pthread_mutex_lock(&api->controlGui);
+        api->imageData1 = this->cprx1->getImageData();
+        pthread_mutex_unlock(&api->controlGui);
 
-      
-//      api->laserDataGui=this->laserData;
+    }
 
+    // Send the actuators info to Gazebo with ICE
 
-   }
+    void Control::SetActuatorsICE(Api *api) {
 
-   // Send the actuators info to Gazebo with ICE
-   void Control::SetActuatorsICE(Api *api){
-  /*    
-      this->mprx->setV(api->motorVout); 
-      this->mprx->setW(api->motorWout);
-      this->mprx->setL(api->motorLout);
-      
-      api->PTmotorsData1 = new jderobot::PTMotorsData ();
-      api->PTmotorsData2 = new jderobot::PTMotorsData ();
-
-      api->PTmotorsData1->latitude = api->v_normalized;
-      api->PTmotorsData1->longitude = api->w_normalized;
-      api->PTmotorsData2->latitude = api->v_normalized;
-      api->PTmotorsData2->longitude = api->w_normalized;
-      
-      this->ptmprx1->setPTMotorsData(api->PTmotorsData1);
-      this->ptmprx2->setPTMotorsData(api->PTmotorsData2);
-*/
-   }
+    }
 
 }
 
