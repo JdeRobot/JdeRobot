@@ -342,6 +342,8 @@ void xmlWriter(TPinHoleCamera camera, const char *filename){
 
 	xmlDocSetRootElement(doc, root_node);
 
+	update_camera_matrix(&camera);
+
 
 	unsigned char vOut[32];
 

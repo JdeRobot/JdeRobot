@@ -21,7 +21,6 @@ IF(with_openni)
 
 TARGET_LINK_LIBRARIES(openniServer
     	${opencv_LIBRARIES}
-    ${libglademm_LIBRARIES}
     ${gthread_LIBRARIES}
     ${Gearbox_LIBRARIES}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
