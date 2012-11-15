@@ -32,7 +32,7 @@ IF(with_fireware)
     TARGET_LINK_LIBRARIES(cameraserver 
 	${gstreamerapp_LIBRARIES}
 	${gstreamer_LIBRARIES}
-	${opencv_LIBRARIES}
+    ${OpenCV_LIBRARIES}        
 	${gtkmm_LIBRARIES}
 	${libglademm_LIBRARIES}
 	${gthread_LIBRARIES}

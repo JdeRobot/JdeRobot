@@ -18,15 +18,8 @@ TARGET_LINK_LIBRARIES(teleoperatorPC
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${OpenCV_LIBRARIES}        
 	${ZeroCIce_LIBRARIES}    
-	#${gtk20_LIBRARIES}
-	#${gtkgl20_LIBRARIES}
 	${gtkmm_LIBRARIES}  
 	${gtkmm3_LIBRARIES}  	
-	#${libglademm_LIBRARIES}
 	${gthread_LIBRARIES}
-	#${libgnomecanvas_LIBRARIES}
-	#${libgnomecanvasmm_LIBRARIES}
-	#${gtkglextmm_LIBRARIES}
-	#${glib_LIBRARIES}
 )
 
