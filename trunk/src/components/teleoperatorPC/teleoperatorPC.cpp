@@ -47,8 +47,8 @@ int main(int argc, char** argv) {
         interfacesData->exit = false;
 
         control = new controlICE(interfacesData);
-        control->initEncoders(); //Init ICE connection with encoders
-        control->initMotors(); //Init ICE connection with motors
+        //control->initEncoders(); //Init ICE connection with encoders
+        //control->initMotors(); //Init ICE connection with motors
         pthread_create(&thr_gui, NULL, &runGui, (void*) interfacesData);
 
         while (!interfacesData->exit) {

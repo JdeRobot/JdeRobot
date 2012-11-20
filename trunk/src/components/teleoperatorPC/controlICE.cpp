@@ -25,8 +25,12 @@
 controlICE::controlICE(SharedMemory *interfacesData) {
     this->interfacesData = interfacesData;
 
-    interfacesData->motorsInterface.activated = TRUE;
-    interfacesData->encodersInterface.activated = TRUE;
+    interfacesData->motorsInterface.activated = FALSE;
+    interfacesData->motorsInterface.checkInit = FALSE;
+    interfacesData->motorsInterface.checkEnd = FALSE;
+    interfacesData->encodersInterface.activated = FALSE;
+    interfacesData->encodersInterface.checkInit = FALSE;
+    interfacesData->encodersInterface.checkEnd = FALSE;
     interfacesData->laserInterface.activated = FALSE;
     interfacesData->laserInterface.checkInit = FALSE;
     interfacesData->laserInterface.checkEnd = FALSE;
@@ -42,6 +46,8 @@ controlICE::controlICE(SharedMemory *interfacesData) {
 
     interfacesData->Pose3DMotorsDataToSendLeft.tilt = 0;
     interfacesData->Pose3DMotorsDataToSendLeft.pan = 0;
+    interfacesData->motorsDataToSend.v = 0;
+    interfacesData->motorsDataToSend.w = 0;
 
 }
 
@@ -71,15 +77,18 @@ void controlICE::getDataGazebo() {
         pthread_mutex_unlock(&interfacesData->imagesData_mutex);
     }
 
-    interfacesData->encodersDataReceived = eprx->getEncodersData();
+    if (interfacesData->encodersInterface.activated) {
+        interfacesData->encodersDataReceived = eprx->getEncodersData();
+    }
 }
 
 void controlICE::sendDataGazebo() {
 
 
-
-    mprx->setV(interfacesData->motorsDataToSend.v);
-    mprx->setW(interfacesData->motorsDataToSend.w);
+    if (interfacesData->motorsInterface.activated) {
+        mprx->setV(interfacesData->motorsDataToSend.v);
+        mprx->setW(interfacesData->motorsDataToSend.w);
+    }
 
     if (interfacesData->pose3DMotorsInterface.activated) {
 
@@ -105,7 +114,7 @@ void controlICE::sendDataGazebo() {
 void controlICE::initLaser() {
     try {
         std::string nameLaser;
-        nameLaser = std::string("--Ice.Config=laser.cfg");
+        nameLaser = std::string("--Ice.Config=teleoperatorPC.cfg");
         char* name = (char*) nameLaser.c_str();
         char* argv[] = {name};
         int argc = 1;
@@ -149,7 +158,7 @@ void controlICE::endLaser() {
 void controlICE::initPose3DEncoders() {
     try {
         std::string namePose3DEncoders;
-        namePose3DEncoders = std::string("--Ice.Config=pose3DEncoders.cfg");
+        namePose3DEncoders = std::string("--Ice.Config=teleoperatorPC.cfg");
         char* name = (char*) namePose3DEncoders.c_str();
         char* argv[] = {name};
         int argc = 1;
@@ -204,7 +213,7 @@ void controlICE::endPose3DEncoders() {
 void controlICE::initPose3DMotors() {
     try {
         std::string namePose3DMotors;
-        namePose3DMotors = std::string("--Ice.Config=pose3DMotors.cfg");
+        namePose3DMotors = std::string("--Ice.Config=teleoperatorPC.cfg");
         char* name = (char*) namePose3DMotors.c_str();
         char* argv[] = {name};
         int argc = 1;
@@ -259,7 +268,7 @@ void controlICE::endPose3DMotors() {
 void controlICE::initMotors() {
     try {
         std::string nameMotors;
-        nameMotors = std::string("--Ice.Config=motors.cfg");
+        nameMotors = std::string("--Ice.Config=teleoperatorPC.cfg");
         char* name = (char*) nameMotors.c_str();
         char* argv[] = {name};
         int argc = 1;
@@ -304,7 +313,7 @@ void controlICE::endMotors() {
 void controlICE::initEncoders() {
     try {
         std::string nameEncoders;
-        nameEncoders = std::string("--Ice.Config=encoders.cfg");
+        nameEncoders = std::string("--Ice.Config=teleoperatorPC.cfg");
         char* name = (char*) nameEncoders.c_str();
         char* argv[] = {name};
         int argc = 1;
@@ -349,7 +358,7 @@ void controlICE::endEncoders() {
 void controlICE::initCameras() {
     try {
         std::string nameCameras;
-        nameCameras = std::string("--Ice.Config=cameras.cfg");
+        nameCameras = std::string("--Ice.Config=teleoperatorPC.cfg");
         char* name = (char*) nameCameras.c_str();
         char* argv[] = {name};
         int argc = 1;
@@ -447,6 +456,26 @@ void controlICE::checkInterfaces() {
         interfacesData->pose3DMotorsInterface.checkEnd = FALSE;
     }
 
+    if (interfacesData->motorsInterface.checkInit) {
+        this->initMotors();
+        interfacesData->motorsInterface.activated = TRUE;
+        interfacesData->motorsInterface.checkInit = FALSE;
+    }
+    if (interfacesData->motorsInterface.checkEnd) {
+        this->endMotors();
+        interfacesData->motorsInterface.activated = FALSE;
+        interfacesData->motorsInterface.checkEnd = FALSE;
+    }
 
-
+    if (interfacesData->encodersInterface.checkInit) {
+        this->initEncoders();
+        interfacesData->encodersInterface.activated = TRUE;
+        interfacesData->encodersInterface.checkInit = FALSE;
+    }
+    if (interfacesData->encodersInterface.checkEnd) {
+        this->endEncoders();
+        interfacesData->encodersInterface.activated = FALSE;
+        interfacesData->encodersInterface.checkEnd = FALSE;
+    }
+    
 }

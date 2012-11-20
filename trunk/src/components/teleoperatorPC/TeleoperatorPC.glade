@@ -3,6 +3,7 @@
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="cameras_window">
+    <property name="title" translatable="yes">CAMERAS</property>
     <child>
       <object class="GtkFixed" id="fixed6">
         <property name="visible">True</property>
@@ -58,6 +59,7 @@
     </child>
   </object>
   <object class="GtkWindow" id="laser_window">
+    <property name="title" translatable="yes">LASER</property>
     <child>
       <object class="GtkFixed" id="fixed5">
         <property name="visible">True</property>
@@ -86,180 +88,14 @@
           <object class="GtkHBox" id="hbox1">
             <property name="visible">True</property>
             <child>
-              <object class="GtkFrame" id="frame1">
-                <property name="visible">True</property>
-                <property name="label_xalign">0</property>
-                <child>
-                  <object class="GtkFixed" id="fixed1">
-                    <property name="width_request">330</property>
-                    <property name="height_request">330</property>
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkLabel" id="label2">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Linear velocity</property>
-                      </object>
-                      <packing>
-                        <property name="x">20</property>
-                        <property name="y">20</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label3">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Rotational velocity</property>
-                      </object>
-                      <packing>
-                        <property name="x">20</property>
-                        <property name="y">60</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="motors_linear_velocity">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="x">220</property>
-                        <property name="y">20</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="motors_rot_velocity">
-                        <property name="height_request">0</property>
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="x">220</property>
-                        <property name="y">60</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkDrawingArea" id="motors_canvas">
-                        <property name="width_request">200</property>
-                        <property name="height_request">200</property>
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="x">20</property>
-                        <property name="y">110</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="stop_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="relief">half</property>
-                        <property name="xalign">0.49000000953674316</property>
-                        <child>
-                          <object class="GtkImage" id="image1">
-                            <property name="visible">True</property>
-                            <property name="stock">gtk-no</property>
-                          </object>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="x">250</property>
-                        <property name="y">200</property>
-                      </packing>
-                    </child>
-                  </object>
-                </child>
-                <child type="label">
-                  <object class="GtkLabel" id="label1">
-                    <property name="visible">True</property>
-                    <property name="label" translatable="yes">&lt;b&gt;MOTORS&lt;/b&gt;</property>
-                    <property name="use_markup">True</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="position">0</property>
-              </packing>
+              <placeholder/>
             </child>
             <child>
               <object class="GtkVBox" id="vbox1">
                 <property name="visible">True</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkFrame" id="frame2">
-                    <property name="visible">True</property>
-                    <property name="label_xalign">0</property>
-                    <child>
-                      <object class="GtkFixed" id="fixed2">
-                        <property name="width_request">330</property>
-                        <property name="visible">True</property>
-                        <child>
-                          <object class="GtkLabel" id="label4">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">X: </property>
-                          </object>
-                          <packing>
-                            <property name="x">20</property>
-                            <property name="y">20</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label5">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">Y:</property>
-                          </object>
-                          <packing>
-                            <property name="x">20</property>
-                            <property name="y">60</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="encoders_x">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="x">115</property>
-                            <property name="y">20</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="encoders_y">
-                            <property name="height_request">0</property>
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="x">115</property>
-                            <property name="y">60</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label7">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">Theta:</property>
-                          </object>
-                          <packing>
-                            <property name="x">20</property>
-                            <property name="y">100</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="encoders_theta">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="x">115</property>
-                            <property name="y">100</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
-                    <child type="label">
-                      <object class="GtkLabel" id="label6">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">&lt;b&gt;GPS&lt;/b&gt;</property>
-                        <property name="use_markup">True</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="position">0</property>
-                  </packing>
+                  <placeholder/>
                 </child>
                 <child>
                   <object class="GtkFrame" id="frame3">
@@ -267,45 +103,9 @@
                     <property name="label_xalign">0</property>
                     <child>
                       <object class="GtkFixed" id="fixed3">
+                        <property name="width_request">350</property>
+                        <property name="height_request">220</property>
                         <property name="visible">True</property>
-                        <child>
-                          <object class="GtkVButtonBox" id="vbuttonbox1">
-                            <property name="visible">True</property>
-                            <property name="orientation">vertical</property>
-                            <child>
-                              <object class="GtkCheckButton" id="check_laser">
-                                <property name="label" translatable="yes">Laser</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="draw_indicator">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkCheckButton" id="check_cameras">
-                                <property name="label" translatable="yes">Cameras</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="draw_indicator">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="x">20</property>
-                            <property name="y">76</property>
-                          </packing>
-                        </child>
                         <child>
                           <object class="GtkLabel" id="label8">
                             <property name="visible">True</property>
@@ -402,6 +202,34 @@
                                     <property name="position">3</property>
                                   </packing>
                                 </child>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkICEmotors">
+                                    <property name="label" translatable="yes">Motors</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="draw_indicator">True</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">4</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkICEencoders">
+                                    <property name="label" translatable="yes">Encoders</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="draw_indicator">True</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">5</property>
+                                  </packing>
+                                </child>
                               </object>
                             </child>
                             <child type="label">
@@ -414,6 +242,72 @@
                           <packing>
                             <property name="x">170</property>
                             <property name="y">10</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkVButtonBox" id="vbuttonbox1">
+                            <property name="visible">True</property>
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkCheckButton" id="check_laser">
+                                <property name="label" translatable="yes">Laser</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="check_cameras">
+                                <property name="label" translatable="yes">Cameras</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="check_motors">
+                                <property name="label" translatable="yes">Motors</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="check_encoders">
+                                <property name="label" translatable="yes">Encoders</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">3</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="x">20</property>
+                            <property name="y">76</property>
                           </packing>
                         </child>
                       </object>
@@ -436,6 +330,212 @@
               </packing>
             </child>
           </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="motors_window">
+    <property name="title" translatable="yes">MOTORS</property>
+    <child>
+      <object class="GtkFrame" id="frame1">
+        <property name="visible">True</property>
+        <property name="label_xalign">0</property>
+        <child>
+          <object class="GtkFixed" id="fixed1">
+            <property name="width_request">330</property>
+            <property name="height_request">330</property>
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkLabel" id="label2">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Linear velocity</property>
+              </object>
+              <packing>
+                <property name="x">20</property>
+                <property name="y">20</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label3">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Rotational velocity</property>
+              </object>
+              <packing>
+                <property name="x">20</property>
+                <property name="y">60</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="motors_linear_velocity">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="x">220</property>
+                <property name="y">20</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="motors_rot_velocity">
+                <property name="height_request">0</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="x">220</property>
+                <property name="y">60</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkDrawingArea" id="motors_canvas">
+                <property name="width_request">200</property>
+                <property name="height_request">200</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="x">20</property>
+                <property name="y">110</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="stop_button">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="relief">half</property>
+                <property name="xalign">0.49000000953674316</property>
+                <child>
+                  <object class="GtkImage" id="image1">
+                    <property name="visible">True</property>
+                    <property name="stock">gtk-media-pause</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="x">250</property>
+                <property name="y">200</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+        <child type="label">
+          <object class="GtkLabel" id="label1">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">&lt;b&gt;MOTORS&lt;/b&gt;</property>
+            <property name="use_markup">True</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="encoders_window">
+    <property name="title" translatable="yes">ENCODERS</property>
+    <child>
+      <object class="GtkFrame" id="frame2">
+        <property name="visible">True</property>
+        <property name="label_xalign">0</property>
+        <child>
+          <object class="GtkFixed" id="fixed2">
+            <property name="width_request">330</property>
+            <property name="height_request">150</property>
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkLabel" id="label4">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">X: </property>
+              </object>
+              <packing>
+                <property name="x">20</property>
+                <property name="y">20</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label5">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Y:</property>
+              </object>
+              <packing>
+                <property name="x">20</property>
+                <property name="y">60</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="encoders_x">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="x">115</property>
+                <property name="y">20</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="encoders_y">
+                <property name="height_request">0</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="x">115</property>
+                <property name="y">60</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label7">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Theta:</property>
+              </object>
+              <packing>
+                <property name="x">20</property>
+                <property name="y">100</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="encoders_theta">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="x">115</property>
+                <property name="y">100</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+        <child type="label">
+          <object class="GtkLabel" id="label6">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">&lt;b&gt;GPS&lt;/b&gt;</property>
+            <property name="use_markup">True</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMessageDialog" id="help_window">
+    <property name="border_width">5</property>
+    <property name="window_position">center</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="secondary_text" translatable="yes">Before selecting a window, its interfaceICE corresponding must be activated.
+
+NOTE: Cameras Window only need activated "Image Cameras"
+</property>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox4">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <placeholder/>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area4">
+            <property name="visible">True</property>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
         </child>
       </object>
     </child>

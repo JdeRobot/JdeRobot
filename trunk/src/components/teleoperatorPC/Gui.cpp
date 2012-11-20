@@ -31,6 +31,8 @@ Gui::Gui(SharedMemory *interfacesData) : gtkmain(0, 0) {
 
     this->laserShowed = FALSE;
     this->camerasShowed = FALSE;
+    this->motorsShowed = FALSE;
+    this->encodersShowed = FALSE;
 
     std::cout << "Loading glade\n";
     this->builder = Gtk::Builder::create_from_file("TeleoperatorPC.glade");
@@ -39,24 +41,35 @@ Gui::Gui(SharedMemory *interfacesData) : gtkmain(0, 0) {
     this->builder->get_widget("button_exit", this->button_exit);
     this->button_exit->signal_clicked().connect(sigc::mem_fun(this, &Gui::exit_button_clicked));
 
+    this->builder->get_widget("main_window", this->main_window);
+    this->builder->get_widget("help_window", this->help_window);
+
     //MOTORS    
     //GET WINDOWS    
-    this->builder->get_widget("main_window", this->main_window);
+    this->builder->get_widget("motors_window", this->motors_window);
     //GET LABELS 
     this->builder->get_widget("motors_linear_velocity", this->motors_linear_velocity);
     this->builder->get_widget("motors_rot_velocity", this->motors_rot_velocity);
     this->builder->get_widget("motors_canvas", this->motors_canvas);
     //GET BUTTONS
     this->builder->get_widget("stop_button", this->stop_button);
+    this->builder->get_widget("check_motors", this->check_motors);
     //Signals
     this->motors_canvas->signal_event().connect(sigc::mem_fun(this, &Gui::on_button_press_motors_canvas));
     this->stop_button->signal_clicked().connect(sigc::mem_fun(this, &Gui::stop_button_clicked));
+    this->check_motors->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_motors_clicked));
     //Init widgets
     this->motors_canvas->add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::VISIBILITY_NOTIFY_MASK | Gdk::BUTTON1_MOTION_MASK);
     this->motors_canvas->get_size_request(this->previous_event_x, this->previous_event_y);
     //END_MOTORS
 
     //ENCODERS
+    //WINDOW
+    this->builder->get_widget("encoders_window", this->encoders_window);
+    //BUTTONS
+    this->builder->get_widget("check_encoders", this->check_encoders);
+    //SIGNALS
+    this->check_encoders->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_encoders_clicked));
     //LABELS
     this->builder->get_widget("encoders_x", this->encoders_x);
     this->builder->get_widget("encoders_y", this->encoders_y);
@@ -103,6 +116,11 @@ Gui::Gui(SharedMemory *interfacesData) : gtkmain(0, 0) {
     this->checkICEpose3DEncoders->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_ICEpose3DEncoders_clicked));
     this->builder->get_widget("checkICEpose3DMotors", this->checkICEpose3DMotors);
     this->checkICEpose3DMotors->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_ICEpose3DMotors_clicked));
+    this->builder->get_widget("checkICEmotors", this->checkICEmotors);
+    this->checkICEmotors->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_ICEmotors_clicked));
+    this->builder->get_widget("checkICEencoders", this->checkICEencoders);
+    this->checkICEencoders->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_ICEencoders_clicked));
+
 
     this->cameras_previous_event_y = this->cameras_previous_event_y / 2;
     this->cameras_previous_event_x = this->cameras_previous_event_x / 2;
@@ -117,8 +135,14 @@ Gui::Gui(SharedMemory *interfacesData) : gtkmain(0, 0) {
 
 void Gui::display() {
 
-    displayMotorsData();
-    displayEncodersData();
+    if (this->motorsShowed) {
+        displayMotorsData();
+    }
+
+    if (this->encodersShowed) {
+        displayEncodersData();
+    }
+
     if ((this->camerasShowed) && (this->interfacesData->pose3DEncodersInterface.activated)) {
         displayPose3DEncodersData();
     }
@@ -403,6 +427,7 @@ void Gui::check_cameras_clicked() {
             this->cameras_window->show();
             this->camerasShowed = TRUE;
         } else {
+            this->help_window->show();
             this->check_cameras->set_active(false);
         }
 
@@ -418,7 +443,36 @@ void Gui::check_laser_clicked() {
             this->laser_window->show();
             this->laserShowed = TRUE;
         } else {
+            this->help_window->show();
             this->check_laser->set_active(false);
+        }
+    }
+}
+
+void Gui::check_motors_clicked() {
+    if (!check_motors->get_active()) {
+        this->motors_window->hide();
+    } else {
+        if (this->interfacesData->motorsInterface.activated) {
+            this->motors_window->show();
+            this->motorsShowed = TRUE;
+        } else {
+            this->help_window->show();
+            this->check_motors->set_active(false);
+        }
+    }
+}
+
+void Gui::check_encoders_clicked() {
+    if (!check_encoders->get_active()) {
+        this->encoders_window->hide();
+    } else {
+        if (this->interfacesData->encodersInterface.activated) {
+            this->encoders_window->show();
+            this->encodersShowed = TRUE;
+        } else {
+            this->help_window->show();
+            this->check_encoders->set_active(false);
         }
     }
 }
@@ -487,5 +541,23 @@ void Gui::check_ICEpose3DMotors_clicked() {
     } else {
 
         this->interfacesData->pose3DMotorsInterface.checkInit = TRUE;
+    }
+}
+
+void Gui::check_ICEmotors_clicked() {
+    if (!checkICEmotors->get_active()) {
+        this->interfacesData->motorsInterface.checkEnd = TRUE;
+    } else {
+
+        this->interfacesData->motorsInterface.checkInit = TRUE;
+    }
+}
+
+void Gui::check_ICEencoders_clicked() {
+    if (!checkICEencoders->get_active()) {
+        this->interfacesData->encodersInterface.checkEnd = TRUE;
+    } else {
+
+        this->interfacesData->encodersInterface.checkInit = TRUE;
     }
 }

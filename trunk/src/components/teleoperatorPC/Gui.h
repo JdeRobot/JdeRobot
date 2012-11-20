@@ -45,12 +45,16 @@ public:
     virtual ~Gui();
 private:
     cv::Mat imagenO;
-    //MOTORS
     Gtk::Window* main_window;
+    //MOTORS
+    Gtk::Window* motors_window;
     Gtk::Label* motors_linear_velocity;
     Gtk::Label* motors_rot_velocity;
     Gtk::DrawingArea* motors_canvas;
     Gtk::Button* stop_button;
+    Gtk::CheckButton* check_motors;
+    Gtk::CheckButton* checkICEmotors;
+    bool motorsShowed;
     bool on_button_press_motors_canvas(GdkEvent* event);
     void stop_button_clicked();
     int previous_event_x, previous_event_y, cameras_previous_event_x, cameras_previous_event_y;
@@ -58,6 +62,8 @@ private:
     void motors_handler();
     void widget2motors(int x, int y, int* v, int* w);
     void widget2Pose3Dmotors(int x, int y, float* v, float* w);
+    void check_motors_clicked();
+    void check_ICEmotors_clicked();
 
     typedef struct motorsData_t {
         double v;
@@ -68,10 +74,16 @@ private:
     //END_MOTORS 
 
     //ENCODERS
+    Gtk::Window* encoders_window;
+    Gtk::CheckButton* check_encoders;
+    Gtk::CheckButton* checkICEencoders;    
     Gtk::Label* encoders_x;
     Gtk::Label* encoders_y;
     Gtk::Label* encoders_theta;
+    bool encodersShowed;
     void displayEncodersData();
+    void check_encoders_clicked();
+    void check_ICEencoders_clicked();
     //END_ENCODERS   
 
     //LASER
@@ -120,7 +132,7 @@ private:
     void exit_button_clicked();
     SharedMemory *interfacesData;
     std::string float2string(float n);
-
+    Gtk::MessageDialog* help_window;
 
 };
 
