@@ -131,6 +131,7 @@ Gui::Gui(SharedMemory *interfacesData) : gtkmain(0, 0) {
 
 
     this->main_window->show();
+
 }
 
 void Gui::display() {
@@ -143,7 +144,7 @@ void Gui::display() {
         displayEncodersData();
     }
 
-    if ((this->camerasShowed) && (this->interfacesData->pose3DEncodersInterface.activated)) {
+    if ((this->cameras_window->is_visible()) && (this->interfacesData->pose3DEncodersInterface.activated || this->interfacesData->pose3DMotorsInterface.activated)) {
         displayPose3DEncodersData();
     }
     if (this->laserShowed) {
@@ -182,49 +183,50 @@ void Gui::displayEncodersData() {
 }
 
 void Gui::displayCameras() {
+    if (interfacesData->imagesReady) {
+        //LEFT CAMERA
+        colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(this->interfacesData->imageDataLeftReceived->description->format);
+        if (!fmt)
+            throw "Format not supported";
 
-    //LEFT CAMERA
-    colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(this->interfacesData->imageDataLeftReceived->description->format);
-    if (!fmt)
-        throw "Format not supported";
+        colorspaces::Image image(this->interfacesData->imageDataLeftReceived->description->width,
+                this->interfacesData->imageDataLeftReceived->description->height,
+                fmt,
+                &(this->interfacesData->imageDataLeftReceived->pixelData[0]));
 
-    colorspaces::Image image(this->interfacesData->imageDataLeftReceived->description->width,
-            this->interfacesData->imageDataLeftReceived->description->height,
-            fmt,
-            &(this->interfacesData->imageDataLeftReceived->pixelData[0]));
+        colorspaces::ImageRGB8 img_rgb8(image); //conversion will happen if needed
+        Glib::RefPtr<Gdk::Pixbuf> imgBuff =
+                Gdk::Pixbuf::create_from_data((const guint8*) img_rgb8.data,
+                Gdk::COLORSPACE_RGB,
+                false,
+                8,
+                img_rgb8.width,
+                img_rgb8.height,
+                img_rgb8.step);
 
-    colorspaces::ImageRGB8 img_rgb8(image); //conversion will happen if needed
-    Glib::RefPtr<Gdk::Pixbuf> imgBuff =
-            Gdk::Pixbuf::create_from_data((const guint8*) img_rgb8.data,
-            Gdk::COLORSPACE_RGB,
-            false,
-            8,
-            img_rgb8.width,
-            img_rgb8.height,
-            img_rgb8.step);
+        //RIGHT CAMERA
+        colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(this->interfacesData->imageDataRightReceived->description->format);
+        if (!fmt2)
+            throw "Format not supported";
 
-    //RIGHT CAMERA
-    colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(this->interfacesData->imageDataRightReceived->description->format);
-    if (!fmt2)
-        throw "Format not supported";
+        colorspaces::Image image2(this->interfacesData->imageDataRightReceived->description->width,
+                this->interfacesData->imageDataRightReceived->description->height,
+                fmt2,
+                &(this->interfacesData->imageDataRightReceived->pixelData[0]));
 
-    colorspaces::Image image2(this->interfacesData->imageDataRightReceived->description->width,
-            this->interfacesData->imageDataRightReceived->description->height,
-            fmt2,
-            &(this->interfacesData->imageDataRightReceived->pixelData[0]));
-
-    colorspaces::ImageRGB8 img_rgb8_2(image2); //conversion will happen if needed
-    Glib::RefPtr<Gdk::Pixbuf> imgBuff2 =
-            Gdk::Pixbuf::create_from_data((const guint8*) img_rgb8_2.data,
-            Gdk::COLORSPACE_RGB,
-            false,
-            8,
-            img_rgb8_2.width,
-            img_rgb8_2.height,
-            img_rgb8_2.step);
-    //this->image_left_camera->clear();
-    this->image_left_camera->set(imgBuff);
-    this->image_right_camera->set(imgBuff2);
+        colorspaces::ImageRGB8 img_rgb8_2(image2); //conversion will happen if needed
+        Glib::RefPtr<Gdk::Pixbuf> imgBuff2 =
+                Gdk::Pixbuf::create_from_data((const guint8*) img_rgb8_2.data,
+                Gdk::COLORSPACE_RGB,
+                false,
+                8,
+                img_rgb8_2.width,
+                img_rgb8_2.height,
+                img_rgb8_2.step);
+        //this->image_left_camera->clear();
+        this->image_left_camera->set(imgBuff);
+        this->image_right_camera->set(imgBuff2);
+    }
 }
 
 void Gui::drawLaser() {
@@ -251,6 +253,7 @@ void Gui::displayPose3DEncodersData() {
 
     Cairo::RefPtr<Cairo::Context> cr_red = this->cameras_canvas->get_window()->create_cairo_context();
     Cairo::RefPtr<Cairo::Context> cr_white = this->cameras_canvas->get_window()->create_cairo_context();
+
     cr_red->set_line_width(2.0);
     cr_white->set_line_width(2.0);
     cr_red->set_source_rgb(0.0, 0.0, 0.0);
@@ -261,13 +264,16 @@ void Gui::displayPose3DEncodersData() {
     cr_white->move_to(100, 0);
     cr_white->line_to(100, 200);
     cr_red->set_source_rgb(0.8, 0.0, 0.0);
-    Pose3Dencoders2widget(&tilt, &pan);
+    if ((this->interfacesData->pose3DEncodersInterface.activated)) {
+        Pose3Dencoders2widget(&tilt, &pan);
+    }
     cr_red->move_to(0, tilt);
     cr_red->line_to(200, tilt);
     cr_red->move_to(pan, 0);
     cr_red->line_to(pan, 200);
     cr_white->stroke();
     cr_red->stroke();
+
 }
 
 void Gui::displayMotorsData() {
@@ -421,12 +427,24 @@ void Gui::exit_button_clicked() {
 
 void Gui::check_cameras_clicked() {
     if (!check_cameras->get_active()) {
+        this->camerasShowed = FALSE;
         this->cameras_window->hide();
     } else {
-        if (this->interfacesData->camerasInterface.activated) {
+
+        if ((this->interfacesData->camerasInterface.activated) ||
+                (this->interfacesData->pose3DEncodersInterface.activated) ||
+                (this->interfacesData->pose3DMotorsInterface.activated)) {
             this->cameras_window->show();
-            this->camerasShowed = TRUE;
+            if (this->interfacesData->camerasInterface.activated) {
+                displayCameras();
+                this->camerasShowed = TRUE;
+                
+            }
+            //this->displayPose3DEncodersData();
+
+
         } else {
+
             this->help_window->show();
             this->check_cameras->set_active(false);
         }
@@ -443,6 +461,7 @@ void Gui::check_laser_clicked() {
             this->laser_window->show();
             this->laserShowed = TRUE;
         } else {
+
             this->help_window->show();
             this->check_laser->set_active(false);
         }
@@ -457,6 +476,7 @@ void Gui::check_motors_clicked() {
             this->motors_window->show();
             this->motorsShowed = TRUE;
         } else {
+
             this->help_window->show();
             this->check_motors->set_active(false);
         }
@@ -471,6 +491,7 @@ void Gui::check_encoders_clicked() {
             this->encoders_window->show();
             this->encodersShowed = TRUE;
         } else {
+
             this->help_window->show();
             this->check_encoders->set_active(false);
         }
@@ -513,6 +534,7 @@ void Gui::check_ICElaser_clicked() {
     if (!checkICElaser->get_active()) {
         this->interfacesData->laserInterface.checkEnd = TRUE;
     } else {
+
         this->interfacesData->laserInterface.checkInit = TRUE;
     }
 }
@@ -520,9 +542,11 @@ void Gui::check_ICElaser_clicked() {
 void Gui::check_ICECameras_clicked() {
     if (!checkICECameras->get_active()) {
         this->interfacesData->camerasInterface.checkEnd = TRUE;
+        //this->camerasShowed = FALSE;
     } else {
 
         this->interfacesData->camerasInterface.checkInit = TRUE;
+        //this->camerasShowed = TRUE;
     }
 }
 

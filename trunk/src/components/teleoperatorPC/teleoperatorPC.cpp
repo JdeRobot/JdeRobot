@@ -47,14 +47,13 @@ int main(int argc, char** argv) {
         interfacesData->exit = false;
 
         control = new controlICE(interfacesData);
-        //control->initEncoders(); //Init ICE connection with encoders
-        //control->initMotors(); //Init ICE connection with motors
+
         pthread_create(&thr_gui, NULL, &runGui, (void*) interfacesData);
 
         while (!interfacesData->exit) {
             gettimeofday(&a, NULL);
             totala = a.tv_sec * 1000000 + a.tv_usec;
-
+            
             control->checkInterfaces(); //Check if interfaces are activated and init/end them
             control->getDataGazebo(); //Get sensor data from gazebo
             control->sendDataGazebo(); //Send data to Gazebo

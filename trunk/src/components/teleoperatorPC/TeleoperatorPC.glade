@@ -512,9 +512,16 @@
     <property name="window_position">center</property>
     <property name="type_hint">normal</property>
     <property name="skip_taskbar_hint">True</property>
-    <property name="secondary_text" translatable="yes">Before selecting a window, its interfaceICE corresponding must be activated.
+    <property name="secondary_text" translatable="yes">Each window is associated with some Interface. To display a window, its corresponding interface must be activated previously.
 
-NOTE: Cameras Window only need activated "Image Cameras"
+Window               Interface
+-----------------------------------
+Pose3Dencoder    Cameras
+Pose3DMotor       Cameras
+Image Cameras     Cameras
+Laser                     Laser
+Motors                  Motors
+Encoders               Encoders
 </property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox4">

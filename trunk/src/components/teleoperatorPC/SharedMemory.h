@@ -69,6 +69,7 @@ public:
     pose3DMotorsData_t Pose3DMotorsDataToSendLeft;
     colorspaces::Image imageLeft2display;
     colorspaces::Image imageRight2display;
+    bool imagesReady;
     motorsData_t motorsDataToSend;
     motorsData_t motorsDataReceived;
 

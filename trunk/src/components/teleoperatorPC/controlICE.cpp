@@ -25,6 +25,7 @@
 controlICE::controlICE(SharedMemory *interfacesData) {
     this->interfacesData = interfacesData;
 
+    interfacesData->imagesReady = FALSE;
     interfacesData->motorsInterface.activated = FALSE;
     interfacesData->motorsInterface.checkInit = FALSE;
     interfacesData->motorsInterface.checkEnd = FALSE;
@@ -72,9 +73,12 @@ void controlICE::getDataGazebo() {
     }
     if (interfacesData->camerasInterface.activated) {
         pthread_mutex_lock(&interfacesData->imagesData_mutex);
+        interfacesData->imagesReady = FALSE;
         interfacesData->imageDataLeftReceived = cprxLeft->getImageData();
         interfacesData->imageDataRightReceived = cprxRight->getImageData();
+        interfacesData->imagesReady = TRUE;
         pthread_mutex_unlock(&interfacesData->imagesData_mutex);
+        
     }
 
     if (interfacesData->encodersInterface.activated) {
