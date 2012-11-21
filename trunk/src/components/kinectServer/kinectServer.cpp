@@ -7,7 +7,7 @@
 #include <jderobotice/component.h>
 #include <jderobotice/application.h>
 
-#include <jderobot/cloudPoints.h>
+#include <jderobot/pointcloud.h>
 #include <jderobot/camera.h>
 
 #include <boost/thread/thread.hpp>
@@ -509,30 +509,32 @@ class CamaraRGB: virtual public jderobot::Camera {
 
 	}; // end class CamaraRGB
 	
-   class KinectI: virtual public jderobot::CloudPointsInterface{
+   class KinectI: virtual public jderobot::pointCloud{
    public:
 		KinectI (std::string& propertyPrefix, const jderobotice::Context& context):
-			prefix(propertyPrefix),context(context),KData(new jderobot::CloudPointsData()) {
-				Ice::PropertiesPtr prop = context.properties();
+			prefix(propertyPrefix),context(context) {
+				
+			  KData = new jderobot::pointCloudData();
+			  Ice::PropertiesPtr prop = context.properties();
               v=NULL;
               v  = new CloudViewer(this);
               v->start();
 			}
 		
-		virtual jderobot::CloudPointsDataPtr getKinectData(const Ice::Current&){
+		virtual jderobot::pointCloudDataPtr getCloudData(const Ice::Current&){
 		      
             pcl::PointCloud<pcl::PointXYZRGBA> cloud = v->getCloud();
 
             if(cloud.points.size()){
-               KData->points.resize(cloud.points.size());
+               KData->p.resize(cloud.points.size());
                int index = 0;
                for(int i = 0; i < cloud.points.size(); i++){
-                  KData->points[index].x = cloud.points[i].x;
-                  KData->points[index].y = cloud.points[i].y;
-                  KData->points[index].z = cloud.points[i].z;
-                  KData->points[index].r = cloud.points[i].r;
-                  KData->points[index].g = cloud.points[i].g;
-                  KData->points[index].b = cloud.points[i].b;    
+                  KData->p[index].x = cloud.points[i].x;
+                  KData->p[index].y = cloud.points[i].y;
+                  KData->p[index].z = cloud.points[i].z;
+                  KData->p[index].r = cloud.points[i].r;
+                  KData->p[index].g = cloud.points[i].g;
+                  KData->p[index].b = cloud.points[i].b;    
                   index++;
                }
             }
@@ -565,9 +567,9 @@ class CamaraRGB: virtual public jderobot::Camera {
          };
          typedef IceUtil::Handle<CloudViewer> CloudViewerPtr;
          CloudViewerPtr v; 
-    	   std::string prefix;
-	      jderobotice::Context context;
-         jderobot::CloudPointsDataPtr KData;
+    	 std::string prefix;
+	     jderobotice::Context context;
+         jderobot::pointCloudDataPtr KData;
 
      }; //end class KinectI
 
@@ -578,7 +580,7 @@ class CamaraRGB: virtual public jderobot::Camera {
 
       virtual void start() {
  
-			Ice::PropertiesPtr prop = context().properties();
+		 Ice::PropertiesPtr prop = context().properties();
 			
          avRGB = prop->getPropertyAsInt(context().tag() + ".CameraRGB");
 
