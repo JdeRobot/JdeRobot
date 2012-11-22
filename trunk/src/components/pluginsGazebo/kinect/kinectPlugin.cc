@@ -237,34 +237,35 @@ void DepthCameraPlugin::OnNewImageFrame(const unsigned char * _image,
 
 }
 
-class KinectI: virtual public jderobot::CloudPointsInterface{
+   class KinectI: virtual public jderobot::pointCloud{
    public:
-		KinectI (std::string propertyPrefix, const jderobotice::Context& context, gazebo::DepthCameraPlugin* kinect):prefix(propertyPrefix),context(context),KData(new jderobot::CloudPointsData()) 
+		KinectI (std::string propertyPrefix, const jderobotice::Context& context, gazebo::DepthCameraPlugin* kinect):prefix(propertyPrefix),context(context) 
 		{
+			  KData = new jderobot::pointCloudData();
 			  this->kinect = kinect;
 		}
 		
-		virtual jderobot::CloudPointsDataPtr getKinectData(const Ice::Current&){
+		virtual jderobot::pointCloudDataPtr getCloudData(const Ice::Current&){
 		      
 			pthread_mutex_lock (&kinect->mutex);
             pcl::PointCloud<pcl::PointXYZRGBA> cloud = *kinect->cloud;
 			pthread_mutex_unlock (&kinect->mutex);
             if(cloud.points.size()){
-               KData->points.resize(cloud.points.size());
+               KData->p.resize(cloud.points.size());
                int index = 0;
                for(int i = 0; i < cloud.points.size(); i++){
-                  KData->points[index].x = cloud.points[i].x;
-                  KData->points[index].y = cloud.points[i].y;
-                  KData->points[index].z = cloud.points[i].z;
-                  KData->points[index].r = cloud.points[i].r;
-                  KData->points[index].g = cloud.points[i].g;
-                  KData->points[index].b = cloud.points[i].b;    
+                  KData->p[index].x = cloud.points[i].x;
+                  KData->p[index].y = cloud.points[i].y;
+                  KData->p[index].z = cloud.points[i].z;
+                  KData->p[index].r = cloud.points[i].r;
+                  KData->p[index].g = cloud.points[i].g;
+                  KData->p[index].b = cloud.points[i].b;    
                   index++;
                }
             }
 				return KData;
 		};
-         jderobot::CloudPointsDataPtr KData;
+         jderobot::pointCloudDataPtr KData;
 	     gazebo::DepthCameraPlugin* kinect;
 		 std::string prefix;
 		 jderobotice::Context context;

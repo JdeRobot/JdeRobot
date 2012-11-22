@@ -43,7 +43,7 @@
 
 #include <colorspaces/colorspacesmm.h>
 
-#include "cloudPoints.h"
+#include <jderobot/pointcloud.h>
 #include <jderobot/camera.h>
 
 //opencv
