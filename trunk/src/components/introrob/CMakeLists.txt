@@ -31,6 +31,6 @@ TARGET_LINK_LIBRARIES(introrob
     ${LIBS_DIR}/pioneer/libpioneer.so
 	${gsl_LIBRARIES}
 	${ZeroCIce_LIBRARIES}
-	
+	${Gearbox_LIBRARIES}
 )
 

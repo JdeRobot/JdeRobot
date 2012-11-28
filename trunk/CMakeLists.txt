@@ -10,15 +10,7 @@ SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libs) # Directorio donde se encuen
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice) # Directorio donde se encuentran las interfaces ICE
 SET( LIBS_NEEDED   bgfgsegmentation jderobotice colorspaces jderobotutil progeo pioneer fuzzylib visionlib ) # Librerias de las que depende el componente
 SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Deps) # Directorio donde se encuentran las dependencias
-SET( COMPONENTS calibrator  calibratorKinect openniServer naooperator         basic_component		         
-		bgfglab              giraffeclient       opencvdemo
-					cameraserver         introrob            
-		cameraview			recorder
-		cameraview_icestorm  kinectViewer        replayer
-		wiimoteClient
-		wiimoteServer       colortuner
-		
-) #Componentes que forman JDErobot
+SET( COMPONENTS introrob) #Componentes que forman JDErobot
 
 
 ###################
@@ -100,40 +92,39 @@ add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/src)
 ###################
 
 # Install libraries
-FILE(GLOB_RECURSE LIBS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/libs/*.so)
+FILE(GLOB_RECURSE LIBS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libs/*/*.so)
 INSTALL (FILES ${LIBS_FILES} DESTINATION /usr/local/lib/jderobot)
-
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/interfaces/cpp/jderobot/libJderobotInterfaces.so DESTINATION /usr/local/lib/jderobot)
 # Install libraries headers
-FILE(GLOB_RECURSE HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/libs/*.h)
+FILE(GLOB_RECURSE HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libs/*.h)
 FOREACH(currentSourceFile ${HEADERS_FILES})
-	string(REGEX REPLACE ".*/(.*/).*.h" "\\1" new_source1 ${currentSourceFile})
-	INSTALL (FILES ${currentSourceFile} DESTINATION /usr/local/include/jderobot/${new_source1})
+    string(REGEX REPLACE ".*/(.*/).*.h" "\\1" new_source1 ${currentSourceFile})
+    INSTALL (FILES ${currentSourceFile} DESTINATION /usr/local/include/jderobot/${new_source1})
+
+
 ENDFOREACH(currentSourceFile)
 
 # Install Executables
-FOREACH (currentBin ${COMPONENTS})
-    SET(EXIST EXIST-NOTFOUND)
-    find_file(EXIST NAMES ${currentBin} PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src/components/${currentBin})
-    IF (EXIST)
-	INSTALL (FILES ${EXIST} DESTINATION /usr/local/bin PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
-    ENDIF(EXIST)
-    #MESSAGE("${EXIST}")
-ENDFOREACH(currentBin)
+FILE(GLOB_RECURSE BIN_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../*cfg)
+    string(REGEX REPLACE ".*/(.*).cfg" "\\1" new_source1 ${BIN_FILES})
+INSTALL (FILES ../${new_source1}  DESTINATION /usr/local/bin PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+
+
 
 # Install interfaces headers
-FILE(GLOB HEADER_INTERFACE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/cpp/jderobot/*.h)
+FILE(GLOB HEADER_INTERFACE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/interfaces/cpp/jderobot/*.h)
 INSTALL (FILES ${HEADER_INTERFACE_FILES} DESTINATION /usr/local/include/jderobot/jderobot)
 
 # Install slice
-FILE(GLOB SLICE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice/jderobot/*.ice)
+FILE(GLOB SLICE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/interfaces/slice/jderobot/*.ice)
 INSTALL (FILES ${SLICE_FILES} DESTINATION /usr/local/include/jderobot/slice)
 
 # Install CONF
-FILE(GLOB_RECURSE CONF_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/components/*.cfg)
+FILE(GLOB_RECURSE CONF_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/../*cfg)
 INSTALL (FILES ${CONF_FILES} DESTINATION /usr/local/share/jderobot/conf)
 
 # Install Glade
-FILE(GLOB_RECURSE GLADE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/components/*.glade)
+FILE(GLOB_RECURSE GLADE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../*.glade)
 INSTALL (FILES ${GLADE_FILES} DESTINATION /usr/local/share/jderobot/glade)
 
 
@@ -151,3 +142,4 @@ configure_file(
 
 add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+

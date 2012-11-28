@@ -21,5 +21,6 @@ TARGET_LINK_LIBRARIES(teleoperatorPC
 	${gtkmm_LIBRARIES}  
 	${gtkmm3_LIBRARIES}  	
 	${gthread_LIBRARIES}
+	${Gearbox_LIBRARIES}
 )
 

@@ -28,3 +28,4 @@ IF( Gearbox_INCLUDE_DIR )
 ENDIF(Gearbox_INCLUDE_DIR)
 
 include_directories(${Gearbox_INCLUDE_DIR})
+link_directories(${Gearbox_LIBRARIES})

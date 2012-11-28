@@ -87,15 +87,20 @@ add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/..)
 ###################
 
 # Install libraries
-FILE(GLOB_RECURSE LIBS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libs/*.so)
-INSTALL (FILES ${LIBS_FILES} DESTINATION /usr/local/lib/jderobot)
-#MESSAGE ( "COMARE ${LIBS_FILES} ")
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/interfaces/cpp/jderobot/libJderobotInterfaces.so DESTINATION /usr/local/lib/jderobot)
+
+FOREACH(currentLibFile ${LIBS_NEEDED})
+    SET (new_lib "lib${currentLibFile}.so")
+    MESSAGE("${new_lib}")    
+    INSTALL (FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libs/${currentLibFile}/${new_lib} DESTINATION /usr/local/lib/jderobot)
+ENDFOREACH(currentLibFile)
+
 # Install libraries headers
 FILE(GLOB_RECURSE HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libs/*.h)
 FOREACH(currentSourceFile ${HEADERS_FILES})
     string(REGEX REPLACE ".*/(.*/).*.h" "\\1" new_source1 ${currentSourceFile})
     INSTALL (FILES ${currentSourceFile} DESTINATION /usr/local/include/jderobot/${new_source1})
-# MESSAGE ( "COMARE ${currentSourceFile} ")
+
 
 ENDFOREACH(currentSourceFile)
 

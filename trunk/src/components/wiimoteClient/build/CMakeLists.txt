@@ -85,40 +85,45 @@ add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/..)
 ###################
 
 # Install libraries
-#FILE(GLOB_RECURSE LIBS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libs/*.so)
-#INSTALL (FILES ${LIBS_FILES} DESTINATION /usr/local/lib/jderobot)
-#MESSAGE ( "COMARE ${LIBS_FILES} ")
-# Install libraries headers
-#FILE(GLOB_RECURSE HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libs/*.h)
-#FOREACH(currentSourceFile ${HEADERS_FILES})
-#    string(REGEX REPLACE ".*/(.*/).*.h" "\\1" new_source1 ${currentSourceFile})
-#    INSTALL (FILES ${currentSourceFile} DESTINATION /usr/local/include/jderobot/${new_source1})
-# MESSAGE ( "COMARE ${currentSourceFile} ")
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/interfaces/cpp/jderobot/libJderobotInterfaces.so DESTINATION /usr/local/lib/jderobot)
 
-#ENDFOREACH(currentSourceFile)
+FOREACH(currentLibFile ${LIBS_NEEDED})
+    SET (new_lib "lib${currentLibFile}.so")
+    MESSAGE("${new_lib}")    
+    INSTALL (FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libs/${currentLibFile}/${new_lib} DESTINATION /usr/local/lib/jderobot)
+ENDFOREACH(currentLibFile)
+
+# Install libraries headers
+FILE(GLOB_RECURSE HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libs/*.h)
+FOREACH(currentSourceFile ${HEADERS_FILES})
+    string(REGEX REPLACE ".*/(.*/).*.h" "\\1" new_source1 ${currentSourceFile})
+    INSTALL (FILES ${currentSourceFile} DESTINATION /usr/local/include/jderobot/${new_source1})
+
+
+ENDFOREACH(currentSourceFile)
 
 # Install Executables
-#FILE(GLOB_RECURSE BIN_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../*cfg)
-#    string(REGEX REPLACE ".*/(.*).cfg" "\\1" new_source1 ${BIN_FILES})
-#INSTALL (FILES ../${new_source1}  DESTINATION /usr/local/bin PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+FILE(GLOB_RECURSE BIN_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../*cfg)
+    string(REGEX REPLACE ".*/(.*).cfg" "\\1" new_source1 ${BIN_FILES})
+INSTALL (FILES ../${new_source1}  DESTINATION /usr/local/bin PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
 
 
 
 # Install interfaces headers
-#FILE(GLOB HEADER_INTERFACE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/interfaces/cpp/jderobot/*.h)
-#INSTALL (FILES ${HEADER_INTERFACE_FILES} DESTINATION /usr/local/include/jderobot/jderobot)
+FILE(GLOB HEADER_INTERFACE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/interfaces/cpp/jderobot/*.h)
+INSTALL (FILES ${HEADER_INTERFACE_FILES} DESTINATION /usr/local/include/jderobot/jderobot)
 
 # Install slice
-#FILE(GLOB SLICE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/interfaces/slice/jderobot/*.ice)
-#INSTALL (FILES ${SLICE_FILES} DESTINATION /usr/local/include/jderobot/slice)
+FILE(GLOB SLICE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/interfaces/slice/jderobot/*.ice)
+INSTALL (FILES ${SLICE_FILES} DESTINATION /usr/local/include/jderobot/slice)
 
 # Install CONF
-#FILE(GLOB_RECURSE CONF_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/../*cfg)
-#INSTALL (FILES ${CONF_FILES} DESTINATION /usr/local/share/jderobot/conf)
+FILE(GLOB_RECURSE CONF_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/../*cfg)
+INSTALL (FILES ${CONF_FILES} DESTINATION /usr/local/share/jderobot/conf)
 
 # Install Glade
-#FILE(GLOB_RECURSE GLADE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../*.glade)
-#INSTALL (FILES ${GLADE_FILES} DESTINATION /usr/local/share/jderobot/glade)
+FILE(GLOB_RECURSE GLADE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../*.glade)
+INSTALL (FILES ${GLADE_FILES} DESTINATION /usr/local/share/jderobot/glade)
 
 
 
@@ -128,11 +133,11 @@ add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/..)
 #                 #
 ###################
 
-#configure_file(
-#    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-#    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
- #   IMMEDIATE @ONLY)
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY)
 
-#add_custom_target(uninstall
-#    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
