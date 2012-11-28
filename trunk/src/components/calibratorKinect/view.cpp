@@ -148,7 +148,6 @@ namespace CalibratorKinect {
 		/*Manage image*/
 		
 
-		std::cout << "inicio gui" << std::endl;
 		/*Set image*/
 		if (w_depth->get_active()){
 			jderobot::ImageDataPtr dataDEPTH = sources[cam].cDEPTHprx->getImageData();
@@ -245,7 +244,6 @@ namespace CalibratorKinect {
     
 
 		/*Show window*/
-		std::cout << "fin gui" << std::endl;
     
     
   }
