@@ -144,16 +144,20 @@ void myprogeo::load_cam(char *fich_in,int cam)
   FILE *entrada;
   int i;
 
-	std::cout << fich_in << std::endl;
+	xmlReader(&(this->cameras[cam]), fich_in);
+	/*this->cameras[cam].position.H=1;
+	this->cameras[cam].foa.H=1;*/
+
+	/*std::cout << fich_in << std::endl;
   entrada=fopen(fich_in,"r");
    if(entrada==NULL){
      printf("tracker3D: camera input calibration file %s does not exits\n",fich_in);
    }else{
      do{i=load_cam_line(entrada,cam);}while(i!=EOF);
      fclose(entrada);
-   } 
+   } */
   update_camera_matrix(&cameras[cam]);
-  //display_camerainfo(cameras[cam]);
+  display_camerainfo(cameras[cam]);
 }
 
 
