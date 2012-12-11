@@ -78,6 +78,22 @@ namespace cameraserver {
     g_main_loop_unref(mainloop);
   }
 
+void GSTPipeline::restart() {
+
+   /* This gstreamer call seeks the pipeline to position "0". */ 
+   if (!gst_element_seek(pipeline,
+                         1.0,
+                         GST_FORMAT_TIME,
+                         GST_SEEK_FLAG_FLUSH, 
+                         GST_SEEK_TYPE_SET,
+                         0,
+                         GST_SEEK_TYPE_NONE,
+                         GST_CLOCK_TIME_NONE))
+   { 
+      printf("Seek failed\n"); 
+   }
+}
+
   GstElement* GSTPipeline::build_pipeline(const Config &cfg) throw (jderobotice::ConfigFileException){
     GstCaps *caps;
     GstElement *p;

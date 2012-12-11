@@ -99,7 +99,7 @@ namespace cameraserver{
       }
       else{
       	context.tracer().info("Creating pipeline with config: " + pipelineCfg.toString());
-      	resetPipeline(pipelineCfg);
+      	createPipeline(pipelineCfg);
       }
       
       context.tracer().info("Starting thread for camera: " + cameraDescription->name);
@@ -188,10 +188,14 @@ namespace cameraserver{
     	return;
     }
 
-    void resetPipeline(const Config &cfg){
+    void createPipeline(const Config &cfg){
       pipeline = new GSTPipeline(context,cfg);
     }
 
+     void restartPipeline(const Config &cfg){
+        pipeline->restart();
+     }
+     
   private:
 	/** cleans up firewire structures and frees the firewire bus.*/
 	int cleanup(dc1394camera_t *camera) {
@@ -373,7 +377,7 @@ namespace cameraserver{
 			  IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(100));
 			  if (mycamera->pipeline->isEos()){
 			    mycamera->context.tracer().info("Pipeline is eos.Restarting pipeline...");
-			    mycamera->resetPipeline(mycamera->pipelineCfg);
+			    mycamera->restartPipeline(mycamera->pipelineCfg);
 			  }
 			}
 		  }

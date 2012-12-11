@@ -56,6 +56,7 @@ namespace cameraserver {
     GstElement* build_pipeline(const Config &cfg) throw(jderobotice::ConfigFileException);
 
     void stop();
+     void restart();
     virtual void walk();
 
     GstBuffer* pull_buffer();
