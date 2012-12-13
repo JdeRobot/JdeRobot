@@ -22,6 +22,7 @@ SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../Deps) # Directorio donde s
   # FIND & CHECK PRINCIPAL LIBRARIES
 
 include(FindPkgConfig)
+
 PKG_CHECK_MODULES(opencv REQUIRED opencv)
 include_directories(${opencv_INCLUDE_DIRS})
 link_directories(${opencv_LIBRARY_DIRS})
@@ -42,9 +43,9 @@ PKG_CHECK_MODULES(libglademm REQUIRED libglademm-2.4)
 include_directories(${libglademm_INCLUDE_DIRS})
 link_directories(${libglademm_LIBRARY_DIRS})
 
-PKG_CHECK_MODULES(gthread REQUIRED gthread-2.0)
-include_directories(${gthread_INCLUDE_DIRS})
-link_directories(${gthread_LIBRARY_DIRS})
+#PKG_CHECK_MODULES(gthread REQUIRED gthread-2.0)
+#include_directories(${gthread_INCLUDE_DIRS})
+#link_directories(${gthread_LIBRARY_DIRS})
 
 PKG_CHECK_MODULES(libgnomecanvas REQUIRED libgnomecanvas-2.0)
 include_directories(${libgnomecanvas_INCLUDE_DIRS})
@@ -58,14 +59,13 @@ PKG_CHECK_MODULES(gtkglextmm REQUIRED gtkglextmm-1.2)
 include_directories(${gtkglextmm_INCLUDE_DIRS})
 link_directories(${gtkglextmm_LIBRARY_DIRS})
 
-PKG_CHECK_MODULES(gsl REQUIRED gsl)
-include_directories(${gsl_INCLUDE_DIRS})
-link_directories(${gsl_LIBRARIES_DIRS})
+#PKG_CHECK_MODULES(gsl REQUIRED gsl)
+#include_directories(${gsl_INCLUDE_DIRS})
+#link_directories(${gsl_LIBRARIES_DIRS})
 
-
-PKG_CHECK_MODULES(cwiid REQUIRED cwiid)
-include_directories(${cwiid_INCLUDE_DIRS})
-link_directories(${cwiid_LIBRARY_DIRS})
+#PKG_CHECK_MODULES(cwiid REQUIRED cwiid)
+#include_directories(${cwiid_INCLUDE_DIRS})
+#link_directories(${cwiid_LIBRARY_DIRS})
 
 
   # FIND AND CHECK OTHER DEPENDENCES

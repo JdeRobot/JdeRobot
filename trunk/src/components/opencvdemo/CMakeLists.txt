@@ -15,10 +15,10 @@ TARGET_LINK_LIBRARIES(opencvdemo
     ${opencv_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
-    ${gthread_LIBRARIES}
-    ${libgnomecanvas_LIBRARIES}
-    ${libgnomecanvasmm_LIBRARIES}
-    ${gtkglextmm_LIBRARIES}
+#    ${gthread_LIBRARIES}
+#    ${libgnomecanvas_LIBRARIES}
+#    ${libgnomecanvasmm_LIBRARIES}
+#    ${gtkglextmm_LIBRARIES}
     ${OpenCV_LIBRARIES}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
