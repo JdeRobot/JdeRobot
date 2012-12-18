@@ -585,7 +585,7 @@ class CamaraRGB: virtual public jderobot::Camera {
          avRGB = prop->getPropertyAsInt(context().tag() + ".CameraRGB");
 
          if(avRGB){
-			   std::string kinectRGB = "kinectRGB";
+			   std::string kinectRGB = "cameraRGB";
 			   context().tracer().info("Creating Camera " + kinectRGB);
 			   kinect_RGB = new CamaraRGB(kinectRGB, context());
 			   context().createInterfaceWithString(kinect_RGB, kinectRGB);
@@ -594,7 +594,7 @@ class CamaraRGB: virtual public jderobot::Camera {
          avDepth = prop->getPropertyAsInt(context().tag() + ".CameraDepth");
 
          if(avDepth){
-			   std::string kinectDepth= "kinectDepth";
+			   std::string kinectDepth= "cameraDepth";
 			   context().tracer().info("Creating Camera " + kinectDepth);
 			   kinect_Depth = new CamaraDepth(kinectDepth, context());
 			   context().createInterfaceWithString(kinect_Depth, kinectDepth);
@@ -602,7 +602,7 @@ class CamaraRGB: virtual public jderobot::Camera {
          
          avCloud = prop->getPropertyAsInt(context().tag() + ".CloudPoints");
          if(avCloud){
-			   std::string kinectCloud = "kinect1";
+			   std::string kinectCloud = "pointcloud1";
 			   context().tracer().info("Creating Cloud " + kinectCloud);
 			   kinect_Cloud = new KinectI(kinectCloud, context());
 			   context().createInterfaceWithString(kinect_Cloud, kinectCloud);
