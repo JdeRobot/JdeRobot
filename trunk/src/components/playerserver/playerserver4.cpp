@@ -44,6 +44,11 @@
 #include <math.h>
 #include <libplayerc++/playerc++.h>
 
+#include <stdio.h> 
+#include <unistd.h> /* for fork */
+#include <sys/types.h> /* for pid_t */
+#include <sys/wait.h> /* for wait */
+
 // Constants
 #define DEGTORAD 0.01745327
 #define RADTODEG 57.29582790
@@ -565,7 +570,27 @@ namespace playerserver {
 
 int main(int argc, char** argv) 
 {
-	playerserver::Component component;
-	jderobotice::Application app(component);
-	return app.jderobotMain(argc,argv);
+	//playerserver::Component component;
+	//jderobotice::Application app(component);
+	//return app.jderobotMain(argc,argv);
+	
+  int pid, status; 
+  
+	if(argc>2){ 
+		if(fork()){ 
+			sleep(2);
+			playerserver::Component component;
+			jderobotice::Application app(component);
+			return app.jderobotMain(argc,argv);
+		}else{ 
+			printf("%s\n", argv[2]); 
+			char* argvs = argv[2];
+			static char *argv[]={"player", argvs,NULL};
+			execv("/usr/local/bin/player",argv);
+			printf("Error\n"); 
+			exit(-1);
+		} 	
+	}else{
+		printf(" %d Usage: ./playerserver <--Ice.Config=fileConfig.cfg> <playerConfigFile>", argc);
+	}
 }
