@@ -29,7 +29,7 @@ FOREACH(currentSourceFile ${ICE_FILES})
 	LIST(APPEND SOURCE_FILES ${new_source1})
 	LIST(APPEND SOURCE_FILES ${new_source2})
 	add_custom_command(OUTPUT ${new_source1} ${new_source2}
-                   COMMAND slice2cpp -I${CMAKE_CURRENT_SOURCE_DIR}/.. -I${slice_path} ${CMAKE_CURRENT_SOURCE_DIR}/${new_source}
+                   COMMAND slice2cpp -I${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/${new_source}
 	)
 	#add_library (${new_source_name} STATIC ${new_source1} ${new_soure_name2})
 ENDFOREACH(currentSourceFile)
