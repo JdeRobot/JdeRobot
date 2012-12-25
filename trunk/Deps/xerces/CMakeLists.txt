@@ -1,22 +1,16 @@
-# CHECK GEARBOX
-FIND_LIBRARY(with_xerces
-    NAMES xerces-c
-    PATHS /usr/lib )
-IF(NOT with_xerces)
-    MESSAGE ( "*** Xerces libraries: libxerces-c not found, it needed in calibrator component")
+FIND_PATH( xerces_INCLUDE_DIR NAMES libxml/parser.h  PATHS ENV C++LIB ENV PATH PATH_SUFFIXES libxml2)
+ 
+IF( xerces_INCLUDE_DIR )
+    FIND_LIBRARY( xerces_LIBRARIES NAMES xerces-c PATHS ENV C++LIB ENV PATH PATH_SUFFIXES /usr/lib)
+    IF( xerces_LIBRARIES )
+		MESSAGE ("*** Xerces ok")
+		MESSAGE ("${xerces_INCLUDE_DIR}")
+		include_directories(${xerces_INCLUDE_DIR})
+		link_directories(${xerces_LIBRARIES})
+    ENDIF( xerces_LIBRARIES )
+ENDIF(xerces_INCLUDE_DIR)
+
+IF(NOT xerces_LIBRARIES)
+		MESSAGE ("*** *** Xerces libraries: libxerces-c not found")
 ENDIF()
-
-IF(with_xerces)
-    MESSAGE ("*** Xerces OK")
-ENDIF()
-
-
-
-
-include_directories( /usr/include/xercesc )
-link_directories( /usr/lib/ )
-
-
-
-
 

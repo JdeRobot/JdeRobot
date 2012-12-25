@@ -34,11 +34,6 @@ PKG_CHECK_MODULES(libglademm REQUIRED libglademm-2.4)
 include_directories(${libglademm_INCLUDE_DIRS})
 link_directories(${libglademm_LIBRARY_DIRS})
 
-
-PKG_CHECK_MODULES(gthread REQUIRED gthread-2.0)
-include_directories(${gthread_INCLUDE_DIRS})
-link_directories(${gthread_LIBRARY_DIRS})
-
   # FIND AND CHECK OTHER DEPENDENCES
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)

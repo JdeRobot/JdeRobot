@@ -8,8 +8,6 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-set( CMAKE_CXX_FLAGS "-lglut -lgsl -lgslcblas -g" ) # Opciones para el compilador
-
 add_executable (basic_component  ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(basic_component 

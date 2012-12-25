@@ -22,9 +22,6 @@ SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../Deps) # Directorio donde s
   # FIND & CHECK PRINCIPAL LIBRARIES
 
 include(FindPkgConfig)
-PKG_CHECK_MODULES(opencv REQUIRED opencv)
-include_directories(${opencv_INCLUDE_DIRS})
-link_directories(${opencv_LIBRARY_DIRS})
 
 PKG_CHECK_MODULES(gtk20 REQUIRED gtk+-2.0)
 include_directories(${gtk20_INCLUDE_DIRS})
@@ -68,6 +65,7 @@ link_directories(${gsl_LIBRARIES_DIRS})
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/xerces/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
+include(${DEPS_DIR}/opencv/CMakeLists.txt)
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
 

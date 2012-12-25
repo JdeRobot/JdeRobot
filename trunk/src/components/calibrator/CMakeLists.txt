@@ -9,16 +9,13 @@ include_directories(
     ${glut_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR})
 
-set( CMAKE_CXX_FLAGS "-lglut")
+
 add_executable (calibrator ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES( calibrator
- ${opencv_LIBRARIES}
  ${gtkmm_LIBRARIES}
  ${libglademm_LIBRARIES}
  ${gthread_LIBRARIES}
- ${libgnomecanvas_LIBRARIES}
- ${libgnomecanvasmm_LIBRARIES}
  ${gtkglextmm_LIBRARIES}
  ${ZeroCIce_LIBRARIES}
  ${OpenCV_LIBRARIES}
@@ -28,5 +25,5 @@ TARGET_LINK_LIBRARIES( calibrator
  ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
  ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
  ${LIBS_DIR}/progeo/libprogeo.so
-    #-lxerces-c
+   glut
 )
