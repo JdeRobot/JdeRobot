@@ -89,38 +89,26 @@ Gui::Gui(SharedMemory *interfacesData) : gtkmain(0, 0) {
 
     //CAMERAS
     //WINDOW
-    this->builder->get_widget("cameras_window", this->cameras_window);
+    this->builder->get_widget("images_window", this->images_window);
+    this->builder->get_widget("teleoperatorCameras_window", this->teleoperatorCameras_window);
     //IMAGES
     this->builder->get_widget("image_left_camera", this->image_left_camera);
     this->builder->get_widget("image_right_camera", this->image_right_camera);
     //CHECK BUTTONS
     this->builder->get_widget("check_cameras", this->check_cameras);
+    this->builder->get_widget("check_pose3d", this->check_pose3d);
     //CANVAS
     this->builder->get_widget("cameras_canvas", this->cameras_canvas);
     //BUTTONS
     this->builder->get_widget("cameras_stop_button", this->cameras_stop_button);
     //SIGNALS
     this->check_cameras->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_cameras_clicked));
+    this->check_pose3d->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_pose3d_clicked));
     this->cameras_canvas->signal_event().connect(sigc::mem_fun(this, &Gui::on_button_press_cameras_canvas));
     this->cameras_stop_button->signal_clicked().connect(sigc::mem_fun(this, &Gui::cameras_stop_button_clicked));
     //Init widgets
     this->cameras_canvas->add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::VISIBILITY_NOTIFY_MASK | Gdk::BUTTON1_MOTION_MASK);
     this->cameras_canvas->get_size_request(this->cameras_previous_event_x, this->cameras_previous_event_y);
-
-    //CHECK ICE
-    this->builder->get_widget("checkICElaser", this->checkICElaser);
-    this->checkICElaser->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_ICElaser_clicked));
-    this->builder->get_widget("checkICECameras", this->checkICECameras);
-    this->checkICECameras->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_ICECameras_clicked));
-    this->builder->get_widget("checkICEpose3DEncoders", this->checkICEpose3DEncoders);
-    this->checkICEpose3DEncoders->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_ICEpose3DEncoders_clicked));
-    this->builder->get_widget("checkICEpose3DMotors", this->checkICEpose3DMotors);
-    this->checkICEpose3DMotors->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_ICEpose3DMotors_clicked));
-    this->builder->get_widget("checkICEmotors", this->checkICEmotors);
-    this->checkICEmotors->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_ICEmotors_clicked));
-    this->builder->get_widget("checkICEencoders", this->checkICEencoders);
-    this->checkICEencoders->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_ICEencoders_clicked));
-
 
     this->cameras_previous_event_y = this->cameras_previous_event_y / 2;
     this->cameras_previous_event_x = this->cameras_previous_event_x / 2;
@@ -128,38 +116,14 @@ Gui::Gui(SharedMemory *interfacesData) : gtkmain(0, 0) {
     this->previous_event_y = this->previous_event_y / 2;
     this->previous_event_x = this->previous_event_x / 2;
 
-
-
     this->main_window->show();
 
 }
 
 void Gui::display() {
 
-    if (this->motorsShowed) {
-        displayMotorsData();
-    }
+    show_windows();
 
-    if (this->encodersShowed) {
-        displayEncodersData();
-    }
-
-    if ((this->cameras_window->is_visible()) && (this->interfacesData->pose3DEncodersInterface.activated || this->interfacesData->pose3DMotorsInterface.activated)) {
-        displayPose3DEncodersData();
-    }
-    if (this->laserShowed) {
-        drawLaser();
-    }
-
-    pthread_mutex_lock(&interfacesData->imagesData_mutex);
-    if (this->camerasShowed) {
-        displayCameras();
-    }
-
-    while (gtkmain.events_pending())
-        gtkmain.iteration();
-
-    pthread_mutex_unlock(&interfacesData->imagesData_mutex);
 }
 
 Gui::~Gui() {
@@ -183,50 +147,66 @@ void Gui::displayEncodersData() {
 }
 
 void Gui::displayCameras() {
+    //pthread_mutex_lock(&interfacesData->imagesData_mutex);
     if (interfacesData->imagesReady) {
-        //LEFT CAMERA
-        colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(this->interfacesData->imageDataLeftReceived->description->format);
-        if (!fmt)
-            throw "Format not supported";
-
-        colorspaces::Image image(this->interfacesData->imageDataLeftReceived->description->width,
-                this->interfacesData->imageDataLeftReceived->description->height,
-                fmt,
-                &(this->interfacesData->imageDataLeftReceived->pixelData[0]));
-
-        colorspaces::ImageRGB8 img_rgb8(image); //conversion will happen if needed
+        try {
+            /*
+            IplImage* image = cvCreateImage(cvSize(interfacesData->imageDataLeftReceived->description->width,interfacesData->imageDataLeftReceived->description->height), 8 ,3);
+    
+    memcpy((unsigned char *) image->imageData,&(interfacesData->imageDataLeftReceived->pixelData[0]),image->width*image->height * 3);
+    
+    colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(interfacesData->imageDataLeftReceived->description->format);
+    
+    if (!fmt)
+       throw "Format not supported";
+                
         Glib::RefPtr<Gdk::Pixbuf> imgBuff =
-                Gdk::Pixbuf::create_from_data((const guint8*) img_rgb8.data,
-                Gdk::COLORSPACE_RGB,
-                false,
-                8,
-                img_rgb8.width,
-                img_rgb8.height,
-                img_rgb8.step);
+            Gdk::Pixbuf:: create_from_data((const guint8*)image->imageData,
+                                        Gdk::COLORSPACE_RGB,
+                                        false,
+                                        image->depth,
+                                        image->width,
+                                        image->height,
+                                        image->widthStep);
 
-        //RIGHT CAMERA
-        colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(this->interfacesData->imageDataRightReceived->description->format);
-        if (!fmt2)
-            throw "Format not supported";
-
-        colorspaces::Image image2(this->interfacesData->imageDataRightReceived->description->width,
-                this->interfacesData->imageDataRightReceived->description->height,
-                fmt2,
-                &(this->interfacesData->imageDataRightReceived->pixelData[0]));
-
-        colorspaces::ImageRGB8 img_rgb8_2(image2); //conversion will happen if needed
+    IplImage* image2 = cvCreateImage(cvSize(interfacesData->imageDataRightReceived->description->width,interfacesData->imageDataRightReceived->description->height), 8 ,3);
+    
+    memcpy((unsigned char *) image2->imageData,&(interfacesData->imageDataRightReceived->pixelData[0]),image2->width*image2->height * 3);
+    
+    colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(interfacesData->imageDataRightReceived->description->format);
+    
+    if (!fmt2)
+       throw "Format not supported";
+                
         Glib::RefPtr<Gdk::Pixbuf> imgBuff2 =
-                Gdk::Pixbuf::create_from_data((const guint8*) img_rgb8_2.data,
-                Gdk::COLORSPACE_RGB,
-                false,
-                8,
-                img_rgb8_2.width,
-                img_rgb8_2.height,
-                img_rgb8_2.step);
-        //this->image_left_camera->clear();
-        this->image_left_camera->set(imgBuff);
-        this->image_right_camera->set(imgBuff2);
+            Gdk::Pixbuf:: create_from_data((const guint8*)image2->imageData,
+                                        Gdk::COLORSPACE_RGB,
+                                        false,
+                                        image2->depth,
+                                        image2->width,
+                                        image2->height,
+                                        image2->widthStep);
+
+             */
+            this->image_left_camera->clear();
+            //if(interfacesData->imgBuff->get_pixels()!=NULL)
+            //std::cout << interfacesData->imgBuff->get_pixels() << std::endl;
+            this->image_left_camera->set(interfacesData->imgBuff);
+            //if(interfacesData->imgBuff2->get_pixels()!=NULL)
+            this->image_right_camera->clear();
+
+            this->image_right_camera->set(interfacesData->imgBuff2);
+
+            //cvReleaseImage(&image);
+            //cvReleaseImage(&image2);
+
+        } catch (const char* msg) {
+            std::cerr << "CAZADO " << msg << std::endl;
+
+        }
+
     }
+    //pthread_mutex_unlock(&interfacesData->imagesData_mutex);
 }
 
 void Gui::drawLaser() {
@@ -425,76 +405,57 @@ void Gui::exit_button_clicked() {
 
 }
 
-void Gui::check_cameras_clicked() {
-    if (!check_cameras->get_active()) {
-        this->camerasShowed = FALSE;
-        this->cameras_window->hide();
+void Gui::check_pose3d_clicked() {
+
+    if (!check_pose3d->get_active()) {
+        this->interfacesData->pose3DEncodersInterface.checkEnd = TRUE;
+        this->interfacesData->pose3DMotorsInterface.checkEnd = TRUE;
+        this->teleoperatorCameras_window->hide();
     } else {
-
-        if ((this->interfacesData->camerasInterface.activated) ||
-                (this->interfacesData->pose3DEncodersInterface.activated) ||
-                (this->interfacesData->pose3DMotorsInterface.activated)) {
-            this->cameras_window->show();
-            if (this->interfacesData->camerasInterface.activated) {
-                displayCameras();
-                this->camerasShowed = TRUE;
-                
-            }
-            //this->displayPose3DEncodersData();
-
-
-        } else {
-
-            this->help_window->show();
-            this->check_cameras->set_active(false);
-        }
-
+        this->teleoperatorCameras_window->show();
+        this->interfacesData->pose3DEncodersInterface.checkInit = TRUE;
+        this->interfacesData->pose3DMotorsInterface.checkInit = TRUE;
     }
-
 }
 
 void Gui::check_laser_clicked() {
     if (!check_laser->get_active()) {
+        this->interfacesData->laserInterface.checkEnd = TRUE;
+
         this->laser_window->hide();
     } else {
-        if (this->interfacesData->laserInterface.activated) {
-            this->laser_window->show();
-            this->laserShowed = TRUE;
-        } else {
-
-            this->help_window->show();
-            this->check_laser->set_active(false);
-        }
+        this->laser_window->show();
+        this->interfacesData->laserInterface.checkInit = TRUE;
     }
 }
 
 void Gui::check_motors_clicked() {
     if (!check_motors->get_active()) {
+        this->interfacesData->motorsInterface.checkEnd = TRUE;
         this->motors_window->hide();
     } else {
-        if (this->interfacesData->motorsInterface.activated) {
-            this->motors_window->show();
-            this->motorsShowed = TRUE;
-        } else {
-
-            this->help_window->show();
-            this->check_motors->set_active(false);
-        }
+        this->motors_window->show();
+        this->interfacesData->motorsInterface.checkInit = TRUE;
     }
 }
 
 void Gui::check_encoders_clicked() {
     if (!check_encoders->get_active()) {
+        this->interfacesData->encodersInterface.checkEnd = TRUE;
         this->encoders_window->hide();
     } else {
-        if (this->interfacesData->encodersInterface.activated) {
-            this->encoders_window->show();
-            this->encodersShowed = TRUE;
-        } else {
+        this->encoders_window->show();
+        this->interfacesData->encodersInterface.checkInit = TRUE;
+    }
+}
 
-            this->help_window->show();
-            this->check_encoders->set_active(false);
-        }
+void Gui::check_cameras_clicked() {
+    if (!check_cameras->get_active()) {
+        this->interfacesData->camerasInterface.checkEnd = TRUE;
+        this->images_window->hide();
+    } else {
+        this->images_window->show();
+        this->interfacesData->camerasInterface.checkInit = TRUE;
     }
 }
 
@@ -530,58 +491,34 @@ void Gui::Pose3Dencoders2widget(float* tilt, float* pan) {
 
 }
 
-void Gui::check_ICElaser_clicked() {
-    if (!checkICElaser->get_active()) {
-        this->interfacesData->laserInterface.checkEnd = TRUE;
-    } else {
+void Gui::show_windows() {
 
-        this->interfacesData->laserInterface.checkInit = TRUE;
+    if ((this->interfacesData->pose3DEncodersInterface.activated) && (this->interfacesData->pose3DMotorsInterface.activated)) {
+        if (this->teleoperatorCameras_window->is_visible())
+            displayPose3DEncodersData();
     }
-}
-
-void Gui::check_ICECameras_clicked() {
-    if (!checkICECameras->get_active()) {
-        this->interfacesData->camerasInterface.checkEnd = TRUE;
-        //this->camerasShowed = FALSE;
-    } else {
-
-        this->interfacesData->camerasInterface.checkInit = TRUE;
-        //this->camerasShowed = TRUE;
+    if ((this->interfacesData->laserInterface.activated) && (this->interfacesData->laserReady)) {
+        if (this->laser_window->is_visible())
+            drawLaser();
     }
-}
-
-void Gui::check_ICEpose3DEncoders_clicked() {
-    if (!checkICEpose3DEncoders->get_active()) {
-        this->interfacesData->pose3DEncodersInterface.checkEnd = TRUE;
-    } else {
-
-        this->interfacesData->pose3DEncodersInterface.checkInit = TRUE;
+    if (this->interfacesData->motorsInterface.activated) {
+        if (this->motors_window->is_visible())
+            displayMotorsData();
     }
-}
-
-void Gui::check_ICEpose3DMotors_clicked() {
-    if (!checkICEpose3DMotors->get_active()) {
-        this->interfacesData->pose3DMotorsInterface.checkEnd = TRUE;
-    } else {
-
-        this->interfacesData->pose3DMotorsInterface.checkInit = TRUE;
+    if (this->interfacesData->encodersInterface.activated) {
+        if (this->encoders_window->is_visible() && (this->interfacesData->encodersReady))
+            displayEncodersData();
     }
-}
+    pthread_mutex_lock(&interfacesData->imagesData_mutex);
 
-void Gui::check_ICEmotors_clicked() {
-    if (!checkICEmotors->get_active()) {
-        this->interfacesData->motorsInterface.checkEnd = TRUE;
-    } else {
-
-        this->interfacesData->motorsInterface.checkInit = TRUE;
+    if (this->interfacesData->camerasInterface.activated) {
+        if (this->images_window->is_visible())
+            displayCameras();
     }
-}
 
-void Gui::check_ICEencoders_clicked() {
-    if (!checkICEencoders->get_active()) {
-        this->interfacesData->encodersInterface.checkEnd = TRUE;
-    } else {
+    pthread_mutex_unlock(&interfacesData->imagesData_mutex);
 
-        this->interfacesData->encodersInterface.checkInit = TRUE;
+    while (gtkmain.events_pending()) {
+        gtkmain.iteration(true);
     }
 }

@@ -21,11 +21,14 @@
  */
 
 #include "controlICE.h"
+#include "Gui.h"
 
 controlICE::controlICE(SharedMemory *interfacesData) {
     this->interfacesData = interfacesData;
 
     interfacesData->imagesReady = FALSE;
+    interfacesData->encodersReady = FALSE;
+    interfacesData->laserReady = FALSE;
     interfacesData->motorsInterface.activated = FALSE;
     interfacesData->motorsInterface.checkInit = FALSE;
     interfacesData->motorsInterface.checkEnd = FALSE;
@@ -66,24 +69,74 @@ void controlICE::getDataGazebo() {
     }
     if (interfacesData->laserInterface.activated) {
         interfacesData->laserDataReceived = lprx->getLaserData();
+        interfacesData->laserReady = TRUE;
     }
     if (interfacesData->pose3DEncodersInterface.activated) {
         interfacesData->Pose3DEncodersDataReceivedLeft = p3deprxLeft->getPose3DEncodersData();
         interfacesData->Pose3DEncodersDataReceivedRight = p3deprxRight->getPose3DEncodersData();
     }
+    pthread_mutex_lock(&interfacesData->imagesData_mutex);
     if (interfacesData->camerasInterface.activated) {
-        pthread_mutex_lock(&interfacesData->imagesData_mutex);
         interfacesData->imagesReady = FALSE;
+
         interfacesData->imageDataLeftReceived = cprxLeft->getImageData();
         interfacesData->imageDataRightReceived = cprxRight->getImageData();
+
+        createImage1();
+        createImage2();
         interfacesData->imagesReady = TRUE;
-        pthread_mutex_unlock(&interfacesData->imagesData_mutex);
-        
     }
+    pthread_mutex_unlock(&interfacesData->imagesData_mutex);
 
     if (interfacesData->encodersInterface.activated) {
         interfacesData->encodersDataReceived = eprx->getEncodersData();
+        interfacesData->encodersReady = TRUE;
+
+
     }
+}
+
+void controlICE::createImage1() {
+
+    cvReleaseImage(&image);
+    this->image = cvCreateImage(cvSize(interfacesData->imageDataLeftReceived->description->width, interfacesData->imageDataLeftReceived->description->height), 8, 3);
+
+    memcpy((unsigned char *) image->imageData, &(interfacesData->imageDataLeftReceived->pixelData[0]), image->width * image->height * 3);
+
+    colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(interfacesData->imageDataLeftReceived->description->format);
+
+    if (!fmt)
+        throw "Format not supported";
+
+    interfacesData->imgBuff =
+            Gdk::Pixbuf::create_from_data((const guint8*) this->image->imageData,
+            Gdk::COLORSPACE_RGB,
+            false,
+            this->image->depth,
+            this->image->width,
+            this->image->height,
+            this->image->widthStep);
+}
+
+void controlICE::createImage2() {
+    cvReleaseImage(&image2);
+    this->image2 = cvCreateImage(cvSize(interfacesData->imageDataRightReceived->description->width, interfacesData->imageDataRightReceived->description->height), 8, 3);
+
+    memcpy((unsigned char *) image2->imageData, &(interfacesData->imageDataRightReceived->pixelData[0]), image2->width * image2->height * 3);
+
+    colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(interfacesData->imageDataRightReceived->description->format);
+
+    if (!fmt2)
+        throw "Format not supported";
+
+    interfacesData->imgBuff2 =
+            Gdk::Pixbuf::create_from_data((const guint8*) this->image2->imageData,
+            Gdk::COLORSPACE_RGB,
+            false,
+            this->image2->depth,
+            this->image2->width,
+            this->image2->height,
+            this->image2->widthStep);
 }
 
 void controlICE::sendDataGazebo() {
@@ -481,5 +534,5 @@ void controlICE::checkInterfaces() {
         interfacesData->encodersInterface.activated = FALSE;
         interfacesData->encodersInterface.checkEnd = FALSE;
     }
-    
+
 }

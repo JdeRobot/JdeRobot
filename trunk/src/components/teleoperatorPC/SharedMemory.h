@@ -32,6 +32,7 @@
 #include <jderobot/pose3dmotors.h>
 #include <jderobot/pose3dencoders.h>
 #include <colorspaces/colorspacesmm.h>
+#include "Gui.h"
 
 #ifndef SHAREDMEMORY_H
 #define	SHAREDMEMORY_H
@@ -70,8 +71,11 @@ public:
     colorspaces::Image imageLeft2display;
     colorspaces::Image imageRight2display;
     bool imagesReady;
+    bool laserReady;
+    bool encodersReady;
     motorsData_t motorsDataToSend;
     motorsData_t motorsDataReceived;
+    Glib::RefPtr<Gdk::Pixbuf> imgBuff2, imgBuff;
 
     typedef struct ice_t {
         bool checkInit;

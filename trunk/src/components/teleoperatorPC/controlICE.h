@@ -57,10 +57,13 @@ public:
     void endMotors();
     void initCameras();
     void endCameras();
-
     void checkInterfaces();
 
 private:
+
+    void createImage1();
+    void createImage2();
+
 
     SharedMemory *interfacesData;
 
@@ -81,6 +84,8 @@ private:
     jderobot::MotorsPrx mprx;
     jderobot::EncodersPrx eprx;
 
+    IplImage* image;
+    IplImage* image2;
 };
 
 #endif	/* CONTROLICE_H */

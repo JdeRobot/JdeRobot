@@ -25,10 +25,11 @@
 
 #include <colorspaces/colorspacesmm.h>
 #include<gtk-2.0/gtk/gtk.h>
-#include<gtk-2.0/gdk/gdk.h>
+//#include<gtk-2.0/gdk/gdk.h>
 #include<gtkmm-2.4/gtkmm.h>
 #include <gtkmm/drawingarea.h>
-#include <gdkmm/pixbuf.h>
+//#include <gdkmm/pixbuf.h>
+//#include <gdkmm-3.0/gdkmm/pixbuf.h>
 
 #include <math.h>
 #include <string>
@@ -53,7 +54,6 @@ private:
     Gtk::DrawingArea* motors_canvas;
     Gtk::Button* stop_button;
     Gtk::CheckButton* check_motors;
-    Gtk::CheckButton* checkICEmotors;
     bool motorsShowed;
     bool on_button_press_motors_canvas(GdkEvent* event);
     void stop_button_clicked();
@@ -63,7 +63,6 @@ private:
     void widget2motors(int x, int y, int* v, int* w);
     void widget2Pose3Dmotors(int x, int y, float* v, float* w);
     void check_motors_clicked();
-    void check_ICEmotors_clicked();
 
     typedef struct motorsData_t {
         double v;
@@ -76,14 +75,12 @@ private:
     //ENCODERS
     Gtk::Window* encoders_window;
     Gtk::CheckButton* check_encoders;
-    Gtk::CheckButton* checkICEencoders;    
     Gtk::Label* encoders_x;
     Gtk::Label* encoders_y;
     Gtk::Label* encoders_theta;
     bool encodersShowed;
     void displayEncodersData();
     void check_encoders_clicked();
-    void check_ICEencoders_clicked();
     //END_ENCODERS   
 
     //LASER
@@ -96,16 +93,19 @@ private:
     //END_LASER
 
     //CAMERAS
-    Gtk::Window* cameras_window;
+    Gtk::Window* images_window;
+    Gtk::Window* teleoperatorCameras_window;
     Gtk::Image* image_left_camera;
     Gtk::Image* image_right_camera;
     Gtk::DrawingArea* cameras_canvas;
     Gtk::CheckButton* check_left_camera;
     Gtk::CheckButton* check_right_camera;
     Gtk::CheckButton* check_cameras;
+    Gtk::CheckButton* check_pose3d;
     Gtk::Button* cameras_stop_button;
     void cameras_stop_button_clicked();
     void check_cameras_clicked();
+    void check_pose3d_clicked();
     void displayCameras();
     bool on_button_press_cameras_canvas(GdkEvent* event);
     void cameras_handler();
@@ -114,16 +114,9 @@ private:
     bool camerasShowed;
     //END_CAMERAS
 
+    void show_windows();
 
     //CHECK ICE
-    Gtk::CheckButton* checkICElaser;
-    void check_ICElaser_clicked();
-    Gtk::CheckButton* checkICECameras;
-    void check_ICECameras_clicked();
-    Gtk::CheckButton* checkICEpose3DEncoders;
-    void check_ICEpose3DEncoders_clicked();
-    Gtk::CheckButton* checkICEpose3DMotors;
-    void check_ICEpose3DMotors_clicked();
 
     //OTHERS
     Gtk::Main gtkmain;

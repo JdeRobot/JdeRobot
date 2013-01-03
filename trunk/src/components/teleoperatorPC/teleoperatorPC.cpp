@@ -53,11 +53,11 @@ int main(int argc, char** argv) {
         while (!interfacesData->exit) {
             gettimeofday(&a, NULL);
             totala = a.tv_sec * 1000000 + a.tv_usec;
-            
+
             control->checkInterfaces(); //Check if interfaces are activated and init/end them
             control->getDataGazebo(); //Get sensor data from gazebo
             control->sendDataGazebo(); //Send data to Gazebo
-            
+
             gettimeofday(&b, NULL);
             totalb = b.tv_sec * 1000000 + b.tv_usec;
             diff = (totalb - totala) / 1000;
@@ -70,9 +70,9 @@ int main(int argc, char** argv) {
             if (diff < 33)
                 usleep(33 * 1000);
         }
-        
+
         pthread_join(thr_gui, NULL);
-        
+
     } catch (const Ice::Exception& ex) {
         std::cerr << ex << std::endl;
     } catch (const char* msg) {
