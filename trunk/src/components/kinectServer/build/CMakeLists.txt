@@ -101,16 +101,12 @@ FILE(GLOB_RECURSE HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libs
 FOREACH(currentSourceFile ${HEADERS_FILES})
     string(REGEX REPLACE ".*/(.*/).*.h" "\\1" new_source1 ${currentSourceFile})
     INSTALL (FILES ${currentSourceFile} DESTINATION /usr/local/include/jderobot/${new_source1})
-
-
 ENDFOREACH(currentSourceFile)
 
 # Install Executables
 FILE(GLOB_RECURSE BIN_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../*cfg)
     string(REGEX REPLACE ".*/(.*).cfg" "\\1" new_source1 ${BIN_FILES})
 INSTALL (FILES ../${new_source1}  DESTINATION /usr/local/bin PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
-
-
 
 # Install interfaces headers
 FILE(GLOB HEADER_INTERFACE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/interfaces/cpp/jderobot/*.h)

@@ -1,5 +1,7 @@
 IF(with_pcl)
 
+    SET( SOURCE_FILES  recorder.cpp)
+
       set( CMAKE_CXX_FLAGS "-Wno-deprecated -lGL -lGLU -lglut -lm -lusb-1.0 " ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
 
     include_directories(
@@ -11,9 +13,8 @@ IF(with_pcl)
 	  /usr/include/libusb-1.0
 	  /usr/include/cminpack-1 
 	  /usr/include/eigen3 
-	  /usr/include/vtk-5.2/ 
+	  /usr/include/vtk-5.8/ 
     )
-    SET( SOURCE_FILES  recorder.cpp)
 
 
 
@@ -36,7 +37,7 @@ IF(with_pcl)
 	  ${LIBS_DIR}/pioneer/libpioneer.so
 	${ZeroCIce_LIBRARIES}
 #	${pcl_LIBRARIES}
-#	${gsl_LIBRARIES}
+	${gsl_LIBRARIES}
 #	${OpenNi_LIBRARY}
 
    
