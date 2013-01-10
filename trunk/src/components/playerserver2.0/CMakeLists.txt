@@ -8,7 +8,8 @@ IF( with_player)
 	  ${INTERFACES_CPP_DIR}
 	  ${LIBS_DIR}
 	  ${CMAKE_CURRENT_SOURCE_DIR}
-	  /usr/local/include/player-2.1
+#	  /usr/local/include/player-2.1
+      /usr/local/include/player-3.0
       )
 
       set( CMAKE_CXX_FLAGS "-lplayerc")
@@ -22,13 +23,13 @@ IF( with_player)
 
 
       TARGET_LINK_LIBRARIES(playerserver 
-	  ${opencv_LIBRARIES}
-	  ${gtkmm_LIBRARIES}
-	  ${libglademm_LIBRARIES}
-	  ${gthread_LIBRARIES}
-	  ${libgnomecanvas_LIBRARIES}
-	  ${libgnomecanvasmm_LIBRARIES}
-	  ${gtkglextmm_LIBRARIES}
+#	  ${opencv_LIBRARIES}
+#	  ${gtkmm_LIBRARIES}
+#	  ${libglademm_LIBRARIES}
+#	  ${gthread_LIBRARIES}
+#	  ${libgnomecanvas_LIBRARIES}
+#	  ${libgnomecanvasmm_LIBRARIES}
+#	  ${gtkglextmm_LIBRARIES}
 	  ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
 	  ${LIBS_DIR}/jderobotice/libjderobotice.so
 	  ${LIBS_DIR}/jderobotutil/libjderobotutil.so

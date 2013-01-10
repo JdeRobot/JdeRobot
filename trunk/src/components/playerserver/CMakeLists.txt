@@ -4,7 +4,9 @@ cmake_minimum_required(VERSION 2.8)
 	#SET( LIBS_DIR /usr/local/lib/jderobot/)
 
   include_directories(
+    ${SLICE_DIR}
 	${LIBS_DIR}/
+	${INTERFACES_CPP_DIR}
   /usr/local/include/jderobot/
   /usr/local/include/player-3.0
   /usr/local/include/gearbox
@@ -21,8 +23,11 @@ cmake_minimum_required(VERSION 2.8)
 		${Gearbox_LIBRARIES}
 		${ZeroCIce_LIBRARIES}
 		${Player_LIBRARIES}
-		${LIBS_DIR}/libJderobotInterfaces.so
-		${LIBS_DIR}/libjderobotice.so
-		${LIBS_DIR}/libjderobotutil.so
+	    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
+	    ${LIBS_DIR}/jderobotice/libjderobotice.so
+	    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
+#		${LIBS_DIR}/libJderobotInterfaces.so
+#		${LIBS_DIR}/libjderobotice.so
+#		${LIBS_DIR}/libjderobotutil.so
   )
 
