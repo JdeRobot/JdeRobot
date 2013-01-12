@@ -1,4 +1,4 @@
-PKG_CHECK_MODULES(cwiid REQUIRED cwiid)
+PKG_CHECK_MODULES(cwiid QUIET cwiid)
 include_directories(${cwiid_INCLUDE_DIRS})
 link_directories(${cwiid_LIBRARY_DIRS})
 FIND_LIBRARY( with_cwiid NAMES cwiid PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib/cwiid)

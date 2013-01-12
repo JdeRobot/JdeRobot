@@ -13,7 +13,7 @@ ELSE ((pcl_INCLUDE_DIR1) AND (pcl_INCLUDE_DIR2))
 	ENDIF(pcl_INCLUDE_DIR2)
 ENDIF ((pcl_INCLUDE_DIR1) AND (pcl_INCLUDE_DIR2))
 
-MESSAGE("PCL LIBRARY FOUND IN ${pcl_INCLUDE_DIR}")
+#MESSAGE("PCL LIBRARY FOUND IN ${pcl_INCLUDE_DIR}")
 FIND_LIBRARY(with_pcl
     NAMES pcl_surface pcl_registration pcl_segmentation pcl_filters pcl_sample_consensus pcl_io pcl_octree pcl_features pcl_kdtree pcl_common
     PATHS /usr/lib)
@@ -32,7 +32,7 @@ IF( pcl_INCLUDE_DIR )
     FIND_LIBRARY( pcl_LIBRARY11 NAMES pcl_common PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
     SET (pcl_LIBRARIES ${pcl_LIBRARY1} ${pcl_LIBRARY2} ${pcl_LIBRARY3} ${pcl_LIBRARY4} ${pcl_LIBRARY5} ${pcl_LIBRARY6} ${pcl_LIBRARY7} ${pcl_LIBRARY8} ${pcl_LIBRARY9} ${pcl_LIBRARY11})
     IF( pcl_LIBRARIES )
-		MESSAGE("PCL LIBRARY FOUND IN ${pcl_LIBRARIES}")
+		#MESSAGE("PCL LIBRARY FOUND IN ${pcl_LIBRARIES}")
     ENDIF( pcl_LIBRARIES )
 ENDIF(pcl_INCLUDE_DIR)
 

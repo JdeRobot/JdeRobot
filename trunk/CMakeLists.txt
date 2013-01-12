@@ -9,8 +9,17 @@ SET( INTERFACES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/cpp) # Direct
 SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libs) # Directorio donde se encuentran las librerias propias de jderobot
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice) # Directorio donde se encuentran las interfaces ICE
 SET( LIBS_NEEDED   bgfgsegmentation jderobotice colorspaces jderobotutil progeo pioneer fuzzylib visionlib ) # Librerias de las que depende el componente
+
 SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Deps) # Directorio donde se encuentran las dependencias
-SET( COMPONENTS introrob) #Componentes que forman JDErobot
+SET( COMPONENTS calibrator  calibratorKinect openniServer naooperator         basic_component		         
+		bgfglab                    opencvdemo
+					cameraserver         introrob            
+		cameraview			recorder
+		cameraview_icestorm  kinectViewer        replayer
+		wiimoteClient
+		wiimoteServer       colortuner teleoperatorPC
+		
+) #Componentes que forman JDErobot
 
 
 ###################
@@ -22,7 +31,7 @@ SET( COMPONENTS introrob) #Componentes que forman JDErobot
   # FIND & CHECK PRINCIPAL LIBRARIES
 
 include(FindPkgConfig)
-PKG_CHECK_MODULES(opencv REQUIRED opencv)
+PKG_CHECK_MODULES(opencv opencv)
 include_directories(${opencv_INCLUDE_DIRS})
 link_directories(${opencv_LIBRARY_DIRS})
 MESSAGE("${opencv_LIBRARY_DIRS}")
@@ -63,7 +72,19 @@ PKG_CHECK_MODULES(gsl REQUIRED gsl)
 include_directories(${gsl_INCLUDE_DIRS})
 link_directories(${gsl_LIBRARIES_DIRS})
 
+PKG_CHECK_MODULES(gstreamer REQUIRED gstreamer-0.10) 
+include_directories(${gstreamer_INCLUDE_DIRS})
+link_directories(${gstreamer_LIBRARY_DIRS})
+PKG_CHECK_MODULES(gstreamerapp REQUIRED gstreamer-app-0.10)
+include_directories(${gstreamerapp_INCLUDE_DIRS})
+link_directories(${gstreamerapp_LIBRARY_DIRS})
+
+
 include_directories(${LIBS_DIR}/progeo)
+FOREACH(LibFile ${LIBS_NEEDED})
+    link_directories(${LIBS_DIR}/${LibFile})
+    MESSAGE("${LIBS_DIR}/${LibFile}")
+ENDFOREACH(LibFile)
 
   # FIND AND CHECK OTHER DEPENDENCES
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
@@ -92,39 +113,51 @@ add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/src)
 ###################
 
 # Install libraries
-FILE(GLOB_RECURSE LIBS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libs/*/*.so)
-INSTALL (FILES ${LIBS_FILES} DESTINATION /usr/local/lib/jderobot)
-INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/interfaces/cpp/jderobot/libJderobotInterfaces.so DESTINATION /usr/local/lib/jderobot)
-# Install libraries headers
-FILE(GLOB_RECURSE HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/libs/*.h)
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/cpp/jderobot/libJderobotInterfaces.so DESTINATION /usr/local/lib/jderobot)
+
+FOREACH(currentLibFile ${LIBS_NEEDED})
+    SET (new_lib "lib${currentLibFile}.so")
+    MESSAGE("${new_lib}")    
+    INSTALL (FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/libs/${currentLibFile}/${new_lib} DESTINATION /usr/local/lib/jderobot)
+ENDFOREACH(currentLibFile)
+
+FILE(GLOB_RECURSE HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/libs/*.h)
 FOREACH(currentSourceFile ${HEADERS_FILES})
     string(REGEX REPLACE ".*/(.*/).*.h" "\\1" new_source1 ${currentSourceFile})
     INSTALL (FILES ${currentSourceFile} DESTINATION /usr/local/include/jderobot/${new_source1})
+ENDFOREACH(currentSourceFile)
 
-
+# Install libraries headers
+FILE(GLOB_RECURSE HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/libs/*.h)
+FOREACH(currentSourceFile ${HEADERS_FILES})
+	string(REGEX REPLACE ".*/(.*/).*.h" "\\1" new_source1 ${currentSourceFile})
+	INSTALL (FILES ${currentSourceFile} DESTINATION /usr/local/include/jderobot/${new_source1})
 ENDFOREACH(currentSourceFile)
 
 # Install Executables
-FILE(GLOB_RECURSE BIN_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../*cfg)
-    string(REGEX REPLACE ".*/(.*).cfg" "\\1" new_source1 ${BIN_FILES})
-INSTALL (FILES ../${new_source1}  DESTINATION /usr/local/bin PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
-
-
+FOREACH (currentBin ${COMPONENTS})
+    #SET(EXIST EXIST-NOTFOUND)
+    #find_file(EXIST NAMES ${currentBin} PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src/components/${currentBin})
+    #IF (EXIST)
+	INSTALL (FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/components/${currentBin}/${currentBin} DESTINATION /usr/local/bin OPTIONAL PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+    #ENDIF(EXIST)
+    #MESSAGE("${EXIST}")
+ENDFOREACH(currentBin)
 
 # Install interfaces headers
-FILE(GLOB HEADER_INTERFACE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/interfaces/cpp/jderobot/*.h)
-INSTALL (FILES ${HEADER_INTERFACE_FILES} DESTINATION /usr/local/include/jderobot/jderobot)
+FILE(GLOB HEADER_INTERFACE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/cpp/jderobot/*.h)
+INSTALL (FILES ${HEADER_INTERFACE_FILES} DESTINATION /usr/local/include/jderobot)
 
 # Install slice
-FILE(GLOB SLICE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../../../../src/interfaces/slice/jderobot/*.ice)
+FILE(GLOB SLICE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice/jderobot/*.ice)
 INSTALL (FILES ${SLICE_FILES} DESTINATION /usr/local/include/jderobot/slice)
 
 # Install CONF
-FILE(GLOB_RECURSE CONF_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/../*cfg)
+FILE(GLOB_RECURSE CONF_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/components/*.cfg)
 INSTALL (FILES ${CONF_FILES} DESTINATION /usr/local/share/jderobot/conf)
 
 # Install Glade
-FILE(GLOB_RECURSE GLADE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../*.glade)
+FILE(GLOB_RECURSE GLADE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/components/*.glade)
 INSTALL (FILES ${GLADE_FILES} DESTINATION /usr/local/share/jderobot/glade)
 
 

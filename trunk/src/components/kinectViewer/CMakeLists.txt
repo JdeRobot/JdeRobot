@@ -15,8 +15,8 @@ add_executable (kinectViewer ${SOURCE_FILES})
 
 
 TARGET_LINK_LIBRARIES(kinectViewer 
-   	${opencv_LIBRARIES}
-#   	${OpenCV_LIBRARIES}
+#   	${opencv_LIBRARIES}
+   	${OpenCV_LIBRARIES}
    	${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
 #    ${gthread_LIBRARIES}
