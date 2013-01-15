@@ -15,7 +15,7 @@ add_executable (calibrator ${SOURCE_FILES})
 TARGET_LINK_LIBRARIES( calibrator
  ${gtkmm_LIBRARIES}
  ${libglademm_LIBRARIES}
- ${gthread_LIBRARIES}
+# ${gthread_LIBRARIES}
  ${gtkglextmm_LIBRARIES}
  ${ZeroCIce_LIBRARIES}
  ${OpenCV_LIBRARIES}
@@ -25,5 +25,6 @@ TARGET_LINK_LIBRARIES( calibrator
  ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
  ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
  ${LIBS_DIR}/progeo/libprogeo.so
+ ${Gearbox_LIBRARIES}
    glut
 )

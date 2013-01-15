@@ -17,18 +17,16 @@ TARGET_LINK_LIBRARIES(naooperator
     ${opencv_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
-    ${gthread_LIBRARIES}
-    ${libgnomecanvas_LIBRARIES}
-    ${libgnomecanvasmm_LIBRARIES}
-    ${gtkglextmm_LIBRARIES}
+#    ${gthread_LIBRARIES}
+#    ${libgnomecanvas_LIBRARIES}
+#    ${libgnomecanvasmm_LIBRARIES}
+#    ${gtkglextmm_LIBRARIES}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${LIBS_DIR}/colorspaces/libcolorspaces.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
     ${LIBS_DIR}/jderobotice/libjderobotice.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
+#    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${Gearbox_LIBRARIES}
     ${ZeroCIce_LIBRARIES}
     ${OpenCV_LIBRARIES}
-
 )
-

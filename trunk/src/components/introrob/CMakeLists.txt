@@ -10,7 +10,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../calibrator
 )
 
-set( CMAKE_CXX_FLAGS "-lglut" ) # Opciones para el compilador
+set( CMAKE_CXX_FLAGS "-lglut -lgsl -lgslcblas" ) # Opciones para el compilador
 
 add_executable (introrob  ${SOURCE_FILES})
 
@@ -33,4 +33,3 @@ TARGET_LINK_LIBRARIES(introrob
 	${ZeroCIce_LIBRARIES}
 	${Gearbox_LIBRARIES}
 )
-

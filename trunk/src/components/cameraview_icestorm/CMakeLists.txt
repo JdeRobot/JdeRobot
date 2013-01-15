@@ -14,14 +14,15 @@ TARGET_LINK_LIBRARIES(cameraview_icestorm
     ${opencv_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
-    ${gthread_LIBRARIES}
-    ${libgnomecanvas_LIBRARIES}
-    ${libgnomecanvasmm_LIBRARIES}
-    ${gtkglextmm_LIBRARIES}
+#    ${gthread_LIBRARIES}
+#    ${libgnomecanvas_LIBRARIES}
+#    ${libgnomecanvasmm_LIBRARIES}
+#    ${gtkglextmm_LIBRARIES}
     ${OpenCV_LIBRARIES}
     ${ZeroCIceCore_LIBRARY}
     ${ZeroCIceStorm_LIBRARY}
     ${ZeroCIce_LIBRARIES}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
+    ${Gearbox_LIBRARIES}
 )
