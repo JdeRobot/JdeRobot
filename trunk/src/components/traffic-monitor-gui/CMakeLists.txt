@@ -24,7 +24,7 @@ include(${DEPS_DIR}/ice/CMakeLists.txt)
 
 SET( SOURCE_FILES main.cpp viewgtk.cpp trafficmonitor_config.cpp)
 
-SET( CMAKE_CXX_FLAGS " -g -std=gnu++0x")
+SET( CMAKE_CXX_FLAGS " -O2 -std=gnu++0x")
 
 include_directories(
   ${INTERFACES_CPP_DIR}
