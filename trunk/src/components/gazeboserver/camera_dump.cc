@@ -55,6 +55,7 @@ namespace gazebo
 		if(count==0){
 			std::vector<std::string> tokens;
 			nameCamera = this->parentSensor->GetCamera()->GetName();
+		//	std::cout << "Camera name: " + nameCamera << std::endl;
   			boost::split(tokens, nameCamera, boost::is_any_of("::"));
   			boost::split(tokens, tokens[2], boost::is_any_of("("));
 			nameGlobal = tokens[0];

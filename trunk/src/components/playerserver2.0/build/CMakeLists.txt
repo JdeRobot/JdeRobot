@@ -68,6 +68,7 @@ include(FindPkgConfig)
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/player/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
+include(${DEPS_DIR}/opencv/CMakeLists.txt)
 
 
 

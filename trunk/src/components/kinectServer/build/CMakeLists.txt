@@ -73,6 +73,7 @@ include(${DEPS_DIR}/pcl/CMakeLists.txt)
 #include(${DEPS_DIR}/xerces/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
+include(${DEPS_DIR}/opencv/CMakeLists.txt)
 
 
 

@@ -67,6 +67,7 @@ link_directories(${libglademm_LIBRARY_DIRS})
   # FIND AND CHECK OTHER DEPENDENCES
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
+include(${DEPS_DIR}/opencv/CMakeLists.txt)
 
 # START RECURSIVE
 add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/../../.. ${CMAKE_CURRENT_SOURCE_DIR}/../../..)

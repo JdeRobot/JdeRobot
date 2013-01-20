@@ -66,6 +66,7 @@ link_directories(${gsl_LIBRARIES_DIRS})
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
 include(${DEPS_DIR}/pcl/CMakeLists.txt)
+include(${DEPS_DIR}/opencv/CMakeLists.txt)
 
 
 # START RECURSIVE
