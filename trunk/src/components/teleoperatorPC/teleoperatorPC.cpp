@@ -21,7 +21,7 @@
  */
 
 
-
+#include <string>
 #include <pthread.h>
 #include "SharedMemory.h"
 #include "Gui.h"
@@ -45,7 +45,9 @@ int main(int argc, char** argv) {
         interfacesData = new SharedMemory();
         pthread_mutex_init(&interfacesData->imagesData_mutex, NULL);
         interfacesData->exit = false;
-
+        
+        interfacesData->configIce = std::string(argv[1]);
+        
         control = new controlICE(interfacesData);
 
         pthread_create(&thr_gui, NULL, &runGui, (void*) interfacesData);

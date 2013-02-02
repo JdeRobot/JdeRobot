@@ -171,8 +171,8 @@ void controlICE::sendDataGazebo() {
 void controlICE::initLaser() {
     try {
         std::string nameLaser;
-        nameLaser = std::string("--Ice.Config=teleoperatorPC.cfg");
-        char* name = (char*) nameLaser.c_str();
+        //nameLaser = std::string("--Ice.Config=teleoperatorPC.cfg");
+        char* name = (char*) interfacesData->configIce.c_str();
         char* argv[] = {name};
         int argc = 1;
 
@@ -215,8 +215,8 @@ void controlICE::endLaser() {
 void controlICE::initPose3DEncoders() {
     try {
         std::string namePose3DEncoders;
-        namePose3DEncoders = std::string("--Ice.Config=teleoperatorPC.cfg");
-        char* name = (char*) namePose3DEncoders.c_str();
+        //namePose3DEncoders = std::string("--Ice.Config=teleoperatorPC.cfg");
+        char* name = (char*) interfacesData->configIce.c_str();
         char* argv[] = {name};
         int argc = 1;
 
@@ -270,8 +270,8 @@ void controlICE::endPose3DEncoders() {
 void controlICE::initPose3DMotors() {
     try {
         std::string namePose3DMotors;
-        namePose3DMotors = std::string("--Ice.Config=teleoperatorPC.cfg");
-        char* name = (char*) namePose3DMotors.c_str();
+        //namePose3DMotors = std::string("--Ice.Config=teleoperatorPC.cfg");
+        char* name = (char*) interfacesData->configIce.c_str();
         char* argv[] = {name};
         int argc = 1;
 
@@ -325,8 +325,8 @@ void controlICE::endPose3DMotors() {
 void controlICE::initMotors() {
     try {
         std::string nameMotors;
-        nameMotors = std::string("--Ice.Config=teleoperatorPC.cfg");
-        char* name = (char*) nameMotors.c_str();
+        //nameMotors = std::string("--Ice.Config=teleoperatorPC.cfg");
+        char* name = (char*) interfacesData->configIce.c_str();
         char* argv[] = {name};
         int argc = 1;
 
@@ -370,8 +370,8 @@ void controlICE::endMotors() {
 void controlICE::initEncoders() {
     try {
         std::string nameEncoders;
-        nameEncoders = std::string("--Ice.Config=teleoperatorPC.cfg");
-        char* name = (char*) nameEncoders.c_str();
+        //nameEncoders = std::string("--Ice.Config=teleoperatorPC.cfg");
+        char* name = (char*) interfacesData->configIce.c_str();
         char* argv[] = {name};
         int argc = 1;
 
@@ -415,8 +415,8 @@ void controlICE::endEncoders() {
 void controlICE::initCameras() {
     try {
         std::string nameCameras;
-        nameCameras = std::string("--Ice.Config=teleoperatorPC.cfg");
-        char* name = (char*) nameCameras.c_str();
+        //nameCameras = std::string("--Ice.Config=teleoperatorPC.cfg");
+        char* name = (char*) interfacesData->configIce.c_str();
         char* argv[] = {name};
         int argc = 1;
 

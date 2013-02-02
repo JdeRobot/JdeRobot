@@ -76,6 +76,7 @@ public:
     motorsData_t motorsDataToSend;
     motorsData_t motorsDataReceived;
     Glib::RefPtr<Gdk::Pixbuf> imgBuff2, imgBuff;
+    std::string configIce;
 
     typedef struct ice_t {
         bool checkInit;
