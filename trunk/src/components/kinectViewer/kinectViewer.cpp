@@ -53,7 +53,7 @@
 #include <jderobot/pointcloud.h>
 #include <colorspaces/colorspacesmm.h>
 #include "kinectViewergui.h"
-+#include <pthread.h>
+#include <pthread.h>
 #include "controllers/Pose3DMotors-controller.h"
 #include "controllers/leds-controller.h"
 

@@ -455,6 +455,7 @@ kinectViewergui::add_depth_pointsCloud(){
 	world->clear_points();
 	std::vector<jderobot::RGBPoint> cloud;
 	cloud=pointCloud->getCloud();
+
 	for (std::vector<jderobot::RGBPoint>::iterator it = cloud.begin(); it != cloud.end(); ++it){
 		world->add_kinect_point(it->x,it->y,it->z,(int)it->r,(int)it->g,(int)it->b);
 	}

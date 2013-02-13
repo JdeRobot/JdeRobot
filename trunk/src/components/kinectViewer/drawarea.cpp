@@ -374,12 +374,14 @@ namespace kinectViewer {
 			glEnd();
 		}
 		glColor3f( 0, 0, 0 );
-		if (draw_kinect_points){
-			for (std::vector<jderobot::RGBPoint>::iterator it = cloud.begin(); it != cloud.end(); ++it){
+		if (true){
+std::cout << "kk" << cloud.size() << std::endl;
+glPointSize(10.0f);
+ 			for (std::vector<jderobot::RGBPoint>::iterator it = cloud.begin(); it != cloud.end(); ++it){
 				if (draw_kinect_with_color)
 					glColor3f( it->r, it->g, it->b );
 				glBegin(GL_POINTS);
-					glVertex3f(it->x/scale,it->y/scale,it->z/scale);
+					glVertex3f(it->x*10,it->y*10,it->z*10);
 				glEnd();
 			}
 				
