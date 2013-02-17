@@ -535,7 +535,7 @@
     </child>
   </widget>
   <widget class="GtkWindow" id="input_image_window">
-    <property name="can_focus">False</property>
+    <property name="can_focus">True</property>
     <property name="title" translatable="yes">Input Video</property>
     <child>
       <widget class="GtkFixed" id="fixed2">

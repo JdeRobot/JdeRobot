@@ -24,15 +24,46 @@
 #include <IceUtil/IceUtil.h>
 #include <jderobot/camera.h>
 #include <colorspaces/colorspacesmm.h>
+#include <traffic_monitor.h> 
 
 #include "viewgtk.h"
 #include "trafficmonitor_config.h"
 
 using namespace trafficmonitor;
 
+void get_current_frame(Ice::CommunicatorPtr ic, colorspaces::Image& current_frame)
+{
+   Ice::ObjectPrx base = ic->stringToProxy("redotest:tcp -h 0.0.0.0 -p 10000");
+   if (0==base)
+   {
+      throw "Could not create REDO proxy";
+   }
+
+   /*cast to CameraPrx*/
+   trafficmonitor::TrafficMonitorIPrx cprx = trafficmonitor::TrafficMonitorIPrx::checkedCast(base);
+   if (0==cprx)
+      throw "Invalid proxy";
+            
+   jderobot::ImageDataPtr data = cprx->getImageData();
+   colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(data->description->format);
+            
+   if (!fmt)
+   {
+      throw "Format not supported";
+   }
+   
+   colorspaces::Image image(data->description->width,
+                            data->description->height,
+                            fmt,
+                            &(data->pixelData[0]));
+
+   current_frame = image.clone();
+}
+
 int main(int argc, char** argv)
 {
-   ViewGtkPtr vp(new ViewGtk());
+   colorspaces::Image current_frame;
+   ViewGtkPtr vp(new ViewGtk(current_frame));
 
    int status;
    Ice::CommunicatorPtr ic;
@@ -64,7 +95,13 @@ int main(int argc, char** argv)
 
          vp->set_cfg(&cfg);
          vp->read_cfg();
-         vp->iteration();
+
+         for(;;)
+         {
+            get_current_frame(ic, current_frame);
+            vp->iteration();
+         }
+
       }
       else
       {
@@ -89,3 +126,4 @@ int main(int argc, char** argv)
    
    return status;
 }
+

@@ -19,10 +19,16 @@ SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../libs) # Directorio donde se encu
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../interfaces/slice) # Directorio donde se encuentran las interfaces ICE
 SET( LIBS_NEEDED bgfgsegmentation jderobotice colorspaces jderobotutil progeo) # Librerias de las que depende el componente
 SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../Deps) # Directorio donde se encuentran las dependencias
+SET( GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
 include(${DEPS_DIR}/ice/CMakeLists.txt)
 
-SET( SOURCE_FILES main.cpp viewgtk.cpp trafficmonitor_config.cpp)
+SET( GENERATED_FILES ${GENERATED_DIR}/traffic_monitor.cpp)
+EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E make_directory generated)
+ADD_CUSTOM_COMMAND(OUTPUT ${GENERATED_FILES} COMMAND slice2cpp  -I${CMAKE_CURRENT_SOURCE_DIR}/../../../src/interfaces/slice/ --output-dir ${GENERATED_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/traffic_monitor.ice)
+
+
+SET( SOURCE_FILES main.cpp viewgtk.cpp trafficmonitor_config.cpp ${GENERATED_FILES})
 
 SET( CMAKE_CXX_FLAGS " -O2 -std=gnu++0x")
 
@@ -32,7 +38,9 @@ include_directories(
   ${LIBS_DIR}/colorspaces
   ${LIBS_DIR}/jderobotice/
   ${cairomm_INCLUDE_DIRS}
-  ${CMAKE_CURRENT_SOURCE_DIR})
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${GENERATED_DIR})
+
 
 add_executable (trafficmonitor-gui ${SOURCE_FILES})
 

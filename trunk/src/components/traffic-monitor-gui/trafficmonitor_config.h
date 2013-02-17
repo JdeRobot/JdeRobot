@@ -30,12 +30,13 @@ public:
    void readProperties(const Ice::PropertyDict props_dict);
    void writeProperties();
 
+   const std::vector<Tpoint2D>& get_road_points() const{return roadPoints;};
    const std::string get_camera_conf() const {return camera_conf_file;};
    unsigned int get_max_vehicles() const {return max_vehicles;};
    double get_road_length() const{return road_length;};
    double get_road_width() const{return road_width;};
    double get_detection_zone_percentage() const{return detectionZonePercentage;};
-   const std::vector<Tpoint2D>& get_road_points() const{return roadPoints;};
+   void set_road_points(std::vector<Tpoint2D>& road_points) {roadPoints = road_points;};
 
    bool play;
    bool classify;

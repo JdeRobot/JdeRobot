@@ -19,16 +19,24 @@ typedef std::tr1::shared_ptr<ViewGtk> ViewGtkPtr;
 class ViewGtk
 {
 public:
-   ViewGtk() throw();
+   ViewGtk(colorspaces::Image& current_frame) throw();
    virtual ~ViewGtk() throw() {}
    void iteration();
    void set_cfg(TrafficMonitorAlgorithmConfig* alg_cfg) {cfg = alg_cfg;};
    void read_cfg();
+   void display( const colorspaces::Image& image);
 
 private:
    void updateWidgets();
+   void display_tracking_zone(Cairo::RefPtr<Cairo::Context> cr);
    void update_cfg();
    void apply_cfg(){cfg->writeProperties();};
+   bool onMotionEvent(GdkEventMotion* const& event);
+   bool onDrawingAreaMainExposeEvent(GdkEventExpose* event);
+   bool onDrawingAreaButtonPressEvent(GdkEventButton* event);
+   void findNearestPoint(int y, int x);
+
+   
    void update_play_cfg()
       {
          cfg->play = play->get_active();
@@ -42,6 +50,10 @@ private:
    Glib::RefPtr<Gnome::Glade::Xml> refXml;
    
    Widget<Gtk::Window> mainwindow;
+   Widget<Gtk::Window> input_image_window;
+
+   //Drawing areas
+   Widget<Gtk::DrawingArea> drawingarea_input_image;
 
    // Model controls
    Widget<Gtk::ToggleButton> play;
@@ -66,6 +78,7 @@ private:
    Widget<Gtk::CheckButton> show_klt_points;
 
    TrafficMonitorAlgorithmConfig* cfg;
+   colorspaces::Image& m_currentFrame;
 };
   
 }//namespace
