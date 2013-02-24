@@ -35,7 +35,8 @@ private:
    bool onDrawingAreaMainExposeEvent(GdkEventExpose* event);
    bool onDrawingAreaButtonPressEvent(GdkEventButton* event);
    void findNearestPoint(int y, int x);
-
+   void update_stats();
+   void  update_vehicles_counts();
    
    void update_play_cfg()
       {
@@ -77,6 +78,16 @@ private:
    Widget<Gtk::CheckButton> show_bounding_box;
    Widget<Gtk::CheckButton> show_klt_points;
 
+   //Text views
+   Widget<Gtk::TextView> vehicles_stats;
+   Widget<Gtk::TextView> moto_view;     
+   Widget<Gtk::TextView> car_view;
+   Widget<Gtk::TextView> suv_view;
+   Widget<Gtk::TextView> van_view;
+   Widget<Gtk::TextView> truck_view;
+   Widget<Gtk::TextView> total_view;
+
+   
    TrafficMonitorAlgorithmConfig* cfg;
    colorspaces::Image& m_currentFrame;
 };

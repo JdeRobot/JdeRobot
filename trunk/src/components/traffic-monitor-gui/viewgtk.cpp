@@ -13,6 +13,8 @@
 #include <unistd.h>
 
 #include "viewgtk.h"
+#include "database.h"
+#include "vehicle_model.h"
 
 #define DISTANCE_2D(a,b) sqrt( (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) )
 
@@ -27,6 +29,13 @@ ViewGtk::ViewGtk(colorspaces::Image& current_frame) throw ():
    refXml(Gnome::Glade::Xml::create(gladepath)), //FIXME: check for existence
    m_currentFrame(current_frame),   
 
+   INIT_WIDGET(vehicles_stats, refXml),
+   INIT_WIDGET(moto_view , refXml),
+   INIT_WIDGET(car_view , refXml),
+   INIT_WIDGET(suv_view , refXml),
+   INIT_WIDGET(van_view , refXml),
+   INIT_WIDGET(truck_view , refXml),
+   INIT_WIDGET(total_view, refXml),
    INIT_WIDGET(mainwindow, refXml),
    INIT_WIDGET(input_image_window, refXml),
    INIT_WIDGET(play, refXml),
@@ -47,6 +56,8 @@ ViewGtk::ViewGtk(colorspaces::Image& current_frame) throw ():
    INIT_WIDGET(show_klt_points, refXml),
    INIT_WIDGET(drawingarea_input_image, refXml)
 {
+
+   database.connect();
    
    /* initialize random seed: */
    srand ( time(NULL) );
@@ -215,6 +226,7 @@ bool ViewGtk::onDrawingAreaMainExposeEvent(GdkEventExpose* event) {
       Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
       display(m_currentFrame);
       display_tracking_zone(cr);
+      update_stats();
       // display_detection_zone(cr);
    }
 
@@ -283,7 +295,81 @@ void ViewGtk::display( const colorspaces::Image& image)
       drawingarea_input_image->set_size_request(img_rgb8.width, img_rgb8.height);
    }
 }
-    
 
+/**
+ *
+ */
+void ViewGtk::update_stats()
+{
+   std::stringstream stats_text;
+   mysqlpp::StoreQueryResult result = database.getLastVehicles(20);
+
+   for (size_t i = 0; i < result.num_rows(); i++)
+   {
+      stats_text << result[i]["vehicle_id"]
+                 << " :: "
+                 << std::fixed
+                 << std::setprecision(2)
+                 << result[i]["speed"]
+                 << "  km/h";
+            
+      /** When classifying we show the vehicle class also*/
+      if (cfg->classify)
+         stats_text << " -- " << result[i]["category"] << endl;
+      else
+         stats_text << endl;
+
+      vehicles_stats->get_buffer()->set_text(stats_text.str());
+      vehicles_stats->show();
+   }
+
+   update_vehicles_counts();
+}
+
+/**
+ *
+ */
+void  ViewGtk::update_vehicles_counts()
+{
+   std::stringstream ss;
+   int motorcycles_count = database.getCount(VehicleModel::get_model_desc(MOTORCYCLE));
+   int trucks_count      = database.getCount(VehicleModel::get_model_desc(TRUCK));
+   int cars_count        = database.getCount(VehicleModel::get_model_desc(CAR));
+   int suvs_count        = database.getCount(VehicleModel::get_model_desc(SUV));
+   int vans_count        = database.getCount(VehicleModel::get_model_desc(VAN));
+
+   ss << motorcycles_count;
+   moto_view->get_buffer()->set_text(ss.str());
+   ss.str("");
+
+   ss << cars_count;
+   car_view->get_buffer()->set_text(ss.str());
+   ss.str("");
+
+   ss << suvs_count;
+   suv_view->get_buffer()->set_text(ss.str());
+   ss.str("");
+      
+   ss << vans_count;
+   van_view->get_buffer()->set_text(ss.str());
+   ss.str("");
+
+   ss << trucks_count;
+   truck_view->get_buffer()->set_text(ss.str());
+   ss.str("");
+      
+   int sum = motorcycles_count + cars_count + suvs_count + vans_count + trucks_count;
+      
+   ss << sum;
+   total_view->get_buffer()->set_text(ss.str());
+   ss.str("");
+
+   moto_view->show();
+   car_view->show();
+   suv_view->show();
+   van_view->show();
+   truck_view->show();
+   total_view->show();
+}
 
 } //namespace
