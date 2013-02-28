@@ -1,7 +1,7 @@
 #include "gazebo.hh"
 #include "plugins/CameraPlugin.hh"
-#include "common/common.h"
-#include "transport/transport.h"
+#include "common/common.hh"
+#include "transport/transport.hh"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>

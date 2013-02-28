@@ -1,8 +1,8 @@
 #include <boost/bind.hpp>
 #include "gazebo.hh"
-#include "physics/physics.h"
-#include "common/common.h"
-#include "transport/transport.h"
+#include "physics/physics.hh"
+#include "common/common.hh"
+#include "transport/transport.hh"
 // ICE utils includes
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>

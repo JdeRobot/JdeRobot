@@ -1,9 +1,9 @@
 #include <boost/bind.hpp>
 #include "gazebo.hh"
-#include "physics/physics.h"
+#include "physics/physics.hh"
 #include "physics/MultiRayShape.hh"
-#include "common/common.h"
-#include "transport/transport.h"
+#include "common/common.hh"
+#include "transport/transport.hh"
 
 #include "plugins/RayPlugin.hh"
 
