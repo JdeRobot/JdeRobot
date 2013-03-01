@@ -170,13 +170,14 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 
 
 	pthread_mutex_lock (&kinect->mutex);
-    //cloud->points.resize(_width*_height);
+    cloud->points.resize(_width*_height);
     
     int indicePunto = 0;
 	pcl::PointXYZRGBA point;
 	point.r      = 255;
 	point.g      = 0;
 	point.b      = 0;
+    
     
 	for(int x = 0 ; x < _width ; x++){
 		for(int y = 0; y < _height; y++){
@@ -210,6 +211,7 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 
 		}
 	}
+
 	
 	pcl::VoxelGrid<pcl::PointXYZRGBA> sor;
 	sor.setInputCloud (cloud);
@@ -661,11 +663,11 @@ void *mainKinect(void* v)
 		jderobotice::Context context;
 
         Ice::ObjectPtr object = new KinectI(std::string("KinectGazebo"), context, kinect);
-        //Ice::ObjectPtr object2 = new CameraI(std::string("KinectGazebo"), context, kinect);
+        Ice::ObjectPtr object2 = new CameraI(std::string("KinectGazebo"), context, kinect);
         //Ice::ObjectPtr object3 = new CameraII(std::string("KinectGazebo"), context, kinect);
 
         adapter->add(object, ic->stringToIdentity("Kinect"));
-        //adapter->add(object2, ic->stringToIdentity("KinectRGB"));
+        adapter->add(object2, ic->stringToIdentity("KinectRGB"));
         //adapter->add(object3, ic->stringToIdentity("KinectDepth"));
         std::cout << "        adapter->add(object, ic->stringToIdentity(Kinect)); "  << std::endl;
         adapter->activate();

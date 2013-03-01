@@ -1,9 +1,12 @@
 <?xml version ='1.0'?>
 <gazebo version ='1.0'>
 <world name='default'>
-  <include filename='ground_plane.model'/>
-  <model name='pioneer2dx' static='0'>
-        <pose>10.000000 -15.000000 0.160000 0.000000 -0.000000 0.000000</pose>
+        <include>
+            <uri>model://ground_plane</uri>
+        </include>
+    
+  <model name='kinect_model'>
+  	<static>true</static>
         <link name="kinect">
             <inertial>
                 <mass>0.30</mass>
@@ -37,7 +40,10 @@
             </sensor>
         </link>
   </model>
-  <include filename='sun.light'/>
+        <include>
+            <uri>model://sun</uri>
+        </include>
+    
 
 </world>
 </gazebo>
