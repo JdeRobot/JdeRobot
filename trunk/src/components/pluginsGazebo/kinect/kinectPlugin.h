@@ -96,6 +96,18 @@ namespace gazebo
 		pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud;
 		cv::Mat imageRGB;
 		cv::Mat imageDepth;
+		
+        int cycle;
+        long totalb, totala, diff;
+        struct timeval a, b;   
+        
+        int cycle2;
+        long totalb2, totala2, diff2;
+        struct timeval a2, b2;  
+        
+        int cycle3;
+        long totalb3, totala3, diff3;
+        struct timeval a3, b3;   
   };
 }
 #endif

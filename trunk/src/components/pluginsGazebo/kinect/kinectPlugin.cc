@@ -23,6 +23,8 @@
 
 using namespace gazebo;
 
+gazebo::DepthCameraPlugin* kinect;
+
 GZ_REGISTER_SENSOR_PLUGIN(DepthCameraPlugin)
 
 void *mainKinect(void* v);
@@ -34,6 +36,7 @@ DepthCameraPlugin::DepthCameraPlugin() : SensorPlugin()/*,viewer ("PCL OpenNI Vi
 	count = 0;
 	pthread_mutex_init (&mutex, NULL);	
 	pthread_mutex_init (&mutexRGB, NULL);	
+    gzerr << "Kinect Construtor\n";
 
 }
 
@@ -65,10 +68,11 @@ void DepthCameraPlugin::Load(sensors::SensorPtr _sensor,
         this, _1, _2, _3, _4, _5));
 
 
+  /*
   this->newRGBPointCloudConnection = this->depthCamera->ConnectNewRGBPointCloud(
       boost::bind(&DepthCameraPlugin::OnNewRGBPointCloud,
         this, _1, _2, _3, _4, _5));
-
+*/
 
 
   this->parentSensor->SetActive(true);
@@ -127,6 +131,10 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
     unsigned int _width, unsigned int _height,
     unsigned int _depth, const std::string &_format)
 {
+    cycle = 100;
+    gettimeofday(&a, NULL);
+    totala = a.tv_sec * 1000000 + a.tv_usec;             
+
 
 	if(count == 0){
 		count++;
@@ -134,6 +142,8 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 		nameKinect = std::string("--Ice.Config=" + name + ".cfg");
 		pthread_t thr_gui;
 		pthread_create(&thr_gui, NULL, &mainKinect, (void*)this);
+	    gzerr << "Creating Kinect\n";
+        cloud->points.resize(_width*_height);
 	}
 
 	double hfov = 1.04719755;
@@ -141,7 +151,7 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 	double pointCloudCutoff = 0.001;
 
 	//std::cout << "depth: " << (int)(_image[0]*1000) << std::endl;
-
+/*
 	cv::Mat image;
 
 	image.create(_height, _width, CV_32FC1);
@@ -153,14 +163,23 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 	cv::cvtColor(imageDepth, imageDepth, CV_GRAY2RGB);
 	//cv::imshow("profundidad", imageDepth);
 	//cv::waitKey(10);
-
+*/
 
 	double pAngle;
     double yAngle;
 
-    cloud->clear();
-	for(int x = 0 ; x < _width ; x+=1){
-		for(int y = 0; y < _height; y+=1){
+
+	pthread_mutex_lock (&kinect->mutex);
+    //cloud->points.resize(_width*_height);
+    
+    int indicePunto = 0;
+	pcl::PointXYZRGBA point;
+	point.r      = 255;
+	point.g      = 0;
+	point.b      = 0;
+    
+	for(int x = 0 ; x < _width ; x++){
+		for(int y = 0; y < _height; y++){
 			int indice = y*_width + x;
 
 		  	if (_height>1) 
@@ -175,12 +194,10 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 
 			float d = _image[indice];
 
-			pcl::PointXYZRGBA point;
+
 			point.x      = d * tan(yAngle);
 			point.y      = d * tan(pAngle);
-			point.r      = 255;
-			point.g      = 0;
-			point.b      = 0;
+
 			if(d > pointCloudCutoff){
 				point.z    = _image[indice];
 			}else{ //point in the unseeable range
@@ -189,25 +206,40 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 				cloud->is_dense = false;
 			}
 
-			cloud->points.push_back(point);
+			cloud->points[indicePunto++] = point;
 
 		}
 	}
+	
 	pcl::VoxelGrid<pcl::PointXYZRGBA> sor;
 	sor.setInputCloud (cloud);
-	sor.setLeafSize (0.02, 0.02, 0.02);
+	sor.setLeafSize (0.05, 0.05, 0.05);
 
 	pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud2(new pcl::PointCloud<pcl::PointXYZRGBA>);
 
 	sor.filter (*cloud2);
 
 	*cloud = *cloud2;
-
-	pthread_mutex_unlock (&mutex);
+	
+	pthread_mutex_unlock (&kinect->mutex);
+		
+	//pthread_mutex_unlock (&mutex);
 
 	//std::cout << "cloud: " << cloud->points.size() << std::endl;
 	//if (!viewer.wasStopped())
 	//  viewer.showCloud(cloud);
+	
+	gettimeofday(&b, NULL);
+	totalb = b.tv_sec * 1000000 + b.tv_usec;
+
+	diff = (totalb - totala) / 1000;
+	diff = cycle - diff;
+
+	if (diff < 10)
+		diff = 10;
+
+	sleep(diff/1000);  
+	
 }
 
 /////////////////////////////////////////////////
@@ -215,9 +247,22 @@ void DepthCameraPlugin::OnNewRGBPointCloud(const float * _image,
                 unsigned int _width, unsigned int _height,
                 unsigned int _depth, const std::string &/*_format*/)
 {
-/*
-	std::cout << "OnNewRGBPointCloud Format: " << format << std::endl;
-*/
+    cycle3 = 100;
+    gettimeofday(&a3, NULL);
+    totala3 = a3.tv_sec * 1000000 + a3.tv_usec; 
+    
+	gettimeofday(&b3, NULL);
+	totalb3 = b3.tv_sec * 1000000 + b3.tv_usec;
+
+	diff3 = (totalb3 - totala3) / 1000;
+	diff3 = cycle3 - diff3;
+
+	if (diff3 < 10)
+		diff3 = 10;
+
+	sleep(diff3/1000); 
+    
+    
 }
 
 /////////////////////////////////////////////////
@@ -227,6 +272,11 @@ void DepthCameraPlugin::OnNewImageFrame(const unsigned char * _image,
                               unsigned int _depth,
                               const std::string &_format)
 {
+
+    cycle2 = 100;
+    gettimeofday(&a2, NULL);
+    totala2 = a2.tv_sec * 1000000 + a2.tv_usec;  
+
   	//std::cout << "OnNewImageFrame Format: " << format << " Depth: " << _depth << std::endl;
 	pthread_mutex_lock (&mutexRGB);
 	imageRGB.create(_height, _width, CV_8UC3);
@@ -234,6 +284,17 @@ void DepthCameraPlugin::OnNewImageFrame(const unsigned char * _image,
 	//cv::imshow("Color", imageRGB);
 	//cv::waitKey(10);
 	pthread_mutex_unlock (&mutexRGB);
+	
+	gettimeofday(&b2, NULL);
+	totalb2 = b2.tv_sec * 1000000 + b2.tv_usec;
+
+	diff2 = (totalb2 - totala2) / 1000;
+	diff2 = cycle2 - diff2;
+
+	if (diff2 < 10)
+		diff2 = 10;
+
+	sleep(diff2/1000); 
 
 }
 
@@ -250,6 +311,7 @@ void DepthCameraPlugin::OnNewImageFrame(const unsigned char * _image,
 			pthread_mutex_lock (&kinect->mutex);
             pcl::PointCloud<pcl::PointXYZRGBA> cloud = *kinect->cloud;
 			pthread_mutex_unlock (&kinect->mutex);
+			
             if(cloud.points.size()){
                KData->p.resize(cloud.points.size());
                int index = 0;
@@ -263,7 +325,7 @@ void DepthCameraPlugin::OnNewImageFrame(const unsigned char * _image,
                   index++;
                }
             }
-				return KData;
+			return KData;
 		};
          jderobot::pointCloudDataPtr KData;
 	     gazebo::DepthCameraPlugin* kinect;
@@ -576,7 +638,7 @@ class CameraII: virtual public jderobot::Camera {
 void *mainKinect(void* v) 
 {
 
-	gazebo::DepthCameraPlugin* kinect = (gazebo::DepthCameraPlugin*)v;
+	kinect = (gazebo::DepthCameraPlugin*)v;
 	
 	char* name = (char*)kinect->nameKinect.c_str();
 
@@ -599,12 +661,12 @@ void *mainKinect(void* v)
 		jderobotice::Context context;
 
         Ice::ObjectPtr object = new KinectI(std::string("KinectGazebo"), context, kinect);
-        Ice::ObjectPtr object2 = new CameraI(std::string("KinectGazebo"), context, kinect);
-        Ice::ObjectPtr object3 = new CameraII(std::string("KinectGazebo"), context, kinect);
+        //Ice::ObjectPtr object2 = new CameraI(std::string("KinectGazebo"), context, kinect);
+        //Ice::ObjectPtr object3 = new CameraII(std::string("KinectGazebo"), context, kinect);
 
         adapter->add(object, ic->stringToIdentity("Kinect"));
-        adapter->add(object2, ic->stringToIdentity("KinectRGB"));
-        adapter->add(object3, ic->stringToIdentity("KinectDepth"));
+        //adapter->add(object2, ic->stringToIdentity("KinectRGB"));
+        //adapter->add(object3, ic->stringToIdentity("KinectDepth"));
         std::cout << "        adapter->add(object, ic->stringToIdentity(Kinect)); "  << std::endl;
         adapter->activate();
         ic->waitForShutdown();
