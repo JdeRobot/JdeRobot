@@ -1,24 +1,16 @@
+#ifndef NODO_H
+#define NODO_H
+
 #include <iostream>
 #include <list>
-
+ 
 #include <gtk/gtk.h>
 #include <libgnomecanvas/libgnomecanvas.h>
 
+#include "tipos.h"
+
 using namespace std;
 
-
-typedef struct tipoNodo {
-
-	GnomeCanvasItem * item;	
-	GnomeCanvasItem * estado_inicial;		
-//	int origenX, origenY;		// Punto (x,y) donde se dibujara en el canvas
-//	int destinoX, destinoY;		// Punto (x,y) donde se dibujara en el canvas
-	string nombre;			// Nombre del nodo. "" por defecto
-	string codigo;		// Codigo del estado
-	GnomeCanvasItem * item_nombre;		// item que muestra el nombre del estado
-	list <GnomeCanvasItem *> listaAdyacentes;  // Para estados -- Lista de lineas adyacentes 
-	int idHijo;  //Id. que indica el subautomata dentro de la lista de subautomatas que se corresponde con el hijo de este estado
-} tNodo; 
 
 /*	Copia y añade un nodo a la lista	*/
 void copiar_nodo (GnomeCanvasItem * item, GnomeCanvasItem * item_cp);
@@ -38,3 +30,5 @@ GnomeCanvasItem * pinta_estado_inicial (GnomeCanvasGroup *group, GnomeCanvasItem
 void get_bounds (GnomeCanvasItem *nodo, double *x1, double *y1, double *x2, double *y2);
 
 gint item_event2 (GnomeCanvasItem *item_group, GdkEvent *event, gpointer data);
+
+#endif

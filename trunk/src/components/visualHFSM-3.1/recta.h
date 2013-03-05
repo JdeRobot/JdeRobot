@@ -1,16 +1,9 @@
-#include <stdio.h>
+#ifndef RECTA_H
+#define RECTA_H
 
+#include "tipos.h"
+#include <math.h>
 
-typedef struct punto {
-	double x;
-	double y;
-} punto; 
-
-typedef struct recta {
-	double A;
-	double B;
-	double C;
-} recta; 
 
 punto crear_punto (double x, double y);
 punto punto_medio (punto p1, punto p2);
@@ -31,4 +24,4 @@ recta recta_paralela (recta r1, punto p1, double distancia);
 punto interseccion_rectas (recta r1, recta r2);
 
 
-
+#endif

@@ -1,31 +1,23 @@
+#ifndef VENTANAS_H
+#define VENTANAS_H
 
+#include <iostream>
+#include <list>
+#include <string.h>
 
-typedef struct importar {
-	bool laser;
-	bool motor;
-	bool radar;
-	bool encoders;
-	bool lat_lon;
-	bool camara;
-	bool ptencoders;
-} importar; 
+#include "transicion.h"
+#include "int2string.h"
+ 
+#include <gtk/gtk.h>
+#include <libgnomecanvas/libgnomecanvas.h>
+#include <libglade-2.0/glade/glade.h>
 
+#include <gtksourceview/gtksourceview.h>
+#include <gtksourceview/gtksourcebuffer.h>
+#include <gtksourceview/gtksourcelanguage.h>
+#include <gtksourceview/gtksourcelanguagemanager.h>
 
-typedef enum TYPE_VENTANA {
-	NOMBRAR,
-	EDITAR,
-	CODIGO,
-	LIBRERIAS,
-	TIMER
-}tVentana;
-
-typedef struct nodoVentana {
-	GnomeCanvasItem * item;		// item correspondiente a la ventana
-	tVentana tipo;			// Nombre del nodo. "" por defecto
-	GtkWidget *ventana;		// Ventana
-} nVentana; 
-
-
+#include "tipos.h"
 
 /****EDICION DE ESTADOS****/
 
@@ -61,3 +53,4 @@ GtkWidget * comprobar_ventana_abierta (GnomeCanvasItem * item, tVentana tipo);
  * del canvas aleatoriamente
  */
 void change_item_color (GnomeCanvasItem *item, int color);
+#endif

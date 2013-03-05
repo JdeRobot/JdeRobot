@@ -1,21 +1,45 @@
+#ifndef INTERFAZ_H
+#define INTERFAZ_H
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+
+#include <sstream>
 #include <iostream>
+#include <string>
+#include <fstream>
 #include <list>
-#include "nodo.h"
+
+#include <gdk/gdkkeysyms.h>	//NOMBRES TECLAS
+
+#include <gtk/gtk.h>
+#include <gtksourceview/gtksourceview.h>
+#include <gtksourceview/gtksourcebuffer.h>
+#include <gtksourceview/gtksourcelanguage.h>
+#include <gtksourceview/gtksourcelanguagemanager.h>
+
+#include <libgnomecanvas/libgnomecanvas.h>
+#include <libglade-2.0/glade/glade.h>
+#include <libxml/tree.h>
+
+#include <sys/types.h>
+#include <unistd.h>
+
+#include "transicion.h"
+#include "xml.h"
+#include "int2string.h"
+#include "imprimir.h"
+
+#include "tipos.h"
 #include "ventanas.h"
+#include "recta.h"
+
 //#include <gtk/gtk.h>
 
 using namespace std;
 
-typedef struct tSubAut {
-	list <tNodo> ListaElementosSub;
-	list <tTransicion> ListaTransicionesSub;
-	int tiempoIteracionSub;	
-	string variablesSub;
-	string funcionesSub;
-	importar impSub;
-	int idSub;
-	int idPadre;
-} tSubAut; 
 
 
 void
@@ -72,3 +96,5 @@ actualizar_tree_view();
 /*
 static GtkWidget *
 create_view_and_model();*/
+
+#endif

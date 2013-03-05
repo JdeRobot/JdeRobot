@@ -1,6 +1,4 @@
-#include <sstream>
-
-using namespace std;
+#include "int2string.h"
 
 string int2string(int n){
 	std:: stringstream flujo;

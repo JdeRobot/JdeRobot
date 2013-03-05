@@ -1,21 +1,4 @@
-#include <iostream>
-#include <list>
-#include <string.h>
-
-#include "nodo.h"
-#include "transicion.h"
 #include "ventanas.h"
-#include "int2string.h"
- 
-#include <gtk/gtk.h>
-#include <libgnomecanvas/libgnomecanvas.h>
-#include <libglade-2.0/glade/glade.h>
-
-#include <gtksourceview/gtksourceview.h>
-#include <gtksourceview/gtksourcebuffer.h>
-#include <gtksourceview/gtksourcelanguage.h>
-#include <gtksourceview/gtksourcelanguagemanager.h>
-
 
 list <nVentana> ListaVentanas;
 

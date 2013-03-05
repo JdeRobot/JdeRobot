@@ -1,18 +1,4 @@
-
-#include <iostream>
-#include <string>
-#include <list>
-#include <string.h>
-
-//#include "nodo.h"
-#include "transicion.h"
-//#include "ventanas.h"
-#include "int2string.h"
 #include "xml.h"
-#include "interfaz.h"
-
-
-#include <libxml/tree.h>
 
 int cont_nodos = 0;
 //************************Añadida lista de subautomatas

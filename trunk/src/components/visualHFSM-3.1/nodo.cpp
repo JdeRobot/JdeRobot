@@ -1,12 +1,4 @@
-#include <iostream>
-#include <list>
-
-#include "recta.h"
 #include "nodo.h"
-#include "transicion.h"
- 
-#include <gtk/gtk.h>
-#include <libgnomecanvas/libgnomecanvas.h>
 //int cont_nodos = 0;
 
 

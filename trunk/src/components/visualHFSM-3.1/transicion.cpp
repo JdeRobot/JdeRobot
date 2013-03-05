@@ -1,21 +1,8 @@
-#include <iostream>
-#include <list>
-#include <cstring>
-
 #include "transicion.h"
-#include "interfaz.h"
-#include "recta.h"
-
-//#include "nodo.h"
-
-#include <gtk/gtk.h>
-#include <libgnomecanvas/libgnomecanvas.h>
-
 int cont_transiciones = 0;
 
 
-extern list <tNodo> ListaElementos;
-extern list <tTransicion> ListaTransiciones;
+
 //extern list <transicion_aux> ListaTransicionesTemporales;
 //extern list <GtkWidget *> ListaBotones;
 //extern GnomeCanvasGroup *root;
@@ -161,6 +148,7 @@ pinta_autotransicion (GnomeCanvasItem *nodo)
 
 GnomeCanvasGroup * repintar_transicion (GnomeCanvasGroup *root, GnomeCanvasItem *origen, GnomeCanvasItem *destino, double x, double y)
 {
+
 	GnomeCanvasItem *item1,*item2;
 	GnomeCanvasGroup *group;
 	
@@ -262,11 +250,13 @@ GnomeCanvasGroup * repintar_transicion (GnomeCanvasGroup *root, GnomeCanvasItem 
 
 
 	return group;
+	
 
 }
 
 GnomeCanvasGroup * repintar_transicion_nodo (GnomeCanvasGroup *root, GnomeCanvasItem *transicion, GnomeCanvasItem *nodo, char * direccion)
 {
+
 	GList * list_items, *list_aux;	
 	GnomeCanvasItem *item, *box, *arrow;
 	GnomeCanvasGroup *group;
@@ -374,6 +364,7 @@ GnomeCanvasGroup * repintar_transicion_nodo (GnomeCanvasGroup *root, GnomeCanvas
 	//gnome_canvas_item_reparent (box, transicion);
 
 	return GNOME_CANVAS_GROUP (group);
+	
 }
 
 

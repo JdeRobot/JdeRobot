@@ -1,36 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-
-#include <sstream>
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <list>
-
-#include <gdk/gdkkeysyms.h>	//NOMBRES TECLAS
-
-#include <gtk/gtk.h>
-#include <gtksourceview/gtksourceview.h>
-#include <gtksourceview/gtksourcebuffer.h>
-#include <gtksourceview/gtksourcelanguage.h>
-#include <gtksourceview/gtksourcelanguagemanager.h>
-
-#include <libgnomecanvas/libgnomecanvas.h>
-#include <libglade-2.0/glade/glade.h>
-#include <libxml/tree.h>
-
-#include <sys/types.h>
-#include <unistd.h>
-
-#include "transicion.h"
-#include "recta.h"
-//#include "nodo.h"
-//#include "ventanas.h"
-#include "xml.h"
-#include "int2string.h"
-#include "imprimir.h"
 #include "interfaz.h"
 
 //#include <gtkmm.h>
@@ -2568,6 +2535,7 @@ create_drag_box (GnomeCanvasGroup *group, char *box_name, double x1, double y1, 
 GnomeCanvasItem *
 pinta_transicion (GnomeCanvasItem *origen, GnomeCanvasItem *destino)
 {
+
 	GnomeCanvasPoints *pointsPoligono = gnome_canvas_points_new (2);
 	GnomeCanvasGroup *group;
 	GnomeCanvasItem *item1, *item2;
@@ -2587,7 +2555,7 @@ pinta_transicion (GnomeCanvasItem *origen, GnomeCanvasItem *destino)
 
 	printf("origen, x1: %f, y1: %f, x2: %f, y2: %f \n", I1x1, I1y1, I1x2, I1y2);
 				
-	/* Resolver desequilibrio */
+	// Resolver desequilibrio //
 			
 	I1x1 += 1.5;
 	I1y1 += 1.5;
@@ -2607,7 +2575,7 @@ pinta_transicion (GnomeCanvasItem *origen, GnomeCanvasItem *destino)
 	g_object_get (G_OBJECT (destino), "y2", &I2y2, NULL);
 	printf("destino, x1: %f, y1: %f, x2: %f, y2: %f \n", I2x1, I2y1, I2x2, I2y2);
 				
-	/* Resolver desequilibrio */
+	// Resolver desequilibrio //
 			
 	I2x1 += 1.5;
 	I2y1 += 1.5;
@@ -2699,6 +2667,7 @@ pinta_transicion (GnomeCanvasItem *origen, GnomeCanvasItem *destino)
 	create_drag_box (group, (char *)"box", pMedioX, pMedioY, G_CALLBACK (highlight_box));
 
 	return GNOME_CANVAS_ITEM(group);
+	
 
 }
 

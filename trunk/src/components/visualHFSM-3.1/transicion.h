@@ -1,39 +1,19 @@
+#ifndef TRANSICION_H
+#define TRANSICION_H
+
 #include <iostream>
 
 #include <gtk/gtk.h>
 #include <libgnomecanvas/libgnomecanvas.h>
 
+#include <list>
+#include <cstring>
 
 
+#include "recta.h"
+#include "nodo.h"
+#include "interfaz.h"
 using namespace std;
-
-
-typedef struct tipoTransicion {
-	//int id;
-	GnomeCanvasItem * item;	// Item que representa la transición. Está formado a su vez por 3 item: 2 líneas y un punto de acción en la unión de ambas (box).
-				// Posicion 0 inicio recta, posicion 1 final recta, posicion 2 box.
-	//int origenX, origenY;		
-	//int destinoX, destinoY;
-	//double pMedioX, pMedioY;	// Posición del punto de acción de la transición.
-	GnomeCanvasItem * origen;	// Nodo origen
-	GnomeCanvasItem * destino;	// Nodo destino
-	string nombre;			// Nombre de la transicion. "" por defecto
-	GnomeCanvasItem * item_nombre;	// Item del nombre de la transición.
-	//GnomeCanvasItem * orientacion;	// Triangulo flecha
-	string codigo;
-	int tiempo;
-} tTransicion; 
-
-typedef struct transicion_aux {		// Transiciones temporales. Usadas para pintar las transiciones despues de cargar un fichero.
-	GnomeCanvasItem *origen;
-	GnomeCanvasItem *destino;
-	int origen_xml;
-	int destino_id;
-	int tiempo;
-	string codigo;
-	string nombre;
-	GnomeCanvasItem *item;
-} transicion_aux;
 
 /*   Devuelve el identificador de la transición   */
 int id_transicion ();
@@ -75,3 +55,5 @@ void t_eliminar_transicion_lista (GnomeCanvasItem *transicion);
 int numero_transiciones (GnomeCanvasItem *estado1, GnomeCanvasItem *estado2);
 
 void eliminar_nombre (GnomeCanvasItem *transicion);
+
+#endif
