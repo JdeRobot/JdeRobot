@@ -2,7 +2,7 @@ SET( gladedir ${CMAKE_CURRENT_SOURCE_DIR})
 
 SET( SOURCE_FILES controller.cpp main.cpp mainthread.cpp model.cpp viewgtk.cpp viewtext.cpp )
 
-set( CMAKE_CXX_FLAGS "-lglut -lgsl -lgslcblas " ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
+
 add_definitions(-DGLADE_DIR="${gladedir}")
 
 
@@ -17,10 +17,7 @@ TARGET_LINK_LIBRARIES( bgfglab
     ${opencv_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
-#    ${gthread_LIBRARIES}
-#    ${libgnomecanvas_LIBRARIES}
-#    ${libgnomecanvasmm_LIBRARIES}
-#    ${gtkglextmm_LIBRARIES}
+	  ${GLUT_LIBRARIES}
     ${OpenCV_LIBRARIES}
     ${LIBS_DIR}/jderobotice/libjderobotice.so
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so

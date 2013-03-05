@@ -4,9 +4,6 @@ add_definitions(-DGLADE_DIR="${gladedir}")
 include_directories(
     ${INTERFACES_CPP_DIR}
     ${LIBS_DIR}
-    ${gl_INCLUDE_DIRS}
-    ${glu_INCLUDE_DIRS}
-    ${glut_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR})
 
 
@@ -15,7 +12,7 @@ add_executable (calibrator ${SOURCE_FILES})
 TARGET_LINK_LIBRARIES( calibrator
  ${gtkmm_LIBRARIES}
  ${libglademm_LIBRARIES}
-# ${gthread_LIBRARIES}
+  ${GLUT_LIBRARIES}
  ${gtkglextmm_LIBRARIES}
  ${ZeroCIce_LIBRARIES}
  ${OpenCV_LIBRARIES}
@@ -25,6 +22,4 @@ TARGET_LINK_LIBRARIES( calibrator
  ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
  ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
  ${LIBS_DIR}/progeo/libprogeo.so
- ${Gearbox_LIBRARIES}
-   glut
 )

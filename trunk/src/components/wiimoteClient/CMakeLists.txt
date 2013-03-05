@@ -7,11 +7,12 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-set( CMAKE_CXX_FLAGS "-lglut -lgsl -lgslcblas -lIce -lIceUtil" ) # Opciones para el compilador
 
 add_executable (wiimoteClient ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(wiimoteClient
+	${GLUT_LIBRARIES}
+	${ZeroCIce_LIBRARIES}
     ${opencv_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}

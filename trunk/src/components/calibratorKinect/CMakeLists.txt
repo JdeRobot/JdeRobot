@@ -9,10 +9,10 @@ include_directories(
     ${glut_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR})
 
-set( CMAKE_CXX_FLAGS "-lglut")
 add_executable (calibratorKinect ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES( calibratorKinect
+ ${GLUT_LIBRARIES}
  ${opencv_LIBRARIES}
  ${gtkmm_LIBRARIES}
  ${libglademm_LIBRARIES}

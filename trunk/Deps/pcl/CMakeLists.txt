@@ -20,6 +20,7 @@ FIND_LIBRARY(with_pcl
 
 
 IF( pcl_INCLUDE_DIR )
+	include_directories (${pcl_INCLUDE_DIR})
     FIND_LIBRARY( pcl_LIBRARY1 NAMES pcl_surface PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
     FIND_LIBRARY( pcl_LIBRARY2 NAMES pcl_registration PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
     FIND_LIBRARY( pcl_LIBRARY3 NAMES pcl_segmentation PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
@@ -44,7 +45,3 @@ endif()
 IF(with_pcl)
     MESSAGE ("*** PCL OK")
 endif()
-
-
-include_directories(/usr/include)
-link_directories(/usr/lib)

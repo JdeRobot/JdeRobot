@@ -1,19 +1,17 @@
 # CHECK OPENNI
-FIND_LIBRARY(with_openni
-    NAMES OpenNI
-    PATHS /usr/lib /usr/local/lib)
+FIND_PATH( openni_INCLUDE_DIR NAMES XnOpenNI.h  PATHS ENV C++LIB ENV PATH PATH_SUFFIXES ni)
+ 
+IF( openni_INCLUDE_DIR )
+    FIND_LIBRARY( openni_LIBRARIES NAMES OpenNI PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
+    IF( openni_LIBRARIES)
+		MESSAGE ("-- OpenNi found at ${openni_LIBRARIES}")
+		include_directories(${openni_INCLUDE_DIR})
+		link_directories(${openni_LIBRARIES})
+    ENDIF( openni_LIBRARIES )
+ENDIF(openni_INCLUDE_DIR)
 
-
-IF(NOT with_openni)
-    MESSAGE ("*** OpenNi libraries not found. Are needed to openniServer component")
-endif()
-IF(with_openni)
-	FIND_LIBRARY( OpenNi_LIBRARY NAMES OpenNI PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
-    MESSAGE ("*** OpenNi OK")
-	#MESSAGE ( ${OpenNi_LIBRARY})
-endif()
-
-include_directories(/usr/include/openni)
-
+IF(NOT openni_LIBRARIES)
+		MESSAGE ("*** OpenNi not found")
+ENDIF()
 
 

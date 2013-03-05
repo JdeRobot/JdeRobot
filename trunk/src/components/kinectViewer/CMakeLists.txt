@@ -2,7 +2,7 @@ SET(SOURCE_FILES kinectViewer.cpp drawarea.cpp kinectViewergui.cpp myprogeo.cpp 
 
 add_definitions(-DGLADE_DIR="${gladedir}")
 
-set( CMAKE_CXX_FLAGS "-Wno-deprecated -lgsl -lgslcblas -lGLU -lGL -lglut" ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
+set( CMAKE_CXX_FLAGS "-Wno-deprecated" ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
 
 include_directories(
     ${INTERFACES_CPP_DIR}
@@ -15,13 +15,10 @@ add_executable (kinectViewer ${SOURCE_FILES})
 
 
 TARGET_LINK_LIBRARIES(kinectViewer 
-   	${opencv_LIBRARIES}
+	${GLUT_LIBRARIES}
    	${OpenCV_LIBRARIES}
    	${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
-#    ${gthread_LIBRARIES}
-#    ${libgnomecanvas_LIBRARIES}
-#    ${libgnomecanvasmm_LIBRARIES}
     ${gtkglextmm_LIBRARIES}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so

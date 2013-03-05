@@ -10,7 +10,7 @@ IF (with_cwiid)
         ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
-    set( CMAKE_CXX_FLAGS "-lgsl -lgslcblas -lGL -lGLU -lglut  -lIce -lIceUtil" ) # Opciones para el compilador
+
 
     add_executable (wiimoteServer ${SOURCE_FILES})
 
@@ -19,6 +19,8 @@ IF (with_cwiid)
         ${LIBS_DIR}/jderobotice/libjderobotice.so
         ${LIBS_DIR}/jderobotutil/libjderobotutil.so
         ${cwiid_LIBRARIES}
+		  ${GLUT_LIBRARIES}
+		${ZeroCIce_LIBRARIES}
     )
 
 ENDIF(with_cwiid)

@@ -29,7 +29,8 @@
 #include <jderobot/kinectleds.h>
 #include <jderobot/camera.h>
 #include <jderobot/pose3dmotors.h>
-#include <jderobot/pointcloud.h>
+#include <jderobot/remoteCloud.h>
+#include <jderobot/remoteConfig.h>
 #include <colorspaces/colorspacesmm.h>
 #include <jderobotice/component.h>
 #include <jderobotice/application.h>
@@ -54,6 +55,8 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <libusb-1.0/libusb.h>
 #include "myprogeo.h"
+#include <iostream>
+#include <fstream>
 
 
 #define VID_MICROSOFT 0x45e
@@ -97,8 +100,13 @@ std::vector<int> distances;
 IplImage* srcRGB=NULL;
 int colors[10][3];
 int userGeneratorActive=0;
+int width;
+int height;
+
+
 /*OJO solo funciona con imágenes de 640x480, no con imágenes redimensionadas, si valdría con tamaños fijados con configuración openni, pero no hemos conseguido que funcione variar la resolución por configuración*/
-int pixelsID[640*480];
+std::vector<int> pixelsID;
+//int pixelsID[640*480];
 
 
 struct KinectDevice
@@ -345,8 +353,8 @@ public:
 	cameraDescription->shortDescription = prop->getProperty(prefix+"ShortDescription");
 
 	//fill imageDescription
-	imageDescription->width = prop->getPropertyAsIntWithDefault(prefix+"ImageWidth",640);
-	imageDescription->height = prop->getPropertyAsIntWithDefault(prefix+"ImageHeight",480);
+	imageDescription->width = width;
+	imageDescription->height = height;
 	int playerdetection = prop->getPropertyAsIntWithDefault(prefix+"PlayerDetection",0);
 	if (!(userGeneratorActive))
 		playerdetection=0;
@@ -418,8 +426,8 @@ private:
 		jderobot::ImageDataPtr reply(new jderobot::ImageData);
 		reply->description = mycameravga->imageDescription;
 		reply->pixelData.resize(mycameravga->imageDescription->width*mycameravga->imageDescription->height*3);
-		rgb.resize(6480*480*3);
-		srcRGB = cvCreateImage(cvSize(640,480), IPL_DEPTH_8U, 3);
+		rgb.resize(width*height*3);
+		srcRGB = cvCreateImage(cvSize(width,height), IPL_DEPTH_8U, 3);
 		IplImage* dst_resize = cvCreateImage(cvSize(mycameravga->imageDescription->width,mycameravga->imageDescription->height), IPL_DEPTH_8U, 3);
 
 		g_nTexMapX = (((unsigned short)(sensors[SELCAM].imageMD.FullXRes()-1) / 512) + 1) * 512;
@@ -429,7 +437,8 @@ private:
 
 		struct timeval a, b;
 		int cycle; // duración del ciclo
-		long totalb,totala;
+		long totala;
+		long totalpre=0;
 		long diff;
 
 		std::cout << "FPS: " << fps << std::endl;
@@ -508,14 +517,18 @@ private:
 
 			}//critical region end
 			pthread_mutex_unlock(&mutex);
-			gettimeofday(&b,NULL);
-			totalb=b.tv_sec*1000000+b.tv_usec;
-			if ((totalb-totala) > cycle ){
-				std::cout<<"-------- openniServer: WARNING- RGB timeout-" << std::endl; 
+			if (totalpre !=0){
+				if ((totala - totalpre) > cycle ){
+					std::cout<<"-------- openniServer: WARNING- RGB timeout-" << std::endl; 
+				}
+				else{
+					usleep(cycle - (totala - totalpre));
+				}
 			}
-			else{
-				usleep(cycle - (totalb-totala));
-			}
+			/*if (totalpre !=0){
+				std::cout << "rgb: " <<  1000000/(totala-totalpre) << std::endl;
+			}*/
+			totalpre=totala;
 		}
 	}
 	
@@ -568,11 +581,11 @@ public:
 	cameraDescription->shortDescription = prop->getProperty(prefix+"ShortDescription");
 
 	//fill imageDescription
-	imageDescription->width = prop->getPropertyAsIntWithDefault(prefix+"ImageWidth",640);
+	imageDescription->width = width;
 	int playerdetection = prop->getPropertyAsIntWithDefault(prefix+"PlayerDetection",0);
 	if (!(userGeneratorActive))
 		playerdetection=0;
-	imageDescription->height = prop->getPropertyAsIntWithDefault(prefix+"ImageHeight",480);
+	imageDescription->height = height;
 	int fps = prop->getPropertyAsIntWithDefault(prefix+"fps",5);
 	//we use formats acording to colorspaces
 	std::string fmtStr = prop->getPropertyWithDefault(prefix+"Format","YUY2");//default format YUY2
@@ -634,26 +647,23 @@ private:
 	}
 
     virtual void walk(){
-		int h=sensors[SELCAM].depthMD.YRes();
-		int w=sensors[SELCAM].depthMD.XRes();
 		int test;
 		
 
 		jderobot::ImageDataPtr reply(new jderobot::ImageData);
 		reply->description = mycameradepth->imageDescription;
 		reply->pixelData.resize(mycameradepth->imageDescription->width*mycameradepth->imageDescription->height*3);
-		IplImage* src = cvCreateImage(cvSize(640,480), IPL_DEPTH_8U, 3);
+		IplImage* src = cvCreateImage(cvSize(width,height), IPL_DEPTH_8U, 3);
 		IplImage* dst_resize = cvCreateImage(cvSize(mycameradepth->imageDescription->width,mycameradepth->imageDescription->height), IPL_DEPTH_8U, 3);
 		g_nTexMapX = (((unsigned short)(sensors[SELCAM].depthMD.FullXRes()-1) / 512) + 1) * 512;
 		g_nTexMapY = (((unsigned short)(sensors[SELCAM].depthMD.FullYRes()-1) / 512) + 1) * 512;
 		g_pTexMap = (XnRGB24Pixel*)malloc(g_nTexMapX * g_nTexMapY * sizeof(XnRGB24Pixel));
-		w=640;
-		h=480;
-		distances.resize(w*h);
+		distances.resize(width*height);
 
 		struct timeval a, b;
 		int cycle; // duración del ciclo
-		long totalb,totala;
+		long totala;
+		long totalpre=0;
 		long diff;
 
 		//std::cout << "FPS depth: " << fps << std::endl;
@@ -759,14 +769,18 @@ private:
 			}
 			}//critical region end
 			pthread_mutex_unlock(&mutex);
-			gettimeofday(&b,NULL);
-			totalb=b.tv_sec*1000000+b.tv_usec;
-			if ((totalb-totala) > cycle ){
-				std::cout<<"-------- openniServer: WARNING- RGB timeout-" << std::endl; 
+			if (totalpre !=0){
+				if ((totala - totalpre) > cycle ){
+					std::cout<<"-------- openniServer: WARNING- DEPTH timeout-" << std::endl; 
+				}
+				else{
+					usleep(cycle - (totala - totalpre));
+				}
 			}
-			else{
-				usleep(cycle - (totalb-totala));
-			}
+			/*if (totalpre !=0){
+				std::cout << "depth: " <<  1000000/(totala-totalpre) << std::endl;
+			}*/
+			totalpre=totala;
 		}
 	}
 	
@@ -800,16 +814,17 @@ private:
 * \brief Class wich contains all the functions and variables to serve point cloud interface
 */
 
-	class pointCloudI: virtual public jderobot::pointCloud{
+	class pointCloudI: virtual public jderobot::remoteCloud{
 		public:
 			pointCloudI (std::string& propertyPrefix, const jderobotice::Context& context):
 				prefix(propertyPrefix),context(context),data(new jderobot::pointCloudData()) {
 					Ice::PropertiesPtr prop = context.properties();
 
 					int playerdetection = prop->getPropertyAsIntWithDefault("openniServer.PlayerDetection",0);
+					int fps =prop->getPropertyAsIntWithDefault("openniServer.pointCloud.Fps",10);
 					if (!(userGeneratorActive))
 						playerdetection=0;
-					   replyCloud = new ReplyCloud(this,prop->getProperty("openniServer.calibration"), playerdetection);
+					   replyCloud = new ReplyCloud(this,prop->getProperty("openniServer.calibration"), playerdetection, width, height,fps);
 					   replyCloud->start();
 				}
 		
@@ -818,25 +833,81 @@ private:
 				data=replyCloud->getCloud();
 				return data;
 			};
+
+		virtual Ice::Int initConfiguration(const Ice::Current&){
+			
+			if (idLocal==0){
+	  			/* initialize random seed: */
+				srand ( time(NULL) );
+	
+				/* generate secret number: */
+				idLocal = rand() + 1;
+	
+				std::stringstream ss;//create a stringstream
+				ss << idLocal << ".xml";//add number to the stream
+				path=ss.str();
+	
+				f2.open(ss.str().c_str(), std::ofstream::out);
+				return idLocal;
+			}
+			else
+				return 0;
+			
+		};
+
+		virtual std::string read(Ice::Int id, const Ice::Current&){
+		};
+
+
+		virtual Ice::Int write(const std::string& data, Ice::Int id, const Ice::Current&){
+			if (id == idLocal){
+				f2 << data << std::endl;
+			}
+		};
+
+		virtual Ice::Int setConfiguration(Ice::Int id, const Ice::Current&){
+			if (id == idLocal){
+				replyCloud->setCalibrationFile(path);
+				id=0;
+				f2.close();
+			}
+
+			//guardar el xml nuevo encima del cargado por defecto (la siguiente vez empezará directamente con la nueva configuración
+		};
 		   
 		   private:
 			 class ReplyCloud :public gbxiceutilacfr::SafeThread{ 
 		       public: 
-		       	ReplyCloud (pointCloudI* pcloud, std::string filepath,  int playerDetection) : gbxiceutilacfr::SafeThread(pcloud->context.tracer()), data(new jderobot::pointCloudData()), data2(new jderobot::pointCloudData())
+		       	ReplyCloud (pointCloudI* pcloud, std::string filepath,  int playerDetection, int widthIn, int heightIn, int fpsIn) : gbxiceutilacfr::SafeThread(pcloud->context.tracer()), data(new jderobot::pointCloudData()), data2(new jderobot::pointCloudData())
 		        	{
 					path=filepath;
 					segmentation=playerDetection;
+					cWidth = widthIn;
+					cHeight = heightIn;
+					fps=fpsIn;
 				}
+
+				void setCalibrationFile(std::string path){
+					mypro->load_cam((char*)path.c_str(),0, cWidth, cHeight);
+				}
+
 		       
 		        void walk()
 		        {
 				mypro= new openniServer::myprogeo();
-				mypro->load_cam((char*)path.c_str(),0);
-				cWidth = 640;
-				cHeight = 480;
+				mypro->load_cam((char*)path.c_str(),0, cWidth, cHeight);
+				
+				struct timeval a, b;
+				int cycle; // duración del ciclo
+				long totala;
+				long totalpre=0;
+
+				cycle=(float)(1/(float)fps)*1000000;
 
 				while(!isStopping()){
 					float distance;
+					gettimeofday(&a,NULL);
+					totala=a.tv_sec*1000000+a.tv_usec;
 					pthread_mutex_lock(&mutex);
 					data2->p.clear();
 					for( unsigned int i = 0 ; (i < cWidth*cHeight)&&(distances.size()>0); i=i+9) {
@@ -888,12 +959,24 @@ private:
 							//}
 						}
 					pthread_mutex_unlock(&mutex);
-					usleep(5000);
+					if (totalpre !=0){
+						if ((totala - totalpre) > cycle ){
+							std::cout<<"-------- openniServer: WARNING- POINTCLOUD timeout-" << std::endl; 
+						}
+						else{
+							usleep(cycle - (totala - totalpre));
+						}
+					}
+					/*if (totalpre !=0){
+						std::cout << "cloud: " <<  1000000/(totala-totalpre) << std::endl;
+					}*/
+					totalpre=totala;
 				}
 		        }
 		        myprogeo *mypro;
 				int cWidth;
 				int cHeight;
+				int fps;
 				jderobot::pointCloudDataPtr data, data2;
 				jderobot::RGBPoint auxP;
 				std::string path;
@@ -915,6 +998,9 @@ private:
 			std::string prefix;
 			jderobotice::Context context;
 			jderobot::pointCloudDataPtr data;
+			std::ofstream f2;
+			int idLocal;
+			std::string path;
 			
 			
 		};
@@ -1006,6 +1092,71 @@ class KinectLedsI: virtual public jderobot::KinectLeds {
 		XN_USB_DEV_HANDLE* dev;
     };
 
+
+
+/**
+* \brief Class wich contains all the functions to remote configuration
+*/
+class RemoteConfigI: virtual public jderobot::remoteConfig {
+	public:
+		RemoteConfigI(Ice::ObjectPtr pointcloud1, std::string& propertyPrefix, const jderobotice::Context& context): prefix(propertyPrefix),context(context)
+		{
+			Ice::PropertiesPtr prop = context.properties();
+			
+     	}
+
+		virtual ~RemoteConfigI(){};
+
+		virtual Ice::Int initConfiguration(Ice::Int idConfig, const Ice::Current&){
+			
+			if (idLocal==0){
+	  			/* initialize random seed: */
+				srand ( time(NULL) );
+	
+				/* generate secret number: */
+				idLocal = rand() + 1;
+	
+				std::stringstream ss;//create a stringstream
+				ss << idLocal << ".txt";//add number to the stream
+	
+				f2.open(ss.str().c_str(), std::ofstream::out);
+				return idLocal;
+			}
+			else
+				return 0;
+			
+		};
+
+		virtual std::string read(Ice::Int id, const Ice::Current&){
+		};
+
+
+		virtual Ice::Int write(const std::string& data, Ice::Int id, const Ice::Current&){
+			if (id == idLocal){
+				f2 << data << std::endl;
+			}
+		};
+
+		virtual Ice::Int setConfiguration(Ice::Int id, const Ice::Current&){
+			if (id == idLocal){
+				id=0;
+				f2.close();
+			}
+
+			//guardar el xml nuevo encima del cargado por defecto (la siguiente vez empezará directamente con la nueva configuración
+		};
+
+
+	private:
+		
+		std::string prefix;
+		jderobotice::Context context;
+		std::ofstream f2;
+		int idLocal;
+    };
+
+
+
 /**
 * \brief Main Class of the component wich create the diferents devices activated using the Ice configuration file.
 */
@@ -1022,6 +1173,11 @@ public:
 		int leds = prop->getPropertyAsIntWithDefault(context().tag() + ".KinectLedsActive",0);
 		int pointCloud = prop->getPropertyAsIntWithDefault(context().tag() + ".pointCloudActive",0);
 		int playerdetection = prop->getPropertyAsIntWithDefault(context().tag() + ".PlayerDetection",0);
+		width=prop->getPropertyAsIntWithDefault("openniServer.Width", 640);
+		height=prop->getPropertyAsIntWithDefault("openniServer.Height",480);
+		int fps=prop->getPropertyAsIntWithDefault("openniServer.Fps",30);
+		
+
 		SELCAM = prop->getPropertyAsIntWithDefault(context().tag() + ".deviceId",0);
 		std::cout << "Selected device: " << SELCAM << std::endl;
 		int nCameras=0;
@@ -1201,11 +1357,11 @@ public:
 	
 	
 	
-	    			    /*XnMapOutputMode depth_mode; 
-					depth_mode.nXRes = 320;
-				    depth_mode.nYRes = 240;
+	    			    XnMapOutputMode depth_mode; 
+					depth_mode.nXRes = width;
+				    depth_mode.nYRes = height;
 				    depth_mode.nFPS = 30;
-				    sensors[i].depth.SetMapOutputMode(depth_mode);*/
+				    sensors[i].depth.SetMapOutputMode(depth_mode);
 	
 					CHECK_RC(rc, "Create Depth");
 					// now create a image generator over this device
@@ -1224,16 +1380,18 @@ public:
 					rc = g_context.CreateAnyProductionTree(XN_NODE_TYPE_USER, &query, sensors[i].g_UserGenerator);
 					CHECK_RC(rc, "Find user generator");
 	
-					/*XnMapOutputMode rgb_mode;
-	            		rgb_mode.nXRes = 640;
-	            		rgb_mode.nYRes = 480;
-            			rgb_mode.nFPS = 30;
-	        			sensors[i].image.SetMapOutputMode(rgb_mode);*/
+					XnMapOutputMode rgb_mode;
+	            		rgb_mode.nXRes = width;
+	            		rgb_mode.nYRes = height;
+            			rgb_mode.nFPS = fps;
+	        			sensors[i].image.SetMapOutputMode(rgb_mode);
 		       		
 					sensors[i].depth.GetAlternativeViewPointCap().SetViewPoint(sensors[i].image);
 					
 					XnCallbackHandle hUserCallbacks, hCalibrationStart, hCalibrationComplete, hPoseDetected, hCalibrationInProgress, hPoseInProgress;
 					if (playerdetection){
+						/*init player id array*/
+						pixelsID.resize(width*height);
 						if (!sensors[i].g_UserGenerator.IsCapabilitySupported(XN_CAPABILITY_SKELETON))
 						{
 							printf("Supplied user generator doesn't support skeleton\n");

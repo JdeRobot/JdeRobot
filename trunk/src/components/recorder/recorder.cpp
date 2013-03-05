@@ -86,6 +86,10 @@ int avCamera4 = 0;
 
 	int nCameras=0;
 	int nDepthSensors=0;
+	int pngCompressRatio;
+	int jpgQuality;
+	std::string imageFormat;
+	std::vector<int> compression_params;
     
    
    //---------------- INPUT ARGUMENTS ---------------//
@@ -132,15 +136,30 @@ int avCamera4 = 0;
          if (0== lprx)
             throw "Invalid proxy Mycomponent.Laser.Proxy";
       }
-     nCameras = prop->getPropertyAsIntWithDefault("Recorder.nCameras",0);
-	if (nCameras > 0 ){
-					struct stat buf;
-					char dire[]="./images/";
-					if( stat( dire, &buf ) == -1 )
-					{
-						system("mkdir images");
-					}
-	}
+      nCameras = prop->getPropertyAsIntWithDefault("Recorder.nCameras",0);
+	  if (nCameras > 0 ){
+				struct stat buf;
+				char dire[]="./images/";
+				if( stat( dire, &buf ) == -1 )
+				{
+					system("mkdir images");
+				}
+				imageFormat=prop->getProperty("Recorder.Format");
+				if (imageFormat.compare(std::string("png"))==0){
+					pngCompressRatio=prop->getPropertyAsIntWithDefault("Recorder.PngCompression",3); 
+					compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
+					compression_params.push_back(pngCompressRatio);
+					
+				}
+				else if (imageFormat.compare(std::string("jpg"))==0){
+					jpgQuality=prop->getPropertyAsIntWithDefault("Recorder.JpgQuality",95); 
+					compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+					compression_params.push_back(jpgQuality);
+				}
+				else{
+					throw "Image format is not valid";
+				}
+		}
 	for (int i=0; i< nCameras; i++){
 		std::stringstream sProxy;
 	         // Get driver camera
@@ -268,8 +287,9 @@ int avCamera4 = 0;
             	memcpy((unsigned char *) image.data ,&(imageData->pixelData[0]), image.cols*image.rows * 3);
             
             	char buff[30]; // enough to hold all numbers up to 64-bits
-            	sprintf(buff, "images/camera%d_%ld.jpg", i+1, timeRelative);
-            	cv::imwrite(buff, image);
+
+            	sprintf(buff, "images/camera%d_%ld.%s", i+1, timeRelative,imageFormat.c_str());
+            	cv::imwrite(buff, image,compression_params);
             	outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Camera" << i+1 << ":\t" << buff  << std::endl;
 		} 
          /* Encoders */ 
@@ -342,7 +362,7 @@ int avCamera4 = 0;
      
          gettimeofday(&b,NULL);
          totalb=b.tv_sec*1000000+b.tv_usec;
-         std::cout << "Introrob takes " << (totalb-totala)/1000 << " ms" << std::endl;
+         std::cout << "Recorder takes " << (totalb-totala)/1000 << " ms" << std::endl;
           
          diff = (totalb-totala)/1000;
          if(diff < 0 || diff > cycle)
@@ -358,6 +378,9 @@ int avCamera4 = 0;
         // std::cout << cycle <<" ->" << diff  << " ->" << timeRelative<< std::endl;
          timeRelative+= diff + (totalb-totala)/1000;
         // std::cout << "->" << diff  << " ->" << timeRelative<< std::endl;
+
+				std::cout << "rgb: " <<  1000000/(totalb-totala) << std::endl;
+
       }
       
       outfile.close();
