@@ -66,6 +66,7 @@ include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 #include(${DEPS_DIR}/xerces/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
 include(${DEPS_DIR}/opencv/CMakeLists.txt)
+include(${DEPS_DIR}/opengl/CMakeLists.txt)
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
 
