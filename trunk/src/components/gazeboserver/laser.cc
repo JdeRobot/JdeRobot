@@ -82,7 +82,7 @@ class LaserI: virtual public jderobot::Laser {
 			laserData->distanceData.resize(sizeof(int)*laserData->numLaser);
 			
 			//Update laser values
-			for(int i = 0 ; i < laserData->numLaser; i++){
+			for(int i = laserData->numLaser-1 ; i > 0; i--){
 			   laserData->distanceData[i] = laser->laserValues[i]*1000;
 			}
 			pthread_mutex_unlock (&laser->mutex); 
