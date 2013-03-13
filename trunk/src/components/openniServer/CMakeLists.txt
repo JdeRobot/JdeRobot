@@ -1,5 +1,5 @@
-IF(with_openni)
-    IF(with_nite)
+IF(openni_LIBRARIES)
+    IF(nite_LIBRARIES)
 	    SET( SOURCE_FILES openniServer.cpp myprogeo.cpp )
 	    add_definitions(-DGLADE_DIR="${gladedir}")
 
