@@ -139,12 +139,30 @@ int myprogeo::load_cam_line(FILE *myfile,int cam)
 }
 
 /* gets the calibration of the camera from a file */
-void myprogeo::load_cam(char *fich_in,int cam)
+void myprogeo::load_cam(char *fich_in,int cam, int w, int h)
 {
   FILE *entrada;
   int i;
+	if (strlen(fich_in) ==0 ){
+		std::cout << w << ", " << h << std::endl;
+		this->cameras[cam].fdistx=515;
+		this->cameras[cam].fdisty=515;
+		this->cameras[cam].u0=h/2;
+		this->cameras[cam].v0=w/2;
+		this->cameras[cam].position.X=0;
+		this->cameras[cam].position.Y=0;
+		this->cameras[cam].position.Z=0;
+		this->cameras[cam].foa.X=0;
+		this->cameras[cam].foa.Y=1;
+		this->cameras[cam].foa.Z=0;
+		update_camera_matrix(&cameras[cam]);
 
-	xmlReader(&(this->cameras[cam]), fich_in);
+		
+	}
+	else{
+		xmlReader(&(this->cameras[cam]), fich_in);
+		update_camera_matrix(&cameras[cam]);
+	}
 	/*this->cameras[cam].position.H=1;
 	this->cameras[cam].foa.H=1;*/
 
@@ -156,7 +174,7 @@ void myprogeo::load_cam(char *fich_in,int cam)
      do{i=load_cam_line(entrada,cam);}while(i!=EOF);
      fclose(entrada);
    } */
-  update_camera_matrix(&cameras[cam]);
+  
   display_camerainfo(cameras[cam]);
 }
 

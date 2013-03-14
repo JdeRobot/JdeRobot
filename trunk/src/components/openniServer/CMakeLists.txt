@@ -3,7 +3,7 @@ IF(openni_LIBRARIES)
 	    SET( SOURCE_FILES openniServer.cpp myprogeo.cpp )
 	    add_definitions(-DGLADE_DIR="${gladedir}")
 
-	    set( CMAKE_CXX_FLAGS "-Wno-deprecated -lgsl -lgslcblas" ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
+	    set( CMAKE_CXX_FLAGS "-Wno-deprecated" ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
 
 	    include_directories(
             ${INTERFACES_CPP_DIR}
@@ -25,7 +25,8 @@ IF(openni_LIBRARIES)
             ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
             ${Gearbox_LIBRARIES}
 	        ${ZeroCIce_LIBRARIES}
-	        ${OpenNi_LIBRARY}
+	        ${openni_LIBRARIES}
+			${nite_LIBRARIES}
 	        ${pcl_LIBRARIES}
             ${opencv_LIBRARIES}
             ${gsl_LIBRARIES}
