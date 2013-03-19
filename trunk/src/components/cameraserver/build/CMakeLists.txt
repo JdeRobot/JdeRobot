@@ -19,22 +19,10 @@ SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../Deps) # Directorio donde s
 #                                         #
 ###################
 
-  # FIND & CHECK PRINCIPAL LIBRARIES
-
-include(FindPkgConfig)
-PKG_CHECK_MODULES(gstreamer REQUIRED gstreamer-0.10) 
-include_directories(${gstreamer_INCLUDE_DIRS})
-link_directories(${gstreamer_LIBRARY_DIRS})
-PKG_CHECK_MODULES(gstreamerapp REQUIRED gstreamer-app-0.10)
-include_directories(${gstreamerapp_INCLUDE_DIRS})
-link_directories(${gstreamerapp_LIBRARY_DIRS})
-
-
 
   # FIND AND CHECK OTHER DEPENDENCES
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
-include(${DEPS_DIR}/fireware/CMakeLists.txt)
 include(${DEPS_DIR}/opencv/CMakeLists.txt)
 
 
