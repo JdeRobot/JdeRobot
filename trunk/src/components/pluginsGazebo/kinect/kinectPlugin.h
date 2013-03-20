@@ -20,11 +20,11 @@
 
 #include <string>
 
-#include "common/Plugin.hh"
-#include "sensors/DepthCameraSensor.hh"
-#include "sensors/CameraSensor.hh"
-#include "rendering/DepthCamera.hh"
-#include "gazebo.hh"
+#include <common/Plugin.hh>
+#include <sensors/DepthCameraSensor.hh>
+#include <sensors/CameraSensor.hh>
+#include <rendering/DepthCamera.hh>
+#include <gazebo.hh>
 
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/point_types.h>
@@ -88,11 +88,14 @@ namespace gazebo
     private: event::ConnectionPtr newRGBPointCloudConnection;
     private: event::ConnectionPtr newImageFrameConnection;
 	//private: pcl::visualization::CloudViewer viewer;
+	
+	void depth2rgb(cv::Mat image);
 	private: int count;
 	public:
 		std::string nameKinect;
 	    pthread_mutex_t mutex;
 	    pthread_mutex_t mutexRGB;
+	    pthread_mutex_t mutexDepth;
 		pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud;
 		cv::Mat imageRGB;
 		cv::Mat imageDepth;

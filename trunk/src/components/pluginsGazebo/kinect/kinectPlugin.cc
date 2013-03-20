@@ -35,8 +35,8 @@ DepthCameraPlugin::DepthCameraPlugin() : SensorPlugin()/*,viewer ("PCL OpenNI Vi
 
 	count = 0;
 	pthread_mutex_init (&mutex, NULL);	
-	pthread_mutex_init (&mutexRGB, NULL);	
-    gzerr << "Kinect Construtor\n";
+	pthread_mutex_init (&mutexRGB, NULL);
+	pthread_mutex_init (&mutexDepth, NULL);	
 
 }
 
@@ -78,63 +78,31 @@ void DepthCameraPlugin::Load(sensors::SensorPtr _sensor,
   this->parentSensor->SetActive(true);
 }
 
-	void raw2depth(){
-	   int i;
-	   for ( i=0; i<MAX_DEPTH; i++) {
-		    float v = (float)i/MAX_DEPTH;//for visualization purposes only
-		    v = v*v;
-		    v = v*36*256;
-		    depth[i] = v;
-		    //std::cout << "depth[]:" << depth[i] << std::endl;
-	   } 
+	void DepthCameraPlugin::depth2rgb(cv::Mat image){
+	   //const unsigned short *disparity = Xn_disparity;
+	   imageDepth.create(image.rows,image.cols,CV_8UC3);
+	   float * data= (float*)image.data;
+	   for (int i=0; i<image.rows* image.cols; i++) {
+		  //std::cout << i << std::endl;
+		  int val = (int)(data[i]*1000);
+			  imageDepth.data[3*i+0] = (float)val/10000*255;;
+			  imageDepth.data[3*i+1] = val>>8;
+			  imageDepth.data[3*i+2] = val&0xff;
+			  
+				if(imageDepth.data[i*3]!=0)
+					imageDepth.data[i*3]=255-imageDepth.data[i*3];
+				imageDepth.data[i*3+1]=imageDepth.data[i*3];
+				imageDepth.data[i*3+2]=imageDepth.data[i*3];
+			
+	   }
 	}
 
-	void depth2rgb( const float* disparity , cv::Mat image){
-	   int i;
-		
-	   for (i=0; i<image.rows* image.cols; i++) {
-		  //std::cout << i << std::endl;
-		  int pval = depth[(int)(disparity[i]*10000)];
-		  int lb = pval & 0xff;
-		  switch (pval>>8) {
-			  case 0:
-				  image.data[3*i+0] = 255;
-				  image.data[3*i+1] = 255-lb;
-				  image.data[3*i+2] = 255-lb;
-				  break;
-			  case 1:
-				  image.data[3*i+0] = 255;
-				  image.data[3*i+1] = lb;
-				  image.data[3*i+2] = 0;
-				  break;
-			  case 2:
-				  image.data[3*i+0] = 255-lb;
-				  image.data[3*i+1] = 255;
-				  image.data[3*i+2] = 0;
-				  break;
-			  case 5:
-				  image.data[3*i+0] = 0;
-				  image.data[3*i+1] = 0;
-				  image.data[3*i+2] = 255-lb;
-				  break;
-			  default:
-				  image.data[3*i+0] = 0;
-				  image.data[3*i+1] = 0;
-				  image.data[3*i+2] = 0;
-				  break;
-		  }
-	   }
-}
 
 /////////////////////////////////////////////////
 void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
     unsigned int _width, unsigned int _height,
     unsigned int _depth, const std::string &_format)
 {
-    cycle = 100;
-    gettimeofday(&a, NULL);
-    totala = a.tv_sec * 1000000 + a.tv_usec;             
-
 
 	if(count == 0){
 		count++;
@@ -142,8 +110,8 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 		nameKinect = std::string("--Ice.Config=" + name + ".cfg");
 		pthread_t thr_gui;
 		pthread_create(&thr_gui, NULL, &mainKinect, (void*)this);
-	    gzerr << "Creating Kinect\n";
         cloud->points.resize(_width*_height);
+    	imageDepth.create(_height, _width, CV_8UC3);
 	}
 
 	double hfov = 1.04719755;
@@ -151,19 +119,15 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 	double pointCloudCutoff = 0.001;
 
 	//std::cout << "depth: " << (int)(_image[0]*1000) << std::endl;
-/*
+
 	cv::Mat image;
 
 	image.create(_height, _width, CV_32FC1);
-	imageDepth.create(_height, _width, CV_8UC1);
-	
-	pthread_mutex_lock (&mutex);
+
     memcpy( (float *)image.data,(float *) _image, _width*_height*4 );
-	image.convertTo(imageDepth, CV_8UC1, 255, 0);
-	cv::cvtColor(imageDepth, imageDepth, CV_GRAY2RGB);
-	//cv::imshow("profundidad", imageDepth);
-	//cv::waitKey(10);
-*/
+
+
+
 
 	double pAngle;
     double yAngle;
@@ -177,7 +141,6 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 	point.r      = 255;
 	point.g      = 0;
 	point.b      = 0;
-    
     
 	for(int x = 0 ; x < _width ; x++){
 		for(int y = 0; y < _height; y++){
@@ -198,7 +161,16 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 
 			point.x      = d * tan(yAngle);
 			point.y      = d * tan(pAngle);
-
+			if(!imageRGB.data){
+				point.r      = 255;
+				point.g      = 0;
+				point.b      = 0;
+			}else{
+				int indice = y*imageRGB.step + x*imageRGB.channels();
+				point.r      = imageRGB.data[indice];
+				point.g      = imageRGB.data[indice+1];
+				point.b      = imageRGB.data[indice+2];
+			}
 			if(d > pointCloudCutoff){
 				point.z    = _image[indice];
 			}else{ //point in the unseeable range
@@ -211,11 +183,10 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 
 		}
 	}
-
 	
 	pcl::VoxelGrid<pcl::PointXYZRGBA> sor;
 	sor.setInputCloud (cloud);
-	sor.setLeafSize (0.05, 0.05, 0.05);
+	sor.setLeafSize (0.01, 0.01, 0.01);
 
 	pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud2(new pcl::PointCloud<pcl::PointXYZRGBA>);
 
@@ -225,22 +196,16 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 	
 	pthread_mutex_unlock (&kinect->mutex);
 		
+  pthread_mutex_lock(&mutexDepth);            
+  depth2rgb(image);
+  pthread_mutex_unlock(&mutexDepth);
+		
 	//pthread_mutex_unlock (&mutex);
 
 	//std::cout << "cloud: " << cloud->points.size() << std::endl;
 	//if (!viewer.wasStopped())
 	//  viewer.showCloud(cloud);
-	
-	gettimeofday(&b, NULL);
-	totalb = b.tv_sec * 1000000 + b.tv_usec;
 
-	diff = (totalb - totala) / 1000;
-	diff = cycle - diff;
-
-	if (diff < 10)
-		diff = 10;
-
-	sleep(diff/1000);  
 	
 }
 
@@ -249,21 +214,7 @@ void DepthCameraPlugin::OnNewRGBPointCloud(const float * _image,
                 unsigned int _width, unsigned int _height,
                 unsigned int _depth, const std::string &/*_format*/)
 {
-    cycle3 = 100;
-    gettimeofday(&a3, NULL);
-    totala3 = a3.tv_sec * 1000000 + a3.tv_usec; 
-    
-	gettimeofday(&b3, NULL);
-	totalb3 = b3.tv_sec * 1000000 + b3.tv_usec;
-
-	diff3 = (totalb3 - totala3) / 1000;
-	diff3 = cycle3 - diff3;
-
-	if (diff3 < 10)
-		diff3 = 10;
-
-	sleep(diff3/1000); 
-    
+ 
     
 }
 
@@ -275,28 +226,12 @@ void DepthCameraPlugin::OnNewImageFrame(const unsigned char * _image,
                               const std::string &_format)
 {
 
-    cycle2 = 100;
-    gettimeofday(&a2, NULL);
-    totala2 = a2.tv_sec * 1000000 + a2.tv_usec;  
 
   	//std::cout << "OnNewImageFrame Format: " << format << " Depth: " << _depth << std::endl;
 	pthread_mutex_lock (&mutexRGB);
 	imageRGB.create(_height, _width, CV_8UC3);
     memcpy((unsigned char *) imageRGB.data, &(_image[0]), _width*_height * 3);
-	//cv::imshow("Color", imageRGB);
-	//cv::waitKey(10);
 	pthread_mutex_unlock (&mutexRGB);
-	
-	gettimeofday(&b2, NULL);
-	totalb2 = b2.tv_sec * 1000000 + b2.tv_usec;
-
-	diff2 = (totalb2 - totala2) / 1000;
-	diff2 = cycle2 - diff2;
-
-	if (diff2 < 10)
-		diff2 = 10;
-
-	sleep(diff2/1000); 
 
 }
 
@@ -567,11 +502,11 @@ class CameraII: virtual public jderobot::Camera {
 							continue;
 						}
 						if(count==0){
-							pthread_mutex_lock (&mycamera->cameraI->mutex);
+							pthread_mutex_lock (&mycamera->cameraI->mutexDepth);
 							mycamera->imageDescription->width = mycamera->cameraI->imageDepth.cols;
 							mycamera->imageDescription->height = mycamera->cameraI->imageDepth.rows;
 							mycamera->imageDescription->size = mycamera->cameraI->imageDepth.cols*mycamera->cameraI->imageDepth.rows*3;
-							pthread_mutex_unlock (&mycamera->cameraI->mutex);
+							pthread_mutex_unlock (&mycamera->cameraI->mutexDepth);
 
 							mycamera->imageDescription->format = "RGB8";
 
@@ -589,11 +524,11 @@ class CameraII: virtual public jderobot::Camera {
 						reply->timeStamp.seconds = (long)t.toSeconds();
 						reply->timeStamp.useconds = (long)t.toMicroSeconds() - reply->timeStamp.seconds*1000000;
           				
-          				pthread_mutex_lock (&mycamera->cameraI->mutex);
+          				pthread_mutex_lock (&mycamera->cameraI->mutexDepth);
 					    reply->pixelData.resize(mycamera->cameraI->imageDepth.rows*mycamera->cameraI->imageDepth.cols*3);
 					    
 					    memcpy( &(reply->pixelData[0]), (unsigned char *) mycamera->cameraI->imageDepth.data, mycamera->cameraI->imageDepth.rows*mycamera->cameraI->imageDepth.cols*3);
-						pthread_mutex_unlock (&mycamera->cameraI->mutex);
+						pthread_mutex_unlock (&mycamera->cameraI->mutexDepth);
 
 					   { //critical region start
 						   IceUtil::Mutex::Lock sync(requestsMutex);
@@ -664,11 +599,11 @@ void *mainKinect(void* v)
 
         Ice::ObjectPtr object = new KinectI(std::string("KinectGazebo"), context, kinect);
         Ice::ObjectPtr object2 = new CameraI(std::string("KinectGazebo"), context, kinect);
-        //Ice::ObjectPtr object3 = new CameraII(std::string("KinectGazebo"), context, kinect);
+        Ice::ObjectPtr object3 = new CameraII(std::string("KinectGazebo"), context, kinect);
 
         adapter->add(object, ic->stringToIdentity("Kinect"));
         adapter->add(object2, ic->stringToIdentity("KinectRGB"));
-        //adapter->add(object3, ic->stringToIdentity("KinectDepth"));
+        adapter->add(object3, ic->stringToIdentity("KinectDepth"));
         std::cout << "        adapter->add(object, ic->stringToIdentity(Kinect)); "  << std::endl;
         adapter->activate();
         ic->waitForShutdown();
