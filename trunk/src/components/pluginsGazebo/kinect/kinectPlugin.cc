@@ -597,13 +597,13 @@ void *mainKinect(void* v)
 
 		jderobotice::Context context;
 
-        Ice::ObjectPtr object = new KinectI(std::string("KinectGazebo"), context, kinect);
-        Ice::ObjectPtr object2 = new CameraI(std::string("KinectGazebo"), context, kinect);
-        Ice::ObjectPtr object3 = new CameraII(std::string("KinectGazebo"), context, kinect);
+        Ice::ObjectPtr object = new KinectI(std::string("pointcloud1"), context, kinect);
+        Ice::ObjectPtr object2 = new CameraI(std::string("cameraRGB"), context, kinect);
+        Ice::ObjectPtr object3 = new CameraII(std::string("cameraDepth"), context, kinect);
 
-        adapter->add(object, ic->stringToIdentity("Kinect"));
-        adapter->add(object2, ic->stringToIdentity("KinectRGB"));
-        adapter->add(object3, ic->stringToIdentity("KinectDepth"));
+        adapter->add(object, ic->stringToIdentity("pointcloud1"));
+        adapter->add(object2, ic->stringToIdentity("cameraRGB"));
+        adapter->add(object3, ic->stringToIdentity("cameraDepth"));
         std::cout << "        adapter->add(object, ic->stringToIdentity(Kinect)); "  << std::endl;
         adapter->activate();
         ic->waitForShutdown();
