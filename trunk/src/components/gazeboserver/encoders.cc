@@ -1,18 +1,15 @@
 #include "encoders.h"
 
 namespace gazebo {
-    
+
     void *encodersICE(void* v);
-    int32_t secs;
+
     GZ_REGISTER_MODEL_PLUGIN(Encoders)
 
     Encoders::Encoders() {
         pthread_mutex_init(&mutex, NULL);
         pthread_mutex_init(&mutexEncoders, NULL);
         count = 0;
-        common::Time time;
-        time = time.GetWallTime();
-        secs = time.sec;
         std::cout << "constructor Encoders" << std::endl;
     }
 
@@ -22,13 +19,14 @@ namespace gazebo {
         this->updateConnection = event::Events::ConnectWorldUpdateStart(
                 boost::bind(&Encoders::OnUpdate, this));
     }
+    
+    physics::ModelPtr Encoders::getModel()
+    {
+    	return model;
+    }
 
     void Encoders::OnUpdate() {
-        gettimeofday(&a, NULL);
-        totala = a.tv_sec * 1000000 + a.tv_usec;             
-        cycle = 50;
-        
-        
+
         if (count == 0) {
             count++;
             std::string name = this->model->GetName();
@@ -53,33 +51,7 @@ namespace gazebo {
         robotEncoders.x = position.pos.x;
         robotEncoders.y = position.pos.y;
         robotEncoders.theta = degrees;
-        //std::cout << "x: " << robotEncoders.x << std::endl;
-        //std::cout << "y: " << robotEncoders.y << std::endl;
         pthread_mutex_unlock(&mutex);
-        
-        common::Time time;
-        
-        //std::cout << time.GetWallTime() << std::endl;
-        
-        time = time.GetWallTime();
-        //std::cout << time.sec - secs << std::endl;
-        //std::cout << "Vel: " << robotEncoders.x/(time.sec - secs) << "m/s" << std::endl;
-        if((time.sec - secs) % 10 == 0){
-            //std::cout << "x: " << robotEncoders.x << std::endl;
-        }
-        
-        
-        gettimeofday(&b, NULL);
-        totalb = b.tv_sec * 1000000 + b.tv_usec;
-        
-        diff = (totalb - totala) / 1000;
-        diff = cycle - diff;
-        
-        if (diff < 10)
-            diff = 10;
-        
-        sleep(diff/1000);        
-        //MSleep(diff*1000);
 
     }
 
@@ -92,14 +64,29 @@ namespace gazebo {
 
         virtual ~EncodersI() {
         };
+        
+        virtual void setEncodersData(const jderobot::EncodersDataPtr&  encodersData,
+        						     const Ice::Current&) {
+             math::Pose position = this->pose->getModel()->GetWorldPose();
+             
+             position.Set(encodersData->robotx,
+             			  encodersData->roboty,
+             			  encodersData->robotcos,
+             			  0,
+             			  0,
+             			  encodersData->robottheta);
+        	this->pose->getModel()->SetWorldPose(position); 
+			//this->getModel();
+        }
+
 
         virtual jderobot::EncodersDataPtr getEncodersData(const Ice::Current&) {
             pthread_mutex_lock(&pose->mutex);
 
             //std::cout << "theta: " << pose->robotEncoders.theta << std::endl;
 
-            encodersData->robotx = pose->robotEncoders.x ;
-            encodersData->roboty = pose->robotEncoders.y ;
+            encodersData->robotx = pose->robotEncoders.x * 1000;
+            encodersData->roboty = pose->robotEncoders.y * 1000;
             encodersData->robottheta = pose->robotEncoders.theta;
             encodersData->robotcos = cos(pose->robotEncoders.theta);
             encodersData->robotsin = sin(pose->robotEncoders.theta);

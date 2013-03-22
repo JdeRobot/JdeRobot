@@ -60,9 +60,6 @@ namespace gazebo {
         double sum;
 
         int count;
-        int cycle;
-        long totalb, totala, diff;
-        struct timeval a, b;        
 
         //event::ConnectionPtr updateConnection; Alex
         //physics::ModelPtr model; Alex

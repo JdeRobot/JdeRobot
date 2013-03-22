@@ -5,7 +5,7 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-//#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 // ICE utils includes
 #include <Ice/Ice.h>
@@ -55,12 +55,16 @@ namespace gazebo
 		if(count==0){
 			std::vector<std::string> tokens;
 			nameCamera = this->parentSensor->GetCamera()->GetName();
-		//	std::cout << "Camera name: " + nameCamera << std::endl;
   			boost::split(tokens, nameCamera, boost::is_any_of("::"));
   			boost::split(tokens, tokens[2], boost::is_any_of("("));
 			nameGlobal = tokens[0];
+			
+			std::string nameParent = this->parentSensor->GetParentName();
+			std::vector<std::string> strs;
+			boost::split(strs, nameParent, boost::is_any_of("::"));
+			
 			// El nombre del fichero de configuracion tiene que coincidir con el de la cámara en el .world y el .cfg 
-			nameCamera = std::string("--Ice.Config=" + tokens[0] + ".cfg"); 
+			nameCamera = std::string("--Ice.Config=" + strs[0] + "_" + tokens[0] + ".cfg"); 
 			
 			if (count == 0){
 				pthread_t thr_gui;

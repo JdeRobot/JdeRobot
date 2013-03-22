@@ -27,8 +27,6 @@ namespace gazebo {
         std::string namePose3DEncoders;
         pthread_mutex_t mutex;
         pthread_mutex_t mutexPose3DEncoders;
-        
-        
 
         struct pose3dencoders_t {
             float x;
@@ -75,9 +73,6 @@ namespace gazebo {
         physics::ModelPtr model;
         event::ConnectionPtr updateConnection;
         int count;
-        int cycle;
-        long totalb, totala, diff;
-        struct timeval a, b;
 
     };
 

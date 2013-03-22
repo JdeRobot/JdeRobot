@@ -1,7 +1,6 @@
 #include "pose3dencoders.h"
 //#include "pose3dmotors.h"
 
-#define RADTODEG 57.29582790
 
 
 namespace gazebo {
@@ -14,18 +13,6 @@ namespace gazebo {
         pthread_mutex_init(&mutex, NULL);
         pthread_mutex_init(&mutexPose3DEncoders, NULL);
         count = 0;
-        //Init right joint properties defined in models/pioneer2dx.model
-        this->cameraRight.motor.maxPan = 1.57;
-        this->cameraRight.motor.minPan = -1.57;
-        this->cameraRight.motor.maxTilt = 0.4;
-        this->cameraRight.motor.minTilt = -0.4;
-        //Init left joint properties defined in models/pioneer2dx.model
-        this->cameraLeft.motor.maxPan = 1.57;
-        this->cameraLeft.motor.minPan = -1.57;
-        this->cameraLeft.motor.maxTilt = 0.4;
-        this->cameraLeft.motor.minTilt = -0.4;
-
-
         std::cout << "constructor pose3dencoders" << std::endl;
     }
 
@@ -41,8 +28,6 @@ namespace gazebo {
 
         this->cameraLeft.joint_pose3dencoders_pan = this->model->GetJoint("pan_joint_left");
         this->cameraLeft.joint_pose3dencoders_tilt = this->model->GetJoint("tilt_joint_left");
-
-
 
         if (!this->cameraLeft.joint_pose3dencoders_pan)
             gzerr << "Unable to find left joint pose3dencoders_pan["
@@ -98,122 +83,134 @@ namespace gazebo {
 
     void Pose3DEncoders::OnUpdate() {
 
-        gettimeofday(&a, NULL);
-        totala = a.tv_sec * 1000000 + a.tv_usec;
-        cycle = 50;
-
         if (count == 0) {
             count++;
-            namePose3DEncoders = std::string("--Ice.Config=pose3dencoders.cfg");
+
+            std::string name = this->model->GetName();
+
+            namePose3DEncoders = std::string("--Ice.Config=" + name + "_pose3dencoders.cfg");
             pthread_t thr_gui;
             pthread_create(&thr_gui, NULL, &pose3dencodersICE, (void*) this);
         }
 
         //          ----------ENCODERS----------
         //GET pose3dencoders data from left_camera (PAN&TILT)
-
-        if (this->cameraLeft.camera_link_pan->GetRelativePose().rot.GetAsEuler().z < 0) {
-            this->cameraLeft.encoder.pan = -(3.14146 + this->cameraLeft.camera_link_pan->GetRelativePose().rot.GetAsEuler().z);
-        } else {
-            this->cameraLeft.encoder.pan = 3.14146 - this->cameraLeft.camera_link_pan->GetRelativePose().rot.GetAsEuler().z;
+        this->cameraLeft.encoder.pan = this->cameraLeft.camera_link_pan->GetRelativePose().rot.GetAsEuler().z * 180.0 / M_PI;
+        if (this->cameraLeft.encoder.pan > 0) {
+            this->cameraLeft.encoder.pan = 180 - this->cameraLeft.encoder.pan;
+        }
+        if (this->cameraLeft.encoder.pan < 0) {
+            this->cameraLeft.encoder.pan = -(180 + this->cameraLeft.encoder.pan);
         }
 
-        this->cameraLeft.encoder.tilt = this->cameraLeft.camera_link_tilt->GetRelativePose().rot.GetAsEuler().y;
+        //std::cout << this->cameraLeft.encoder.pan << std::endl;
+        this->cameraLeft.encoder.tilt = this->cameraLeft.camera_link_tilt->GetRelativePose().rot.GetAsEuler().y * 180.0 / M_PI;
+        //std::cout << this->cameraLeft.encoder.tilt << std::endl;
+
 
         //GET pose3dencoders data from left_camera (PAN&TILT)
-        if (this->cameraRight.camera_link_pan->GetRelativePose().rot.GetAsEuler().z < 0) {
-            this->cameraRight.encoder.pan = -(3.14146 + this->cameraRight.camera_link_pan->GetRelativePose().rot.GetAsEuler().z);
-        } else {
-            this->cameraRight.encoder.pan = 3.14146 - this->cameraRight.camera_link_pan->GetRelativePose().rot.GetAsEuler().z;
+
+        this->cameraRight.encoder.pan = this->cameraRight.camera_link_pan->GetRelativePose().rot.GetAsEuler().z * 180.0 / M_PI;
+        if (this->cameraRight.encoder.pan > 0) {
+            this->cameraRight.encoder.pan = 180 - this->cameraRight.encoder.pan;
+        }
+        if (this->cameraRight.encoder.pan < 0) {
+            this->cameraRight.encoder.pan = -(180 + this->cameraRight.encoder.pan);
         }
 
-        this->cameraRight.encoder.tilt = this->cameraRight.camera_link_tilt->GetRelativePose().rot.GetAsEuler().y;
+        //std::cout << this->cameraRight.pan << std::endl;
+        this->cameraRight.encoder.tilt = this->cameraRight.camera_link_tilt->GetRelativePose().rot.GetAsEuler().y * 180.0 / M_PI;
+        //std::cout << this->cameraRight.encoder.tilt << std::endl;
 
+        double setPanRight = -50;
+        double setPanLeft = -50;
+        double setTiltRight = -10;
+        double setTiltLeft = -10;
         //          ----------MOTORS----------
+
+        
+        
         if (this->cameraLeft.motor.pan >= 0) {
             if (this->cameraLeft.encoder.pan < this->cameraLeft.motor.pan) {
                 this->cameraLeft.joint_pose3dencoders_pan->SetVelocity(0, -0.1);
                 this->cameraLeft.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
+                //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraLeft.joint_pose3dencoders_pan->SetVelocity(0, 0.1);
+                this->cameraLeft.joint_pose3dencoders_pan->SetVelocity(0, 0);
                 this->cameraLeft.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
             }
         } else {
             if (this->cameraLeft.encoder.pan > this->cameraLeft.motor.pan) {
                 this->cameraLeft.joint_pose3dencoders_pan->SetVelocity(0, 0.1);
                 this->cameraLeft.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
+                //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraLeft.joint_pose3dencoders_pan->SetVelocity(0, -0.1);
+                this->cameraLeft.joint_pose3dencoders_pan->SetVelocity(0, 0);
                 this->cameraLeft.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
-            }
+            }            
         }
         if (this->cameraRight.motor.pan >= 0) {
             if (this->cameraRight.encoder.pan < this->cameraRight.motor.pan) {
                 this->cameraRight.joint_pose3dencoders_pan->SetVelocity(0, -0.1);
                 this->cameraRight.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
+                //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraRight.joint_pose3dencoders_pan->SetVelocity(0, 0.1);
+                this->cameraRight.joint_pose3dencoders_pan->SetVelocity(0, 0);
                 this->cameraRight.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
             }
         } else {
             if (this->cameraRight.encoder.pan > this->cameraRight.motor.pan) {
                 this->cameraRight.joint_pose3dencoders_pan->SetVelocity(0, 0.1);
                 this->cameraRight.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
+                //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraRight.joint_pose3dencoders_pan->SetVelocity(0, -0.1);
+                this->cameraRight.joint_pose3dencoders_pan->SetVelocity(0, 0);
                 this->cameraRight.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
-            }
+            }            
         }
-
-
 
         if (this->cameraLeft.motor.tilt >= 0) {
             if (this->cameraLeft.encoder.tilt < this->cameraLeft.motor.tilt) {
                 this->cameraLeft.joint_pose3dencoders_tilt->SetVelocity(0, -0.1);
                 this->cameraLeft.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
+                //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraLeft.joint_pose3dencoders_tilt->SetVelocity(0, 0.1);
+                this->cameraLeft.joint_pose3dencoders_tilt->SetVelocity(0, 0);
                 this->cameraLeft.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
             }
         } else {
-            if (this->cameraLeft.encoder.tilt > this->cameraLeft.motor.tilt) {
+            if (this->cameraLeft.encoder.pan > this->cameraLeft.motor.tilt) {
                 this->cameraLeft.joint_pose3dencoders_tilt->SetVelocity(0, 0.1);
                 this->cameraLeft.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
+                //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraLeft.joint_pose3dencoders_tilt->SetVelocity(0, -0.1);
+                this->cameraLeft.joint_pose3dencoders_tilt->SetVelocity(0, 0);
                 this->cameraLeft.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
-            }
+            }            
         }
         if (this->cameraRight.motor.tilt >= 0) {
             if (this->cameraRight.encoder.tilt < this->cameraRight.motor.tilt) {
                 this->cameraRight.joint_pose3dencoders_tilt->SetVelocity(0, -0.1);
                 this->cameraRight.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
+                //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraRight.joint_pose3dencoders_tilt->SetVelocity(0, 0.1);
+                this->cameraRight.joint_pose3dencoders_tilt->SetVelocity(0, 0);
                 this->cameraRight.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
             }
         } else {
-            if (this->cameraRight.encoder.tilt > this->cameraRight.motor.tilt) {
+            if (this->cameraRight.encoder.pan > this->cameraRight.motor.tilt) {
                 this->cameraRight.joint_pose3dencoders_tilt->SetVelocity(0, 0.1);
                 this->cameraRight.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
+                //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraRight.joint_pose3dencoders_tilt->SetVelocity(0, -0.1);
+                this->cameraRight.joint_pose3dencoders_tilt->SetVelocity(0, 0);
                 this->cameraRight.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
-            }
-        }
+            }            
+        }        
+        
 
 
-        gettimeofday(&b, NULL);
-        totalb = b.tv_sec * 1000000 + b.tv_usec;
 
-        diff = (totalb - totala) / 1000;
-        diff = cycle - diff;
-
-        if (diff < 10)
-            diff = 10;
-
-        //usleep(diff*1000);
-        sleep(diff / 1000);
 
     }
 
@@ -232,6 +229,7 @@ namespace gazebo {
 
         virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData(const Ice::Current&) {
 
+            pthread_mutex_lock(&pose->mutex);
             pose3DEncodersData->x = 0;
             pose3DEncodersData->y = 0;
             pose3DEncodersData->z = 0;
@@ -239,10 +237,7 @@ namespace gazebo {
             pose3DEncodersData->tilt = pose->cameraLeft.encoder.tilt;
             pose3DEncodersData->clock = 0;
             pose3DEncodersData->roll = 0;
-            pose3DEncodersData->maxPan = pose->cameraLeft.motor.maxPan;
-            pose3DEncodersData->minPan = pose->cameraLeft.motor.minPan;
-            pose3DEncodersData->maxTilt = pose->cameraLeft.motor.maxTilt;
-            pose3DEncodersData->minTilt = pose->cameraLeft.motor.minTilt;
+            pthread_mutex_unlock(&pose->mutex);
 
             return pose3DEncodersData;
 
@@ -270,6 +265,7 @@ namespace gazebo {
 
         virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData(const Ice::Current&) {
 
+            pthread_mutex_lock(&pose->mutex);
             pose3DEncodersData->x = 0;
             pose3DEncodersData->y = 0;
             pose3DEncodersData->z = 0;
@@ -277,10 +273,7 @@ namespace gazebo {
             pose3DEncodersData->tilt = pose->cameraRight.encoder.tilt;
             pose3DEncodersData->clock = 0;
             pose3DEncodersData->roll = 0;
-            pose3DEncodersData->maxPan = pose->cameraLeft.motor.maxPan;
-            pose3DEncodersData->minPan = pose->cameraLeft.motor.minPan;
-            pose3DEncodersData->maxTilt = pose->cameraLeft.motor.maxTilt;
-            pose3DEncodersData->minTilt = pose->cameraLeft.motor.minTilt;
+            pthread_mutex_unlock(&pose->mutex);
 
             return pose3DEncodersData;
 
@@ -292,22 +285,24 @@ namespace gazebo {
         jderobot::Pose3DEncodersDataPtr pose3DEncodersData;
 
     };
-
+    
     class Pose3DMotorsI : virtual public jderobot::Pose3DMotors {
+        
     public:
-
+        
         Pose3DMotorsI(gazebo::Pose3DEncoders* pose) : pose3DMotorsData(new jderobot::Pose3DMotorsData()) {
-
+            
             this->pose = pose;
-
+            
         }
-
-        virtual ~Pose3DMotorsI() {
-
+        
+        virtual ~Pose3DMotorsI(){
+            
         }
-
-        virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData(const Ice::Current&) {
-
+        
+        virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData(const Ice::Current&){
+            
+            pthread_mutex_lock(&pose->mutex);
             pose3DMotorsData->x = 0;
             pose3DMotorsData->y = 0;
             pose3DMotorsData->z = 0;
@@ -316,25 +311,28 @@ namespace gazebo {
             pose3DMotorsData->roll = 0;
             pose3DMotorsData->panSpeed = 0;
             pose3DMotorsData->tiltSpeed = 0;
+            pthread_mutex_unlock(&pose->mutex);
 
             return pose3DMotorsData;
-
+            
+            
         }
-
+        
         virtual jderobot::Pose3DMotorsParamsPtr getPose3DMotorsParams(const Ice::Current&) {
-
-            pose3DMotorsParams->maxPan = pose->cameraLeft.motor.maxPan;
-            pose3DMotorsParams->minPan = pose->cameraLeft.motor.minPan;
-            pose3DMotorsParams->maxTilt = pose->cameraLeft.motor.maxTilt;
-            pose3DMotorsParams->minTilt = pose->cameraLeft.motor.minTilt;
+            pthread_mutex_lock(&pose->mutex);
+            pose3DMotorsParams->maxPan = 0;
+            pose3DMotorsParams->minPan = 0;
+            pose3DMotorsParams->maxTilt = 0;
+            pose3DMotorsParams->minTilt = 0;
             pose3DMotorsParams->maxPanSpeed = 0;
             pose3DMotorsParams->maxTiltSpeed = 0;
+            pthread_mutex_unlock(&pose->mutex);
 
             return pose3DMotorsParams;
         }
-
+        
         virtual Ice::Int setPose3DMotorsData(const jderobot::Pose3DMotorsDataPtr & data, const Ice::Current&) {
-
+            pthread_mutex_lock(&pose->mutex);
             pose->cameraLeft.motor.x = data->x;
             pose->cameraLeft.motor.y = data->y;
             pose->cameraLeft.motor.z = data->z;
@@ -342,34 +340,37 @@ namespace gazebo {
             pose->cameraLeft.motor.tilt = data->tilt;
             pose->cameraLeft.motor.roll = data->roll;
             pose->cameraLeft.motor.panSpeed = data->panSpeed;
-            pose->cameraLeft.motor.tiltSpeed = data->tiltSpeed;
+            pose->cameraLeft.motor.tiltSpeed = data->tiltSpeed;            
+            pthread_mutex_unlock(&pose->mutex);
 
-        }
-
+        }        
+        
         gazebo::Pose3DEncoders* pose;
-
+        
     private:
         jderobot::Pose3DMotorsDataPtr pose3DMotorsData;
         jderobot::Pose3DMotorsParamsPtr pose3DMotorsParams;
-
-
+        
+                
     };
 
     class Pose3DMotorsII : virtual public jderobot::Pose3DMotors {
+        
     public:
-
+        
         Pose3DMotorsII(gazebo::Pose3DEncoders* pose) : pose3DMotorsData(new jderobot::Pose3DMotorsData()) {
-
+            
             this->pose = pose;
-
+            
         }
-
-        virtual ~Pose3DMotorsII() {
-
+        
+        virtual ~Pose3DMotorsII(){
+            
         }
-
-        virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData(const Ice::Current&) {
-
+        
+        virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData(const Ice::Current&){
+            
+            pthread_mutex_lock(&pose->mutex);
             pose3DMotorsData->x = 0;
             pose3DMotorsData->y = 0;
             pose3DMotorsData->z = 0;
@@ -378,25 +379,28 @@ namespace gazebo {
             pose3DMotorsData->roll = 0;
             pose3DMotorsData->panSpeed = 0;
             pose3DMotorsData->tiltSpeed = 0;
+            pthread_mutex_unlock(&pose->mutex);
 
             return pose3DMotorsData;
-
+            
+            
         }
-
+        
         virtual jderobot::Pose3DMotorsParamsPtr getPose3DMotorsParams(const Ice::Current&) {
-
-            pose3DMotorsParams->maxPan = pose->cameraRight.motor.maxPan;
-            pose3DMotorsParams->minPan = pose->cameraRight.motor.minPan;
-            pose3DMotorsParams->maxTilt = pose->cameraRight.motor.maxTilt;
-            pose3DMotorsParams->minTilt = pose->cameraRight.motor.minTilt;
+            pthread_mutex_lock(&pose->mutex);
+            pose3DMotorsParams->maxPan = 0;
+            pose3DMotorsParams->minPan = 0;
+            pose3DMotorsParams->maxTilt = 0;
+            pose3DMotorsParams->minTilt = 0;
             pose3DMotorsParams->maxPanSpeed = 0;
             pose3DMotorsParams->maxTiltSpeed = 0;
+            pthread_mutex_unlock(&pose->mutex);
 
             return pose3DMotorsParams;
         }
-
+        
         virtual Ice::Int setPose3DMotorsData(const jderobot::Pose3DMotorsDataPtr & data, const Ice::Current&) {
-
+            pthread_mutex_lock(&pose->mutex);
             pose->cameraRight.motor.x = data->x;
             pose->cameraRight.motor.y = data->y;
             pose->cameraRight.motor.z = data->z;
@@ -404,18 +408,21 @@ namespace gazebo {
             pose->cameraRight.motor.tilt = data->tilt;
             pose->cameraRight.motor.roll = data->roll;
             pose->cameraRight.motor.panSpeed = data->panSpeed;
-            pose->cameraRight.motor.tiltSpeed = data->tiltSpeed;
+            pose->cameraRight.motor.tiltSpeed = data->tiltSpeed;            
+            pthread_mutex_unlock(&pose->mutex);
 
-        }
-
+        }        
+        
         gazebo::Pose3DEncoders* pose;
-
+        
     private:
         jderobot::Pose3DMotorsDataPtr pose3DMotorsData;
         jderobot::Pose3DMotorsParamsPtr pose3DMotorsParams;
-
+        
+                
     };
-
+    
+    
     void *pose3dencodersICE(void* v) {
 
         gazebo::Pose3DEncoders* base = (gazebo::Pose3DEncoders*)v;
@@ -429,40 +436,46 @@ namespace gazebo {
 
             ic = Ice::initialize(argc, argv);
 
+
             prop = ic->getProperties();
-            std::string Endpoints1 = prop->getProperty("Pose3DEncodersLeft.Endpoints");
-            std::cout << "Pose3DEncodersLeft Endpoints > " << Endpoints1 << std::endl;
-            std::string Endpoints2 = prop->getProperty("Pose3DEncodersRight.Endpoints");
-            std::cout << "Pose3DEncodersRight Endpoints > " << Endpoints2 << std::endl;
-            std::string Endpoints3 = prop->getProperty("Pose3DMotorsLeft.Endpoints");
-            std::cout << "Pose3DMotorsLeft Endpoints > " << Endpoints3 << std::endl;
-            std::string Endpoints4 = prop->getProperty("Pose3DMotorsRight.Endpoints");
-            std::cout << "Pose3DMotorsRight Endpoints > " << Endpoints4 << std::endl;
+            std::string Endpoints1 = prop->getProperty("Pose3DEncoders1.Endpoints");
+            std::cout << "Pose3DEncoders1 Endpoints > " << Endpoints1 << std::endl;
+            std::string Endpoints2 = prop->getProperty("Pose3DEncoders2.Endpoints");
+            std::cout << "Pose3DEncoders2 Endpoints > " << Endpoints2 << std::endl;
+            std::string Endpoints3 = prop->getProperty("Pose3DMotors1.Endpoints");
+            std::cout << "Pose3DMotors1 Endpoints > " << Endpoints3 << std::endl;
+            std::string Endpoints4 = prop->getProperty("Pose3DMotors2.Endpoints");
+            std::cout << "Pose3DMotors2 Endpoints > " << Endpoints4 << std::endl;
+
 
             Ice::ObjectAdapterPtr adapter1 =
-                    ic->createObjectAdapterWithEndpoints("Pose3DEncodersLeft", Endpoints1);
+                    ic->createObjectAdapterWithEndpoints("Pose3DEncoders1", Endpoints1);
             Ice::ObjectAdapterPtr adapter2 =
-                    ic->createObjectAdapterWithEndpoints("Pose3DEncodersRight", Endpoints2);
+                    ic->createObjectAdapterWithEndpoints("Pose3DEncoders2", Endpoints2);
             Ice::ObjectAdapterPtr adapter3 =
-                    ic->createObjectAdapterWithEndpoints("Pose3DMotorsLeft", Endpoints3);
+                    ic->createObjectAdapterWithEndpoints("Pose3DMotors1", Endpoints3);
             Ice::ObjectAdapterPtr adapter4 =
-                    ic->createObjectAdapterWithEndpoints("Pose3DMotorsRight", Endpoints4);
+                    ic->createObjectAdapterWithEndpoints("Pose3DMotors2", Endpoints4);
+
+
 
             Ice::ObjectPtr object1 = new Pose3DEncodersI(base);
             Ice::ObjectPtr object2 = new Pose3DEncodersII(base);
             Ice::ObjectPtr object3 = new Pose3DMotorsI(base);
             Ice::ObjectPtr object4 = new Pose3DMotorsII(base);
 
-            adapter1->add(object1, ic->stringToIdentity("Pose3DEncodersLeft"));
-            adapter2->add(object2, ic->stringToIdentity("Pose3DEncodersRight"));
-            adapter3->add(object3, ic->stringToIdentity("Pose3DMotorsLeft"));
-            adapter4->add(object4, ic->stringToIdentity("Pose3DMotorsRight"));
+
+
+            adapter1->add(object1, ic->stringToIdentity("Pose3DEncoders1"));
+            adapter2->add(object2, ic->stringToIdentity("Pose3DEncoders2"));
+            adapter3->add(object3, ic->stringToIdentity("Pose3DMotors1"));
+            adapter4->add(object4, ic->stringToIdentity("Pose3DMotors2"));
 
             adapter1->activate();
             adapter2->activate();
             adapter3->activate();
             adapter4->activate();
-
+            
             ic->waitForShutdown();
         } catch (const Ice::Exception& e) {
             std::cerr << e << std::endl;

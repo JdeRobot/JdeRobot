@@ -26,6 +26,7 @@ namespace gazebo {
         Encoders();
         
         virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/);
+        physics::ModelPtr getModel();
         
         pthread_mutex_t mutex;
         pthread_mutex_t mutexEncoders;
@@ -47,9 +48,7 @@ namespace gazebo {
         physics::ModelPtr model;
         math::Pose position;
         event::ConnectionPtr updateConnection;
-        int cycle;
-        long totalb, totala, diff;
-        struct timeval a, b;        
+        
         
     };
     

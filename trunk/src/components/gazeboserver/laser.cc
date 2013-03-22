@@ -7,6 +7,9 @@
 
 #include "plugins/RayPlugin.hh"
 
+#include <boost/algorithm/string.hpp>
+
+
 #include <iostream>
 
 // ICE utils includes
@@ -21,6 +24,7 @@ namespace gazebo
 {     
     class LaserDump : public RayPlugin
   	{ 
+  	
 		public: LaserDump() : RayPlugin()
 		{
 			std::cout << "LaserDump Constructor" <<std::endl;
@@ -41,8 +45,13 @@ namespace gazebo
 		{
 			if(count == 0){
 				count++;
-				std::string name = this->parentSensor->GetName();
-    			nameLaser = std::string("--Ice.Config=" + name + ".cfg");
+				std::string name = this->parentSensor->GetParentName();
+				std::cout <<" laser: " << name  << std::endl;
+				
+				std::vector<std::string> strs;
+				boost::split(strs, name, boost::is_any_of("::"));
+
+    			nameLaser = std::string("--Ice.Config=" +  strs[0] + "_laser.cfg");
 				pthread_t thr_gui;
 				pthread_create(&thr_gui, NULL, &mainLaser, (void*)this);
 			}
@@ -82,7 +91,7 @@ class LaserI: virtual public jderobot::Laser {
 			laserData->distanceData.resize(sizeof(int)*laserData->numLaser);
 			
 			//Update laser values
-			for(int i = laserData->numLaser-1 ; i > 0; i--){
+			for(int i = 0 ; i < laserData->numLaser; i++){
 			   laserData->distanceData[i] = laser->laserValues[i]*1000;
 			}
 			pthread_mutex_unlock (&laser->mutex); 
