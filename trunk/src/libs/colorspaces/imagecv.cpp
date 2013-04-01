@@ -58,7 +58,7 @@ namespace colorspaces {
   const Image::FormatPtr ImageGRAY8::FORMAT_GRAY8 = Image::Format::createFormat("GRAY8",CV_8UC1,&ImageGRAY8::createInstance,&ImageGRAY8::imageCvt);
   const Image::FormatPtr ImageHSV8::FORMAT_HSV8 = Image::Format::createFormat("HSV8",CV_8UC3,&ImageHSV8::createInstance,&ImageHSV8::imageCvt);
   const Image::FormatPtr ImageYCRCB::FORMAT_YCRCB = Image::Format::createFormat("YCRCB",CV_8UC3,&ImageYCRCB::createInstance,&ImageYCRCB::imageCvt);
-
+const Image::FormatPtr ImageNV21::FORMAT_NV21 = Image::Format::createFormat("NV21",CV_8UC2,&ImageNV21::createInstance,&ImageNV21::imageCvt);
   Image::Image()
     : cv::Mat(),width(0),height(0),_format() {}
 
@@ -381,7 +381,88 @@ namespace colorspaces {
       return new ImageYCRCB(width,height);
   }
 
-  
+  ImageNV21::ImageNV21(const int width, const int height)
+    : Image(width,height,FORMAT_NV21) {}
+    
+  ImageNV21::ImageNV21(const int width, const int height, void *const data)
+    : Image(width,height,FORMAT_NV21,data) {}
+
+  ImageNV21::ImageNV21(const Image& i)
+    : Image(i.width,i.height,FORMAT_NV21) {
+    i.convert(*this);
+  }
+
+  Image& ImageNV21::imageCvt(const Image& src, Image& dst) throw(NoConversion){
+    assert(src.format() == FORMAT_NV21 && "src is not a NV21 image");
+    if (dst.format() == FORMAT_NV21)
+      dst = src;
+    else {
+      const ImageNV21 srcNv21(src);
+      if (dst.format() == ImageRGB8::FORMAT_RGB8)
+	srcNv21.toRGB8(dst);/*
+      else if (dst.format() == ImageGRAY8::FORMAT_GRAY8)
+	srcNv21.toGRAY8(dst);
+      else if (dst.format() == ImageYCRCB::FORMAT_YCRCB)
+	srcNv21.toYCRCB(dst);*/
+      else
+	throw Image::NoConversion();
+    }
+    return dst;
+  }
+
+  void ImageNV21::toGRAY8(Image& dst) const throw(Image::FormatMismatch){
+    if (dst.format() != ImageGRAY8::FORMAT_GRAY8)
+      throw Image::FormatMismatch("FORMAT_GRAY8 required for dst");
+
+    int fromTo[] = {0,0};//first channel of YUY2 have the luminance information (need to test!!)
+    cv::mixChannels(this,1,&dst,1,fromTo,1);
+  }
+
+  void ImageNV21::toRGB8(Image& dst) const throw(Image::FormatMismatch){
+    if (dst.format() != ImageRGB8::FORMAT_RGB8)
+      throw Image::FormatMismatch("FORMAT_RGB8 required for dst");
+    if ((dst.width % 2 != 0) || (this->width % 2 != 0))
+      throw Image::FormatMismatch("src and dst images have to have even number of columns");
+
+    //cv::cvtColor(*this,dst,CV_YUV420sp2RGB);
+    
+    unsigned char *rgb = (unsigned char *)dst.data;
+    unsigned char *yuv = (unsigned char *)this->data,
+    	*yuv_y = yuv, *yuv_uv = yuv + dst.width * dst.height;
+    for (int i = 0; i < height; i++, yuv_uv -= (i&1)?width:0) {
+        for (int j = 0; j < width; j++, yuv_uv += (j&1)?0:2) {
+            int y = *yuv_y++;
+            y = (y < 16) ? 16 : y;
+            int v = yuv_uv[0] - 128;
+            int u = yuv_uv[1] - 128;
+
+			int multi = 1.164f * (y - 16);
+            int r = (int) (multi + 1.596f * v);
+            int g = (int) (multi - 0.813f * v - 0.391f * u);
+            int b = (int) (multi + 2.018f * u);
+
+            *rgb++ = r < 0 ? 0 : (r > 255 ? 255 : r);
+            *rgb++ = g < 0 ? 0 : (g > 255 ? 255 : g);
+            *rgb++ = b < 0 ? 0 : (b > 255 ? 255 : b);
+        }
+    }
+  }
+
+  void ImageNV21::toYCRCB(Image& dst) const throw(FormatMismatch){
+    if (dst.format() != ImageYCRCB::FORMAT_YCRCB)
+      throw Image::FormatMismatch("FORMAT_YCRCB required for dst");
+    ImageYCRCB rgbImg(dst.height,dst.width);
+    toRGB8(rgbImg);
+    cv::cvtColor(rgbImg,dst,CV_RGB2YCrCb);
+  }
+
+  Image* ImageNV21::createInstance(const int width, const int height, void *const data){
+    if (data)
+      return new ImageNV21(width,height,data);
+    else
+      return new ImageNV21(width,height);
+  }
+
 
 
 //   ImageppPtr Imagepp::createTestHline(const int width,
