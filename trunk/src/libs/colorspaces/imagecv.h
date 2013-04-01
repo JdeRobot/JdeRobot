@@ -347,6 +347,46 @@ namespace colorspaces {
     static Image& imageCvt(const Image& src, Image& dst) throw(NoConversion);
     static const FormatPtr FORMAT_YCRCB;
   };
+
+  /**
+   * A NV21 image
+   */
+  class ImageNV21: public  Image {
+  public:
+    /**
+     * Constructor
+     * Width have to be an even number.
+     */
+    ImageNV21(const int width, const int height);
+    
+    /**
+     * Constructor from user data
+     * Width have to be an even number.
+     */
+    ImageNV21(const int width, const int height, void *const data);
+
+    /**
+     * Copy constructor.
+     * if \param i doesn't match format a conversion will happen.
+     */
+    ImageNV21(const Image& i);
+
+    
+    /**
+     * Conversion methods.
+     * Returns a copy
+     */
+    void toGRAY8(Image& dst) const throw(FormatMismatch);
+    void toRGB8(Image& dst) const throw(FormatMismatch);
+    void toYCRCB(Image& dst) const throw(FormatMismatch);
+    
+    /**
+     * Factory method
+     */
+    static Image* createInstance(const int width, const int height, void *const data);
+    static Image& imageCvt(const Image& src, Image& dst) throw(NoConversion);
+    static const FormatPtr FORMAT_NV21;
+  };
   
 
 } //namespace
