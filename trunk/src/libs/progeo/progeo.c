@@ -429,14 +429,14 @@ void xmlWriter(TPinHoleCamera camera, const char *filename){
 	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt33", BAD_CAST vOut);
 	sprintf(vOut, "%f", camera.rt34);
 	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt34", BAD_CAST vOut);
-	sprintf(vOut, "%f", camera.rt31);
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt31", BAD_CAST vOut);
-	sprintf(vOut, "%f", camera.rt32);
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt32", BAD_CAST vOut);
-	sprintf(vOut, "%f", camera.rt33);
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt33", BAD_CAST vOut);
-	sprintf(vOut, "%f", camera.rt34);
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt34", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt41);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt41", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt42);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt42", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt43);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt43", BAD_CAST vOut);
+	sprintf(vOut, "%f", camera.rt44);
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt44", BAD_CAST vOut);
 
 	xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
 
