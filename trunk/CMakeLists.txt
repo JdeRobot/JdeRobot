@@ -17,7 +17,7 @@ SET( COMPONENTS calibrator  calibratorKinect openniServer-kinect naooperator    
 		cameraview			recorder
 		cameraview_icestorm  kinectViewer        replayer
 		wiimoteClient
-		wiimoteServer       colortuner
+		wiimoteServer       colortuner openniServer
 		
 ) #Componentes que forman JDErobot
 
