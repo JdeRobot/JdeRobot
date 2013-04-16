@@ -1,6 +1,6 @@
 IF(openni_LIBRARIES)
     IF(nite_LIBRARIES)
-	    SET( SOURCE_FILES openniServer.cpp myprogeo.cpp )
+	    SET( SOURCE_FILES openniServer-kinect.cpp myprogeo.cpp )
 	    add_definitions(-DGLADE_DIR="${gladedir}")
 
 	    set( CMAKE_CXX_FLAGS "-Wno-deprecated" ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
@@ -14,9 +14,9 @@ IF(openni_LIBRARIES)
 	        ${ni_INCLUDE_DIR}
         )
 
-	    add_executable (openniServer ${SOURCE_FILES})
+	    add_executable (openniServer-kinect ${SOURCE_FILES})
 
-        TARGET_LINK_LIBRARIES(openniServer
+        TARGET_LINK_LIBRARIES(openniServer-kinect
             ${LIBS_DIR}/jderobotice/libjderobotice.so
             ${LIBS_DIR}/jderobotutil/libjderobotutil.so
             ${LIBS_DIR}/progeo/libprogeo.so

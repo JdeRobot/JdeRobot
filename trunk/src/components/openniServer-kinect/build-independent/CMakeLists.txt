@@ -1,5 +1,5 @@
  cmake_minimum_required(VERSION 2.8)
-SET( SOURCE_FILES ../openniServer.cpp ../myprogeo.cpp)
+SET( SOURCE_FILES ../openniServer-kinect.cpp ../myprogeo.cpp)
 SET( LIBS_DIR /usr/local/lib/jderobot/)
 
 
@@ -8,7 +8,7 @@ include_directories(
 	  /usr/local/include/jderobot
 )
 
-add_executable (openniServer  ${SOURCE_FILES})
+add_executable (openniServer-kinect  ${SOURCE_FILES})
 
 #automated opencv
 include(FindPkgConfig)
@@ -109,7 +109,7 @@ ENDIF()
 set( CMAKE_CXX_FLAGS "-Wno-deprecated -Wl,-rpath ./" ) # Opciones para el compilador
 
 
-TARGET_LINK_LIBRARIES(openniServer
+TARGET_LINK_LIBRARIES(openniServer-kinect
   ${opencv_LIBRARIES}
   ${gsl_LIBRARIES}
   ${Gearbox_LIBRARIES}

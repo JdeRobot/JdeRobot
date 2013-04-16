@@ -11,13 +11,13 @@ SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice) # Directorio do
 SET( LIBS_NEEDED   bgfgsegmentation jderobotice colorspaces jderobotutil progeo pioneer fuzzylib visionlib ) # Librerias de las que depende el componente
 
 SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Deps) # Directorio donde se encuentran las dependencias
-SET( COMPONENTS calibrator  calibratorKinect openniServer naooperator         basic_component		         
+SET( COMPONENTS calibrator  calibratorKinect openniServer-kinect naooperator         basic_component		         
 		bgfglab                    opencvdemo
 					cameraserver         introrob            
 		cameraview			recorder
 		cameraview_icestorm  kinectViewer        replayer
 		wiimoteClient
-		wiimoteServer       colortuner teleoperatorPC
+		wiimoteServer       colortuner
 		
 ) #Componentes que forman JDErobot
 
@@ -98,6 +98,8 @@ include(${DEPS_DIR}/ice/CMakeLists.txt)
 include(${DEPS_DIR}/cwiid/CMakeLists.txt)
 include(${DEPS_DIR}/opencv/CMakeLists.txt)
 include(${DEPS_DIR}/opengl/CMakeLists.txt)
+include(${DEPS_DIR}/openni2/CMakeLists.txt)
+include(${DEPS_DIR}/nite2/CMakeLists.txt)
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
 

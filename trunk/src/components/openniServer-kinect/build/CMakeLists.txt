@@ -1,4 +1,4 @@
-project (JDEROBOT_OPENNISERVER)
+project (JDEROBOT_OPENNISERVER-KINECT)
 
 cmake_minimum_required(VERSION 2.8)
 
