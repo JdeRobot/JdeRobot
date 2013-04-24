@@ -179,7 +179,7 @@ namespace gazebo {
                 this->cameraLeft.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
             }
         } else {
-            if (this->cameraLeft.encoder.pan > this->cameraLeft.motor.tilt) {
+            if (this->cameraLeft.encoder.tilt > this->cameraLeft.motor.tilt) {
                 this->cameraLeft.joint_pose3dencoders_tilt->SetVelocity(0, 0.1);
                 this->cameraLeft.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
                 //std::cout << "AQUI" << std::endl;
@@ -198,7 +198,7 @@ namespace gazebo {
                 this->cameraRight.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
             }
         } else {
-            if (this->cameraRight.encoder.pan > this->cameraRight.motor.tilt) {
+            if (this->cameraRight.encoder.tilt > this->cameraRight.motor.tilt) {
                 this->cameraRight.joint_pose3dencoders_tilt->SetVelocity(0, 0.1);
                 this->cameraRight.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
                 //std::cout << "AQUI" << std::endl;

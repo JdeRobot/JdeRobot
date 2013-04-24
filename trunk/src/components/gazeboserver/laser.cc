@@ -78,7 +78,7 @@ namespace gazebo
 
 class LaserI: virtual public jderobot::Laser {
 	public:
-		LaserI (gazebo::LaserDump* laser):laserData(new jderobot::LaserData()) 
+		LaserI (gazebo::LaserDump* laser) 
 		{
 			this->laser = laser;
 		}
@@ -86,6 +86,7 @@ class LaserI: virtual public jderobot::Laser {
 		virtual ~LaserI(){};
 
 		virtual jderobot::LaserDataPtr getLaserData(const Ice::Current&) {
+		    jderobot::LaserDataPtr laserData (new jderobot::LaserData());
 			pthread_mutex_lock (&laser->mutex); 
 			laserData->numLaser = laser->laserValues.size();
 			laserData->distanceData.resize(sizeof(int)*laserData->numLaser);
@@ -99,7 +100,6 @@ class LaserI: virtual public jderobot::Laser {
 		};
 
 	private:
-		jderobot::LaserDataPtr laserData;
 		int laser_num_readings;
 		gazebo::LaserDump* laser;
 };
