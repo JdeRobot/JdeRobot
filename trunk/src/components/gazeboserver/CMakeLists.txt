@@ -56,13 +56,3 @@ target_link_libraries(pose3dencoders ${GAZEBO_libraries}
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so)
-    
-add_library(pose3dencodersbrazo SHARED pose3dencodersbrazo.cc)
-target_link_libraries(pose3dencodersbrazo ${GAZEBO_libraries} 	 	
-	${GAZEBO_libraries} 
-
-	${ZeroCIce_LIBRARIES} 
-    ${LIBS_DIR}/jderobotice/libjderobotice.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
-    ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so)
