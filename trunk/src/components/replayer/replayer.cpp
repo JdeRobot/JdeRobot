@@ -694,7 +694,7 @@ namespace playerserver {
 				   cameras[i]=NULL;
 				}
 				
-            usleep(100*1000);  
+            	usleep(100*1000);  
 				
 				cout << "DEBUG: Entramos en camera con " << nCameras << " cameras" << endl;
 				//Camera
@@ -851,6 +851,7 @@ namespace playerserver {
 					std::string s=objIdS.str();
 					depthSensors[k] = new KinectI(s, context());
 					context().createInterfaceWithString(depthSensors[k] , s);
+					std::cout << "NOMBRE:" <<  s << std::endl;
 					Nread++;
 				}
 				
@@ -953,8 +954,7 @@ namespace playerserver {
                   if(feof(pFile)){
                      fseek ( pFile , 0 , SEEK_SET );
                      timeRelativeInicial = timeRelativeInicial0;
-					      cout << "FIN" <<endl;
-					   }
+				}
 
                   fscanf (pFile, "%ld", &timeRelative);
                   
@@ -966,7 +966,7 @@ namespace playerserver {
                   }
                   
                   fscanf (pFile, "%s", buff);
-                  std::cout << buff << std::endl;
+
                   
 
                   std:: stringstream streamLaser;
@@ -1003,20 +1003,21 @@ namespace playerserver {
 						   encoders->update( robotx, roboty, robottheta);
 						   continue;
                   }
-                  
+
                   for(int i = 0; i < camera.size(); i++){ 
                      
                      std:: stringstream stream;
                      stream << robotName +":"+robotPort + ":Camera" << i+1 << ":";
                      std::string s = stream.str();
-			            //cout << s << "  " << buff <<endl;
+			         
 			            
-	         if(!strcmp(buff, s.c_str()) ){
+	         		if(!strcmp(buff, s.c_str()) ){
+						cout << "Updating camera " << i  <<endl;
 
                         fscanf (pFile, "%s", buff);
 
                         std:: stringstream streamBuffer;
-			streamBuffer << fileName << "/" << buff;
+						streamBuffer << fileName << "/" << buff;
                         
                         FILE* fpImage = fopen(streamBuffer.str().c_str(),"r");
                         if(fpImage==NULL){
@@ -1028,12 +1029,10 @@ namespace playerserver {
 
 
              
-		   	camera[i]->update(streamBuffer.str().c_str());
-			//cout << "Dentro:" << i  << streamBuffer <<endl;
-			//encoders->update( robotx, roboty, robottheta);
-		        break;
-			}
-                  }
+				   		camera[i]->update(streamBuffer.str().c_str());
+						break;
+					}
+				}
                   
                   std:: stringstream streamPose3DEncoders1;
                   streamPose3DEncoders1 << robotName+":"+robotPort + ":Pose3DEncoders1:";
@@ -1070,17 +1069,16 @@ namespace playerserver {
 				for (int k=0; k<nDepthSensors; k++){
 			   		std::stringstream streamKinect;
 					int idK=k+1;
-	                  	streamKinect << robotName << ":" << robotPort << ":KinectData" << idK << ":";
-					
-	                  std::string sKinect = streamKinect.str();
-					std::cout << sKinect <<std::endl;
 
+
+					streamKinect << robotName << ":" << robotPort << ":KinectData" << idK << ":";
+	                std::string sKinect = streamKinect.str();
 				        if(!strcmp(buff, sKinect.c_str())){
+							std::cout << "Updading depth : " << k << std::endl;						   
+
 				           int tam;
 				           fscanf(pFile, "%d", &tam);
 				           
-				            printf("tam: %d \n", tam);
-
 				           float x,y,z;
 				           float r,g,b;
 					   std::vector<int> idVector;
@@ -1093,7 +1091,7 @@ namespace playerserver {
 				           pcl::PointCloud<pcl::PointXYZRGB>::Ptr frame (new pcl::PointCloud<pcl::PointXYZRGB>);
 				           frame->points.resize(tam);
 				           
-							int counter=0;
+
 				           for(int i = 0; i < KData->p.size() ; i++){
 				              fscanf(pFile, "%f", &x);
 				              fscanf(pFile, "%f", &y);
@@ -1104,9 +1102,7 @@ namespace playerserver {
 							  fscanf(pFile, "%f", &id);
 				              
 				              //printf("x:%f y:%f z:%f r:%f g:%f b:%f id: %d \n", x, y, z, r, g, b, id);
-							  if (id!=0){
-									counter++;
-								}
+
 				              frame->points[i].x = x;
 				              frame->points[i].y = y;
 				              frame->points[i].z = z;
@@ -1146,20 +1142,21 @@ namespace playerserver {
                
                std::cout << "Replayer takes " << (totalb-totala)/1000 << " ms" << std::endl;
                
-               //cout << "Time to sleep: " << (timeToSleep/speed)-(totalb-totala)/1000 << endl;
                
                timeToSleep = (timeToSleep/speed)-(totalb-totala)/1000;
-               
                //Sleep Algorithm
-               usleep(timeToSleep*1000);
-                  
-               //std::cout << "->" << diff << std::endl;      
+			   if (timeToSleep > 0)
+	               usleep(timeToSleep*1000);
+				else
+					std::cout << "TIMEOUT: " << timeToSleep << std::endl;
                
-               if(feof(pFile))
+               if(feof(pFile)){
+				  std::cout << "fseek" << std::endl;
                   fseek ( pFile , 0 , SEEK_SET );
-
-               
 				}
+				
+				
+			}
 				
             fclose(pFile);
             
