@@ -62,6 +62,7 @@
 #define VID_MICROSOFT 0x45e
 #define PID_NUI_MOTOR 0x02b0
 #define NUM_THREADS 5
+#define MAX_LENGHT 10000
 
 #define CHECK_RC(rc, what)                                      \
 if (rc != XN_STATUS_OK)                                         \
@@ -99,7 +100,7 @@ int SELCAM;
 std::vector<int> distances;
 IplImage* srcRGB=NULL;
 int colors[10][3];
-int userGeneratorActive=0;
+int userGeneratorActive=1;
 int width;
 int height;
 
@@ -356,6 +357,7 @@ public:
 	imageDescription->width = width;
 	imageDescription->height = height;
 	int playerdetection = prop->getPropertyAsIntWithDefault(prefix+"PlayerDetection",0);
+	std::cout << prefix+"PlayerDetection" << std::endl;
 	if (!(userGeneratorActive))
 		playerdetection=0;
 	int fps = prop->getPropertyAsIntWithDefault(prefix+"fps",5);
@@ -465,6 +467,7 @@ private:
 	
 				for (XnUInt x = 0; x < sensors[SELCAM].imageMD.XRes(); ++x, ++pImage, ++pTex)
 				{
+					//std::cout << segmentation << std::endl;
 					if (segmentation){
 						pixelsID[(y*sensors[SELCAM].imageMD.XRes() + x)]= *pLabels;
 						if (*pLabels!=0)
@@ -473,10 +476,15 @@ private:
 							srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 1] = colors[*pLabels][1];
 							srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 2] = colors[*pLabels][2];
 						}
-						else{
+						/*else{
 							srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 0] = 0;
 							srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 1] = 0;
 							srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 2] = 0;
+						}*/
+						else{
+							srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 0] = pImage->nRed;
+							srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 1] = pImage->nGreen;
+							srcRGB->imageData[(y*sensors[SELCAM].imageMD.XRes() + x)*3 + 2] = pImage->nBlue;
 						}
 						++pLabels;
 					}
@@ -693,47 +701,9 @@ private:
 						distances[(y*sensors[SELCAM].depthMD.XRes() + x)] = *pDepth;
 						if (*pDepth != 0)
 						{
-	        					int pval = (int)*pDepth/10; 
-							
-							int lb = pval & 0xff;
-							
-							switch (pval>>8) {
-							case 0:
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+0] = 255;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+1] = 255-lb;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+2] = 255-lb;
-								break;
-							case 1:
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+0] = 255;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+1] = lb;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+2] = 0;
-								break;
-							case 2:
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+0] = 255-lb;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+1] = 255;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+2] = 0;
-								break;
-							case 3:
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+0] = 0;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+1] = 255;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+2] = lb;
-								break;
-							case 4:
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+0] = 0;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+1] = 255-lb;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+2] = 255;
-								break;
-							case 5:
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+0] = 0;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+1] = 0;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+2] = 255-lb;
-								break;
-							default:
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+0] = 0;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+1] = 0;
-								src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+2] = 0;
-								break;
-							}
+							src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+0] = (float(*pDepth)/(float)MAX_LENGHT)*255.;
+							src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+1] = (*pDepth)>>8;
+							src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+2] = (*pDepth)&0xff;
 						}
 						else{
 							src->imageData[(y*sensors[SELCAM].depthMD.XRes() + x)*3+0] = 0;

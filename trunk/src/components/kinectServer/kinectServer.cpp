@@ -74,44 +74,9 @@ void depth2rgb( const XnDepthPixel*  Xn_disparity, cv::Mat image){
    for (i=0; i<image.rows* image.cols; i++) {
       //std::cout << i << std::endl;
       int pval = depth[Xn_disparity[i]];
-      int lb = pval & 0xff;
-      switch (pval>>8) {
-	      case 0:
-		      image.data[3*i+0] = 255;
-		      image.data[3*i+1] = 255-lb;
-		      image.data[3*i+2] = 255-lb;
-		      break;
-	      case 1:
-		      image.data[3*i+0] = 255;
-		      image.data[3*i+1] = lb;
-		      image.data[3*i+2] = 0;
-		      break;
-	      case 2:
-		      image.data[3*i+0] = 255-lb;
-		      image.data[3*i+1] = 255;
-		      image.data[3*i+2] = 0;
-		      break;
-	      case 3:
-		      image.data[3*i+0] = 0;
-		      image.data[3*i+1] = 255;
-		      image.data[3*i+2] = lb;
-		      break;
-	      case 4:
-		      image.data[3*i+0] = 0;
-		      image.data[3*i+1] = 255-lb;
-		      image.data[3*i+2] = 255;
-		      break;
-	      case 5:
-		      image.data[3*i+0] = 0;
-		      image.data[3*i+1] = 0;
-		      image.data[3*i+2] = 255-lb;
-		      break;
-	      default:
-		      image.data[3*i+0] = 0;
-		      image.data[3*i+1] = 0;
-		      image.data[3*i+2] = 0;
-		      break;
-      }
+	  image.data[3*i+0] = (float(*pDepth)/(float)MAX_LENGHT)*255.;
+	  image.data[3*i+1] = (*pDepth)>>8;
+	  image.data[3*i+2] = (*pDepth)&0xff;
    }
 }
 

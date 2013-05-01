@@ -53,7 +53,7 @@
 #include <jderobot/pointcloud.h>
 #include <colorspaces/colorspacesmm.h>
 #include "kinectViewergui.h"
-#include <pthread.h>
+#include "pthread.h"
 #include "controllers/Pose3DMotors-controller.h"
 #include "controllers/leds-controller.h"
 
@@ -122,6 +122,7 @@ void *camera_server(void* arg){
 		std::cerr << msg << std::endl;
 	}
 	pthread_exit(NULL);
+	return NULL;
 }
 
 /**
@@ -148,8 +149,7 @@ int main(int argc, char** argv){
 	int globalWidth=0;
 	int globalHeight=0;
 
-	// Reset thread array
-	for(int i=0;i<MAX_COMPONENTS;threads[i++]=0);	
+	
 
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -311,8 +311,6 @@ int main(int argc, char** argv){
 		throw "kinectViewer: Could not create the grafic interface";
 	for (i = 0; i < n_components; i++) {
 		pthread_join(threads[i], NULL);
-			if(threads[i] != 0)
-				pthread_join(threads[i], NULL);
 	}
 	if (ic)
 		ic->destroy();

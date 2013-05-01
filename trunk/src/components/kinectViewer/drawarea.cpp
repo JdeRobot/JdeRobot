@@ -190,6 +190,9 @@ namespace kinectViewer {
 	}
 
 	bool DrawArea::on_expose_event(GdkEventExpose* event) {
+	}
+
+	bool DrawArea::my_expose_event(){
 		//std::cout << "expose" << std::endl;
 		Gtk::Allocation allocation = get_allocation();
 		GLfloat width, height;
@@ -374,14 +377,12 @@ namespace kinectViewer {
 			glEnd();
 		}
 		glColor3f( 0, 0, 0 );
-		if (true){
-std::cout << "kk" << cloud.size() << std::endl;
-glPointSize(10.0f);
- 			for (std::vector<jderobot::RGBPoint>::iterator it = cloud.begin(); it != cloud.end(); ++it){
+		if (draw_kinect_points){
+			for (std::vector<jderobot::RGBPoint>::iterator it = cloud.begin(); it != cloud.end(); ++it){
 				if (draw_kinect_with_color)
 					glColor3f( it->r, it->g, it->b );
 				glBegin(GL_POINTS);
-					glVertex3f(it->x*10,it->y*10,it->z*10);
+					glVertex3f(it->x/scale,it->y/scale,it->z/scale);
 				glEnd();
 			}
 				

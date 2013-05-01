@@ -93,7 +93,7 @@ namespace kinectViewer {
 			bool on_clicked_event_depth(GdkEventButton* event);
 			bool reconstruct_depth_activate;
 			void on_reconstruct_depth();
-			void add_depth_pointsImage(const colorspaces::Image& imageDEPTH, const colorspaces::Image& imageRGB);
+			void add_depth_pointsImage(const colorspaces::Image& imageRGB, cv::Mat distance);
 			void add_depth_pointsCloud();
 			void add_cameras_position();
 			void add_camera_position();

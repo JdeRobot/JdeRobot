@@ -54,11 +54,12 @@
 #define VID_MICROSOFT 0x45e
 #define PID_NUI_MOTOR 0x02b0
 #define NUM_THREADS 5
+#define MAX_LENGHT 10000
 
 #define CHECK_RC(rc, what)                                      \
 if (rc != openni::STATUS_OK)                                         \
 {                                                               \
-    printf("%s failed: %s\n", what, openni::OpenNI::getExtendedError());     \
+        std::cout << what << " failed: " << openni::OpenNI::getExtendedError() << std::endl;     \
                                                     \
 }
 
@@ -101,7 +102,7 @@ void* updateThread(void*)
 	rc = openni::OpenNI::initialize();
 	if (rc != openni::STATUS_OK)
 	{
-		printf("%d: Initialize failed\n%s\n", SELCAM, openni::OpenNI::getExtendedError());
+		std::cout << SELCAM << ": Initialize failed: "<<  openni::OpenNI::getExtendedError() <<std::endl;
 	}
 
 	openni::Array<openni::DeviceInfo> deviceList;
@@ -111,9 +112,8 @@ void* updateThread(void*)
 	//checking the number off connected devices
 	if (deviceList.getSize() < 1)
 	{
-		printf("Missing devices\n");
+		std::cout << "Missing devices" << std::endl;
 		openni::OpenNI::shutdown();
-		//return 1;
 	}
 
 	//getting the Uri of the selected device
@@ -124,9 +124,8 @@ void* updateThread(void*)
 	rc = m_device.open(deviceUri);
 	if (rc != openni::STATUS_OK)
 	{
-		printf("%d: Couldn't open device %s\n%s\n", SELCAM, deviceUri, openni::OpenNI::getExtendedError());
+		std::cout << SELCAM << " : Couldn't open device " << deviceUri << ": " << openni::OpenNI::getExtendedError() << std::endl;
 		openni::OpenNI::shutdown();
-		//return 3;
 	}
 
 	//NITE
@@ -137,7 +136,6 @@ void* updateThread(void*)
 	if (m_pUserTracker->create(&m_device) != nite::STATUS_OK)
 	{
 		std::cout << "OpenniServer: Couldn't create userTracker " << std::endl;
-		//return openni::STATUS_ERROR;
 	}
 	#endif
 
@@ -153,13 +151,13 @@ void* updateThread(void*)
 		rc = depth.start();
 		if (rc != openni::STATUS_OK)
 		{
-			printf("OpenniServer: Couldn't start depth stream:\n%s\n", openni::OpenNI::getExtendedError());
+			std::cout << "OpenniServer: Couldn't start depth stream: "<< openni::OpenNI::getExtendedError() << std::endl;
 			depth.destroy();
 		}
 	}
 	else
 	{
-		printf("OpenniServer: Couldn't find depth stream:\n%s\n", openni::OpenNI::getExtendedError());
+		std::cout << "OpenniServer: Couldn't find depth stream: " <<  openni::OpenNI::getExtendedError() << std::endl;
 	}
 
 	//color
@@ -169,13 +167,13 @@ void* updateThread(void*)
 		rc = color.start();
 		if (rc != openni::STATUS_OK)
 		{
-			printf("OpenniServer: Couldn't start color stream:\n%s\n", openni::OpenNI::getExtendedError());
+			std::cout << "OpenniServer: Couldn't start color stream: " << openni::OpenNI::getExtendedError() << std::endl;
 			color.destroy();
 		}
 	}
 	else
 	{
-		printf("OpenniServer: Couldn't find color stream:\n%s\n", openni::OpenNI::getExtendedError());
+		std::cout << "OpenniServer: Couldn't find color stream: " << openni::OpenNI::getExtendedError() << std::endl;
 	}
 
 	openni::VideoMode depthVideoMode;
@@ -211,9 +209,9 @@ void* updateThread(void*)
 		}
 		else
 		{
-			printf("Error - expect color and depth to be in same resolution: D: %dx%d, C: %dx%d\n",
-				depthWidth, depthHeight,
-				colorWidth, colorHeight);
+			std::cout <<  "Error - expect color and depth to be in same resolution: D: " << depthWidth << "x" << depthHeight << "C: " << colorWidth << "x" <<  colorHeight << std::endl;
+
+
 		}
 	}
 	else if (depth.isValid())
@@ -230,7 +228,7 @@ void* updateThread(void*)
 	}
 	else
 	{
-		printf("Error - expects at least one of the streams to be valid...\n");
+		std::cout << "Error - expects at least one of the streams to be valid..." << std::endl;
 	}
 	
 	distances.resize(m_width*m_height);
@@ -253,17 +251,20 @@ void* updateThread(void*)
 		#ifndef WITH_NITE2
 		if (rc != openni::STATUS_OK)
 		{
-			printf("Wait failed\n");
+			std::cout << "Wait failed" << std::endl;
 		}
 
 		switch (changedIndex)
 		{
 		case 0:
-			depth.readFrame(&m_depthFrame); break;
+			depth.readFrame(&m_depthFrame);
+			break;
 		case 1:
-			color.readFrame(&m_colorFrame); break;
+			color.readFrame(&m_colorFrame);
+			break;
 		default:
-			printf("Error in wait\n");
+			std::cout << "Error in wait" << std::endl;
+			break;
 		}
 		//nite
 		#else
@@ -272,7 +273,7 @@ void* updateThread(void*)
 		m_depthFrame = userTrackerFrame.getDepthFrame();
 		if (rcN != nite::STATUS_OK)
 		{
-			printf("GetNextData failed\n");
+			std::cout << "GetNextData failed" << std::endl;
 			//return;
 		}
 		#endif
@@ -284,13 +285,13 @@ void* updateThread(void*)
 		//OJO it control
 		usleep(1000);
    }
-   
+   return NULL;
 }
 
 
 
 /**
-* \brief Class wich contains all the functions and variables to make run the Robot Cameras
+* \brief Class which contains all the functions and variables to make run the Robot Cameras
 */
 	class CameraRGB: virtual public jderobot::Camera {
 public:
@@ -319,7 +320,7 @@ public:
 		playerdetection=0;
 	#endif
 	int fps = prop->getPropertyAsIntWithDefault(prefix+"fps",5);
-	//we use formats acording to colorspaces
+	//we use formats according to colorspaces
 	std::string fmtStr = prop->getPropertyWithDefault(prefix+"Format","YUY2");//default format YUY2
 	imageFmt = colorspaces::Image::Format::searchFormat(fmtStr);
 	if (!imageFmt)
@@ -353,6 +354,7 @@ public:
 
 	virtual std::string startCameraStreaming(const Ice::Current&){
 		context.tracer().info("Should be made anything to start camera streaming: " + cameraDescription->name);
+		return std::string("");
 	}
 
 	virtual void stopCameraStreaming(const Ice::Current&) {
@@ -360,7 +362,7 @@ public:
 	}
 
 	virtual Ice::Int setCameraDescription(const jderobot::CameraDescriptionPtr&, const Ice::Current&){
-		
+		return 0;
 	}
 
 private:
@@ -589,6 +591,7 @@ public:
 
 	virtual std::string startCameraStreaming(const Ice::Current&){
 		context.tracer().info("Should be made anything to start camera streaming: " + cameraDescription->name);
+		return std::string("");
 	}
 
 	virtual void stopCameraStreaming(const Ice::Current&) {
@@ -596,7 +599,7 @@ public:
 	}
 	
 	virtual Ice::Int setCameraDescription(const jderobot::CameraDescriptionPtr&, const Ice::Current&){
-		
+		return 0;
 	}
 
 private:
@@ -670,45 +673,10 @@ private:
 						distances[(y*m_depthFrame.getWidth() + x)] = *pDepth;
 						if (*pDepth != 0)
 						{
-	        				int pval = (int)*pDepth/10; 
-							int lb = pval & 0xff;
-							switch (pval>>8) {
-							case 0:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)255;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)(255-lb);
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)(255-lb);
-								break;
-							case 1:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)255;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)lb;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)0;
-								break;
-							case 2:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)(255-lb);
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)255;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)0;
-								break;
-							case 3:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)0;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)255;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)lb;
-								break;
-							case 4:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)0;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)(255-lb);
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)255;
-								break;
-							case 5:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)0;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)0;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)(255-lb);
-								break;
-							default:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)0;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)0;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)0;
-								break;
-							}
+							src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (float(*pDepth)/(float)MAX_LENGHT)*255.;
+							src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (*pDepth)>>8;
+							src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (*pDepth)&0xff;
+
 						}
 						else{
 							src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = 0;
@@ -726,45 +694,9 @@ private:
 						distances[(y*m_depthFrame.getWidth() + x)] = *pDepth;
 						if (*pDepth != 0)
 						{
-	        				int pval = (int)*pDepth/10; 
-							int lb = pval & 0xff;
-							switch (pval>>8) {
-							case 0:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)255;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)(255-lb);
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)(255-lb);
-								break;
-							case 1:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)255;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)lb;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)0;
-								break;
-							case 2:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)(255-lb);
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)255;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)0;
-								break;
-							case 3:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)0;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)255;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)lb;
-								break;
-							case 4:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)0;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)(255-lb);
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)255;
-								break;
-							case 5:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)0;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)0;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)(255-lb);
-								break;
-							default:
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (unsigned int)0;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (unsigned int)0;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (unsigned int)0;
-								break;
-							}
+							src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (float(*pDepth)/(float)MAX_LENGHT)*255.;
+							src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (*pDepth)>>8;
+							src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (*pDepth)&0xff;
 					}
 					#endif
 				}

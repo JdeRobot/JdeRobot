@@ -27,7 +27,7 @@ namespace kinectViewer {
 			modesAvalables=1; //only one mode
 		}
 		else{
-			reconstructMode=0;
+			reconstructMode=1;
 			modesAvalables=2; //both modes
 		}
 	}
@@ -119,9 +119,9 @@ namespace kinectViewer {
 
 	std::cout << "Creating Progeos Virtual Cameras" << std::endl;
 	mypro= new kinectViewer::myprogeo();
-	mypro->load_cam((char*)path_rgb.c_str(),0);
+	mypro->load_cam((char*)path_rgb.c_str(),0,width, height);
 
-	mypro->load_cam((char*)path_ir.c_str(),1);
+	mypro->load_cam((char*)path_ir.c_str(),1,width, height);
 	util = new kinectViewer::util3d(mypro);
 
 		/*Show window. Note: Set window visibility to false in Glade, otherwise opengl won't work*/
@@ -138,6 +138,7 @@ namespace kinectViewer {
 void 
 kinectViewergui::updateAll( const colorspaces::Image& imageRGB, const colorspaces::Image& imageDEPTH )
 {
+		cv::Mat distance(imageRGB.rows, imageRGB.cols, CV_32FC1);
 		CvPoint pt1,pt2;
 			if (w_toggle_rgb->get_active()){
 				colorspaces::ImageRGB8 img_rgb888(imageRGB);//conversion will happen if needed
@@ -145,40 +146,48 @@ kinectViewergui::updateAll( const colorspaces::Image& imageRGB, const colorspace
 	    		w_imageRGB->clear();
 				/*si queremos pintar las lineas*/
 				if (lines_rgb_active){
-					IplImage* src = cvCreateImage(cvSize(img_rgb888.width,img_rgb888.height), IPL_DEPTH_8U, 3);
-					memcpy((unsigned char *) src->imageData, &(img_rgb888.data[0]),img_rgb888.width*img_rgb888.height * 3);
+					cv::Mat src = cv::Mat(cvSize(img_rgb888.width,img_rgb888.height), CV_8UC3, img_rgb888.data);
+					memcpy((unsigned char *) src.data, &(img_rgb888.data[0]),img_rgb888.width*img_rgb888.height * 3);
 					util->draw_room(src,0, world->lines, world->numlines);
-					memmove(&(img_rgb888.data[0]),(unsigned char *) src->imageData,img_rgb888.width*img_rgb888.height * 3);
+					memmove(&(img_rgb888.data[0]),(unsigned char *) src.data,img_rgb888.width*img_rgb888.height * 3);
 					
 				}
 	    		w_imageRGB->set(imgBuff);
-	    		displayFrameRate();
-	    		while (gtkmain.events_pending())
-	      		gtkmain.iteration();
 			}
-			if (w_toggle_depth->get_active()){
+			if (w_toggle_depth->get_active()||((reconstruct_depth_activate)&&(reconstructMode==0))){
 	
 				colorspaces::ImageRGB8 img_rgb888(imageDEPTH);//conversion will happen if needed
-				Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) img_rgb888.data,Gdk::COLORSPACE_RGB,false,8,img_rgb888.width,img_rgb888.height,img_rgb888.step);    
-	    		w_imageDEPTH->clear();
-				if (lines_depth_active){
-					IplImage* src = cvCreateImage(cvSize(img_rgb888.width,img_rgb888.height), IPL_DEPTH_8U, 3);
-					memcpy((unsigned char *) src->imageData, &(img_rgb888.data[0]),img_rgb888.width*img_rgb888.height * 3);
-					util->draw_room(src,1, world->lines, world->numlines);
-					memmove(&(img_rgb888.data[0]),(unsigned char *) src->imageData,img_rgb888.width*img_rgb888.height * 3);
-					
+				cv::Mat srcDEPTH = cv::Mat(cvSize(img_rgb888.width,img_rgb888.height), CV_8UC3, img_rgb888.data);
+				/*split channels to separate distance from image*/
+				std::vector<cv::Mat> layers;
+				cv::split(srcDEPTH, layers);
+				cv::Mat colorDepth(srcDEPTH.size(),srcDEPTH.type());
+				cv::cvtColor(layers[0],colorDepth,CV_GRAY2RGB);
+
+				for (int x=0; x< layers[1].cols ; x++){
+					for (int y=0; y<layers[1].rows; y++){
+						distance.at<float>(y,x) = ((int)layers[1].at<unsigned char>(y,x)<<8)|(int)layers[2].at<unsigned char>(y,x);					}
 				}
-	    		w_imageDEPTH->set(imgBuff);
-	    		displayFrameRate();
-	    		while (gtkmain.events_pending())
-	      		gtkmain.iteration();
+
+				if (w_toggle_depth->get_active()){
+					Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) img_rgb888.data,Gdk::COLORSPACE_RGB,false,8,img_rgb888.width,img_rgb888.height,img_rgb888.step);
+					w_imageDEPTH->clear();
+					if (lines_depth_active){
+						util->draw_room(colorDepth,1, world->lines, world->numlines);
+					}
+					memmove(&(img_rgb888.data[0]),(unsigned char *) colorDepth.data,img_rgb888.width*img_rgb888.height * 3);
+
+					w_imageDEPTH->set(imgBuff);
+				}
 			}
 			if (reconstruct_depth_activate){
-				if (reconstructMode==0)
-					add_depth_pointsImage(imageDEPTH, imageRGB);
+				if (reconstructMode==0){
+					add_depth_pointsImage(imageRGB, distance);
+				}
 				else
 					add_depth_pointsCloud();
 			}
+		world->my_expose_event();
     	while (gtkmain.events_pending())
       	gtkmain.iteration();
   	}
@@ -208,6 +217,7 @@ kinectViewergui::updateRGB( const colorspaces::Image& imageRGB)
 				if (reconstructMode!=0)
 					add_depth_pointsCloud();
 			}
+		world->my_expose_event();
     	while (gtkmain.events_pending())
       	gtkmain.iteration();
   	}
@@ -238,7 +248,7 @@ kinectViewergui::updateDEPTH(const colorspaces::Image& imageDEPTH )
 					add_depth_pointsCloud();
 				}
 			}
-				
+		world->my_expose_event();
     	while (gtkmain.events_pending())
       	gtkmain.iteration();
   	}
@@ -254,6 +264,7 @@ kinectViewergui::updatePointCloud( )
 					add_depth_pointsCloud();
 				}
 			}
+		world->my_expose_event();
     	while (gtkmain.events_pending())
       	gtkmain.iteration();
   	}
@@ -359,42 +370,18 @@ kinectViewergui::on_reconstruct_depth(){
 }
 
 void 
-kinectViewergui::add_depth_pointsImage(const colorspaces::Image& imageDEPTH, const colorspaces::Image& imageRGB){
-	float distance;
+kinectViewergui::add_depth_pointsImage(const colorspaces::Image& imageRGB, cv::Mat distance){
+	float d;
+		//std::cout << "point image" << std::endl;
 
 		world->clear_points();
 		//std::cout << "inicio reconstrucción" << std::endl;
-		for( unsigned int i = 0 ; i < cWidth*cHeight ; i++) {
-			if (((int)imageDEPTH.data[3*i+0]==255) && ( ((int)imageDEPTH.data[3*i+1] >0 ) && ((int)imageDEPTH.data[3*i+1] < 255)) && (((int)imageDEPTH.data[3*i+2] > 0 ) && ((int)imageDEPTH.data[3*i+2] < 255))){
-					distance = -((int)imageDEPTH.data[3*i+1] - 255);
-				}
-				else if (((int)imageDEPTH.data[3*i+0]==255) && (((int)imageDEPTH.data[3*i+1] >= 0) && ((int)imageDEPTH.data[3*i+1]<255)) && ((int)imageDEPTH.data[3*i+2] == 0)){
-					distance = 255+ (int)imageDEPTH.data[3*i+1];
-				}
-				else if ((((int)imageDEPTH.data[3*i+0] >= 0 ) && ((int)imageDEPTH.data[3*i+0] < 255))  && ((int)imageDEPTH.data[3*i+1]==255) && ((int)imageDEPTH.data[3*i+2] == 0)){
-					distance = 2*255 - ((int)imageDEPTH.data[3*i+0] - 255);
-				}
-				else if (((int)imageDEPTH.data[3*i+0] == 0) && ((int)imageDEPTH.data[3*i+1]==255) && (((int)imageDEPTH.data[3*i+2] >= 0 ) && ((int)imageDEPTH.data[3*i+2] < 255))){
-					distance = 3*255 + (int)imageDEPTH.data[3*i+2];
-				}
-				else if (((int)imageDEPTH.data[3*i+0] == 0) && ((int)imageDEPTH.data[3*i+1] >= 0 ) && ((int)imageDEPTH.data[3*i+1] < 255) && ((int)imageDEPTH.data[3*i+2]==255)){
-					distance = 4*255 - ((int)imageDEPTH.data[3*i+1] - 255);
-				}
-				else if (((int)imageDEPTH.data[3*i+0] == 0) && ((int)imageDEPTH.data[3*i+1] == 0) && ((int)imageDEPTH.data[3*i+2] > 0 ) && ((int)imageDEPTH.data[3*i+2] < 255)){
-					distance = 5*255 - ((int)imageDEPTH.data[3*i+2] - 255);
-				}
-				else{
-					distance=0;
-				}
-
-				if (distance != 0 ){
-					//PRUEBA DE DISTANCIA		
-					/*if (i==153600 + 320){
-						std::cout << distance << std::endl;
-					}*/
-
-				distance = distance *10;
-			
+		for (int xIm=0; xIm< cWidth; xIm++){
+			for (int yIm=0; yIm<cHeight ; yIm++){
+			d=distance.at<float>(yIm,xIm);
+			if (d!=0){
+				//std::cout << d << std::endl;
+				//d=d*10;
 				float xp,yp,zp,camx,camy,camz;
 				float ux,uy,uz; 
 				float x,y;
@@ -407,7 +394,7 @@ kinectViewergui::add_depth_pointsImage(const colorspaces::Image& imageDEPTH, con
 			
 		
 			
-				mypro->mybackproject(i % cWidth, i / cWidth, &xp, &yp, &zp, &camx, &camy, &camz,0);
+				mypro->mybackproject(xIm, yIm, &xp, &yp, &zp, &camx, &camy, &camz,0);
 			
 				//vector unitario
 				float modulo;
@@ -423,9 +410,9 @@ kinectViewergui::add_depth_pointsImage(const colorspaces::Image& imageDEPTH, con
 				uy = (yp-camy)*modulo;
 				uz = (zp-camz)*modulo;
 
-				Fx= distance*fx + camx;
-				Fy= distance*fy + camy;
-				Fz= distance*fz + camz;
+				Fx= d*fx + camx;
+				Fy= d*fy + camy;
+				Fz= d*fz + camz;
 
 				/* calculamos el punto real */
 				t = (-(fx*camx) + (fx*Fx) - (fy*camy) + (fy*Fy) - (fz*camz) + (fz*Fz))/((fx*ux) + (fy*uy) + (fz*uz));
@@ -440,11 +427,12 @@ kinectViewergui::add_depth_pointsImage(const colorspaces::Image& imageDEPTH, con
 				std::cout << ux << "," << uy<< "," << uz << std::endl;*/
 				//k= (80-yp)/uy;
 				//std::cout << "distancia" << distance << std::endl;
-			
-				world->add_kinect_point(t*ux + camx,t*uy+ camy,t*uz + camz,(int)imageRGB.data[3*i],(int)imageRGB.data[3*i+1],(int)imageRGB.data[3*i+2]);
+				//std::cout<< t*ux + camx << ", " << t*uy + camy << ", " << t*uz + camz << std::endl;
+				world->add_kinect_point(t*ux + camx,t*uy+ camy,t*uz + camz,(int)imageRGB.data[3*(yIm*cWidth+xIm)],(int)imageRGB.data[3*(yIm*cWidth+xIm)+1],(int)imageRGB.data[3*(yIm*cWidth+xIm)+2]);
 
 				//world->add_line(distance*ux + camx,distance*uy+ camy,distance*uz + camz,camx,camy,camz);
 				}
+			}
 		}
 
 	//std::cout << "fin reconstrucción" << std::endl;
@@ -455,7 +443,6 @@ kinectViewergui::add_depth_pointsCloud(){
 	world->clear_points();
 	std::vector<jderobot::RGBPoint> cloud;
 	cloud=pointCloud->getCloud();
-
 	for (std::vector<jderobot::RGBPoint>::iterator it = cloud.begin(); it != cloud.end(); ++it){
 		world->add_kinect_point(it->x,it->y,it->z,(int)it->r,(int)it->g,(int)it->b);
 	}
@@ -556,13 +543,13 @@ kinectViewergui::on_w_radio_depth_activate(){
 void
 kinectViewergui::on_w_radio_mode_pointcloud_activate(){
 	if (w_radio_mode_pointcloud->get_active())
-		reconstructMode=0;
+		reconstructMode=1;
 }
 
 void
 kinectViewergui::on_w_radio_mode_image_activate(){
 	if (w_radio_mode_image->get_active())
-		reconstructMode=1;
+		reconstructMode=0;
 }
 
 void

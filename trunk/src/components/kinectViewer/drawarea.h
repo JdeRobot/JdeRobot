@@ -96,6 +96,7 @@ namespace kinectViewer {
 		void clear_points();
 		void clearExtraLines();
 		void setCamerasResolution(int width, int height);
+		bool my_expose_event();
 	
 		bool draw_kinect_points;
 		bool draw_kinect_with_color;

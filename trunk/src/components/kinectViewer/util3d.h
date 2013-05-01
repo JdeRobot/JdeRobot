@@ -30,14 +30,14 @@
 
 
 namespace kinectViewer {
-  class util3d {
+class util3d {
 	public:
 		util3d(myprogeo* p);
 		~util3d();
-		void draw_room(IplImage *image,int cam, float lines[][8], int n_lines);
+		void draw_room(cv::Mat image,int cam, float lines[][8], int n_lines);
 
 	private:
-		int cvDrawline(IplImage* image,HPoint2D p1, HPoint2D p2, CvScalar color,int cam);
+		int cvDrawline(cv::Mat image,HPoint2D p1, HPoint2D p2, cv::Scalar color,int cam);
 		myprogeo* mypro;
 	};
 }

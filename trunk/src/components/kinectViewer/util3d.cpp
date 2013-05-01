@@ -32,7 +32,7 @@ util3d::util3d(myprogeo* p){
 util3d::~util3d(){
 }
 
-int util3d::cvDrawline(IplImage* image,HPoint2D p1, HPoint2D p2, CvScalar color,int cam){
+int util3d::cvDrawline(cv::Mat image,HPoint2D p1, HPoint2D p2, cv::Scalar color,int cam){
   HPoint2D gooda,goodb;
   CvPoint pt1,pt2;
 	TPinHoleCamera camera;
@@ -41,13 +41,13 @@ int util3d::cvDrawline(IplImage* image,HPoint2D p1, HPoint2D p2, CvScalar color,
   if(displayline(p1,p2,&gooda,&goodb,camera)==1){
 	pt1.x=(int)gooda.y; pt1.y=camera.rows-1-(int)gooda.x;
 	pt2.x=(int)goodb.y; pt2.y=camera.rows-1-(int)goodb.x;
-	cvLine(image, pt1, pt2, color, 2, 1, 0);
+	cv::line(image,pt1,pt2,color,2,1,0);
 	return 1;
   }
   return 0;
 }
 
-void util3d::draw_room(IplImage *image,int cam, float lines[][8], int n_lines){
+void util3d::draw_room(cv::Mat image,int cam, float lines[][8], int n_lines){
   	int i,j;
   	HPoint2D a,b;
   	HPoint3D a3A,a3B,a3C,a3D;
