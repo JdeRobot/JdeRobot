@@ -1,6 +1,6 @@
 IF(with_pcl)
 
-    SET( SOURCE_FILES  recorder.cpp)
+    SET( SOURCE_FILES  recorder.cpp recordergui.cpp)
 
       set( CMAKE_CXX_FLAGS "-Wno-deprecated -lGL -lGLU -lglut -lm -lusb-1.0 " ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
 
@@ -23,12 +23,12 @@ IF(with_pcl)
 
     TARGET_LINK_LIBRARIES(recorder 
 	  ${opencv_LIBRARIES}
-#	  ${gtkmm_LIBRARIES}
-#	  ${libglademm_LIBRARIES}
+	  ${gtkmm_LIBRARIES}
+	  ${libglademm_LIBRARIES}
 #	  ${gthread_LIBRARIES}
 #	  ${libgnomecanvas_LIBRARIES}
 #	  ${libgnomecanvasmm_LIBRARIES}
-#	  ${gtkglextmm_LIBRARIES}
+	  ${gtkglextmm_LIBRARIES}
 	  ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
 	  ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
 	  ${LIBS_DIR}/jderobotice/libjderobotice.so

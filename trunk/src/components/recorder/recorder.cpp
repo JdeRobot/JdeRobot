@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <string.h>
+#include "recordergui.h"
 
 int main(int argc, char** argv){
 
@@ -271,115 +272,154 @@ int avCamera4 = 0;
       long timeInicio = 0;
       gettimeofday(&inicio,NULL);   
       timeInicio = inicio.tv_sec*1000000+inicio.tv_usec;
+	  int guiActive=prop->getPropertyAsIntWithDefault("Recorder.GUI",0); 
+	  bool active=true;
+	 bool recording=true;
+	recorder::recordergui *gui;
+
+		if (guiActive){
+	      gui = new recorder::recordergui();
+		}
+      long long int iteration=0;
+		
             
-      while(true){
-         gettimeofday(&a,NULL);
-         totala=a.tv_sec*1000000+a.tv_usec;
-      
+      while(active){
 
-		/*cameras*/
-		for (int i=0; i<nCameras ; i++){
-			imageData = cprx[i]->getImageData();
-			colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(imageData->description->format);
-			cv::Mat image;
-            	image.create(cv::Size(imageData->description->width, imageData->description->height), CV_8UC3);
+		if (guiActive){
+    	 gui->set_iteration(iteration);
+    	 gui->update();
+		 active=gui->get_active();
+		recording=gui->get_recording();
+		}
 
-            	memcpy((unsigned char *) image.data ,&(imageData->pixelData[0]), image.cols*image.rows * 3);
-            
-            	char buff[30]; // enough to hold all numbers up to 64-bits
 
-            	sprintf(buff, "images/camera%d_%ld.%s", i+1, timeRelative,imageFormat.c_str());
-            	cv::imwrite(buff, image,compression_params);
-            	outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Camera" << i+1 << ":\t" << buff  << std::endl;
-		} 
-         /* Encoders */ 
-         if(avEncoders){
-            ed = eprx->getEncodersData(); // cogemos informacion de los encoders
-		      //std::cout << timeRelative << " " << "x: " << ed->robotx << " y: " <<ed->roboty << " z: " << ed->robottheta << std::endl;
-            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Encoders:\t" << ed->robotx << "\t" <<ed->roboty << "\t" << ed->robottheta << std::endl;
-         }
-         
-         /* Laser */
-         if(avLaser){
-            ld = lprx->getLaserData();
-            outfile << timeRelative <<" "+robotName +":"+robotPort + ":Laser: ";
-            for(int i = 0; i < muestrasLaser; i++){
-               outfile <<ld->distanceData[i] << "\t";
-            }
-               outfile << std::endl;
-            //std::cout << ld->distanceData[80] << std::endl;
-         }
-         
-         /* PTencoders A */
-         if(avPose3DEncoders1){
-            pose3DEncodersData1 = pose3DEncoders1->getPose3DEncodersData();
-            outfile << timeRelative <<" "<<robotName <<":"<<robotPort <<":Pose3DEncoders1: "<< pose3DEncodersData1->x << " " << pose3DEncodersData1->y << " " << pose3DEncodersData1->z << " "<< pose3DEncodersData1->pan << " " <<  pose3DEncodersData1->tilt << " " << pose3DEncodersData1->roll <<std::endl;
-            //std::cout << timeRelative << " pan: " << pose3DEncodersData1->pan << " tilt:" <<  pose3DEncodersData1->tilt << std::endl;
-         }
-         
-         /* PTencoders B */
-         if(avPose3DEncoders2){
-            pose3DEncodersData2 = pose3DEncoders2->getPose3DEncodersData();
-            outfile << timeRelative <<" "<<robotName <<":"<<robotPort <<":Pose3DEncoders2: "<< pose3DEncodersData2->x << " " << pose3DEncodersData2->y << " " << pose3DEncodersData2->z << " "<< pose3DEncodersData2->pan << " " <<  pose3DEncodersData2->tilt<< " " << pose3DEncodersData2->roll << std::endl;
-            
-            //std::cout << timeRelative << " pan: " << pose3DEncodersData2->pan << " tilt:" <<  pose3DEncodersData2->tilt << std::endl;
-         }
-         
-         /* PTencoders A deprecated?? */
-         if(ptencoders){
-            PTencodersData1 = pteprx1->getPTEncodersData();
-            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":PTEncoders1:\t";
-            outfile << PTencodersData1->panAngle <<"\t" << PTencodersData1->tiltAngle << std::endl; 
-         }
-         
-      /* PTencoders B deprecated?? */
-        if(ptencoders2){
-            PTencodersData2 = pteprx2->getPTEncodersData();
-            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":PTEncoders2:\t";
-            outfile << PTencodersData2->panAngle <<"\t" << PTencodersData2->tiltAngle << std::endl; 
-         }
-         
 
-		/* DepthSensors */
-		for (int j=0; j< nDepthSensors ; j++){
-            kinectData = prx[j]->getCloudData();
-            outfile << timeRelative << "\t"+robotName +":"+robotPort + ":KinectData" << j+1 << ":\t"<< kinectData->p.size() << "\t";
-            for(int i = 0; i < kinectData->p.size(); i++){
-               float x,y,z;
-               float r,g,b;
-			   float id;
-               x = kinectData->p[i].x;
-               y = kinectData->p[i].y;
-               z = kinectData->p[i].z;
-               r = kinectData->p[i].r;
-               g = kinectData->p[i].g;
-               b = kinectData->p[i].b;
-			   id = (float)kinectData->p[i].id;
-               outfile << x << "\t" << y << "\t" << z << "\t" << r << "\t" << g << "\t" << b << "\t" << id <<"\t" ;
-            }
-            outfile << std::endl;
-		} 
-     
-         gettimeofday(&b,NULL);
-         totalb=b.tv_sec*1000000+b.tv_usec;
-         std::cout << "Recorder takes " << (totalb-totala)/1000 << " ms" << std::endl;
-          
-         diff = (totalb-totala)/1000;
-         if(diff < 0 || diff > cycle)
-            diff = cycle;
-         else
-            diff = cycle-diff;
-         
-         //Sleep Algorithm
-         usleep(diff*1000);
-         if(diff < 10)
-            usleep(10*1000);
-            
-        // std::cout << cycle <<" ->" << diff  << " ->" << timeRelative<< std::endl;
-         timeRelative+= diff + (totalb-totala)/1000;
-        // std::cout << "->" << diff  << " ->" << timeRelative<< std::endl;
+		if (recording){
+			iteration++;
+			gettimeofday(&b,NULL);
+			    	 totalb=b.tv_sec*1000000+b.tv_usec;
 
-				std::cout << "rgb: " <<  1000000/(totalb-totala) << std::endl;
+
+
+
+			         float myfps=1000000./((float)totalb-(float)totala);
+					if (guiActive){
+			         gui->set_fps((int)myfps);
+					}
+
+
+
+
+					gettimeofday(&a,NULL);
+					totala=a.tv_sec*1000000+a.tv_usec;
+
+			/*cameras*/
+			for (int i=0; i<nCameras ; i++){
+				imageData = cprx[i]->getImageData();
+				colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(imageData->description->format);
+				cv::Mat image;
+					image.create(cv::Size(imageData->description->width, imageData->description->height), CV_8UC3);
+
+					memcpy((unsigned char *) image.data ,&(imageData->pixelData[0]), image.cols*image.rows * 3);
+
+					char buff[30]; // enough to hold all numbers up to 64-bits
+
+					sprintf(buff, "images/camera%d_%ld.%s", i+1, timeRelative,imageFormat.c_str());
+					cv::imwrite(buff, image,compression_params);
+					outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Camera" << i+1 << ":\t" << buff  << std::endl;
+			}
+			 /* Encoders */
+			 if(avEncoders){
+				ed = eprx->getEncodersData(); // cogemos informacion de los encoders
+				  //std::cout << timeRelative << " " << "x: " << ed->robotx << " y: " <<ed->roboty << " z: " << ed->robottheta << std::endl;
+				outfile << timeRelative << "\t"+robotName +":"+robotPort + ":Encoders:\t" << ed->robotx << "\t" <<ed->roboty << "\t" << ed->robottheta << std::endl;
+			 }
+
+			 /* Laser */
+			 if(avLaser){
+				ld = lprx->getLaserData();
+				outfile << timeRelative <<" "+robotName +":"+robotPort + ":Laser: ";
+				for(int i = 0; i < muestrasLaser; i++){
+				   outfile <<ld->distanceData[i] << "\t";
+				}
+				   outfile << std::endl;
+				//std::cout << ld->distanceData[80] << std::endl;
+			 }
+
+			 /* PTencoders A */
+			 if(avPose3DEncoders1){
+				pose3DEncodersData1 = pose3DEncoders1->getPose3DEncodersData();
+				outfile << timeRelative <<" "<<robotName <<":"<<robotPort <<":Pose3DEncoders1: "<< pose3DEncodersData1->x << " " << pose3DEncodersData1->y << " " << pose3DEncodersData1->z << " "<< pose3DEncodersData1->pan << " " <<  pose3DEncodersData1->tilt << " " << pose3DEncodersData1->roll <<std::endl;
+				//std::cout << timeRelative << " pan: " << pose3DEncodersData1->pan << " tilt:" <<  pose3DEncodersData1->tilt << std::endl;
+			 }
+
+			 /* PTencoders B */
+			 if(avPose3DEncoders2){
+				pose3DEncodersData2 = pose3DEncoders2->getPose3DEncodersData();
+				outfile << timeRelative <<" "<<robotName <<":"<<robotPort <<":Pose3DEncoders2: "<< pose3DEncodersData2->x << " " << pose3DEncodersData2->y << " " << pose3DEncodersData2->z << " "<< pose3DEncodersData2->pan << " " <<  pose3DEncodersData2->tilt<< " " << pose3DEncodersData2->roll << std::endl;
+
+				//std::cout << timeRelative << " pan: " << pose3DEncodersData2->pan << " tilt:" <<  pose3DEncodersData2->tilt << std::endl;
+			 }
+
+			 /* PTencoders A deprecated?? */
+			 if(ptencoders){
+				PTencodersData1 = pteprx1->getPTEncodersData();
+				outfile << timeRelative << "\t"+robotName +":"+robotPort + ":PTEncoders1:\t";
+				outfile << PTencodersData1->panAngle <<"\t" << PTencodersData1->tiltAngle << std::endl;
+			 }
+
+		  /* PTencoders B deprecated?? */
+			if(ptencoders2){
+				PTencodersData2 = pteprx2->getPTEncodersData();
+				outfile << timeRelative << "\t"+robotName +":"+robotPort + ":PTEncoders2:\t";
+				outfile << PTencodersData2->panAngle <<"\t" << PTencodersData2->tiltAngle << std::endl;
+			 }
+
+
+			/* DepthSensors */
+			for (int j=0; j< nDepthSensors ; j++){
+				kinectData = prx[j]->getCloudData();
+				outfile << timeRelative << "\t"+robotName +":"+robotPort + ":KinectData" << j+1 << ":\t"<< kinectData->p.size() << "\t";
+				for(int i = 0; i < kinectData->p.size(); i++){
+				   float x,y,z;
+				   float r,g,b;
+				   float id;
+				   x = kinectData->p[i].x;
+				   y = kinectData->p[i].y;
+				   z = kinectData->p[i].z;
+				   r = kinectData->p[i].r;
+				   g = kinectData->p[i].g;
+				   b = kinectData->p[i].b;
+				   id = (float)kinectData->p[i].id;
+				   outfile << x << "\t" << y << "\t" << z << "\t" << r << "\t" << g << "\t" << b << "\t" << id <<"\t" ;
+				}
+				outfile << std::endl;
+			}
+
+			 gettimeofday(&b,NULL);
+			 totalb=b.tv_sec*1000000+b.tv_usec;
+			 std::cout << "Recorder takes " << (totalb-totala)/1000 << " ms" << std::endl;
+
+			 diff = (totalb-totala)/1000;
+			 if(diff < 0 || diff > cycle)
+				diff = cycle;
+			 else
+				diff = cycle-diff;
+
+			 //Sleep Algorithm
+			 usleep(diff*1000);
+			 if(diff < 10)
+				usleep(10*1000);
+
+			// std::cout << cycle <<" ->" << diff  << " ->" << timeRelative<< std::endl;
+			 timeRelative+= diff + (totalb-totala)/1000;
+			// std::cout << "->" << diff  << " ->" << timeRelative<< std::endl;
+
+					std::cout << "rgb: " <<  1000000/(totalb-totala) << std::endl;
+		}
+		else{
+			usleep(10*1000);
+		}
 
       }
       
