@@ -23,13 +23,11 @@
 
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
-#include <gbxsickacfr/gbxiceutilacfr/safethread.h>
 
 #include <jderobot/camera.h>
 #include <jderobot/image.h>
 #include <colorspaces/colorspacesmm.h>
-#include <jderobotice/component.h>
-#include <jderobotice/application.h>
+
 
 //Opencv
 #include <opencv2/core/core.hpp>
@@ -54,15 +52,15 @@ class CameraI: virtual public jderobot::Camera {
     int framerateN;
     int framerateD;
 
-        CameraI(std::string propertyPrefix, const jderobotice::Context& context)
-               : prefix(propertyPrefix),context(context) {
+        CameraI(std::string propertyPrefix, Ice::CommunicatorPtr ic)
+               : prefix(propertyPrefix) {
 
             std::cout << "Constructor CameraI -> " << propertyPrefix << std::endl;
 
             imageDescription = (new jderobot::ImageDescription());
             cameraDescription = (new jderobot::CameraDescription());
 
-            Ice::PropertiesPtr prop = context.properties();
+            Ice::PropertiesPtr prop = ic->getProperties();
 
             //fill cameraDescription
             name = prop->getProperty(prefix+"Name");
@@ -110,12 +108,12 @@ class CameraI: virtual public jderobot::Camera {
         }
 
         std::string getRobotName () {
-            return ((context.properties())->getProperty(context.tag()+".RobotName"));
+//            return ((context.properties())->getProperty(context.tag()+".RobotName"));
         }
 
         virtual ~CameraI() {
-            context.tracer().info("Stopping and joining thread for camera: " + cameraDescription->name);
-            gbxiceutilacfr::stopAndJoin(replyTask);
+//            context.tracer().info("Stopping and joining thread for camera: " + cameraDescription->name);
+//            gbxiceutilacfr::stopAndJoin(replyTask);
         }
 
         virtual jderobot::ImageDescriptionPtr getImageDescription(const Ice::Current& c){
@@ -135,19 +133,19 @@ class CameraI: virtual public jderobot::Camera {
         }
 
         virtual std::string startCameraStreaming(const Ice::Current&){
-            context.tracer().info("Should be made anything to start camera streaming: " + cameraDescription->name);
         }
 
         virtual void stopCameraStreaming(const Ice::Current&) {
-            context.tracer().info("Should be made anything to stop camera streaming: " + cameraDescription->name);
         }
 
     private:
-        class ReplyTask: public gbxiceutilacfr::SafeThread {
+
+        class ReplyTask: public IceUtil::Thread {
             public:
                 ReplyTask(CameraI* camera)
-                : gbxiceutilacfr::SafeThread(camera->context.tracer()), mycamera(camera) {
+                {
                     std::cout << "safeThread" << std::endl;
+                    mycamera = camera;
                 }
 
                 void pushJob(const jderobot::AMD_ImageProvider_getImageDataPtr& cb){
@@ -155,7 +153,7 @@ class CameraI: virtual public jderobot::Camera {
                     requests.push_back(cb);
                 }
 
-                virtual void walk(){
+                virtual void run(){
                     jderobot::ImageDataPtr reply(new jderobot::ImageData);
                     struct timeval a, b;
                     int cycle = 48;
@@ -167,7 +165,7 @@ class CameraI: virtual public jderobot::Camera {
 
                     int cycle_control = 1000/mycamera->framerateN;
 
-                    while(!isStopping()){
+                    while(1){
 
                         gettimeofday(&a,NULL);
                         totala=a.tv_sec*1000000+a.tv_usec;
@@ -241,7 +239,6 @@ class CameraI: virtual public jderobot::Camera {
 
         typedef IceUtil::Handle<ReplyTask> ReplyTaskPtr;
         std::string prefix;
-        jderobotice::Context context;
         colorspaces::Image::FormatPtr imageFmt;
         jderobot::ImageDescriptionPtr imageDescription;
         jderobot::CameraDescriptionPtr cameraDescription;
@@ -250,45 +247,46 @@ class CameraI: virtual public jderobot::Camera {
 
 }; // end class CameraI
 
-  class Component: public jderobotice::Component{
-  public:
-    Component()
-      :jderobotice::Component("CameraSrv"), cameras(0) {}
-
-    virtual void start(){
-      Ice::PropertiesPtr prop = context().properties();
-
-      int nCameras = prop->getPropertyAsInt(context().tag() + ".NCameras");
-      cameras.resize(nCameras);
-      for (int i=0; i<nCameras; i++){//build camera objects
-        std::stringstream objIdS;
-        objIdS <<  i;
-        std::string objId = objIdS.str();// should this be something unique??
-        std::string objPrefix(context().tag() + ".Camera." + objId + ".");
-        std::string cameraName = prop->getProperty(objPrefix + "Name");
-
-        if (cameraName.size() == 0){//no name specified, we create one using the index
-            cameraName = "camera" + objId;
-            prop->setProperty(objPrefix + "Name",cameraName);//set the value
-        }
-        context().tracer().info("Creating camera " + cameraName);
-        cameras[i] = new CameraI(objPrefix,context());
-        context().createInterfaceWithString(cameras[i],cameraName);
-      }
-    }
-
-    virtual ~Component(){}
-
-  private:
-    std::vector<Ice::ObjectPtr> cameras;
-  };
-
 } //namespace
 
-int main(int argc, char** argv){
-  cameraserver::Component component;
+int main(int argc, char** argv)
+{
+    std::vector<Ice::ObjectPtr> cameras;
 
-  jderobotice::Application app(component);
+    Ice::CommunicatorPtr ic;
+    try{
+        ic = Ice::initialize(argc, argv);
 
-  return app.jderobotMain(argc,argv);
+        Ice::PropertiesPtr prop = ic->getProperties();
+
+        std::string Endpoints = prop->getProperty("CameraSrv.Endpoints");
+
+        int nCameras = prop->getPropertyAsInt("CameraSrv.NCameras");
+        cameras.resize(nCameras);
+        for (int i=0; i<nCameras; i++){//build camera objects
+          std::stringstream objIdS;
+          objIdS <<  i;
+          std::string objId = objIdS.str();// should this be something unique??
+          std::string objPrefix("CameraSrv.Camera." + objId + ".");
+          std::string cameraName = prop->getProperty(objPrefix + "Name");
+
+          Ice::ObjectAdapterPtr adapter =
+                  ic->createObjectAdapterWithEndpoints(cameraName, Endpoints);
+
+          Ice::ObjectPtr object = new cameraserver::CameraI(objPrefix, ic);
+
+          adapter->add(object, ic->stringToIdentity(cameraName));
+
+          adapter->activate();
+        }
+        ic->waitForShutdown();
+
+    }catch (const Ice::Exception& ex) {
+        std::cerr << ex << std::endl;
+        exit(-1);
+    } catch (const char* msg) {
+        std::cerr << msg << std::endl;
+        exit(-1);
+    }
+
 }

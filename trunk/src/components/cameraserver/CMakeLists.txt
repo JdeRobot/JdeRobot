@@ -16,6 +16,5 @@ TARGET_LINK_LIBRARIES(cameraserver
 	${LIBS_DIR}/jderobotice/libjderobotice.so
 	${LIBS_DIR}/colorspaces/libcolorspacesmm.so
 	${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
-	${Gearbox_LIBRARIES}
 	${ZeroCIce_LIBRARIES}
 	)
