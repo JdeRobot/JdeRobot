@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<sdf version="1.3">
+  <world name="default">
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    
+    <include>
+      <uri>model://ground_plane_sincolor</uri>
+      <pose>0 0 -1 0 0 0</pose>
+    </include>
+
+    <!-- Pioneer2dx model -->
+    <include>
+      <uri>model://pioneer2dxJde</uri>
+      <pose>10 10 0 0 0 0</pose>
+    </include>
+
+    <!-- Pioneer2dx model -->
+    <include>
+      <uri>model://jarama</uri>
+      <pose>10 10 0 0 0 0</pose>
+    </include>
+   
+  </world>
+</sdf>
