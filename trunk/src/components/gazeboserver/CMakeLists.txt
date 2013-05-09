@@ -10,8 +10,7 @@ add_library(motors SHARED motors.cc)
 target_link_libraries(motors 
 	${GAZEBO_libraries} 
 	${ZeroCIce_LIBRARIES} 
-    ${LIBS_DIR}/jderobotice/libjderobotice.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
+
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so) 
     
@@ -20,8 +19,6 @@ target_link_libraries(encoders
 	${GAZEBO_libraries} 
 
 	${ZeroCIce_LIBRARIES} 
-    ${LIBS_DIR}/jderobotice/libjderobotice.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so)    
 
@@ -31,8 +28,6 @@ target_link_libraries(laser
 	${GAZEBO_libraries} 
 
 	${ZeroCIce_LIBRARIES} 
-    ${LIBS_DIR}/jderobotice/libjderobotice.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so) 
 
@@ -42,8 +37,6 @@ target_link_libraries(camera_dump ${GAZEBO_libraries}
 	${GAZEBO_libraries} 
 
 	${ZeroCIce_LIBRARIES} 
-    ${LIBS_DIR}/jderobotice/libjderobotice.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so)
     
@@ -52,7 +45,5 @@ target_link_libraries(pose3dencoders ${GAZEBO_libraries}
 	${GAZEBO_libraries} 
 
 	${ZeroCIce_LIBRARIES} 
-    ${LIBS_DIR}/jderobotice/libjderobotice.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so)

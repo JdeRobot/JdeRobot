@@ -10,13 +10,6 @@
 // ICE utils includes
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
-#include <gbxsickacfr/gbxiceutilacfr/safethread.h>
-
-// JDErobot general ice component includes
-#include <jderobotice/component.h>
-#include <jderobotice/application.h>
-#include <jderobotice/exceptions.h>
-#include <jderobotice/context.h>
 
 #include <jderobot/camera.h>
 
@@ -58,13 +51,8 @@ namespace gazebo
   			boost::split(tokens, nameCamera, boost::is_any_of("::"));
   			boost::split(tokens, tokens[2], boost::is_any_of("("));
 			nameGlobal = tokens[0];
-			
-			std::string nameParent = this->parentSensor->GetParentName();
-			std::vector<std::string> strs;
-			boost::split(strs, nameParent, boost::is_any_of("::"));
-			
 			// El nombre del fichero de configuracion tiene que coincidir con el de la cámara en el .world y el .cfg 
-			nameCamera = std::string("--Ice.Config=" + strs[0] + "_" + tokens[0] + ".cfg"); 
+			nameCamera = std::string("--Ice.Config=" + tokens[0] + ".cfg"); 
 			
 			if (count == 0){
 				pthread_t thr_gui;
@@ -98,8 +86,8 @@ namespace gazebo
 
 class CameraI: virtual public jderobot::Camera {
 	public:
-		CameraI(std::string propertyPrefix, const jderobotice::Context& context, gazebo::CameraDump* camera)
-			   : prefix(propertyPrefix),context(context), cameraI(camera) {
+		CameraI(std::string propertyPrefix, gazebo::CameraDump* camera)
+			   : prefix(propertyPrefix), cameraI(camera) {
 		
 			std::cout << "Constructor CameraI" << std::endl;
 
@@ -115,12 +103,12 @@ class CameraI: virtual public jderobot::Camera {
 		}
 
 		std::string getRobotName () {
-			return ((context.properties())->getProperty(context.tag()+".RobotName"));
+			return "RobotName";
 		}
 
 		virtual ~CameraI() {
-			context.tracer().info("Stopping and joining thread for camera: " + cameraDescription->name);
-			gbxiceutilacfr::stopAndJoin(replyTask);
+
+
 		}
 
 		virtual jderobot::ImageDescriptionPtr getImageDescription(const Ice::Current& c){
@@ -140,18 +128,19 @@ class CameraI: virtual public jderobot::Camera {
 		}
 
 		virtual std::string startCameraStreaming(const Ice::Current&){
-			context.tracer().info("Should be made anything to start camera streaming: " + cameraDescription->name);
+
 		}
 
 		virtual void stopCameraStreaming(const Ice::Current&) {
-			context.tracer().info("Should be made anything to stop camera streaming: " + cameraDescription->name);
+
 		}
 
 	private:
-		class ReplyTask: public gbxiceutilacfr::SafeThread {
+		class ReplyTask: public IceUtil::Thread {
 			public:
-				ReplyTask(CameraI* camera)
-				: gbxiceutilacfr::SafeThread(camera->context.tracer()), mycamera(camera) {
+				ReplyTask(CameraI* camera){
+                    mycamera = camera;
+
 				   	std::cout << "safeThread" << std::endl;
 				}
 
@@ -160,7 +149,7 @@ class CameraI: virtual public jderobot::Camera {
 					requests.push_back(cb);
 				}
 
-				virtual void walk(){
+				virtual void run(){
 					jderobot::ImageDataPtr reply(new jderobot::ImageData);
 					struct timeval a, b;
 					int cycle = 48;
@@ -169,7 +158,7 @@ class CameraI: virtual public jderobot::Camera {
 					
 					int count =0 ;
 
-					while(!isStopping()){
+					while(1){
 						
 						if(!mycamera->cameraI->image.data){
 							usleep(100);
@@ -237,7 +226,7 @@ class CameraI: virtual public jderobot::Camera {
 
 		typedef IceUtil::Handle<ReplyTask> ReplyTaskPtr;
 		std::string prefix;
-		jderobotice::Context context;
+
 		colorspaces::Image::FormatPtr imageFmt;
 		jderobot::ImageDescriptionPtr imageDescription;
 		jderobot::CameraDescriptionPtr cameraDescription;
@@ -269,11 +258,9 @@ void *myMain(void* v)
         std::cout << "CameraGazebo "<< camera->nameGlobal <<" Endpoints > "  << Endpoints << std::endl;
         
         Ice::ObjectAdapterPtr adapter =
-            ic->createObjectAdapterWithEndpoints("CameraGazebo", Endpoints);
-            
-		jderobotice::Context context;
+        ic->createObjectAdapterWithEndpoints("CameraGazebo", Endpoints);
 		
-        Ice::ObjectPtr object = new CameraI(std::string("CameraGazebo"), context, camera);
+        Ice::ObjectPtr object = new CameraI(std::string("CameraGazebo"),  camera);
         adapter->add(object, ic->stringToIdentity(camera->nameGlobal));
         adapter->activate();
         ic->waitForShutdown();

@@ -47,7 +47,7 @@ if (PKG_CONFIG_FOUND)
   pkg_check_modules(GAZEBO gazebo)
   message(${GAZEBO_INCLUDE_DIRS})
 endif()
-include_directories(${GAZEBO_INCLUDE_DIRS} /usr/local/include/jderobot /usr/local/include/gearbox )
+include_directories(${GAZEBO_INCLUDE_DIRS} /usr/local/include/jderobot )
 
 link_directories(${GAZEBO_LIBRARY_DIRS}  /usr/local/lib/jderobot)
 set( CMAKE_CXX_FLAGS "-lIce -lIceUtil" ) # Opciones para el compilador
@@ -57,8 +57,6 @@ target_link_libraries(motors
 	${GAZEBO_libraries} 
     ${opencv_LIBRARIES}	
 	${ZeroCIce_LIBRARIES} 
-    libjderobotice.so
-    libjderobotutil.so
     libcolorspacesmm.so
     libJderobotInterfaces.so) 
     
@@ -67,8 +65,6 @@ target_link_libraries(encoders
 	${GAZEBO_libraries} 
     ${opencv_LIBRARIES}	
 	${ZeroCIce_LIBRARIES} 
-    libjderobotice.so
-    libjderobotutil.so
     libcolorspacesmm.so
     libJderobotInterfaces.so)    
 
@@ -78,8 +74,7 @@ target_link_libraries(laser
 	${GAZEBO_libraries} 
     ${opencv_LIBRARIES}	
 	${ZeroCIce_LIBRARIES} 
-    libjderobotice.so
-    libjderobotutil.so
+
     libcolorspacesmm.so
     libJderobotInterfaces.so) 
 
@@ -89,8 +84,6 @@ target_link_libraries(camera_dump
 	${GAZEBO_libraries} 
     ${opencv_LIBRARIES}	
 	${ZeroCIce_LIBRARIES} 
-    libjderobotice.so
-    libjderobotutil.so
     libcolorspacesmm.so
     libJderobotInterfaces.so)
     
@@ -100,7 +93,5 @@ target_link_libraries(pose3dencoders
 	${GAZEBO_libraries} 
     ${opencv_LIBRARIES}	
 	${ZeroCIce_LIBRARIES} 
-    libjderobotice.so
-    libjderobotutil.so
     libcolorspacesmm.so
     libJderobotInterfaces.so)
