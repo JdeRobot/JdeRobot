@@ -11,7 +11,6 @@ find_package(OpenCV REQUIRED)
 include_directories( 
 	${GAZEBO_INCLUDE_DIRS} 
 	${PCL_INCLUDE_DIRS} 
-	/usr/local/include/gearbox/ 
 	/usr/local/include/jderobot
 	
 	) 
@@ -29,7 +28,5 @@ target_link_libraries(kinectPlugin
 	${PCL_LIBRARIES} 
 	${OpenCV_LIBS} 
 		/usr/local/lib/jderobot/libJderobotInterfaces.so
-		/usr/local/lib/jderobot/libjderobotice.so
-		/usr/local/lib/jderobot/libjderobotutil.so
 
 )

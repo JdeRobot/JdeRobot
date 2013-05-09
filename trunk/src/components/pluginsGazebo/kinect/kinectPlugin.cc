@@ -237,15 +237,16 @@ void DepthCameraPlugin::OnNewImageFrame(const unsigned char * _image,
 
    class KinectI: virtual public jderobot::pointCloud{
    public:
-		KinectI (std::string propertyPrefix, const jderobotice::Context& context, gazebo::DepthCameraPlugin* kinect):prefix(propertyPrefix),context(context) 
+		KinectI (std::string propertyPrefix, gazebo::DepthCameraPlugin* kinect):prefix(propertyPrefix)
 		{
-			  KData = new jderobot::pointCloudData();
+
 			  this->kinect = kinect;
 		}
 		
 		virtual jderobot::pointCloudDataPtr getCloudData(const Ice::Current&){
 		      
 			pthread_mutex_lock (&kinect->mutex);
+			jderobot::pointCloudDataPtr KData = new jderobot::pointCloudData();
             pcl::PointCloud<pcl::PointXYZRGBA> cloud = *kinect->cloud;
 			pthread_mutex_unlock (&kinect->mutex);
 			
@@ -264,17 +265,15 @@ void DepthCameraPlugin::OnNewImageFrame(const unsigned char * _image,
             }
 			return KData;
 		};
-         jderobot::pointCloudDataPtr KData;
 	     gazebo::DepthCameraPlugin* kinect;
 		 std::string prefix;
-		 jderobotice::Context context;
 
  }; //end class KinectI
 
 class CameraI: virtual public jderobot::Camera {
 	public:
-		CameraI(std::string propertyPrefix, const jderobotice::Context& context, gazebo::DepthCameraPlugin* camera)
-			   : prefix(propertyPrefix),context(context), cameraI(camera) {
+		CameraI(std::string propertyPrefix, gazebo::DepthCameraPlugin* camera)
+			   : prefix(propertyPrefix), cameraI(camera) {
 		
 			std::cout << "Constructor CameraI" << std::endl;
 
@@ -290,12 +289,11 @@ class CameraI: virtual public jderobot::Camera {
 		}
 
 		std::string getRobotName () {
-			return ((context.properties())->getProperty(context.tag()+".RobotName"));
+			return ("RobotName");
 		}
 
 		virtual ~CameraI() {
-			context.tracer().info("Stopping and joining thread for camera: " + cameraDescription->name);
-			gbxiceutilacfr::stopAndJoin(replyTask);
+
 		}
 
 		virtual jderobot::ImageDescriptionPtr getImageDescription(const Ice::Current& c){
@@ -315,18 +313,18 @@ class CameraI: virtual public jderobot::Camera {
 		}
 
 		virtual std::string startCameraStreaming(const Ice::Current&){
-			context.tracer().info("Should be made anything to start camera streaming: " + cameraDescription->name);
+
 		}
 
 		virtual void stopCameraStreaming(const Ice::Current&) {
-			context.tracer().info("Should be made anything to stop camera streaming: " + cameraDescription->name);
+
 		}
 
 	private:
-		class ReplyTask: public gbxiceutilacfr::SafeThread {
+		class ReplyTask: public IceUtil::Thread  {
 			public:
 				ReplyTask(CameraI* camera)
-				: gbxiceutilacfr::SafeThread(camera->context.tracer()), mycamera(camera) {
+				: mycamera(camera) {
 				   	std::cout << "safeThread" << std::endl;
 				}
 
@@ -335,7 +333,7 @@ class CameraI: virtual public jderobot::Camera {
 					requests.push_back(cb);
 				}
 
-				virtual void walk(){
+				virtual void run(){
 					jderobot::ImageDataPtr reply(new jderobot::ImageData);
 					struct timeval a, b;
 					int cycle = 48;
@@ -344,7 +342,7 @@ class CameraI: virtual public jderobot::Camera {
 					
 					int count =0 ;
 
-					while(!isStopping()){
+					while(1){
 						
 						if(!mycamera->cameraI->imageRGB.data){
 							usleep(100);
@@ -412,7 +410,6 @@ class CameraI: virtual public jderobot::Camera {
 
 		typedef IceUtil::Handle<ReplyTask> ReplyTaskPtr;
 		std::string prefix;
-		jderobotice::Context context;
 		colorspaces::Image::FormatPtr imageFmt;
 		jderobot::ImageDescriptionPtr imageDescription;
 		jderobot::CameraDescriptionPtr cameraDescription;
@@ -424,8 +421,8 @@ class CameraI: virtual public jderobot::Camera {
 
 class CameraII: virtual public jderobot::Camera {
 	public:
-		CameraII(std::string propertyPrefix, const jderobotice::Context& context, gazebo::DepthCameraPlugin* camera)
-			   : prefix(propertyPrefix),context(context), cameraI(camera) {
+		CameraII(std::string propertyPrefix, gazebo::DepthCameraPlugin* camera)
+			   : prefix(propertyPrefix), cameraI(camera) {
 		
 			std::cout << "Constructor CameraDepth" << std::endl;
 
@@ -441,12 +438,11 @@ class CameraII: virtual public jderobot::Camera {
 		}
 
 		std::string getRobotName () {
-			return ((context.properties())->getProperty(context.tag()+".RobotName"));
+			return ("RobotName");
 		}
 
 		virtual ~CameraII() {
-			context.tracer().info("Stopping and joining thread for camera: " + cameraDescription->name);
-			gbxiceutilacfr::stopAndJoin(replyTask);
+
 		}
 
 		virtual jderobot::ImageDescriptionPtr getImageDescription(const Ice::Current& c){
@@ -466,18 +462,18 @@ class CameraII: virtual public jderobot::Camera {
 		}
 
 		virtual std::string startCameraStreaming(const Ice::Current&){
-			context.tracer().info("Should be made anything to start camera streaming: " + cameraDescription->name);
+
 		}
 
 		virtual void stopCameraStreaming(const Ice::Current&) {
-			context.tracer().info("Should be made anything to stop camera streaming: " + cameraDescription->name);
+
 		}
 
 	private:
-		class ReplyTask: public gbxiceutilacfr::SafeThread {
+		class ReplyTask: public IceUtil::Thread {
 			public:
 				ReplyTask(CameraII* camera)
-				: gbxiceutilacfr::SafeThread(camera->context.tracer()), mycamera(camera) {
+				:  mycamera(camera) {
 				   	std::cout << "safeThread" << std::endl;
 				}
 
@@ -486,7 +482,7 @@ class CameraII: virtual public jderobot::Camera {
 					requests.push_back(cb);
 				}
 
-				virtual void walk(){
+				virtual void run(){
 					jderobot::ImageDataPtr reply(new jderobot::ImageData);
 					struct timeval a, b;
 					int cycle = 48;
@@ -495,7 +491,7 @@ class CameraII: virtual public jderobot::Camera {
 					
 					int count =0 ;
 
-					while(!isStopping()){
+					while(1){
 						
 						if(!mycamera->cameraI->imageDepth.data){
 							usleep(100);
@@ -563,7 +559,6 @@ class CameraII: virtual public jderobot::Camera {
 
 		typedef IceUtil::Handle<ReplyTask> ReplyTaskPtr;
 		std::string prefix;
-		jderobotice::Context context;
 		colorspaces::Image::FormatPtr imageFmt;
 		jderobot::ImageDescriptionPtr imageDescription;
 		jderobot::CameraDescriptionPtr cameraDescription;
@@ -595,11 +590,11 @@ void *mainKinect(void* v)
         Ice::ObjectAdapterPtr adapter =
             ic->createObjectAdapterWithEndpoints("Kinect", Endpoints);
 
-		jderobotice::Context context;
 
-        Ice::ObjectPtr object = new KinectI(std::string("pointcloud1"), context, kinect);
-        Ice::ObjectPtr object2 = new CameraI(std::string("cameraRGB"), context, kinect);
-        Ice::ObjectPtr object3 = new CameraII(std::string("cameraDepth"), context, kinect);
+
+        Ice::ObjectPtr object = new KinectI(std::string("pointcloud1"),  kinect);
+        Ice::ObjectPtr object2 = new CameraI(std::string("cameraRGB"),  kinect);
+        Ice::ObjectPtr object3 = new CameraII(std::string("cameraDepth"),  kinect);
 
         adapter->add(object, ic->stringToIdentity("pointcloud1"));
         adapter->add(object2, ic->stringToIdentity("cameraRGB"));

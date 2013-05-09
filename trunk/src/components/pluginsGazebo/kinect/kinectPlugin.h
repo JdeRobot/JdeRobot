@@ -31,15 +31,9 @@
 #include <pcl/filters/voxel_grid.h>
 
 // ICE utils includes
-#include <gbxsickacfr/gbxiceutilacfr/safethread.h>
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
 
-// JDErobot general ice component includes
-#include <jderobotice/component.h>
-#include <jderobotice/application.h>
-#include <jderobotice/exceptions.h>
-#include <jderobotice/context.h>
 
 #include <colorspaces/colorspacesmm.h>
 
