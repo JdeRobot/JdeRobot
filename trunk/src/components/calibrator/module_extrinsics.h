@@ -45,10 +45,11 @@ namespace calibrator {
 			void get_widgets(Glib::RefPtr<Gnome::Glade::Xml> refXml);
 			void display(const colorspaces::Image& image);
 			TPinHoleCamera getCam();
+			void setCam(TPinHoleCamera camera);
 			void set_mainwindow(Gtk::Window* mainwindow);
 
 
-			void button_Load_clicked(const char* filename);
+			void button_load_clicked(const char* filename);
 
 		private:
 			#define IMAGE_WIDTH 320
@@ -74,9 +75,8 @@ namespace calibrator {
 			void setV0(float value);	
 			void setRoll(float value);
 			void changeDrawCenter();
-			int saveParameters(const char* fileName);
-			int load_world();
 			int load_world_line(FILE *myfile);
+
 			void resetLines();
 
 			Gtk::VScale *vscale_pos_x;
@@ -99,12 +99,8 @@ namespace calibrator {
 			Gtk::Window* window;
 			Gtk::Label labelK[13];
 			Gtk::Label labelRT[13];
-			Gtk::Table m_table;
-
 
 			void button_center_clicked();
-			void button_save_clicked();
-			void button_KRT_clicked();
 			void pos_x_changed();
 			void pos_y_changed();
 			void pos_z_changed();
@@ -117,10 +113,7 @@ namespace calibrator {
 			void v0_changed();
 			void roll_changed();
 
-
-
 			void init(Ice::PropertiesPtr prop);
-			int load_camera_config(Ice::PropertyDict pd);
 			void drawLine(IplImage * src, HPoint3D pini, HPoint3D pend);
 
 

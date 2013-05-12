@@ -90,8 +90,8 @@ Comentarios de procedimiento
 
 		/* OpenGL World */
 		refXml->get_widget_derived("gl_world",world);
-		refXml->get_widget("button_load_world",button_Load_world);
-		button_Load_world->signal_clicked().connect(sigc::mem_fun(this,&View::button_Load_word_clicked));
+		refXml->get_widget("load_world_button",button_Load_world);
+		button_Load_world->signal_clicked().connect(sigc::mem_fun(this,&View::button_load_word_clicked));
 		
 
 		/* Update World OpenGl*/
@@ -107,6 +107,11 @@ Comentarios de procedimiento
 		refXml->get_widget("camera_combo",camera_set);
 		camera_set->set_model(m_refTreeModel);
 
+		/* Buttons */
+		refXml->get_widget("save_calibration_button",save_calibration_button);
+		refXml->get_widget("load_calibration_button",load_calibration_button);
+		save_calibration_button->signal_clicked().connect(sigc::mem_fun(this,&View::on_save_calibration_button_clicked));
+		load_calibration_button->signal_clicked().connect(sigc::mem_fun(this,&View::on_load_calibration_button_clicked));
 
 		camera_set->set_active(0);
 		camera_set->signal_changed().connect(sigc::mem_fun(this,&View::on_changed_camera_set));
@@ -133,11 +138,6 @@ Comentarios de procedimiento
 
 
 		mainwindow->show();
-/*
-		xmlReader(&camera, "/home/caupolican/robotica/newnewnew/trunk/src/components/calibrator/calibration.xml");
-		display_camerainfo(camera);
-		xmlWriter(camera, "/home/caupolican/robotica/newnewnew/trunk/src/components/calibrator/calibration2.xml");
-*/
 	}
 
 	View::~View() {
@@ -198,6 +198,7 @@ Comentarios de procedimiento
 		
 		/* Update information matrix */
 		std::stringstream labelString;
+		labelString.precision(4);
 		labelString << camera.k11;
 		k[0]->set_label(labelString.str());
 		labelString.str(""); labelString << camera.k12;
@@ -257,134 +258,12 @@ Comentarios de procedimiento
 		labelString.str(""); labelString << camera.rt44;
 		rt[15]->set_label(labelString.str());
 
-		/* Draw Camera */
-		world->draw_camera(10, 20, 1);
+
+		//world->draw_camera(10, 20, 1);
 
 		while (gtkmain.events_pending())
 			gtkmain.iteration();
 
-
-/* Module_Rectifier 
-
-		colorspaces::ImageRGB8 img_rgb84(image);//conversion will happen if needed
-		Glib::RefPtr<Gdk::Pixbuf> imgBuff4 = 
-		Gdk::Pixbuf::create_from_data((const guint8*)img_rgb84.data,
-			Gdk::COLORSPACE_RGB,
-			false,
-			8,
-			img_rgb84.width,
-			img_rgb84.height,
-			img_rgb84.step);
-
-		this->module_rectifier->gtkimage_notrectified->clear();
-		this->module_rectifier->gtkimage_notrectified->set(imgBuff3);
-
-
-		/* Image 
-		gtkimage_notrectified->clear(); 
-		gtkimage_notrectified->set(imgBuff4);
-		mybuffer_notrectified = imgBuff4->get_pixels();
-	
-		/* Rectified Image 
-		imgRectifiedBuff = imgBuff4->copy();
-		gtkimage_rectified->clear(); 
-		gtkimage_rectified->set(imgRectifiedBuff);
-		mybuffer_rectified = imgRectifiedBuff->get_pixels();
-
-
-		/* if the user have selected 4 points on each image the application rectify the second image 
-		if ((counter_points_image == NUM_POINTS_RECTIFIER) and (counter_points_image_rectified == NUM_POINTS_RECTIFIER)){
-
-			/* Calculate the solution matrix 
-			if (flag_resolved == false){
-				solve_equation_system();
-				flag_resolved = true;
-			}
-	  
-			/* Build the rectified image 
-			build_rectified_image(mybuffer_notrectified, mybuffer_rectified);
-
-		}
-
-		/* Draw selected points 
-		drawSelectedPoints(counter_points_image, points_image, mybuffer_notrectified);
-		drawSelectedPoints(counter_points_image_rectified, points_image_rectified, mybuffer_rectified);
-
-		/*Manage image
-		this->module_extrinsics2->drawWorld(image4);
-
-		/*Set image
-		colorspaces::ImageRGB8 img_rgb84(image4);//conversion will happen if needed
-		Glib::RefPtr<Gdk::Pixbuf> imgBuff4 = Gdk::Pixbuf::create_from_data((const guint8*)img_rgb84.data,
-				    Gdk::COLORSPACE_RGB,
-				    false,
-				    8,
-				    img_rgb84.width,
-				    img_rgb84.height,
-				    img_rgb84.step); 
-		gtk_image22->clear();
-		gtk_image22->set(imgBuff4);
-*/
-		/*Show window
-		this->module_dlt->displayFrameRate(fpslabel);
-		*/
-/*
-
-CvPoint pt1,pt2;
-			if (1){
-				colorspaces::ImageRGB8 img_rgb888(image);//conversion will happen if needed
-				Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) img_rgb888.data,Gdk::COLORSPACE_RGB,false,8,img_rgb888.width,img_rgb888.height,img_rgb888.step);    
-	    		gtk_image->clear();
-
-				/*si queremos pintar las lineas
-bool lines_rgb_active = true;
-				if (lines_rgb_active){
-					IplImage* src = cvCreateImage(cvSize(img_rgb888.width,img_rgb888.height), IPL_DEPTH_8U, 3);
-					memcpy((unsigned char *) src->imageData, &(img_rgb888.data[0]),img_rgb888.width*img_rgb888.height * 3);
-util->draw_room(src,0, world->lines, world->numlines);
-					memmove(&(img_rgb888.data[0]),(unsigned char *) src->imageData,img_rgb888.width*img_rgb888.height * 3);
-					
-				}
-gtk_image->set(imgBuff);
-//	    		displayFrameRate();
-	    		while (gtkmain.events_pending())
-	      		gtkmain.iteration();
-			}
-
-			if (1){
-	
-//				colorspaces::ImageRGB8 img_rgb888(imageDEPTH);//conversion will happen if needed
-colorspaces::ImageRGB8 img_rgb888(image);//conversion will happen if needed
-				Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) img_rgb888.data,Gdk::COLORSPACE_RGB,false,8,img_rgb888.width,img_rgb888.height,img_rgb888.step);    
-//	    		w_imageDEPTH->clear();
-gtk_patron->clear();
-bool lines_depth_active = true;
-				if (lines_depth_active){
-					IplImage* src = cvCreateImage(cvSize(img_rgb888.width,img_rgb888.height), IPL_DEPTH_8U, 3);
-					memcpy((unsigned char *) src->imageData, &(img_rgb888.data[0]),img_rgb888.width*img_rgb888.height * 3);
-					util->draw_room(src,1, world->lines, world->numlines);
-					memmove(&(img_rgb888.data[0]),(unsigned char *) src->imageData,img_rgb888.width*img_rgb888.height * 3);
-					
-				}
-//	    		w_imageDEPTH->set(imgBuff);
-gtk_patron->set(imgBuff);
-//	    		displayFrameRate();
-*/
-	    		while (gtkmain.events_pending())
-	      		gtkmain.iteration();
-/*
-			}
-
-bool reconstruct_depth_activate = true;
-			if (reconstruct_depth_activate){
-				add_depth_points(imageDEPTH, imageRGB);
-				//reconstruct_depth_activate=false;
-			}
-*/
-
-
-
-		//mainwindow->resize(1,1);
 	}
 
 int View::get_active_camera(){
@@ -431,9 +310,71 @@ int View::get_active_camera(){
 		std::cout << "Camara activa " << active_camera << std::endl;
 	}
 
-	void View::button_Load_word_clicked()
-	{
+	void View::on_save_calibration_button_clicked(){
+		Gtk::FileChooserDialog dialog("Please choose a calibration file", Gtk::FILE_CHOOSER_ACTION_SAVE);
+		dialog.set_transient_for(*mainwindow);
 
+		//Add response buttons the the dialog:
+		dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+		dialog.add_button("Save", Gtk::RESPONSE_OK);
+
+		int result = dialog.run();
+
+		//Handle the response:
+		switch(result){
+			case(Gtk::RESPONSE_OK):{
+				display_camerainfo(camera);
+				xmlWriter(camera, dialog.get_filename().data());
+				break;
+			}
+
+			case(Gtk::RESPONSE_CANCEL):{
+				std::cout << "Cancel clicked." << std::endl;
+				break;
+			}
+
+			default:{
+				std::cout << "Unexpected button clicked." << std::endl;
+				break;
+			}
+		}
+	}
+
+	void View::on_load_calibration_button_clicked(){
+		Gtk::FileChooserDialog dialog("Please choose a calibration file", Gtk::FILE_CHOOSER_ACTION_OPEN);
+		dialog.set_transient_for(*mainwindow);
+
+		//Add response buttons the the dialog:
+		dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+		dialog.add_button("Load", Gtk::RESPONSE_OK);
+
+		int result = dialog.run();
+
+		//Handle the response:
+		switch(result){
+			case(Gtk::RESPONSE_OK):{
+
+				display_camerainfo(camera);
+				xmlReader(&camera, dialog.get_filename().data());
+				display_camerainfo(camera);
+
+				// Actualizar componente extrinsics
+				this->module_extrinsics->setCam(camera);
+				break;
+			}
+			case(Gtk::RESPONSE_CANCEL):{
+				std::cout << "Cancel clicked." << std::endl;
+				break;
+			}
+			default:{
+				std::cout << "Unexpected button clicked." << std::endl;
+				break;
+			}
+		}
+	}
+
+	void View::button_load_word_clicked()
+	{
 		int i=0;
 		FILE *worldconfig;
 
@@ -449,17 +390,14 @@ int View::get_active_camera(){
 		//Handle the response:
 		switch(result){
 			case(Gtk::RESPONSE_OK):{
-
-				this->module_extrinsics->button_Load_clicked(dialog.get_filename().data());
-				world->readFile(dialog.get_filename());
+				this->module_extrinsics->button_load_clicked(dialog.get_filename().data());
+				world->readFile(dialog.get_filename());				
 				break;
 			}
-
 			case(Gtk::RESPONSE_CANCEL):{
 				std::cout << "Cancel clicked." << std::endl;
 				break;
 			}
-
 			default:{
 				std::cout << "Unexpected button clicked." << std::endl;
 				break;

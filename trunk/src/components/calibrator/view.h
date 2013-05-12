@@ -87,6 +87,8 @@ class ModelColumns : public Gtk::TreeModel::ColumnRecord
 		Gtk::Table* estereo_panel;
 		Gtk::ComboBox* camera_set;
 		Gtk::Button* button_Load_world;
+		Gtk::Button* save_calibration_button;
+		Gtk::Button* load_calibration_button;
 
 		int active_camera;
 
@@ -102,7 +104,9 @@ class ModelColumns : public Gtk::TreeModel::ColumnRecord
 		void on_toggled_rectifier();
 		void on_toggled_estereo();
 		void on_changed_camera_set();
-		void button_Load_word_clicked();
+		void button_load_word_clicked();
+		void on_save_calibration_button_clicked();
+		void on_load_calibration_button_clicked();
 
 		Module_DLT * module_dlt;
 		Module_Extrinsics * module_extrinsics;

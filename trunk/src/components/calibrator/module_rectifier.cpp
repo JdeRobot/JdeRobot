@@ -321,6 +321,28 @@ void Module_Rectifier::calculate_allocation(int x,int y,Tpoint *p){
 */
 void Module_Rectifier::drawSelectedPoints(int counter, Tpoint* points, guint8* buffer)
 {
+
+/*
+	CvPoint p, q;
+
+	/* Draw horizontal line 
+	for(int k=0;k<counter;k++){
+		/* Draw horizontal line 		
+		p.x = points[k].x-5;
+		p.y = points[k].y;
+		q.x = points[k].x+5;
+		q.y = points[k].y;
+		cvLine(&buffer, p, q, CV_RGB(0,0,0), 1, CV_AA, 0);
+
+		/* Draw vertical line 		
+		p.x = points[k].x;
+		p.y = points[k].y-5;
+		q.x = points[k].x;
+		q.y = points[k].y+5;
+		cvLine(&buffer, p, q, CV_RGB(0,0,0), 1, CV_AA, 0);
+
+	}
+*/
 	for(int k=0;k<counter;k++){
 		int height = points[k].y*IMAGE_WIDTH*3;
 		int width = points[k].x*3;

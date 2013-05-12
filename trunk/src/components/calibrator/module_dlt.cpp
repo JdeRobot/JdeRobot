@@ -963,23 +963,23 @@ void Module_DLT::get_widgets(Glib::RefPtr<Gnome::Glade::Xml> refXml){
 gboolean Module_DLT::on_button_press_image(GdkEventButton* event)
 {
 
-/*
+
 	if (this->getCounterPointsImage() < NUM_POINTSS){
 
 		int x = event->x;
 		int y = event->y;
 		std::cout << "PRESS " << x << " " << y << std::endl;
 
-		this->controllerCamera2->points_image[this->controllerCamera2->getCounterPointsImage()].x = event->x; 
-		this->controllerCamera2->points_image[this->controllerCamera2->getCounterPointsImage()].y = event->y;
+		this->points_image[this->getCounterPointsImage()].x = event->x; 
+		this->points_image[this->getCounterPointsImage()].y = event->y;
 	
-		this->controllerCamera2->counter_points_image++;
+		this->counter_points_image++;
 
 		return TRUE;
 	}else{
 		std::cout << "Clear the buffer" << std::endl;
 	}
-*/
+/*
 	int mark[NUM_POINTSS*2] = {
 				173, 87
 				,160,82
@@ -1021,9 +1021,8 @@ gboolean Module_DLT::on_button_press_image(GdkEventButton* event)
 		this->points_image[this->getCounterPointsImage()].y = mark[i*2+1];
 	
 		this->counter_points_image++;
-
-
 	}
+*/
 }
 
 void Module_DLT::on_capture_button_clicked()
