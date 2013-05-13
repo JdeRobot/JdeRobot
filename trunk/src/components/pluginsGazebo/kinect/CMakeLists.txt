@@ -1,32 +1,25 @@
-
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-include (FindPkgConfig)
-if (PKG_CONFIG_FOUND)
-  pkg_check_modules(GAZEBO gazebo)
-endif()
-
-find_package(PCL 1.2 REQUIRED)
-find_package(OpenCV REQUIRED)
-
 include_directories( 
-	${GAZEBO_INCLUDE_DIRS} 
-	${PCL_INCLUDE_DIRS} 
-	/usr/local/include/jderobot
-	
+	${GAZEBO_INCLUDE_DIRS}
+    ${INTERFACES_CPP_DIR}
+    ${LIBS_DIR}
+	${GEARBOX_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}
 	) 
+
 link_directories( 
 	${GAZEBO_LIBRARY_DIRS} 
-	${PCL_LIBRARY_DIRS} 
 	)
 
-set( CMAKE_CXX_FLAGS "-lIce -lIceUtil" ) # Opciones para el compilador
+set( CMAKE_CXX_FLAGS "-Wall" ) # Opciones para el compilador
 
 add_library(kinectPlugin SHARED kinectPlugin.cc)
 
 target_link_libraries(kinectPlugin 
+    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
+    ${LIBS_DIR}/jderobotice/libjderobotice.so
+    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
 	${GAZEBO_libraries} 
-	${PCL_LIBRARIES} 
-	${OpenCV_LIBS} 
-		/usr/local/lib/jderobot/libJderobotInterfaces.so
-
+    ${PCL_LIBRARIES}  
+    ${OpenCV_LIBRARIES}
+    ${ZeroCIce_LIBRARIES}
 )

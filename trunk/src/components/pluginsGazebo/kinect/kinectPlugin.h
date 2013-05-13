@@ -72,7 +72,10 @@ namespace gazebo
                               unsigned int _width, unsigned int _height,
                               unsigned int _depth, const std::string &_format);
 
+    public: virtual void SetLeafSize(const float size);
+
     protected: unsigned int width, height, depth;
+    protected: float leafSize;
     protected: std::string format;
 
     protected: sensors::DepthCameraSensorPtr parentSensor;

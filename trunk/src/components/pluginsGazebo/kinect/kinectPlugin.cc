@@ -142,9 +142,9 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 	point.g      = 0;
 	point.b      = 0;
     
-	for(int x = 0 ; x < _width ; x++){
-		for(int y = 0; y < _height; y++){
-			int indice = y*_width + x;
+	for(unsigned int x = 0 ; x < _width ; x++){
+		for(unsigned int y = 0; y < _height; y++){
+			unsigned int indice = y*_width + x;
 
 		  	if (_height>1) 
 				yAngle = atan2( (double)x - 0.5*(double)(width-1), fl);
@@ -166,7 +166,7 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 				point.g      = 0;
 				point.b      = 0;
 			}else{
-				int indice = y*imageRGB.step + x*imageRGB.channels();
+				unsigned int indice = y*imageRGB.step + x*imageRGB.channels();
 				point.r      = imageRGB.data[indice];
 				point.g      = imageRGB.data[indice+1];
 				point.b      = imageRGB.data[indice+2];
@@ -186,7 +186,7 @@ void DepthCameraPlugin::OnNewDepthFrame(const float *_image,
 	
 	pcl::VoxelGrid<pcl::PointXYZRGBA> sor;
 	sor.setInputCloud (cloud);
-	sor.setLeafSize (0.01, 0.01, 0.01);
+	sor.setLeafSize (this->leafSize, this->leafSize, this->leafSize);
 
 	pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud2(new pcl::PointCloud<pcl::PointXYZRGBA>);
 
@@ -235,6 +235,13 @@ void DepthCameraPlugin::OnNewImageFrame(const unsigned char * _image,
 
 }
 
+void DepthCameraPlugin::SetLeafSize(const float size)
+{
+	pthread_mutex_lock (&kinect->mutex);
+    this->leafSize = size;
+	pthread_mutex_unlock (&kinect->mutex);
+}
+
    class KinectI: virtual public jderobot::pointCloud{
    public:
 		KinectI (std::string propertyPrefix, gazebo::DepthCameraPlugin* kinect):prefix(propertyPrefix)
@@ -252,8 +259,8 @@ void DepthCameraPlugin::OnNewImageFrame(const unsigned char * _image,
 			
             if(cloud.points.size()){
                KData->p.resize(cloud.points.size());
-               int index = 0;
-               for(int i = 0; i < cloud.points.size(); i++){
+               unsigned int index = 0;
+               for(unsigned int i = 0; i < cloud.points.size(); i++){
                   KData->p[index].x = cloud.points[i].x;
                   KData->p[index].y = cloud.points[i].y;
                   KData->p[index].z = cloud.points[i].z;
@@ -313,7 +320,7 @@ class CameraI: virtual public jderobot::Camera {
 		}
 
 		virtual std::string startCameraStreaming(const Ice::Current&){
-
+            return ("N/A");
 		}
 
 		virtual void stopCameraStreaming(const Ice::Current&) {
@@ -462,7 +469,7 @@ class CameraII: virtual public jderobot::Camera {
 		}
 
 		virtual std::string startCameraStreaming(const Ice::Current&){
-
+            return ("N/A");
 		}
 
 		virtual void stopCameraStreaming(const Ice::Current&) {
@@ -587,10 +594,21 @@ void *mainKinect(void* v)
         std::string Endpoints = prop->getProperty("Kinect.Endpoints");
         std::cout << "Kinect Endpoints > " << Endpoints << std::endl;
         
+
+        std::stringstream cnvrt(prop->getPropertyWithDefault("PointCloud.LeafSize","100"));
+        float size;
+        cnvrt >> size;
+        if (cnvrt.fail()) {
+         std::cout << "Couldn't read PointCloud.LeafSize property, setting to default" << std::endl;
+         size=100;
+        }else if(size <= 0.001){
+         std::cout << "PointCloud.LeafSize property out of bounds, setting to default" << std::endl;
+         size=100;
+        }
+        kinect->SetLeafSize(1./size);
+
         Ice::ObjectAdapterPtr adapter =
             ic->createObjectAdapterWithEndpoints("Kinect", Endpoints);
-
-
 
         Ice::ObjectPtr object = new KinectI(std::string("pointcloud1"),  kinect);
         Ice::ObjectPtr object2 = new CameraI(std::string("cameraRGB"),  kinect);
@@ -615,5 +633,6 @@ void *mainKinect(void* v)
         }
     }
 
+    return NULL;
 }
 
