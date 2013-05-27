@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1997-2010 JDERobot Developers Team
+*  Copyright (C) 1997-2013 JDERobot Developers Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *   Authors : Eduardo Perdices <eperdices@gsyc.es>,
+ *   			Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
  *             Jose María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
@@ -181,8 +182,6 @@ namespace CalibratorKinect {
 		std::string camera = prop->getProperty(strInd.str());
 		xmlReader(&(this->cameras[cam]), camera.c_str());
 
-		std::cout << camera << std::endl;
-		std::cout << this->cameras[cam].position.X << std::endl;
 
 		//old calibration
 	    /*Ice::PropertyDict pd = prop->getPropertiesForPrefix("CalibratorKinect.Config");
@@ -207,23 +206,21 @@ namespace CalibratorKinect {
   }
 
   void
-  Controller::drawWorld(const colorspaces::Image& image, int cam) {
-    IplImage src;
-    CvPoint p, q;
+  Controller::drawWorld(cv::Mat image, int cam) {
+    cv::Point p, q;
     HPoint3D p1, p2;
     int n=0;
 
     /*Update camera with current values*/
     update_camera_matrix(&(this->cameras[cam]));
 
-    src=image;
 
     for(vector<HPoint3D>::iterator it = this->lines.begin(); it != this->lines.end(); it++) {
       if(n%2==0) {
 	p1 = (*it);
       } else {
 	p2 = (*it);
-	this->drawLine(&src, p1, p2, cam);
+	this->drawLine(image, p1, p2, cam);
       }
       n++;
     }
@@ -234,20 +231,20 @@ namespace CalibratorKinect {
       p.y = 0;
       q.x = cWidth/2;
       q.y = cHeight-1;
-      cvLine(&src, p, q, CV_RGB(255,0,0), 1, CV_AA, 0);
+      cv::line(image, p, q, cv::Scalar(255,0,0), 1, CV_AA, 0);
       p.x = 0;
       p.y = cHeight/2;
       q.x = cWidth-1;
       q.y = cHeight/2;
-      cvLine(&src, p, q, CV_RGB(255,0,0), 1, CV_AA, 0);
+      cv::line(image, p, q, cv::Scalar(255,0,0), 1, CV_AA, 0);
     }
   }
 
   void
-  Controller::drawLine(IplImage * src, HPoint3D pini, HPoint3D pend, int cam) {
+  Controller::drawLine(cv::Mat  src, HPoint3D pini, HPoint3D pend, int cam) {
     HPoint2D p1, p2;
     HPoint2D gooda,goodb;
-    CvPoint pt1, pt2;
+    cv::Point pt1, pt2;
 
     project(pini,&p1,this->cameras[cam]);
     project(pend,&p2,this->cameras[cam]);
@@ -260,15 +257,13 @@ namespace CalibratorKinect {
       pt2.x=(int)goodb.y;
       pt2.y=this->cameras[cam].rows-1-(int)goodb.x;
       
-      cvLine(src, pt1, pt2, cvScalar(255, 0, 255, 0), 0.5, 8, 0);
+      cv::line(src, pt1, pt2, cv::Scalar(255, 0, 255, 0), 0.5, 8, 0);
     }
   }
 
   int
   Controller::load_camera_config(Ice::PropertyDict pd, int cam) {
-	  std::cout << "cargo" << std::endl;
     for(Ice::PropertyDict::const_iterator it = pd.begin(); it != pd.end(); it++) {
-    	std::cout << (*it).first << std::endl;
 
 		std::istringstream sTemp;
       if((*it).first.compare("CalibratorKinect.Config.Position.X")==0) {
@@ -387,141 +382,102 @@ namespace CalibratorKinect {
   }
 
 
-	void Controller::add_depth_pointsImage(const colorspaces::Image& imageDEPTH, const colorspaces::Image& imageRGB, CalibratorKinect::DrawArea* world, int cam, int scale, int colour){
-	float distance;
+	void Controller::add_depth_pointsImage(cv::Mat distances, cv::Mat imageRGB, CalibratorKinect::DrawArea* world, int cam, int scale, int colour){
+	float d;
 
-		
-		//std::cout << "inicio reconstrucción" << std::endl;
-		//std::cout << cWidth*cHeight << std::endl;
-		for( unsigned int i = 0 ; i < cWidth*cHeight ; i=i+scale) {
-			if (((int)imageDEPTH.data[3*i+0]==255) && ( ((int)imageDEPTH.data[3*i+1] >0 ) && ((int)imageDEPTH.data[3*i+1] < 255)) && (((int)imageDEPTH.data[3*i+2] > 0 ) && ((int)imageDEPTH.data[3*i+2] < 255))){
-					distance = -((int)imageDEPTH.data[3*i+1] - 255);
-				}
-				else if (((int)imageDEPTH.data[3*i+0]==255) && (((int)imageDEPTH.data[3*i+1] >= 0) && ((int)imageDEPTH.data[3*i+1]<255)) && ((int)imageDEPTH.data[3*i+2] == 0)){
-					distance = 255+ (int)imageDEPTH.data[3*i+1];
-				}
-				else if ((((int)imageDEPTH.data[3*i+0] >= 0 ) && ((int)imageDEPTH.data[3*i+0] < 255))  && ((int)imageDEPTH.data[3*i+1]==255) && ((int)imageDEPTH.data[3*i+2] == 0)){
-					distance = 2*255 - ((int)imageDEPTH.data[3*i+0] - 255);
-				}
-				else if (((int)imageDEPTH.data[3*i+0] == 0) && ((int)imageDEPTH.data[3*i+1]==255) && (((int)imageDEPTH.data[3*i+2] >= 0 ) && ((int)imageDEPTH.data[3*i+2] < 255))){
-					distance = 3*255 + (int)imageDEPTH.data[3*i+2];
-				}
-				else if (((int)imageDEPTH.data[3*i+0] == 0) && ((int)imageDEPTH.data[3*i+1] >= 0 ) && ((int)imageDEPTH.data[3*i+1] < 255) && ((int)imageDEPTH.data[3*i+2]==255)){
-					distance = 4*255 - ((int)imageDEPTH.data[3*i+1] - 255);
-				}
-				else if (((int)imageDEPTH.data[3*i+0] == 0) && ((int)imageDEPTH.data[3*i+1] == 0) && ((int)imageDEPTH.data[3*i+2] > 0 ) && ((int)imageDEPTH.data[3*i+2] < 255)){
-					distance = 5*255 - ((int)imageDEPTH.data[3*i+2] - 255);
-				}
-				else{
-					distance=0;
-				}
+		for (int xIm=0; xIm< cWidth; xIm++){
+			for (int yIm=0; yIm<cHeight ; yIm++){
+				d=distances.at<float>(yIm,xIm);
 
-				if (distance != 0 ){
-					//PRUEBA DE DISTANCIA		
-					/*if (i==153600 + 320){
-						std::cout << distance << std::endl;
-					}*/
 
-				distance = distance *10;
-			
-				float xp,yp,zp,camx,camy,camz;
-				float ux,uy,uz; 
-				float x,y;
-				float k;
-				float c1x, c1y, c1z;
-				float fx,fy,fz;
-				float fmod;
-				float t;
-				float Fx,Fy,Fz;
-			
-		
-				//mybackproject(float x, float y, float* xp, float* yp, float* zp, float* camx, float* camy, float* camz, int cam){
-				//mybackproject(i % cWidth, i / cWidth, &xp, &yp, &zp, &camx, &camy, &camz,0);
-				
-				/*mybackproyect*/
-				x=i % (int)cWidth;
-				y= i / (int) cWidth;
-				HPoint2D p;
-				HPoint3D pro;
-				p.x=GRAPHIC_TO_OPTICAL_X(x,y,cHeight); 
-				p.y=GRAPHIC_TO_OPTICAL_Y(x,y,cHeight);
-				p.h=1;
-				backproject(&pro,p,this->cameras[cam]);
-				xp=pro.X;
-				yp=pro.Y;
-				zp=pro.Z;
+				if (d != 0 ){
+					float xp,yp,zp,camx,camy,camz;
+					float ux,uy,uz;
+					float x,y;
+					float k;
+					float c1x, c1y, c1z;
+					float fx,fy,fz;
+					float fmod;
+					float t;
+					float Fx,Fy,Fz;
 
-				camx=this->cameras[cam].position.X;
-				camy=this->cameras[cam].position.Y;
-				camz=this->cameras[cam].position.Z;
-				/*end*/
+					HPoint2D p;
+					HPoint3D pro;
+					p.x=GRAPHIC_TO_OPTICAL_X(xIm,yIm,cHeight);
+					p.y=GRAPHIC_TO_OPTICAL_Y(xIm,yIm,cHeight);
+					p.h=1;
+					backproject(&pro,p,this->cameras[cam]);
+					xp=pro.X;
+					yp=pro.Y;
+					zp=pro.Z;
+
+					camx=this->cameras[cam].position.X;
+					camy=this->cameras[cam].position.Y;
+					camz=this->cameras[cam].position.Z;
 
 			
-				//vector unitario
-				float modulo;
+					//vector unitario
+					float modulo;
 			
-				modulo = sqrt(1/(((camx-xp)*(camx-xp))+((camy-yp)*(camy-yp))+((camz-zp)*(camz-zp))));
+					modulo = sqrt(1/(((camx-xp)*(camx-xp))+((camy-yp)*(camy-yp))+((camz-zp)*(camz-zp))));
 
-				//mypro->mygetcameras[cam]foa(&c1x, &c1y, &c1z, 0);
-				c1x=this->cameras[cam].foa.X;
-				c1y=this->cameras[cam].foa.Y;
-				c1z=this->cameras[cam].foa.Z;
+					//mypro->mygetcameras[cam]foa(&c1x, &c1y, &c1z, 0);
+					c1x=this->cameras[cam].foa.X;
+					c1y=this->cameras[cam].foa.Y;
+					c1z=this->cameras[cam].foa.Z;
 
-				fmod = sqrt(1/(((camx-c1x)*(camx-c1x))+((camy-c1y)*(camy-c1y))+((camz-c1z)*(camz-c1z))));
-				fx = (c1x - camx)*fmod;
-				fy = (c1y - camy)*fmod;
-				fz = (c1z - camz) * fmod;
-				ux = (xp-camx)*modulo;
-				uy = (yp-camy)*modulo;
-				uz = (zp-camz)*modulo;
+					fmod = sqrt(1/(((camx-c1x)*(camx-c1x))+((camy-c1y)*(camy-c1y))+((camz-c1z)*(camz-c1z))));
+					fx = (c1x - camx)*fmod;
+					fy = (c1y - camy)*fmod;
+					fz = (c1z - camz) * fmod;
+					ux = (xp-camx)*modulo;
+					uy = (yp-camy)*modulo;
+					uz = (zp-camz)*modulo;
 
-				Fx= distance*fx + camx;
-				Fy= distance*fy + camy;
-				Fz= distance*fz + camz;
+					Fx= d*fx + camx;
+					Fy= d*fy + camy;
+					Fz= d*fz + camz;
 
-				/* calculamos el punto real */
-				t = (-(fx*camx) + (fx*Fx) - (fy*camy) + (fy*Fy) - (fz*camz) + (fz*Fz))/((fx*ux) + (fy*uy) + (fz*uz));
+					/* calculamos el punto real */
+					t = (-(fx*camx) + (fx*Fx) - (fy*camy) + (fy*Fy) - (fz*camz) + (fz*Fz))/((fx*ux) + (fy*uy) + (fz*uz));
 
-			
 
-				/*world->points[i][0]=distance*ux+camx;
-				world->points[i][1]=distance*uy+camy;
-				world->points[i][2]=distance*uz+camz;*/
-				/*std::cout << xp << "," << yp << "," << zp << "," << modulo << std::endl;
-				std::cout << xp-camx << "," << yp-camy<< "," << zp-camz << std::endl;
-				std::cout << ux << "," << uy<< "," << uz << std::endl;*/
-				//k= (80-yp)/uy;
-				//std::cout << "distancia" << distance << std::endl;
-			
-				if (colour==0)
-					world->add_kinect_point(t*ux + camx,t*uy+ camy,t*uz + camz,(int)imageRGB.data[3*i],(int)imageRGB.data[3*i+1],(int)imageRGB.data[3*i+2]);
-				else{
-					int r,g,b;
-					if (colour==1){
-						r=255;
-						g=0;
-						b=0;
-					}
-					else if (colour==2){
-						r=0;
-						g=0;
-						b=255;
-					}
+
+					/*world->points[i][0]=distance*ux+camx;
+					world->points[i][1]=distance*uy+camy;
+					world->points[i][2]=distance*uz+camz;*/
+					/*std::cout << xp << "," << yp << "," << zp << "," << modulo << std::endl;
+					std::cout << xp-camx << "," << yp-camy<< "," << zp-camz << std::endl;
+					std::cout << ux << "," << uy<< "," << uz << std::endl;*/
+					//k= (80-yp)/uy;
+					//std::cout << "distancia" << distance << std::endl;
+
+					if (colour==0)
+						world->add_kinect_point(t*ux + camx,t*uy+ camy,t*uz + camz,(int)imageRGB.data[3*(yIm*cWidth+xIm)],(int)imageRGB.data[3*(yIm*cWidth+xIm)+1],(int)imageRGB.data[3*(yIm*cWidth+xIm)+2]);
 					else{
-						r=0;
-						g=1;
-						b=0;
+						int r,g,b;
+						if (colour==1){
+							r=255;
+							g=0;
+							b=0;
+						}
+						else if (colour==2){
+							r=0;
+							g=0;
+							b=255;
+						}
+						else{
+							r=0;
+							g=1;
+							b=0;
+						}
+						world->add_kinect_point(t*ux + camx,t*uy+ camy,t*uz + camz,r,g,b);
 					}
-					world->add_kinect_point(t*ux + camx,t*uy+ camy,t*uz + camz,r,g,b);
-				}
-
-
 
 				//world->add_line(distance*ux + camx,distance*uy+ camy,distance*uz + camz,camx,camy,camz);
 				}
+			}
 		}
-
-	//std::cout << "fin reconstrucción" << std::endl;
 }
 
 

@@ -77,4 +77,5 @@ TARGET_LINK_LIBRARIES(calibratorKinect
   ${LIBS_DIR}/libjderobotice.so
   ${LIBS_DIR}/libjderobotutil.so
   ${LIBS_DIR}/libprogeo.so
+    ${LIBS_DIR}/libparallelIce.so
 )

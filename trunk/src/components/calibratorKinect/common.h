@@ -19,15 +19,15 @@
  *             Jose María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
-#include <jderobot/camera.h>
+#include <parallelIce/cameraClient.h>
 
 #ifndef calibrator_COMMON_H
 #define calibrator_COMMON_H
 namespace CalibratorKinect {
 
 struct kinectData{
-	jderobot::CameraPrx cRGBprx;
-	jderobot::CameraPrx cDEPTHprx;
+	jderobot::cameraClient* RGB;
+	jderobot::cameraClient* DEPTH;
 };
 
 

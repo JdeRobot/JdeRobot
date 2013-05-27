@@ -190,6 +190,9 @@ namespace CalibratorKinect {
 	}
 
 	bool DrawArea::on_expose_event(GdkEventExpose* event) {
+	}
+
+	void DrawArea::my_expose_event(){
 		//std::cout << "expose" << std::endl;
 		Gtk::Allocation allocation = get_allocation();
 		GLfloat width, height;
@@ -233,8 +236,6 @@ namespace CalibratorKinect {
 			glFlush();
 
 		glwindow->gl_end();
-
-		return true;
 	}
 
 	bool DrawArea::on_timeout() {

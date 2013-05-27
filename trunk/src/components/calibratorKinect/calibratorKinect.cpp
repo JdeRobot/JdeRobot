@@ -1,6 +1,6 @@
 /*
 *
-*  Copyright (C) 1997-2010 JDERobot Developers Team
+*  Copyright (C) 1997-2013 JDERobot Developers Team
 *
 *  This program is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 *
 *  Authors : Sara Marugán Alonso <smarugan@gsyc.es>,
  *           Eduardo Perdices <eperdices@gsyc.es>
+ *           Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
 *
 */
 
@@ -57,23 +58,20 @@ int main(int argc, char** argv){
 		for (int i=0; i< nCameras; i++){
 			std::ostringstream sTemp;
 			std::ostringstream sTemp2;
-			sTemp << "CalibratorKinect.CameraRGB." << i << ".Proxy";
-			Ice::ObjectPrx baseRGB = ic->propertyToProxy(sTemp.str());
-			sTemp2 << "CalibratorKinect.CameraDEPTH." << i << ".Proxy";
-			Ice::ObjectPrx baseDEPTH = ic->propertyToProxy(sTemp2.str());
-			if (0==baseRGB)
+			sTemp << "CalibratorKinect.CameraRGB." << i << ".";
+			sources[i].RGB=new jderobot::cameraClient(ic, sTemp.str());
+			sTemp2 << "CalibratorKinect.CameraDEPTH." << i << ".";
+			sources[i].DEPTH=new jderobot::cameraClient(ic, sTemp2.str());
+
+
+			if (sources[i].RGB==NULL)
 				throw "Could not create proxy to RGB camera";
-			if (0==baseDEPTH)
+			else
+				sources[i].RGB->start();
+			if (sources[i].DEPTH==NULL)
 				throw "Could not create proxy to DEPTH camera";
-
-			/*cast to CameraPrx*/
-			sources[i].cRGBprx = jderobot::CameraPrx::checkedCast(baseRGB);
-			if (0==sources[i].cRGBprx)
-				throw "Invalid RGB proxy";
-
-			sources[i].cDEPTHprx = jderobot::CameraPrx::checkedCast(baseDEPTH);
-			if (0==sources[i].cDEPTHprx)
-				throw "Invalid DEPTH proxy";
+			else
+				sources[i].DEPTH->start();
 		}
 
 
@@ -85,55 +83,10 @@ int main(int argc, char** argv){
 
 
 		while(view->isVisible()){
-			/*Get image*/
-
-			/*jderobot::ImageDataPtr dataRGB = sources[cam].cRGBprx->getImageData();
-			colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(dataRGB->description->format);
-			if (!fmt)
-				throw "Format not supported";
-			jderobot::ImageDataPtr dataDEPTH = sources[cam].cDEPTHprx->getImageData();
-			colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(dataDEPTH->description->format);
-			if (!fmt2)
-				throw "Format not supported";
-
-			colorspaces::Image image(dataRGB->description->width, dataRGB->description->height, fmt, &(dataRGB->pixelData[0]));
-			colorspaces::Image imageDEPTH(dataDEPTH->description->width, dataDEPTH->description->height, fmt2, &(dataDEPTH->pixelData[0]));*/
-
 			view->display(sources);
-			usleep(10*1000);
+
+			usleep(1000);
 		}
-
-/*libcalibrator_init(worldconf.c_str(),camInconf.c_str(),camOutconf.c_str());
-libcalibrator_initgui();
-
-unsigned char image[IMAGE_WIDTH*IMAGE_HEIGHT*3];
-
-for(;;){
-jderobot::ImageDataPtr data = cprx->getImageData();
-colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(data->description->format);
-if (!fmt)
-throw "Format not supported";
-
-colorspaces::Image img(data->description->width,
-data->description->height,
-fmt,
-&(data->pixelData[0]));
-
-if(img.width!=IMAGE_WIDTH || img.height!=IMAGE_HEIGHT){
-throw "Image size not supported";
-}*/
-
-/* BGR to RGB */
-/* int size=img.width*img.height;
-for (int j=0; j<size; j++) {
-image[j*3] = img.data[j*3+2];
-image[j*3+1] = img.data[j*3+1];
-image[j*3+2] = img.data[j*3];
-}
-
-libcalibrator_guibuttons();
-libcalibrator_guidisplay((unsigned char*)image);
-}*/
 
 	}catch (const Ice::Exception& ex) {
 		std::cerr << ex << std::endl;

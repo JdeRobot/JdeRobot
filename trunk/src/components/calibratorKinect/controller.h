@@ -1,5 +1,5 @@
 /*
-*  Copyright (C) 1997-2010 JDERobot Developers Team
+*  Copyright (C) 1997-2013 JDERobot Developers Team
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *   Authors : Eduardo Perdices <eperdices@gsyc.es>,
+ *   			Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
  *             Jose María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
@@ -54,11 +55,11 @@ namespace CalibratorKinect {
     
     std::string getGladePath();
 
-		void drawWorld(const colorspaces::Image& image,int cam);
+		void drawWorld(cv::Mat image,int cam);
 
-		//OJO asignar valores
-		float cWidth;
-		float cHeight;
+		//Tamaño de la imagen
+		int cWidth;
+		int cHeight;
 
 		HPoint3D * getPos(int cam);
 		HPoint3D * getFoa(int cam);
@@ -76,7 +77,7 @@ namespace CalibratorKinect {
 		void setV0(float value,int cam);	
 		void setRoll(float value,int cam);
 		void changeDrawCenter();
-		void add_depth_pointsImage(const colorspaces::Image& imageDEPTH, const colorspaces::Image& imageRGB, CalibratorKinect::DrawArea* world,int cam, int scale, int colour);
+		void add_depth_pointsImage(cv::Mat distances, cv::Mat imageRGB, CalibratorKinect::DrawArea* world,int cam, int scale, int colour);
 		void saveCameras(int nCameras);
 
   private:
@@ -86,7 +87,7 @@ namespace CalibratorKinect {
 		int load_camera_config(Ice::PropertyDict pd,int cam);
 		int load_world();
 		
-		void drawLine(IplImage * src, HPoint3D pini, HPoint3D pend, int cam);
+		void drawLine(cv::Mat , HPoint3D pini, HPoint3D pend, int cam);
 
 		std::string gladepath;
 		std::string world;

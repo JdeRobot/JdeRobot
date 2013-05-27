@@ -90,6 +90,7 @@ namespace CalibratorKinect {
 		void setToUserCamera ();
 		void readFile(std::string path);
 		virtual bool on_expose_event(GdkEventExpose* event);
+		void my_expose_event();
 		void add_line(float x0,float y0, float z0, float x1, float y1, float z1);
 		void add_camera_line(float x0,float y0, float z0, float x1, float y1, float z1);
 		void add_kinect_point(float x,float y, float z,int r,int g, int b);

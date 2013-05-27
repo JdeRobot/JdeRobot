@@ -75,7 +75,7 @@ namespace CalibratorKinect {
 
         
 		/*Set default config*/
-		std::cout << (double)this->controller->getPos(cam)->X << std::endl;
+
 		//vscale_pos_x->set_value((double)this->controller->getPos(cam)->X);
 		vscale_pos_x->set_value(12);
 		vscale_pos_y->set_value((double)this->controller->getPos(cam)->Y);
@@ -129,8 +129,6 @@ namespace CalibratorKinect {
   m_Combo->pack_start(m_Columns.m_col_name);
 
 
-	std::cout << "creado" << std::endl;
-
 	}
 
 	View::~View() {
@@ -147,53 +145,64 @@ namespace CalibratorKinect {
 
 		/*Manage image*/
 		
-
 		/*Set image*/
-		if (w_depth->get_active()){
-			jderobot::ImageDataPtr dataDEPTH = sources[cam].cDEPTHprx->getImageData();
-			colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(dataDEPTH->description->format);
-			if (!fmt2)
-				throw "Format not supported";
-			colorspaces::Image imageDEPTH(dataDEPTH->description->width, dataDEPTH->description->height, fmt2, &(dataDEPTH->pixelData[0]));
 
-			this->controller->drawWorld(imageDEPTH, cam);
-			colorspaces::ImageRGB8 img_rgb8(imageDEPTH);//conversion will happen if needed
-			Glib::RefPtr<Gdk::Pixbuf> imgBuff = Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8.data,
+
+		if (w_depth->get_active()){
+
+
+			cv::Mat srcDEPTH=sources[cam].DEPTH->getImage();
+
+
+			/*split channels to separate distance from image*/
+			std::vector<cv::Mat> layers;
+			cv::split(srcDEPTH, layers);
+			cv::Mat colorDepth(srcDEPTH.size(),srcDEPTH.type());
+			cv::cvtColor(layers[0],colorDepth,CV_GRAY2RGB);
+
+			controller->drawWorld(colorDepth,cam);
+
+
+			Glib::RefPtr<Gdk::Pixbuf> imgBuff = Gdk::Pixbuf::create_from_data((const guint8*)colorDepth.data,
 				    Gdk::COLORSPACE_RGB,
 				    false,
 				    8,
-				    img_rgb8.width,
-				    img_rgb8.height,
-				    img_rgb8.step); 
+				    colorDepth.cols,
+				    colorDepth.rows,
+				    colorDepth.step);
 			gtk_image->clear();
     		gtk_image->set(imgBuff);
 			mainwindow->resize(1,1);
 			while (gtkmain.events_pending()){
       			gtkmain.iteration();
-	}
+			}
 		}
 		else{
-			jderobot::ImageDataPtr dataRGB = sources[cam].cRGBprx->getImageData();
-			colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(dataRGB->description->format);
-			if (!fmt)
-				throw "Format not supported";
-			colorspaces::Image image(dataRGB->description->width, dataRGB->description->height, fmt, &(dataRGB->pixelData[0]));
-			this->controller->drawWorld(image, cam);
-			colorspaces::ImageRGB8 img_rgb8(image);//conversion will happen if needed
-			Glib::RefPtr<Gdk::Pixbuf> imgBuff = Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8.data,
+
+			cv::Mat rgb = sources[cam].RGB->getImage();
+
+			controller->drawWorld(rgb,cam);
+			Glib::RefPtr<Gdk::Pixbuf> imgBuff = Gdk::Pixbuf::create_from_data((const guint8*)rgb.data,
 				    Gdk::COLORSPACE_RGB,
 				    false,
 				    8,
-				    img_rgb8.width,
-				    img_rgb8.height,
-				    img_rgb8.step);
+				    rgb.cols,
+				    rgb.rows,
+				    rgb.step);
 			gtk_image->clear();
     		gtk_image->set(imgBuff);
 			mainwindow->resize(1,1);
+
+			//world->my_expose_event();
 			while (gtkmain.events_pending()){
       			gtkmain.iteration();
-	}
+
+
+			}
+
 		}
+
+
 
 		//creo el mundo en 3D.
 
@@ -201,51 +210,54 @@ namespace CalibratorKinect {
 			this->world->clear_points();
 			for (int pos=0; pos< nCameras; pos++){
 				int colour;
-				jderobot::ImageDataPtr dataDEPTH = sources[pos].cDEPTHprx->getImageData();
-				colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(dataDEPTH->description->format);
-				if (!fmt2)
-					throw "Format not supported";
-				colorspaces::Image imageDEPTH(dataDEPTH->description->width, dataDEPTH->description->height, fmt2, &(dataDEPTH->pixelData[0]));
-				jderobot::ImageDataPtr dataRGB = sources[pos].cRGBprx->getImageData();
-				colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(dataRGB->description->format);
-				if (!fmt)
-					throw "Format not supported";
-				colorspaces::Image image(dataRGB->description->width, dataRGB->description->height, fmt, &(dataRGB->pixelData[0]));
+				cv::Mat srcDEPTH =sources[cam].DEPTH->getImage();
+
+				cv::Mat distance(srcDEPTH.rows, srcDEPTH.cols, CV_32FC1);
+				//split channels to separate distance from image
+				std::vector<cv::Mat> layers;
+				cv::split(srcDEPTH, layers);
+
+				for (int x=0; x< layers[1].cols ; x++){
+					for (int y=0; y<layers[1].rows; y++){
+						distance.at<float>(y,x) = ((int)layers[1].at<unsigned char>(y,x)<<8)|(int)layers[2].at<unsigned char>(y,x);					}
+				}
+				cv::Mat rgb = sources[cam].RGB->getImage();
 				if (this->trueColor)
 					colour=0;
 				else
 					colour=pos+1;
-				this->controller->add_depth_pointsImage(imageDEPTH,image, world, pos,10,colour);
+				this->controller->add_depth_pointsImage(distance,rgb, world, pos,10,colour);
 			}
 			mainwindow->resize(1,1);
+			world->my_expose_event();
 			while (gtkmain.events_pending()){
       			gtkmain.iteration();
 	}
 		}
 		else{
 			this->world->clear_points();
-			jderobot::ImageDataPtr dataDEPTH = sources[cam].cDEPTHprx->getImageData();
-			colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(dataDEPTH->description->format);
-			if (!fmt2)
-				throw "Format not supported";
-			colorspaces::Image imageDEPTH(dataDEPTH->description->width, dataDEPTH->description->height, fmt2, &(dataDEPTH->pixelData[0]));
-			jderobot::ImageDataPtr dataRGB = sources[cam].cRGBprx->getImageData();
-			colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(dataRGB->description->format);
-			if (!fmt)
-				throw "Format not supported";
-			colorspaces::Image image(dataRGB->description->width, dataRGB->description->height, fmt, &(dataRGB->pixelData[0]));
-			
-			this->controller->add_depth_pointsImage(imageDEPTH,image, world, cam,5,0);
-			mainwindow->resize(1,1);
-			while (gtkmain.events_pending()){
-      			gtkmain.iteration();
-	}
+			cv::Mat srcDEPTH =sources[cam].DEPTH->getImage();
+
+			cv::Mat distance(srcDEPTH.rows, srcDEPTH.cols, CV_32FC1);
+			//split channels to separate distance from image
+			std::vector<cv::Mat> layers;
+			cv::split(srcDEPTH, layers);
+
+			for (int x=0; x< layers[1].cols ; x++){
+				for (int y=0; y<layers[1].rows; y++){
+					distance.at<float>(y,x) = ((int)layers[1].at<unsigned char>(y,x)<<8)|(int)layers[2].at<unsigned char>(y,x);					}
+			}
+
+			cv::Mat rgb = sources[cam].RGB->getImage();
+			this->controller->add_depth_pointsImage(distance,rgb, world, cam,5,0);
+
+
+			world->my_expose_event();
+
 		}
-    
 
 		/*Show window*/
-    
-    
+
   }
 
 
