@@ -190,6 +190,7 @@ namespace kinectViewer {
 	}
 
 	bool DrawArea::on_expose_event(GdkEventExpose* event) {
+		return true;
 	}
 
 	bool DrawArea::my_expose_event(){
@@ -443,6 +444,7 @@ namespace kinectViewer {
 
 		old_x=x;
 		old_y=y;
+		return true;
 	}
 
 	bool DrawArea::on_drawarea_scroll(GdkEventScroll * event) {
@@ -471,6 +473,7 @@ namespace kinectViewer {
 			this->glcam_pos.Y = this->glcam_pos.Y - vy;
 			this->glcam_pos.Z = this->glcam_pos.Z - vz;
 		}
+		return true;
 	}
 
 int

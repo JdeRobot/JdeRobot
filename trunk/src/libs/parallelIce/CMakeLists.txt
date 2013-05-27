@@ -6,14 +6,14 @@ include_directories(
 )
 
 add_library (parallelIce STATIC cameraClient.cpp  cameraClient.h  pointcloudClient.cpp  pointcloudClient.h)
-TARGET_LINK_LIBRARIES(paralellIce 
+TARGET_LINK_LIBRARIES(parallelIce 
    	${OpenCV_LIBRARIES}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${ZeroCIce_LIBRARIES}
 )
 
 add_library (parallelIceshare SHARED cameraClient.cpp  cameraClient.h  pointcloudClient.cpp  pointcloudClient.h)
-TARGET_LINK_LIBRARIES(paralellIceshare 
+TARGET_LINK_LIBRARIES(parallelIceshare 
    	${OpenCV_LIBRARIES}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${ZeroCIce_LIBRARIES}

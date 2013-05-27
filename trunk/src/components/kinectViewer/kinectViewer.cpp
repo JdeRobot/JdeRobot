@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1997-2010 JDE Developers TeamkinectViewer.camRGB
+ *  Copyright (C) 1997-2013 JDE Developers TeamkinectViewer.camRGB
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,32 +14,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/.
  *
- *  Authors : Jose María Cañas <jmplaza@gsyc.es>
-			Francisco Miguel Rivas Montero <fm.rivas@alumnos.urjc.es>
-			
+ *  Author : Jose María Cañas <jmplaza@gsyc.es>
+			Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
+
  */
-
-/** \file kinectViewer.cpp
- * \brief kinectViewer component master file
- */
-
-/**
-   \mainpage kinectViewer teleoperador JDE Component 5.0 for humanoid robots
-   \author Francisco Miguel Rivas Montero
-   \author Jose Maria Cañas Plaza
-   \date 2010, December
-	\version 5.0
-
-   \par Readme:
-	JDE-5.0 and Naobody component are nedeed to run this component
-
-   \htmlonly
-   <marquee scrollamount="5" scrolldelay="25"><font color=red>
-    kinectViewer.</font></marquee>
-   \endhtmlonly
-   </ul>
-*/
-
 
 
 
@@ -48,72 +26,72 @@
 #include <iostream>
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
-#include <jderobot/camera.h>
-#include <jderobot/kinectleds.h>
 #include <jderobot/pointcloud.h>
-#include <colorspaces/colorspacesmm.h>
 #include "kinectViewergui.h"
 #include "pthread.h"
-#include "controllers/Pose3DMotors-controller.h"
-#include "controllers/leds-controller.h"
+#include "parallelIce/cameraClient.h"
+#include "parallelIce/pointcloudClient.h"
 
 
 
 #define MAX_COMPONENTS 20	
 
 kinectViewer::kinectViewergui* kinectViewergui_ptx;
-Ice::ObjectPrx baseCameraRGB;
-Ice::ObjectPrx baseCameraDEPTH;
-jderobot::CameraPrx cDEPTHprx;
-jderobot::CameraPrx cRGBprx;
+
+jderobot::cameraClient* camRGB=NULL;
+jderobot::cameraClient* camDEPTH=NULL;
+jderobot::pointcloudClient* pcClient=NULL;
 
 
-/**
- * \brief Thread that performs the camera upgrade
- * \param arg: variable where any needed argument can be set (not used).
- */
-void *camera_server(void* arg){
-	int camRGB=0;
-	int camDEPTH=0;
+
+
+void *gui_thread(void* arg){
 	try{
+		//local data
+		std::vector<jderobot::RGBPoint> cloud;
+		cv::Mat rgb,depth;
+
+		struct timeval post;
+		long long int totalpre=0;
+		long long int totalpost=0;
+
+		//std::cout << "******************************** entro" << std::endl;
 		while(kinectViewergui_ptx->isVisible() && ! kinectViewergui_ptx->isClosed()){
-			jderobot::ImageDataPtr dataRGB;
-			jderobot::ImageDataPtr dataDEPTH;
-			colorspaces::Image::FormatPtr fmtRGB;
-			colorspaces::Image::FormatPtr fmtDEPTH;
-			if (0!=cRGBprx){
-				camRGB=1;
-				dataRGB = cRGBprx->getImageData();
-				fmtRGB = colorspaces::Image::Format::searchFormat(dataRGB->description->format);
-				if (!fmtRGB)
-					throw "Format not supported";
-			}
-			if (0!=cDEPTHprx){
-				camDEPTH=1;
-				dataDEPTH = cDEPTHprx->getImageData();
-				fmtDEPTH = colorspaces::Image::Format::searchFormat(dataDEPTH->description->format);
-				if (!fmtDEPTH)
-					throw "Format not supported";
-			}
+			//std::cout << "******************************** entro1" << std::endl;
+			gettimeofday(&post,NULL);
+			totalpost=post.tv_sec*1000000+post.tv_usec;
+
+			if (camRGB!=NULL)
+				rgb=camRGB->getImage();
+			if (camDEPTH!=NULL)
+				depth=camDEPTH->getImage();
+			if (pcClient!=NULL)
+				cloud=pcClient->getData();
 
 
-			if ((camRGB)&&(camDEPTH)){
-				colorspaces::Image imageRGB(dataRGB->description->width,dataRGB->description->height,fmtRGB,&(dataRGB->pixelData[0]));
-				colorspaces::Image imageDEPTH(dataDEPTH->description->width,dataDEPTH->description->height,fmtDEPTH,&(dataDEPTH->pixelData[0]));
-				kinectViewergui_ptx->updateAll(imageRGB,imageDEPTH);
+			if ((rgb.rows!=0)&&(depth.rows!=0)){
+				kinectViewergui_ptx->updateAll(rgb,depth, cloud);
 			}
-			else if (camRGB){
-				colorspaces::Image imageRGB(dataRGB->description->width,dataRGB->description->height,fmtRGB,&(dataRGB->pixelData[0]));
-				kinectViewergui_ptx->updateRGB(imageRGB);
+			else if (rgb.rows!=0){
+				kinectViewergui_ptx->updateRGB(rgb);
 			}
-			else if (camDEPTH){
-				colorspaces::Image imageDEPTH(dataDEPTH->description->width,dataDEPTH->description->height,fmtDEPTH,&(dataDEPTH->pixelData[0]));
-				kinectViewergui_ptx->updateDEPTH(imageDEPTH);
+			else if (depth.rows!=0){
+				kinectViewergui_ptx->updateDEPTH(depth);
 			}
 			else{	
-				kinectViewergui_ptx->updatePointCloud();
+				kinectViewergui_ptx->updatePointCloud(cloud);
 			}
-			usleep(1000);
+			if (totalpre !=0){
+				if ((totalpost - totalpre) > kinectViewergui_ptx->getCycle() ){
+					std::cout<<"-------- kinectViewer: timeout-" << std::endl;
+				}
+				else{
+					usleep(kinectViewergui_ptx->getCycle() - (totalpost - totalpre));
+				}
+			}
+			totalpre=totalpost;
+
+
 		}
 	}catch (const Ice::Exception& ex) {
 		std::cerr << ex << std::endl;
@@ -136,18 +114,15 @@ int main(int argc, char** argv){
 	pthread_t threads[MAX_COMPONENTS];
 	pthread_attr_t attr;
 	Ice::PropertiesPtr prop;
-	int camera_active=0;
-	jderobot::Pose3DMotorsPrx mprx;
-	jderobot::KinectLedsPrx lprx;
-	jderobot::pointCloudPrx pointCloudprx;
-	std::string path;
-	kinectViewerController::Pose3DMotorsController *Pose3DMotors_ctr=NULL;
-	kinectViewerController::LedsController *leds_ctr=NULL;
-	kinectViewerController::PointCloudController *pointCloud_ctr=NULL;
-	int rgbCamSelected=0;
-	int depthCamSelected=0;
-	int globalWidth=0;
-	int globalHeight=0;
+	bool create_gui=false;
+
+
+
+	bool rgbCamSelected=false;
+	bool depthCamSelected=false;
+	bool pointCloudSelected=false;
+	int globalWidth;
+	int globalHeight;
 
 	
 
@@ -165,153 +140,63 @@ int main(int argc, char** argv){
 		return 1;
 	}
 	if (prop->getPropertyAsIntWithDefault("kinectViewer.CameraRGBActive",0)){
-		try{
-			baseCameraRGB = ic->propertyToProxy("kinectViewer.CameraRGB.Proxy");
-			if (0==baseCameraRGB){
-				throw "kinectViewer: Could not create proxy with Camera";
-			}
-			else {
-				cRGBprx= jderobot::CameraPrx::checkedCast(baseCameraRGB);
-				if (0==cRGBprx)
-					throw "Invalid proxy kinectViewer.CameraRGB.Proxy";
-				camera_active=1;
-				rgbCamSelected=1;
-			}
-		}catch (const Ice::Exception& ex) {
-			std::cerr << ex << std::endl;
-			status = 1;
+		camRGB = new jderobot::cameraClient(ic,"kinectViewer.CameraRGB.");
+		if (camRGB != NULL){
+			rgbCamSelected=true;
+			camRGB->start();
+			create_gui=true;
 		}
-		catch (const char* msg) {
-			std::cerr << msg << std::endl;
-			std::cout << "kinectViewer: Not camera provided" << std::endl;
-			status = 1;
-		}
+
 	}
 	if (prop->getPropertyAsIntWithDefault("kinectViewer.CameraDEPTHActive",0)){
-		try{
-			baseCameraDEPTH = ic->propertyToProxy("kinectViewer.CameraDEPTH.Proxy");
-			if (0==baseCameraDEPTH){
-				throw "kinectViewer: Could not create proxy with Camera";
-			}
-			else {
-				cDEPTHprx = jderobot::CameraPrx::checkedCast(baseCameraDEPTH);
-				if (0==cDEPTHprx)
-					throw "Invalid proxy kinectViewer.CameraDEPTH.Proxy";
-				camera_active=1;
-				depthCamSelected=1;
-			}
-		}catch (const Ice::Exception& ex) {
-			std::cerr << ex << std::endl;
-			status = 1;
+		camDEPTH = new jderobot::cameraClient(ic,"kinectViewer.CameraDEPTH.");
+		if (camDEPTH != NULL){
+			depthCamSelected=true;
+			camDEPTH->start();
+			create_gui=true;
 		}
-		catch (const char* msg) {
-			std::cerr << msg << std::endl;
-			std::cout << "kinectViewer: Not camera provided" << std::endl;
-			status = 1;
-		}
-	}
-
-	if (prop->getPropertyAsIntWithDefault("kinectViewer.pointCloudActive",0)){
-		try{
-			Ice::ObjectPrx basePointCloud = ic->propertyToProxy("kinectViewer.pointCloud.Proxy");
-			if (0==basePointCloud){
-				throw "kinectViewer: Could not create proxy with Camera";
-			}
-			else {
-				pointCloudprx = jderobot::pointCloudPrx::checkedCast(basePointCloud);
-				if (0==pointCloudprx)
-					throw "Invalid proxy kinectViewer.pointCloud.Proxy";
-				camera_active=1;
-				pointCloud_ctr = new kinectViewerController::PointCloudController(pointCloudprx);
-			}
-		}catch (const Ice::Exception& ex) {
-			std::cerr << ex << std::endl;
-			status = 1;
-		}
-		catch (const char* msg) {
-			std::cerr << msg << std::endl;
-			std::cout << "kinectViewer: Not camera provided" << std::endl;
-			status = 1;
-		}
-	}
-
-	if (prop->getPropertyAsIntWithDefault("kinectViewer.Pose3DMotorsActive",0)){
-		try{
-			/*Contact to Pose3DMotors proxy */
-		    Ice::ObjectPrx basePose3DMotors = ic->propertyToProxy("kinectViewer.Pose3DMotors.Proxy");
-		    if (0==basePose3DMotors)
-				throw "kinectViewer: Could not create proxy with Pose3DMotors";
-		    /*cast to Pose3DMotorsPrx*/
-		    mprx = jderobot::Pose3DMotorsPrx::checkedCast(basePose3DMotors);
-		    if (0==mprx)
-				throw "kinectViewer: Invalid proxy kinectViewer.Pose3DMotors.Proxy";
-			/*creating all the devices controllers*/
-			Pose3DMotors_ctr = new kinectViewerController::Pose3DMotorsController(mprx);
-		}catch (const Ice::Exception& ex) {
-			std::cerr << ex << std::endl;
-			return 1;
-		}
-		catch (const char* msg) {
-			std::cerr << msg << std::endl;
-			return 1;
-		}
-	}
-	if (prop->getPropertyAsIntWithDefault("kinectViewer.KinectLedsActive",0)){
-		try{
-			/*Contact to KinectLeds proxy */
-		    Ice::ObjectPrx baseKinectLeds = ic->propertyToProxy("kinectViewer.KinectLeds.Proxy");
-		    if (0==baseKinectLeds)
-				throw "kinectViewer: Could not create proxy with KinectLeds";
-		    /*cast to KinectLedsPrx*/
-		    lprx = jderobot::KinectLedsPrx::checkedCast(baseKinectLeds);
-		    if (0==lprx)
-				throw "kinectViewer: Invalid proxy kinectViewer.KinectLeds.Proxy";
-			/*creating all the devices controllers*/
-			leds_ctr = new kinectViewerController::LedsController(lprx);
-		}catch (const Ice::Exception& ex) {
-			std::cerr << ex << std::endl;
-			return 1;
-		}
-		catch (const char* msg) {
-			std::cerr << msg << std::endl;
-			return 1;
-		}
-	}
-	if ((rgbCamSelected)&&(depthCamSelected)){
-		if ((cRGBprx->getImageData()->description->width!=cDEPTHprx->getImageData()->description->width)||(cRGBprx->getImageData()->description->height!=cDEPTHprx->getImageData()->description->height)){
-			throw "kinectViewer: DEPTH and RGB images are not compatibles";
-		}
-		else{
-			globalWidth=cRGBprx->getImageData()->description->width;
-			globalHeight=cRGBprx->getImageData()->description->height;
-		}
-	}
-	else if (rgbCamSelected){
-		globalWidth=cRGBprx->getImageData()->description->width;
-		globalHeight=cRGBprx->getImageData()->description->height;
-	}
-	else if (depthCamSelected){
-		globalWidth=cDEPTHprx->getImageData()->description->width;
-		globalHeight=cDEPTHprx->getImageData()->description->height;
-	}
-	else{
-		globalWidth=0;
-		globalHeight=0;
 	}
 
 
+	if (prop->getPropertyAsIntWithDefault("kinectViewer.pointCloudActive",0)){
+		pcClient = new jderobot::pointcloudClient(ic,"kinectViewer.pointCloud.");
+		if (pcClient!= NULL){
+			pcClient->start();
+			pointCloudSelected=true;
+			create_gui=true;
+		}
+	}
 
-	kinectViewergui_ptx = new kinectViewer::kinectViewergui(cRGBprx,cDEPTHprx, pointCloud_ctr ,Pose3DMotors_ctr, leds_ctr, prop->getProperty("kinectViewer.WorldFile"), prop->getProperty("kinectViewer.camRGB"), prop->getProperty("kinectViewer.camIR"),globalWidth,globalHeight);
+	globalHeight=prop->getPropertyAsIntWithDefault("kinectViewer.Height",240);
+	globalWidth=prop->getPropertyAsIntWithDefault("kinectViewer.Width",320);
+	int fps=prop->getPropertyAsIntWithDefault("kinectViewer.Fps",10);
+	float cycle=(float)(1/(float)fps)*1000000;
+
+
+	std::cout << rgbCamSelected <<", " << depthCamSelected << ", " << pointCloudSelected << std::endl;
+
+	kinectViewergui_ptx = new kinectViewer::kinectViewergui(rgbCamSelected,depthCamSelected, pointCloudSelected, prop->getProperty("kinectViewer.WorldFile"), prop->getProperty("kinectViewer.camRGB"), prop->getProperty("kinectViewer.camIR"),globalWidth,globalHeight, cycle);
 	
-	n_components++;
-	if (camera_active){
-		pthread_create(&threads[0], &attr, camera_server,NULL);
+	if (create_gui){
+		pthread_create(&threads[n_components], &attr, gui_thread,NULL);
+		n_components++;
 	}
+
+
 	if (kinectViewergui_ptx == NULL)
 		throw "kinectViewer: Could not create the grafic interface";
 	for (i = 0; i < n_components; i++) {
 		pthread_join(threads[i], NULL);
 	}
+
+	if (camRGB!=NULL)
+		delete camRGB;
+	if (camDEPTH!=NULL)
+		delete camDEPTH;
+	if (pcClient!=NULL)
+		delete pcClient;
+
+
 	if (ic)
 		ic->destroy();
 	return status;

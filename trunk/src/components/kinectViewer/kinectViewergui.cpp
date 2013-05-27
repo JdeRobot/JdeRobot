@@ -1,38 +1,58 @@
+/*
+ *  Copyright (C) 1997-2013 JDE Developers TeamkinectViewer.camRGB
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see http://www.gnu.org/licenses/.
+ *
+ *  Author : Jose María Cañas <jmplaza@gsyc.es>
+			Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
 
+ */
 
 #include "kinectViewergui.h"
 #include <jderobot/pointcloud.h>
 
 namespace kinectViewer {
-	kinectViewergui::kinectViewergui(jderobot::CameraPrx rgb,jderobot::CameraPrx depth,kinectViewerController::PointCloudController* pointCloud_ctr,kinectViewerController::Pose3DMotorsController* ptmc_in, kinectViewerController::LedsController* lc_in, std::string path, std::string path_rgb, std::string path_ir, int width, int height): gtkmain(0,0) {	
+	kinectViewergui::kinectViewergui(bool rgb, bool depth,bool pointCloud , std::string path, std::string path_rgb, std::string path_ir, int width, int height, float cycle): gtkmain(0,0) {
+
 		/*Init OpenGL*/
 		if(!Gtk::GL::init_check(NULL, NULL))	{
 			std::cerr << "Couldn't initialize GL\n";
 			std::exit(1);
 		}
-	cam_rgb=rgb;
-	cam_depth=depth;
-	if (cam_rgb==0)
+		this->cycle=cycle;
+
+	if (rgb)
 		cam_rgb_active=1;
 	else
 		cam_rgb_active=0;
-	if (cam_depth==0)
+	if (depth)
 		cam_depth_active=1;
 	else
 		cam_depth_active=0;
 	modesAvalables=0;
-	if (pointCloud_ctr != NULL){
-		if ((cam_rgb==0)||(cam_depth==0)){
+	if (pointCloud){
+		if ((rgb)&&(depth)){
 			reconstructMode=1;
-			modesAvalables=1; //only one mode
+			modesAvalables=2; //only one mode
 		}
 		else{
 			reconstructMode=1;
-			modesAvalables=2; //both modes
+			modesAvalables=1; //both modes
 		}
 	}
 	else{
-		if ((cam_rgb!=0)&&(cam_depth!=0)){
+		if ((rgb)&&(depth)){
 			reconstructMode=1;
 			modesAvalables=1; //only point cloud mode 
 		}
@@ -49,17 +69,7 @@ namespace kinectViewer {
 	refXml = Gnome::Glade::Xml::create("./kinectViewergui.glade");
 	cWidth=width;
 	cHeight=height;
-	
-	/*Create controller*/
-	if (ptmc_in != NULL){
-		ptmGui = new kinectViewerGuiModules::Pose3DMotorsGui(ptmc_in, refXml);
-	}
-	if (lc_in){
-		lGui = new kinectViewerGuiModules::ledsGui(lc_in,refXml);
-	}
 
-	/*ojo controlar si existe */
-	pointCloud=pointCloud_ctr;
 
 	
 
@@ -88,10 +98,10 @@ namespace kinectViewer {
 	refXml->get_widget("tg_gl",w_tg_gl);
 	refXml->get_widget("vbox_gl",w_vbox_gl);
 		
-	if (cam_rgb_active){
+	if (!cam_rgb_active){
 		w_toggle_rgb->hide();
 	}
-	if (cam_depth_active){
+	if (!cam_depth_active){
 		w_toggle_depth->hide();
 	}
 	
@@ -136,33 +146,28 @@ namespace kinectViewer {
 
 
 void 
-kinectViewergui::updateAll( const colorspaces::Image& imageRGB, const colorspaces::Image& imageDEPTH )
+kinectViewergui::updateAll( cv::Mat imageRGB, cv::Mat imageDEPTH, std::vector<jderobot::RGBPoint> cloud )
 {
 		cv::Mat distance(imageRGB.rows, imageRGB.cols, CV_32FC1);
 		CvPoint pt1,pt2;
 			if (w_toggle_rgb->get_active()){
-				colorspaces::ImageRGB8 img_rgb888(imageRGB);//conversion will happen if needed
-				Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) img_rgb888.data,Gdk::COLORSPACE_RGB,false,8,img_rgb888.width,img_rgb888.height,img_rgb888.step);    
+				Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) imageRGB.data,Gdk::COLORSPACE_RGB,false,8,imageRGB.cols,imageRGB.rows,imageRGB.step);
 	    		w_imageRGB->clear();
 				/*si queremos pintar las lineas*/
 				if (lines_rgb_active){
-					cv::Mat src = cv::Mat(cvSize(img_rgb888.width,img_rgb888.height), CV_8UC3, img_rgb888.data);
-					memcpy((unsigned char *) src.data, &(img_rgb888.data[0]),img_rgb888.width*img_rgb888.height * 3);
-					util->draw_room(src,0, world->lines, world->numlines);
-					memmove(&(img_rgb888.data[0]),(unsigned char *) src.data,img_rgb888.width*img_rgb888.height * 3);
-					
+					util->draw_room(imageRGB,0, world->lines, world->numlines);
 				}
 	    		w_imageRGB->set(imgBuff);
 			}
 			if (w_toggle_depth->get_active()||((reconstruct_depth_activate)&&(reconstructMode==0))){
 	
-				colorspaces::ImageRGB8 img_rgb888(imageDEPTH);//conversion will happen if needed
-				cv::Mat srcDEPTH = cv::Mat(cvSize(img_rgb888.width,img_rgb888.height), CV_8UC3, img_rgb888.data);
 				/*split channels to separate distance from image*/
 				std::vector<cv::Mat> layers;
-				cv::split(srcDEPTH, layers);
-				cv::Mat colorDepth(srcDEPTH.size(),srcDEPTH.type());
+				cv::split(imageDEPTH, layers);
+				cv::Mat colorDepth(imageDEPTH.size(),imageDEPTH.type());
 				cv::cvtColor(layers[0],colorDepth,CV_GRAY2RGB);
+				/*cv::imshow("color", colorDepth);
+				cv::waitKey(1);*/
 
 				for (int x=0; x< layers[1].cols ; x++){
 					for (int y=0; y<layers[1].rows; y++){
@@ -170,22 +175,22 @@ kinectViewergui::updateAll( const colorspaces::Image& imageRGB, const colorspace
 				}
 
 				if (w_toggle_depth->get_active()){
-					Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) img_rgb888.data,Gdk::COLORSPACE_RGB,false,8,img_rgb888.width,img_rgb888.height,img_rgb888.step);
+					Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) colorDepth.data,Gdk::COLORSPACE_RGB,false,8,colorDepth.cols,colorDepth.rows,colorDepth.step);
 					w_imageDEPTH->clear();
 					if (lines_depth_active){
 						util->draw_room(colorDepth,1, world->lines, world->numlines);
 					}
-					memmove(&(img_rgb888.data[0]),(unsigned char *) colorDepth.data,img_rgb888.width*img_rgb888.height * 3);
-
 					w_imageDEPTH->set(imgBuff);
 				}
+				while (gtkmain.events_pending())
+				      	gtkmain.iteration();
 			}
 			if (reconstruct_depth_activate){
 				if (reconstructMode==0){
 					add_depth_pointsImage(imageRGB, distance);
 				}
 				else
-					add_depth_pointsCloud();
+					add_depth_pointsCloud(cloud);
 			}
 		world->my_expose_event();
     	while (gtkmain.events_pending())
@@ -193,19 +198,15 @@ kinectViewergui::updateAll( const colorspaces::Image& imageRGB, const colorspace
   	}
 
 void 
-kinectViewergui::updateRGB( const colorspaces::Image& imageRGB)
+kinectViewergui::updateRGB( cv::Mat imageRGB)
 {
 		CvPoint pt1,pt2;
 			if (w_toggle_rgb->get_active()){
-				colorspaces::ImageRGB8 img_rgb888(imageRGB);//conversion will happen if needed
-				Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) img_rgb888.data,Gdk::COLORSPACE_RGB,false,8,img_rgb888.width,img_rgb888.height,img_rgb888.step);    
+				Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) imageRGB.data,Gdk::COLORSPACE_RGB,false,8,imageRGB.cols,imageRGB.rows,imageRGB.step);
 	    		w_imageRGB->clear();
 				/*si queremos pintar las lineas*/
 				if (lines_rgb_active){
-					IplImage* src = cvCreateImage(cvSize(img_rgb888.width,img_rgb888.height), IPL_DEPTH_8U, 3);
-					memcpy((unsigned char *) src->imageData, &(img_rgb888.data[0]),img_rgb888.width*img_rgb888.height * 3);
-					util->draw_room(src,0, world->lines, world->numlines);
-					memmove(&(img_rgb888.data[0]),(unsigned char *) src->imageData,img_rgb888.width*img_rgb888.height * 3);
+					util->draw_room(imageRGB,0, world->lines, world->numlines);
 					
 				}
 	    		w_imageRGB->set(imgBuff);
@@ -214,8 +215,9 @@ kinectViewergui::updateRGB( const colorspaces::Image& imageRGB)
 	      		gtkmain.iteration();
 			}
 			if (reconstruct_depth_activate){
-				if (reconstructMode!=0)
-					add_depth_pointsCloud();
+				if (reconstructMode!=0){
+					//add_depth_pointsCloud();
+				}
 			}
 		world->my_expose_event();
     	while (gtkmain.events_pending())
@@ -223,19 +225,14 @@ kinectViewergui::updateRGB( const colorspaces::Image& imageRGB)
   	}
 
 void 
-kinectViewergui::updateDEPTH(const colorspaces::Image& imageDEPTH )
+kinectViewergui::updateDEPTH(cv::Mat imageDEPTH )
 {
 		CvPoint pt1,pt2;
 			if (w_toggle_depth->get_active()){
-	
-				colorspaces::ImageRGB8 img_rgb888(imageDEPTH);//conversion will happen if needed
-				Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) img_rgb888.data,Gdk::COLORSPACE_RGB,false,8,img_rgb888.width,img_rgb888.height,img_rgb888.step);    
+					Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) imageDEPTH.data,Gdk::COLORSPACE_RGB,false,8,imageDEPTH.cols,imageDEPTH.rows,imageDEPTH.step);
 	    		w_imageDEPTH->clear();
 				if (lines_depth_active){
-					IplImage* src = cvCreateImage(cvSize(img_rgb888.width,img_rgb888.height), IPL_DEPTH_8U, 3);
-					memcpy((unsigned char *) src->imageData, &(img_rgb888.data[0]),img_rgb888.width*img_rgb888.height * 3);
-					util->draw_room(src,1, world->lines, world->numlines);
-					memmove(&(img_rgb888.data[0]),(unsigned char *) src->imageData,img_rgb888.width*img_rgb888.height * 3);
+					util->draw_room(imageDEPTH,1, world->lines, world->numlines);
 					
 				}
 	    		w_imageDEPTH->set(imgBuff);
@@ -245,7 +242,7 @@ kinectViewergui::updateDEPTH(const colorspaces::Image& imageDEPTH )
 			}
 			if (reconstruct_depth_activate){
 				if (reconstructMode!=0){
-					add_depth_pointsCloud();
+					//add_depth_pointsCloud();
 				}
 			}
 		world->my_expose_event();
@@ -254,14 +251,14 @@ kinectViewergui::updateDEPTH(const colorspaces::Image& imageDEPTH )
   	}
 
 void 
-kinectViewergui::updatePointCloud( )
+kinectViewergui::updatePointCloud(std::vector<jderobot::RGBPoint> cloud )
 {
 	displayFrameRate();
 	    		while (gtkmain.events_pending())
 	      		gtkmain.iteration();
 			if (reconstruct_depth_activate){
 				if (reconstructMode==1){
-					add_depth_pointsCloud();
+					add_depth_pointsCloud(cloud);
 				}
 			}
 		world->my_expose_event();
@@ -370,7 +367,7 @@ kinectViewergui::on_reconstruct_depth(){
 }
 
 void 
-kinectViewergui::add_depth_pointsImage(const colorspaces::Image& imageRGB, cv::Mat distance){
+kinectViewergui::add_depth_pointsImage(cv::Mat imageRGB, cv::Mat distance){
 	float d;
 		//std::cout << "point image" << std::endl;
 
@@ -439,10 +436,8 @@ kinectViewergui::add_depth_pointsImage(const colorspaces::Image& imageRGB, cv::M
 }
 
 void 
-kinectViewergui::add_depth_pointsCloud(){
+kinectViewergui::add_depth_pointsCloud(std::vector<jderobot::RGBPoint> cloud){
 	world->clear_points();
-	std::vector<jderobot::RGBPoint> cloud;
-	cloud=pointCloud->getCloud();
 	for (std::vector<jderobot::RGBPoint>::iterator it = cloud.begin(); it != cloud.end(); ++it){
 		world->add_kinect_point(it->x,it->y,it->z,(int)it->r,(int)it->g,(int)it->b);
 	}
@@ -575,5 +570,9 @@ kinectViewergui::on_w_tg_gl_toggled(){
 	}
 }
 
+float
+kinectViewergui::getCycle(){
+	return this->cycle;
+}
 
 } // namespace

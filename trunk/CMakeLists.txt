@@ -8,7 +8,7 @@ SET(gladedir ./)
 SET( INTERFACES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/cpp) # Directorio con las interfaces ICE en C++
 SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libs) # Directorio donde se encuentran las librerias propias de jderobot
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice) # Directorio donde se encuentran las interfaces ICE
-SET( LIBS_NEEDED   bgfgsegmentation jderobotice colorspaces jderobotutil progeo pioneer fuzzylib visionlib paralellIce ) # Librerias de las que depende el componente
+SET( LIBS_NEEDED   bgfgsegmentation jderobotice colorspaces jderobotutil progeo pioneer fuzzylib visionlib parallelIce ) # Librerias de las que depende el componente
 
 SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Deps) # Directorio donde se encuentran las dependencias
 SET( COMPONENTS calibrator  calibratorKinect openniServer-kinect naooperator         basic_component		         
@@ -17,7 +17,7 @@ SET( COMPONENTS calibrator  calibratorKinect openniServer-kinect naooperator    
 		cameraview			recorder
 		cameraview_icestorm  kinectViewer        replayer
 		wiimoteClient
-		wiimoteServer       colortuner openniServer
+		wiimoteServer       colortuner openniServer replayController
 		
 ) #Componentes que forman JDErobot
 

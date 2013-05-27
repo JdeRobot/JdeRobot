@@ -1,4 +1,8 @@
-SET(SOURCE_FILES kinectViewer.cpp drawarea.cpp kinectViewergui.cpp myprogeo.cpp util3d.cpp)
+ cmake_minimum_required(VERSION 2.8)
+
+
+SET( SOURCE_FILES replayController.cpp replayControllerGui.cpp)
+
 
 add_definitions(-DGLADE_DIR="${gladedir}")
 
@@ -8,13 +12,12 @@ include_directories(
     ${INTERFACES_CPP_DIR}
     ${LIBS_DIR}/
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/cameras
 )
 
-add_executable (kinectViewer ${SOURCE_FILES})
+add_executable (replayController ${SOURCE_FILES})
 
 
-TARGET_LINK_LIBRARIES(kinectViewer 
+TARGET_LINK_LIBRARIES(replayController 
 	${GLUT_LIBRARIES}
    	${OpenCV_LIBRARIES}
    	${gtkmm_LIBRARIES}

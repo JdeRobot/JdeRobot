@@ -1,3 +1,24 @@
+/*
+ *  Copyright (C) 1997-2013 JDE Developers TeamkinectViewer.camRGB
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see http://www.gnu.org/licenses/.
+ *
+ *  Author : Jose María Cañas <jmplaza@gsyc.es>
+			Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
+
+ */
+
 #ifndef kinectViewer_VIEW_H
 #define kinectViewer_VIEW_H
 
@@ -14,17 +35,12 @@
 #include <cv.h>
 #include <highgui.h>
 #include "util3d.h"
-#include "controllers/Pose3DMotors-controller.h"
-#include "gui-modules/Pose3DMotorsGui.h"
-#include "controllers/leds-controller.h"
-#include "gui-modules/ledsGui.h"
-#include "controllers/pointCloud-controller.h"
 
 namespace kinectViewer {
   class kinectViewergui {
 		public:
 
-		  kinectViewergui(jderobot::CameraPrx rgb,jderobot::CameraPrx depth,kinectViewerController::PointCloudController* pointCloud_ctr ,kinectViewerController::Pose3DMotorsController* ptmc_in, kinectViewerController::LedsController* lc_in, std::string path, std::string path_rgb, std::string path_ir, int width, int height);
+		  kinectViewergui(bool rgb, bool depth,bool pointCloud , std::string path, std::string path_rgb, std::string path_ir, int width, int height, float cycle);
 		  virtual ~kinectViewergui();
 
 			/*Return true if the windows is visible*/
@@ -32,15 +48,15 @@ namespace kinectViewer {
 
 
 		  /*Display window*/
-		  void updateAll( const colorspaces::Image& imageRGB, const colorspaces::Image& imageDEPTH );
-		void updateRGB( const colorspaces::Image& imageRGB);
-		void updateDEPTH(const colorspaces::Image& imageDEPTH );
-		void updatePointCloud();
+		  void updateAll( cv::Mat imageRGB, cv::Mat imageDEPTH, std::vector<jderobot::RGBPoint> cloud );
+		void updateRGB( cv::Mat imageRGB);
+		void updateDEPTH(cv::Mat imageDEPTH );
+		void updatePointCloud(std::vector<jderobot::RGBPoint> cloud);
 		bool isClosed();
+		float getCycle();
 
 		private:
-			
-			kinectViewerController::PointCloudController* pointCloud;
+			float cycle;
 
 	
 			Glib::RefPtr<Gnome::Glade::Xml> refXml;
@@ -70,8 +86,6 @@ namespace kinectViewer {
 			Gtk::Button *w_button_clear_lines;
 			util3d* util;
 			DrawArea* world;
-			kinectViewerGuiModules::Pose3DMotorsGui* ptmGui;
-			kinectViewerGuiModules::ledsGui* lGui;
 			int cWidth, cHeight;
 			int reconstructMode;
 			int modesAvalables;
@@ -82,9 +96,7 @@ namespace kinectViewer {
 			IceUtil::Time currentFrameTime,oldFrameTime;
     		double fps;
     		int frameCount;
-			jderobot::CameraPrx cam_rgb;
-			jderobot::CameraPrx cam_depth;
-			jderobot::KinectLedsPrx leds;
+
 			myprogeo *mypro;
 			bool lines_depth_active;
 			bool lines_rgb_active;
@@ -93,8 +105,8 @@ namespace kinectViewer {
 			bool on_clicked_event_depth(GdkEventButton* event);
 			bool reconstruct_depth_activate;
 			void on_reconstruct_depth();
-			void add_depth_pointsImage(const colorspaces::Image& imageRGB, cv::Mat distance);
-			void add_depth_pointsCloud();
+			void add_depth_pointsImage(cv::Mat imageRGB, cv::Mat distance);
+			void add_depth_pointsCloud(std::vector<jderobot::RGBPoint> cloud);
 			void add_cameras_position();
 			void add_camera_position();
 			void on_w_lines_rgb_toggled();
