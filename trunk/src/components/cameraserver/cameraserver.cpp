@@ -263,16 +263,13 @@ int main(int argc, char** argv)
 
         int nCameras = prop->getPropertyAsInt("CameraSrv.NCameras");
         cameras.resize(nCameras);
+		Ice::ObjectAdapterPtr adapter =ic->createObjectAdapterWithEndpoints("CameraServer", Endpoints);
         for (int i=0; i<nCameras; i++){//build camera objects
           std::stringstream objIdS;
           objIdS <<  i;
           std::string objId = objIdS.str();// should this be something unique??
           std::string objPrefix("CameraSrv.Camera." + objId + ".");
           std::string cameraName = prop->getProperty(objPrefix + "Name");
-
-          Ice::ObjectAdapterPtr adapter =
-                  ic->createObjectAdapterWithEndpoints(cameraName, Endpoints);
-
           Ice::ObjectPtr object = new cameraserver::CameraI(objPrefix, ic);
 
           adapter->add(object, ic->stringToIdentity(cameraName));
