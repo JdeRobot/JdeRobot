@@ -274,8 +274,9 @@ int main(int argc, char** argv)
 
           adapter->add(object, ic->stringToIdentity(cameraName));
 
-          adapter->activate();
+          
         }
+		adapter->activate();
         ic->waitForShutdown();
 
     }catch (const Ice::Exception& ex) {
