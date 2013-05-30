@@ -26,6 +26,7 @@ namespace jderobot {
 
 cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix) {
 	// TODO Auto-generated constructor stubcameraClient* client = new cameraClient;
+	this->prefix=prefix;
 	Ice::PropertiesPtr prop;
 	prop = ic->getProperties();
 	Ice::ObjectPrx baseCamera;
@@ -36,7 +37,7 @@ cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix) {
 	try{
 		baseCamera = ic->propertyToProxy(prefix+"Proxy");
 		if (0==baseCamera){
-			throw "kinectViewer: Could not create proxy with Camera";
+			throw prefix + "Could not create proxy with Camera";
 		}
 		else {
 			this->prx= jderobot::CameraPrx::checkedCast(baseCamera);
@@ -48,7 +49,7 @@ cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix) {
 	}
 	catch (const char* msg) {
 		std::cerr << msg << std::endl;
-		std::cout << "kinectViewer: Not camera provided" << std::endl;
+		std::cout << prefix + " Not camera provided" << std::endl;
 	}
 }
 
@@ -83,7 +84,7 @@ cameraClient::run(){
 
 		if (totalpre !=0){
 			if ((totalpost - totalpre) > this->cycle ){
-				std::cout<<"-------- kinectViewer: camera adquisition timeout-" << std::endl;
+				std::cout<<"--------" << prefix << " adquisition timeout-" << std::endl;
 			}
 			else{
 				usleep(this->cycle - (totalpost - totalpre));

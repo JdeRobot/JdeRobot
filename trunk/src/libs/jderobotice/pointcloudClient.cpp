@@ -24,21 +24,22 @@ namespace jderobot {
 
 pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix) {
 	// TODO Auto-generated constructor stub
+	this->prefix=prefix;
 
 	Ice::PropertiesPtr prop;
 	prop = ic->getProperties();
 
-	int fps=prop->getPropertyAsIntWithDefault("kinectViewer.pointCloud.Fps",10);
+	int fps=prop->getPropertyAsIntWithDefault(prefix+"Fps",10);
 	this->cycle=(float)(1/(float)fps)*1000000;
 	try{
-		Ice::ObjectPrx basePointCloud = ic->propertyToProxy("kinectViewer.pointCloud.Proxy");
+		Ice::ObjectPrx basePointCloud = ic->propertyToProxy(prefix+"Proxy");
 		if (0==basePointCloud){
-			throw "kinectViewer: Could not create proxy with Camera";
+			throw prefix + " Could not create proxy";
 		}
 		else {
 			this->prx = jderobot::pointCloudPrx::checkedCast(basePointCloud);
 			if (0==this->prx)
-				throw "Invalid proxy kinectViewer.pointCloud.Proxy";
+				throw "Invalid proxy" + prefix;
 
 		}
 	}catch (const Ice::Exception& ex) {
@@ -46,7 +47,7 @@ pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix) 
 	}
 	catch (const char* msg) {
 		std::cerr << msg << std::endl;
-		std::cout << "kinectViewer: Not camera provided" << std::endl;
+		std::cout <<  prefix + " Not camera provided" << std::endl;
 	}
 
 }
@@ -73,7 +74,7 @@ void pointcloudClient::run(){
 		this->controlMutex.unlock();
 		if (totalpre !=0){
 			if ((totalpost - totalpre) > this->cycle ){
-				std::cout<<"-------- kinectViewer: pointCloud adquisition timeout-" << std::endl;
+				std::cout<< prefix << ": pointCloud adquisition timeout-" << std::endl;
 			}
 			else{
 				usleep(this->cycle - (totalpost - totalpre));

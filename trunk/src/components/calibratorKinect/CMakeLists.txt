@@ -28,6 +28,6 @@ TARGET_LINK_LIBRARIES( calibratorKinect
  ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
  ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
  ${LIBS_DIR}/progeo/libprogeo.so
- ${LIBS_DIR}/parallelIce/libparallelIce.so
+ ${LIBS_DIR}/jderobotice/libparallelIce.so
     #-lxerces-c
 )

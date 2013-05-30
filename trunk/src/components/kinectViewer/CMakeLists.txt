@@ -26,6 +26,6 @@ TARGET_LINK_LIBRARIES(kinectViewer
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/progeo/libprogeo.so
     ${LIBS_DIR}/pioneer/libpioneer.so
-    ${LIBS_DIR}/parallelIce/libparallelIce.so
+    ${LIBS_DIR}/jderobotice/libparallelIce.so
     ${ZeroCIce_LIBRARIES}
 )

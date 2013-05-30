@@ -19,37 +19,37 @@
 
  */
 
-#ifndef CAMERACLIENT_H_
-#define CAMERACLIENT_H_
+
+#ifndef POINTCLOUDCLIENT_H_
+#define POINTCLOUDCLIENT_H_
 
 #include <IceUtil/IceUtil.h>
 #include <iostream>
 #include <Ice/Ice.h>
-#include <colorspaces/colorspacesmm.h>
-#include <jderobot/camera.h>
+#include <jderobot/pointcloud.h>
 #include <cv.h>
 #include <sstream>
 #include <fstream>
 
-
 namespace jderobot {
 
-class cameraClient: public IceUtil::Thread {
+class pointcloudClient: public IceUtil::Thread {
 public:
-	cameraClient(Ice::CommunicatorPtr ic, std::string prefix);
-	virtual ~cameraClient();
+	pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix);
+	virtual ~pointcloudClient();
 	virtual void run();
 
-	//callbacks
-	cv::Mat getImage();
+	std::vector<jderobot::RGBPoint>  getData();
+
+
 private:
-	cv::Mat data;
-	jderobot::CameraPrx prx;
+	std::string prefix;
+	std::vector<jderobot::RGBPoint> data;
+	jderobot::pointCloudPrx prx;
 	long long int cycle;
-	//int type; //0 color 1 depth
 	IceUtil::Mutex controlMutex;
 
 };
 
 } /* namespace jderobot */
-#endif /* CAMERACLIENT_H_ */
+#endif /* POINTCLOUDCLIENT_H_ */
