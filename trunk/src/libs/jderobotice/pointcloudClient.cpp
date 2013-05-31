@@ -22,10 +22,10 @@
 
 namespace jderobot {
 
-pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix) {
+pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug) {
 	// TODO Auto-generated constructor stub
 	this->prefix=prefix;
-
+	this->debug= debug;
 	Ice::PropertiesPtr prop;
 	prop = ic->getProperties();
 
@@ -74,7 +74,8 @@ void pointcloudClient::run(){
 		this->controlMutex.unlock();
 		if (totalpre !=0){
 			if ((totalpost - totalpre) > this->cycle ){
-				std::cout<< prefix << ": pointCloud adquisition timeout-" << std::endl;
+				if (this->debug)
+					std::cout<< prefix << ": pointCloud adquisition timeout-" << std::endl;
 			}
 			else{
 				usleep(this->cycle - (totalpost - totalpre));

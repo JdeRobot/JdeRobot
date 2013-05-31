@@ -36,7 +36,7 @@ namespace jderobot {
 
 class cameraClient: public IceUtil::Thread {
 public:
-	cameraClient(Ice::CommunicatorPtr ic, std::string prefix);
+	cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug);
 	virtual ~cameraClient();
 	virtual void run();
 
@@ -49,6 +49,7 @@ private:
 	//int type; //0 color 1 depth
 	IceUtil::Mutex controlMutex;
 	std::string prefix;
+	bool debug;
 
 };
 

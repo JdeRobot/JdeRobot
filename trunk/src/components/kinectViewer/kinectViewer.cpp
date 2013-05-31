@@ -140,7 +140,7 @@ int main(int argc, char** argv){
 		return 1;
 	}
 	if (prop->getPropertyAsIntWithDefault("kinectViewer.CameraRGBActive",0)){
-		camRGB = new jderobot::cameraClient(ic,"kinectViewer.CameraRGB.");
+		camRGB = new jderobot::cameraClient(ic,"kinectViewer.CameraRGB.",false);
 		if (camRGB != NULL){
 			rgbCamSelected=true;
 			camRGB->start();
@@ -149,7 +149,7 @@ int main(int argc, char** argv){
 
 	}
 	if (prop->getPropertyAsIntWithDefault("kinectViewer.CameraDEPTHActive",0)){
-		camDEPTH = new jderobot::cameraClient(ic,"kinectViewer.CameraDEPTH.");
+		camDEPTH = new jderobot::cameraClient(ic,"kinectViewer.CameraDEPTH.",false);
 		if (camDEPTH != NULL){
 			depthCamSelected=true;
 			camDEPTH->start();
@@ -159,7 +159,7 @@ int main(int argc, char** argv){
 
 
 	if (prop->getPropertyAsIntWithDefault("kinectViewer.pointCloudActive",0)){
-		pcClient = new jderobot::pointcloudClient(ic,"kinectViewer.pointCloud.");
+		pcClient = new jderobot::pointcloudClient(ic,"kinectViewer.pointCloud.",false);
 		if (pcClient!= NULL){
 			pcClient->start();
 			pointCloudSelected=true;

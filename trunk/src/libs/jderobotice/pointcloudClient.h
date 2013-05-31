@@ -35,7 +35,7 @@ namespace jderobot {
 
 class pointcloudClient: public IceUtil::Thread {
 public:
-	pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix);
+	pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug);
 	virtual ~pointcloudClient();
 	virtual void run();
 
@@ -48,6 +48,7 @@ private:
 	jderobot::pointCloudPrx prx;
 	long long int cycle;
 	IceUtil::Mutex controlMutex;
+	bool debug;
 
 };
 

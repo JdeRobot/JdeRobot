@@ -24,9 +24,10 @@
 
 namespace jderobot {
 
-cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix) {
+cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug) {
 	// TODO Auto-generated constructor stubcameraClient* client = new cameraClient;
 	this->prefix=prefix;
+	this->debug=debug;
 	Ice::PropertiesPtr prop;
 	prop = ic->getProperties();
 	Ice::ObjectPrx baseCamera;
@@ -84,7 +85,8 @@ cameraClient::run(){
 
 		if (totalpre !=0){
 			if ((totalpost - totalpre) > this->cycle ){
-				std::cout<<"--------" << prefix << " adquisition timeout-" << std::endl;
+				if (this->debug)
+					std::cout<<"--------" << prefix << " adquisition timeout-" << std::endl;
 			}
 			else{
 				usleep(this->cycle - (totalpost - totalpre));

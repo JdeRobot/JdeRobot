@@ -59,9 +59,9 @@ int main(int argc, char** argv){
 			std::ostringstream sTemp;
 			std::ostringstream sTemp2;
 			sTemp << "CalibratorKinect.CameraRGB." << i << ".";
-			sources[i].RGB=new jderobot::cameraClient(ic, sTemp.str());
+			sources[i].RGB=new jderobot::cameraClient(ic, sTemp.str(),false);
 			sTemp2 << "CalibratorKinect.CameraDEPTH." << i << ".";
-			sources[i].DEPTH=new jderobot::cameraClient(ic, sTemp2.str());
+			sources[i].DEPTH=new jderobot::cameraClient(ic, sTemp2.str(),false);
 
 
 			if (sources[i].RGB==NULL)
