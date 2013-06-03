@@ -179,6 +179,8 @@ cuadro_informacion (char *szMessage)
 		
 	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT)
 			gtk_widget_destroy (dialog);
+			
+	cout << "cuadro_informacion" << endl;
 }
 
 
@@ -206,6 +208,8 @@ compilar (GtkWindow *window, gpointer data){
 			}
 		}
 	}
+	
+	cout << "compilar" << endl;
 }
 
 void
@@ -238,6 +242,8 @@ generar_c (GtkWindow *windows, gpointer data){
 		}
 	
 	}
+	
+	cout << "generar_c" << endl;
 }
 
 void
@@ -266,6 +272,8 @@ marcar_estado_inicial (GnomeCanvasItem *item)
 
 	ListaElementos.erase(pos);
 	ListaElementos.push_front (n);
+	
+	cout << "marcar_estado_inicial" << endl;
 }
 
 void cargar_transiciones ()
@@ -338,7 +346,8 @@ void cargar_transiciones ()
 
 		pos++;
 	}	
-
+    
+    cout << "cargar_transiciones" << endl;
 }
 
 
@@ -355,6 +364,8 @@ bool ventana_timer (GtkWindow *window, GdkEventMotion *event, gpointer data){
 		ventana = tiempo_iteracion();
 		add_ventana (ventana, NULL, TIMER);
 	}
+	
+	cout << "ventana_timer" << endl;
 	
 	return TRUE;
 
@@ -374,6 +385,8 @@ bool ventana_importar (GtkWindow *window, GdkEventMotion *event, gpointer data){
 		add_ventana (ventana, NULL, LIBRERIAS);
 	}
 	
+	cout << "ventana_importar" << endl;
+	
 	return TRUE;
 
 }
@@ -392,6 +405,8 @@ bool codigo_esquema (GtkWindow *window, GdkEventMotion *event, gpointer data)
 		ventana = new_code_windows ();
 		add_ventana (ventana, NULL, CODIGO);
 	}
+	
+	cout << "codigo_esquema" << endl;
 	
 	return TRUE;
 
@@ -425,6 +440,8 @@ void new_windows (GtkWindow *window, GdkEventMotion *event, gpointer data)
 	gtk_container_add (GTK_CONTAINER(window2), label);
 
 	gtk_widget_show_all(window2);
+	
+	cout << "new_windows" << endl;
 
 }
 
@@ -471,6 +488,8 @@ GtkWidget *create_bbox( gint  horizontal,
 
 	button = gtk_button_new_from_stock (GTK_STOCK_HELP);
 	gtk_signal_connect(GTK_OBJECT(button), "button_release_event", GTK_SIGNAL_FUNC(new_windows), text); 
+	
+	cout << "create_bbox" << endl;
 
   return frame;
 }
@@ -486,6 +505,8 @@ void frame_callback(GtkWindow *window,
 	sprintf(buf, "%d, %d", x, y);
 	printf("Mover %d, %d\n", x, y);
 	gtk_window_set_title(window, buf);
+	
+	cout << "frame_callback" << endl;
 }
 
 void guardar(GtkWindow *windows, gpointer data)
@@ -497,6 +518,8 @@ void guardar(GtkWindow *windows, gpointer data)
 
 	cout << directorio << endl;
 	cout << (int)data << endl;
+	
+	cout << "guardar" << endl;
 
 	if ( (((int)data ==0) && (directorio == "")) || ((int)data == 1) ){
   		dialog = gtk_file_chooser_dialog_new ("Save File", NULL, 
@@ -615,10 +638,14 @@ void guardar(GtkWindow *windows, gpointer data)
 void remarcar_boton (GtkFileChooser *window, gpointer data)
 	{
 		gtk_widget_grab_focus ((GtkWidget *)data);
+		
+		cout << "remarcar_boton" << endl;
 	}
 
 void  borrar_canvas ()
 {
+
+    cout << "borrar_canvas" << endl;
 
 	list<tTransicion>::iterator posTransiciones;
 
@@ -652,6 +679,7 @@ void  borrar_canvas ()
 
 void cargar(GtkWindow *windows, gpointer data)
 {
+    cout << "cargar" << endl;
 	xmlDocPtr doc; 
 	
 	xmlNodePtr root;
@@ -902,6 +930,7 @@ void cargar(GtkWindow *windows, gpointer data)
 
 void mostrar_subautomata(int pidSub)
 {
+    cout << "mostrar_subautomata" << endl;
 
 	list<tSubAut>::iterator posSub;
 
@@ -965,6 +994,7 @@ void mostrar_subautomata(int pidSub)
 
 void ocultar_subautomata(int pidSub)
 {
+    cout << "ocultar_subautomata" << endl;
 
 	list<tSubAut>::iterator posSub;
 
@@ -1022,7 +1052,7 @@ void ocultar_subautomata(int pidSub)
 
 void coordenadas(GtkWindow *window, GdkEvent *event, gpointer data)
 {
-
+    cout << "coordenadas" << endl;
 	origenX = event->button.x;
 	origenY = event->button.y;
 	printf("Click Press %d, %d\n", origenX, origenY);
@@ -1039,6 +1069,8 @@ void coordenadas(GtkWindow *window, GdkEvent *event, gpointer data)
 void pinta_nodo(GtkWindow *window, GdkEventMotion *event, gpointer data)
 {
 	int x, y;
+	
+	cout << "pinta_nodo" << endl;
 	
 	GnomeCanvasItem *item;
 	GnomeCanvasGroup *group;
@@ -1117,6 +1149,8 @@ void pinta_nodo(GtkWindow *window, GdkEventMotion *event, gpointer data)
 static gint nodo(GtkWindow *window, GdkEventMotion *event, gpointer data)
 {
 	int x, y;
+	
+	cout << "nodo" << endl;
 
 	x = event->x;
 	y = event->y;
@@ -1153,6 +1187,8 @@ static gint nodo(GtkWindow *window, GdkEventMotion *event, gpointer data)
 static gint motion_notify_event(GtkWindow *window, GdkEventMotion *event, gpointer data)
 {
 	int x, y;
+	
+	cout << "motion_notify_event" << endl;
 
 	x = event->x;
 	y = event->y;
@@ -1165,6 +1201,8 @@ static gint motion_notify_event(GtkWindow *window, GdkEventMotion *event, gpoint
 void transicion(GtkWindow *window, GdkEventMotion *event, gpointer data)
 {
 	item_transicion_saved = NULL;
+	
+	cout << "transicion" << endl;
 
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(botonEstado),FALSE);
 
@@ -1185,6 +1223,8 @@ void transicion(GtkWindow *window, GdkEventMotion *event, gpointer data)
 void mover(GtkWindow *window, GdkEventMotion *event, gpointer data)
 {
 	botonPulsado = "Mover";
+	
+	cout << "mover" << endl;
 }
 
 void eliminar(GtkWindow *window, GdkEventMotion *event, gpointer data)
@@ -1195,16 +1235,22 @@ void eliminar(GtkWindow *window, GdkEventMotion *event, gpointer data)
 void copiar(GtkWindow *window, GdkEventMotion *event, gpointer data)
 {
 	botonPulsado = "Copiar";
+	
+	cout << "copiar" << endl;
 }
 
 void editar(GtkWindow *window, GdkEventMotion *event, gpointer data)
 {
 	botonPulsado = "Editar";
+	
+	cout << "editar" << endl;
 }
 
 void nombrar(GtkWindow *window, GdkEventMotion *event, gpointer data)
 {
 	botonPulsado = "Nombrar";
+	
+	cout << "nombrar" << endl;
 }
 
 void set_zoom (GtkWidget *window, GdkEvent *event, gpointer data){
@@ -1222,6 +1268,8 @@ void set_zoom (GtkWidget *window, GdkEvent *event, gpointer data){
 		zoom = 1.0;
 
 	gnome_canvas_set_pixels_per_unit ((GnomeCanvas*)canvas, zoom);
+	
+	cout << "set_zoom" << endl;
 
 }
 
@@ -1353,7 +1401,7 @@ void arriba(GtkWindow *window, GdkEventMotion *event, gpointer data)
 
 void actualizar_tree_view()
 {
-
+    cout << "actualizar_tree_view" << endl;
 	list<tSubAut>::iterator posNodoSub;
 
 	//Guardamos los datos del nivel en el que estamos
@@ -1378,6 +1426,7 @@ void actualizar_tree_view()
 
 void rellenar_arbol_recursivo(GtkTreeStore *treestore, GtkTreeIter toplevel, int idSubautomata)
 {
+    cout << "rellenar_arbol_recursivo" << endl;
 	GtkTreeIter child;
 	list<tSubAut>::iterator posNodoSub;
 	list<tNodo>::iterator posEst;
@@ -1433,6 +1482,7 @@ void rellenar_arbol_recursivo(GtkTreeStore *treestore, GtkTreeIter toplevel, int
 static GtkTreeModel *
 create_and_fill_model (void)
 {
+    cout << "create_and_fill_model" << endl;
   	GtkTreeStore *treestore;
   	GtkTreeIter toplevel;
 
@@ -1494,6 +1544,8 @@ void treeview_onRowActivated(GtkTreeView *treeview,
 							 GtkTreePath *path,
 							 GtkTreeViewColumn *col,
 							 gpointer userdata){
+							 
+	cout << "treeview_onRowActivated" << endl;
 
 	list<tSubAut>::iterator posSub;
 
@@ -1694,6 +1746,7 @@ void treeview_onRowActivated(GtkTreeView *treeview,
 static GtkWidget *
 create_view_and_model (void)
 {
+  cout << "create_view_and_model" << endl;
   GtkTreeViewColumn *col;
   GtkCellRenderer *renderer;
   GtkWidget *view;
@@ -1720,6 +1773,7 @@ create_view_and_model (void)
 }
 
 void borrar_subautomata_recursivo(int sub_a_borrar){
+    cout << "borrar_subautomata_recursivo" << endl;
 
 	list<tSubAut>::iterator posNodoSub;
 	list<tNodo>::iterator posEst;
@@ -2096,6 +2150,7 @@ int main( int argc, char *argv[])
 
 void desconectarLinea (GnomeCanvasItem *transicion, GnomeCanvasItem *estado)
 {
+    cout << "desconectarLinea" << endl;
 	list<tNodo>::iterator pos;
 
 	list<GnomeCanvasItem *>::iterator pos2;
@@ -2122,6 +2177,7 @@ void desconectarLinea (GnomeCanvasItem *transicion, GnomeCanvasItem *estado)
 
 void eliminarLinea (GnomeCanvasItem *item, gpointer data)
 {
+    cout << "eliminarLinea" << endl;
 	if ((botonPulsado == "Eliminar") || (botonPulsado == "Mover")) {
 		list<tTransicion>::iterator pos;
 
@@ -2157,6 +2213,7 @@ void eliminarLinea (GnomeCanvasItem *item, gpointer data)
 void
 change_item_width (gpointer data, gpointer user_data)
 {
+    cout << "change_item_width" << endl;
 	gnome_canvas_item_set (GNOME_CANVAS_ITEM (data),
 			      "width_units", (double)(int)user_data,
 			       NULL);
@@ -2165,6 +2222,7 @@ change_item_width (gpointer data, gpointer user_data)
 static gint
 item_event_linea (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
+    cout << "item_event_linea" << endl;
 	GList * list_items;
 	
 	switch (event->type) {
@@ -2214,6 +2272,7 @@ item_event_linea (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 gint
 highlight_box (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
+      cout << "highlight_box" << endl;
       GdkCursor *fleur;
       static double x, y; /* used to keep track of motion coordinates */
       double new_x, new_y;
@@ -2400,6 +2459,7 @@ highlight_box (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 gint
 highlight_box_edit (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
+      cout << "hightlight_box_edit" << endl;
       static double x, y; /* used to keep track of motion coordinates */
       list<tTransicion>::iterator posLinea;
       GnomeCanvasGroup *group_parent;
@@ -2497,7 +2557,7 @@ highlight_box_edit (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 static gint
 box_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
-
+      cout << "box_event" << endl;
       if ((event->type != GDK_MOTION_NOTIFY) || !(event->motion.state & GDK_BUTTON1_MASK))
             return FALSE;
 
@@ -2507,6 +2567,7 @@ box_event (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 void
 create_drag_box (GnomeCanvasGroup *group, char *box_name, double x1, double y1, GCallback callback)
 {
+    cout << "create_drag_box" << endl;
 	GnomeCanvasItem *box;
 
 	box = gnome_canvas_item_new (group,
@@ -2535,7 +2596,7 @@ create_drag_box (GnomeCanvasGroup *group, char *box_name, double x1, double y1, 
 GnomeCanvasItem *
 pinta_transicion (GnomeCanvasItem *origen, GnomeCanvasItem *destino)
 {
-
+    cout << "pinta_transicion" << endl;
 	GnomeCanvasPoints *pointsPoligono = gnome_canvas_points_new (2);
 	GnomeCanvasGroup *group;
 	GnomeCanvasItem *item1, *item2;
@@ -2687,6 +2748,7 @@ pinta_transicion (GnomeCanvasItem *origen, GnomeCanvasItem *destino)
 gint
 item_event (GnomeCanvasItem *item_group, GdkEvent *event, gpointer data)
 {
+    cout << "item_event" << endl;
 	//static double x, y; /* used to keep track of motion coordinates */
 	//double new_x, new_y;
 	
@@ -3243,6 +3305,8 @@ item_event (GnomeCanvasItem *item_group, GdkEvent *event, gpointer data)
 
 void on_menu_estado_nombrar(){
 
+    cout << "on_menu_estado_nombrar" << endl;
+
 	GtkWidget *ventana;
 
 	change_item_color (item_menu_estado,0);
@@ -3265,6 +3329,8 @@ void on_menu_estado_nombrar(){
 void 
 on_menu_estado_editar(){
 
+    cout << "on_menu_estado_editar" << endl;
+
 	GtkWidget *ventana;
 
 	change_item_color (item_menu_estado,0);
@@ -3282,6 +3348,7 @@ on_menu_estado_editar(){
 
 void 
 on_menu_estado_marcar_inicial(){
+    cout << "on_menu_estado_marcar_inicial" << endl;
 
 	marcar_estado_inicial (item_menu_estado);
 
@@ -3289,6 +3356,8 @@ on_menu_estado_marcar_inicial(){
 
 void 
 on_menu_estado_copiar(){
+
+cout << "on_menu_estado_copiar" << endl;
 
 	list<tNodo>::iterator posNodo;
 
@@ -3305,6 +3374,8 @@ on_menu_estado_copiar(){
 
 void 
 on_menu_estado_eliminar(){
+
+    cout << "on_menu_estado_eliminar" << endl;
 	
 	list<tNodo>::iterator posNodo;
 	list<GnomeCanvasItem *>::iterator posAdy;
@@ -3363,6 +3434,8 @@ on_menu_estado_eliminar(){
 void 
 on_menu_transicion_nombrar(){
 
+    cout << "on_menu_estado_nombrar" << endl;
+
 	GtkWidget *ventana;
 
 	change_item_color (item_menu_transicion,0);
@@ -3381,6 +3454,7 @@ on_menu_transicion_nombrar(){
 
 void 
 on_menu_transicion_editar(){
+    cout << "on_menu_transicion_editar" << endl;
 
 	GtkWidget *ventana;
 
@@ -3401,6 +3475,8 @@ on_menu_transicion_editar(){
 void 
 on_menu_transicion_eliminar(){
 
+    cout << "on_menu_transicion_eliminar" << endl;
+
 	GnomeCanvasGroup *group_parent;
 
 	group_parent = GNOME_CANVAS_GROUP(item_menu_transicion->parent);
@@ -3416,6 +3492,8 @@ on_menu_transicion_eliminar(){
 
 void 
 reemplazar_nodo_subautomata(int idSub, GnomeCanvasItem *item_buscar, GnomeCanvasItem* item_nuevo){
+
+    cout << "reemplazar_nodo_subautomata" << endl;
 
 	list<tSubAut>::iterator posNodoSub;
 	list<tNodo>::iterator posNodo;
@@ -3461,6 +3539,7 @@ reemplazar_nodo_subautomata(int idSub, GnomeCanvasItem *item_buscar, GnomeCanvas
 
 void 
 reemplazar_nombre_nodo_subautomata(int idSub, GnomeCanvasItem* nombre_buscar, GnomeCanvasItem* nombre_nuevo){
+    cout << "reemplazar_nombre_nodo_subautomata" << endl;
 
 	list<tSubAut>::iterator posNodoSub;
 	list<tNodo>::iterator posNodo;
@@ -3487,6 +3566,7 @@ reemplazar_nombre_nodo_subautomata(int idSub, GnomeCanvasItem* nombre_buscar, Gn
 
 void
 reemplazar_estado_inicial_subautomata(int idSub, GnomeCanvasItem* inicial_buscar, GnomeCanvasItem* inicial_nuevo){
+    cout << "reemplazar_estado_inicial_subautomata" << endl;
 
 	list<tSubAut>::iterator posNodoSub;
 	list<tNodo>::iterator posNodo;
@@ -3513,6 +3593,7 @@ reemplazar_estado_inicial_subautomata(int idSub, GnomeCanvasItem* inicial_buscar
 
 void
 reemplazar_transicion_subautomata(int idSub, GnomeCanvasItem* trans_buscar, GnomeCanvasItem* trans_nueva){
+    cout << "reemplazar_transicion_subautomata" << endl;
 
 	list<tSubAut>::iterator posNodoSub;
 	list<tNodo>::iterator posNodo;
@@ -3559,6 +3640,7 @@ reemplazar_transicion_subautomata(int idSub, GnomeCanvasItem* trans_buscar, Gnom
 
 void
 reemplazar_nombre_trans_subautomata(int idSub, GnomeCanvasItem* nombre_buscar, GnomeCanvasItem* nombre_nuevo){
+    cout << "reemplazar_nombre_trans_subautomata" << endl;
 
 	list<tSubAut>::iterator posNodoSub;
 	list<tTransicion>::iterator posTrans;
@@ -3587,6 +3669,7 @@ reemplazar_nombre_trans_subautomata(int idSub, GnomeCanvasItem* nombre_buscar, G
 
 
 void pegado_recursivo(int sub_a_copiar, int sub_padre){
+    cout << "pegado_recursivo" << endl;
 
 	tSubAut nuevo_sub;
 	list<tSubAut>::iterator posNodoSub;
@@ -3822,6 +3905,8 @@ void pegado_recursivo(int sub_a_copiar, int sub_padre){
 
 void
 on_menu_pegar(){
+
+    cout << "on_menu_pegar" << endl;
 
 	GnomeCanvasItem *item; 
 	GnomeCanvasGroup *group;
