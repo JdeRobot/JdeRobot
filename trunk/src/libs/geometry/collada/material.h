@@ -10,86 +10,87 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+namespace files_3D {
+    class Material
+    {
+    public:
+        Material();
 
-class Material
-{
-public:
-    Material();
+        public: void setDiffuse(const Color &_clr);
+        Color getDiffuse() const;
 
-    public: void setDiffuse(const Color &_clr);
-    Color getDiffuse() const;
+        void setAmbient(const Color &_clr);
+        Color getAmbient() const;
 
-    void setAmbient(const Color &_clr);
-    Color getAmbient() const;
+        void setEmissive(const Color &_clr);
+        Color getEmissive() const;
 
-    void setEmissive(const Color &_clr);
-    Color getEmissive() const;
+        bool getLighting() const;
+        double getShininess() const;
 
-    bool getLighting() const;
-    double getShininess() const;
-
-    std::string getTextureImage() const;
-
-
-    void setTextureImage(const std::string &_tex);
-    void setTextureImage(const std::string &_tex,
-                                   const std::string &_resourcePath);
-    void setTransparency(double _t);
-    double getTransparency() const;
-    void setBlendFactors(double _srcFactor, double _dstFactor);
-    void setShininess(double _s);
-
-    Color getSpecular() const;
+        std::string getTextureImage() const;
 
 
-    std::string getName() const;
+        void setTextureImage(const std::string &_tex);
+        void setTextureImage(const std::string &_tex,
+                                       const std::string &_resourcePath);
+        void setTransparency(double _t);
+        double getTransparency() const;
+        void setBlendFactors(double _srcFactor, double _dstFactor);
+        void setShininess(double _s);
+
+        Color getSpecular() const;
 
 
-    cv::Mat getImage();
+        std::string getName() const;
 
 
-///////////////////////////////////////////////////////////////////////////
-    /// \brief the name of the material
-     public: std::string name;
+        cv::Mat getImage();
 
-     /// \brief the texture image file name
-     public: std::string texImage;
 
-     /// \brief the ambient light color
-     public: Color ambient;
+    ///////////////////////////////////////////////////////////////////////////
+        /// \brief the name of the material
+         public: std::string name;
 
-     /// \brief the diffuse ligth color
-     public: Color diffuse;
+         /// \brief the texture image file name
+         public: std::string texImage;
 
-     /// \brief the specular light color
-     public: Color specular;
+         /// \brief the ambient light color
+         public: Color ambient;
 
-     /// \brief the emissive light color
-     public: Color emissive;
+         /// \brief the diffuse ligth color
+         public: Color diffuse;
 
-     /// \brief transparency value in the range 0 to 1
-     public: double transparency;
+         /// \brief the specular light color
+         public: Color specular;
 
-     /// \brief shininess value (0 to 1)
-     public: double shininess;
+         /// \brief the emissive light color
+         public: Color emissive;
 
-    /// \brief the total number of instanciated Material instances
-    private: static unsigned int counter;
+         /// \brief transparency value in the range 0 to 1
+         public: double transparency;
 
-    /// \brief flag to perform depth buffer write
-    private: bool depthWrite;
+         /// \brief shininess value (0 to 1)
+         public: double shininess;
 
-    private: bool lighting;
+        /// \brief the total number of instanciated Material instances
+        private: static unsigned int counter;
 
-    /// \brief source blend factor
-    private: double srcBlendFactor;
+        /// \brief flag to perform depth buffer write
+        private: bool depthWrite;
 
-    /// \brief destination blend factor
-    private: double dstBlendFactor;
+        private: bool lighting;
 
-    public: unsigned int idTextura ;
+        /// \brief source blend factor
+        private: double srcBlendFactor;
 
-    cv::Mat image;
-};
+        /// \brief destination blend factor
+        private: double dstBlendFactor;
+
+        public: unsigned int idTextura ;
+
+        cv::Mat image;
+    };
+}
 
 #endif // MATERIAL_H
