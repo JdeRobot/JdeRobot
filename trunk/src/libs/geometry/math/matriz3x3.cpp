@@ -9,7 +9,12 @@ namespace math
                     0, 0, 1;
     }
 
-    Eigen::Matrix3f Matriz3x3::getMatriz()
+    Eigen::Matrix3f &Matriz3x3::getMatriz()
+    {
+        return this->matriz;
+    }
+
+    Eigen::Matrix3f Matriz3x3::getCopyMatriz()
     {
         return this->matriz;
     }

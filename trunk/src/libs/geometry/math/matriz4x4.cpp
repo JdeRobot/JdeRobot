@@ -78,7 +78,12 @@ namespace math
 
     }
 
-    Eigen::Matrix4f Matriz4x4::getMatrix()
+    Eigen::Matrix4f &Matriz4x4::getMatrix()
+    {
+        return this->matriz;
+    }
+
+    Eigen::Matrix4f Matriz4x4::getCopyMatrix()
     {
         return this->matriz;
     }

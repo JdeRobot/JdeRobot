@@ -1,6 +1,8 @@
 #ifndef MATRIZ3X3_H
 #define MATRIZ3X3_H
 
+#define EIGEN_DONT_ALIGN_STATICALLY True
+
 #include <eigen3/Eigen/Dense>
 
 #include "vector3.h"
@@ -13,7 +15,9 @@ namespace math
 
     public: Eigen::Matrix3f matriz;
 
-    public: Eigen::Matrix3f getMatriz();
+    public: Eigen::Matrix3f& getMatriz();
+
+    public: Eigen::Matrix3f getCopyMatriz();
 
     public:
         void setFromAxis(float x, float y, float z, float angle);

@@ -1,6 +1,8 @@
 #ifndef MATRIZ4X4_H
 #define MATRIZ4X4_H
 
+#define EIGEN_DONT_ALIGN_STATICALLY True
+
 #include <eigen3/Eigen/Dense>
 
 #include "vector3.h"
@@ -17,7 +19,8 @@ namespace math
     public:
         Matriz4x4();
         Matriz4x4(int type);
-        Eigen::Matrix4f getMatrix();
+        Eigen::Matrix4f &getMatrix();
+        Eigen::Matrix4f getCopyMatrix();
         void setMatrix(Eigen::Matrix4f m);
 
         void setTranslate(Vector3 &_t);

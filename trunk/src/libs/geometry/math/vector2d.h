@@ -1,6 +1,8 @@
 #ifndef VECTOR2D_H
 #define VECTOR2D_H
 
+#define EIGEN_DONT_ALIGN_STATICALLY True
+
 #include <eigen3/Eigen/Dense>
 
 namespace math
