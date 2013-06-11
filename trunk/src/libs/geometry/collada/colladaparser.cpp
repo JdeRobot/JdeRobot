@@ -133,7 +133,10 @@ namespace files_3D {
 
                 math::Vector3 v= submalla->getVertex(indice);
                 math::Vector3 normals= submalla->getNormal(indice);
-                glNormal3f(normals.vector(0), normals.vector(1), normals.vector(2));
+                if(submalla->getNormalCount()>0){
+                    math::Vector3 normals= submalla->getNormal(indice);
+                    glNormal3f(normals.vector(0), normals.vector(1), normals.vector(2));
+                }
 
                 if(submalla->getTexCoordCount()>0){
                     math::Vector2d text= submalla->getTexCoord(indice);
