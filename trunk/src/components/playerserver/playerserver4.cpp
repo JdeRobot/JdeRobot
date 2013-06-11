@@ -44,10 +44,7 @@
 #include <math.h>
 #include <libplayerc++/playerc++.h>
 
-#include <stdio.h> 
-#include <unistd.h> /* for fork */
-#include <sys/types.h> /* for pid_t */
-#include <sys/wait.h> /* for wait */
+#include <pthread.h>
 
 // Constants
 #define DEGTORAD 0.01745327
@@ -142,28 +139,46 @@ namespace playerserver {
 			prefix(propertyPrefix),context(context),laserData(new jderobot::LaserData()) {
 				Ice::PropertiesPtr prop = context.properties();
 
+                pthread_mutex_init(&mutex, NULL);
+
 				// Create a client object
 				cout << "Connecting to Player Server at '" << playerhost << ":" << playerport << "..." << endl;
 
 				robot = new PlayerCc::PlayerClient(playerhost.c_str(), playerport);
-				playerLaser = new PlayerCc::RangerProxy(robot, 1);
+            	playerLaser = new PlayerCc::RangerProxy(robot, 0);
 
 				/*Get laser resolution*/
 				laser_num_readings = prop->getPropertyAsIntWithDefault("PlayerServer.Laser.Num_readings", NUM_LASER_DEF);
 				laser_resolution = (double) prop->getPropertyAsIntWithDefault("PlayerServer.Laser.Readings_per_degree", RESOLUTION_LASER_DEF);
+				hokuyo = (double) prop->getPropertyAsIntWithDefault("PlayerServer.Hokuyo", 0);
 
 				laserData->numLaser = laser_num_readings;
 				laserData->distanceData.resize(sizeof(int)*laserData->numLaser);
+                cout << "Constructor end" << endl;
+                
 			}
 
 			virtual ~LaserI(){};
 
 			virtual jderobot::LaserDataPtr getLaserData(const Ice::Current&) {
-				return laserData;
+		        pthread_mutex_lock(&mutex);
+        		jderobot::LaserDataPtr laserData_send(new jderobot::LaserData());
+
+laserData_send->numLaser = 180;
+        		laserData_send->distanceData.resize(180);
+        		//std::cout << laserData->numLaser <<" "<<  laserData_send->distanceData.size()  << std::endl;
+				for(int i = 0; i < 180; i++ ) {
+	        		//std::cout << i  << std::endl;
+				    laserData_send->distanceData[i]=laserData->distanceData[i];
+				}
+				
+		        pthread_mutex_unlock(&mutex);
+				return laserData_send;
 			};
 
 			virtual void update() {
 
+		        pthread_mutex_lock(&mutex);
 				robot->Read();
 
 				int i;
@@ -171,26 +186,51 @@ namespace playerserver {
 				double player_resolution;
 				double jump;
 				int offset;
+				
+				if(hokuyo==1){
+				    offset=0;//((playerLaser->GetRangeCount()/jump)-laser_num_readings)/2;
+				    i=180;
+				    j=offset;
+				
+				    //std::cout << "playerLaser->GetRangeCount(): "<< playerLaser->GetRangeCount()  << std::endl;
+				    //std::cout << "jump "<< jump  << std::endl;
 
-				//Now we must transform player resolution into user defined resolution
-				player_resolution=(double)1.0/(0.5);
+                    jump = 2.85;
 
-				jump = player_resolution / laser_resolution;
+				    //Update laser values//
+				    while(j<playerLaser->GetRangeCount() && i>0){
+				        if(playerLaser->GetRange((int)j)<0.01){
+					        laserData->distanceData[i]=(int)(5*1000);
+				        }else{
+					        laserData->distanceData[i]=(int)(playerLaser->GetRange((int)j)*1000);
+				        }
+					    j=j+jump;
+					    i--;
+				    }
+				}else{
+				    //Now we must transform player resolution into user defined resolution
+				    player_resolution=(double)1.0/(0.5);
 
-				offset=((playerLaser->GetRangeCount()/jump)-laser_num_readings)/2;
-				i=0;
-				j=offset;
+				    jump = player_resolution / laser_resolution;
 
-				//Update laser values//
-				while(j<playerLaser->GetRangeCount() && i<laser_num_readings){
-					laserData->distanceData[i]=(int)(playerLaser->GetRange((int)j)*1000);
-					j=j+jump;
-					i++;
+				    offset=((playerLaser->GetRangeCount()/jump)-laser_num_readings)/2;
+				    i=0;
+				    j=offset;
+
+				    //Update laser values//
+				    while(j<playerLaser->GetRangeCount() && i<laser_num_readings){
+					    laserData->distanceData[i]=(int)(playerLaser->GetRange((int)j)*1000);
+					    j=j+jump;
+					    i++;
+				    }
 				}
+		        pthread_mutex_unlock(&mutex);
+				//std::cout << "nReading: "  << i << std::endl;
 
 			};
 
 		private:
+	        pthread_mutex_t mutex;
 			std::string prefix;
 			jderobotice::Context context;
 			jderobot::LaserDataPtr laserData;
@@ -200,6 +240,7 @@ namespace playerserver {
 
 			int laser_num_readings;
 			double laser_resolution;
+			int hokuyo;
 	};
 
   class EncodersI: virtual public jderobot::Encoders {
@@ -224,7 +265,9 @@ namespace playerserver {
 			virtual jderobot::EncodersDataPtr getEncodersData(const Ice::Current&){
 				return encodersData;
 			};
-
+	        virtual void setEncodersData(const jderobot::EncodersDataPtr&  encodersData,
+						     const Ice::Current&) {
+		     };
 			virtual void update() {
 				float robotx, roboty, robottheta;
 
@@ -570,27 +613,7 @@ namespace playerserver {
 
 int main(int argc, char** argv) 
 {
-	//playerserver::Component component;
-	//jderobotice::Application app(component);
-	//return app.jderobotMain(argc,argv);
-	
-  int pid, status; 
-  
-	if(argc>2){ 
-		if(fork()){ 
-			sleep(2);
-			playerserver::Component component;
-			jderobotice::Application app(component);
-			return app.jderobotMain(argc,argv);
-		}else{ 
-			printf("%s\n", argv[2]); 
-			char* argvs = argv[2];
-			static char *argv[]={"player", argvs,NULL};
-			execv("/usr/local/bin/player",argv);
-			printf("Error\n"); 
-			exit(-1);
-		} 	
-	}else{
-		printf(" %d Usage: ./playerserver <--Ice.Config=fileConfig.cfg> <playerConfigFile>", argc);
-	}
+	playerserver::Component component;
+	jderobotice::Application app(component);
+	return app.jderobotMain(argc,argv);
 }
