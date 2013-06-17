@@ -19,6 +19,8 @@ namespace files_3D {
         SubMalla *getSubMesh(unsigned int i) const;
         Material *getMaterial(int index);
 
+        void Scale(double _factor);
+
         math::Vector3 getMax() const;
         math::Vector3 getMin() const;
 

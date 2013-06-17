@@ -19,6 +19,8 @@
 #include "math/matriz4x4.h"
 #include "math/matriz3x3.h"
 #include "math/vector3.h"
+#include "math/plano.h"
+#include "math/segmento.h"
 
 #include <GL/glut.h>
 #include <GL/gl.h>
@@ -28,6 +30,10 @@ namespace files_3D {
     {
     public:
         ColladaParser(std::string filename);
+
+        void worldTo2D();
+        cv::Mat getWorld2D();
+
 
         void loadScene(Malla *_mesh);
 
@@ -103,6 +109,10 @@ namespace files_3D {
         private: std::map<std::string, std::string> materialMap;
 
     public: Malla *mesh;
+
+    public: cv::Mat image;
+
+
     };
 }
 

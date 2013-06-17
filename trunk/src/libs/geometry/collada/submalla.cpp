@@ -16,6 +16,18 @@ namespace files_3D {
     }
 
     //////////////////////////////////////////////////
+    void SubMalla::Scale(double _factor)
+    {
+      for (std::vector<math::Vector3>::iterator iter = this->vertices.begin();
+           iter != this->vertices.end(); ++iter)
+      {
+          (*iter).vector(0) *= _factor;
+          (*iter).vector(1) *= _factor;
+          (*iter).vector(2) *= _factor;
+      }
+    }
+
+    //////////////////////////////////////////////////
     void SubMalla::setPrimitiveType(PrimitiveType _type)
     {
       this->primitiveType = _type;

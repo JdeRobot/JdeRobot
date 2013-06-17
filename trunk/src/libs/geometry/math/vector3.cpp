@@ -82,5 +82,11 @@ namespace math
       return *this;
     }
 
+    double Vector3::distance(math::Vector3 p){
+        return sqrt( pow(p.getX()-this->vector(0),2) +
+                     pow(p.getY()-this->vector(1),2) +
+                     pow(p.getZ()-this->vector(2),2));
+    }
+
 
 }

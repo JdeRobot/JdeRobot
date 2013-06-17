@@ -20,6 +20,8 @@ namespace files_3D {
 
         public: virtual ~SubMalla();
 
+        void Scale(double _factor);
+
         public: void setName(const std::string &_n);
 
         public: void setPrimitiveType(PrimitiveType _type);

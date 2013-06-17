@@ -37,6 +37,10 @@ namespace files_3D {
         mesh->setPath(this->filename);
 
         loadScene(mesh);
+
+        mesh->Scale(this->meter*100);
+
+        worldTo2D();
     }
 
     int ite = 0;
@@ -132,7 +136,6 @@ namespace files_3D {
                 unsigned int indice =submalla->getIndex(k);
 
                 math::Vector3 v= submalla->getVertex(indice);
-                math::Vector3 normals= submalla->getNormal(indice);
                 if(submalla->getNormalCount()>0){
                     math::Vector3 normals= submalla->getNormal(indice);
                     glNormal3f(normals.vector(0), normals.vector(1), normals.vector(2));
@@ -1337,5 +1340,124 @@ namespace files_3D {
         std::cout  << "profile_CG unsupported\n";
       return mat;
     }
+
+    void ColladaParser::worldTo2D()
+    {
+        std::vector<Segmento> listaSegmentos;
+
+        for(int i = 0; i < this->mesh->getSubMeshCount();i++){
+
+            SubMalla* submalla = this->mesh->getSubMesh(i);
+
+            Plano plano1(0, 0, 1, -0.5);
+            Plano plano2(0, 0, 1, 400.0);
+            Plano p_proyeccion(0, 0, 1, 0);
+
+            math::Vector3 inter1;
+
+            int triangulo = 0;
+            int indice_triangulo = 0;
+
+            for(int k = 0; k < submalla->getVertexCount()-1; k++){
+                unsigned int indice =submalla->getIndex(k);
+
+                triangulo++;
+                if(triangulo == 3){
+                    indice_triangulo++;
+                    triangulo = 0;
+                }
+
+                math::Vector3 v1= submalla->getVertex(indice%3 + indice_triangulo*3);
+                math::Vector3 v2= submalla->getVertex((indice+1)%3 + indice_triangulo*3);
+
+                inter1 = plano1.InterConRecta(v1, v2);
+
+                if(inter1.getX()!=0 && inter1.getY()!=0 && inter1.getZ()!=0 ){
+                    math::Vector3 proyeccion1 = p_proyeccion.proyeccionOrtogonal(v1, p_proyeccion.getCoefA(), p_proyeccion.getCoefB(), p_proyeccion.getCoefC());
+                    math::Vector3 proyeccion2 = p_proyeccion.proyeccionOrtogonal(v2, p_proyeccion.getCoefA(), p_proyeccion.getCoefB(), p_proyeccion.getCoefC());
+
+                    double dist = proyeccion1.distance(proyeccion2);
+
+                    if(dist > 1){
+                        listaSegmentos.push_back(Segmento(proyeccion1,proyeccion2));
+                    }
+                }
+
+                inter1 = plano2.InterConRecta(v1, v2);
+
+                if(inter1.getX()!=0 && inter1.getY()!=0 && inter1.getZ()!=0 ){
+                    math::Vector3 proyeccion1 = p_proyeccion.proyeccionOrtogonal(v1, p_proyeccion.getCoefA(), p_proyeccion.getCoefB(), p_proyeccion.getCoefC());
+                    math::Vector3 proyeccion2 = p_proyeccion.proyeccionOrtogonal(v2, p_proyeccion.getCoefA(), p_proyeccion.getCoefB(), p_proyeccion.getCoefC());
+
+                    double dist = proyeccion1.distance(proyeccion2);
+
+                    if(dist > 1){
+                        listaSegmentos.push_back(Segmento(proyeccion1,proyeccion2));
+                    }
+                }
+            }
+
+//            int verticesDentroSandwich = 0;
+//            float distanciaEntrePlanos = plano2.distanciaAPunto(0, 0, 1);
+//            std::vector<math::Vector3> vectorProyecciones;
+
+//            for(int k = 0; k < submalla->getVertexCount()-1; k++){
+//                unsigned int indice =submalla->getIndex(k);
+
+//                math::Vector3 v1= submalla->getVertex(indice);
+
+//                float distanciaEntrePlanos1_1 = plano1.distanciaAPunto(v1);
+
+//                float distanciaEntrePlanos1_2 = plano2.distanciaAPunto(v1);
+
+//                if(fabs(distanciaEntrePlanos1_1+distanciaEntrePlanos1_2)<=fabs(distanciaEntrePlanos)){
+//                    verticesDentroSandwich++;
+//                    vectorProyecciones.push_back(p_proyeccion.proyeccionOrtogonal(v1,
+//                                                                                  p_proyeccion.getCoefA(),
+//                                                                                  p_proyeccion.getCoefB(),
+//                                                                                  p_proyeccion.getCoefC()));
+//                }
+//            }
+
+//            if(submalla->getVertexCount()==verticesDentroSandwich){
+//                for(int k = 0; k < submalla->getVertexCount()-1; k++){
+//                    unsigned int indice =submalla->getIndex(k);
+
+//                    math::Vector3 v1= submalla->getVertex(indice);
+//                    math::Vector3 v2= submalla->getVertex(indice);
+
+//                    float dist = v1.distance(v2);
+
+//                    if(dist > 2){
+//                        listaSegmentos.push_back(Segmento( v1, v2));
+//                    }
+//                }
+//            }
+        }
+
+
+        math::Vector3 max = mesh->getMax();
+        math::Vector3 min = mesh->getMin();
+        image.create(max.getY() - min.getY(), max.getX() - min.getY(), CV_8UC3);
+
+        image = cv::Scalar(255, 255, 255);
+
+        for(int i = 0; i < listaSegmentos.size(); i++){
+            cv::line(image,
+                     cv::Point2f(listaSegmentos[i].x1 - min.getX(), listaSegmentos[i].y1 - min.getY()),
+                     cv::Point2f(listaSegmentos[i].x2 - min.getX(), listaSegmentos[i].y2 - min.getY()),
+                     cv::Scalar(0, 0, 0),
+                     3);
+        }
+        cv::imwrite("mapa.jpg", image);
+
+    }
+
+    cv::Mat ColladaParser::getWorld2D()
+    {
+        return this->image.clone();
+    }
+
 }
+
 

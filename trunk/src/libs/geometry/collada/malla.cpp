@@ -17,6 +17,14 @@ namespace files_3D {
     }
 
     //////////////////////////////////////////////////
+    void Malla::Scale(double _factor)
+    {
+      std::vector<SubMalla*>::iterator iter;
+      for (iter = this->submeshes.begin(); iter != this->submeshes.end(); ++iter)
+        (*iter)->Scale(_factor);
+    }
+
+    //////////////////////////////////////////////////
     int Malla::addMaterial(Material *_mat)
     {
       int result = -1;

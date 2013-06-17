@@ -23,6 +23,8 @@ namespace math
         public: void setZ(float f);
 
         Vector3 normalize();
+        double distance(math::Vector3 p);
+
         public: Eigen::Vector3f vector;
 
     public: Vector3 operator+(const Vector3 &pt) const;
