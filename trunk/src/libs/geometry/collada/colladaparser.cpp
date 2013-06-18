@@ -1,7 +1,7 @@
 #include "colladaparser.h"
 namespace files_3D {
 
-    ColladaParser::ColladaParser(std::string filename)
+    ColladaParser::ColladaParser(std::string filename, int scale)
     {
         TiXmlDocument xmlDoc;
 
@@ -38,7 +38,7 @@ namespace files_3D {
 
         loadScene(mesh);
 
-        mesh->Scale(this->meter*100);
+        mesh->Scale(this->meter*scale);
 
         worldTo2D();
     }

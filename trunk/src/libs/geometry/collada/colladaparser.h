@@ -29,7 +29,7 @@ namespace files_3D {
     class ColladaParser
     {
     public:
-        ColladaParser(std::string filename);
+        ColladaParser(std::string filename, int scale=1);
 
         void worldTo2D();
         cv::Mat getWorld2D();
