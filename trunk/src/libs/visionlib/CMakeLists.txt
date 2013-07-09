@@ -21,7 +21,6 @@ TARGET_LINK_LIBRARIES(visionlib
     ${libgnomecanvasmm_LIBRARIES}
     ${gtkglextmm_LIBRARIES}
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
-    ${LIBS_DIR}/jderobotice/libjderobotice.so
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/progeo/libprogeo.so
 )

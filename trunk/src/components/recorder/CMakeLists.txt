@@ -8,8 +8,6 @@ IF(with_pcl)
     ${INTERFACES_CPP_DIR}
     ${LIBS_DIR}/
     ${CMAKE_CURRENT_SOURCE_DIR}
-#	  ${pcl_INCLUDE_DIR}/
-#	  /usr/include/openni
 	  /usr/include/libusb-1.0
 	  /usr/include/cminpack-1 
 	  /usr/include/eigen3 
@@ -25,20 +23,15 @@ IF(with_pcl)
 	  ${opencv_LIBRARIES}
 	  ${gtkmm_LIBRARIES}
 	  ${libglademm_LIBRARIES}
-#	  ${gthread_LIBRARIES}
-#	  ${libgnomecanvas_LIBRARIES}
-#	  ${libgnomecanvasmm_LIBRARIES}
+
 	  ${gtkglextmm_LIBRARIES}
 	  ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
 	  ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
-	  ${LIBS_DIR}/jderobotice/libjderobotice.so
 	  ${LIBS_DIR}/jderobotutil/libjderobotutil.so
 	  ${LIBS_DIR}/progeo/libprogeo.so
 	  ${LIBS_DIR}/pioneer/libpioneer.so
 	${ZeroCIce_LIBRARIES}
-#	${pcl_LIBRARIES}
 	${gsl_LIBRARIES}
-#	${OpenNi_LIBRARY}
 
    
     )

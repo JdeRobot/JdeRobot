@@ -74,8 +74,7 @@ TARGET_LINK_LIBRARIES(calibratorKinect
   ${GLUT_LIBRARIES}
   ${LIBS_DIR}/libcolorspacesmm.so
   ${LIBS_DIR}/libJderobotInterfaces.so
-  ${LIBS_DIR}/libjderobotice.so
   ${LIBS_DIR}/libjderobotutil.so
   ${LIBS_DIR}/libprogeo.so
-    ${LIBS_DIR}/libparallelIce.so
+  ${LIBS_DIR}/libparallelIce.so
 )

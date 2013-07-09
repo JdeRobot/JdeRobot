@@ -19,7 +19,7 @@
  *             Jose María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
-#include <jderobotice/cameraClient.h>
+#include <parallelIce/cameraClient.h>
 
 #ifndef calibrator_COMMON_H
 #define calibrator_COMMON_H

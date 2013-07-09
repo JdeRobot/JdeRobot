@@ -29,8 +29,8 @@
 #include <jderobot/pointcloud.h>
 #include "kinectViewergui.h"
 #include "pthread.h"
-#include "jderobotice/cameraClient.h"
-#include "jderobotice/pointcloudClient.h"
+#include "parallelIce/cameraClient.h"
+#include "parallelIce/pointcloudClient.h"
 
 
 

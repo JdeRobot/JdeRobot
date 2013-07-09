@@ -30,7 +30,6 @@ add_executable (basic_component  ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(basic_component 
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
-    ${INTERFACES_CPP_DIR}/jderobot/libjderobotice.so
     ${INTERFACES_CPP_DIR}/jderobot/libjderobotutil.so
     ${INTERFACES_CPP_DIR}/jderobot/libcolorspacesmm.so
     ${libglademm_LIBRARIES}
