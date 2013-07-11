@@ -1,7 +1,7 @@
 #include "colladaparser.h"
 namespace files_3D {
 
-    ColladaParser::ColladaParser(std::string filename, int scale)
+    ColladaParser::ColladaParser(std::string filename, bool to2D, double scalemap, double scale)
     {
         TiXmlDocument xmlDoc;
 
@@ -40,7 +40,13 @@ namespace files_3D {
 
         mesh->Scale(this->meter*scale);
 
-        worldTo2D();
+        if(to2D){
+            mesh->Scale(scalemap);
+
+            worldTo2D();
+
+            mesh->Scale(1/scalemap);
+        }
     }
 
     int ite = 0;
@@ -1343,13 +1349,14 @@ namespace files_3D {
 
     void ColladaParser::worldTo2D()
     {
+
         std::vector<Segmento> listaSegmentos;
 
         for(int i = 0; i < this->mesh->getSubMeshCount();i++){
 
             SubMalla* submalla = this->mesh->getSubMesh(i);
 
-            Plano plano1(0, 0, 1, -0.5);
+            Plano plano1(0, 0, 1, -10);
             Plano plano2(0, 0, 1, 400.0);
             Plano p_proyeccion(0, 0, 1, 0);
 
@@ -1438,18 +1445,27 @@ namespace files_3D {
 
         math::Vector3 max = mesh->getMax();
         math::Vector3 min = mesh->getMin();
-        image.create(max.getY() - min.getY(), max.getX() - min.getY(), CV_8UC3);
+        image.create((max.getY() - min.getY()),
+                     (max.getX() - min.getY()),
+                     CV_8UC3);
 
         image = cv::Scalar(255, 255, 255);
 
+        FILE* fp;
+        fp = fopen("lineas.txt", "w");
+
         for(int i = 0; i < listaSegmentos.size(); i++){
             cv::line(image,
-                     cv::Point2f(listaSegmentos[i].x1 - min.getX(), listaSegmentos[i].y1 - min.getY()),
-                     cv::Point2f(listaSegmentos[i].x2 - min.getX(), listaSegmentos[i].y2 - min.getY()),
+                     cv::Point2f((listaSegmentos[i].x1 - min.getX()), (listaSegmentos[i].y1 - min.getY())),
+                     cv::Point2f((listaSegmentos[i].x2 - min.getX()), (listaSegmentos[i].y2 - min.getY())),
                      cv::Scalar(0, 0, 0),
                      3);
+            fprintf(fp, "%.2f %.2f %.2f %.2f\n", listaSegmentos[i].x1, listaSegmentos[i].y1,
+                            listaSegmentos[i].x2, listaSegmentos[i].y2);
         }
         cv::imwrite("mapa.jpg", image);
+
+        fclose(fp);
 
     }
 
