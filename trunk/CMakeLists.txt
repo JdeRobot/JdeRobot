@@ -27,7 +27,7 @@ SET( COMPONENTS calibrator  calibratorKinect  naooperator         basic_componen
 		cameraview			recorder
 		cameraview_icestorm  kinectViewer        
 		wiimoteClient
-		       colortuner replayController
+		       colortuner replayController basic_server
 
 
 		
