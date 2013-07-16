@@ -38,11 +38,9 @@ IF(OPENNI2_LIB)
 			file (COPY ${NITE2_LIB}/NiTE2 DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
 		endif()
 	TARGET_LINK_LIBRARIES(openniServer
-		${Gearbox_LIBRARIES}
         ${ZeroCIce_LIBRARIES}
         ${opencv_LIBRARIES}
         ${gsl_LIBRARIES}
-		${LIBS_DIR}/jderobotice/libjderobotice.so
         ${LIBS_DIR}/jderobotutil/libjderobotutil.so
         ${LIBS_DIR}/progeo/libprogeo.so
         ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
@@ -52,11 +50,9 @@ IF(OPENNI2_LIB)
 	)
 	else()
 	TARGET_LINK_LIBRARIES(openniServer
-		${Gearbox_LIBRARIES}
 		${ZeroCIce_LIBRARIES}
 		${opencv_LIBRARIES}
 		${gsl_LIBRARIES}
-		${LIBS_DIR}/jderobotice/libjderobotice.so
         ${LIBS_DIR}/jderobotutil/libjderobotutil.so
         ${LIBS_DIR}/progeo/libprogeo.so
         ${LIBS_DIR}/colorspaces/libcolorspacesmm.so

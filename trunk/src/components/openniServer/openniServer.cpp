@@ -25,18 +25,14 @@
 
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
-#include <gbxsickacfr/gbxiceutilacfr/safethread.h>
 #include <jderobot/kinectleds.h>
 #include <jderobot/camera.h>
 #include <jderobot/pose3dmotors.h>
 #include <jderobot/pointcloud.h>
 #include <colorspaces/colorspacesmm.h>
-#include <jderobotice/component.h>
-#include <jderobotice/application.h>
 #include <tr1/memory>
 #include <list>
 #include <sstream>
-#include <jderobotice/exceptions.h>
 #include <math.h>
 #include <cv.h>
 #include <highgui.h>
@@ -44,6 +40,9 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "myprogeo.h"
 #include <OpenNI.h>
+#include <opencv2/imgproc/imgproc_c.h>
+#include <opencv2/video/background_segm.hpp>
+#include <signal.h>
 
 
 #ifdef WITH_NITE2
@@ -63,10 +62,6 @@ if (rc != openni::STATUS_OK)                                         \
                                                     \
 }
 
-openni::VideoFrameRef		m_depthFrame;
-openni::VideoFrameRef		m_colorFrame;
-openni::Device			m_device;
-
 
 #ifdef WITH_NITE2
 	nite::UserTracker* m_pUserTracker;
@@ -76,28 +71,48 @@ openni::Device			m_device;
 
 
 
-namespace openniServer{
 
-pthread_mutex_t mutex;
-int SELCAM;
-std::vector<int> distances;
-std::vector<int> pixelsID;
-cv::Mat* srcRGB;
+
+//global configuration
+openni::VideoFrameRef		m_depthFrame;
+openni::VideoFrameRef		m_colorFrame;
+openni::Device			m_device;
+int cameraR, cameraD;
 int colors[10][3];
-int userGeneratorActive=0;
-int m_width;
-int m_height;
-openni::VideoStream depth, color;
-openni::VideoStream** m_streams;
-
+int SELCAM;
 int configWidth;
 int configHeight;
 int configFps;
+pthread_mutex_t mutex;
+bool componentAlive;
+pthread_t updateThread;
+
+
+namespace openniServer{
+
+
+std::vector<int> distances;
+std::vector<int> pixelsID;
+cv::Mat* srcRGB;
+int userGeneratorActive=0;
+openni::VideoStream depth, color;
+openni::VideoStream** m_streams;
+int m_width;
+int m_height;
+
+//fondo
+cv::Mat back;
+
+
+struct timeval a,b;
+
+int segmentationType=1; //0 ninguna, 1 NITE, 2 fondo
 
 
 
 void* updateThread(void*)
 {
+
 	openni::Status rc = openni::STATUS_OK;
 	rc = openni::OpenNI::initialize();
 	if (rc != openni::STATUS_OK)
@@ -139,122 +154,181 @@ void* updateThread(void*)
 	}
 	#endif
 
-
 	
-	m_device.setImageRegistrationMode( openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR );
-	//m_device.Device::setDepthColorSyncEnabled(true);
+	if (cameraR && cameraD)
+		m_device.setImageRegistrationMode( openni::IMAGE_REGISTRATION_DEPTH_TO_COLOR );
+
 
 	//depth
-	rc = depth.create(m_device, openni::SENSOR_DEPTH);
-	if (rc == openni::STATUS_OK)
-	{
-		rc = depth.start();
-		if (rc != openni::STATUS_OK)
+	if (cameraD){
+		rc = depth.create(m_device, openni::SENSOR_DEPTH);
+		if (rc == openni::STATUS_OK)
 		{
-			std::cout << "OpenniServer: Couldn't start depth stream: "<< openni::OpenNI::getExtendedError() << std::endl;
-			depth.destroy();
+			rc = depth.start();
+			if (rc != openni::STATUS_OK)
+			{
+				std::cout << "OpenniServer: Couldn't start depth stream: "<< openni::OpenNI::getExtendedError() << std::endl;
+				depth.destroy();
+			}
 		}
-	}
-	else
-	{
-		std::cout << "OpenniServer: Couldn't find depth stream: " <<  openni::OpenNI::getExtendedError() << std::endl;
+		else
+		{
+			std::cout << "OpenniServer: Couldn't find depth stream: " <<  openni::OpenNI::getExtendedError() << std::endl;
+		}
 	}
 
 	//color
-	rc = color.create(m_device, openni::SENSOR_COLOR);
-	if (rc == openni::STATUS_OK)
-	{
-		rc = color.start();
-		if (rc != openni::STATUS_OK)
+	if (cameraR){
+		rc = color.create(m_device, openni::SENSOR_COLOR);
+		if (rc == openni::STATUS_OK)
 		{
-			std::cout << "OpenniServer: Couldn't start color stream: " << openni::OpenNI::getExtendedError() << std::endl;
-			color.destroy();
+			rc = color.start();
+			if (rc != openni::STATUS_OK)
+			{
+				std::cout << "OpenniServer: Couldn't start color stream: " << openni::OpenNI::getExtendedError() << std::endl;
+				color.destroy();
+			}
 		}
-	}
-	else
-	{
-		std::cout << "OpenniServer: Couldn't find color stream: " << openni::OpenNI::getExtendedError() << std::endl;
+		else
+		{
+			std::cout << "OpenniServer: Couldn't find color stream: " << openni::OpenNI::getExtendedError() << std::endl;
+		}
 	}
 
 	openni::VideoMode depthVideoMode;
 	openni::VideoMode colorVideoMode;
 
+	/*std::cout << "DEPTH ------------------------" << std::endl;
+	const openni::SensorInfo *depthSensorInfo = m_device.getSensorInfo(openni::SENSOR_DEPTH);
 
-
-	colorVideoMode.setResolution(configWidth,configHeight);
-	colorVideoMode.setFps( configFps );
-	colorVideoMode.setPixelFormat( openni::PIXEL_FORMAT_RGB888 );
-	color.setVideoMode(colorVideoMode);
-	depthVideoMode.setResolution(configWidth,configHeight);
-	depthVideoMode.setFps( configFps );
-	depthVideoMode.setPixelFormat( openni::PIXEL_FORMAT_DEPTH_1_MM );
-	depth.setVideoMode(depthVideoMode);
-
-
-	if (depth.isValid() && color.isValid())
+	for(int i=0;i < depthSensorInfo->getSupportedVideoModes().getSize();i++)
 	{
-		depthVideoMode = depth.getVideoMode();
-		colorVideoMode = color.getVideoMode();
+		openni::VideoMode videoMode = depthSensorInfo->getSupportedVideoModes()[i];
 
-		int depthWidth = depthVideoMode.getResolutionX();
-		int depthHeight = depthVideoMode.getResolutionY();
-		int colorWidth = colorVideoMode.getResolutionX();
-		int colorHeight = colorVideoMode.getResolutionY();
+		std::cout << "fps: " << videoMode.getFps() << "x: " << videoMode.getResolutionX() << "y " <<  videoMode.getResolutionY() << std::endl;
+	}
 
-		if (depthWidth == colorWidth &&
-			depthHeight == colorHeight)
+	std::cout << "COLOR ------------------------" << std::endl;
+	const openni::SensorInfo *COLORSensorInfo = m_device.getSensorInfo(openni::SENSOR_COLOR);
+
+		for(int i=0;i < COLORSensorInfo->getSupportedVideoModes().getSize();i++)
 		{
-			m_width = depthWidth;
-			m_height = depthHeight;
+			openni::VideoMode videoMode = COLORSensorInfo->getSupportedVideoModes()[i];
+
+			std::cout << "fps: " << videoMode.getFps() << "x: " << videoMode.getResolutionX() << "y " <<  videoMode.getResolutionY() << std::endl;
+		}*/
+
+	//std::cout << "voy a fijar resolucion" << std::endl;
+	if (cameraR){
+		colorVideoMode.setResolution(configWidth,configHeight);
+		colorVideoMode.setFps( configFps );
+		colorVideoMode.setPixelFormat( openni::PIXEL_FORMAT_RGB888 );
+		//std::cout << "color" << std::endl;
+		color.setVideoMode(colorVideoMode);
+		color.setMirroringEnabled(true);
+	}
+	if (cameraD){
+		depthVideoMode.setResolution(configWidth,configHeight);
+		depthVideoMode.setFps( configFps );
+		depthVideoMode.setPixelFormat(openni::PIXEL_FORMAT_DEPTH_1_MM);
+		//std::cout << "depth" << std::endl;
+		rc= depth.setVideoMode(depthVideoMode);
+		//std::cout << "done" << std::endl;
+		if (rc != openni::STATUS_OK)
+		{
+			std::cout << "OpenniServer: error at set depth videoMode: " << openni::OpenNI::getExtendedError() << std::endl;
+			//color.destroy();
+		}
+		depth.setMirroringEnabled(false);
+	}
+
+
+	std::cout << "fps:" << configFps << "w" << configWidth << "h" << configHeight << std::endl;
+
+	if (cameraR && cameraD){
+
+		if (depth.isValid() && color.isValid())
+		{
+			depthVideoMode = depth.getVideoMode();
+			colorVideoMode = color.getVideoMode();
+
+			int depthWidth = depthVideoMode.getResolutionX();
+			int depthHeight = depthVideoMode.getResolutionY();
+			int colorWidth = colorVideoMode.getResolutionX();
+			int colorHeight = colorVideoMode.getResolutionY();
+
+			if (depthWidth == colorWidth &&
+				depthHeight == colorHeight)
+			{
+				m_width = depthWidth;
+				m_height = depthHeight;
+			}
+			else
+			{
+				std::cout <<  "Error - expect color and depth to be in same resolution: D: " << depthWidth << "x" << depthHeight << "C: " << colorWidth << "x" <<  colorHeight << std::endl;
+
+
+			}
+		}
+		else if (depth.isValid())
+		{
+			depthVideoMode = depth.getVideoMode();
+			m_width = depthVideoMode.getResolutionX();
+			m_height = depthVideoMode.getResolutionY();
+		}
+		else if (color.isValid())
+		{
+			colorVideoMode = color.getVideoMode();
+			m_width = colorVideoMode.getResolutionX();
+			m_height = colorVideoMode.getResolutionY();
 		}
 		else
 		{
-			std::cout <<  "Error - expect color and depth to be in same resolution: D: " << depthWidth << "x" << depthHeight << "C: " << colorWidth << "x" <<  colorHeight << std::endl;
-
-
+			std::cout << "Error - expects at least one of the streams to be valid..." << std::endl;
 		}
-	}
-	else if (depth.isValid())
-	{
-		depthVideoMode = depth.getVideoMode();
-		m_width = depthVideoMode.getResolutionX();
-		m_height = depthVideoMode.getResolutionY();
-	}
-	else if (color.isValid())
-	{
-		colorVideoMode = color.getVideoMode();
-		m_width = colorVideoMode.getResolutionX();
-		m_height = colorVideoMode.getResolutionY();
-	}
-	else
-	{
-		std::cout << "Error - expects at least one of the streams to be valid..." << std::endl;
 	}
 	
 	distances.resize(m_width*m_height);
 	pixelsID.resize(m_width*m_height);
+
+	/*std::cout << "aqui" << std::endl;
+	m_device.Device::setDepthColorSyncEnabled(true);
+	std::cout << "2" << std::endl;*/
 
 	m_streams = new openni::VideoStream*[2];
 	m_streams[0] = &depth;
 	m_streams[1] = &color;
 	
 
-	depth.setMirroringEnabled(false);
-	color.setMirroringEnabled(true);
 
-	
-	while(1){
+	//diferente en arm que en x86???
+
+
+	struct timeval Na, Nb;
+
+	gettimeofday(&Na,NULL);
+
+	while(componentAlive){
+		long long int timeInicio = Na.tv_sec*1000000+Na.tv_usec;
+		gettimeofday(&Nb,NULL);
+		long long int timeNew = Nb.tv_sec*1000000+Nb.tv_usec;
+		//std::cout << "Tiempo completo: " << (timeNew - timeInicio)/1000 << std::endl;
+		gettimeofday(&Na,NULL);
+
 		pthread_mutex_lock(&mutex);
+
+
 		int changedIndex;
 
 		openni::Status rc = openni::OpenNI::waitForAnyStream(m_streams, 2, &changedIndex);
+
 		#ifndef WITH_NITE2
 		if (rc != openni::STATUS_OK)
 		{
 			std::cout << "Wait failed" << std::endl;
 		}
 
-		switch (changedIndex)
+		/*switch (changedIndex)
 		{
 		case 0:
 			depth.readFrame(&m_depthFrame);
@@ -265,16 +339,27 @@ void* updateThread(void*)
 		default:
 			std::cout << "Error in wait" << std::endl;
 			break;
-		}
+		}*/
+
+
+		if (cameraD)
+			depth.readFrame(&m_depthFrame);
+		if (cameraR)
+			color.readFrame(&m_colorFrame);
+
+
 		//nite
+
 		#else
-		color.readFrame(&m_colorFrame);
-		rcN = m_pUserTracker->readFrame(&userTrackerFrame);
-		m_depthFrame = userTrackerFrame.getDepthFrame();
-		if (rcN != nite::STATUS_OK)
-		{
-			std::cout << "GetNextData failed" << std::endl;
-			//return;
+		if (segmentationType==1){
+			color.readFrame(&m_colorFrame);
+			rcN = m_pUserTracker->readFrame(&userTrackerFrame);
+			m_depthFrame = userTrackerFrame.getDepthFrame();
+			if (rcN != nite::STATUS_OK)
+			{
+				std::cout << "GetNextData failed" << std::endl;
+				//return;
+			}
 		}
 		#endif
 
@@ -284,6 +369,7 @@ void* updateThread(void*)
 		pthread_mutex_unlock(&mutex);
 		//OJO it control
 		usleep(1000);
+
    }
    return NULL;
 }
@@ -295,22 +381,21 @@ void* updateThread(void*)
 */
 	class CameraRGB: virtual public jderobot::Camera {
 public:
-	CameraRGB(std::string& propertyPrefix, const jderobotice::Context& context)
-      : prefix(propertyPrefix),context(context),
+	CameraRGB(std::string& propertyPrefix, const Ice::PropertiesPtr propIn)
+      : prefix(propertyPrefix),
 	imageFmt(),
 	imageDescription(new jderobot::ImageDescription()),
 	cameraDescription(new jderobot::CameraDescription()),
 	replyTask()
 	{
-	Ice::PropertiesPtr prop = context.properties();
+	Ice::PropertiesPtr prop = propIn;
 
 	//fill cameraDescription
 	cameraDescription->name = prop->getProperty(prefix+"Name");
 	if (cameraDescription->name.size() == 0)
-	throw 
-		jderobotice::ConfigFileException(ERROR_INFO,"Camera name not configured");
+		std::cout << "Camera name not configured" << std::endl;
 
-	cameraDescription->shortDescription = prop->getProperty(prefix+"ShortDescription");
+	cameraDescription->shortDescription = prop->getProperty(prefix + "ShortDescription");
 
 	//fill imageDescription
 	imageDescription->width = configWidth;
@@ -324,20 +409,22 @@ public:
 	std::string fmtStr = prop->getPropertyWithDefault(prefix+"Format","YUY2");//default format YUY2
 	imageFmt = colorspaces::Image::Format::searchFormat(fmtStr);
 	if (!imageFmt)
-	throw 
-		jderobotice::ConfigFileException(ERROR_INFO, "Format " + fmtStr + " unknown");
+		std::cout <<  "Format " << fmtStr << " unknown" << std::endl;
 	imageDescription->size = imageDescription->width * imageDescription->height * CV_ELEM_SIZE(imageFmt->cvType);
 	imageDescription->format = imageFmt->name;
 
-	context.tracer().info("Starting thread for camera: " + cameraDescription->name);
-	replyTask = new ReplyTask(this, imageDescription->width, imageDescription->height,fps, playerdetection);
+	std::cout << "Starting thread for camera: " << cameraDescription->name << std::endl;
+	replyTask = new ReplyTask(this,fps, playerdetection);
 
-	replyTask->start();//my own thread
+	this->control=replyTask->start();//my own thread
 	}
 
 	virtual ~CameraRGB(){
-		context.tracer().info("Stopping and joining thread for camera: " + cameraDescription->name);
-		gbxiceutilacfr::stopAndJoin(replyTask);
+		std::cout << "-------------------------------------------Stopping and joining thread for camera: " << cameraDescription->name << std::endl;
+		replyTask->destroy();
+		this->control.join();
+		color.stop();
+		color.destroy();
 	}
     
 	virtual jderobot::ImageDescriptionPtr getImageDescription(const Ice::Current& c){
@@ -353,12 +440,12 @@ public:
 	}
 
 	virtual std::string startCameraStreaming(const Ice::Current&){
-		context.tracer().info("Should be made anything to start camera streaming: " + cameraDescription->name);
+		std::cout << "Should be made anything to start camera streaming: " << cameraDescription->name<< std::endl;
 		return std::string("");
 	}
 
 	virtual void stopCameraStreaming(const Ice::Current&) {
-		context.tracer().info("Should be made anything to stop camera streaming: " + cameraDescription->name);
+		std::cout << "Should be made anything to stop camera streaming: " <<  cameraDescription->name << std::endl;
 	}
 
 	virtual Ice::Int setCameraDescription(const jderobot::CameraDescriptionPtr&, const Ice::Current&){
@@ -366,10 +453,9 @@ public:
 	}
 
 private:
-	class ReplyTask: public gbxiceutilacfr::SafeThread{
+	class ReplyTask: public IceUtil::Thread{
 	public:
-		ReplyTask(CameraRGB* camera, int width, int height, int fps, int playerdetection)
-	: gbxiceutilacfr::SafeThread(camera->context.tracer()), mycameravga(camera) {
+		ReplyTask(CameraRGB* camera, int fps, int playerdetection):mycameravga(camera),_done(false) {
 		segmentation=playerdetection;
 		this->fps=fps;
       }
@@ -380,7 +466,7 @@ private:
 		requests.push_back(cb);
 	}
 
-    virtual void walk(){
+    virtual void run(){
 
 		jderobot::ImageDataPtr reply(new jderobot::ImageData);
 		reply->description = mycameravga->imageDescription;
@@ -398,7 +484,7 @@ private:
 		cycle=(float)(1/(float)fps)*1000000;
 		
 	
-		while(!isStopping()){
+		while(!(_done)){
 			gettimeofday(&a,NULL);
 			totala=a.tv_sec*1000000+a.tv_usec;
 			pthread_mutex_lock(&mutex);
@@ -412,10 +498,11 @@ private:
 			}
 
 			//nite
-			#ifdef WITH_NITE2
-			const nite::UserMap& userLabels = userTrackerFrame.getUserMap();
-			const nite::UserId* pLabels = userLabels.getPixels();
-			#endif
+
+				#ifdef WITH_NITE2
+				const nite::UserMap& userLabels = userTrackerFrame.getUserMap();
+				const nite::UserId* pLabels = userLabels.getPixels();
+				#endif
 
 			const openni::RGB888Pixel* pImageRow = (const openni::RGB888Pixel*)m_colorFrame.getData();
 			int rowSize = m_colorFrame.getStrideInBytes() / sizeof(openni::RGB888Pixel);
@@ -425,36 +512,50 @@ private:
 				const openni::RGB888Pixel* pImage = pImageRow;
 				for (int x = 0; x < m_colorFrame.getWidth(); ++x, ++pImage)
 				{
-					#ifdef WITH_NITE2
-					if (segmentation){
-						pixelsID[(y*m_colorFrame.getWidth() + x)]= *pLabels;
-						if (*pLabels!=0)
-		                {
-		                    srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 0] = colors[*pLabels][0];
-							srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 1] = colors[*pLabels][1];
-							srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 2] = colors[*pLabels][2];
-						}
-						else{
-							srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 0] = 0;
-							srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 1] = 0;
-							srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 2] = 0;
-						}
-						++pLabels;
+					switch(segmentationType){
+						case 0:
+							srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 0] = pImage->r;
+							srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 1] = pImage->g;
+							srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 2] = pImage->b;
+							break;
+						case 1:
+							#ifdef WITH_NITE2
+							if (segmentation){
+								pixelsID[(y*m_colorFrame.getWidth() + x)]= *pLabels;
+								if (*pLabels!=0)
+								{
+									srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 0] = colors[*pLabels][0];
+									srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 1] = colors[*pLabels][1];
+									srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 2] = colors[*pLabels][2];
+								}
+								else{
+									srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 0] = 0;
+									srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 1] = 0;
+									srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 2] = 0;
+								}
+								++pLabels;
+							}
+							else{
+								srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 0] = pImage->r;
+								srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 1] = pImage->g;
+								srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 2] = pImage->b;
+							}
+							#endif
+							break;
+						case 2:
+
+						default:
+							std::cout << "openniServer: Error segmentation not supported" << std::endl;
+							break;
 					}
-					else{
-						srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 0] = pImage->r;
-						srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 1] = pImage->g;
-						srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 2] = pImage->b;
-					}
-					#else
-						srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 0] = pImage->r;
-						srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 1] = pImage->g;
-						srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 2] = pImage->b;
-					#endif
+
+
 				}
 				pImageRow += rowSize;
 			}	
 	
+
+			cv::imshow("color", *srcRGB);
 
 			//test
 			//CalculateJoints();
@@ -500,28 +601,29 @@ private:
 			totalpre=totala;
 		}
 	}
-	
-	CameraRGB* mycameravga;
-	IceUtil::Mutex requestsMutex;
-	std::list<jderobot::AMD_ImageProvider_getImageDataPtr> requests;
-	unsigned int m_nTexMapX;
-	unsigned int m_nTexMapY;
-	int m_width;
-	int	m_height;
-	openni::RGB888Pixel* m_pTexMap;
-	int segmentation;
-	int fps;
-	
+    virtual void destroy(){
+		this->_done=true;
+	}
+
+
+	private:
+		CameraRGB* mycameravga;
+		IceUtil::Mutex requestsMutex;
+		std::list<jderobot::AMD_ImageProvider_getImageDataPtr> requests;
+		int segmentation;
+		int fps;
+		bool _done;
+
     };
     typedef IceUtil::Handle<ReplyTask> ReplyTaskPtr;
 
 
     std::string prefix;
-	jderobotice::Context context;
     colorspaces::Image::FormatPtr imageFmt;
     jderobot::ImageDescriptionPtr imageDescription;
     jderobot::CameraDescriptionPtr cameraDescription;
     ReplyTaskPtr replyTask;
+    IceUtil::ThreadControl control;
 
 
   };
@@ -530,8 +632,8 @@ private:
 //*********************************************************************/
 	class CameraDEPTH: virtual public jderobot::Camera {
 public:
-	CameraDEPTH(std::string& propertyPrefix, const jderobotice::Context& context)
-      : prefix(propertyPrefix),context(context),
+	CameraDEPTH(std::string& propertyPrefix, const Ice::PropertiesPtr propIn)
+      : prefix(propertyPrefix),
 	imageFmt(),
 	imageDescription(new jderobot::ImageDescription()),
 	cameraDescription(new jderobot::CameraDescription()),
@@ -539,13 +641,12 @@ public:
 	{
       
       
-	Ice::PropertiesPtr prop = context.properties();
+	Ice::PropertiesPtr prop = propIn;
 
 	//fill cameraDescription
 	cameraDescription->name = prop->getProperty(prefix+"Name");
 	if (cameraDescription->name.size() == 0)
-	throw 
-		jderobotice::ConfigFileException(ERROR_INFO,"Camera name not configured");
+		std::cout << "Camera name not configured" << std::endl;
 
 	cameraDescription->shortDescription = prop->getProperty(prefix+"ShortDescription");
 
@@ -561,20 +662,22 @@ public:
 	std::string fmtStr = prop->getPropertyWithDefault(prefix+"Format","YUY2");//default format YUY2
 	imageFmt = colorspaces::Image::Format::searchFormat(fmtStr);
 	if (!imageFmt)
-	throw 
-		jderobotice::ConfigFileException(ERROR_INFO, "Format " + fmtStr + " unknown");
+		std::cout << "Format " <<  fmtStr << " unknown" << std::endl;
 	imageDescription->size = imageDescription->width * imageDescription->height * CV_ELEM_SIZE(imageFmt->cvType);
 	imageDescription->format = imageFmt->name;
 
-	context.tracer().info("Starting thread for camera: " + cameraDescription->name);
+	std::cout << "Starting thread for camera: " <<  cameraDescription->name << std::endl;
 	replyTask = new ReplyTask(this, imageDescription->width, imageDescription->height,fps, playerdetection);
 
-	replyTask->start();//my own thread
+	this->control=replyTask->start();//my own thread
 	}
 
 	virtual ~CameraDEPTH(){
-		context.tracer().info("Stopping and joining thread for camera: " + cameraDescription->name);
-		gbxiceutilacfr::stopAndJoin(replyTask);
+		std::cout << "Stopping and joining thread for camera: " << cameraDescription->name << std::endl;
+		replyTask->destroy();
+		this->control.join();
+		depth.stop();
+		depth.destroy();
 	}
     
 	virtual jderobot::ImageDescriptionPtr getImageDescription(const Ice::Current& c){
@@ -590,12 +693,12 @@ public:
 	}
 
 	virtual std::string startCameraStreaming(const Ice::Current&){
-		context.tracer().info("Should be made anything to start camera streaming: " + cameraDescription->name);
+		std::cout << "Should be made anything to start camera streaming: " << cameraDescription->name << std::endl;
 		return std::string("");
 	}
 
 	virtual void stopCameraStreaming(const Ice::Current&) {
-		context.tracer().info("Should be made anything to stop camera streaming: " + cameraDescription->name);
+		std::cout << "Should be made anything to stop camera streaming: "  << cameraDescription->name << std::endl;
 	}
 	
 	virtual Ice::Int setCameraDescription(const jderobot::CameraDescriptionPtr&, const Ice::Current&){
@@ -603,12 +706,13 @@ public:
 	}
 
 private:
-	class ReplyTask: public gbxiceutilacfr::SafeThread{
+	class ReplyTask: public IceUtil::Thread{
 	public:
 		ReplyTask(CameraDEPTH* camera, int width, int height, int fps, int playerDetection)
-	: gbxiceutilacfr::SafeThread(camera->context.tracer()), mycameradepth(camera) {
+	:mycameradepth(camera),_done(false) {
 		segmentation=playerDetection;
 		this->fps=fps;
+		this->minToTrain=15;
       }
 		
 
@@ -617,7 +721,7 @@ private:
 		requests.push_back(cb);
 	}
 
-    virtual void walk(){
+    virtual void run(){
 		int test;
 		
 
@@ -626,7 +730,6 @@ private:
 		reply->pixelData.resize(mycameradepth->imageDescription->width*mycameradepth->imageDescription->height*3);
 		cv::Mat dst_resize(cv::Size(mycameradepth->imageDescription->width, mycameradepth->imageDescription->height),CV_8UC3);
 		cv::Mat src(cv::Size(mycameradepth->imageDescription->width, mycameradepth->imageDescription->height),CV_8UC3);
-
 		struct timeval a, b;
 		int cycle; // duración del ciclo
 		long totalb,totala;
@@ -636,10 +739,9 @@ private:
 		//std::cout << "FPS depth: " << fps << std::endl;
 		cycle=(float)(1/(float)fps)*1000000;
 
-
 		
 	
-		while(!isStopping()){
+		while(!(_done)){
 			gettimeofday(&a,NULL);
 			totala=a.tv_sec*1000000+a.tv_usec;
 			pthread_mutex_lock(&mutex);
@@ -661,6 +763,7 @@ private:
 			const nite::UserId* pLabels = userLabels.getPixels();
 			#endif
 
+
 			const openni::DepthPixel* pDepth = (const openni::DepthPixel*)m_depthFrame.getData();
 			int restOfRow = m_depthFrame.getStrideInBytes() / sizeof(openni::DepthPixel) - m_depthFrame.getWidth();
 
@@ -668,38 +771,56 @@ private:
 			{	
 				for (int x = 0; x < m_depthFrame.getWidth(); ++x, ++pDepth)
 				{
-					#ifdef WITH_NITE2
-					if ((*pLabels!=0)||(!segmentation)){
-						distances[(y*m_depthFrame.getWidth() + x)] = *pDepth;
-						if (*pDepth != 0)
-						{
-							src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (float(*pDepth)/(float)MAX_LENGHT)*255.;
-							src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (*pDepth)>>8;
-							src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (*pDepth)&0xff;
+					switch(segmentationType){
+						case 0:
+							distances[(y*m_depthFrame.getWidth() + x)] = *pDepth;
+							if (*pDepth != 0)
+							{
+								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (float(*pDepth)/(float)MAX_LENGHT)*255.;
+								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (*pDepth)>>8;
+								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (*pDepth)&0xff;
+							}
+							break;
+						case 1:
+							#ifdef WITH_NITE2
+							if ((*pLabels!=0)||(!segmentation)){
+								distances[(y*m_depthFrame.getWidth() + x)] = *pDepth;
+								if (*pDepth != 0)
+								{
+									src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (float(*pDepth)/(float)MAX_LENGHT)*255.;
+									src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (*pDepth)>>8;
+									src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (*pDepth)&0xff;
 
-						}
-						else{
-							src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = 0;
-							src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = 0;
-							src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = 0;
-						}
+								}
+								else{
+									src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = 0;
+									src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = 0;
+									src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = 0;
+								}
+							}
+							else{
+								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = 0;
+								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = 0;
+								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = 0;
+							}
+							++pLabels;
+							#endif
+							break;
+						case 2:
+							distances[(y*m_depthFrame.getWidth() + x)] = *pDepth;
+							if (*pDepth != 0)
+							{
+								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (float(*pDepth)/(float)MAX_LENGHT)*255.;
+								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (*pDepth)>>8;
+								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (*pDepth)&0xff;
+							}
+							break;
+						default:
+							std::cout << "openniServer: Error segmentation not supported" << std::endl;
+							break;
 					}
-					else{
-						src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = 0;
-						src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = 0;
-						src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = 0;
-					}
-					++pLabels;
-					#else
-						distances[(y*m_depthFrame.getWidth() + x)] = *pDepth;
-						if (*pDepth != 0)
-						{
-							src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (float(*pDepth)/(float)MAX_LENGHT)*255.;
-							src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (*pDepth)>>8;
-							src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (*pDepth)&0xff;
-					}
-					#endif
 				}
+
 				pDepth += restOfRow;
 			}
 
@@ -740,13 +861,24 @@ private:
 		}
 	}
 	
-	CameraDEPTH* mycameradepth;
-	IceUtil::Mutex requestsMutex;
-	std::list<jderobot::AMD_ImageProvider_getImageDataPtr> requests;
-	
+    virtual void destroy(){
+		this->_done=true;
+	}
 
-	int segmentation;
-	int fps;
+
+	private:
+		CameraDEPTH* mycameradepth;
+		IceUtil::Mutex requestsMutex;
+		std::list<jderobot::AMD_ImageProvider_getImageDataPtr> requests;
+
+	
+		int segmentation;
+		int fps;
+		int minToTrain;
+		cv::BackgroundSubtractorMOG2 bg;
+		cv::Mat fore;
+		cv::Mat trainImage;
+		bool _done;
 	
 	
     };
@@ -754,11 +886,11 @@ private:
 
 
     std::string prefix;
-    jderobotice::Context context;
     colorspaces::Image::FormatPtr imageFmt;
     jderobot::ImageDescriptionPtr imageDescription;
     jderobot::CameraDescriptionPtr cameraDescription;
     ReplyTaskPtr replyTask;
+    IceUtil::ThreadControl control;
 
   };
 
@@ -768,18 +900,25 @@ private:
 
 	class pointCloudI: virtual public jderobot::pointCloud{
 		public:
-			pointCloudI (std::string& propertyPrefix, const jderobotice::Context& context):
-				prefix(propertyPrefix),context(context),data(new jderobot::pointCloudData()) {
-					Ice::PropertiesPtr prop = context.properties();
+			pointCloudI (std::string& propertyPrefix, const Ice::PropertiesPtr propIn):
+				prefix(propertyPrefix),data(new jderobot::pointCloudData()) {
+					Ice::PropertiesPtr prop = propIn;
 
 					int playerdetection = prop->getPropertyAsIntWithDefault("openniServer.PlayerDetection",0);
 					int fps =prop->getPropertyAsIntWithDefault("openniServer.pointCloud.Fps",10);
 					#ifndef WITH_NITE2
 						playerdetection=0;
 					#endif
+						pthread_mutex_init(&this->localMutex, NULL);
 					   replyCloud = new ReplyCloud(this,prop->getProperty("openniServer.calibration"), playerdetection, configWidth, configHeight,fps);
-					   replyCloud->start();
+					   this->control=replyCloud->start();
 				}
+
+			virtual ~pointCloudI(){
+				std::cout << "Stopping and joining thread for pointCloud" << std::endl;
+				replyCloud->destroy();
+				this->control.join();
+			}
 		
 
 		virtual jderobot::pointCloudDataPtr getCloudData(const Ice::Current&){
@@ -788,18 +927,21 @@ private:
 			};
 		   
 		   private:
-			 class ReplyCloud :public gbxiceutilacfr::SafeThread{ 
+			 class ReplyCloud :public IceUtil::Thread{
 		       public: 
-		       	ReplyCloud (pointCloudI* pcloud, std::string filepath,  int playerDetection, int widthIn, int heightIn, int fpsIn) : gbxiceutilacfr::SafeThread(pcloud->context.tracer()), data(new jderobot::pointCloudData()), data2(new jderobot::pointCloudData())
+		       	ReplyCloud (pointCloudI* pcloud, std::string filepath,  int playerDetection, int widthIn, int heightIn, int fpsIn) : data(new jderobot::pointCloudData()), data2(new jderobot::pointCloudData()), _done(false)
 		        	{
 					path=filepath;
 					segmentation=playerDetection;
 					cWidth = widthIn;
 					cHeight = heightIn;
 					fps=fpsIn;
+					myCloud=pcloud;
+					mypro=NULL;
+
 				}
 		       
-		        void walk()
+		        void run()
 		        {
 				mypro= new openniServer::myprogeo();
 				mypro->load_cam((char*)path.c_str(),0, cWidth, cHeight);
@@ -811,14 +953,20 @@ private:
 
 				cycle=(float)(1/(float)fps)*1000000;
 
-				while(!isStopping()){
+				while(!(_done)){
 					float distance;
 					gettimeofday(&a,NULL);
 					totala=a.tv_sec*1000000+a.tv_usec;
 					pthread_mutex_lock(&mutex);
+					//creamos una copia local de la imagen de color y de las distancias.
+					cv::Mat localRGB;
+					srcRGB->copyTo(localRGB);
+					std::vector<int> localDistance(distances);
+					pthread_mutex_unlock(&mutex);
+					pthread_mutex_lock(&(this->myCloud->localMutex));
 					data2->p.clear();
 					for( unsigned int i = 0 ; (i < cWidth*cHeight)&&(distances.size()>0); i=i+9) {
-							distance=(float)distances[i];
+							distance=(float)localDistance[i];
 							if (distance!=0){
 								//if (((unsigned char)srcRGB->data[3*i]!=0) && ((unsigned char)srcRGB->data[3*i+1]!=0) && ((unsigned char)srcRGB->data[3*i+2]!=0)){
 									float xp,yp,zp,camx,camy,camz;
@@ -857,14 +1005,14 @@ private:
 									if ( segmentation){
 										auxP.id=pixelsID[i];
 									}
-									auxP.r=(float)(int) (unsigned char)srcRGB->data[3*i];
-									auxP.g=(float)(int) (unsigned char)srcRGB->data[3*i+1];
-									auxP.b=(float)(int) (unsigned char)srcRGB->data[3*i+2];
+									auxP.r=(float)(int) (unsigned char)localRGB.data[3*i];
+									auxP.g=(float)(int) (unsigned char)localRGB.data[3*i+1];
+									auxP.b=(float)(int) (unsigned char)localRGB.data[3*i+2];
 									data2->p.push_back(auxP);
 								}
 							//}
 						}
-					pthread_mutex_unlock(&mutex);
+					pthread_mutex_unlock(&(this->myCloud->localMutex));
 					if (totalpre !=0){
 						if ((totala - totalpre) > cycle ){
 							std::cout<<"-------- openniServer: WARNING- POINTCLOUD timeout-" << std::endl; 
@@ -877,9 +1025,26 @@ private:
 						std::cout << "cloud: " <<  1000000/(totala-totalpre) << std::endl;
 					}*/
 					totalpre=totala;
-				}
 		        }
-		        myprogeo *mypro;
+		    }
+		        
+
+		       jderobot::pointCloudDataPtr getCloud()
+		       {
+		        pthread_mutex_lock(&(this->myCloud->localMutex));
+				data->p=data2->p;
+				pthread_mutex_unlock(&(this->myCloud->localMutex));
+		          return data;
+		       }
+
+		    virtual void destroy(){
+				this->_done=true;
+			}
+
+
+
+		   private:
+		       myprogeo *mypro;
 				int cWidth;
 				int cHeight;
 				int fps;
@@ -887,280 +1052,198 @@ private:
 				jderobot::RGBPoint auxP;
 				std::string path;
 				int segmentation;
-		        
-		       jderobot::pointCloudDataPtr getCloud()
-		       {
-		          pthread_mutex_lock(&mutex);
-				data->p=data2->p;
-				pthread_mutex_unlock(&mutex);
-		          return data;
-		       }
-				
+				pointCloudI* myCloud;
+				bool _done;
 		      
-		    	};	
+		    };
 
 			typedef IceUtil::Handle<ReplyCloud> ReplyCloudPtr;
 			ReplyCloudPtr replyCloud;
 			std::string prefix;
-			jderobotice::Context context;
 			jderobot::pointCloudDataPtr data;
+			pthread_mutex_t localMutex;
+			IceUtil::ThreadControl control;
+
 			
 			
 		};
-
-
-
-
-/**
-* \brief Class wich contains all the functions and variables to controle the Pose3DMotors module
-*/
-/*class Pose3DMotorsI: virtual public jderobot::Pose3DMotors {
-	public:
-		Pose3DMotorsI(XN_USB_DEV_HANDLE* d, std::string& propertyPrefix, const jderobotice::Context& context): prefix(propertyPrefix),context(context),Pose3DMotorsData(new jderobot::Pose3DMotorsData()), Pose3DMotorsParams(new jderobot::Pose3DMotorsParams())
-		{
-			Ice::PropertiesPtr prop = context.properties();
-			Pose3DMotorsData->tilt=0;
-			Pose3DMotorsData->tiltSpeed=0;
-			rc= XN_STATUS_OK;
-			dev=d;
-			rc=xnUSBSendControl( *dev, XN_USB_CONTROL_TYPE_VENDOR, 0x06, 1, 0x00, NULL, 0, 0 );
-			CHECK_RC(rc,"led");
-     	}
-
-		virtual ~Pose3DMotorsI(){};
-
-		virtual  Ice::Int setPose3DMotorsData(const jderobot::Pose3DMotorsDataPtr& p, const Ice::Current&){
-			Pose3DMotorsData=p;
-			uint8_t empty[0x1];
-			//int angle = 25 * 2;
-			rc = xnUSBSendControl(*dev, XN_USB_CONTROL_TYPE_VENDOR, 0x31, (XnUInt16)p->tilt, 0x0, empty, 0x0, 0);
-			CHECK_RC(rc,"Changing angle");
-
-		};
-	
-		virtual jderobot::Pose3DMotorsParamsPtr getPose3DMotorsParams(const Ice::Current&){
-			return Pose3DMotorsParams;
-		};
-
-		virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData (const Ice::Current&){
-			return Pose3DMotorsData;
-		};
-
-	private:
-		std::string prefix;
-		jderobotice::Context context;
-		jderobot::Pose3DMotorsDataPtr Pose3DMotorsData;
-		jderobot::Pose3DMotorsParamsPtr Pose3DMotorsParams;
-		XnStatus rc;
-		XN_USB_DEV_HANDLE* dev;
-    };*/
-
-/**
-* \brief Class wich contains all the functions and variables to controle the KinectLeds module
-*/
-/*class KinectLedsI: virtual public jderobot::KinectLeds {
-	public:
-		KinectLedsI(XN_USB_DEV_HANDLE* d, std::string& propertyPrefix, const jderobotice::Context& context): prefix(propertyPrefix),context(context)
-		{
-			Ice::PropertiesPtr prop = context.properties();
-			dev=d;
-     	}
-
-		virtual ~KinectLedsI(){};
-
-		virtual  void setLedActive(jderobot::KinectLedsAvailable led, const Ice::Current&){
-			int iled;
-			if (led==jderobot::OFF)
-				iled=0;
-			if (led==jderobot::GREEN)
-				iled=1;
-			if (led==jderobot::RED)
-				iled=2;
-			if (led==jderobot::YELLOW)
-				iled=3;
-			if (led==jderobot::BLINKYELLOW)
-				iled=4;
-			if (led==jderobot::BLINKGREEN)
-				iled=5;
-			if (led==jderobot::BLINKRED)
-				iled=6;
-			uint8_t empty[0x1];
-			rc = xnUSBSendControl(*dev, XN_USB_CONTROL_TYPE_VENDOR, 0x6, iled, 0x0, empty, 0x0, 0);
-			CHECK_RC(rc,"Changing led");
-		}
-
-	private:
-		std::string prefix;
-		jderobotice::Context context;
-		XN_USB_DEV_HANDLE* dev;
-    };*/
-
-/**
-* \brief Main Class of the component wich create the diferents devices activated using the Ice configuration file.
-*/
-class Component: public jderobotice::Component{
-public:
-	Component()
-	:jderobotice::Component("openniServer"){}
-
-	virtual void start(){
-		Ice::PropertiesPtr prop = context().properties();
-		int cameraR = prop->getPropertyAsIntWithDefault(context().tag() + ".CameraRGB",0);
-		int cameraD = prop->getPropertyAsIntWithDefault(context().tag() + ".CameraDEPTH",0);
-		int motors = prop->getPropertyAsIntWithDefault(context().tag() + ".Pose3DMotorsActive",0);
-		int leds = prop->getPropertyAsIntWithDefault(context().tag() + ".KinectLedsActive",0);
-		int pointCloud = prop->getPropertyAsIntWithDefault(context().tag() + ".pointCloudActive",0);
-		int playerdetection = prop->getPropertyAsIntWithDefault(context().tag() + ".PlayerDetection",0);
-		configWidth=prop->getPropertyAsIntWithDefault("openniServer.Width", 320);
-		configHeight=prop->getPropertyAsIntWithDefault("openniServer.Height",240);
-		configFps=prop->getPropertyAsIntWithDefault("openniServer.Fps",30);
-		
-		
-
-		SELCAM = prop->getPropertyAsIntWithDefault(context().tag() + ".deviceId",0);
-		std::cout << "Selected device: " << SELCAM << std::endl;
-		int nCameras=0;
-
-
-		/*COLORS*/
-		colors[0][0]=0;
-		colors[0][1]=0;
-		colors[0][2]=255;
-		colors[1][0]=0;
-		colors[1][1]=255;
-		colors[1][2]=255;
-		colors[2][0]=255;
-		colors[2][1]=255;
-		colors[2][2]=0;
-		colors[3][0]=255;
-		colors[3][1]=0;
-		colors[3][2]=0;
-		colors[4][0]=0;
-		colors[4][1]=255;
-		colors[4][2]=0;
-		colors[5][0]=255;
-		colors[5][1]=255;
-		colors[5][2]=0;
-		colors[6][0]=0;
-		colors[6][1]=0;
-		colors[6][2]=0;
-		colors[7][0]=150;
-		colors[7][1]=150;
-		colors[7][2]=0;
-		colors[8][0]=150;
-		colors[8][1]=150;
-		colors[8][2]=150;
-		colors[9][0]=0;
-		colors[9][1]=150;
-		colors[9][2]=150;
-
-		nCameras=cameraR + cameraD;
-		//g_context =  new xn::Context;
-		std::cout << "NCAMERAS = " << nCameras << std::endl;
-		cameras.resize(nCameras);
-		pthread_mutex_init(&mutex, NULL);
-		if ((nCameras>0)||(pointCloud)){
-			
-
-			pthread_create(&threads[0], NULL, &openniServer::updateThread, NULL);
-
-		}
-
-		if ((motors) || (leds)){
-			/*const XnUSBConnectionString *paths; 
-			XnUInt32 count; 
-			std::cout << "inicializo el dispositivo" << std::endl;
-			rc = xnUSBInit();
-			CHECK_RC(rc, "USB Initialization") ;
-			//rc = xnUSBOpenDevice(VID_MICROSOFT, PID_NUI_MOTOR, NULL, NULL, &dev);
-			CHECK_RC(rc,"Openning Device");
-			rc = xnUSBEnumerateDevices(VID_MICROSOFT, PID_NUI_MOTOR, &paths, &count);
-             	CHECK_RC(rc,"xnUSBEnumerateDevices failed");
-
-
-	        	// Open first found device
-        		rc = xnUSBOpenDeviceByPath(paths[SELCAM], &dev);
-	        	CHECK_RC(rc,"xnUSBOpenDeviceByPath failed");*/
-		}
-
-		if (cameraR){
-			std::string objPrefix(context().tag() + ".CameraRGB.");
-			std::string cameraName = prop->getProperty(objPrefix + "Name");
-			if (cameraName.size() == 0){//no name specified, we create one using the index
-				cameraName = "cameraR";
-				prop->setProperty(objPrefix + "Name",cameraName);//set the value
-				}
-			context().tracer().info("Creating camera " + cameraName);
-			cameras[0] = new CameraRGB(objPrefix,context());
-			context().createInterfaceWithString(cameras[0],cameraName);
-			std::cout<<"              -------- openniServer: Component: CameraRGB created successfully   --------" << std::endl;
-		}
-		if (cameraD){
-			std::string objPrefix(context().tag() + ".CameraDEPTH.");
-			std::string cameraName = prop->getProperty(objPrefix + "Name");
-			if (cameraName.size() == 0){//no name specified, we create one using the index
-				cameraName = "cameraD";
-				prop->setProperty(objPrefix + "Name",cameraName);//set the value
-				}
-			context().tracer().info("Creating camera " + cameraName);
-			cameras[1] = new CameraDEPTH(objPrefix,context());
-			context().createInterfaceWithString(cameras[1],cameraName);
-			//test camera ok
-			std::cout<<"              -------- openniServer: Component: CameraDEPTH created successfully   --------" << std::endl;
-		}
-		if (motors){
-			/*std::string objPrefix4="Pose3DMotors1";
-			std::string Pose3DMotorsName = "Pose3DMotors1";
-			context().tracer().info("Creating Pose3DMotors1 " + Pose3DMotorsName);
-			Pose3DMotors1 = new Pose3DMotorsI(&dev,objPrefix4,context());
-			context().createInterfaceWithString(Pose3DMotors1,Pose3DMotorsName);
-			std::cout<<"              -------- openniServer: Component: Pose3DMotors created successfully   --------" << std::endl;*/
-		}
-			
-		if (leds){
-			/*std::string objPrefix4="kinectleds1";
-			std::string Name = "kinectleds1";
-			context().tracer().info("Creating kinectleds1 " + Name);
-			kinectleds1 = new KinectLedsI(&dev,objPrefix4,context());
-			context().createInterfaceWithString(kinectleds1,Name);
-			std::cout<<"              -------- openniServer: Component: KinectLeds created successfully   --------" << std::endl;
-			*/
-		}
-		if (pointCloud){
-			std::string objPrefix5="pointcloud1";
-			std::string Name = "pointcloud1";
-			context().tracer().info("Creating pointcloud1 " + Name);
-			pointcloud1 = new pointCloudI(objPrefix5,context());
-			context().createInterfaceWithString(pointcloud1,Name);
-			std::cout<<"              -------- openniServer: Component: PointCloud created successfully   --------" << std::endl;
-		}
-
-		std::cout << "LISTOOOOOOOOOOOO" << std::endl;
-		sleep(50);
-    }
-
-    virtual ~Component(){
-    }
-
-  private:
-    std::vector<Ice::ObjectPtr> cameras;
-	Ice::ObjectPtr Pose3DMotors1;
-	Ice::ObjectPtr kinectleds1;
-	Ice::ObjectPtr pointcloud1;
-	pthread_t threads[NUM_THREADS];
-	//XN_USB_DEV_HANDLE dev;
-
-  };
-
 } //namespace
+
+
+Ice::CommunicatorPtr ic;
+bool killed;
+openniServer::CameraRGB *camRGB;
+openniServer::CameraDEPTH *camDEPTH;
+openniServer::pointCloudI *pc1;
+
+void exitApplication(int s){
+
+
+	killed=true;
+	componentAlive=false;
+
+	if (camRGB!= NULL)
+		delete camRGB;
+	if (camDEPTH != NULL)
+		delete camDEPTH;
+	if (pc1 != NULL){
+		delete pc1;
+	}
+	ic->shutdown();
+
+
+
+	pthread_join(updateThread, NULL);
+
+
+	m_device.close();
+	openni::OpenNI::shutdown();
+	exit(1);
+
+}
+
 
 int main(int argc, char** argv){
 
-  openniServer::Component component;
+	componentAlive=true;
+	killed=false;
+	struct sigaction sigIntHandler;
 
-	//usleep(1000);
-     jderobotice::Application app(component);
+	sigIntHandler.sa_handler = exitApplication;
+	sigemptyset(&sigIntHandler.sa_mask);
+	sigIntHandler.sa_flags = 0;
 
-     return app.jderobotMain(argc,argv);
+	sigaction(SIGINT, &sigIntHandler, NULL);
+
+
+
+	Ice::ObjectPtr Pose3DMotors1;
+	Ice::ObjectPtr kinectleds1;
+	Ice::ObjectPtr pointcloud1;
+	Ice::PropertiesPtr prop;
+
+
+	try{
+			ic = Ice::initialize(argc,argv);
+			prop = ic->getProperties();
+	}
+	catch (const Ice::Exception& ex) {
+			std::cerr << ex << std::endl;
+			return 1;
+	}
+	catch (const char* msg) {
+			std::cerr <<"Error :" << msg << std::endl;
+			return 1;
+	}
+	std::string componentPrefix("openniServer");
+
+	cameraR = prop->getPropertyAsIntWithDefault(componentPrefix + ".CameraRGB",0);
+	cameraD = prop->getPropertyAsIntWithDefault(componentPrefix + ".CameraDEPTH",0);
+	int motors = prop->getPropertyAsIntWithDefault(componentPrefix + ".Pose3DMotorsActive",0);
+	int leds = prop->getPropertyAsIntWithDefault(componentPrefix + ".KinectLedsActive",0);
+	int pointCloud = prop->getPropertyAsIntWithDefault(componentPrefix + ".pointCloudActive",0);
+	int playerdetection = prop->getPropertyAsIntWithDefault(componentPrefix + ".PlayerDetection",0);
+	configWidth=prop->getPropertyAsIntWithDefault(componentPrefix + ".Width", 640);
+	configHeight=prop->getPropertyAsIntWithDefault(componentPrefix+ ".Height",480);
+	configFps=prop->getPropertyAsIntWithDefault(componentPrefix + ".Fps",30);
+	std::string Endpoints = prop->getProperty(componentPrefix + ".Endpoints");
+	Ice::ObjectAdapterPtr adapter =ic->createObjectAdapterWithEndpoints(componentPrefix, Endpoints);
+
+
+
+	if (playerdetection){
+		cameraR=1;
+		cameraD=1;
+	}
+
+	SELCAM = prop->getPropertyAsIntWithDefault(componentPrefix + ".deviceId",0);
+	std::cout << "Selected device: " << SELCAM << std::endl;
+	int nCameras=0;
+
+
+	/*COLORS*/
+	colors[0][0]=0;
+	colors[0][1]=0;
+	colors[0][2]=255;
+	colors[1][0]=0;
+	colors[1][1]=255;
+	colors[1][2]=255;
+	colors[2][0]=255;
+	colors[2][1]=255;
+	colors[2][2]=0;
+	colors[3][0]=255;
+	colors[3][1]=0;
+	colors[3][2]=0;
+	colors[4][0]=0;
+	colors[4][1]=255;
+	colors[4][2]=0;
+	colors[5][0]=255;
+	colors[5][1]=255;
+	colors[5][2]=0;
+	colors[6][0]=0;
+	colors[6][1]=0;
+	colors[6][2]=0;
+	colors[7][0]=150;
+	colors[7][1]=150;
+	colors[7][2]=0;
+	colors[8][0]=150;
+	colors[8][1]=150;
+	colors[8][2]=150;
+	colors[9][0]=0;
+	colors[9][1]=150;
+	colors[9][2]=150;
+
+	nCameras=cameraR + cameraD;
+	//g_context =  new xn::Context;
+	std::cout << "NCAMERAS = " << nCameras << std::endl;
+	pthread_mutex_init(&mutex, NULL);
+	if ((nCameras>0)||(pointCloud)){
+
+
+		pthread_create(&updateThread, NULL, &openniServer::updateThread, NULL);
+
+	}
+
+	if (cameraR){
+		std::string objPrefix(componentPrefix + ".CameraRGB.");
+		std::string cameraName = prop->getProperty(objPrefix + "Name");
+		if (cameraName.size() == 0){//no name specified, we create one using the index
+			cameraName = "cameraR";
+			prop->setProperty(objPrefix + "Name",cameraName);//set the value
+			}
+		std::cout << "Creating camera " << cameraName << std::endl;
+		camRGB = new openniServer::CameraRGB(objPrefix,prop);
+		adapter->add(camRGB, ic->stringToIdentity(cameraName));
+		std::cout<<"              -------- openniServer: Component: CameraRGB created successfully   --------" << std::endl;
+	}
+	if (cameraD){
+		std::string objPrefix(componentPrefix + ".CameraDEPTH.");
+		std::string cameraName = prop->getProperty(objPrefix + "Name");
+		if (cameraName.size() == 0){//no name specified, we create one using the index
+			cameraName = "cameraD";
+			prop->setProperty(objPrefix + "Name",cameraName);//set the value
+			}
+		std::cout << "Creating camera " <<  cameraName << std::endl;
+		camDEPTH = new openniServer::CameraDEPTH(objPrefix,prop);
+		adapter->add(camDEPTH, ic->stringToIdentity(cameraName));
+		//test camera ok
+		std::cout<<"              -------- openniServer: Component: CameraDEPTH created successfully   --------" << std::endl;
+	}
+	if (pointCloud){
+		std::string objPrefix(componentPrefix + ".PointCloud.");
+		std::string Name = prop->getProperty(objPrefix + "Name");
+		std::cout << "Creating pointcloud1 " << Name << std::endl;
+		pc1 = new openniServer::pointCloudI(objPrefix,prop);
+		adapter->add(pc1 , ic->stringToIdentity(Name));
+		adapter->add(pointcloud1, ic->stringToIdentity(Name));
+		std::cout<<"              -------- openniServer: Component: PointCloud created successfully   --------" << std::endl;
+	}
+
+	adapter->activate();
+	ic->waitForShutdown();
+
+	if (!killed)
+		exitApplication(0);
+	return 0;
 
 }

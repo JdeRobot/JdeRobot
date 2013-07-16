@@ -61,25 +61,6 @@ ENDIF()
 
 
 
-#manual gearbox libraries
-FIND_PATH( Gearbox_INCLUDE_DIR NAMES gbxutilacfr/gbxutilacfr.h  PATHS ENV C++LIB ENV PATH PATH_SUFFIXES gearbox)
- 
-IF( Gearbox_INCLUDE_DIR )
-    FIND_LIBRARY( Gearbox_LIBRARY1 NAMES GbxUtilAcfr PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib/gearbox lib64/gearbox )
-    FIND_LIBRARY( Gearbox_LIBRARY2 NAMES GbxIceUtilAcfr PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib/gearbox lib64/gearbox)
-    SET (Gearbox_LIBRARIES ${Gearbox_LIBRARY1} ${Gearbox_LIBRARY2})
-    IF( Gearbox_LIBRARIES )
-		MESSAGE ("-- Gearbox found at ${Gearbox_LIBRARIES}")
-		include_directories(${Gearbox_INCLUDE_DIR})
-		link_directories(${Gearbox_LIBRARIES})
-    ENDIF( Gearbox_LIBRARIES )
-ENDIF(Gearbox_INCLUDE_DIR)
-
-IF(NOT Gearbox_LIBRARIES)
-		MESSAGE ("*** Gearbox not found")
-ENDIF()
-
-
 #manual ICE
 FIND_PATH( Ice_INCLUDE_DIR NAMES Ice/Ice.h  PATHS ENV C++LIB ENV)
  
@@ -112,13 +93,11 @@ set( CMAKE_CXX_FLAGS "-Wno-deprecated -Wl,-rpath ./" ) # Opciones para el compil
 TARGET_LINK_LIBRARIES(openniServer-kinect
   ${opencv_LIBRARIES}
   ${gsl_LIBRARIES}
-  ${Gearbox_LIBRARIES}
   ${Ice_LIBRARIES} 
   ${openni_LIBRARIES}
   ${nite_LIBRARIES}
   ${LIBS_DIR}/libcolorspacesmm.so
   ${LIBS_DIR}/libJderobotInterfaces.so
-  ${LIBS_DIR}/libjderobotice.so
   ${LIBS_DIR}/libjderobotutil.so
   ${LIBS_DIR}/libprogeo.so
  
