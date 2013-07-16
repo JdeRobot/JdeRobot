@@ -4,22 +4,40 @@ cmake_minimum_required(VERSION 2.8)
 
 # ENV VARS
 SET(gladedir ./)
+SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Deps) # Directorio donde se encuentran las dependencias
+
+#comprobamos si tenemos gearbox y si no desactivamos todos los componentes que dependan de él
+include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 
 SET( INTERFACES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/cpp) # Directorio con las interfaces ICE en C++
 SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libs) # Directorio donde se encuentran las librerias propias de jderobot
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice) # Directorio donde se encuentran las interfaces ICE
-SET( LIBS_NEEDED   bgfgsegmentation colorspaces jderobotice jderobotutil progeo pioneer fuzzylib visionlib ) # Librerias de las que depende el componente
+SET( LIBS_NEEDED  colorspaces jderobotutil progeo pioneer fuzzylib visionlib parallelIce ) # Librerias de las que depende el componente
 
-SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Deps) # Directorio donde se encuentran las dependencias
-SET( COMPONENTS calibrator  calibratorKinect openniServer-kinect naooperator         basic_component		         
-		bgfglab                    opencvdemo
+IF( Gearbox_INCLUDE_DIR ) 
+	#librerías que dependen de gearbox
+	SET( LIBS_NEEDED   ${LIBS_NEEDED} bgfgsegmentation jderobotice )
+ENDIF()
+
+
+
+SET( COMPONENTS calibrator  calibratorKinect  naooperator         basic_component		         
+		                    opencvdemo
 					cameraserver         introrob            
 		cameraview			recorder
-		cameraview_icestorm  kinectViewer        replayer
+		cameraview_icestorm  kinectViewer        
 		wiimoteClient
-		wiimoteServer       colortuner openniServer replayController
+		       colortuner replayController
+
+
 		
 ) #Componentes que forman JDErobot
+
+IF( Gearbox_INCLUDE_DIR ) 
+	#librerías que dependen de gearbox
+	SET( COMPONENTS   ${COMPONENTS}  bgfglab replayer wiimoteServer)
+ENDIF()
+
 
 
 ###################
@@ -87,7 +105,7 @@ FOREACH(LibFile ${LIBS_NEEDED})
 ENDFOREACH(LibFile)
 
   # FIND AND CHECK OTHER DEPENDENCES
-include(${DEPS_DIR}/gearbox/CMakeLists.txt)
+
 include(${DEPS_DIR}/fireware/CMakeLists.txt)
 include(${DEPS_DIR}/pcl/CMakeLists.txt)
 include(${DEPS_DIR}/openni/CMakeLists.txt)
