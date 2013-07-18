@@ -1,4 +1,4 @@
-#include "progeo.h"
+#include "progeo2.h"
 namespace Progeo {
 
     Progeo::Progeo()
