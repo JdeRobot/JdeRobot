@@ -106,7 +106,7 @@ cv::Mat back;
 
 struct timeval a,b;
 
-int segmentationType=1; //0 ninguna, 1 NITE, 2 fondo
+int segmentationType; //0 ninguna, 1 NITE, 2 fondo
 
 
 
@@ -512,7 +512,7 @@ private:
 				const openni::RGB888Pixel* pImage = pImageRow;
 				for (int x = 0; x < m_colorFrame.getWidth(); ++x, ++pImage)
 				{
-					switch(segmentationType){
+					switch(segmentation){
 						case 0:
 							srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 0] = pImage->r;
 							srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 1] = pImage->g;
@@ -554,8 +554,6 @@ private:
 				pImageRow += rowSize;
 			}	
 	
-
-			cv::imshow("color", *srcRGB);
 
 			//test
 			//CalculateJoints();
@@ -771,7 +769,7 @@ private:
 			{	
 				for (int x = 0; x < m_depthFrame.getWidth(); ++x, ++pDepth)
 				{
-					switch(segmentationType){
+					switch(segmentation){
 						case 0:
 							distances[(y*m_depthFrame.getWidth() + x)] = *pDepth;
 							if (*pDepth != 0)
@@ -807,13 +805,6 @@ private:
 							#endif
 							break;
 						case 2:
-							distances[(y*m_depthFrame.getWidth() + x)] = *pDepth;
-							if (*pDepth != 0)
-							{
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+0] = (float(*pDepth)/(float)MAX_LENGHT)*255.;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+1] = (*pDepth)>>8;
-								src.data[(y*m_depthFrame.getWidth()+ x)*3+2] = (*pDepth)&0xff;
-							}
 							break;
 						default:
 							std::cout << "openniServer: Error segmentation not supported" << std::endl;
@@ -1142,7 +1133,8 @@ int main(int argc, char** argv){
 	int motors = prop->getPropertyAsIntWithDefault(componentPrefix + ".Pose3DMotorsActive",0);
 	int leds = prop->getPropertyAsIntWithDefault(componentPrefix + ".KinectLedsActive",0);
 	int pointCloud = prop->getPropertyAsIntWithDefault(componentPrefix + ".pointCloudActive",0);
-	int playerdetection = prop->getPropertyAsIntWithDefault(componentPrefix + ".PlayerDetection",0);
+	openniServer::segmentationType= prop->getPropertyAsIntWithDefault(componentPrefix + ".PlayerDetection",0);
+
 	configWidth=prop->getPropertyAsIntWithDefault(componentPrefix + ".Width", 640);
 	configHeight=prop->getPropertyAsIntWithDefault(componentPrefix+ ".Height",480);
 	configFps=prop->getPropertyAsIntWithDefault(componentPrefix + ".Fps",30);
@@ -1151,7 +1143,7 @@ int main(int argc, char** argv){
 
 
 
-	if (playerdetection){
+	if (openniServer::segmentationType){
 		cameraR=1;
 		cameraD=1;
 	}
