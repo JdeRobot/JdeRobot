@@ -143,6 +143,11 @@ FOREACH(currentLibFile ${LIBS_NEEDED})
     INSTALL (FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/libs/${currentLibFile}/${new_lib} DESTINATION /usr/local/lib/jderobot)
 ENDFOREACH(currentLibFile)
 
+# WORKAROUND: copy libcolorspacesmm.so It's needed to change this!
+SET (new lib libcolorspacesmm.so)
+MESSAGE("${new_lib}")
+INSTALL (FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/libs/colorspaces/libcolorspacesmm.so DESTINATION /usr/local/lib/jderobot)
+
 FILE(GLOB_RECURSE HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/libs/*.h)
 FOREACH(currentSourceFile ${HEADERS_FILES})
     string(REGEX REPLACE ".*/(.*/).*.h" "\\1" new_source1 ${currentSourceFile})
