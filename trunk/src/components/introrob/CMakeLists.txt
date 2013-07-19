@@ -14,7 +14,8 @@ set( CMAKE_CXX_FLAGS "-lglut -lgsl -lgslcblas" ) # Opciones para el compilador
 
 add_executable (introrob  ${SOURCE_FILES})
 
-TARGET_LINK_LIBRARIES(introrob 
+TARGET_LINK_LIBRARIES(introrob
+    ${CMAKE_THREAD_LIBS_INIT} 
     ${opencv_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}

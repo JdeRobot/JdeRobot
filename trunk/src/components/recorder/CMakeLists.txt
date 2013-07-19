@@ -19,7 +19,8 @@ IF(with_pcl)
     add_executable (recorder ${SOURCE_FILES})
 
 
-    TARGET_LINK_LIBRARIES(recorder 
+    TARGET_LINK_LIBRARIES(recorder
+          ${CMAKE_THREAD_LIBS_INIT} 
 	  ${opencv_LIBRARIES}
 	  ${gtkmm_LIBRARIES}
 	  ${libglademm_LIBRARIES}

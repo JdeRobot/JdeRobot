@@ -16,6 +16,7 @@ include_directories(
 
 add_executable (basic_server  ${SOURCE_FILES})
 
-TARGET_LINK_LIBRARIES(basic_server 
+TARGET_LINK_LIBRARIES(basic_server
+        ${CMAKE_THREAD_LIBS_INIT}
 	${ZeroCIce_LIBRARIES}    	
 )

@@ -11,6 +11,7 @@ include_directories(
 add_executable (colortuner ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(colortuner 
+    ${CMAKE_THREAD_LIBS_INIT}
     ${opencv_LIBRARIES}
     ${OpenCV_LIBRARIES}
     ${gtkmm_LIBRARIES}

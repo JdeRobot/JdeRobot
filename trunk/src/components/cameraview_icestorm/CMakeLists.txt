@@ -10,7 +10,8 @@ include_directories(
 
 add_executable (cameraview_icestorm ${SOURCE_FILES})
 
-TARGET_LINK_LIBRARIES(cameraview_icestorm 
+TARGET_LINK_LIBRARIES(cameraview_icestorm
+    ${CMAKE_THREAD_LIBS_INIT} 
     ${opencv_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}

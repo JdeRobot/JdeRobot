@@ -17,7 +17,8 @@ include_directories(
 add_executable (replayController ${SOURCE_FILES})
 
 
-TARGET_LINK_LIBRARIES(replayController 
+TARGET_LINK_LIBRARIES(replayController
+    ${CMAKE_THREAD_LIBS_INIT} 
 	${GLUT_LIBRARIES}
    	${OpenCV_LIBRARIES}
    	${gtkmm_LIBRARIES}

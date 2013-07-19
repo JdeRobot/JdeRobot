@@ -14,7 +14,8 @@ include_directories(
 add_executable (kinectViewer ${SOURCE_FILES})
 
 
-TARGET_LINK_LIBRARIES(kinectViewer 
+TARGET_LINK_LIBRARIES(kinectViewer
+    ${CMAKE_THREAD_LIBS_INIT} 
 	${GLUT_LIBRARIES}
    	${OpenCV_LIBRARIES}
    	${gtkmm_LIBRARIES}

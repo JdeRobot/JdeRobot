@@ -11,6 +11,7 @@ include_directories(
 add_executable (wiimoteClient ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(wiimoteClient
+    ${CMAKE_THREAD_LIBS_INIT}
 	${GLUT_LIBRARIES}
 	${ZeroCIce_LIBRARIES}
     ${opencv_LIBRARIES}

@@ -10,6 +10,7 @@ include_directories(
 add_executable (calibrator ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES( calibrator
+ ${CMAKE_THREAD_LIBS_INIT}
  ${gtkmm_LIBRARIES}
  ${libglademm_LIBRARIES}
   ${GLUT_LIBRARIES}

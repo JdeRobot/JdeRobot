@@ -11,7 +11,8 @@ include_directories(
 add_executable (opencvdemo ${SOURCE_FILES})
 
 
-TARGET_LINK_LIBRARIES(opencvdemo 
+TARGET_LINK_LIBRARIES(opencvdemo
+    ${CMAKE_THREAD_LIBS_INIT} 
     ${opencv_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
