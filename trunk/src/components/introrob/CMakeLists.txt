@@ -10,10 +10,9 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../calibrator
 )
 
-set( CMAKE_CXX_FLAGS "-lglut -lgsl -lgslcblas" ) # Opciones para el compilador
+set( CMAKE_CXX_FLAGS "") #"-lgsl -lgslcblas" ) # Opciones para el compilador
 
 add_executable (introrob  ${SOURCE_FILES})
-
 TARGET_LINK_LIBRARIES(introrob
     ${CMAKE_THREAD_LIBS_INIT} 
     ${opencv_LIBRARIES}
@@ -29,7 +28,10 @@ TARGET_LINK_LIBRARIES(introrob
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/progeo/libprogeo.so
     ${LIBS_DIR}/pioneer/libpioneer.so
-	${gsl_LIBRARIES}
+    "glut"
+    "gsl"
+    "gslcblas"
+#	${gsl_LIBRARIES}
 	${ZeroCIce_LIBRARIES}
 	${Gearbox_LIBRARIES}
 )

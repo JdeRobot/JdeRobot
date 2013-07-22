@@ -12,9 +12,9 @@ include_directories(
 add_executable (cameraserver ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(cameraserver
-	${CMAKE_THREAD_LIBS_INIT} 
 	${OpenCV_LIBRARIES}        
 	${LIBS_DIR}/colorspaces/libcolorspacesmm.so
 	${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
 	${ZeroCIce_LIBRARIES}
+	${CMAKE_THREAD_LIBS_INIT} 
 	)

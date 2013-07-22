@@ -63,6 +63,7 @@ link_directories(${gtkglextmm_LIBRARY_DIRS})
 include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
 include(${DEPS_DIR}/opencv/CMakeLists.txt)
+include(${DEPS_DIR}/pthread/CMakeLists.txt)
 
 include_directories(${LIBS_DIR}/progeo)
 

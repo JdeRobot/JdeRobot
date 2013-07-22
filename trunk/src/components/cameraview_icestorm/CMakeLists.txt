@@ -12,7 +12,7 @@ add_executable (cameraview_icestorm ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(cameraview_icestorm
     ${CMAKE_THREAD_LIBS_INIT} 
-    ${opencv_LIBRARIES}
+    ${OpenCV_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
 #    ${gthread_LIBRARIES}

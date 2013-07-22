@@ -27,5 +27,6 @@ TARGET_LINK_LIBRARIES(kinectViewer
     ${LIBS_DIR}/progeo/libprogeo.so
     ${LIBS_DIR}/pioneer/libpioneer.so
     ${LIBS_DIR}/parallelIce/libparallelIce.so
+    ${gsl_LIBRARIES}
     ${ZeroCIce_LIBRARIES}
 )
