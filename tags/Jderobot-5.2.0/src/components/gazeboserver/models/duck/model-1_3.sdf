@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<sdf version="1.3">
+    <model name="duck">
+      <static>true</static>
+      <link name="duck_body">
+  		<collision name='duck_collision'>
+          <geometry>
+            <mesh>
+            	<uri>model://duck/meshes/duck2.dae</uri>
+        	</mesh>
+          </geometry>
+		</collision>
+
+        <visual name="duck_visual">
+          <geometry>
+            <mesh>
+            	<uri>model://duck/meshes/duck.dae</uri>
+        	</mesh>
+          </geometry>
+        </visual>
+      </link>
+  	</model>
+</sdf>

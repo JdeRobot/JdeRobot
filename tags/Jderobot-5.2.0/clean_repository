@@ -1,0 +1,46 @@
+#!/bin/sh
+
+mivar=`du -a | grep cmake_install.cmake | awk '{print $2}'`
+
+mv ./doc/paper-autonomous_robots/Makefile /tmp
+
+for file in $mivar; do
+	rm $file
+done
+
+mivar=`du -a | grep Makefile$ | awk '{print $2}'`
+
+
+for file in $mivar; do
+	rm $file
+done
+
+mivar=`du -a | grep CMakeFiles | awk '{print $2}'`
+
+
+for file in $mivar; do
+	rm -r $file
+done
+
+mivar=`du -a | grep CMakeCache.txt | awk '{print $2}'`
+
+
+for file in $mivar; do
+	rm -r $file
+done
+
+rm src/interfaces/cpp/jderobot/*
+
+mivar=`du -a | grep "cmake_uninstall.cmake$" | awk '{print $2}'`
+
+for file in $mivar; do
+	rm -r $file
+done
+
+rm src/libs/*/*.so
+rm src/libs/*/*.a
+
+
+
+
+mv /tmp/Makefile ./doc/paper-autonomous_robots

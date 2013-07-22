@@ -1,0 +1,5 @@
+#!/bin/bash
+mkdir stormdb
+icebox --Ice.Config=../ice/icebox.cfg &
+icestormadmin --Ice.Config=../ice/icestorm.cfg -e "create cameraA; create cameraB; create cameraC; create cameraD"
+

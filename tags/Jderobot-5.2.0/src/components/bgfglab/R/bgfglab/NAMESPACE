@@ -1,0 +1,6 @@
+importFrom(flexclust,qtclust)
+import(bigmemory)
+import(biganalytics)
+import(doMC)
+
+exportPattern("^[[:alpha:]]+")
