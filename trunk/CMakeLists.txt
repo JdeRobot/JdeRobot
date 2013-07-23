@@ -1,4 +1,4 @@
-project (JDEROBOT)
+project (jderobot)
 
 cmake_minimum_required(VERSION 2.8)
 
@@ -21,21 +21,27 @@ ENDIF()
 
 
 
-SET( COMPONENTS calibrator  calibratorKinect  naooperator         basic_component		         
-		                    opencvdemo
-					cameraserver         introrob            
-		cameraview			recorder
-		cameraview_icestorm  kinectViewer        
+SET( COMPONENTS calibrator  
+		calibratorKinect
+		naooperator         
+		basic_component	   
+		opencvdemo
+		cameraserver         
+		introrob            
+		cameraview
+		recorder
+		cameraview_icestorm
+		kinectViewer        
 		wiimoteClient
-		       colortuner replayController basic_server
-
-
+		colortuner 
+		replayController 
+		basic_server
 		
 ) #Componentes que forman JDErobot
 
 IF( Gearbox_INCLUDE_DIR ) 
 	#librerías que dependen de gearbox
-	SET( COMPONENTS   ${COMPONENTS}  bgfglab replayer wiimoteServer)
+	SET( COMPONENTS  ${COMPONENTS}  bgfglab replayer wiimoteServer)
 ENDIF()
 
 
@@ -203,3 +209,39 @@ configure_file(
 add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 
+#
+# Deb packages
+#
+
+
+include (InstallRequiredSystemLibraries)
+SET (CPACK_GENERATOR "DEB")
+SET (CPACK_SOURCE_GENERATOR TGZ)
+SET (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+SET (CPACK_SET_DESTDIR "on")
+SET (CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
+
+
+SET (VERSION 5.2.0-1)
+# CPack version numbers for release tarball name.
+SET (CPACK_PACKAGE_VERSION_MAJOR 5)
+SET (CPACK_PACKAGE_VERSION_MINOR 2)
+SET (CPACK_PACKAGE_VERSION_PATCH 0)
+SET ($ {VERSION} CPACK_DEBIAN_PACKAGE_VERSION)
+
+SET (CPACK_DEBIAN_PACKAGE_PRIORITY "extra")
+SET (CPACK_DEBIAN_PACKAGE_SECTION "net")
+SET (CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+    "${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/postinst"
+    "${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/postrm")
+
+SET (CPACK_PACKAGE_DESCRIPTION_SUMMARY "jderobot is a software development suite for robotics applications.")
+SET (CPACK_PACKAGE_DESCRIPTION "jderobot is a software development suite for robotics applications, written in C++ language. It provides a programming environment where the robot control program is made up of a collection of several concurrent asynchronous threads named schemas. It is based on JDE cognitive architecture for autonomous robots.")
+
+SET (CPACK_PACKAGE_CONTACT "Roberto Calvo <rocapal@gsyc.urjc.es>")
+SET (CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${VERSION}_${CPACK_DEBIAN_ARCHITECTURE}")
+
+SET (CPACK_COMPONENTS_ALL Libraries ApplicationData)
+include (CPack Documentation)
