@@ -36,6 +36,7 @@ SET( COMPONENTS calibrator
 		colortuner 
 		replayController 
 		basic_server
+		remoteConfiguration
 		
 ) #Componentes que forman JDErobot
 
@@ -125,6 +126,7 @@ include(${DEPS_DIR}/opengl/CMakeLists.txt)
 include(${DEPS_DIR}/openni2/CMakeLists.txt)
 include(${DEPS_DIR}/nite2/CMakeLists.txt)
 include(${DEPS_DIR}/pthread/CMakeLists.txt)
+include(${DEPS_DIR}/libxml++/CMakeLists.txt)
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
 

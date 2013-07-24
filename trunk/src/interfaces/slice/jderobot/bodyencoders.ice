@@ -15,7 +15,7 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/.
  *
  *  Authors : Jose María Cañas <jmplaza@gsyc.es>
- *            Francisco Miguel Rivas Montero <fm.rivas@alumnos.urjc.es>	
+ *            Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>	
  */
 
 #ifndef BODYENCODERS_ICE
