@@ -148,7 +148,10 @@ namespace kinectViewer {
 void 
 kinectViewergui::updateAll( cv::Mat imageRGB, cv::Mat imageDEPTH, std::vector<jderobot::RGBPoint> cloud )
 {
+		std::cout << imageRGB.rows << std::endl;
+
 		cv::Mat distance(imageRGB.rows, imageRGB.cols, CV_32FC1);
+		cv::Mat colorDepth(imageDEPTH.size(),imageDEPTH.type());
 		CvPoint pt1,pt2;
 			if (w_toggle_rgb->get_active()){
 				Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) imageRGB.data,Gdk::COLORSPACE_RGB,false,8,imageRGB.cols,imageRGB.rows,imageRGB.step);
@@ -158,13 +161,15 @@ kinectViewergui::updateAll( cv::Mat imageRGB, cv::Mat imageDEPTH, std::vector<jd
 					util->draw_room(imageRGB,0, world->lines, world->numlines);
 				}
 	    		w_imageRGB->set(imgBuff);
+	    		while (gtkmain.events_pending())
+	    		      	gtkmain.iteration();
 			}
 			if (w_toggle_depth->get_active()||((reconstruct_depth_activate)&&(reconstructMode==0))){
 	
 				/*split channels to separate distance from image*/
 				std::vector<cv::Mat> layers;
 				cv::split(imageDEPTH, layers);
-				cv::Mat colorDepth(imageDEPTH.size(),imageDEPTH.type());
+
 				cv::cvtColor(layers[0],colorDepth,CV_GRAY2RGB);
 				/*cv::imshow("color", colorDepth);
 				cv::waitKey(1);*/
@@ -175,7 +180,8 @@ kinectViewergui::updateAll( cv::Mat imageRGB, cv::Mat imageDEPTH, std::vector<jd
 				}
 
 				if (w_toggle_depth->get_active()){
-					Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) colorDepth.data,Gdk::COLORSPACE_RGB,false,8,colorDepth.cols,colorDepth.rows,colorDepth.step);
+					cv::Mat localDepth;
+										Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) colorDepth.data,Gdk::COLORSPACE_RGB,false,8,colorDepth.cols,colorDepth.rows,colorDepth.step);
 					w_imageDEPTH->clear();
 					if (lines_depth_active){
 						util->draw_room(colorDepth,1, world->lines, world->numlines);
