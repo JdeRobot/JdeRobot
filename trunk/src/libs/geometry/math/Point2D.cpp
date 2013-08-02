@@ -22,6 +22,8 @@
  */
 
 #include "Point2D.h"
+#include "Segment2D.h"
+#include "Line2D.h"
 
 Point2D::Point2D() {
   this->point.setZero();
@@ -31,23 +33,75 @@ Point2D::Point2D(double x, double y, double h) {
   this->point << x, y, h;
 }
 
-Point2D::Point2D(Eigen::Vector2d p, double h) {
+Point2D::Point2D(Eigen::Vector2d &p, double h) {
   this->point << p(0), p(1), h;
 }
 
-Point2D::Point2D(Eigen::Vector3d p) {
+Point2D::Point2D(Eigen::Vector3d &p) {
   this->point = p;
 }
 
-Eigen::Vector3d
+Eigen::Vector3d&
 Point2D::getPoint() {
   return this->point;
 }
 
 double
-Point2D::distanceTo(Point2D p) {
+Point2D::distanceTo(Point2D &p) {
   return sqrt(G_SQUARE(this->point(0)-p.point(0)) + G_SQUARE(this->point(1)-p.point(1)));
 }
 
+bool
+Point2D::isInsideSegment(Segment2D &s) {
+  double tmp;
 
+  if(s.isPoint())
+    return false;
+
+  tmp = this->getPositionInSegment(s);
+
+  if(tmp >=0 && tmp <=1)
+    return true;
+
+  return false;
+}
+
+double
+Point2D::getPositionInSegment(Segment2D &s) {
+  double tmp;
+  Point2D ps, pe;
+
+  /*  (Px-Ax)(Bx-Ax) + (Py-Ay)(By-Ay)
+  u = -------------------------------
+      (Bx-Ax)^2 + (By-Ay)^2*/
+  
+  /*Check if the line is a point*/
+  if(s.isPoint())
+    return 0;
+
+  ps = s.getPointStart();
+  pe = s.getPointEnd();
+
+  tmp = (this->point(0)-ps.point(0))*(pe.point(0)-ps.point(0)) + (this->point(1)-ps.point(1))*(pe.point(1)-ps.point(1));
+  tmp = tmp /(G_SQUARE(pe.point(0)-ps.point(0)) + G_SQUARE(pe.point(1)-ps.point(1)));
+
+  return tmp;
+}
+
+bool
+Point2D::belongsToLine(Line2D &l) {
+  return l.hasPoint(*this);
+}
+
+bool
+Point2D::belongsToSegment(Segment2D &s) {
+  return s.hasPoint(*this);
+}
+
+Point2D &
+Point2D::operator =(const Point2D &pt) {
+  this->point = getPoint();
+
+  return *this;
+}
 

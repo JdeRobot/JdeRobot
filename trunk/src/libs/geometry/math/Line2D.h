@@ -30,27 +30,34 @@
 
 #include <math.h>
 #include <eigen3/Eigen/Dense>
-#include "Point2D.h"
+
+class Point2D;
 
 class Line2D {
 public:
   Line2D();
   Line2D(double p1x, double p1y, double p2x, double p2y);
-  Line2D(Eigen::Vector2d p1, Eigen::Vector2d p2);
-  Line2D(Point2D p1, Point2D p2);
+  Line2D(Eigen::Vector2d &p1, Eigen::Vector2d &p2);
+  Line2D(Point2D &p1, Point2D &p2);
   Line2D(double va, double vb, double vc);
-  Line2D(Eigen::Vector3d v);
+  Line2D(Eigen::Vector3d &v);
 
-  Eigen::Vector3d getVector();
+  Eigen::Vector3d& getVector();
 
   /*Calculate line from 2 2D points*/
   Eigen::Vector3d getLine(double p1x, double p1y, double p2x, double p2y);
-  Eigen::Vector3d getLine(Eigen::Vector2d p1, Eigen::Vector2d p2);
-  Eigen::Vector3d getLine(Point2D p1, Point2D p2);
+  Eigen::Vector3d getLine(Eigen::Vector2d &p1, Eigen::Vector2d &p2);
+  Eigen::Vector3d getLine(Point2D &p1, Point2D &p2);
 
   /*Calculate a 2D normal line from current 2D line and a 2D point*/
   Line2D getNormalLine(double px, double py);
-  Line2D getNormalLine(Point2D p);
+  Line2D getNormalLine(Point2D &p);
+
+  /*Intersect two lines into a 2D Point*/
+  Point2D intersectLine(Line2D &l);
+
+  /*Return true if the 2D line has a concrete 2D Point*/
+  bool hasPoint(Point2D &p);
   
 private:
 

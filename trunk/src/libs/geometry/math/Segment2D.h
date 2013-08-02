@@ -21,50 +21,47 @@
  *
  *
  *
- *  Point2D: Represents a 2D Point in homogeneous coordinates
+ *  Segment2D: Represents a 2D Segment represented by 2 2D Points
  */
 
-#ifndef POINT2D_H
-#define POINT2D_H
+#ifndef SEGMENT2D_H
+#define SEGMENT2D_H
 #define EIGEN_DONT_ALIGN_STATICALLY True
 
 #include <math.h>
 #include <eigen3/Eigen/Dense>
 #include "geoconst.h"
+#include "Line2D.h"
 
-class Segment2D;
-class Line2D;
+class Point2D;
 
-class Point2D {
+class Segment2D {
 public:
-  Point2D();
-  Point2D(double x, double y, double h=1.0);
-  Point2D(Eigen::Vector2d &p, double h=1.0);
-  Point2D(Eigen::Vector3d &p);
+  Segment2D();
+  Segment2D(Point2D &p1, Point2D &p2);
 
-  Eigen::Vector3d& getPoint();
+  Point2D& getPointStart();
+  Point2D& getPointEnd();
 
-  /*Distance between 2D points*/
-  double distanceTo(Point2D &p);
+  /*Get segment length*/
+  double getLength();
 
-  /*Check if the point is inside a 2D segment*/
-  bool isInsideSegment(Segment2D &s);
+  /*Return true if the segment is a point*/
+  bool isPoint();
 
-	/*Get the position of the point according to a segment: Solve u in P = A+u(B-A)*/
-  double getPositionInSegment(Segment2D &s);
+  /*Convert 2D segment into a 2D line*/
+  Line2D toLine();
 
-  /*Return true if the point belongs to a 2D line*/
-  bool belongsToLine(Line2D &l);
+	/*Return a 2D Point belonging to the segment: Solve P in P = A+u(B-A)*/
+  Point2D getPointInPosition(double u);
 
-  /*Return true if the point belongs to a 2D segment*/
-  bool belongsToSegment(Segment2D &s);
-
-  /*Operators*/
-  Point2D &operator =(const Point2D &pt);
+  /*Return true if the 2D segment has a concrete 2D Point*/
+  bool hasPoint(Point2D &p);
   
 private:
 
-  Eigen::Vector3d point;
+  Point2D *pstart;
+  Point2D *pend;
     
 };
 

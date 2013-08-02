@@ -22,6 +22,7 @@
  */
 
 #include "Line2D.h"
+#include "Point2D.h"
 
 Line2D::Line2D() {
   this->v.setZero();
@@ -31,11 +32,11 @@ Line2D::Line2D(double p1x, double p1y, double p2x, double p2y) {
   this->v = this->getLine(p1x, p1y, p2x, p2y);
 }
 
-Line2D::Line2D(Eigen::Vector2d p1, Eigen::Vector2d p2) {
+Line2D::Line2D(Eigen::Vector2d &p1, Eigen::Vector2d &p2) {
   this->v = this->getLine(p1, p2);
 }
 
-Line2D::Line2D(Point2D p1, Point2D p2) {
+Line2D::Line2D(Point2D &p1, Point2D &p2) {
   this->v = this->getLine(p1, p2);
 }
 
@@ -43,11 +44,11 @@ Line2D::Line2D(double va, double vb, double vc) {
   this->v << va, vb, vc;
 }
 
-Line2D::Line2D(Eigen::Vector3d v) {
+Line2D::Line2D(Eigen::Vector3d &v) {
   this->v = v;
 }
 
-Eigen::Vector3d
+Eigen::Vector3d&
 Line2D::getVector() {
   return this->v;
 }
@@ -65,7 +66,7 @@ Line2D::getLine(double p1x, double p1y, double p2x, double p2y) {
 }
 
 Eigen::Vector3d
-Line2D::getLine(Eigen::Vector2d p1, Eigen::Vector2d p2) {
+Line2D::getLine(Eigen::Vector2d &p1, Eigen::Vector2d &p2) {
   Eigen::Vector3d v;
 
   /*Get the Ax + By + C = 0 parameters*/
@@ -77,7 +78,7 @@ Line2D::getLine(Eigen::Vector2d p1, Eigen::Vector2d p2) {
 }
 
 Eigen::Vector3d
-Line2D::getLine(Point2D p1, Point2D p2) {
+Line2D::getLine(Point2D &p1, Point2D &p2) {
   return this->getLine(p1.getPoint()(0), p1.getPoint()(1), p2.getPoint()(0), p2.getPoint()(1));
 }
 
@@ -95,12 +96,31 @@ Line2D::getNormalLine(double px, double py) {
 }
 
 Line2D
-Line2D::getNormalLine(Point2D p) {
+Line2D::getNormalLine(Point2D &p) {
   return this->getNormalLine(p.getPoint()(0), p.getPoint()(1));
 }
 
+Point2D
+Line2D::intersectLine(Line2D &l) {
+	double x,y,h;
+  Point2D p;
 
+	h = this->v(0)*l.v(1) - this->v(1)*l.v(0); 		  /*x1*y2 - y1*x2*/
 
+	/*Are parallel*/	
+	if(h==0)
+		return Point2D(0.0,0.0,0.0);
+  else {
+	  x = (this->v(1)*l.v(2) - l.v(1)*this->v(2))/h; /*y1*z2 - z1*y2*/
+	  y = (this->v(2)*l.v(0) - this->v(0)*l.v(2))/h; /*z1*x2 - x1*z2*/
+    return Point2D(x,y,1.0);
+  }
+}
+
+bool
+Line2D::hasPoint(Point2D &p) {
+  return this->v(0) * p.getPoint()(0) + this->v(1) * p.getPoint()(1) + this->v(2) == 0;
+}
 
 
 /*

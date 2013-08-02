@@ -31,21 +31,21 @@ Point3D::Point3D(double x, double y, double z, double h) {
   this->point << x, y, z, h;
 }
 
-Point3D::Point3D(Eigen::Vector3d p, double h) {
+Point3D::Point3D(Eigen::Vector3d &p, double h) {
   this->point << p(0), p(1), p(2), h;
 }
 
-Point3D::Point3D(Eigen::Vector4d p) {
+Point3D::Point3D(Eigen::Vector4d &p) {
   this->point = p;
 }
 
-Eigen::Vector4d
+Eigen::Vector4d&
 Point3D::getPoint() {
   return this->point;
 }
 
 double
-Point3D::distanceTo(Point3D p) {
+Point3D::distanceTo(Point3D &p) {
   return sqrt(G_SQUARE(this->point(0)-p.point(0)) + G_SQUARE(this->point(1)-p.point(1)) + + G_SQUARE(this->point(2)-p.point(2)));
 }
 

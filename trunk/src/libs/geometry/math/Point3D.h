@@ -36,12 +36,13 @@ class Point3D {
 public:
   Point3D();
   Point3D(double x, double y, double z, double h=1.0);
-  Point3D(Eigen::Vector3d p, double h=1.0);
-  Point3D(Eigen::Vector4d p);
+  Point3D(Eigen::Vector3d &p, double h=1.0);
+  Point3D(Eigen::Vector4d &p);
 
-  Eigen::Vector4d getPoint();
+  Eigen::Vector4d& getPoint();
 
-  double distanceTo(Point3D p);
+  /*Distance between 3D points*/
+  double distanceTo(Point3D &p);
   
 private:
 
