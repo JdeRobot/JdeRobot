@@ -21,40 +21,31 @@
  *
  *
  *
- *  Line2D: Represents a 2D line with the general equation of the line: Ax+By+C = 0
+ *  Point2D: Represents a 2D Point in homogeneous coordinates
  */
 
-#ifndef LINE2D_H
-#define LINE2D_H
+#ifndef POINT2D_H
+#define POINT2D_H
 #define EIGEN_DONT_ALIGN_STATICALLY True
 
 #include <math.h>
 #include <eigen3/Eigen/Dense>
-#include "Point2D.h"
+#include "geoconst.h"
 
-class Line2D {
+class Point2D {
 public:
-  Line2D();
-  Line2D(double p1x, double p1y, double p2x, double p2y);
-  Line2D(Eigen::Vector2d p1, Eigen::Vector2d p2);
-  Line2D(Point2D p1, Point2D p2);
-  Line2D(double va, double vb, double vc);
-  Line2D(Eigen::Vector3d v);
+  Point2D();
+  Point2D(double x, double y, double h=1.0);
+  Point2D(Eigen::Vector2d p, double h=1.0);
+  Point2D(Eigen::Vector3d p);
 
-  Eigen::Vector3d getVector();
+  Eigen::Vector3d getPoint();
 
-  /*Calculate line from 2 2D points*/
-  Eigen::Vector3d getLine(double p1x, double p1y, double p2x, double p2y);
-  Eigen::Vector3d getLine(Eigen::Vector2d p1, Eigen::Vector2d p2);
-  Eigen::Vector3d getLine(Point2D p1, Point2D p2);
-
-  /*Calculate a 2D normal line from current 2D line and a 2D point*/
-  Line2D getNormalLine(double px, double py);
-  Line2D getNormalLine(Point2D p);
+  double distanceTo(Point2D p);
   
 private:
 
-  Eigen::Vector3d v;
+  Eigen::Vector3d point;
     
 };
 

@@ -416,7 +416,7 @@ void Progeo::backproject(math::Vector2H point, math::Vector3H& pro)
     ik.getMatriz()= K.getCopyMatriz();
     ik.getMatriz() = ik.getCopyMatriz().inverse();
 
-    math::Vector2H Pi(opX*this->k11/point.getH(), opY*this->k11/point.getH(),this->k11);
+    math::Vector2H Pi(opX*K.getMatriz()(0,0)/point.getH(), opY*K.getMatriz()(0,0)/point.getH(),K.getMatriz()(0,0));
 
     math::Vector2H a;
     a.vector = ik.getCopyMatriz()*Pi.vector;

@@ -391,15 +391,15 @@ int Progeo::project(Eigen::Vector4d in, Eigen::Vector3d &out)
     out = K*a.head(3);
 
     // optical 2 graphics
-    out(0) = out(0)/out(3);
-    out(1) = out(1)/out(3);
+    out(0) = out(0)/out(2);
+    out(1) = out(1)/out(2);
     out(2) = 1.0;
 
     double aux = out(0);
     out(0) = out(1);
     out(1) = this->rows-1-aux;
 
-    if (out(3)!=0.) {
+    if (out(2)!=0.) {
         return 1;
     } else {
         return 0;
@@ -408,16 +408,15 @@ int Progeo::project(Eigen::Vector4d in, Eigen::Vector3d &out)
 
 void Progeo::backproject(Eigen::Vector3d point, Eigen::Vector4d& pro)
 {
-
-    //GRAPHIC_TO_OPTICAL
+   //GRAPHIC_TO_OPTICAL
     int opX = this->rows -1 -point(1);
     int opY = point(0);
 
     Eigen::Matrix3d ik;
     ik = K;
-    ik = ik.inverse();
+    ik = ik.inverse().eval();
 
-    Eigen::Vector3d Pi(opX*this->k11/point(3), opY*this->k11/point(3),this->k11);
+    Eigen::Vector3d Pi(opX*K(0,0)/point(2), opY*K(0,0)/point(2),K(0,0));
 
     Eigen::Vector3d a;
     a = ik*Pi;
@@ -425,7 +424,7 @@ void Progeo::backproject(Eigen::Vector3d point, Eigen::Vector4d& pro)
     Eigen::Vector4d aH;
     aH(0) = a(0);
     aH(1) = a(1);
-    aH(2) = a(3);
+    aH(2) = a(2);
     aH(3) = 1.0;
 
     Eigen::Matrix4d RT2;

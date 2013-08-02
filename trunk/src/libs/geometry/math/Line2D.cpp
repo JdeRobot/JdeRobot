@@ -35,6 +35,10 @@ Line2D::Line2D(Eigen::Vector2d p1, Eigen::Vector2d p2) {
   this->v = this->getLine(p1, p2);
 }
 
+Line2D::Line2D(Point2D p1, Point2D p2) {
+  this->v = this->getLine(p1, p2);
+}
+
 Line2D::Line2D(double va, double vb, double vc) {
   this->v << va, vb, vc;
 }
@@ -72,6 +76,11 @@ Line2D::getLine(Eigen::Vector2d p1, Eigen::Vector2d p2) {
   return v;
 }
 
+Eigen::Vector3d
+Line2D::getLine(Point2D p1, Point2D p2) {
+  return this->getLine(p1.getPoint()(0), p1.getPoint()(1), p2.getPoint()(0), p2.getPoint()(1));
+}
+
 Line2D
 Line2D::getNormalLine(double px, double py) {
   Eigen::Vector3d vn;
@@ -85,3 +94,67 @@ Line2D::getNormalLine(double px, double py) {
   return Line2D(vn);
 }
 
+Line2D
+Line2D::getNormalLine(Point2D p) {
+  return this->getNormalLine(p.getPoint()(0), p.getPoint()(1));
+}
+
+
+
+
+
+/*
+Recta Recta::Perpendicular (float PuntoX, float PuntoY)
+{
+	Recta Recta_Perp;
+  
+    if ( fabs(this->m) < 0.001 ){
+        Recta_Perp.m = infinito; //( 1 / ( Recta.m * ( -1 ) ) );
+
+		Recta_Perp.c =  PuntoX;  
+	}else{
+        Recta_Perp.m = -( 1 / ( this->m ) );
+
+        Recta_Perp.c = ( ( -Recta_Perp.m *  PuntoX  ) + PuntoY );
+	}
+	return Recta_Perp;
+  
+}
+
+Recta Recta::Paralela_Der_Dist (float  distancia, float x)
+{
+  Recta recta_salida;
+
+   if( fabs(this->m) < 1000 ){
+      recta_salida.m = this->m;
+      recta_salida.c = this->c;
+
+      recta_salida.c = recta_salida.c - distancia;
+
+   }else{
+       recta_salida.m = infinito;
+       recta_salida.c = x - distancia;
+   }
+  return recta_salida;
+
+}
+Recta Recta::Paralela_Izq_Dist ( float  distancia, float x)
+{
+  Recta recta_salida;
+
+  if( fabs(this->m) < 1000 ){
+      recta_salida.m = this->m;
+      recta_salida.c = this->c;
+
+      recta_salida.c = recta_salida.c + distancia;
+
+  }else{
+      recta_salida.m = infinito;
+      recta_salida.c = x + distancia;
+  }
+
+
+
+  return recta_salida;
+
+}*/

@@ -34,7 +34,7 @@ namespace math
         public: Matriz4x4 operator*(Matriz3x3 _mat) const;
         public: Matriz4x4 operator*( Matriz4x4 &_mat) const;
         public: Vector3 operator*(Vector3 &_vec) const;
-    private:
+    //private:
         Eigen::Matrix4f matriz;
     };
 
