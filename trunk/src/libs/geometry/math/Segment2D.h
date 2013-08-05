@@ -52,11 +52,24 @@ public:
   /*Convert 2D segment into a 2D line*/
   Line2D toLine();
 
+  /*Distance between segment and point*/
+  double distanceTo(Point2D &p);
+
+  /*Calc positive angle*/
+  double getAngle();
+  double getGradient();
+
 	/*Return a 2D Point belonging to the segment: Solve P in P = A+u(B-A)*/
   Point2D getPointInPosition(double u);
 
   /*Return true if the 2D segment has a concrete 2D Point*/
   bool hasPoint(Point2D &p);
+
+  /*Intersect two segments into a 2D Point. If intersection is not valid Point2D is set at the infinite*/
+  Point2D intersectSegment(Segment2D &s);
+
+  /*Compare parallel segments with a threshold*/
+  bool parallelTo(Segment2D &s, double threshold);
   
 private:
 

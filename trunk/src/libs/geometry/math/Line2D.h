@@ -30,6 +30,7 @@
 
 #include <math.h>
 #include <eigen3/Eigen/Dense>
+#include "geoconst.h"
 
 class Point2D;
 
@@ -53,11 +54,24 @@ public:
   Line2D getNormalLine(double px, double py);
   Line2D getNormalLine(Point2D &p);
 
-  /*Intersect two lines into a 2D Point*/
+  /*Distance between line and point*/
+  double distanceTo(Point2D &p);
+
+  /*Distance between line and the coordinates origin (0,0)*/
+  double distanceToOrigin();
+
+  /*Calc positive angle*/
+  double getAngle();
+  double getGradient();
+
+  /*Intersect two lines into a 2D Point. If intersection is not valid Point2D is set at the infinite*/
   Point2D intersectLine(Line2D &l);
 
   /*Return true if the 2D line has a concrete 2D Point*/
   bool hasPoint(Point2D &p);
+
+  /*Compare parallel lines with a threshold*/
+  bool parallelTo(Line2D &l, double threshold);
   
 private:
 

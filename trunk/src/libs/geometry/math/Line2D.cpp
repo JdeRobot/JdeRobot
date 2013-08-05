@@ -100,6 +100,56 @@ Line2D::getNormalLine(Point2D &p) {
   return this->getNormalLine(p.getPoint()(0), p.getPoint()(1));
 }
 
+double
+Line2D::distanceTo(Point2D &p) {
+	/*dist = |A*x + B*y + C|
+					---------------
+					sqrt(A^2 + B^2)*/
+
+	if(this->v(0) == 0.0 && this->v(1) == 0.0)
+		return G_INFINITE;
+	
+	return abs(this->v(0)*p.getPoint()(0) + this->v(1)*p.getPoint()(1) + this->v(2))/(sqrt(G_SQUARE(this->v(0)) + G_SQUARE(this->v(1))));
+}
+
+double
+Line2D::distanceToOrigin() {
+	/*dist = 			|C|
+					---------------
+					sqrt(A^2 + B^2)*/
+
+	if(this->v(0) == 0.0 && this->v(1) == 0.0)
+		return G_INFINITE;
+
+	return abs(this->v(2))/(sqrt(G_SQUARE(this->v(0)) + G_SQUARE(this->v(1))));
+}
+
+double
+Line2D::getAngle() {
+	double alpha;
+
+	if(this->v(1) == 0.0)
+		return G_PI_2;
+
+	alpha = atan(-this->v(0)/this->v(1));
+
+	/*Normalize*/
+	if(alpha < 0)
+		alpha += G_PI;
+	if(alpha > G_PI)
+		alpha -= G_PI;	
+
+	return alpha;
+}
+
+double
+Line2D::getGradient() {
+	if(this->v(1) == 0.0)
+		return G_INFINITE;
+
+	return -this->v(0)/this->v(1);
+}
+
 Point2D
 Line2D::intersectLine(Line2D &l) {
 	double x,y,h;
@@ -122,6 +172,20 @@ Line2D::hasPoint(Point2D &p) {
   return this->v(0) * p.getPoint()(0) + this->v(1) * p.getPoint()(1) + this->v(2) == 0;
 }
 
+bool
+Line2D::parallelTo(Line2D &l, double threshold) {
+	double diff;
+
+	diff = this->getAngle() - l.getAngle();
+
+	/*Normalize*/
+	while(diff < -G_PI_2)
+		diff += G_PI;
+	while(diff > G_PI_2)
+		diff -= G_PI;
+
+	return fabs(diff) < threshold;
+}
 
 /*
 Recta Recta::Perpendicular (float PuntoX, float PuntoY)

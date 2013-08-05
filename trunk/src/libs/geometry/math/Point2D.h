@@ -44,8 +44,13 @@ public:
 
   Eigen::Vector3d& getPoint();
 
-  /*Distance between 2D points*/
+  /*Return true if the point is at the infinite*/
+  bool isInfinite();
+
+  /*Distance between 2D objects*/
   double distanceTo(Point2D &p);
+  double distanceTo(Line2D &l);
+  double distanceTo(Segment2D &s);
 
   /*Check if the point is inside a 2D segment*/
   bool isInsideSegment(Segment2D &s);

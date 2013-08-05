@@ -21,35 +21,43 @@
  *
  *
  *
- *  Point3D: Represents a 3D Point in homogeneous coordinates
+ *  Line3D: Represents a 3D line in Plücker coordinates
  */
 
-#ifndef POINT3D_H
-#define POINT3D_H
+#ifndef LINE3D_H
+#define LINE3D_H
 #define EIGEN_DONT_ALIGN_STATICALLY True
 
 #include <math.h>
 #include <eigen3/Eigen/Dense>
 #include "geoconst.h"
 
-class Point3D {
+class Point3D;
+class Plane3D;
+
+class Line3D {
 public:
-  Point3D();
-  Point3D(double x, double y, double z, double h=1.0);
-  Point3D(Eigen::Vector3d &p, double h=1.0);
-  Point3D(Eigen::Vector4d &p);
+  Line3D();
+  Line3D(Point3D &p1, Point3D &p2);
+  Line3D(Plane3D &p1, Plane3D &p2);
 
-  Eigen::Vector4d& getPoint();
+  Eigen::VectorXd& getVector();
 
-  /*Return true if the point is at the infinite*/
-  bool isInfinite();
+  /*Calculate line from 2 3D points or 2 3D planes*/
+  Eigen::VectorXd getLine(Point3D &p1, Point3D &p2);
+  Eigen::VectorXd getLine(Plane3D &p1, Plane3D &p2);
 
-  /*Distance between 3D points*/
-  double distanceTo(Point3D &p);
-  
+  /*Create a plane from a 3D point and current line*/
+  Plane3D toPlane(Point3D &p);
+ 
 private:
 
-  Eigen::Vector4d point;
+  void plucker_matrix2vector(Eigen::MatrixXd &m, Eigen::VectorXd &v);
+  void plucker_vector2matrix(Eigen::MatrixXd &m, Eigen::VectorXd &v);
+  void plucker_vector_swap(Eigen::VectorXd &v);
+
+  Eigen::VectorXd v;
+  Eigen::MatrixXd m;
     
 };
 

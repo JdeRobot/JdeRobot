@@ -21,35 +21,41 @@
  *
  *
  *
- *  Point3D: Represents a 3D Point in homogeneous coordinates
+ *  Plane3D: Represents a 3D plane with the general equation of the plane: Ax+By+Cz+D = 0
  */
 
-#ifndef POINT3D_H
-#define POINT3D_H
+#ifndef PLANE3D_H
+#define PLANE3D_H
 #define EIGEN_DONT_ALIGN_STATICALLY True
 
 #include <math.h>
 #include <eigen3/Eigen/Dense>
 #include "geoconst.h"
 
-class Point3D {
+class Point3D;
+class Line3D;
+
+class Plane3D {
 public:
-  Point3D();
-  Point3D(double x, double y, double z, double h=1.0);
-  Point3D(Eigen::Vector3d &p, double h=1.0);
-  Point3D(Eigen::Vector4d &p);
+  Plane3D();
+  Plane3D(Point3D &p1, Point3D &p2, Point3D &p3);
+  Plane3D(Line3D &l, Point3D &p);
+  Plane3D(Eigen::Vector4d p);
 
-  Eigen::Vector4d& getPoint();
+  Eigen::Vector4d& getPlane();
 
-  /*Return true if the point is at the infinite*/
-  bool isInfinite();
+  /*Calculate plane from 3 3D points*/
+  Eigen::Vector4d getPlane(Point3D &p1, Point3D &p2, Point3D &p3);
 
-  /*Distance between 3D points*/
-  double distanceTo(Point3D &p);
-  
+  /*Intersect two planes into a 3D line*/
+  Line3D intersectPlane(Plane3D &p);
+
+  /*Operators*/
+  Plane3D &operator =(const Plane3D &p);
+ 
 private:
 
-  Eigen::Vector4d point;
+  Eigen::Vector4d plane;
     
 };
 

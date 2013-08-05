@@ -46,9 +46,24 @@ Point2D::getPoint() {
   return this->point;
 }
 
+bool
+Point2D::isInfinite() {
+  return this->point(2) == 0.0;
+}
+
 double
 Point2D::distanceTo(Point2D &p) {
   return sqrt(G_SQUARE(this->point(0)-p.point(0)) + G_SQUARE(this->point(1)-p.point(1)));
+}
+
+double
+Point2D::distanceTo(Line2D &l) {
+  return l.distanceTo(*this);
+}
+
+double
+Point2D::distanceTo(Segment2D &s) {
+  return s.distanceTo(*this);
 }
 
 bool
@@ -100,7 +115,7 @@ Point2D::belongsToSegment(Segment2D &s) {
 
 Point2D &
 Point2D::operator =(const Point2D &pt) {
-  this->point = getPoint();
+  this->point = pt.point;
 
   return *this;
 }

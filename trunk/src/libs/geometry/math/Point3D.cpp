@@ -44,6 +44,11 @@ Point3D::getPoint() {
   return this->point;
 }
 
+bool
+Point3D::isInfinite() {
+  return this->point(3) == 0.0;
+}
+
 double
 Point3D::distanceTo(Point3D &p) {
   return sqrt(G_SQUARE(this->point(0)-p.point(0)) + G_SQUARE(this->point(1)-p.point(1)) + + G_SQUARE(this->point(2)-p.point(2)));

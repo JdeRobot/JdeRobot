@@ -4,7 +4,7 @@ PROJECT(libgeometry)
  
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} /usr/include/libxml2/)
 
-set(SRC_FILES math/matriz3x3.cpp  math/matriz4x4.cpp  math/plano.cpp  math/utils.cpp  math/vector2d.cpp  math/vector3.cpp  math/vector2H.cpp math/vector3H.cpp math/Line2D.cpp math/Segment2D.cpp  math/Point2D.cpp math/Point3D.cpp collada/colladaparser.cpp collada/color.cpp collada/malla.cpp collada/material.cpp collada/submalla.cpp progeo/Progeo.cpp math/segmento.cpp math/recta.cpp) 
+set(SRC_FILES math/matriz3x3.cpp  math/matriz4x4.cpp  math/plano.cpp  math/utils.cpp  math/vector2d.cpp  math/vector3.cpp  math/vector2H.cpp math/vector3H.cpp math/Line2D.cpp math/Segment2D.cpp math/Point2D.cpp math/Point3D.cpp math/Line3D.cpp math/Plane3D collada/colladaparser.cpp collada/color.cpp collada/malla.cpp collada/material.cpp collada/submalla.cpp progeo/Progeo.cpp math/segmento.cpp math/recta.cpp) 
  
 ADD_LIBRARY(geometry SHARED ${SRC_FILES})
 

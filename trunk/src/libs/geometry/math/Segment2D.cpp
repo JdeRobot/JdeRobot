@@ -57,6 +57,57 @@ Segment2D::toLine() {
   return Line2D(*(this->pstart),*(this->pend));
 }
 
+double
+Segment2D::distanceTo(Point2D &p) {
+  double pos;
+
+  /*Position in segment*/
+  pos = p.getPositionInSegment(*this);
+
+  if(pos >= 0 && pos <= 1)
+    return this->toLine().distanceTo(p);
+
+  if(pos < 0)
+    return pstart->distanceTo(p);
+  else
+    return pend->distanceTo(p);    
+}
+
+double
+Segment2D::getAngle() {
+	double alpha;
+	double diffx, diffy;
+
+	diffx = this->pend->getPoint()(0) - this->pstart->getPoint()(0);
+	diffy = this->pend->getPoint()(1) - this->pstart->getPoint()(1);
+
+	if(diffy == 0.0)
+		return G_PI_2;
+
+	alpha = atan(-diffx/diffy);
+
+	/*Normalize*/
+	if(alpha < 0)
+		alpha += G_PI;
+	if(alpha > G_PI)
+		alpha -= G_PI;	
+
+	return alpha;
+}
+
+double
+Segment2D::getGradient() {
+	double diffx, diffy;
+
+	diffx = this->pend->getPoint()(0) - this->pstart->getPoint()(0);
+	diffy = this->pend->getPoint()(1) - this->pstart->getPoint()(1);
+
+	if(diffy == 0.0)
+		return G_INFINITE;
+
+	return -diffx/diffy;
+}
+
 Point2D
 Segment2D::getPointInPosition(double u) {
   double px, py;
@@ -71,4 +122,40 @@ Segment2D::getPointInPosition(double u) {
 bool
 Segment2D::hasPoint(Point2D &p) {
   return this->toLine().hasPoint(p) && p.isInsideSegment(*this);
+}
+
+Point2D
+Segment2D::intersectSegment(Segment2D &s) {
+  Point2D p2d;
+  Line2D l1, l2;
+
+  /*Calc line intersection*/
+  l1 = this->toLine();
+  l2 = s.toLine();
+  p2d = l1.intersectLine(l2);
+
+  /*Check if p2d is valid*/
+	if(p2d.isInfinite())
+		return Point2D(0.0,0.0,0.0);
+
+	/*Check extremes*/
+	if(p2d.isInsideSegment(*this) && p2d.isInsideSegment(s))
+		return p2d;
+
+	return Point2D(0.0,0.0,0.0);
+}
+
+bool
+Segment2D::parallelTo(Segment2D &s, double threshold) {
+	double diff;
+
+	diff = this->getAngle() - s.getAngle();
+
+	/*Normalize*/
+	while(diff < -G_PI_2)
+		diff += G_PI;
+	while(diff > G_PI_2)
+		diff -= G_PI;
+
+	return fabs(diff) < threshold;
 }
