@@ -17,32 +17,26 @@
  *
  *  Authors : Alejandro Hernández <ahcorde [at] gmail [dot] com>
  *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
+ *            Eduardo Perdices <eperdices [at] gsyc [dot] es>
  *
  */
 
-#ifndef PROGEO2_H
-#define PROGEO2_H
+#ifndef PROGEOMM_H
+#define PROGEOMM_H
 
 #define EIGEN_DONT_ALIGN_STATICALLY True
 
-// standard C
 #include <iostream>
+#include <eigen3/Eigen/Dense>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
 
 /*xml*/
 #include <libxml/parser.h>
 #include <libxml/xmlreader.h>
 #include <libxml/xpath.h>
 #include <libxml/tree.h>
-
-#include "../math/vector3H.h"
-#include "../math/vector2H.h"
-#include "../math/matriz3x3.h"
-#include "../math/matriz4x4.h"
-
-#include <stdio.h>
-
-#include <stdlib.h>
-#include <errno.h>
 
 #define PI 3.141592654
 #define BIGNUM 1.0e4
@@ -61,19 +55,19 @@ public:
     Progeo();
     Progeo(std::string filename);
 
-    Progeo(math::Vector3H posCamera,
-           math::Matriz3x3 KMatrix,
-           math::Matriz4x4 RTMatrix,
+    Progeo(Eigen::Vector4d posCamera,
+           Eigen::Matrix3d KMatrix,
+           Eigen::Matrix4d RTMatrix,
            int width, int height);
 
-    void setPosition (math::Vector3H pos);
-    void setKMatrix (math::Matriz3x3 KMatrix);
-    void setRTMatrix (math::Matriz4x4 RTMatrix);
+    void setPosition (Eigen::Vector4d pos);
+    void setKMatrix (Eigen::Matrix3d KMatrix);
+    void setRTMatrix (Eigen::Matrix4d RTMatrix);
     void setImageSize (int width, int height);
     
     void display_camerainfo();
-    void backproject(math::Vector2H, math::Vector3H& pro);
-    int project(math::Vector3H in, math::Vector2H &out);
+    void backproject(Eigen::Vector3d point, Eigen::Vector4d& pro);
+    int project(Eigen::Vector4d in, Eigen::Vector3d &out);
     void update_camera_matrix();
 
 
@@ -81,13 +75,13 @@ public:
 private:
 
     /* camera 3d position in mm */
-    math::Vector3H position;
+    Eigen::Vector4d position;
 
     /* camera 3d focus of attention in mm */
-    math::Vector3H foa;
+    Eigen::Vector4d foa;
 
     /* top right and bottom left points */
-    math::Vector3 tr, bl;
+    Eigen::Vector3d tr, bl;
 
     /* camera roll position angle in rads */
     float roll;
@@ -110,11 +104,11 @@ private:
 
     /* camera K matrix */
     float k11, k12, k13, k14, k21, k22, k23, k24, k31, k32, k33, k34;
-    math::Matriz3x3 K;
+    Eigen::Matrix3d K;
 
     /* camera rotation + translation matrix */
     float rt11, rt12, rt13, rt14, rt21, rt22, rt23, rt24, rt31, rt32, rt33, rt34, rt41, rt42, rt43, rt44;
-    math::Matriz4x4 RT;
+    Eigen::Matrix4d RT;
 
     /* distortion parameters */
     float d1,d2,d3,d4,d5,d6;

@@ -17,19 +17,20 @@
  *
  *  Authors : Alejandro Hernández <ahcorde [at] gmail [dot] com>
  *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
+ *            Eduardo Perdices <eperdices [at] gsyc [dot] es>
  *
  */
 
-#include "progeo2.h"
+#include "Progeo.h"
 namespace Progeo {
 
   Progeo::Progeo()
   {
   }
   
-  Progeo::Progeo(math::Vector3H posCamera,
-		 math::Matriz3x3 KMatrix,
-		 math::Matriz4x4 RTMatrix,
+  Progeo::Progeo(Eigen::Vector4d posCamera,
+		 Eigen::Matrix3d KMatrix,
+		 Eigen::Matrix4d RTMatrix,
 		 int width, int height)
   {
 
@@ -117,17 +118,17 @@ namespace Progeo {
                     while (curAux_child != NULL) {
                         if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"x"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
-                            this->position.vector(0) = atof((char*)key);
+                            this->position(0) = atof((char*)key);
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"y"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
-                            this->position.vector(1) = atof((char*)key);
+                            this->position(1) = atof((char*)key);
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"z"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
-                            this->position.vector(2) = atof((char*)key);
+                            this->position(2) = atof((char*)key);
                             xmlFree(key);
 
                         }
@@ -139,17 +140,17 @@ namespace Progeo {
                     while (curAux_child != NULL) {
                         if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"x"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
-                            this->foa.vector(0) = atof((char*)key);
+                            this->foa(0) = atof((char*)key);
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"y"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
-                            this->foa.vector(1) = atof((char*)key);
+                            this->foa(1) = atof((char*)key);
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"z"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
-                            this->foa.vector(2) = atof((char*)key);
+                            this->foa(2) = atof((char*)key);
                             xmlFree(key);
 
                         }
@@ -162,19 +163,19 @@ namespace Progeo {
                         if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k11"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->k11 = atof((char*)key);
-                            K.getMatriz()(0,0) = this->k11;
+                            K(0,0) = this->k11;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k12"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->k12 = atof((char*)key);
-                            K.getMatriz()(0,1) = this->k12;
+                            K(0,1) = this->k12;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k13"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->k13 = atof((char*)key);
-                            K.getMatriz()(0,2) = this->k13;
+                            K(0,2) = this->k13;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k14"))) {
@@ -185,19 +186,19 @@ namespace Progeo {
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k21"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->k21 = atof((char*)key);
-                            K.getMatriz()(1,0) = this->k21;
+                            K(1,0) = this->k21;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k22"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->k22 = atof((char*)key);
-                            K.getMatriz()(1,1) = this->k22;
+                            K(1,1) = this->k22;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k23"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->k23 = atof((char*)key);
-                            K.getMatriz()(1,2) = this->k23;
+                            K(1,2) = this->k23;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k24"))) {
@@ -208,19 +209,19 @@ namespace Progeo {
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k31"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->k31 = atof((char*)key);
-                            K.getMatriz()(2,0) = this->k31;
+                            K(2,0) = this->k31;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k32"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->k32 = atof((char*)key);
-                            K.getMatriz()(2,1) = this->k32;
+                            K(2,1) = this->k32;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k33"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->k33 = atof((char*)key);
-                            K.getMatriz()(2,2) = this->k33;
+                            K(2,2) = this->k33;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k34"))) {
@@ -238,97 +239,97 @@ namespace Progeo {
                         if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt11"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt11 = atof((char*)key);
-                            RT.getMatrix()(0,0) = this->rt11;
+                            RT(0,0) = this->rt11;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt12"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt12 = atof((char*)key);
-                            RT.getMatrix()(0,1) = this->rt12;
+                            RT(0,1) = this->rt12;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt13"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt13 = atof((char*)key);
-                            RT.getMatrix()(0,2) = this->rt13;
+                            RT(0,2) = this->rt13;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt14"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt14 = atof((char*)key);
-                            RT.getMatrix()(0,3) = this->rt14;
+                            RT(0,3) = this->rt14;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt21"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt21 = atof((char*)key);
-                            RT.getMatrix()(1,0) = this->rt21;
+                            RT(1,0) = this->rt21;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt22"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt22 = atof((char*)key);
-                            RT.getMatrix()(1,1) = this->rt22;
+                            RT(1,1) = this->rt22;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt23"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt23 = atof((char*)key);
-                            RT.getMatrix()(1,2) = this->rt23;
+                            RT(1,2) = this->rt23;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt24"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt24 = atof((char*)key);
-                            RT.getMatrix()(1,3) = this->rt24;
+                            RT(1,3) = this->rt24;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt31"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt31 = atof((char*)key);
-                            RT.getMatrix()(2,0) = this->rt31;
+                            RT(2,0) = this->rt31;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt32"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt32 = atof((char*)key);
-                            RT.getMatrix()(2,1) = this->rt32;
+                            RT(2,1) = this->rt32;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt33"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt33 = atof((char*)key);
-                            RT.getMatrix()(2,2) = this->rt33;
+                            RT(2,2) = this->rt33;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt34"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt34 = atof((char*)key);
-                            RT.getMatrix()(2,3) = this->rt34;
+                            RT(2,3) = this->rt34;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt41"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt41 = atof((char*)key);
-                            RT.getMatrix()(3,0) = this->rt41;
+                            RT(3,0) = this->rt41;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt42"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt42 = atof((char*)key);
-                            RT.getMatrix()(3,1) = this->rt42;
+                            RT(3,1) = this->rt42;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt43"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt43 = atof((char*)key);
-                            RT.getMatrix()(3,2) = this->rt43;
+                            RT(3,2) = this->rt43;
                             xmlFree(key);
 
                         } else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt44"))) {
                             key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
                             this->rt44 = atof((char*)key);
-                            RT.getMatrix()(3,3) = this->rt44;
+                            RT(3,3) = this->rt44;
                             xmlFree(key);
 
                         }
@@ -348,14 +349,14 @@ namespace Progeo {
 void Progeo::display_camerainfo() {
     printf("------------------------------------------------------\n");
     printf("Camera %s\n\n", this->name.c_str());
-    printf("     Position: (X,Y,Z,H)=(%.1f,%.1f,%.1f,%.1f)\n",   position.getX(),
-           position.getY(),
-           position.getZ(),
-           position.getH());
-    printf("     Focus of Attention: (x,y,z,h)=(%.1f,%.1f,%.1f,%.1f)\n\n",  foa.getX(),
-           foa.getY(),
-           foa.getZ(),
-           foa.getH());
+    printf("     Position: (X,Y,Z,H)=(%.1f,%.1f,%.1f,%.1f)\n",   position(0),
+           position(1),
+           position(2),
+           position(3));
+    printf("     Focus of Attention: (x,y,z,h)=(%.1f,%.1f,%.1f,%.1f)\n\n",  foa(0),
+           foa(1),
+           foa(2),
+           foa(3));
     printf("     Focus DistanceX(vertical): %.1f mm\n",fdistx);
     printf("     Focus DistanceY(horizontal): %.1f mm\n",fdisty);
 
@@ -367,107 +368,107 @@ void Progeo::display_camerainfo() {
     //  std::cout << "\t\t\t" << k31 << " " << k32 << " " << k33 << " " << k34 << std::endl;
     //std::cout << "\t\t\t\t" << k41 << " " << k42 << " " << k43 << " " << k44 << std::endl;
 
-    std::cout << "K Matrix: \n" << K.getMatriz() << std::endl;
+    std::cout << "K Matrix: \n" << K << std::endl;
 
     //  std::cout << "\t\tR&T Matrix:\t" << rt11 << " " << rt12 << " " << rt13 << " " << rt14 << std::endl;
     //  std::cout << "\t\t\t" << rt21 << " " << rt22 << " " << rt23 << " " << rt24 << std::endl;
     //  std::cout << "\t\t\t" << rt31 << " " << rt32 << " " << rt33 << " " << rt34 << std::endl;
     //  std::cout << "\t\t\t" << rt41 << " " << rt42 << " " << rt43 << " " << rt44 << std::endl;
 
-    std::cout <<" R&T Matrix:\n"<<  RT.getMatrix() << std::endl;
+    std::cout <<" R&T Matrix:\n"<<  RT << std::endl;
 
     printf("------------------------------------------------------\n");
 }
 
-int Progeo::project(math::Vector3H in, math::Vector2H &out)
+int Progeo::project(Eigen::Vector4d in, Eigen::Vector3d &out)
 /* returns -1 if the point lies behind the camera,
    returns 1 if "in" 3Dpoint projects into a 2D finite point,
    0 otherwise */
 {
-    math::Vector3H a;
-    a.vector = RT.getCopyMatrix()*in.vector;
+    Eigen::Vector4d a;
+    a = RT*in;
 
-    out.vector = K.getCopyMatriz()*a.vector.head(3);
+    out = K*a.head(3);
 
     // optical 2 graphics
-    out.setX(out.getX()/out.getH());
-    out.setY(out.getY()/out.getH());
-    out.setH(1.0);
+    out(0) = out(0)/out(2);
+    out(1) = out(1)/out(2);
+    out(2) = 1.0;
 
-    float aux =out.getX();
-    out.setX(out.getY());
-    out.setY(this->rows-1-aux);
+    double aux = out(0);
+    out(0) = out(1);
+    out(1) = this->rows-1-aux;
 
-    if (out.getH()!=0.) {
+    if (out(2)!=0.) {
         return 1;
     } else {
         return 0;
     }
 }
 
-void Progeo::backproject(math::Vector2H point, math::Vector3H& pro)
+void Progeo::backproject(Eigen::Vector3d point, Eigen::Vector4d& pro)
 {
+   //GRAPHIC_TO_OPTICAL
+    int opX = this->rows -1 -point(1);
+    int opY = point(0);
 
-    //GRAPHIC_TO_OPTICAL
-    int opX = this->rows -1 -point.getY();
-    int opY = point.getX();
+    Eigen::Matrix3d ik;
+    ik = K;
+    ik = ik.inverse().eval();
 
-    math::Matriz3x3 ik;
-    ik.getMatriz()= K.getCopyMatriz();
-    ik.getMatriz() = ik.getCopyMatriz().inverse();
+    Eigen::Vector3d Pi(opX*K(0,0)/point(2), opY*K(0,0)/point(2),K(0,0));
 
-    math::Vector2H Pi(opX*K.getMatriz()(0,0)/point.getH(), opY*K.getMatriz()(0,0)/point.getH(),K.getMatriz()(0,0));
+    Eigen::Vector3d a;
+    a = ik*Pi;
 
-    math::Vector2H a;
-    a.vector = ik.getCopyMatriz()*Pi.vector;
+    Eigen::Vector4d aH;
+    aH(0) = a(0);
+    aH(1) = a(1);
+    aH(2) = a(2);
+    aH(3) = 1.0;
 
-    math::Vector3H aH;
-    aH.setX(a.getX());
-    aH.setY(a.getY());
-    aH.setZ(a.getH());
-    aH.setH(1.0);
+    Eigen::Matrix4d RT2;
+    RT2 = RT;
 
-    math::Matriz4x4 RT2;
-    RT2.getMatrix() = RT.getCopyMatrix();
-
-    RT2.getMatrix()(0, 3) = .0;
-    RT2.getMatrix()(1, 3) = .0;
-    RT2.getMatrix()(2, 3) = .0;
-    RT2.getMatrix()(3, 3) = 1.0;
+    RT2(0, 3) = .0;
+    RT2(1, 3) = .0;
+    RT2(2, 3) = .0;
+    RT2(3, 3) = 1.0;
 
 
-    math::Vector3H b;
+    Eigen::Vector4d b;
 
-    b.vector = RT2.getCopyMatrix()*aH.vector;
+    b = RT2*aH;
 
-    math::Matriz4x4 Translate(math::Matriz4x4::IDENTITY);
-    Translate.getMatrix()(0, 3) = position.getX();
-    Translate.getMatrix()(1, 3) = position.getY();
-    Translate.getMatrix()(2, 3) = position.getZ();
+    Eigen::Matrix4d Translate;
+    Translate.setIdentity();
+    Translate(0, 3) = position(0);
+    Translate(1, 3) = position(1);
+    Translate(2, 3) = position(2);
 
-    b.vector = Translate.getCopyMatrix()*b.vector;
+    b = Translate*b;
 
-    pro.setX(b.getX()/b.getH());
-    pro.setY(b.getY()/b.getH());
-    pro.setZ(b.getZ()/b.getH());
-    pro.setH(b.getH());
+    pro(0) = b(0)/b(3);
+    pro(1) = b(1)/b(3);
+    pro(2) = b(2)/b(3);
+    pro(3) = b(3);
 }
 
-  void Progeo::setPosition (math::Vector3H pos)
+  void Progeo::setPosition (Eigen::Vector4d pos)
   {
     position = pos;
   }
 
-  void Progeo::setKMatrix (math::Matriz3x3 KMatrix)
+  void Progeo::setKMatrix (Eigen::Matrix3d KMatrix)
   {
     K = KMatrix;
-    fdistx = K.getMatriz()(0,0);
-    fdisty = K.getMatriz()(1,1);
-    u0 = K.getMatriz()(0,2);
-    v0 = K.getMatriz()(1,2);
+    fdistx = K(0,0);
+    fdisty = K(1,1);
+    u0 = K(0,2);
+    v0 = K(1,2);
   }
 
-  void Progeo::setRTMatrix (math::Matriz4x4 RTMatrix)
+  void Progeo::setRTMatrix (Eigen::Matrix4d RTMatrix)
   {
     RT = RTMatrix;
   }
@@ -481,13 +482,13 @@ void Progeo::backproject(math::Vector2H point, math::Vector3H& pro)
   void Progeo::update_camera_matrix()
   {}
 //{
-//  float rc11,rc12,rc13,rc21,rc22,rc23,rc31,rc32,rc33;
-//  float rab11,rab12,rab13,rab21,rab22,rab23,rab31,rab32,rab33;
-//  float r;
+//  double rc11,rc12,rc13,rc21,rc22,rc23,rc31,rc32,rc33;
+//  double rab11,rab12,rab13,rab21,rab22,rab23,rab31,rab32,rab33;
+//  double r;
 //  /* a very small value but not infinite!! */
-//  float SMALL=0.0001;
+//  double SMALL=0.0001;
 //  double t;
-//  float ux,uy,uz,vx,vy,vz,wx,wy,wz;
+//  double ux,uy,uz,vx,vy,vz,wx,wy,wz;
 
 //  camera->foa.H=1.;
 //  camera->position.H=1;
@@ -496,7 +497,7 @@ void Progeo::backproject(math::Vector2H point, math::Vector3H& pro)
 //  rab31=camera->foa.X-camera->position.X;
 //  rab32=camera->foa.Y-camera->position.Y;
 //  rab33=camera->foa.Z-camera->position.Z;
-//  r=(float)sqrt((double)(rab31*rab31+rab32*rab32+rab33*rab33));
+//  r=(double)sqrt((double)(rab31*rab31+rab32*rab32+rab33*rab33));
 //  rab31=rab31/r; rab32=rab32/r; rab33=rab33/r;
 
 //  /* Second method:*/
@@ -504,8 +505,8 @@ void Progeo::backproject(math::Vector2H point, math::Vector3H& pro)
 //  wy=rab32;
 //  wz=rab33;
 //  t = atan2(-wx,wy);
-//  vx=(float)cos(t);
-//  vy=(float)sin(t);
+//  vx=(double)cos(t);
+//  vy=(double)sin(t);
 //  vz=0.;
 //  ux=vy*wz-wy*vz;
 //  uy=-vx*wz+wx*vz;
@@ -531,12 +532,12 @@ void Progeo::backproject(math::Vector2H point, math::Vector3H& pro)
 //      rab31=0.; rab32=0.; rab33=1.;
 //    }else{
 //    rab11=rab31*rab33; rab12=rab32*rab33; rab13=-rab31*rab31-rab32*rab32;
-//    r=(float)sqrt((double)(rab11*rab11+rab12*rab12+rab13*rab13));
+//    r=(double)sqrt((double)(rab11*rab11+rab12*rab12+rab13*rab13));
 //    rab11=rab11/r; rab12=rab12/r; rab13=rab13/r;
 //    if (rab13<0.) {rab11=-rab11; rab12=-rab12; rab13=-rab13;}
 
 //    rab21=rab32*rab13-rab12*rab33; rab22=rab11*rab33-rab31*rab13; rab23=rab31*rab12-rab11*rab32;
-//    r=(float)sqrt((double)(rab21*rab21+rab22*rab22+rab23*rab23));
+//    r=(double)sqrt((double)(rab21*rab21+rab22*rab22+rab23*rab23));
 //    rab21=rab21/r; rab22=rab22/r; rab23=rab23/r;
 //  }
 //  */
