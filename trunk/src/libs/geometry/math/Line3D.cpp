@@ -76,6 +76,15 @@ Line3D::toPlane(Point3D &p) {
   return Plane3D(plane);
 }
 
+Point3D
+Line3D::intersectPlane(Plane3D &p) {
+   Eigen::Vector4d point;
+
+  this->plucker_vector2matrix(this->m, this->v);
+  point = this->m * p.getPlane();  
+  return Point3D(point); 
+}
+
 void
 Line3D::plucker_matrix2vector(Eigen::MatrixXd &m, Eigen::VectorXd &v) {
   v << m(0,1), m(0,2), m(0,3), m(1,2), m(3,1), m(2,3);

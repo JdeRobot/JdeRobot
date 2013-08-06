@@ -21,46 +21,41 @@
  *
  *
  *
- *  Line3D: Represents a 3D line in Plücker coordinates
+ *  Segment3D: Represents a 3D Segment represented by 2 3D Points
  */
 
-#ifndef LINE3D_H
-#define LINE3D_H
+#ifndef SEGMENT3D_H
+#define SEGMENT3D_H
 #define EIGEN_DONT_ALIGN_STATICALLY True
 
 #include <math.h>
 #include <eigen3/Eigen/Dense>
 #include "geoconst.h"
+#include "Line3D.h"
 
 class Point3D;
-class Plane3D;
 
-class Line3D {
+class Segment3D {
 public:
-  Line3D();
-  Line3D(Point3D &p1, Point3D &p2);
-  Line3D(Plane3D &p1, Plane3D &p2);
+  Segment3D();
+  Segment3D(Point3D &p1, Point3D &p2);
 
-  Eigen::VectorXd& getVector();
+  Point3D& getPointStart();
+  Point3D& getPointEnd();
 
-  /*Calculate line from 2 3D points or 2 3D planes*/
-  Eigen::VectorXd getLine(Point3D &p1, Point3D &p2);
-  Eigen::VectorXd getLine(Plane3D &p1, Plane3D &p2);
+  /*Get segment length*/
+  double getLength();
 
-  /*Create a plane from a 3D point and current line*/
-  Plane3D toPlane(Point3D &p);
+  /*Return true if the segment is a point*/
+  bool isPoint();
 
-  /*Intersect the line with a plane and get a 3D point*/
-  Point3D intersectPlane(Plane3D &p);
- 
+  /*Convert 3D segment into a 3D line*/
+  Line3D toLine();
+  
 private:
 
-  void plucker_matrix2vector(Eigen::MatrixXd &m, Eigen::VectorXd &v);
-  void plucker_vector2matrix(Eigen::MatrixXd &m, Eigen::VectorXd &v);
-  void plucker_vector_swap(Eigen::VectorXd &v);
-
-  Eigen::VectorXd v;
-  Eigen::MatrixXd m;
+  Point3D *pstart;
+  Point3D *pend;
     
 };
 

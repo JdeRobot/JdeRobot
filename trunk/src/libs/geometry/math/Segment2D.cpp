@@ -25,6 +25,8 @@
 #include "Point2D.h"
 
 Segment2D::Segment2D() {
+  this->pstart = new Point2D();
+  this->pend = new Point2D();
 }
 
 Segment2D::Segment2D(Point2D &p1, Point2D &p2) {
