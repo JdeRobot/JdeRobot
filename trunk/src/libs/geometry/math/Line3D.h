@@ -15,9 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
- *  Authors : Alejandro Hernández <ahcorde [at] gmail [dot] com>
- *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
- *            Eduardo Perdices <eperdices [at] gsyc [dot] es>
+ *  Authors : Eduardo Perdices <eperdices [at] gsyc [dot] es>
  *
  *
  *
@@ -52,6 +50,12 @@ public:
 
   /*Intersect the line with a plane and get a 3D point*/
   Point3D intersectPlane(Plane3D &p);
+
+  /*Return true if the 3D line has a concrete 3D Point*/
+  bool hasPoint(Point3D &p);
+
+  /*Operators*/
+  friend std::ostream& operator <<(std::ostream &o,const Line3D &l);
  
 private:
 

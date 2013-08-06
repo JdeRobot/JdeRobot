@@ -15,9 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
- *  Authors : Alejandro Hernández <ahcorde [at] gmail [dot] com>
- *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
- *            Eduardo Perdices <eperdices [at] gsyc [dot] es>
+ *  Authors : Eduardo Perdices <eperdices [at] gsyc [dot] es>
  *
  *
  *
@@ -32,6 +30,9 @@
 #include <eigen3/Eigen/Dense>
 #include "geoconst.h"
 
+class Line3D;
+class Plane3D;
+
 class Point3D {
 public:
   Point3D();
@@ -44,8 +45,20 @@ public:
   /*Return true if the point is at the infinite*/
   bool isInfinite();
 
+  /*Normaliza point. Return true the point is not the infinite*/
+  bool normalize();
+
   /*Distance between 3D points*/
   double distanceTo(Point3D &p);
+
+  /*Return true if the point belongs to a 3D line*/
+  bool belongsToLine(Line3D &l);
+
+  /*Return true if the point belongs to a 3D plane*/
+  bool belongsToPlane(Plane3D &p);
+
+  /*Operators*/
+  friend std::ostream& operator <<(std::ostream &o,const Point3D &p);
   
 private:
 

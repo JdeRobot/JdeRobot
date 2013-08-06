@@ -15,9 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
- *  Authors : Alejandro Hernández <ahcorde [at] gmail [dot] com>
- *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
- *            Eduardo Perdices <eperdices [at] gsyc [dot] es>
+ *  Authors : Eduardo Perdices <eperdices [at] gsyc [dot] es>
  *
  */
 
@@ -49,6 +47,15 @@ Point2D::getPoint() {
 bool
 Point2D::isInfinite() {
   return this->point(2) == 0.0;
+}
+
+bool
+Point2D::normalize() {
+  if(this->point(2) == 0.0)
+    return false;
+
+  this->point = this->point/this->point(2);
+  return true;
 }
 
 double
@@ -113,10 +120,15 @@ Point2D::belongsToSegment(Segment2D &s) {
   return s.hasPoint(*this);
 }
 
-Point2D &
+Point2D&
 Point2D::operator =(const Point2D &pt) {
   this->point = pt.point;
 
   return *this;
 }
 
+std::ostream&
+operator <<(std::ostream &o,const Point2D &p) {
+  o << "(" << p.point(0) << "," << p.point(1) << "," << p.point(2) << ")";
+  return o;
+}

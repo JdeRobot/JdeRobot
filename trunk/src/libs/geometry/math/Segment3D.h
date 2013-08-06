@@ -15,9 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
- *  Authors : Alejandro Hernández <ahcorde [at] gmail [dot] com>
- *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
- *            Eduardo Perdices <eperdices [at] gsyc [dot] es>
+ *  Authors : Eduardo Perdices <eperdices [at] gsyc [dot] es>
  *
  *
  *
@@ -51,6 +49,9 @@ public:
 
   /*Convert 3D segment into a 3D line*/
   Line3D toLine();
+
+  /*Operators*/
+  friend std::ostream& operator <<(std::ostream &o,const Segment3D &s);
   
 private:
 

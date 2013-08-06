@@ -15,9 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
- *  Authors : Alejandro Hernández <ahcorde [at] gmail [dot] com>
- *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
- *            Eduardo Perdices <eperdices [at] gsyc [dot] es>
+ *  Authors : Eduardo Perdices <eperdices [at] gsyc [dot] es>
  *
  */
 
@@ -185,6 +183,12 @@ Line2D::parallelTo(Line2D &l, double threshold) {
 		diff -= G_PI;
 
 	return fabs(diff) < threshold;
+}
+
+std::ostream&
+operator <<(std::ostream &o,const Line2D &l) {
+  o << l.v;
+  return o;
 }
 
 /*

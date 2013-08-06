@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
- *  Authors : Alejandro Hernández <ahcorde [at] gmail [dot] com>
- *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
- *            Eduardo Perdices <eperdices [at] gsyc [dot] es>
+ *  Authors : Eduardo Perdices <eperdices [at] gsyc [dot] es>
  *
  */
 
 #include "Point3D.h"
+#include "Line3D.h"
+#include "Plane3D.h"
 
 Point3D::Point3D() {
   this->point.setZero();
@@ -49,10 +49,33 @@ Point3D::isInfinite() {
   return this->point(3) == 0.0;
 }
 
+bool
+Point3D::normalize() {
+  if(this->point(3) == 0.0)
+    return false;
+
+  this->point = this->point/this->point(3);
+  return true;
+}
+
 double
 Point3D::distanceTo(Point3D &p) {
   return sqrt(G_SQUARE(this->point(0)-p.point(0)) + G_SQUARE(this->point(1)-p.point(1)) + + G_SQUARE(this->point(2)-p.point(2)));
 }
 
+bool
+Point3D::belongsToLine(Line3D &l) {
+  return l.hasPoint(*this);
+}
 
+bool
+Point3D::belongsToPlane(Plane3D &p) {
+  return p.hasPoint(*this);
+}
+
+std::ostream&
+operator <<(std::ostream &o,const Point3D &p) {
+  o << "(" << p.point(0) << "," << p.point(1) << "," << p.point(2) << "," << p.point(3) << ")";
+  return o;
+}
 

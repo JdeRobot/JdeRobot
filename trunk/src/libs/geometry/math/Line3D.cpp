@@ -15,9 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
- *  Authors : Alejandro Hernández <ahcorde [at] gmail [dot] com>
- *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
- *            Eduardo Perdices <eperdices [at] gsyc [dot] es>
+ *  Authors : Eduardo Perdices <eperdices [at] gsyc [dot] es>
  *
  */
 
@@ -67,22 +65,44 @@ Line3D::getLine(Plane3D &p1, Plane3D &p2) {
   return v;
 }
 
+
 Plane3D
 Line3D::toPlane(Point3D &p) {
+  Eigen::VectorXd v;
   Eigen::Vector4d plane;
 
-  this->plucker_vector2matrix(this->m, this->v);
+  v = this->v;
+  this->plucker_vector_swap(v);
+  this->plucker_vector2matrix(this->m, v);
   plane = this->m * p.getPoint();
   return Plane3D(plane);
 }
 
 Point3D
 Line3D::intersectPlane(Plane3D &p) {
-   Eigen::Vector4d point;
+  Eigen::Vector4d point;
 
   this->plucker_vector2matrix(this->m, this->v);
   point = this->m * p.getPlane();  
   return Point3D(point); 
+}
+
+bool
+Line3D::hasPoint(Point3D &p) {
+  Eigen::VectorXd v, res;
+
+  v = this->v;
+  this->plucker_vector_swap(v);
+  this->plucker_vector2matrix(this->m, v);
+  res = this->m*p.getPoint();
+
+  return res.isZero();
+}
+
+std::ostream&
+operator <<(std::ostream &o,const Line3D &l) {
+  o << l.v;
+  return o;
 }
 
 void

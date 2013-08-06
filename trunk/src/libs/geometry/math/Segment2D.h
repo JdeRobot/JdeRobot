@@ -15,9 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
- *  Authors : Alejandro Hernández <ahcorde [at] gmail [dot] com>
- *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
- *            Eduardo Perdices <eperdices [at] gsyc [dot] es>
+ *  Authors : Eduardo Perdices <eperdices [at] gsyc [dot] es>
  *
  *
  *
@@ -70,6 +68,9 @@ public:
 
   /*Compare parallel segments with a threshold*/
   bool parallelTo(Segment2D &s, double threshold);
+
+  /*Operators*/
+  friend std::ostream& operator <<(std::ostream &o,const Segment2D &s);
   
 private:
 

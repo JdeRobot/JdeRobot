@@ -1,3 +1,5 @@
+#include <iostream>
+
 #ifndef G_SQUARE
 #define G_SQUARE(a) ( (a) * (a) )
 #endif

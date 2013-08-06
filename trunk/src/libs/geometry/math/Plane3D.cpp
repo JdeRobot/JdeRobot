@@ -15,9 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
- *  Authors : Alejandro Hernández <ahcorde [at] gmail [dot] com>
- *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
- *            Eduardo Perdices <eperdices [at] gsyc [dot] es>
+ *  Authors : Eduardo Perdices <eperdices [at] gsyc [dot] es>
  *
  */
 
@@ -32,6 +30,7 @@ Plane3D::Plane3D() {
 Plane3D::Plane3D(Point3D &p1, Point3D &p2, Point3D &p3) {
   this->plane = this->getPlane(p1, p2, p3);
 }
+
 
 Plane3D::Plane3D(Line3D &l, Point3D &p) {
   this->plane = l.toPlane(p).plane;
@@ -66,10 +65,21 @@ Plane3D::intersectPlane(Plane3D &p) {
   return Line3D(*this, p);
 }
 
+bool
+Plane3D::hasPoint(Point3D &p) {
+  return this->plane(0) * p.getPoint()(0) + this->plane(1) * p.getPoint()(1) + this->plane(2) * p.getPoint()(2) + this->plane(3) == 0;
+}
+
 Plane3D &
 Plane3D::operator =(const Plane3D &p) {
   this->plane = p.plane;
 
   return *this;
+}
+
+std::ostream&
+operator <<(std::ostream &o,const Plane3D &p) {
+  o << p.plane;
+  return o;
 }
 

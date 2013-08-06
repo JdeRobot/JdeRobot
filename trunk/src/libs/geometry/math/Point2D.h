@@ -15,9 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
- *  Authors : Alejandro Hernández <ahcorde [at] gmail [dot] com>
- *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
- *            Eduardo Perdices <eperdices [at] gsyc [dot] es>
+ *  Authors : Eduardo Perdices <eperdices [at] gsyc [dot] es>
  *
  *
  *
@@ -47,6 +45,9 @@ public:
   /*Return true if the point is at the infinite*/
   bool isInfinite();
 
+  /*Normaliza point. Return true the point is not the infinite*/
+  bool normalize();
+
   /*Distance between 2D objects*/
   double distanceTo(Point2D &p);
   double distanceTo(Line2D &l);
@@ -65,8 +66,9 @@ public:
   bool belongsToSegment(Segment2D &s);
 
   /*Operators*/
-  Point2D &operator =(const Point2D &pt);
-  
+  Point2D& operator =(const Point2D &pt);
+  friend std::ostream& operator <<(std::ostream &o,const Point2D &p);
+
 private:
 
   Eigen::Vector3d point;
