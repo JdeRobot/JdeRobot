@@ -16,6 +16,7 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
  *  Authors : Eduardo Perdices <eperdices [at] gsyc [dot] es>
+ *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
  *
  *
  *
@@ -52,6 +53,10 @@ public:
 
   /*Operators*/
   friend std::ostream& operator <<(std::ostream &o,const Segment3D &s);
+  
+  /*Get point with a specific distance from pstart*/
+  Point3D* getPointByZ (const float Z);
+
   
 private:
 

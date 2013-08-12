@@ -3,7 +3,7 @@
  *  Copyright (C) 1997-2013 JDERobot Developers Team
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published this->pend->getPoint()(1)
+ *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
@@ -16,6 +16,7 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
  *  Authors : Eduardo Perdices <eperdices [at] gsyc [dot] es>
+ *            Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
  *
  */
 
@@ -61,5 +62,29 @@ std::ostream&
 operator <<(std::ostream &o,const Segment3D &s) {
   o << *s.pstart << " -> " << *s.pend;
   return o;
+}
+
+Point3D*
+Segment3D::getPointByZ (const float Z)
+{
+
+  // create Vector
+  double x,y,z,t;
+  x = pstart->getPoint()(0) - pend->getPoint()(0);
+  y = pstart->getPoint()(1) - pend->getPoint()(1);
+  z = pstart->getPoint()(2) - pend->getPoint()(2);
+
+  Point3D *vector = new Point3D(x,y,z);
+  
+  // pstart and vector define the segment in parametrics
+  t = (Z - pstart->getPoint()(2)) / vector->getPoint()(2);
+  x = pstart->getPoint()(0) + t*vector->getPoint()(0);
+  y = pstart->getPoint()(1) + t*vector->getPoint()(1);
+  z = Z;  
+
+  delete(vector);
+
+  Point3D* res = new Point3D(x,y,z);
+  return res;
 }
 
