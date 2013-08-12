@@ -129,6 +129,10 @@ include(${DEPS_DIR}/nite2/CMakeLists.txt)
 include(${DEPS_DIR}/pthread/CMakeLists.txt)
 include(${DEPS_DIR}/libxml++/CMakeLists.txt)
 include(${DEPS_DIR}/libxml2/CMakeLists.txt)
+include(${DEPS_DIR}/boost/CMakeLists.txt)
+include(${DEPS_DIR}/alut/CMakeLists.txt)
+include(${DEPS_DIR}/tinyxml/CMakeLists.txt)
+
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
 
