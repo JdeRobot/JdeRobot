@@ -26,6 +26,9 @@
 #include <boost/filesystem.hpp>
 #include "calibration.h"
 
+#define DEGTORAD     (3.14159264 / 180.0)
+#define DEBUG TRUE
+
 using namespace boost::filesystem; 
 using namespace cv;
 
@@ -40,7 +43,7 @@ namespace rgbdCalibrator{
 
   Viewer::Viewer() 
     : gtkmain(0,0),frameCount(0),
-      intrinsicsEnable(0),contPhoto(1) {
+      intrinsicsEnable(0),contPhoto(1),hsvFilter(NULL) {
 
     std::cout << "Loading glade\n";
 
@@ -55,25 +58,34 @@ namespace rgbdCalibrator{
     refXml->get_widget("et_num_photo", etNumPhoto);
     refXml->get_widget("tv_status", tvStatus);
     refXml->get_widget("bt_intrinsic_calib", btIntrinsic);
+    refXml->get_widget("eventbox", ebImage);
 
     // connect signals
     btTakePhoto->signal_clicked().connect(sigc::mem_fun(this,&Viewer::on_bt_take_photo_clicked));
 
     btIntrinsic->signal_clicked().connect(sigc::mem_fun(this,&Viewer::on_bt_intrinsic));
-        
+    ebImage->signal_button_press_event().connect(sigc::mem_fun(this, &Viewer::on_eventbox_clicked));   
 
     // start the timer for calculating the number of frames per second
     // the images are being displayed at
     oldFrameTime = IceUtil::Time::now();
 
-   
+    RGB2HSV_init();
+    RGB2HSV_createTable();
+    pthread_mutex_init(&mutex, NULL);
+    
+
   }
     
 
-  Viewer::~Viewer() {}
+  Viewer::~Viewer() 
+  {
+    RGB2HSV_destroyTable();
+  }
 
   bool Viewer::isVisible(){
     return mainwindow->is_visible();
+    
   }
 
   void Viewer::display( const colorspaces::Image& imageColor, const colorspaces::Image& imageDepth )
@@ -95,20 +107,32 @@ namespace rgbdCalibrator{
       saveImage(imageColor);
     
 
-    colorspaces::ImageRGB8 img_rgb8D(imageDepth);
-    Glib::RefPtr<Gdk::Pixbuf> imgBuffDepth = 
-      Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8D.data,
-				    Gdk::COLORSPACE_RGB,
-				    false,
-				    8,
-				    img_rgb8D.width,
-				    img_rgb8D.height,
-				    img_rgb8D.step);
+    pthread_mutex_lock(&mutex);
+    imgOrig.create(imageColor.size(), CV_8UC3);
+    imageColor.copyTo(imgOrig);
+    pthread_mutex_unlock(&mutex);
     
-    gtkimage_depth->clear();
-    gtkimage_depth->set(imgBuffDepth);
     
+    if (hsvFilter != NULL)
+    {
+      createImageHSV();
+    
+          
+      //colorspaces::ImageRGB8 img_rgb8D(imgHSV);
+      Glib::RefPtr<Gdk::Pixbuf> imgBuffDepth = 
+	Gdk::Pixbuf::create_from_data((const guint8*)imgHSV.data,
+				      Gdk::COLORSPACE_RGB,
+				      false,
+				      8,
+				      imgHSV.size().width,
+				      imgHSV.size().height,
+				      imgHSV.step);
+      
+      gtkimage_depth->clear();
+      gtkimage_depth->set(imgBuffDepth);
+      
 
+    }
 
     displayFrameRate();
     mainwindow->resize(1,1);
@@ -116,6 +140,33 @@ namespace rgbdCalibrator{
       gtkmain.iteration();
   }
     
+  void Viewer::createImageHSV()
+  {
+    float r,g,b;
+
+    imgHSV.create(imgOrig.size(), CV_8UC1);
+    imgOrig.copyTo(imgHSV);
+    
+    for (int i=0;i< imgHSV.size().width*imgHSV.size().height; i++)
+    {
+      r = (float)(unsigned int)(unsigned char) imgOrig.data[i*3];
+      g = (float)(unsigned int)(unsigned char) imgOrig.data[i*3+1];
+      b = (float)(unsigned int)(unsigned char) imgOrig.data[i*3+2];
+
+      const HSV* hsvData =  RGB2HSV_getHSV (r,g,b);
+
+      if( hmax >= hsvData->H*DEGTORAD && hmin <= hsvData->H*DEGTORAD 
+	  && smax >= hsvData->S && smin <= hsvData->S
+	  && vmax >= hsvData->V && vmin <=  hsvData->V )
+      {
+      }
+      else
+	imgHSV.data[i*3] = imgHSV.data[i*3+1] = imgHSV.data[i*3+2] = 0;
+
+    }
+      
+  }
+
   void Viewer::setDepth(const jderobot::ImageDataPtr depth)
   {
     dataDepth = depth;
@@ -141,6 +192,56 @@ namespace rgbdCalibrator{
       fpsLabel->set_label(fpsString.str());
     }
   }
+
+ bool Viewer::on_eventbox_clicked(GdkEventButton * event)
+ {
+   int posX, posY;
+   float r,g,b;
+   posX = (int) event->x;
+   posY = (int) event->y;
+
+   pthread_mutex_lock(&mutex);
+
+   int index = posY*imgOrig.step+posX*imgOrig.channels();
+   r = (float)(unsigned int) (unsigned char)imgOrig.data[index];
+   g = (float)(unsigned int) (unsigned char)imgOrig.data[index+1];
+   b = (float)(unsigned int) (unsigned char)imgOrig.data[index+2]; 
+
+   pthread_mutex_unlock(&mutex);
+
+   
+   if (DEBUG) std::cout << "[RGB] -> " << r << " " << g << " " << b << std::endl;
+   hsvFilter = RGB2HSV_getHSV (r,g,b);
+   if (DEBUG) std::cout << "[HSV] -> " << hsvFilter->H << " " << hsvFilter->S << " " << hsvFilter->V << std::endl;
+
+   // Calculate HSV Min y Max
+   hmax = hsvFilter->H*DEGTORAD + 0.2;
+   hmin = hsvFilter->H*DEGTORAD - 0.2;
+   if(hmax>6.28) hmax = 6.28;
+   if(hmin<0.0)  hmin = 0.0;
+
+   smax = hsvFilter->S + 0.1;
+   smin = hsvFilter->S - 0.1;
+   if(smax > 1.0)
+     smax = 1.0;
+   if(smin < 0.0)
+     smin = 0.0;
+
+   vmax = hsvFilter->V + 50.0;
+   vmin = hsvFilter->V - 50.0;
+   if(vmax > 255.0)
+     vmax = 255.0;
+   if(vmin < 0.0)
+     vmin = 0.0; 
+
+   if (DEBUG)
+     std::cout << "H[min,max] - S[min,max] - V[min,max]: " <<
+       "[" << hmin << " " << hmax << "] " <<
+       "[" << smin << " " << smax << "] " <<
+       "[" << vmin << " " << vmax << "] " << std::endl;
+
+   return true;
+ }
 
   void Viewer::on_bt_take_photo_clicked() 
   {

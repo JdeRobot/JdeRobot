@@ -22,18 +22,6 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkImage" id="color_image">
-            <property name="width_request">320</property>
-            <property name="height_request">240</property>
-            <property name="visible">True</property>
-            <property name="stock">gtk-missing-image</property>
-          </widget>
-          <packing>
-            <property name="x">27</property>
-            <property name="y">21</property>
-          </packing>
-        </child>
-        <child>
           <widget class="GtkImage" id="depth_image">
             <property name="width_request">320</property>
             <property name="height_request">240</property>
@@ -248,6 +236,25 @@
           <packing>
             <property name="x">381</property>
             <property name="y">147</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkEventBox" id="eventbox">
+            <property name="width_request">320</property>
+            <property name="height_request">240</property>
+            <property name="visible">True</property>
+            <child>
+              <widget class="GtkImage" id="color_image">
+                <property name="width_request">320</property>
+                <property name="height_request">240</property>
+                <property name="visible">True</property>
+                <property name="stock">gtk-missing-image</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">28</property>
+            <property name="y">25</property>
           </packing>
         </child>
       </widget>

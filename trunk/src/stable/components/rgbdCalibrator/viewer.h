@@ -31,6 +31,7 @@
 #include <colorspaces/colorspacesmm.h>
 #include <cmath>
 #include <jderobot/camera.h>
+#include <colorspaces/colorspaces.h>
 
 using namespace cv;
 
@@ -62,6 +63,7 @@ namespace rgbdCalibrator{
     Gtk::Entry* etSleepPhoto;
     Gtk::Entry* etNumPhoto;
     Gtk::TextView* tvStatus;
+    Gtk::EventBox* ebImage;
     Gtk::Main gtkmain;
   
     //! display the frame rate of the received images
@@ -80,14 +82,20 @@ namespace rgbdCalibrator{
     int contPhoto;
 
     jderobot::ImageDataPtr dataDepth;
-    
+    cv::Mat imgOrig;
+    cv::Mat imgHSV;
+    pthread_mutex_t mutex;
+    const HSV* hsvFilter;
+    double hmin, hmax, smin, smax, vmin, vmax;
 
     // onclicks
+    bool on_eventbox_clicked(GdkEventButton * event);
     void on_bt_take_photo_clicked ();
     void on_bt_intrinsic();
     
     void saveImage(const colorspaces::Image& imageColor);
     void beep();
+    void createImageHSV();
 
 
     

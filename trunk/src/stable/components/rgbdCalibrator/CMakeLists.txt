@@ -22,4 +22,5 @@ TARGET_LINK_LIBRARIES(rgbdCalibrator
     ${Boost_LIBRARIES}
     ${LIBS_DIR}/progeo/libprogeo.so
     ${LIBS_DIR}/geometry/libgeometry.so
+    ${LIBS_DIR}/colorspaces/libcolorspaces.so
 )
