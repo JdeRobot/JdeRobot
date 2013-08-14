@@ -22,9 +22,9 @@
 #include <calibration.h>
 #include <iostream>
 #include "geoUtils.h"
-#include <jderobot/progeo/Progeo.h>
-#include <jderobot/math/Point3D.h>
-#include <jderobot/math/Segment3D.h>
+#include "../../libs/geometry/progeo/Progeo.h"
+#include "../../libs/geometry/math/Point3D.h"
+#include "../../libs/geometry/math/Segment3D.h"
 
 using namespace cv;
 
