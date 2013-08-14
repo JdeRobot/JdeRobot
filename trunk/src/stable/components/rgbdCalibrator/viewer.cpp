@@ -25,12 +25,14 @@
 #include <IceUtil/IceUtil.h>
 #include <boost/filesystem.hpp>
 #include "calibration.h"
+#include "../../libs/cvBlob/cvblob.h"
 
 #define DEGTORAD     (3.14159264 / 180.0)
 #define DEBUG TRUE
 
 using namespace boost::filesystem; 
 using namespace cv;
+using namespace cvb;
 
 namespace rgbdCalibrator{
   
@@ -106,7 +108,7 @@ namespace rgbdCalibrator{
     if (intrinsicsEnable)
       saveImage(imageColor);
     
-
+    
     pthread_mutex_lock(&mutex);
     imgOrig.create(imageColor.size(), CV_8UC3);
     imageColor.copyTo(imgOrig);
@@ -146,6 +148,8 @@ namespace rgbdCalibrator{
 
     imgHSV.create(imgOrig.size(), CV_8UC1);
     imgOrig.copyTo(imgHSV);
+
+    IplImage *threshy=cvCreateImage(imgOrig.size(),8,1);
     
     for (int i=0;i< imgHSV.size().width*imgHSV.size().height; i++)
     {
@@ -159,12 +163,54 @@ namespace rgbdCalibrator{
 	  && smax >= hsvData->S && smin <= hsvData->S
 	  && vmax >= hsvData->V && vmin <=  hsvData->V )
       {
+	threshy->imageData[i] = 1;
       }
       else
+      {
 	imgHSV.data[i*3] = imgHSV.data[i*3+1] = imgHSV.data[i*3+2] = 0;
+	threshy->imageData[i] = 0;
+      }
+      
 
     }
+
+    //Structure to hold blobs
+    CvBlobs blobs;
+
+    IplImage *iplOrig = new IplImage(imgOrig);
+    IplImage *frame=cvCreateImage(imgOrig.size(),8,3);
+    IplImage *labelImg=cvCreateImage(imgOrig.size(),IPL_DEPTH_LABEL,1);
+
+    cvResize(iplOrig,frame,CV_INTER_LINEAR );
+
+    //Threshy is a binary image
+    cvSmooth(threshy,threshy,CV_MEDIAN,7,7);
+
+    //Finding the blobs
+    unsigned int result=cvLabel(threshy,labelImg,blobs);
+
+    //Rendering the blobs
+    cvRenderBlobs(labelImg,blobs,frame,frame);
+
+    //Filter Blobs
+    cvFilterByArea(blobs,300,1000);    
+
+    for (CvBlobs::const_iterator it=blobs.begin(); it!=blobs.end(); ++it)
+    {
+      std::cout << "BLOB found: " << it->second->area  <<std::endl;
+      double moment10 = it->second->m10;
+      double moment01 = it->second->m01;
+      double area = it->second->area;
       
+    }
+
+    cvShowImage("Live",frame);
+
+    // Release and free memory
+    delete(iplOrig);
+    cvReleaseImage(&threshy);
+    cvReleaseImage(&frame);
+    cvReleaseImage(&labelImg);
   }
 
   void Viewer::setDepth(const jderobot::ImageDataPtr depth)
