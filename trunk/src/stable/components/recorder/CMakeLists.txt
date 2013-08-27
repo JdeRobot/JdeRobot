@@ -26,4 +26,5 @@ TARGET_LINK_LIBRARIES(recorder
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${gsl_LIBRARIES}
     ${ZeroCIce_LIBRARIES}
+    ${Boost_LIBRARIES}
 )
