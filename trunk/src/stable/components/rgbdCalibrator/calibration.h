@@ -30,6 +30,7 @@
 #include <string>
 #include <colorspaces/colorspacesmm.h>
 #include <jderobot/camera.h>
+#include "../../libs/geometry/math/Point3D.h"
 
 using namespace cv;
 
@@ -58,6 +59,7 @@ namespace rgbdCalibrator
     
   private:
 
+    Mat mKMatrix;
 
     void calcBoardCornerPositions(Size boardSize, 
 				  float squareSize, 
@@ -83,8 +85,15 @@ namespace rgbdCalibrator
 			vector<Mat>& tvecs,
 			vector<float>& reprojErrs,  
 			double& totalAvgErr);
+
+
+    void BackProjectWithDepth (const Eigen::Vector3d pixel,
+			       const jderobot::ImageDataPtr depthData,
+			       Eigen::Vector4d& res3D);
     
   };
+
+  
 
 
 }

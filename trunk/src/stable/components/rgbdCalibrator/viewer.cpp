@@ -24,7 +24,6 @@
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
 #include <boost/filesystem.hpp>
-#include "calibration.h"
 #include "../../libs/cvBlob/cvblob.h"
 
 #define DEGTORAD     (3.14159264 / 180.0)
@@ -53,6 +52,8 @@ namespace rgbdCalibrator{
     refXml = Gnome::Glade::Xml::create(gladepath);
     refXml->get_widget("color_image", gtkimage_color);
     refXml->get_widget("depth_image", gtkimage_depth);
+    refXml->get_widget("hsv_image", gtkimage_hsv);
+    refXml->get_widget("blob_image", gtkimage_blob);
     refXml->get_widget("mainwindow",mainwindow);
     refXml->get_widget("fpslabel",fpsLabel);
     refXml->get_widget("bt_take_photo", btTakePhoto);
@@ -74,6 +75,9 @@ namespace rgbdCalibrator{
 
     RGB2HSV_init();
     RGB2HSV_createTable();
+
+    mCalibration = new Calibration();
+
     pthread_mutex_init(&mutex, NULL);
     
 
@@ -82,6 +86,7 @@ namespace rgbdCalibrator{
 
   Viewer::~Viewer() 
   {
+    delete(mCalibration);
     RGB2HSV_destroyTable();
   }
 
@@ -118,10 +123,9 @@ namespace rgbdCalibrator{
     if (hsvFilter != NULL)
     {
       createImageHSV();
-    
-          
-      //colorspaces::ImageRGB8 img_rgb8D(imgHSV);
-      Glib::RefPtr<Gdk::Pixbuf> imgBuffDepth = 
+
+      // Show HSV image
+      Glib::RefPtr<Gdk::Pixbuf> imgBuffHSV = 
 	Gdk::Pixbuf::create_from_data((const guint8*)imgHSV.data,
 				      Gdk::COLORSPACE_RGB,
 				      false,
@@ -130,8 +134,48 @@ namespace rgbdCalibrator{
 				      imgHSV.size().height,
 				      imgHSV.step);
       
+      gtkimage_hsv->clear();
+      gtkimage_hsv->set(imgBuffHSV);
+
+      // Show Blob Image
+      
+      Glib::RefPtr<Gdk::Pixbuf> imgBuffBLOB = 
+	Gdk::Pixbuf::create_from_data(
+				      (guint8*)mFrameBlob->imageData,
+				      Gdk::COLORSPACE_RGB,
+				      false,
+				      mFrameBlob->depth,
+				      mFrameBlob->width,
+				      mFrameBlob->height,
+				      mFrameBlob->widthStep);
+
+      gtkimage_blob->clear();
+      gtkimage_blob->set(imgBuffBLOB);
+
+      cvReleaseImage(&mFrameBlob);
+
+      // Show depth image          
+      colorspaces::ImageRGB8 img_rgb8D(imageDepth);
+      Glib::RefPtr<Gdk::Pixbuf> imgBuffDepth = 
+	Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8D.data,
+				      Gdk::COLORSPACE_RGB,
+				      false,
+				      8,
+				      img_rgb8D.width,
+				      img_rgb8D.height,
+				      img_rgb8D.step);
+      
       gtkimage_depth->clear();
       gtkimage_depth->set(imgBuffDepth);
+
+      Eigen::Vector3d pixel;
+      pixel(0) = 2;
+      pixel(1) = 3;
+      pixel(2) = 1.;
+
+      Eigen::Vector4d target;
+
+      //mCalibration->BackProjectWithDepth(pixel, imageDepth, &target);
       
 
     }
@@ -178,10 +222,10 @@ namespace rgbdCalibrator{
     CvBlobs blobs;
 
     IplImage *iplOrig = new IplImage(imgOrig);
-    IplImage *frame=cvCreateImage(imgOrig.size(),8,3);
+    mFrameBlob=cvCreateImage(imgOrig.size(),8,3);
     IplImage *labelImg=cvCreateImage(imgOrig.size(),IPL_DEPTH_LABEL,1);
 
-    cvResize(iplOrig,frame,CV_INTER_LINEAR );
+    cvResize(iplOrig,mFrameBlob,CV_INTER_LINEAR );
 
     //Threshy is a binary image
     cvSmooth(threshy,threshy,CV_MEDIAN,7,7);
@@ -190,26 +234,39 @@ namespace rgbdCalibrator{
     unsigned int result=cvLabel(threshy,labelImg,blobs);
 
     //Rendering the blobs
-    cvRenderBlobs(labelImg,blobs,frame,frame);
+    cvRenderBlobs(labelImg,blobs,mFrameBlob,mFrameBlob);
 
     //Filter Blobs
-    cvFilterByArea(blobs,300,1000);    
+    cvFilterByArea(blobs,1000,2000);    
+
+    double area = 0.0;
+    int x, y;
 
     for (CvBlobs::const_iterator it=blobs.begin(); it!=blobs.end(); ++it)
     {
-      std::cout << "BLOB found: " << it->second->area  <<std::endl;
+      //std::cout << "BLOB found: " << it->second->area  <<std::endl;
+
       double moment10 = it->second->m10;
       double moment01 = it->second->m01;
-      double area = it->second->area;
+
+      if (it->second->area >= area)
+      {      
+	area = it->second->area;
+	x = moment10/area;
+	y = moment01/area;
+      }
       
     }
 
-    cvShowImage("Live",frame);
+    std::cout << "Max BLOB: " << area << ": " << x << " , " << y  <<std::endl;
+
+    //cvShowImage("Live",mFrameBlob);
+
+    
 
     // Release and free memory
     delete(iplOrig);
     cvReleaseImage(&threshy);
-    cvReleaseImage(&frame);
     cvReleaseImage(&labelImg);
   }
 
@@ -409,9 +466,9 @@ namespace rgbdCalibrator{
       }
     }
 
-    Calibration* calib = new Calibration();
-    calib->runCalibrationAndSave(boardSize, 20.0, flag, imageSize,  
-				 cameraMatrix, distCoeffs, imagePoints);
+
+    mCalibration->runCalibrationAndSave(boardSize, 20.0, flag, imageSize,  
+					cameraMatrix, distCoeffs, imagePoints);
 
     std::cout << std::endl << cameraMatrix << std::endl;
 
@@ -433,8 +490,9 @@ namespace rgbdCalibrator{
       tvStatus->get_buffer()->set_text(matrixStr.str().c_str());
     }
 
-    calib->extrinsics(cameraMatrix, dataDepth);
+    mCalibration->extrinsics(cameraMatrix, dataDepth);
 
+    
   }
 
 

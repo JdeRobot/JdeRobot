@@ -21,7 +21,6 @@
 
 #include <calibration.h>
 #include <iostream>
-#include "geoUtils.h"
 #include "../../libs/geometry/progeo/Progeo.h"
 #include "../../libs/geometry/math/Point3D.h"
 #include "../../libs/geometry/math/Segment3D.h"
@@ -39,6 +38,8 @@ namespace rgbdCalibrator{
   Calibration::Calibration()
   {}
 
+  Calibration::~Calibration()
+  {}
 
   // Intrinsics 
   bool Calibration::runCalibrationAndSave(Size &boardSize, 
@@ -59,6 +60,8 @@ namespace rgbdCalibrator{
 
     std::cout << (ok ? "Calibration succeeded" : "Calibration failed")
 	 << ". avg re projection error = "  << totalAvgErr ;
+
+    mKMatrix = Mat(cameraMatrix);
 
 
     return ok;
@@ -459,6 +462,83 @@ namespace rgbdCalibrator{
     delete(nP3D);
     delete(segment);
     delete(progeo);
+  }
+
+
+  void
+  Calibration::BackProjectWithDepth (const Eigen::Vector3d pixel,
+				     const jderobot::ImageDataPtr depthData,
+				     Eigen::Vector4d& res3D)
+  {
+
+
+    Eigen::Vector4d posCamera;
+    posCamera(0) = double(0.0);
+    posCamera(1) = double(0.0);
+    posCamera(2) = double(0.0);
+
+
+    Eigen::Matrix3d K;
+    K(0,0) = mKMatrix.at<double>(0,0);
+    K(0,1) = mKMatrix.at<double>(0,1);
+    K(0,2) = mKMatrix.at<double>(0,2);
+
+    K(1,0) = mKMatrix.at<double>(1,0);
+    K(1,1) = mKMatrix.at<double>(1,1);
+    K(1,2) = mKMatrix.at<double>(1,2);
+
+    K(2,0) = mKMatrix.at<double>(2,0);
+    K(2,1) = mKMatrix.at<double>(2,1);
+    K(2,2) = mKMatrix.at<double>(2,2);
+
+    Eigen::Matrix4d RT;
+    RT(0,0) = double(1.);
+    RT(0,1) = double(0.);
+    RT(0,2) = double(0.);
+    RT(0,3) = double(0.);
+
+    RT(1,0) = double(0.);
+    RT(1,1) = double(1.);
+    RT(1,2) = double(0.);
+    RT(1,3) = double(0.);
+
+    RT(2,0) = double(0.);
+    RT(2,1) = double(0.);
+    RT(2,2) = double(1.);
+    RT(2,3) = double(0.);
+
+    RT(3,0) = double(0.);
+    RT(3,1) = double(0.);
+    RT(3,2) = double(0.);
+    RT(3,3) = double(1.);
+
+
+    Progeo::Progeo* progeo = new Progeo::Progeo(posCamera, K, RT, 320, 240);
+    //progeo->display_camerainfo(); 
+
+
+    Eigen::Vector4d p3D;
+    progeo->backproject(pixel, p3D); 
+
+    Point3D *pStart = new Point3D(0.0,0.0,0.0);
+    Point3D *pEnd = new Point3D(p3D);
+
+    Segment3D *segment = new Segment3D(*pStart,*pEnd);
+
+    float depth = (int)depthData->pixelData[((depthData->description->width*(int)pixel(1))+(int)pixel(0))*3+1]<<8 | (int)depthData->pixelData[((depthData->description->width*(int)pixel(1))+(int)pixel(0))*3+2];
+
+    Point3D *nP3D = segment->getPointByZ(depth);    
+
+    //Eigen::Vector4d* resP3D = new Eigen::Vector4d(nP3D->getPoint());
+
+    res3D = nP3D->getPoint();
+
+    delete(segment);
+    delete(pStart);
+    delete(pEnd);
+    delete(nP3D);
+    delete(progeo);
+
   }
 
 }

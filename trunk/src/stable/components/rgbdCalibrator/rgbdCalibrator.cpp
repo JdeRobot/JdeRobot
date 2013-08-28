@@ -70,7 +70,7 @@ int main(int argc, char** argv){
 				  &(data->pixelData[0]));
 
 
-      /*
+      
       jderobot::ImageDataPtr data2 = cprxDepth->getImageData();
       colorspaces::Image::FormatPtr fmt2 =  colorspaces::Image::Format::searchFormat(data2->description->format);
       if (!fmt2)
@@ -80,12 +80,12 @@ int main(int argc, char** argv){
 				  data2->description->height,
 				  fmt2,
 				  &(data2->pixelData[0]));
-      */
+      
 
       //viewer.setDepth(NULL);//cprxDepth->getImageData());
 
 
-      viewer.display(imgColor, imgColor);
+      viewer.display(imgColor, imgDepth);
 
 
 

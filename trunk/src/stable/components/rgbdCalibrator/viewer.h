@@ -32,6 +32,7 @@
 #include <cmath>
 #include <jderobot/camera.h>
 #include <colorspaces/colorspaces.h>
+#include "calibration.h"
 
 using namespace cv;
 
@@ -55,6 +56,8 @@ namespace rgbdCalibrator{
     Glib::RefPtr<Gnome::Glade::Xml> refXml;
     Gtk::Image* gtkimage_color;
     Gtk::Image* gtkimage_depth;
+    Gtk::Image* gtkimage_hsv;
+    Gtk::Image* gtkimage_blob;
     Gtk::Window* mainwindow;
     Gtk::Label* fpsLabel;
     Gtk::Label* lbSleepPhoto;
@@ -75,6 +78,7 @@ namespace rgbdCalibrator{
     int frameCount;
 
     // Intrinsics variables
+    Calibration* mCalibration;
     int intrinsicsEnable;
     IceUtil::Time lastTimePhoto;
     int delayPhoto;
@@ -84,6 +88,7 @@ namespace rgbdCalibrator{
     jderobot::ImageDataPtr dataDepth;
     cv::Mat imgOrig;
     cv::Mat imgHSV;
+    IplImage* mFrameBlob;
     pthread_mutex_t mutex;
     const HSV* hsvFilter;
     double hmin, hmax, smin, smax, vmin, vmax;
