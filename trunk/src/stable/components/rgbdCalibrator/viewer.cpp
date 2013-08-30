@@ -122,7 +122,7 @@ namespace rgbdCalibrator{
     
     if (hsvFilter != NULL)
     {
-      createImageHSV();
+      createImageHSV(imageDepth);
 
       // Show HSV image
       Glib::RefPtr<Gdk::Pixbuf> imgBuffHSV = 
@@ -168,14 +168,8 @@ namespace rgbdCalibrator{
       gtkimage_depth->clear();
       gtkimage_depth->set(imgBuffDepth);
 
-      Eigen::Vector3d pixel;
-      pixel(0) = 2;
-      pixel(1) = 3;
-      pixel(2) = 1.;
 
-      Eigen::Vector4d target;
-
-      //mCalibration->BackProjectWithDepth(pixel, imageDepth, &target);
+      
       
 
     }
@@ -186,7 +180,7 @@ namespace rgbdCalibrator{
       gtkmain.iteration();
   }
     
-  void Viewer::createImageHSV()
+  void Viewer::createImageHSV(const colorspaces::Image& imageDepth)
   {
     float r,g,b;
 
@@ -237,7 +231,7 @@ namespace rgbdCalibrator{
     cvRenderBlobs(labelImg,blobs,mFrameBlob,mFrameBlob);
 
     //Filter Blobs
-    cvFilterByArea(blobs,1000,2000);    
+    cvFilterByArea(blobs,500,2000);    
 
     double area = 0.0;
     int x, y;
@@ -262,7 +256,17 @@ namespace rgbdCalibrator{
 
     //cvShowImage("Live",mFrameBlob);
 
-    
+    if (area != 0)
+    {
+      Eigen::Vector3d pixel;
+      pixel(0) = x;
+      pixel(1) = y;
+      pixel(2) = 1.0;
+      
+      Eigen::Vector4d target;
+      
+      mCalibration->BackProjectWithDepth(pixel, imageDepth, target);
+    }
 
     // Release and free memory
     delete(iplOrig);

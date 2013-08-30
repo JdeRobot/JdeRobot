@@ -467,7 +467,7 @@ namespace rgbdCalibrator{
 
   void
   Calibration::BackProjectWithDepth (const Eigen::Vector3d pixel,
-				     const jderobot::ImageDataPtr depthData,
+				     const colorspaces::Image depthData,
 				     Eigen::Vector4d& res3D)
   {
 
@@ -516,22 +516,28 @@ namespace rgbdCalibrator{
     Progeo::Progeo* progeo = new Progeo::Progeo(posCamera, K, RT, 320, 240);
     //progeo->display_camerainfo(); 
 
+    std::cout << "Pixel: " << pixel << std::endl;
 
     Eigen::Vector4d p3D;
     progeo->backproject(pixel, p3D); 
+
+    std::cout << "P3D: " << p3D << std::endl;
 
     Point3D *pStart = new Point3D(0.0,0.0,0.0);
     Point3D *pEnd = new Point3D(p3D);
 
     Segment3D *segment = new Segment3D(*pStart,*pEnd);
 
-    float depth = (int)depthData->pixelData[((depthData->description->width*(int)pixel(1))+(int)pixel(0))*3+1]<<8 | (int)depthData->pixelData[((depthData->description->width*(int)pixel(1))+(int)pixel(0))*3+2];
+    float depth = (int)depthData.data[((depthData.cols*(int)pixel(1))+(int)pixel(0))*3+1]<<8 | (int)depthData.data[((depthData.cols*(int)pixel(1))+(int)pixel(0))*3+2];
+
+
+    std::cout << "Depth: " << depth << std::endl;
 
     Point3D *nP3D = segment->getPointByZ(depth);    
 
-    //Eigen::Vector4d* resP3D = new Eigen::Vector4d(nP3D->getPoint());
-
     res3D = nP3D->getPoint();
+
+    std::cout << res3D << std::endl;
 
     delete(segment);
     delete(pStart);

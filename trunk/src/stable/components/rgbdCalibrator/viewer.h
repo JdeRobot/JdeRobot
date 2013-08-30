@@ -100,7 +100,7 @@ namespace rgbdCalibrator{
     
     void saveImage(const colorspaces::Image& imageColor);
     void beep();
-    void createImageHSV();
+    void createImageHSV(const colorspaces::Image& imageDepth);
 
 
     

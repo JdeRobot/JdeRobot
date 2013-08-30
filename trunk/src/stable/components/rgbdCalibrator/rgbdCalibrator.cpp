@@ -82,17 +82,20 @@ int main(int argc, char** argv){
 				  &(data2->pixelData[0]));
       
 
-      //viewer.setDepth(NULL);//cprxDepth->getImageData());
+      /*
+      float depth = (int)data2->pixelData[((data2->description->width*(int)120)+(int)160)*3+1]<<8 | (int)data2->pixelData[((data2->description->width*(int)120)+(int)160)*3+2];
+      
+      std::cout << "- Depth (160,120) = " << depth << std::endl;
+
+      depth = (int)imgDepth.data[((imgDepth.cols*(int)120)+(int)160)*3+1]<<8 | (int)imgDepth.data[((imgDepth.cols*(int)120)+(int)160)*3+2];
+
+      std::cout << "* Depth (160,120) = " << depth << std::endl;
+      */
 
 
       viewer.display(imgColor, imgDepth);
-
-
-
-
-      
-
     }
+
   }catch (const Ice::Exception& ex) {
     std::cerr << ex << std::endl;
     status = 1;

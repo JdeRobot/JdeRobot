@@ -56,7 +56,10 @@ namespace rgbdCalibrator
 			       vector<vector<Point2f> > imagePoints );
 
     void extrinsics (const Mat& kMatrix, const jderobot::ImageDataPtr depth);
-    
+
+    void BackProjectWithDepth (const Eigen::Vector3d pixel,
+			       const colorspaces::Image depthData,
+			       Eigen::Vector4d& res3D);
   private:
 
     Mat mKMatrix;
@@ -87,9 +90,7 @@ namespace rgbdCalibrator
 			double& totalAvgErr);
 
 
-    void BackProjectWithDepth (const Eigen::Vector3d pixel,
-			       const jderobot::ImageDataPtr depthData,
-			       Eigen::Vector4d& res3D);
+  
     
   };
 
