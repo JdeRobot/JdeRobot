@@ -60,6 +60,8 @@ namespace rgbdCalibrator
     void BackProjectWithDepth (const Eigen::Vector3d pixel,
 			       const colorspaces::Image depthData,
 			       Eigen::Vector4d& res3D);
+
+    void getOpticalCenter (Eigen::Vector2d &center);
   private:
 
     Mat mKMatrix;

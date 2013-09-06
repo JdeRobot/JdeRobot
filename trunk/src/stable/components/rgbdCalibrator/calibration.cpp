@@ -16,11 +16,11 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/. 
  *
  *  Authors : Roberto Calvo <rocapal [at] gsyc [dot] urjc [dot] es>
- *
+ * 
  */
 
 #include <calibration.h>
-#include <iostream>
+#include <iostream> 
 #include "../../libs/geometry/progeo/Progeo.h"
 #include "../../libs/geometry/math/Point3D.h"
 #include "../../libs/geometry/math/Segment3D.h"
@@ -164,6 +164,11 @@ namespace rgbdCalibrator{
     return std::sqrt(totalErr/totalPoints);
   }
 
+  void Calibration::getOpticalCenter (Eigen::Vector2d &center)
+  {
+    center(0) = mKMatrix.at<double>(0,2);
+    center(1) = mKMatrix.at<double>(1,2);
+  }
 
   // Extrinsics
   void Calibration::extrinsics (const Mat& kMatrix, 
@@ -491,7 +496,7 @@ namespace rgbdCalibrator{
     K(2,1) = mKMatrix.at<double>(2,1);
     K(2,2) = mKMatrix.at<double>(2,2);
 
-    Eigen::Matrix4d RT;
+    Eigen::Matrix4d RT; 
     RT(0,0) = double(1.);
     RT(0,1) = double(0.);
     RT(0,2) = double(0.);
@@ -512,14 +517,23 @@ namespace rgbdCalibrator{
     RT(3,2) = double(0.);
     RT(3,3) = double(1.);
 
+    float depth = (int)depthData.data[((depthData.cols*(int)pixel(1))+(int)pixel(0))*3+1]<<8 | (int)depthData.data[((depthData.cols*(int)pixel(1))+(int)pixel(0))*3+2];
 
     Progeo::Progeo* progeo = new Progeo::Progeo(posCamera, K, RT, 320, 240);
     //progeo->display_camerainfo(); 
 
-    std::cout << "Pixel: " << pixel << std::endl;
+    std::cout << "Pixel (opticas): " << pixel << std::endl;
+   
+    // Optical coordinates
+    Eigen::Vector3d graphic;
+    graphic(0) = pixel(1);
+    graphic(1) = 240 - 1 - pixel(0);
+    graphic(2) = 1.0;
+
+    std::cout << "Graphic (progeo): " << graphic << std::endl;
 
     Eigen::Vector4d p3D;
-    progeo->backproject(pixel, p3D); 
+    progeo->backproject(graphic, p3D); 
 
     std::cout << "P3D: " << p3D << std::endl;
 
@@ -528,9 +542,6 @@ namespace rgbdCalibrator{
 
     Segment3D *segment = new Segment3D(*pStart,*pEnd);
 
-    float depth = (int)depthData.data[((depthData.cols*(int)pixel(1))+(int)pixel(0))*3+1]<<8 | (int)depthData.data[((depthData.cols*(int)pixel(1))+(int)pixel(0))*3+2];
-
-
     std::cout << "Depth: " << depth << std::endl;
 
     Point3D *nP3D = segment->getPointByZ(depth);    
@@ -538,6 +549,27 @@ namespace rgbdCalibrator{
     res3D = nP3D->getPoint();
 
     std::cout << res3D << std::endl;
+
+    /*
+    std::cout << "-------------" << std::endl;
+    p3D(0) = 0.;
+    p3D(1) = 0.;
+    p3D(2) = 900.;
+    p3D(3)= 1.;
+    std::cout << p3D << std::endl;
+
+    progeo->project(p3D, optical);
+    std::cout << optical << std::endl;
+
+    std::cout << "-------------" << std::endl;
+    optical(0) = 0.;
+    optical(1) = 0.;
+    optical(2) = 1.;
+
+    std::cout << optical << std::endl;
+    progeo->backproject(optical, p3D);
+    std::cout << p3D << std::endl;
+    */
 
     delete(segment);
     delete(pStart);

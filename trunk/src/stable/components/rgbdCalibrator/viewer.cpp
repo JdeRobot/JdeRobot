@@ -231,11 +231,12 @@ namespace rgbdCalibrator{
     cvRenderBlobs(labelImg,blobs,mFrameBlob,mFrameBlob);
 
     //Filter Blobs
-    cvFilterByArea(blobs,500,2000);    
+    cvFilterByArea(blobs,500,5000);    
 
     double area = 0.0;
     int x, y;
 
+    
     for (CvBlobs::const_iterator it=blobs.begin(); it!=blobs.end(); ++it)
     {
       //std::cout << "BLOB found: " << it->second->area  <<std::endl;
@@ -266,6 +267,11 @@ namespace rgbdCalibrator{
       Eigen::Vector4d target;
       
       mCalibration->BackProjectWithDepth(pixel, imageDepth, target);
+
+      //Eigen::Vector2d center;
+      //mCalibration->getOpticalCenter(center);
+      //std::cout << "Center: " << center << std::endl;
+      
     }
 
     // Release and free memory
