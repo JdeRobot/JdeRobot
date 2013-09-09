@@ -70,7 +70,8 @@ public:
     int project(Eigen::Vector4d in, Eigen::Vector3d &out);
     void update_camera_matrix();
 
-
+    void pixel2optical (Eigen::Vector3d &point);
+    void optical2pixel (Eigen::Vector3d &point);
 
 private:
 

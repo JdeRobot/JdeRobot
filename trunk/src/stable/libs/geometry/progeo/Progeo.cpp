@@ -38,6 +38,10 @@ namespace Progeo {
     setKMatrix(KMatrix);
     setRTMatrix(RTMatrix);
     setImageSize(width, height);
+    foa(0) = 0.;
+    foa(1) = 0.;
+    foa(2) = 0.;
+    foa(3) = 0.;
   }
 
   Progeo::Progeo(std::string filename)
@@ -481,98 +485,18 @@ void Progeo::backproject(Eigen::Vector3d point, Eigen::Vector4d& pro)
 
   void Progeo::update_camera_matrix()
   {}
-//{
-//  double rc11,rc12,rc13,rc21,rc22,rc23,rc31,rc32,rc33;
-//  double rab11,rab12,rab13,rab21,rab22,rab23,rab31,rab32,rab33;
-//  double r;
-//  /* a very small value but not infinite!! */
-//  double SMALL=0.0001;
-//  double t;
-//  double ux,uy,uz,vx,vy,vz,wx,wy,wz;
 
-//  camera->foa.H=1.;
-//  camera->position.H=1;
+  void Progeo::pixel2optical (Eigen::Vector3d &point)
+  {
+    double aux = point(0);
+    point(0) = rows-1-point(1);
+    point(1) = aux;
+  }
 
-//  /* Orientation model: focus of attention + roll */
-//  rab31=camera->foa.X-camera->position.X;
-//  rab32=camera->foa.Y-camera->position.Y;
-//  rab33=camera->foa.Z-camera->position.Z;
-//  r=(double)sqrt((double)(rab31*rab31+rab32*rab32+rab33*rab33));
-//  rab31=rab31/r; rab32=rab32/r; rab33=rab33/r;
-
-//  /* Second method:*/
-//  wx=rab31;
-//  wy=rab32;
-//  wz=rab33;
-//  t = atan2(-wx,wy);
-//  vx=(double)cos(t);
-//  vy=(double)sin(t);
-//  vz=0.;
-//  ux=vy*wz-wy*vz;
-//  uy=-vx*wz+wx*vz;
-//  uz=vx*wy-wx*vy;
-//  if (uz<0.)
-//    {vx=-vx; vy=-vy; vz=-vz;
-//      ux=-ux; uy=-uy; uz=-uz;}
-//  rab11=ux;
-//  rab12=uy;
-//  rab13=uz;
-//  rab21=vx;
-//  rab22=vy;
-//  rab23=vz;
-
-//  /* First method:
-//   * this was commented in the previous version. only else branch of this if was valid. test it!!*
-
-//  if ((rab31<SMALL) && (rab31>-SMALL) && (rab32<SMALL) && (rab32>-SMALL))
-//    * u3 = OZ or FA=camera position *
-//    {
-//      rab11=1.; rab12=0.; rab13=0.;
-//      rab21=0.; rab22=1.; rab23=0.;
-//      rab31=0.; rab32=0.; rab33=1.;
-//    }else{
-//    rab11=rab31*rab33; rab12=rab32*rab33; rab13=-rab31*rab31-rab32*rab32;
-//    r=(double)sqrt((double)(rab11*rab11+rab12*rab12+rab13*rab13));
-//    rab11=rab11/r; rab12=rab12/r; rab13=rab13/r;
-//    if (rab13<0.) {rab11=-rab11; rab12=-rab12; rab13=-rab13;}
-
-//    rab21=rab32*rab13-rab12*rab33; rab22=rab11*rab33-rab31*rab13; rab23=rab31*rab12-rab11*rab32;
-//    r=(double)sqrt((double)(rab21*rab21+rab22*rab22+rab23*rab23));
-//    rab21=rab21/r; rab22=rab22/r; rab23=rab23/r;
-//  }
-//  */
-
-//  rc11=cos(camera->roll); rc12=sin(camera->roll); rc13=0.;
-//  rc21=-sin(camera->roll); rc22=cos(camera->roll); rc23=0.;
-//  rc31=0.; rc32=0.; rc33=1.;
-
-//  camera->rt11=rc11*rab11+rc12*rab21+rc13*rab31;
-//  camera->rt12=rc11*rab12+rc12*rab22+rc13*rab32;
-//  camera->rt13=rc11*rab13+rc12*rab23+rc13*rab33;
-//  camera->rt21=rc21*rab11+rc22*rab21+rc23*rab31;
-//  camera->rt22=rc21*rab12+rc22*rab22+rc23*rab32;
-//  camera->rt23=rc21*rab13+rc22*rab23+rc23*rab33;
-//  camera->rt31=rc31*rab11+rc32*rab21+rc33*rab31;
-//  camera->rt32=rc31*rab12+rc32*rab22+rc33*rab32;
-//  camera->rt33=rc31*rab13+rc32*rab23+rc33*rab33;
-
-//  camera->rt14=-camera->position.X*camera->rt11-camera->position.Y*camera->rt12-camera->position.Z*camera->rt13;
-//  camera->rt24=-camera->position.X*camera->rt21-camera->position.Y*camera->rt22-camera->position.Z*camera->rt23;
-//  camera->rt34=-camera->position.X*camera->rt31-camera->position.Y*camera->rt32-camera->position.Z*camera->rt33;
-//  camera->rt41=0.;
-//  camera->rt42=0.;
-//  camera->rt43=0.;
-//  camera->rt44=1.;
-
-//  /* intrinsics parameters */
-//  camera->k11=camera->fdistx;  camera->k12=camera->skew*camera->fdisty; camera->k13=camera->u0; camera->k14=0.;
-//  camera->k21=0.; camera->k22=camera->fdisty;  camera->k23=camera->v0; camera->k24=0.;
-//  camera->k31=0.; camera->k32=0.; camera->k33=1.; camera->k34=0.;
-
-//  if (debug==1) printf("Camera %s Located at (%.f,%.f,%.f)\n",camera->name,camera->position.X,camera->position.Y,camera->position.Z);
-//  if (debug==1) printf("Camera %s Orientation: pointing towards FocusOfAtention (%.f,%.f,%.f), roll (%.f)\n",camera->name,camera->foa.X,camera->foa.Y,camera->foa.Z,camera->roll*360./(2*PI));
-//  if (debug==1) printf("Camera %s fx= %.5f fy= %.5f skew= %.5f y0=%d x0=%d\n",camera->name, camera->fdistx, camera->fdisty, camera->skew,(int)camera->v0,(int)camera->u0);
-//  if (debug==1) printf("Camera %s K matrix\n %.3f %.1f %.1f %.1f\n %.1f %.3f %.1f %.1f\n %.1f %.1f %.1f %.1f\n",camera->name,camera->k11,camera->k12,camera->k13,camera->k14,camera->k21,camera->k22,camera->k23,camera->k24,camera->k31,camera->k32,camera->k33,camera->k34);
-//  if (debug==1) printf("Camera %s RT matrix\n %.1f %.1f %.1f %.1f\n %.1f %.1f %.1f %.1f\n %.1f %.1f %.1f %.1f\n %.1f %.1f %.1f %.1f\n",camera->name,camera->rt11,camera->rt12,camera->rt13,camera->rt14,camera->rt21,camera->rt22,camera->rt23,camera->rt24,camera->rt31,camera->rt32,camera->rt33,camera->rt34,camera->rt41,camera->rt42,camera->rt43,camera->rt44);
-//}
+  void Progeo::optical2pixel(Eigen::Vector3d &point)
+  {
+    double aux = point(1);
+    point(1) = rows-1-point(0);
+    point(0) = aux;
+  }
 }
