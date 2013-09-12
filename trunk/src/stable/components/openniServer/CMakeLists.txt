@@ -49,6 +49,7 @@ IF(OPENNI2_LIB)
         ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
 	${OPENNI2_LIB}/libOpenNI2.so
 	${NITE2_LIB}/libNiTE2.so
+	${Boost_LIBRARIES}	
 	)
 	else()
 	TARGET_LINK_LIBRARIES(openniServer
@@ -61,6 +62,7 @@ IF(OPENNI2_LIB)
         ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
         ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
 	${OPENNI2_LIB}/libOpenNI2.so
+        ${Boost_LIBRARIES}
 	)
 	endif()
 ENDIF()

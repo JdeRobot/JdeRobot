@@ -40,23 +40,23 @@
 #define MAX_BUFFER 1024
 
 namespace openniServer {
-  class myprogeo {
-	public:
-	myprogeo();
-	~myprogeo();
-	int load_cam_line(FILE *myfile,int cam);
-	void load_cam(char *fich_in,int cam, int w, int h);
-	void mybackproject(float x, float y, float* xp, float* yp, float* zp, float* camx, float* camy, float* camz, int cam);
-	void myproject(float x, float y, float z, float* xp, float* yp, int cam);
-	void mygetcameraposition(float *x, float *y, float *z, int cam);
-	void mygetcamerafoa(float *x, float *y, float *z, int cam);
-	void mygetcamerasize(float *w, float *h, int cam);
-	TPinHoleCamera getCamera(int camera);
+class myprogeo {
+public:
+    myprogeo();
+    ~myprogeo();
+    int load_cam_line(FILE *myfile,int cam);
+    void load_cam(char *fich_in,int cam, int w, int h);
+    void mybackproject(float x, float y, float* xp, float* yp, float* zp, float* camx, float* camy, float* camz, int cam);
+    void myproject(float x, float y, float z, float* xp, float* yp, int cam);
+    void mygetcameraposition(float *x, float *y, float *z, int cam);
+    void mygetcamerafoa(float *x, float *y, float *z, int cam);
+    void mygetcamerasize(float *w, float *h, int cam);
+    TPinHoleCamera getCamera(int camera);
 
-	private:
-		/* cameras */
-		TPinHoleCamera cameras[MAX_CAMERAS];
-  };
+private:
+    /* cameras */
+    TPinHoleCamera cameras[MAX_CAMERAS];
+};
 } // namespace
 
 #endif /*KINECTVIEWER_MYPROGEO_H*/
