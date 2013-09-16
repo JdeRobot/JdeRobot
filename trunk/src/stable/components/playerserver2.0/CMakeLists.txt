@@ -19,10 +19,10 @@ IF( with_player)
 
 
 
-      add_executable (playerserver ${SOURCE_FILES})
+      add_executable (playerserver2 ${SOURCE_FILES})
 
 
-      TARGET_LINK_LIBRARIES(playerserver 
+      TARGET_LINK_LIBRARIES(playerserver2 
 #	  ${opencv_LIBRARIES}
 #	  ${gtkmm_LIBRARIES}
 #	  ${libglademm_LIBRARIES}
