@@ -105,9 +105,9 @@ Line2D::distanceTo(Point2D &p) {
 					sqrt(A^2 + B^2)*/
 
 	if(this->v(0) == 0.0 && this->v(1) == 0.0)
-		return G_INFINITE;
+		return GEOMETRY_INFINITE;
 	
-	return abs(this->v(0)*p.getPoint()(0) + this->v(1)*p.getPoint()(1) + this->v(2))/(sqrt(G_SQUARE(this->v(0)) + G_SQUARE(this->v(1))));
+	return abs(this->v(0)*p.getPoint()(0) + this->v(1)*p.getPoint()(1) + this->v(2))/(sqrt(GEOMETRY_SQUARE(this->v(0)) + GEOMETRY_SQUARE(this->v(1))));
 }
 
 double
@@ -117,9 +117,9 @@ Line2D::distanceToOrigin() {
 					sqrt(A^2 + B^2)*/
 
 	if(this->v(0) == 0.0 && this->v(1) == 0.0)
-		return G_INFINITE;
+		return GEOMETRY_INFINITE;
 
-	return abs(this->v(2))/(sqrt(G_SQUARE(this->v(0)) + G_SQUARE(this->v(1))));
+	return abs(this->v(2))/(sqrt(GEOMETRY_SQUARE(this->v(0)) + GEOMETRY_SQUARE(this->v(1))));
 }
 
 double
@@ -127,15 +127,15 @@ Line2D::getAngle() {
 	double alpha;
 
 	if(this->v(1) == 0.0)
-		return G_PI_2;
+		return GEOMETRY_PI_2;
 
 	alpha = atan(-this->v(0)/this->v(1));
 
 	/*Normalize*/
 	if(alpha < 0)
-		alpha += G_PI;
-	if(alpha > G_PI)
-		alpha -= G_PI;	
+		alpha += GEOMETRY_PI;
+	if(alpha > GEOMETRY_PI)
+		alpha -= GEOMETRY_PI;	
 
 	return alpha;
 }
@@ -143,7 +143,7 @@ Line2D::getAngle() {
 double
 Line2D::getGradient() {
 	if(this->v(1) == 0.0)
-		return G_INFINITE;
+		return GEOMETRY_INFINITE;
 
 	return -this->v(0)/this->v(1);
 }
@@ -177,10 +177,10 @@ Line2D::parallelTo(Line2D &l, double threshold) {
 	diff = this->getAngle() - l.getAngle();
 
 	/*Normalize*/
-	while(diff < -G_PI_2)
-		diff += G_PI;
-	while(diff > G_PI_2)
-		diff -= G_PI;
+	while(diff < -GEOMETRY_PI_2)
+		diff += GEOMETRY_PI;
+	while(diff > GEOMETRY_PI_2)
+		diff -= GEOMETRY_PI;
 
 	return fabs(diff) < threshold;
 }

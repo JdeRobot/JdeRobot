@@ -38,13 +38,6 @@
 #include <libxml/xpath.h>
 #include <libxml/tree.h>
 
-#define PI 3.141592654
-#define BIGNUM 1.0e4
-
-/* geometric distances */
-#define DIST2D(p1,p2) sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y))
-#define DIST3D(p1,p2) sqrt((p1.X-p2.X)*(p1.X-p2.X)+(p1.Y-p2.Y)*(p1.Y-p2.Y)+(p1.Z-p2.Z)*(p1.Z-p2.Z))
-
 namespace Progeo {
 
 class Progeo

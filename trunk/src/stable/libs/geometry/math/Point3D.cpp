@@ -39,6 +39,21 @@ Point3D::Point3D(Eigen::Vector4d &p) {
   this->point = p;
 }
 
+void
+Point3D::set(double x, double y, double z, double h) {
+  this->point << x, y, z, h;
+}
+
+void
+Point3D::set(Eigen::Vector3d &p, double h) {
+  this->point << p(0), p(1), p(2), h;
+}
+
+void
+Point3D::set(Eigen::Vector4d &p) {
+  this->point = p;
+}
+
 Eigen::Vector4d&
 Point3D::getPoint() {
   return this->point;
@@ -60,7 +75,7 @@ Point3D::normalize() {
 
 double
 Point3D::distanceTo(Point3D &p) {
-  return sqrt(G_SQUARE(this->point(0)-p.point(0)) + G_SQUARE(this->point(1)-p.point(1)) + + G_SQUARE(this->point(2)-p.point(2)));
+  return sqrt(GEOMETRY_SQUARE(this->point(0)-p.point(0)) + GEOMETRY_SQUARE(this->point(1)-p.point(1)) + + GEOMETRY_SQUARE(this->point(2)-p.point(2)));
 }
 
 bool
@@ -71,6 +86,13 @@ Point3D::belongsToLine(Line3D &l) {
 bool
 Point3D::belongsToPlane(Plane3D &p) {
   return p.hasPoint(*this);
+}
+
+Point3D&
+Point3D::operator =(const Point3D &pt) {
+  this->point = pt.point;
+
+  return *this;
 }
 
 std::ostream&

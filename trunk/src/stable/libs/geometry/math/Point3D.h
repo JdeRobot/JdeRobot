@@ -40,6 +40,10 @@ public:
   Point3D(Eigen::Vector3d &p, double h=1.0);
   Point3D(Eigen::Vector4d &p);
 
+  void set(double x, double y, double z, double h=1.0);
+  void set(Eigen::Vector3d &p, double h=1.0);
+  void set(Eigen::Vector4d &p);
+
   Eigen::Vector4d& getPoint();
 
   /*Return true if the point is at the infinite*/
@@ -58,6 +62,7 @@ public:
   bool belongsToPlane(Plane3D &p);
 
   /*Operators*/
+  Point3D& operator =(const Point3D &pt);
   friend std::ostream& operator <<(std::ostream &o,const Point3D &p);
   
 private:

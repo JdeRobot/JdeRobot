@@ -82,15 +82,15 @@ Segment2D::getAngle() {
 	diffy = this->pend->getPoint()(1) - this->pstart->getPoint()(1);
 
 	if(diffy == 0.0)
-		return G_PI_2;
+		return GEOMETRY_PI_2;
 
 	alpha = atan(-diffx/diffy);
 
 	/*Normalize*/
 	if(alpha < 0)
-		alpha += G_PI;
-	if(alpha > G_PI)
-		alpha -= G_PI;	
+		alpha += GEOMETRY_PI;
+	if(alpha > GEOMETRY_PI)
+		alpha -= GEOMETRY_PI;	
 
 	return alpha;
 }
@@ -103,7 +103,7 @@ Segment2D::getGradient() {
 	diffy = this->pend->getPoint()(1) - this->pstart->getPoint()(1);
 
 	if(diffy == 0.0)
-		return G_INFINITE;
+		return GEOMETRY_INFINITE;
 
 	return -diffx/diffy;
 }
@@ -152,10 +152,10 @@ Segment2D::parallelTo(Segment2D &s, double threshold) {
 	diff = this->getAngle() - s.getAngle();
 
 	/*Normalize*/
-	while(diff < -G_PI_2)
-		diff += G_PI;
-	while(diff > G_PI_2)
-		diff -= G_PI;
+	while(diff < -GEOMETRY_PI_2)
+		diff += GEOMETRY_PI;
+	while(diff > GEOMETRY_PI_2)
+		diff -= GEOMETRY_PI;
 
 	return fabs(diff) < threshold;
 }

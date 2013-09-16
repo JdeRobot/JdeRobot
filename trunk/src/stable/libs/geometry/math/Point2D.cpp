@@ -39,6 +39,21 @@ Point2D::Point2D(Eigen::Vector3d &p) {
   this->point = p;
 }
 
+void
+Point2D::set(double x, double y, double h) {
+  this->point << x, y, h;
+}
+
+void
+Point2D::set(Eigen::Vector2d &p, double h) {
+  this->point << p(0), p(1), h;
+}
+
+void
+Point2D::set(Eigen::Vector3d &p) {
+  this->point = p;
+}
+
 Eigen::Vector3d&
 Point2D::getPoint() {
   return this->point;
@@ -60,7 +75,7 @@ Point2D::normalize() {
 
 double
 Point2D::distanceTo(Point2D &p) {
-  return sqrt(G_SQUARE(this->point(0)-p.point(0)) + G_SQUARE(this->point(1)-p.point(1)));
+  return sqrt(GEOMETRY_SQUARE(this->point(0)-p.point(0)) + GEOMETRY_SQUARE(this->point(1)-p.point(1)));
 }
 
 double
@@ -105,7 +120,7 @@ Point2D::getPositionInSegment(Segment2D &s) {
   pe = s.getPointEnd();
 
   tmp = (this->point(0)-ps.point(0))*(pe.point(0)-ps.point(0)) + (this->point(1)-ps.point(1))*(pe.point(1)-ps.point(1));
-  tmp = tmp /(G_SQUARE(pe.point(0)-ps.point(0)) + G_SQUARE(pe.point(1)-ps.point(1)));
+  tmp = tmp /(GEOMETRY_SQUARE(pe.point(0)-ps.point(0)) + GEOMETRY_SQUARE(pe.point(1)-ps.point(1)));
 
   return tmp;
 }

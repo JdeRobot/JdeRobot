@@ -40,6 +40,10 @@ public:
   Point2D(Eigen::Vector2d &p, double h=1.0);
   Point2D(Eigen::Vector3d &p);
 
+  void set(double x, double y, double h=1.0);
+  void set(Eigen::Vector2d &p, double h=1.0);
+  void set(Eigen::Vector3d &p);
+
   Eigen::Vector3d& getPoint();
 
   /*Return true if the point is at the infinite*/
