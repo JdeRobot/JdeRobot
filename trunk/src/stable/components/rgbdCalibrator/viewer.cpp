@@ -29,7 +29,6 @@
 #define DEGTORAD     (3.14159264 / 180.0)
 #define DEBUG TRUE
 
-using namespace boost::filesystem; 
 using namespace cv;
 using namespace cvb;
 
@@ -382,9 +381,9 @@ namespace rgbdCalibrator{
     {
 
       // Check the directory
-      if ( !exists(pathImage)) 
+      if ( !boost::filesystem::exists(pathImage)) 
       {
-	path dir(pathImage);
+	boost::filesystem::path dir(pathImage);
 	if (!boost::filesystem::create_directory(dir))
 	  std::cout << "Error to create directory" << std::endl;
       }
@@ -444,8 +443,8 @@ namespace rgbdCalibrator{
     flag |= CV_CALIB_FIX_ASPECT_RATIO;
 
     // List of images
-    directory_iterator end_itr; 
-    for ( directory_iterator itr( pathImage ); itr != end_itr; ++itr )
+    boost::filesystem::directory_iterator end_itr; 
+    for ( boost::filesystem::directory_iterator itr( pathImage ); itr != end_itr; ++itr )
     {
 
       Mat view;
