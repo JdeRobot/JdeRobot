@@ -43,13 +43,14 @@ namespace rgbdCalibrator{
 
   Viewer::Viewer() 
     : gtkmain(0,0),frameCount(0),
-      intrinsicsEnable(0),contPhoto(1),hsvFilter(NULL) {
+      intrinsicsEnable(0),contPhoto(1),hsvFilter(NULL), mFrameBlob(NULL) {
 
     std::cout << "Loading glade\n";
 
     // ref widgets
     refXml = Gnome::Glade::Xml::create(gladepath);
     refXml->get_widget("color_image", gtkimage_color);
+    refXml->get_widget("color_image2", gtkimage_color2);
     refXml->get_widget("depth_image", gtkimage_depth);
     refXml->get_widget("hsv_image", gtkimage_hsv);
     refXml->get_widget("blob_image", gtkimage_blob);
@@ -61,12 +62,15 @@ namespace rgbdCalibrator{
     refXml->get_widget("tv_status", tvStatus);
     refXml->get_widget("bt_intrinsic_calib", btIntrinsic);
     refXml->get_widget("eventbox", ebImage);
+    refXml->get_widget("eb_extrinsics", ebImageExtrinsics);
 
     // connect signals
     btTakePhoto->signal_clicked().connect(sigc::mem_fun(this,&Viewer::on_bt_take_photo_clicked));
 
     btIntrinsic->signal_clicked().connect(sigc::mem_fun(this,&Viewer::on_bt_intrinsic));
-    ebImage->signal_button_press_event().connect(sigc::mem_fun(this, &Viewer::on_eventbox_clicked));   
+    ebImage->signal_button_press_event().connect(sigc::mem_fun(this, &Viewer::on_eventbox_clicked));  
+
+    ebImageExtrinsics->signal_button_press_event().connect(sigc::mem_fun(this, &Viewer::on_eventbox_extrinsics_clicked)); 
 
     // start the timer for calculating the number of frames per second
     // the images are being displayed at
@@ -85,7 +89,9 @@ namespace rgbdCalibrator{
 
   Viewer::~Viewer() 
   {
-    delete(mCalibration);
+    if(mCalibration)
+      delete(mCalibration);
+
     RGB2HSV_destroyTable();
   }
 
@@ -109,6 +115,9 @@ namespace rgbdCalibrator{
     gtkimage_color->clear();
     gtkimage_color->set(imgBuffColor);
 
+    gtkimage_color2->clear();
+    gtkimage_color2->set(imgBuffColor);
+
     if (intrinsicsEnable)
       saveImage(imageColor);
     
@@ -116,9 +125,34 @@ namespace rgbdCalibrator{
     pthread_mutex_lock(&mutex);
     imgOrig.create(imageColor.size(), CV_8UC3);
     imageColor.copyTo(imgOrig);
+
+    mImageDepth = imageDepth.clone();
     pthread_mutex_unlock(&mutex);
     
-    
+    // Show depth image          
+    /*
+    colorspaces::ImageRGB8 img_rgb8D(imageDepth);
+    Glib::RefPtr<Gdk::Pixbuf> imgBuffDepth = 
+      Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8D.data,
+				    Gdk::COLORSPACE_RGB,
+				    false,
+				    8,
+				    img_rgb8D.width,
+				    img_rgb8D.height,
+				    img_rgb8D.step);
+    */
+    Glib::RefPtr<Gdk::Pixbuf> imgBuffDepth = 
+      Gdk::Pixbuf::create_from_data((const guint8*)imageDepth.data,
+				    Gdk::COLORSPACE_RGB,
+				    false,
+				    8,
+				    imageDepth.width,
+				    imageDepth.height,
+				    imageDepth.step);
+
+    gtkimage_depth->clear();
+    gtkimage_depth->set(imgBuffDepth);
+
     if (hsvFilter != NULL)
     {
       createImageHSV(imageDepth);
@@ -150,27 +184,9 @@ namespace rgbdCalibrator{
 
       gtkimage_blob->clear();
       gtkimage_blob->set(imgBuffBLOB);
-
-      cvReleaseImage(&mFrameBlob);
-
-      // Show depth image          
-      colorspaces::ImageRGB8 img_rgb8D(imageDepth);
-      Glib::RefPtr<Gdk::Pixbuf> imgBuffDepth = 
-	Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8D.data,
-				      Gdk::COLORSPACE_RGB,
-				      false,
-				      8,
-				      img_rgb8D.width,
-				      img_rgb8D.height,
-				      img_rgb8D.step);
       
-      gtkimage_depth->clear();
-      gtkimage_depth->set(imgBuffDepth);
-
-
+      //cvReleaseImage(&mFrameBlob);
       
-      
-
     }
 
     displayFrameRate();
@@ -215,7 +231,11 @@ namespace rgbdCalibrator{
     CvBlobs blobs;
 
     IplImage *iplOrig = new IplImage(imgOrig);
+
+    if (mFrameBlob)
+      cvReleaseImage(&mFrameBlob);
     mFrameBlob=cvCreateImage(imgOrig.size(),8,3);
+
     IplImage *labelImg=cvCreateImage(imgOrig.size(),IPL_DEPTH_LABEL,1);
 
     cvResize(iplOrig,mFrameBlob,CV_INTER_LINEAR );
@@ -233,8 +253,8 @@ namespace rgbdCalibrator{
     cvFilterByArea(blobs,500,5000);    
 
     double area = 0.0;
-    int x, y;
-
+    int x=0;
+    int y=0;
     
     for (CvBlobs::const_iterator it=blobs.begin(); it!=blobs.end(); ++it)
     {
@@ -267,21 +287,13 @@ namespace rgbdCalibrator{
       
       mCalibration->BackProjectWithDepth(pixel, imageDepth, target);
 
-      //Eigen::Vector2d center;
-      //mCalibration->getOpticalCenter(center);
-      //std::cout << "Center: " << center << std::endl;
-      
     }
 
     // Release and free memory
     delete(iplOrig);
     cvReleaseImage(&threshy);
     cvReleaseImage(&labelImg);
-  }
 
-  void Viewer::setDepth(const jderobot::ImageDataPtr depth)
-  {
-    dataDepth = depth;
   }
 
   void
@@ -305,56 +317,79 @@ namespace rgbdCalibrator{
     }
   }
 
- bool Viewer::on_eventbox_clicked(GdkEventButton * event)
- {
-   int posX, posY;
-   float r,g,b;
-   posX = (int) event->x;
-   posY = (int) event->y;
+  bool Viewer::on_eventbox_extrinsics_clicked(GdkEventButton * event)
+  {
 
-   pthread_mutex_lock(&mutex);
-
-   int index = posY*imgOrig.step+posX*imgOrig.channels();
-   r = (float)(unsigned int) (unsigned char)imgOrig.data[index];
-   g = (float)(unsigned int) (unsigned char)imgOrig.data[index+1];
-   b = (float)(unsigned int) (unsigned char)imgOrig.data[index+2]; 
-
-   pthread_mutex_unlock(&mutex);
-
+    if (mCalibration){
    
-   if (DEBUG) std::cout << "[RGB] -> " << r << " " << g << " " << b << std::endl;
-   hsvFilter = RGB2HSV_getHSV (r,g,b);
-   if (DEBUG) std::cout << "[HSV] -> " << hsvFilter->H << " " << hsvFilter->S << " " << hsvFilter->V << std::endl;
+      pthread_mutex_lock(&mutex);
+      bool res = mCalibration->addPatternPixel (Eigen::Vector3d ((int) event->x, 
+								 (int) event->y, 
+								 1.0),
+						mImageDepth);
 
-   // Calculate HSV Min y Max
-   hmax = hsvFilter->H*DEGTORAD + 0.2;
-   hmin = hsvFilter->H*DEGTORAD - 0.2;
-   if(hmax>6.28) hmax = 6.28;
-   if(hmin<0.0)  hmin = 0.0;
+      if (res == false)
+      {
+	Eigen::Vector3d p2D ((int) event->x, (int) event->y, 1.0);
+	Eigen::Vector4d p3D;
+	mCalibration->BackProjectWithDepth (p2D, mImageDepth, p3D);
+	mCalibration->test(p3D);
+      }
 
-   smax = hsvFilter->S + 0.1;
-   smin = hsvFilter->S - 0.1;
-   if(smax > 1.0)
-     smax = 1.0;
-   if(smin < 0.0)
-     smin = 0.0;
+      pthread_mutex_unlock(&mutex);
+    }
+  }
 
-   vmax = hsvFilter->V + 50.0;
-   vmin = hsvFilter->V - 50.0;
-   if(vmax > 255.0)
-     vmax = 255.0;
-   if(vmin < 0.0)
-     vmin = 0.0; 
-
-   if (DEBUG)
-     std::cout << "H[min,max] - S[min,max] - V[min,max]: " <<
+  bool Viewer::on_eventbox_clicked(GdkEventButton * event)
+  {
+    int posX, posY;
+    float r,g,b;
+    posX = (int) event->x;
+    posY = (int) event->y;
+    
+    pthread_mutex_lock(&mutex);
+    
+    int index = posY*imgOrig.step+posX*imgOrig.channels();
+    r = (float)(unsigned int) (unsigned char)imgOrig.data[index];
+    g = (float)(unsigned int) (unsigned char)imgOrig.data[index+1];
+    b = (float)(unsigned int) (unsigned char)imgOrig.data[index+2]; 
+    
+    pthread_mutex_unlock(&mutex);
+    
+    
+    if (DEBUG) std::cout << "[RGB] -> " << r << " " << g << " " << b << std::endl;
+    hsvFilter = RGB2HSV_getHSV (r,g,b);
+    if (DEBUG) std::cout << "[HSV] -> " << hsvFilter->H << " " << hsvFilter->S << " " << hsvFilter->V << std::endl;
+    
+    // Calculate HSV Min y Max
+    hmax = hsvFilter->H*DEGTORAD + 0.2;
+    hmin = hsvFilter->H*DEGTORAD - 0.2;
+    if(hmax>6.28) hmax = 6.28;
+    if(hmin<0.0)  hmin = 0.0;
+    
+    smax = hsvFilter->S + 0.1;
+    smin = hsvFilter->S - 0.1;
+    if(smax > 1.0)
+      smax = 1.0;
+    if(smin < 0.0)
+      smin = 0.0;
+    
+    vmax = hsvFilter->V + 50.0;
+    vmin = hsvFilter->V - 50.0;
+    if(vmax > 255.0)
+      vmax = 255.0;
+    if(vmin < 0.0)
+      vmin = 0.0; 
+    
+    if (DEBUG)
+      std::cout << "H[min,max] - S[min,max] - V[min,max]: " <<
        "[" << hmin << " " << hmax << "] " <<
-       "[" << smin << " " << smax << "] " <<
-       "[" << vmin << " " << vmax << "] " << std::endl;
-
-   return true;
- }
-
+	"[" << smin << " " << smax << "] " <<
+	"[" << vmin << " " << vmax << "] " << std::endl;
+    
+    return true;
+  }
+  
   void Viewer::on_bt_take_photo_clicked() 
   {
     intrinsicsEnable = 1;
@@ -498,8 +533,6 @@ namespace rgbdCalibrator{
 
       tvStatus->get_buffer()->set_text(matrixStr.str().c_str());
     }
-
-    mCalibration->extrinsics(cameraMatrix, dataDepth);
 
     
   }

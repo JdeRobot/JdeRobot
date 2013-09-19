@@ -55,6 +55,7 @@ namespace rgbdCalibrator{
   private:
     Glib::RefPtr<Gnome::Glade::Xml> refXml;
     Gtk::Image* gtkimage_color;
+    Gtk::Image* gtkimage_color2;
     Gtk::Image* gtkimage_depth;
     Gtk::Image* gtkimage_hsv;
     Gtk::Image* gtkimage_blob;
@@ -67,6 +68,7 @@ namespace rgbdCalibrator{
     Gtk::Entry* etNumPhoto;
     Gtk::TextView* tvStatus;
     Gtk::EventBox* ebImage;
+    Gtk::EventBox* ebImageExtrinsics;
     Gtk::Main gtkmain;
   
     //! display the frame rate of the received images
@@ -85,16 +87,19 @@ namespace rgbdCalibrator{
     int numPhoto;
     int contPhoto;
 
-    jderobot::ImageDataPtr dataDepth;
     cv::Mat imgOrig;
     cv::Mat imgHSV;
+    colorspaces::Image mImageDepth;
     IplImage* mFrameBlob;
     pthread_mutex_t mutex;
     const HSV* hsvFilter;
     double hmin, hmax, smin, smax, vmin, vmax;
 
+    // Extrinsics variables
+
     // onclicks
     bool on_eventbox_clicked(GdkEventButton * event);
+    bool on_eventbox_extrinsics_clicked(GdkEventButton * event);
     void on_bt_take_photo_clicked ();
     void on_bt_intrinsic();
     

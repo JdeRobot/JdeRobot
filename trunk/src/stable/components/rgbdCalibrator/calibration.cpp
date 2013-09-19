@@ -25,6 +25,11 @@
 #include "../../libs/geometry/math/Point3D.h"
 #include "../../libs/geometry/math/Segment3D.h"
 
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_linalg.h> 
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_multifit.h>
+
 using namespace cv;
 
 namespace rgbdCalibrator{
@@ -36,7 +41,9 @@ namespace rgbdCalibrator{
 
 
   Calibration::Calibration()
-  {}
+  {
+    initPatternPoints();
+  }
 
   Calibration::~Calibration()
   {}
@@ -164,310 +171,6 @@ namespace rgbdCalibrator{
     return std::sqrt(totalErr/totalPoints);
   }
 
-  void Calibration::getOpticalCenter (Eigen::Vector2d &center)
-  {
-    center(0) = mKMatrix.at<double>(0,2);
-    center(1) = mKMatrix.at<double>(1,2);
-  }
-
-  // Extrinsics
-  void Calibration::extrinsics (const Mat& kMatrix, 
-				const jderobot::ImageDataPtr depthData)
-
-  {
-
-    /*
-    
-    TPinHoleCamera m_progeoCam;
-
-    // Camera Position
-    HPoint3D positionCam;
-
-    positionCam.X= 0;
-    positionCam.Y= 0;
-    positionCam.Z= 0;
-    positionCam.H= 0.0;
-
-    m_progeoCam.position = positionCam;
-
-    // K Matrix
-    m_progeoCam.k11 = kMatrix.at<double>(0,0);
-    m_progeoCam.k12 = kMatrix.at<double>(0,1);
-    m_progeoCam.k13 = kMatrix.at<double>(0,2);
-    m_progeoCam.k14 = 0;
-    
-    m_progeoCam.k21 = kMatrix.at<double>(1,0);
-    m_progeoCam.k22 = kMatrix.at<double>(1,1);
-    m_progeoCam.k23 = kMatrix.at<double>(1,2);
-    m_progeoCam.k24 = 0;
-
-    m_progeoCam.k31 = kMatrix.at<double>(2,0);
-    m_progeoCam.k32 = kMatrix.at<double>(2,1);
-    m_progeoCam.k33 = kMatrix.at<double>(2,2);
-    m_progeoCam.k34 = 0;
-
-    // RT Matrix
-    m_progeoCam.rt11 = 1;
-    m_progeoCam.rt12 = 0;
-    m_progeoCam.rt13 = 0; 
-    m_progeoCam.rt14 = 0;
-    
-    m_progeoCam.rt21 = 0;
-    m_progeoCam.rt22 = 1;
-    m_progeoCam.rt23 = 0;
-    m_progeoCam.rt24 = 0;
-    
-    m_progeoCam.rt31 = 0;
-    m_progeoCam.rt32 = 0;
-    m_progeoCam.rt33 = 1;
-    m_progeoCam.rt34 = 0;
-    
-    m_progeoCam.rt41 = 0;
-    m_progeoCam.rt42 = 0;
-    m_progeoCam.rt43 = 0;
-    m_progeoCam.rt44 = 1;
-
-
-    display_camerainfo(m_progeoCam);
-    // backproject
-    HPoint3D point3D;
-    HPoint2D point2D;
-
-    point2D.x = 180,0;
-    point2D.y = 180.0;
-    point2D.h = 1.0;
-    
-    printf ("Pto en 2D: %2.2f %2.2f %2.2f \n",point2D.x,point2D.y,point2D.h);
-
-    if (backproject(&point3D,point2D,m_progeoCam)!=-1)
-      printf("Backproject a 3D (de nuevo): %.2f %.2f %.2f %.2f \n",point3D.X, point3D.Y, point3D.Z, point3D.H);
-
-
-    float depth = (int)depthData->pixelData[((depthData->description->width*(int)point2D.y)+(int)point2D.x)*3+1]<<8 | 
-      (int)depthData->pixelData[((depthData->description->width*(int)point2D.y)+(int)point2D.x)*3+2];
-
-
-    std::cout << depth << std::endl;
-    std::cout << depthData->description->width << std::endl;
-
-    HPoint2D p2;
-    if (project(point3D, &p2, m_progeoCam))
-      printf("Project a 2D (de nuevo): %2.2f,%2.2f,%2.2f \n",p2.x,p2.y,p2.h);
-
-    point3D.X = 150.64;
-    point3D.Y = 444.57;
-    point3D.Z = 1000.0;
-    point3D.H = 1.0;
-
-    if (project(point3D, &p2, m_progeoCam))
-      printf("Project a 2D (): %2.2f,%2.2f,%2.2f \n",p2.x,p2.y,p2.h);
-
-    std::cout << "_----------------------_" << std::endl;
-    point2D.x = 180,0;
-    point2D.y = 180.0;
-    point2D.h = 1.0;
-
-    printf ("Pixek 2D: %2.2f %2.2f %2.2f \n",point2D.x,point2D.y,point2D.h);
-
-    if (backproject(&point3D,point2D,m_progeoCam)!=-1)
-      printf("Backproject a 3D (de nuevo): %.2f %.2f %.2f %.2f \n",point3D.X, point3D.Y, point3D.Z, point3D.H);
-
-    HPoint3D orig;
-    orig.X = 0.;
-    orig.Y = 0.;
-    orig.Z = 0.;
-    orig.H = 1.;
-    
-    GeoUtils* gUtils = new GeoUtils();
-    HPoint3D vector = gUtils->getVector(orig, point3D);
-    
-    GeoUtils::Line3D* line3D = new GeoUtils::Line3D(orig, vector);
-
-    HPoint3D p3 = line3D->getPointByZ(2000.0);
-
-    printf("getPointByZ : %.2f %.2f %.2f %.2f \n",p3.X, p3.Y, p3.Z, p3.H);
-
-    if (project(p3, &p2, m_progeoCam))
-      printf("Project a 2D (): %2.2f,%2.2f,%2.2f \n",p2.x,p2.y,p2.h);
-    
-    delete(line3D);
-    delete (gUtils);
-    
-    
-    std::cout << "_----------------------_" << std::endl;
-
-    */
-
-    /*
-
-    math::Vector3H pos;
-    pos.vector(0) = 0.0;
-    pos.vector(1) = 0.0;
-    pos.vector(2) = 0.0;
-    pos.vector(3) = 0.0;
-
-    math::Matriz3x3 K;
-    K.getMatriz()(0,0) = kMatrix.at<double>(0,0);
-    K.getMatriz()(0,1) = kMatrix.at<double>(0,1);
-    K.getMatriz()(0,2) = kMatrix.at<double>(0,2);
-
-    K.getMatriz()(1,0) = kMatrix.at<double>(1,0);
-    K.getMatriz()(1,1) = kMatrix.at<double>(1,1);
-    K.getMatriz()(1,2) = kMatrix.at<double>(1,2);
-
-    K.getMatriz()(2,0) = kMatrix.at<double>(2,0);
-    K.getMatriz()(2,1) = kMatrix.at<double>(2,1);
-    K.getMatriz()(2,2) = kMatrix.at<double>(2,2);
-
-    math::Matriz4x4 RT;
-    RT.getMatrix()(0,0) = 1.;
-    RT.getMatrix()(0,1) = 0.;
-    RT.getMatrix()(0,2) = 0.;
-    RT.getMatrix()(0,3) = 0.;
-
-    RT.getMatrix()(1,0) = 0.;
-    RT.getMatrix()(1,1) = 1.;
-    RT.getMatrix()(1,2) = 0.;
-    RT.getMatrix()(1,3) = 0.;
-
-    RT.getMatrix()(2,0) = 0.;
-    RT.getMatrix()(2,1) = 0.;
-    RT.getMatrix()(2,2) = 1.;
-    RT.getMatrix()(2,3) = 0.;
-
-    RT.getMatrix()(3,0) = 0.;
-    RT.getMatrix()(3,1) = 0.;
-    RT.getMatrix()(3,2) = 0.;
-    RT.getMatrix()(3,3) = 1.;
-
-    
-    Progeo::Progeo* progeo = new Progeo::Progeo(pos, K, RT, 320, 240);
-    progeo->display_camerainfo();
-
-    math::Vector3H p3D;
-    math::Vector2H pixel (10.0, 100.0, 1.0); 
-    
-    progeo->backproject(pixel, p3D);
-
-    std::cout << p3D << std::endl;
-
-    HPoint3D orig;
-    orig.X = 0.;
-    orig.Y = 0.;
-    orig.Z = 0.;
-    orig.H = 1.;
-    
-    HPoint3D point3D;
-    point3D.X = p3D.getX();
-    point3D.Y = p3D.getY();
-    point3D.Z = p3D.getZ();
-    point3D.H = 1.;
-
-    GeoUtils* gUtils = new GeoUtils();
-    HPoint3D vector = gUtils->getVector(orig, point3D);
-    
-    GeoUtils::Line3D* line3D = new GeoUtils::Line3D(orig, vector);
-
-    HPoint3D p3 = line3D->getPointByZ(2000.0);
-
-    printf("getPointByZ : %.2f %.2f %.2f %.2f \n",p3.X, p3.Y, p3.Z, p3.H);
-
-
-    p3D.setX(p3.X);
-    p3D.setY(p3.Y);
-    p3D.setZ(p3.Z);
-    p3D.setH(1.0);
-
-    std::cout << p3D << std::endl;
-
-    math::Vector2H pixel2;
-    progeo->project(p3D, pixel2);
-
-    std::cout << pixel2.getX() << " " << pixel2.getY() << std::endl;
-
-    delete(line3D);
-    delete (gUtils);
-    delete(progeo);
-
-    */
-
-    Eigen::Vector4d posCamera;
-    posCamera(0) = double(0.0);
-    posCamera(1) = double(0.0);
-    posCamera(2) = double(0.0);
-
-
-    Eigen::Matrix3d K;
-    K(0,0) = kMatrix.at<double>(0,0);
-    K(0,1) = kMatrix.at<double>(0,1);
-    K(0,2) = kMatrix.at<double>(0,2);
-
-    K(1,0) = kMatrix.at<double>(1,0);
-    K(1,1) = kMatrix.at<double>(1,1);
-    K(1,2) = kMatrix.at<double>(1,2);
-
-    K(2,0) = kMatrix.at<double>(2,0);
-    K(2,1) = kMatrix.at<double>(2,1);
-    K(2,2) = kMatrix.at<double>(2,2);
-
-    Eigen::Matrix4d RT;
-    RT(0,0) = double(1.);
-    RT(0,1) = double(0.);
-    RT(0,2) = double(0.);
-    RT(0,3) = double(0.);
-
-    RT(1,0) = double(0.);
-    RT(1,1) = double(1.);
-    RT(1,2) = double(0.);
-    RT(1,3) = double(0.);
-
-    RT(2,0) = double(0.);
-    RT(2,1) = double(0.);
-    RT(2,2) = double(1.);
-    RT(2,3) = double(0.);
-
-    RT(3,0) = double(0.);
-    RT(3,1) = double(0.);
-    RT(3,2) = double(0.);
-    RT(3,3) = double(1.);
-
-
-    Progeo::Progeo* progeo = new Progeo::Progeo(posCamera, K, RT, 320, 240);
-    progeo->display_camerainfo();   
-
-    Eigen::Vector4d p3D;
-    Eigen::Vector3d pixel;
-
-    pixel(0) = double(180.);
-    pixel(1) = double(180.); 
-    pixel(2) = double(1.);
-
-    progeo->backproject(pixel, p3D);
-
-    std::cout << "Punto 3D: " << p3D << std::endl; 
-
-    progeo->project(p3D, pixel);   
-
-    std::cout << "Pixel 2D: " << pixel << std::endl;
-     
-    Point3D *pStart = new Point3D(0.0,0.0,0.0);
-    Point3D *pEnd = new Point3D(p3D);
-
-    Segment3D *segment = new Segment3D(*pStart,*pEnd);
-    Point3D *nP3D = segment->getPointByZ(200.0);
-
-    std::cout << "New Point 3D with Z=200.0 " << *nP3D << std::endl;
-    
-    progeo->project(nP3D->getPoint(), pixel);
-
-    std::cout << "Project Pixel\n" << pixel << std::endl;
-
-    delete(pStart);
-    delete(pEnd);
-    delete(nP3D);
-    delete(segment);
-    delete(progeo);
-  }
 
 
   void
@@ -522,7 +225,7 @@ namespace rgbdCalibrator{
     Progeo::Progeo* progeo = new Progeo::Progeo(posCamera, K, RT, 320, 240);
     //progeo->display_camerainfo(); 
 
-    std::cout << "Pixel (opticas): " << pixel << std::endl;
+    //std::cout << "Pixel (opticas): " << pixel << std::endl;
    
     // Optical coordinates
     Eigen::Vector3d graphic;
@@ -530,25 +233,25 @@ namespace rgbdCalibrator{
     graphic(1) = 240 - 1 - pixel(0);
     graphic(2) = 1.0;
 
-    std::cout << "Graphic (progeo): " << graphic << std::endl;
+    //std::cout << "Graphic (progeo): " << graphic << std::endl;
 
     Eigen::Vector4d p3D;
     progeo->backproject(graphic, p3D); 
 
-    std::cout << "P3D: " << p3D << std::endl;
+    //std::cout << "P3D: " << p3D << std::endl;
 
     Point3D *pStart = new Point3D(0.0,0.0,0.0);
     Point3D *pEnd = new Point3D(p3D);
 
     Segment3D *segment = new Segment3D(*pStart,*pEnd);
 
-    std::cout << "Depth: " << depth << std::endl;
+    //std::cout << "Depth: " << depth << std::endl;
 
     Point3D *nP3D = segment->getPointByZ(depth);    
 
     res3D = nP3D->getPoint();
 
-    std::cout << res3D << std::endl;
+    //std::cout << res3D << std::endl;
 
     /*
     std::cout << "-------------" << std::endl;
@@ -576,6 +279,188 @@ namespace rgbdCalibrator{
     delete(pEnd);
     delete(nP3D);
     delete(progeo);
+
+  }
+
+  void Calibration::initPatternPoints()
+  {
+    mPatternPoints.push_back(Eigen::Vector4d (0.,0.,0.,1.));
+    mPatternPoints.push_back(Eigen::Vector4d (120.,0.,0.,1.));
+    mPatternPoints.push_back(Eigen::Vector4d (0.,0.,120.,1.));
+    mPatternPoints.push_back(Eigen::Vector4d (0.,120.,0.,1.));
+    mPatternPoints.push_back(Eigen::Vector4d (120.,120.,0.,1.));
+    mPatternPoints.push_back(Eigen::Vector4d (0.,120.,120.,1.));
+
+  }
+
+  bool Calibration::addPatternPixel (Eigen::Vector3d pixel, const colorspaces::Image depthData)
+  {
+    mPixelPoints.push_back(pixel);
+    
+    if  (mPixelPoints.size() > 6)
+      return false;
+
+    if (mPixelPoints.size() == 6)
+    {  
+
+      std::cout << "\tPixels" << "\t\t" << "Pattern" << "\t\t" << "Camera" << std::endl;
+
+      for (int i=0; i<mPixelPoints.size(); i++)
+      {
+        
+         std::cout << "P" << i << "\t(" 
+		   << mPixelPoints[i](0) << "," 
+		   << mPixelPoints[i](1) << ")  \t";
+
+         std::cout << "(" << mPatternPoints[i](0) << "," 
+		   << mPatternPoints[i](1) << "," 
+		   << mPatternPoints[i](2) << ") \t";
+
+	 Eigen::Vector4d pCamera(0.,0.,1000000.,0.);
+
+	 // We use a window of 5x5 pixels to avoid errors of the depth image
+	 for (int x=-2; x<=2; x++) {
+
+           for (int y=-2;y<=2; y++) {
+	     Eigen::Vector3d pixel(mPixelPoints[i](0)+x,mPixelPoints[i](1)+y,1.0);
+	     Eigen::Vector4d aux;
+	     BackProjectWithDepth (pixel, depthData, aux);
+	     
+	     if (aux(2) != 0 && aux(2) < pCamera(2)) {
+	       pCamera = aux;
+             }
+           }
+         }
+
+	 mCameraPoints.push_back(pCamera);
+
+	 std::cout << "(" << pCamera[0] 
+		   << "," << pCamera[1] 
+		   << "," << pCamera[2] << ")"
+		   << std::endl;
+
+
+	
+	 
+      }
+
+      mPairPoints.clear();
+      
+      //Build pairs
+      for (int i = 0; i<4; i++)
+	mPairPoints.push_back(std::make_pair(mPatternPoints[i] ,mCameraPoints[i]));
+
+      
+      for (int i = 0; i<4; i++)
+      {
+	std::cout << "(" << mPairPoints[i].first(0) 
+		  << "," << mPairPoints[i].first(1)
+		  << "," << mPairPoints[i].first(2) << ")  ->  ";
+
+	std::cout << "(" << mPairPoints[i].second(0) 
+		  << "," << mPairPoints[i].second(1)
+		  << "," << mPairPoints[i].second(2) << ")"
+	  	  << std::endl;
+      }
+      
+      LSO();      
+
+      mCameraPoints.clear();
+      mPairPoints.clear();
+
+    }
+
+    return true;
+
+  }
+
+  void Calibration::test(Eigen::Vector4d pCamera)
+  {
+
+    std::cout << "====== TEST ====== " << std::endl;
+
+    std::cout << pCamera << std::endl;
+    
+    Eigen::Vector4d s = mRTsolution * pCamera;
+
+    std::cout << s << std::endl;
+
+  }
+
+  void Calibration::LSO()
+  {
+
+    gsl_matrix *ertm=gsl_matrix_alloc(4,4);
+    double chisq;
+    gsl_matrix *x,*cov;
+    gsl_vector *y,*c;
+    gsl_multifit_linear_workspace * work;
+    
+    x=gsl_matrix_calloc(mPairPoints.size()*3,12);
+    cov=gsl_matrix_alloc(12,12);
+    y=gsl_vector_alloc(mPairPoints.size()*3);
+    c=gsl_vector_alloc(12);
+    work = gsl_multifit_linear_alloc (mPairPoints.size()*3,12);
+    double x1,y1,z1,x2,y2,z2;
+    //preaparamos la matriz de ecuaciones 
+
+    for (int i=0; i<mPairPoints.size(); i++){
+      x1=mPairPoints[i].first(0);
+      y1=mPairPoints[i].first(1);
+      z1=mPairPoints[i].first(2);
+      x2=mPairPoints[i].second(0);
+      y2=mPairPoints[i].second(1);
+      z2=mPairPoints[i].second(2);
+
+      gsl_matrix_set(x, i*3,0, x2);
+      gsl_matrix_set(x, i*3,1, y2);
+      gsl_matrix_set(x, i*3,2, z2);
+      gsl_matrix_set(x, i*3,3, 1);
+      gsl_vector_set(y,i*3, x1);      
+      
+      gsl_matrix_set(x, i*3+1, 4, x2);
+      gsl_matrix_set(x, i*3+1, 5, y2);
+      gsl_matrix_set(x, i*3+1, 6, z2);
+      gsl_matrix_set(x, i*3+1, 7, 1);
+      gsl_vector_set(y,i*3+1, y1);
+      
+      gsl_matrix_set(x, i*3+2,8, x2);
+      gsl_matrix_set(x, i*3+2,9, y2);
+      gsl_matrix_set(x, i*3+2,10, z2);
+      gsl_matrix_set(x, i*3+2,11, 1);
+      gsl_vector_set(y,i*3+2, z1);      
+    }
+
+    gsl_multifit_linear(x,y,c,cov,&chisq,work);
+    gsl_multifit_linear_free(work);
+    
+    for (int i=0;i<3; i++) {
+      for (int j=0;j<4;j++) {
+        double v=c->data[i*4+j];
+        if(sqrt(v*v)<0.0001) 
+	  v=0;
+        //gsl_matrix_set(ertm,i,j,v);
+	mRTsolution(i,j) = v;
+      }
+    }
+
+    /*
+    gsl_matrix_set(ertm,3,0,0);
+    gsl_matrix_set(ertm,3,1,0);
+    gsl_matrix_set(ertm,3,2,0);
+    gsl_matrix_set(ertm,3,3,1);
+    */
+
+    mRTsolution(3,0) = 0.;
+    mRTsolution(3,1) = 0.;
+    mRTsolution(3,2) = 0.;
+    mRTsolution(3,3) = 1.;
+
+    //gsl_matrix_fprintf(stdout,ertm,"%f");
+
+    std::cout << mRTsolution << std::endl;
+
+    
 
   }
 

@@ -281,6 +281,25 @@
             <property name="y">306</property>
           </packing>
         </child>
+        <child>
+          <widget class="GtkEventBox" id="eb_extrinsics">
+            <property name="width_request">320</property>
+            <property name="height_request">240</property>
+            <property name="visible">True</property>
+            <child>
+              <widget class="GtkImage" id="color_image2">
+                <property name="width_request">320</property>
+                <property name="height_request">240</property>
+                <property name="visible">True</property>
+                <property name="stock">gtk-missing-image</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="x">28</property>
+            <property name="y">577</property>
+          </packing>
+        </child>
       </widget>
     </child>
   </widget>

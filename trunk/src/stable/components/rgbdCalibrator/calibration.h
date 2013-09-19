@@ -31,6 +31,7 @@
 #include <colorspaces/colorspacesmm.h>
 #include <jderobot/camera.h>
 #include "../../libs/geometry/math/Point3D.h"
+#include <boost/tuple/tuple.hpp>
 
 using namespace cv;
 
@@ -55,16 +56,32 @@ namespace rgbdCalibrator
 			       Mat& distCoeffs,
 			       vector<vector<Point2f> > imagePoints );
 
-    void extrinsics (const Mat& kMatrix, const jderobot::ImageDataPtr depth);
-
     void BackProjectWithDepth (const Eigen::Vector3d pixel,
 			       const colorspaces::Image depthData,
 			       Eigen::Vector4d& res3D);
 
-    void getOpticalCenter (Eigen::Vector2d &center);
+    bool addPatternPixel (Eigen::Vector3d pixel, 
+			  const colorspaces::Image depthData);
+
+    Eigen::Matrix4d getRTSolution() { return mRTsolution; };
+
+    void test(Eigen::Vector4d pCamera);
+
   private:
 
     Mat mKMatrix;
+
+    Eigen::Matrix4d mRTsolution;
+
+    std::vector<Eigen::Vector3d> mPixelPoints;
+    std::vector<Eigen::Vector4d> mPatternPoints;
+    std::vector<Eigen::Vector4d> mCameraPoints;
+    std::vector<std::pair<Eigen::Vector4d,Eigen::Vector4d> > mPairPoints;
+
+    void initPatternPoints();
+
+    void LSO();
+   
 
     void calcBoardCornerPositions(Size boardSize, 
 				  float squareSize, 
