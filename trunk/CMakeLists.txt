@@ -57,11 +57,7 @@ ENDIF()
   # FIND & CHECK PRINCIPAL LIBRARIES
 
 include(FindPkgConfig)
-PKG_CHECK_MODULES(opencv opencv)
-include_directories(${opencv_INCLUDE_DIRS})
-link_directories(${opencv_LIBRARY_DIRS})
-MESSAGE("${opencv_LIBRARY_DIRS}")
-MESSAGE("${opencv_INCLUDE_DIRS}")
+
 PKG_CHECK_MODULES(gtk20 REQUIRED gtk+-2.0)
 include_directories(${gtk20_INCLUDE_DIRS})
 link_directories(${gtk20_LIBRARY_DIRS})
@@ -106,7 +102,6 @@ include_directories(${gstreamerapp_INCLUDE_DIRS})
 link_directories(${gstreamerapp_LIBRARY_DIRS})
 
 
-include_directories(${LIBS_DIR}/progeo)
 FOREACH(LibFile ${LIBS_NEEDED})
     link_directories(${LIBS_DIR}/${LibFile})
     MESSAGE("${LIBS_DIR}/${LibFile}")

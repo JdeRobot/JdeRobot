@@ -41,7 +41,7 @@ IF(OPENNI2_LIB)
         ${CMAKE_THREAD_LIBS_INIT}
 	${CMAKE_THREAD_LIBS_INIT}
         ${ZeroCIce_LIBRARIES}
-        ${opencv_LIBRARIES}
+        ${OpenCV_LIBRARIES}
         ${gsl_LIBRARIES}
         ${LIBS_DIR}/jderobotutil/libjderobotutil.so
         ${LIBS_DIR}/progeo/libprogeo.so
@@ -55,7 +55,7 @@ IF(OPENNI2_LIB)
 	TARGET_LINK_LIBRARIES(openniServer
         ${CMAKE_THREAD_LIBS_INIT}
 	${ZeroCIce_LIBRARIES}
-	${opencv_LIBRARIES}
+	${OpenCV_LIBRARIES}
 	${gsl_LIBRARIES}
         ${LIBS_DIR}/jderobotutil/libjderobotutil.so
         ${LIBS_DIR}/progeo/libprogeo.so

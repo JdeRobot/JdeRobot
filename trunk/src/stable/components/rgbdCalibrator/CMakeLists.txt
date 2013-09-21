@@ -12,6 +12,7 @@ add_executable (rgbdCalibrator ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(rgbdCalibrator
     ${CMAKE_THREAD_LIBS_INIT}
+    ${gsl_LIBRARIES}
     ${alut_LIBRARIES}
     ${OpenCV_LIBRARIES}
     ${gtkmm_LIBRARIES}
@@ -24,5 +25,5 @@ TARGET_LINK_LIBRARIES(rgbdCalibrator
     ${LIBS_DIR}/geometry/libgeometry.so
     ${LIBS_DIR}/colorspaces/libcolorspaces.so
     ${LIBS_DIR}/cvBlob/libcvblob.so
-    ${gsl_LIBRARIES}
+    
 )

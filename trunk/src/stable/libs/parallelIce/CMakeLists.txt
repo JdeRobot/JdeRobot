@@ -3,26 +3,13 @@ include_directories(${INTERFACES_CPP_DIR}) # Aquí se alojan las cabeceras de la
 include_directories(${LIBS_DIR}) # Aquí se alojan las cabeceras de las interfaces ICE en C++
 
 
-include_directories(
-    ${INTERFACES_CPP_DIR}
-    ${LIBS_DIR}/
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/cameras
-)
+include_directories( ${LIBS_DIR}/)
 
 add_library (parallelIce STATIC cameraClient.cpp  cameraClient.h  pointcloudClient.cpp  pointcloudClient.h)
-TARGET_LINK_LIBRARIES(parallelIce 
-   	${OpenCV_LIBRARIES}
-    ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-    ${ZeroCIce_LIBRARIES}
-)
+TARGET_LINK_LIBRARIES(parallelIce colorspacesmm)
 
 add_library (parallelIceshare SHARED cameraClient.cpp  cameraClient.h  pointcloudClient.cpp  pointcloudClient.h)
-TARGET_LINK_LIBRARIES(parallelIceshare 
-   	${OpenCV_LIBRARIES}
-    ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-    ${ZeroCIce_LIBRARIES}
-)
+TARGET_LINK_LIBRARIES(parallelIceshare colorspacesmm)
 
 
 set_target_properties(parallelIceshare PROPERTIES OUTPUT_NAME parallelIce)

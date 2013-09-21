@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-IF( Gearbox_INCLUDE_DIR )
+IF( false )
 
   SET( SOURCE_FILES playerserver4.cpp)
 	#SET( LIBS_DIR /usr/local/lib/jderobot/)

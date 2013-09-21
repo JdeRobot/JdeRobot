@@ -1,4 +1,4 @@
-IF( with_player)
+IF( false)
 
       SET( SOURCE_FILES playerserver.cpp)
 

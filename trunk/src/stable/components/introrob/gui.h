@@ -42,7 +42,7 @@
 #include <gdkmm/pixbuf.h>
 #include "API.h"
 //#include "camera.h"
-#include <progeo.h>
+#include <progeo/progeo.h>
 #include <libgnomecanvasmm.h> 
 #include "drawarea.h"
 
