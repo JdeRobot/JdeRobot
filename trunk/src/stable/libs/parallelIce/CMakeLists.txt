@@ -9,7 +9,7 @@ add_library (parallelIce STATIC cameraClient.cpp  cameraClient.h  pointcloudClie
 TARGET_LINK_LIBRARIES(parallelIce colorspacesmm)
 
 add_library (parallelIceshare SHARED cameraClient.cpp  cameraClient.h  pointcloudClient.cpp  pointcloudClient.h)
-TARGET_LINK_LIBRARIES(parallelIceshare colorspacesmm)
+TARGET_LINK_LIBRARIES(parallelIceshare colorspacesmmshare)
 
 
 set_target_properties(parallelIceshare PROPERTIES OUTPUT_NAME parallelIce)
