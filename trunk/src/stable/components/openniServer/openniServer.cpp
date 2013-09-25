@@ -89,6 +89,7 @@ int deviceMode; //videmode for device streamings
 //block to wait the device initialization
 IceUtil::Mutex controlMutex;
 IceUtil::Cond sem;
+int mirrorDepth, mirrorRGB;
 
 
 namespace openniServer{
@@ -102,6 +103,7 @@ openni::VideoStream depth, color, ir;
 openni::VideoStream** m_streams;
 openni::VideoMode depthVideoMode;
 openni::VideoMode colorVideoMode;
+
 
 
 
@@ -164,6 +166,21 @@ void* updateThread(void*)
 		{
 			std::cout << "OpenniServer: Couldn't find depth stream: " <<  openni::OpenNI::getExtendedError() << std::endl;
 		}
+
+		if (mirrorDepth){
+			rc=depth.setMirroringEnabled(true);
+			if (rc != openni::STATUS_OK)
+			{
+				std::cout << "OpenniServer: error at set depth mirror: " << openni::OpenNI::getExtendedError() << std::endl;
+			}
+		}
+		else{
+			rc=depth.setMirroringEnabled(false);
+			if (rc != openni::STATUS_OK)
+			{
+				std::cout << "OpenniServer: error at set depth mirror: " << openni::OpenNI::getExtendedError() << std::endl;
+			}
+		}
 	}
 
 	//color
@@ -182,6 +199,20 @@ void* updateThread(void*)
 		{
 			std::cout << "OpenniServer: Couldn't find color stream: " << openni::OpenNI::getExtendedError() << std::endl;
 		}
+		if (mirrorRGB){
+			rc=color.setMirroringEnabled(true);
+			if (rc != openni::STATUS_OK)
+			{
+				std::cout << "OpenniServer: error at set color mirror: " << openni::OpenNI::getExtendedError() << std::endl;
+			}
+		}
+		else{
+			rc=color.setMirroringEnabled(false);
+			if (rc != openni::STATUS_OK)
+			{
+				std::cout << "OpenniServer: error at set color mirror: " << openni::OpenNI::getExtendedError() << std::endl;
+			}
+		}
 	}
 
 
@@ -195,7 +226,7 @@ void* updateThread(void*)
 		rc= depth.setVideoMode(depthSensorInfo->getSupportedVideoModes()[deviceMode]);
 		if (rc != openni::STATUS_OK)
 		{
-			std::cout << "OpenniServer0000: error at set depth videoMode: " << openni::OpenNI::getExtendedError() << std::endl;
+			std::cout << "OpenniServer: error at set depth videoMode: " << openni::OpenNI::getExtendedError() << std::endl;
 		}
 		/*std::cout << "depth" << std::endl;
 		for(int i=0;i < depthSensorInfo->getSupportedVideoModes().getSize();i++)
@@ -1149,7 +1180,8 @@ int main(int argc, char** argv){
 	int leds = prop->getPropertyAsIntWithDefault(componentPrefix + ".KinectLedsActive",0);
 	int pointCloud = prop->getPropertyAsIntWithDefault(componentPrefix + ".pointCloudActive",0);
 	openniServer::segmentationType= prop->getPropertyAsIntWithDefault(componentPrefix + ".PlayerDetection",0);
-
+	mirrorDepth = prop->getPropertyAsIntWithDefault(componentPrefix + ".CameraDEPTH.Mirror",0);
+	mirrorRGB = prop->getPropertyAsIntWithDefault(componentPrefix + ".CameraRGB.Mirror",0);
 	deviceMode=prop->getPropertyAsIntWithDefault(componentPrefix + ".Mode", 0);
 	std::string Endpoints = prop->getProperty(componentPrefix + ".Endpoints");
 	Ice::ObjectAdapterPtr adapter =ic->createObjectAdapterWithEndpoints(componentPrefix, Endpoints);
