@@ -284,23 +284,36 @@ namespace rgbdCalibrator{
 
   void Calibration::initPatternPoints()
   {
-    mPatternPoints.push_back(Eigen::Vector4d (0.,0.,0.,1.));
+    // Down line, right to left
     mPatternPoints.push_back(Eigen::Vector4d (120.,0.,0.,1.));
+    mPatternPoints.push_back(Eigen::Vector4d (60.0,0.,0.,1.));
+    mPatternPoints.push_back(Eigen::Vector4d (0.,0.,0.,1.));    
+    mPatternPoints.push_back(Eigen::Vector4d (0.,0.,60.,1.));
     mPatternPoints.push_back(Eigen::Vector4d (0.,0.,120.,1.));
-    mPatternPoints.push_back(Eigen::Vector4d (0.,120.,0.,1.));
+
+    // Up line, right to left
     mPatternPoints.push_back(Eigen::Vector4d (120.,120.,0.,1.));
+    mPatternPoints.push_back(Eigen::Vector4d (60.,120.,0.,1.));
+    mPatternPoints.push_back(Eigen::Vector4d (0.,120.,0.,1.));
+    mPatternPoints.push_back(Eigen::Vector4d (0.,120.,60.,1.));
     mPatternPoints.push_back(Eigen::Vector4d (0.,120.,120.,1.));
 
+    // Middle line, right to left
+    mPatternPoints.push_back(Eigen::Vector4d (120.,60.,0.,1.));
+    mPatternPoints.push_back(Eigen::Vector4d (0.,60.,0.,1.));
+    mPatternPoints.push_back(Eigen::Vector4d (0.,60.,120.,1.));
+    
+    
   }
 
   bool Calibration::addPatternPixel (Eigen::Vector3d pixel, const colorspaces::Image depthData)
   {
     mPixelPoints.push_back(pixel);
     
-    if  (mPixelPoints.size() > 6)
+    if  (mPixelPoints.size() > mPatternPoints.size())
       return false;
 
-    if (mPixelPoints.size() == 6)
+    if (mPixelPoints.size() == mPatternPoints.size())
     {  
 
       std::cout << "\tPixels" << "\t\t" << "Pattern" << "\t\t" << "Camera" << std::endl;
@@ -347,11 +360,11 @@ namespace rgbdCalibrator{
       mPairPoints.clear();
       
       //Build pairs
-      for (int i = 0; i<4; i++)
+      for (int i = 0; i< mPatternPoints.size(); i++)
 	mPairPoints.push_back(std::make_pair(mPatternPoints[i] ,mCameraPoints[i]));
 
       
-      for (int i = 0; i<4; i++)
+      for (int i = 0; i< mPatternPoints.size(); i++)
       {
 	std::cout << "(" << mPairPoints[i].first(0) 
 		  << "," << mPairPoints[i].first(1)

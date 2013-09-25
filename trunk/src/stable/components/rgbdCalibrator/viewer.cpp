@@ -129,20 +129,21 @@ namespace rgbdCalibrator{
     mImageDepth = imageDepth.clone();
     pthread_mutex_unlock(&mutex);
     
-    // Show depth image          
-    /*
-    colorspaces::ImageRGB8 img_rgb8D(imageDepth);
+    // Show depth image in color
+    // 3 RGB canals
+    // 0: Image in gray scale
+    // [1,2]: Real data of distance
+    // 1: 8bit MSB
+    // 2: 8bit LSB
+
+    std::vector<cv::Mat> layers;
+    cv::Mat colorDepth(imageDepth.size(),imageDepth.type());
+    cv::split(imageDepth, layers);
+
+    cv::cvtColor(layers[0],colorDepth,CV_GRAY2RGB);
+
     Glib::RefPtr<Gdk::Pixbuf> imgBuffDepth = 
-      Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8D.data,
-				    Gdk::COLORSPACE_RGB,
-				    false,
-				    8,
-				    img_rgb8D.width,
-				    img_rgb8D.height,
-				    img_rgb8D.step);
-    */
-    Glib::RefPtr<Gdk::Pixbuf> imgBuffDepth = 
-      Gdk::Pixbuf::create_from_data((const guint8*)imageDepth.data,
+      Gdk::Pixbuf::create_from_data((const guint8*) colorDepth.data,
 				    Gdk::COLORSPACE_RGB,
 				    false,
 				    8,
