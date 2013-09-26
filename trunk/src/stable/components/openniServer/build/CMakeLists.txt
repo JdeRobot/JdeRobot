@@ -69,7 +69,6 @@ include(${DEPS_DIR}/ice/CMakeLists.txt)
 include(${DEPS_DIR}/opencv/CMakeLists.txt)
 #include(${DEPS_DIR}/fireware/CMakeLists.txt)
 #include(${DEPS_DIR}/pcl/CMakeLists.txt)
-#include(${DEPS_DIR}/player/CMakeLists.txt)
 #include(${DEPS_DIR}/xerces/CMakeLists.txt)
 
 # START RECURSIVE
