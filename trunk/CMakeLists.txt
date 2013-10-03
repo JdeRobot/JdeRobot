@@ -101,6 +101,15 @@ PKG_CHECK_MODULES(gstreamerapp REQUIRED gstreamer-app-0.10)
 include_directories(${gstreamerapp_INCLUDE_DIRS})
 link_directories(${gstreamerapp_LIBRARY_DIRS})
 
+PKG_CHECK_MODULES(GAZEBO REQUIRED gazebo)
+include_directories(${GAZEBO_INCLUDE_DIRS})
+link_directories(${GAZEBO_LIBRARY_DIRS})
+if (GAZEBO_INCLUDE_DIRS STREQUAL "")
+    SET(GAZEBO_COMPILE FALSE)
+else()
+    SET(GAZEBO_COMPILE TRUE)
+endif()
+
 
 FOREACH(LibFile ${LIBS_NEEDED})
     link_directories(${LIBS_DIR}/${LibFile})
