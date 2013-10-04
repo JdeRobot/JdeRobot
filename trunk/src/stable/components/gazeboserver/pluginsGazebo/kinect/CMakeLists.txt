@@ -3,6 +3,7 @@ include_directories(
     ${INTERFACES_CPP_DIR}
     ${LIBS_DIR}
 	${GEARBOX_INCLUDE_DIRS}
+	/usr/include/vtk-5.8
     ${CMAKE_CURRENT_SOURCE_DIR}
 	) 
 

@@ -51,4 +51,6 @@ target_link_libraries(pose3dencoders ${GAZEBO_libraries}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so)
 
+add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/pluginsGazebo ${CMAKE_CURRENT_SOURCE_DIR}/pluginsGazebo)
+
 ENDIF()
