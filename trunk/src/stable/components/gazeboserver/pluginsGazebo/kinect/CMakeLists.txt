@@ -17,7 +17,6 @@ add_library(kinectPlugin SHARED kinectPlugin.cc)
 
 target_link_libraries(kinectPlugin 
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
-    ${LIBS_DIR}/jderobotice/libjderobotice.so
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
 	${GAZEBO_libraries} 
     ${PCL_LIBRARIES}  
