@@ -1,5 +1,5 @@
 # CHECK PCL
-FIND_PATH( pcl_INCLUDE_DIR NAMES point_cloud.h PATHS ENV C++LIB ENV PATH PATH_SUFFIXES include/pcl-1.5/ include/pcl-1.6/ include/pcl-1.7/ )
+FIND_PATH( pcl_INCLUDE_DIR NAMES pcl/point_cloud.h PATHS ENV C++LIB ENV PATH PATH_SUFFIXES include/pcl-1.5/ include/pcl-1.6/ include/pcl-1.7/ )
 
 #MESSAGE("PCL LIBRARY FOUND IN ${pcl_INCLUDE_DIR}")
 FIND_LIBRARY(with_pcl
