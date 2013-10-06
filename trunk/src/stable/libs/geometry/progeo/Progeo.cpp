@@ -566,6 +566,26 @@ void Progeo::updateRTMatrix()
     RT(3,3) = 1.;
 }
 
+void Progeo::updateKMatrix()
+{
+
+	K(0,0) = fdistx;
+	K(0,1) = skew*fdisty;
+	K(0,2) = u0;
+	K(0,3) = 0.;
+
+	K(1,0) = 0.;
+    K(1,1) = fdisty;
+    K(1,2) = v0;
+    K(1,3) = 0.;
+
+    K(2,0) = 0.;
+    K(2,1) = 0.;
+    K(2,2) = 1.;
+    K(2,3) = 0.;
+
+}
+
 void Progeo::pixel2optical (Eigen::Vector3d &point)
 {
 	double aux = point(0);

@@ -73,6 +73,7 @@ public:
 	void backproject(Eigen::Vector3d point, Eigen::Vector4d& pro);
 	int project(Eigen::Vector4d in, Eigen::Vector3d &out);
 
+	void updateKMatrix();
 	void updateRTMatrix();
 	void displayCameraInfo();
 
