@@ -80,6 +80,8 @@ public:
 	void pixel2optical (Eigen::Vector3d &point);
 	void optical2pixel (Eigen::Vector3d &point);
 
+	void saveToFile (std::string filename);
+
 
 private:
 
@@ -125,6 +127,8 @@ private:
 
 	/* name */
 	std::string name;
+
+	const char* double2char(double d);
 };
 }
 
