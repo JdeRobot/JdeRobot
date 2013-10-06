@@ -22,6 +22,7 @@
  */
 
 #include "Progeo.h"
+#include <math.h>
 namespace Progeo {
 
 Progeo::Progeo()
@@ -353,7 +354,8 @@ Progeo::Progeo(std::string filename)
 	return;
 }
 
-void Progeo::display_camerainfo() {
+void Progeo::displayCameraInfo() {
+
 	printf("------------------------------------------------------\n");
 	printf("Camera %s\n\n", this->name.c_str());
 	printf("     Position: (X,Y,Z,H)=(%.1f,%.1f,%.1f,%.1f)\n",   position(0),
@@ -475,8 +477,94 @@ void Progeo::setImageSize (int width, int height)
 	columns = width;
 }
 
-void Progeo::update_camera_matrix()
-{}
+void Progeo::updateRTMatrix()
+{
+	Eigen::Matrix4d RC;
+	Eigen::Matrix4d RAB;
+	float r;
+	double t;
+
+	Eigen::Vector3d u,v,w;
+
+	// Set homogeneous coordinate of camera and FOA
+	foa(3) = 1.0;
+	position(3) = 1.0;
+
+	// Orientation model: focus of attention + roll
+
+	RAB(2,0) = double(foa(0) - position(0));
+	RAB(2,1) = double(foa(1) - position(1));
+	RAB(2,2) = double(foa(2) - position(2));
+
+	r=(float)sqrt((double)(RAB(2,0)*RAB(2,0)+RAB(2,1)*RAB(2,1)+RAB(2,2)*RAB(2,2)));
+
+	RAB(2,0) = double(RAB(2,0) / r);
+	RAB(2,1) = double(RAB(2,1) / r);
+	RAB(2,2) = double(RAB(2,2) / r);
+
+	w(0) = RAB(2,0);
+	w(1) = RAB(2,1);
+	w(2) = RAB(2,2);
+
+	t = atan2((double)-w(0),(double)w(1));
+
+	v(0) = (float) cos(t);
+	v(1) = (float) sin(t);
+	v(2) = 0.;
+
+	u(0) = v(1)*w(2)-w(1)*v(2);
+	u(1) = -v(0)*w(2)+w(0)*v(2);
+	u(2) = v(0)*w(1)-w(0)*v(1);
+
+	if (u(2) <0.)
+	{
+		v(0) = -v(0);
+		v(1) = -v(1);
+		v(2) = -v(2);
+		u(0) = -u(0);
+		u(1) = -u(1);
+		u(2) = -u(2);
+	}
+
+	RAB(0,0) = double(u(0));
+	RAB(0,1) = double(u(1));
+	RAB(0,2) = double(u(2));
+
+	RAB(1,0) = double(v(0));
+	RAB(1,1) = double(v(1));
+	RAB(1,2) = double(v(2));
+
+
+	RC(0,0) = double(cos(roll));
+	RC(0,1) = double(sin(roll));
+	RC(0,2) = 0.;
+	RC(1,0) = double(-sin(roll));
+	RC(1,1) = double(cos(roll));
+	RC(1,2) = 0.;
+	RC(2,0) = 0.;
+	RC(2,1) = 0.;
+	RC(2,2) = 1.;
+
+	RT(0,0) = double(RC(0,0)*RAB(0,0) + RC(0,1)*RAB(1,0) + RC(0,2)*RAB(2,0));
+	RT(0,1) = double(RC(0,0)*RAB(0,1) + RC(0,1)*RAB(1,1) + RC(0,2)*RAB(2,1));
+	RT(0,2) = double(RC(0,0)*RAB(0,2) + RC(0,1)*RAB(1,2) + RC(0,2)*RAB(2,2));
+	RT(0,3) = double(-position(0)*RT(0,0) -position(1)*RT(0,1) -position(2)*RT(0,2));
+
+	RT(1,0) = double(RC(1,0)*RAB(0,0) + RC(1,1)*RAB(1,0) + RC(1,2)*RAB(2,0));
+	RT(1,1) = double(RC(1,0)*RAB(0,1) + RC(1,1)*RAB(1,1) + RC(1,2)*RAB(2,1));
+	RT(1,2) = double(RC(1,0)*RAB(0,2) + RC(1,1)*RAB(1,2) + RC(1,2)*RAB(2,2));
+	RT(1,3) = double(-position(0)*RT(1,0) -position(1)*RT(1,1) -position(2)*RT(1,2));
+
+	RT(2,0) = double(RC(2,0)*RAB(0,0) + RC(2,1)*RAB(1,0) + RC(2,2)*RAB(2,0));
+	RT(2,1) = double(RC(2,0)*RAB(0,1) + RC(2,1)*RAB(1,1) + RC(2,2)*RAB(2,1));
+	RT(2,2) = double(RC(2,0)*RAB(0,2) + RC(2,1)*RAB(1,2) + RC(2,2)*RAB(2,2));
+	RT(2,3) = double(-position(0)*RT(2,0) -position(1)*RT(2,1) -position(2)*RT(2,2));
+
+    RT(3,0) = 0.;
+    RT(3,1) = 0.;
+    RT(3,2) = 0.;
+    RT(3,3) = 1.;
+}
 
 void Progeo::pixel2optical (Eigen::Vector3d &point)
 {

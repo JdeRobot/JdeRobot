@@ -70,10 +70,11 @@ public:
 	Eigen::Vector4d getPosition() {return position; };
 	Eigen::Vector4d getFoa() {return foa; };
 
-	void display_camerainfo();
 	void backproject(Eigen::Vector3d point, Eigen::Vector4d& pro);
 	int project(Eigen::Vector4d in, Eigen::Vector3d &out);
-	void update_camera_matrix();
+
+	void updateRTMatrix();
+	void displayCameraInfo();
 
 	void pixel2optical (Eigen::Vector3d &point);
 	void optical2pixel (Eigen::Vector3d &point);
