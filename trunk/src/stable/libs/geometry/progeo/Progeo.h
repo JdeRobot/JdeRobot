@@ -21,6 +21,8 @@
  *
  */
 
+
+
 #ifndef PROGEOMM_H
 #define PROGEOMM_H
 
@@ -32,7 +34,6 @@
 #include <stdlib.h>
 #include <errno.h>
 
-/*xml*/
 #include <libxml/parser.h>
 #include <libxml/xmlreader.h>
 #include <libxml/xpath.h>
@@ -40,76 +41,88 @@
 
 namespace Progeo {
 
+/**
+	\class Progeo
+	\brief This class implements a pinhole camera model
+	\autor Roberto Calvo <rocapal@gsyc.urjc.es>
+	\date  06/10/2013
+ **/
+
+
+
 class Progeo
 {
 
 public:
 
-    Progeo();
-    Progeo(std::string filename);
+	Progeo();
+	Progeo(std::string filename);
+	Progeo(Eigen::Vector4d posCamera,
+			Eigen::Matrix3d KMatrix,
+			Eigen::Matrix4d RTMatrix,
+			int width, int height);
 
-    Progeo(Eigen::Vector4d posCamera,
-           Eigen::Matrix3d KMatrix,
-           Eigen::Matrix4d RTMatrix,
-           int width, int height);
+	void setPosition (Eigen::Vector4d pos);
+	void setKMatrix (Eigen::Matrix3d KMatrix);
+	void setRTMatrix (Eigen::Matrix4d RTMatrix);
+	void setImageSize (int width, int height);
 
-    void setPosition (Eigen::Vector4d pos);
-    void setKMatrix (Eigen::Matrix3d KMatrix);
-    void setRTMatrix (Eigen::Matrix4d RTMatrix);
-    void setImageSize (int width, int height);
-    
-    void display_camerainfo();
-    void backproject(Eigen::Vector3d point, Eigen::Vector4d& pro);
-    int project(Eigen::Vector4d in, Eigen::Vector3d &out);
-    void update_camera_matrix();
+	Eigen::Vector4d getPosition() {return position; };
+	Eigen::Vector4d getFoa() {return foa; };
 
-    void pixel2optical (Eigen::Vector3d &point);
-    void optical2pixel (Eigen::Vector3d &point);
+	void display_camerainfo();
+	void backproject(Eigen::Vector3d point, Eigen::Vector4d& pro);
+	int project(Eigen::Vector4d in, Eigen::Vector3d &out);
+	void update_camera_matrix();
+
+	void pixel2optical (Eigen::Vector3d &point);
+	void optical2pixel (Eigen::Vector3d &point);
+
 
 private:
 
-    /* camera 3d position in mm */
-    Eigen::Vector4d position;
+	/* camera 3d position in mm */
+	Eigen::Vector4d position;
 
-    /* camera 3d focus of attention in mm */
-    Eigen::Vector4d foa;
+	/* camera 3d focus of attention in mm */
+	Eigen::Vector4d foa;
 
-    /* top right and bottom left points */
-    Eigen::Vector3d tr, bl;
+	/* top right and bottom left points */
+	Eigen::Vector3d tr, bl;
 
-    /* camera roll position angle in rads */
-    float roll;
+	/* camera roll position angle in rads */
+	float roll;
 
-    /* focus x distance in mm*/
-    float fdistx;
-    float fdisty;
+	/* focus x distance in mm*/
+	float fdistx;
+	float fdisty;
 
-    /* pixels */
-    float u0,v0;
+	/* pixels */
+	float u0,v0;
 
-    /*angle between the x and y pixel axes in rads*/
-    float skew
+	/*angle between the x and y pixel axes in rads*/
+	float skew
 
-    /* image height in pixels */;
-    int rows;
+	/* image height in pixels */;
+	int rows;
 
-    /* image width in pixels */
-    int columns;
+	/* image width in pixels */
+	int columns;
 
-    /* camera K matrix */
-    float k11, k12, k13, k14, k21, k22, k23, k24, k31, k32, k33, k34;
-    Eigen::Matrix3d K;
+	/* camera K matrix */
+	float k11, k12, k13, k14, k21, k22, k23, k24, k31, k32, k33, k34;
+	Eigen::Matrix3d K;
 
-    /* camera rotation + translation matrix */
-    float rt11, rt12, rt13, rt14, rt21, rt22, rt23, rt24, rt31, rt32, rt33, rt34, rt41, rt42, rt43, rt44;
-    Eigen::Matrix4d RT;
+	/* camera rotation + translation matrix */
+	float rt11, rt12, rt13, rt14, rt21, rt22, rt23, rt24, rt31, rt32, rt33, rt34, rt41, rt42, rt43, rt44;
+	Eigen::Matrix4d RT;
 
-    /* distortion parameters */
-    float d1,d2,d3,d4,d5,d6;
-    float dx,dy;
+	/* distortion parameters */
+	float d1,d2,d3,d4,d5,d6;
+	float dx,dy;
 
-    /* name */
-    std::string name;
+	/* name */
+	std::string name;
 };
 }
 
