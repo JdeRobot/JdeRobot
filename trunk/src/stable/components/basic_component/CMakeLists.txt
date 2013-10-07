@@ -16,7 +16,8 @@ TARGET_LINK_LIBRARIES(basic_component
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
     ${libglademm_LIBRARIES}
-    ${OpenCV_LIBRARIES}        
+    ${OpenCV_LIBRARIES}       
+    ${OpenCVGUI_LIBRARIES} 
 	${ZeroCIce_LIBRARIES}    
 	${gtkmm_LIBRARIES}  
 	${gtkmm3_LIBRARIES}  	

@@ -19,9 +19,10 @@ add_executable (replayController ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(replayController
     ${CMAKE_THREAD_LIBS_INIT} 
-	${GLUT_LIBRARIES}
-   	${OpenCV_LIBRARIES}
-   	${gtkmm_LIBRARIES}
+    ${GLUT_LIBRARIES}
+    ${OpenCV_LIBRARIES}
+    ${OpenCVGUI_LIBRARIES}
+    ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
     ${gtkglextmm_LIBRARIES}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so

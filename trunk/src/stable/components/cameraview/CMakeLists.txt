@@ -13,6 +13,7 @@ add_executable (cameraview ${SOURCE_FILES})
 TARGET_LINK_LIBRARIES(cameraview
     ${CMAKE_THREAD_LIBS_INIT} 
     ${OpenCV_LIBRARIES}
+    ${OpenCVGUI_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so

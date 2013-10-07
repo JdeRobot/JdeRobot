@@ -15,6 +15,7 @@ TARGET_LINK_LIBRARIES(rgbdCalibrator
     ${gsl_LIBRARIES}
     ${alut_LIBRARIES}
     ${OpenCV_LIBRARIES}
+    ${OpenCVGUI_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
     ${LIBS_DIR}/colorspaces/libcolorspacesmm.so

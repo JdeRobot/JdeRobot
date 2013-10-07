@@ -14,6 +14,7 @@ add_executable (opencvdemo ${SOURCE_FILES})
 TARGET_LINK_LIBRARIES(opencvdemo
     ${CMAKE_THREAD_LIBS_INIT} 
     ${opencv_LIBRARIES}
+    ${OpenCVGUI_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
 #    ${gthread_LIBRARIES}
