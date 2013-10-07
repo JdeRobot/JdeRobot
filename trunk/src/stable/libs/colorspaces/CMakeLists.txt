@@ -1,4 +1,6 @@
 
+
+
 add_library (colorspacesmm STATIC imagecv.cpp imagecv.h uncopyable.h)
 
 TARGET_LINK_LIBRARIES(colorspacesmm ${OpenCV_LIBRARIES})
@@ -9,7 +11,7 @@ TARGET_LINK_LIBRARIES(colorspaces ${OpenCV_LIBRARIES})
 
 add_library (colorspacesshare SHARED rgb2hsv.c rgb2yuv.c colorspaces.h colorspacesmm.h)
 
-TARGET_LINK_LIBRARIES(colorspacesshare ${OpenCV_LIBRARIES})
+TARGET_LINK_LIBRARIES(colorspacesshare  ${OpenCV_LIBRARIES})
 
 add_library (colorspacesmmshare SHARED imagecv.cpp imagecv.h uncopyable.h)
 
