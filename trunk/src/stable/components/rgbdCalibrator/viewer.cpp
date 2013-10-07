@@ -38,7 +38,7 @@ namespace rgbdCalibrator{
 const std::string gladepath = std::string(GLADE_DIR) +
 		std::string("/rgbdCalibrator.glade");
 
-const std::string pathImage = "./images/";
+const std::string pathImage = "./images2/";
 
 
 Viewer::Viewer()
@@ -422,6 +422,7 @@ void Viewer::saveImage(const colorspaces::Image& imageColor)
 			boost::filesystem::path dir(pathImage);
 			if (!boost::filesystem::create_directory(dir))
 				std::cout << "Error to create directory" << std::endl;
+
 		}
 
 
@@ -477,6 +478,13 @@ void Viewer::on_bt_intrinsic()
 	flag |= CV_CALIB_FIX_PRINCIPAL_POINT;
 	flag |= CV_CALIB_ZERO_TANGENT_DIST;
 	flag |= CV_CALIB_FIX_ASPECT_RATIO;
+
+
+	if ( !boost::filesystem::exists(pathImage))
+	{
+		std::cerr << "[E] Images calibration directory doesn't exist: " << pathImage << std::endl;
+		return;
+	}
 
 	// List of images
 	boost::filesystem::directory_iterator end_itr;
