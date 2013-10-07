@@ -22,12 +22,12 @@ TARGET_LINK_LIBRARIES(kinectViewer
     ${OpenCVGUI_LIBRARIES}
     ${libglademm_LIBRARIES}
     ${gtkglextmm_LIBRARIES}
-    ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
-    ${LIBS_DIR}/progeo/libprogeo.so
-    ${LIBS_DIR}/pioneer/libpioneer.so
-    ${LIBS_DIR}/parallelIce/libparallelIce.so
+    colorspacesmm
+    JderobotInterfaces
+    jderobotutil
+    progeo
+    pioneer
+    parallelIce
     ${gsl_LIBRARIES}
     ${ZeroCIce_LIBRARIES}
 )

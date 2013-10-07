@@ -25,8 +25,8 @@ IF (libxmlpp_INCLUDE_DIRS)
 		  ${gtkglextmm_LIBRARIES}
 		  ${libglademm_LIBRARIES}
 		  ${gtkmm_LIBRARIES}
-		  ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
-		  ${LIBS_DIR}/jderobotutil/libjderobotutil.so
+		  JderobotInterfaces
+		  jderobotutil
 		${CMAKE_THREAD_LIBS_INIT} 
 		${ZeroCIce_LIBRARIES}
 	)

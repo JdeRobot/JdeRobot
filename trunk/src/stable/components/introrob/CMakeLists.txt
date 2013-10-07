@@ -24,11 +24,11 @@ TARGET_LINK_LIBRARIES(introrob
     ${libgnomecanvasmm_LIBRARIES}
     ${gtkglextmm_LIBRARIES}
     ${OpenCV_LIBRARIES}
-    ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
-    ${LIBS_DIR}/progeo/libprogeo.so
-    ${LIBS_DIR}/pioneer/libpioneer.so
+    colorspacesmm
+    JderobotInterfaces
+    jderobotutil
+    progeo
+    pioneer
     "glut"
     "gsl"
     "gslcblas"

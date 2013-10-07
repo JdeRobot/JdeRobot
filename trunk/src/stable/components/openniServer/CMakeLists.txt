@@ -44,10 +44,10 @@ IF(OPENNI2_LIB)
         ${OpenCV_LIBRARIES}
         ${OpenCVGUI_LIBRARIES} 
         ${gsl_LIBRARIES}
-        ${LIBS_DIR}/jderobotutil/libjderobotutil.so
-        ${LIBS_DIR}/progeo/libprogeo.so
-        ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-        ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
+        jderobotutil
+        progeo
+        colorspacesmm
+        JderobotInterfaces
 	${OPENNI2_LIB}/libOpenNI2.so
 	${NITE2_LIB}/libNiTE2.so
 	${Boost_LIBRARIES}	
@@ -59,10 +59,10 @@ IF(OPENNI2_LIB)
 	${OpenCV_LIBRARIES}
         ${OpenCVGUI_LIBRARIES}
 	${gsl_LIBRARIES}
-        ${LIBS_DIR}/jderobotutil/libjderobotutil.so
-        ${LIBS_DIR}/progeo/libprogeo.so
-        ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-        ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
+        jderobotutil
+        libprogeo
+        colorspacesmm
+        JderobotInterfaces
 	${OPENNI2_LIB}/libOpenNI2.so
         ${Boost_LIBRARIES}
 	)

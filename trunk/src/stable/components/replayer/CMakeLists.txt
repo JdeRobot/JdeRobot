@@ -22,9 +22,9 @@ TARGET_LINK_LIBRARIES(replayer
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
     ${gtkglextmm_LIBRARIES}
-    ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
+    colorspacesmm
+    JderobotInterfaces
+    jderobotutil
     ${gsl_LIBRARIES}
     ${ZeroCIce_LIBRARIES}
 )

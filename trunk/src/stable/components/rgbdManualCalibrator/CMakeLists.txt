@@ -24,10 +24,10 @@ ${opencv_LIBRARIES}
  ${ZeroCIce_LIBRARIES}
  ${OpenCV_LIBRARIES}
  ${gsl_LIBRARIES}
- ${LIBS_DIR}/jderobotutil/libjderobotutil.so
- ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
- ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
- ${LIBS_DIR}/progeo/libprogeo.so
- ${LIBS_DIR}/parallelIce/libparallelIce.so
+ jderobotutil
+ colorspacesmm
+ JderobotInterfaces
+ progeo
+ parallelIce
     #-lxerces-c
 )

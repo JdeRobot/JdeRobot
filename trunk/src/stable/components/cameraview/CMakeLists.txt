@@ -16,7 +16,7 @@ TARGET_LINK_LIBRARIES(cameraview
     ${OpenCVGUI_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
-    ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
+    colorspacesmm
+    JderobotInterfaces
    ${ZeroCIce_LIBRARIES}
 )

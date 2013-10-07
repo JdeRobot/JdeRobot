@@ -16,8 +16,8 @@ set( CMAKE_CXX_FLAGS "-Wall -lpcl_filters" ) # Opciones para el compilador
 add_library(kinectPlugin SHARED kinectPlugin.cc)
 
 target_link_libraries(kinectPlugin 
-    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
+    JderobotInterfaces
+    jderobotutil
 	${GAZEBO_libraries} 
     ${PCL_LIBRARIES}  
     ${OpenCV_LIBRARIES}

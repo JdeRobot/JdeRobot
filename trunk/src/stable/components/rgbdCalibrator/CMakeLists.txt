@@ -18,13 +18,13 @@ TARGET_LINK_LIBRARIES(rgbdCalibrator
     ${OpenCVGUI_LIBRARIES}
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
-    ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
-    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
+    colorspacesmm
+    JderobotInterfaces
     ${ZeroCIce_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${LIBS_DIR}/progeo/libprogeo.so
-    ${LIBS_DIR}/geometry/libgeometry.so
-    ${LIBS_DIR}/colorspaces/libcolorspaces.so
-    ${LIBS_DIR}/cvBlob/libcvblob.so
+    progeo
+    geometry
+    colorspaces
+    cvblob
     
 )
