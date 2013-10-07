@@ -7,7 +7,11 @@ include_directories(
     ${gl_INCLUDE_DIRS}
     ${glu_INCLUDE_DIRS}
     ${glut_INCLUDE_DIRS}
-    ${CMAKE_CURRENT_SOURCE_DIR})
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${gtkmm_INCLUDE_DIRS}
+    ${libglademm_INCLUDE_DIRS}
+    ${gtkglextmm_INCLUDE_DIRS}
+    )
 
 add_executable (rgbdManualCalibrator ${SOURCE_FILES})
 

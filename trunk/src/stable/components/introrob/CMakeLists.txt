@@ -8,6 +8,11 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/cameras
     ${CMAKE_CURRENT_SOURCE_DIR}/../calibrator
+    ${gtkmm_INCLUDE_DIRS}
+    ${libglademm_INCLUDE_DIRS}
+    ${gtkglextmm_INCLUDE_DIRS}
+    ${libgnomecanvas_INCLUDE_DIRS}
+    ${libgnomecanvasmm_INCLUDE_DIRS}
 )
 
 set( CMAKE_CXX_FLAGS "") #"-lgsl -lgslcblas" ) # Opciones para el compilador

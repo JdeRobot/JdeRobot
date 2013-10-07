@@ -43,48 +43,17 @@ endmacro()
 
 include(FindPkgConfig)
 
-PKG_CHECK_MODULES(gtk20 REQUIRED gtk+-2.0)
-include_directories(${gtk20_INCLUDE_DIRS})
-link_directories(${gtk20_LIBRARY_DIRS})
+PKG_CHECK_MODULES(gstreamer REQUIRED gstreamer-0.10) 
+include_directories(${gstreamer_INCLUDE_DIRS})
+link_directories(${gstreamer_LIBRARY_DIRS})
 
-PKG_CHECK_MODULES(gtkgl20 REQUIRED gtkgl-2.0)
-include_directories(${gtkgl20_INCLUDE_DIRS})
-link_directories(${gtkgl20_LIBRARY_DIRS})
-
-PKG_CHECK_MODULES(gtkmm REQUIRED gtkmm-2.4)
-include_directories(${gtkmm_INCLUDE_DIRS})
-link_directories(${gtkmm_LIBRARY_DIRS})
-
-PKG_CHECK_MODULES(libglademm REQUIRED libglademm-2.4)
-include_directories(${libglademm_INCLUDE_DIRS})
-link_directories(${libglademm_LIBRARY_DIRS})
-
-PKG_CHECK_MODULES(gthread REQUIRED gthread-2.0)
-include_directories(${gthread_INCLUDE_DIRS})
-link_directories(${gthread_LIBRARY_DIRS})
-
-PKG_CHECK_MODULES(libgnomecanvas REQUIRED libgnomecanvas-2.0)
-include_directories(${libgnomecanvas_INCLUDE_DIRS})
-link_directories(${libgnomecanvas_LIBRARY_DIRS})
-
-PKG_CHECK_MODULES(libgnomecanvasmm REQUIRED libgnomecanvasmm-2.6)
-include_directories(${libgnomecanvasmm_INCLUDE_DIRS})
-link_directories(${libgnomecanvasmm_LIBRARY_DIRS})
-
-PKG_CHECK_MODULES(gtkglextmm REQUIRED gtkglextmm-1.2)
-include_directories(${gtkglextmm_INCLUDE_DIRS})
-link_directories(${gtkglextmm_LIBRARY_DIRS})
+PKG_CHECK_MODULES(gstreamerapp REQUIRED gstreamer-app-0.10)
+include_directories(${gstreamerapp_INCLUDE_DIRS})
+link_directories(${gstreamerapp_LIBRARY_DIRS})
 
 PKG_CHECK_MODULES(gsl REQUIRED gsl)
 include_directories(${gsl_INCLUDE_DIRS})
 link_directories(${gsl_LIBRARIES_DIRS})
-
-PKG_CHECK_MODULES(gstreamer REQUIRED gstreamer-0.10) 
-include_directories(${gstreamer_INCLUDE_DIRS})
-link_directories(${gstreamer_LIBRARY_DIRS})
-PKG_CHECK_MODULES(gstreamerapp REQUIRED gstreamer-app-0.10)
-include_directories(${gstreamerapp_INCLUDE_DIRS})
-link_directories(${gstreamerapp_LIBRARY_DIRS})
 
 PKG_CHECK_MODULES(eigen REQUIRED eigen3)
 include_directories(${eigen_INCLUDE_DIRS})
@@ -118,6 +87,7 @@ include(${DEPS_DIR}/libxml2/CMakeLists.txt)
 include(${DEPS_DIR}/boost/CMakeLists.txt)
 include(${DEPS_DIR}/alut/CMakeLists.txt)
 include(${DEPS_DIR}/tinyxml/CMakeLists.txt)
+include(${DEPS_DIR}/gtk2/CMakeLists.txt)
 
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 

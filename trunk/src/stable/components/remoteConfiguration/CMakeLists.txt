@@ -13,6 +13,9 @@ IF (libxmlpp_INCLUDE_DIRS)
 		${LIBS_DIR}/
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/cameras
+		${gtkmm_INCLUDE_DIRS}
+        ${libglademm_INCLUDE_DIRS}
+        ${gtkglextmm_INCLUDE_DIRS}
 	)
 
 	add_executable (remoteConfiguration ${SOURCE_FILES})

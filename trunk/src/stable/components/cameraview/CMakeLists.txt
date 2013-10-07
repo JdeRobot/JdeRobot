@@ -6,6 +6,9 @@ include_directories(
     ${INTERFACES_CPP_DIR}
     ${LIBS_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${gtkmm_INCLUDE_DIRS}
+    ${libglademm_INCLUDE_DIRS}
+    ${gtkglextmm_INCLUDE_DIRS}
 )
 
 add_executable (cameraview ${SOURCE_FILES})

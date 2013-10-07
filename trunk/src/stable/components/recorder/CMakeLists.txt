@@ -9,6 +9,9 @@ include_directories(
     ${LIBS_DIR}/
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/cameras
+    ${gtkmm_INCLUDE_DIRS}
+    ${libglademm_INCLUDE_DIRS}
+    ${gtkglextmm_INCLUDE_DIRS}
 )
 
 add_executable (recorder ${SOURCE_FILES})
@@ -22,10 +25,10 @@ TARGET_LINK_LIBRARIES(recorder
     ${gtkmm_LIBRARIES}
     ${libglademm_LIBRARIES}
     ${gtkglextmm_LIBRARIES}
-    colorspacesmm
-    JderobotInterfaces
-    jderobotutil
     ${gsl_LIBRARIES}
     ${ZeroCIce_LIBRARIES}
     ${Boost_LIBRARIES}
+    colorspacesmm
+    JderobotInterfaces
+    jderobotutil
 )
