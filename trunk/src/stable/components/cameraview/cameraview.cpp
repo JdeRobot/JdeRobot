@@ -23,7 +23,7 @@
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
 #include <jderobot/camera.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include "viewer.h"
 
 

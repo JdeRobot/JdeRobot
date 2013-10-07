@@ -29,7 +29,7 @@
 #include <iostream>
 #include <opencv/cv.h>
 #include <progeo/progeo.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
 #include <opencv/cv.h>

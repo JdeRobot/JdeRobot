@@ -27,7 +27,7 @@
 #include <gtkmm.h>
 #include <libglademm.h>
 #include "drawarea.h"
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <jderobot/camera.h>
 #include <IceUtil/Thread.h>
 #include <IceUtil/Time.h>

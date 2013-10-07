@@ -37,7 +37,7 @@
 #include <IceUtil/Time.h>
 #include <jderobot/camera.h>
 #include <pthread.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <gtkmm/drawingarea.h>
 #include <gdkmm/pixbuf.h>
 #include "API.h"

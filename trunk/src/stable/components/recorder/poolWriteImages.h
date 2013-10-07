@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <jderobot/camera.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <fstream>
 
 

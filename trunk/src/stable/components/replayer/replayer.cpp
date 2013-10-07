@@ -34,7 +34,7 @@
 #include <cv.h>
 #include <highgui.h>
 
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <jderobot/camera.h>
 #include <jderobot/pointcloud.h>
 #include <jderobot/pose3dencoders.h>

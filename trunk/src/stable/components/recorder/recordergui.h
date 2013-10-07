@@ -29,7 +29,7 @@
 #include <libglademm.h>
 #include <IceUtil/Thread.h>
 #include <IceUtil/Time.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 
 namespace recorder {
   class recordergui {

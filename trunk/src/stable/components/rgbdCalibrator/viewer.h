@@ -28,10 +28,10 @@
 #include <IceUtil/Thread.h>
 #include <IceUtil/Time.h>
 #include <string>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <cmath>
 #include <jderobot/camera.h>
-#include <colorspaces/colorspaces.h>
+#include <visionlib/colorspaces/colorspaces.h>
 #include "calibration.h"
 
 using namespace cv;

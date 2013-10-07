@@ -25,7 +25,7 @@
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
 #include <jderobot/camera.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include "view.h"
 #include "controller.h"
 #include "common.h"

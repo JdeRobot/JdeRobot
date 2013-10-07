@@ -30,7 +30,7 @@
 #include <IceUtil/Thread.h>
 #include <IceUtil/Time.h>
 #include "controller.h"
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include "drawarea.h"
 #include "common.h"
 //eclipse

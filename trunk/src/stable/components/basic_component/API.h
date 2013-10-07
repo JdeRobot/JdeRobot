@@ -33,7 +33,7 @@
 #include <jderobot/laser.h>
 #include <jderobot/encoders.h>
 #include <jderobot/ptencoders.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <pthread.h>
 
 

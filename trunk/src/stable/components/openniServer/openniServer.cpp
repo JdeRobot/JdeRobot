@@ -29,7 +29,7 @@
 #include <jderobot/camera.h>
 #include <jderobot/pose3dmotors.h>
 #include <jderobot/pointcloud.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <tr1/memory>
 #include <list>
 #include <sstream>

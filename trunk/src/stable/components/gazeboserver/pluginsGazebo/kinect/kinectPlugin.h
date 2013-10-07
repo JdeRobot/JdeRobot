@@ -35,7 +35,7 @@
 #include <IceUtil/IceUtil.h>
 
 
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 
 #include <jderobot/pointcloud.h>
 #include <jderobot/camera.h>

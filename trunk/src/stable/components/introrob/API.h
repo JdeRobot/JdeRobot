@@ -38,7 +38,7 @@
 #include <jderobot/laser.h>
 #include <jderobot/encoders.h>
 #include <jderobot/ptencoders.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <jderobot/pose3dmotors.h>
 #include <jderobot/pose3dencoders.h>
 #include <pthread.h>

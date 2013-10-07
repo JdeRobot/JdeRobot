@@ -22,7 +22,7 @@
 #ifndef BASIC_COMPONENT_GUI_H
 #define BASIC_COMPONENT_GUI_H
 
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include<gtk-2.0/gtk/gtk.h>
 #include<gtk-2.0/gdk/gdk.h>
 #include<gtkmm-2.4/gtkmm.h>

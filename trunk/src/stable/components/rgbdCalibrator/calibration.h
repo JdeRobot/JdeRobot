@@ -28,11 +28,12 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <cmath>
 #include <string>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <jderobot/camera.h>
 #include "../../libs/geometry/math/Point3D.h"
 #include <boost/tuple/tuple.hpp>
 
+#include "../../libs/geometry/progeo/Progeo.h"
 using namespace cv;
 
 namespace rgbdCalibrator
@@ -73,11 +74,19 @@ namespace rgbdCalibrator
 
     Eigen::Matrix4d mRTsolution;
 
+    Progeo::Progeo *mProgeo;
+
     std::vector<Eigen::Vector3d> mPixelPoints;
     std::vector<Eigen::Vector4d> mPatternPoints;
     std::vector<Eigen::Vector4d> mCameraPoints;
     std::vector<std::pair<Eigen::Vector4d,Eigen::Vector4d> > mPairPoints;
 
+    void initProgeo();
+
+    void getRealPoint(const Eigen::Vector3d pixel,
+		       const colorspaces::Image depthData,
+		       Eigen::Vector4d& res3D);
+    
     void initPatternPoints();
 
     void LSO();

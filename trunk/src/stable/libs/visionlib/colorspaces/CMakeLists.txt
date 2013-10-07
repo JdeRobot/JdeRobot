@@ -1,6 +1,4 @@
 
-
-
 add_library (colorspacesmm STATIC imagecv.cpp imagecv.h uncopyable.h)
 
 TARGET_LINK_LIBRARIES(colorspacesmm ${OpenCV_LIBRARIES})

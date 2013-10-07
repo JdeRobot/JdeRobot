@@ -25,7 +25,7 @@
 #include <IceUtil/IceUtil.h>
 #include <iostream>
 #include <Ice/Ice.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <jderobot/camera.h>
 #include <cv.h>
 #include <sstream>

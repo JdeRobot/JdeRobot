@@ -13,7 +13,7 @@
 #include <jderobot/pose3dmotors.h>
 #include <jderobot/pose3dencoders.h>
 #include <jderobot/pointcloud.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>

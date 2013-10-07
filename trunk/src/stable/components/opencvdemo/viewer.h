@@ -25,7 +25,7 @@
 
 #include <gtkmm.h>
 #include <libglademm.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 
 #define DEGTORAD     (3.14159264 / 180.0)
 

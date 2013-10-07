@@ -84,7 +84,7 @@ Segment3D::getPointByZ (const float Z)
 
   delete(vector);
 
-  Point3D* res = new Point3D(x,y,z);
+  Point3D* res = new Point3D(x,y,z,1.0);
   return res;
 }
 

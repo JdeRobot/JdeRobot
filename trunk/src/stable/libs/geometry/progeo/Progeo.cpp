@@ -24,6 +24,7 @@
 #include "Progeo.h"
 #include <math.h>
 
+
 namespace Progeo {
 
 Progeo::Progeo()
@@ -46,6 +47,7 @@ Progeo::Progeo(Eigen::Vector4d posCamera,
 	foa(3) = 1.;
 
 	roll = 0.;
+	skew = 0.;
 
 }
 
@@ -357,7 +359,7 @@ Progeo::Progeo(std::string filename)
 
 void Progeo::displayCameraInfo() {
 
-	printf("------------------------------------------------------\n");
+	printf("\n----------------------- PROGEO C++ ---------------------\n");
 	printf("Camera %s\n\n", this->name.c_str());
 	printf("     Position: (X,Y,Z,H)=(%.1f,%.1f,%.1f,%.1f)\n",   position(0),
 			position(1),
@@ -408,14 +410,14 @@ int Progeo::project(Eigen::Vector4d in, Eigen::Vector3d &out)
 void Progeo::backproject(Eigen::Vector3d point, Eigen::Vector4d& pro)
 {
 	//GRAPHIC_TO_OPTICAL
-	int opX = this->rows -1 -point(1);
-	int opY = point(0);
+	//int opX = this->rows -1 -point(1);
+	//int opY = point(0);
 
 	Eigen::Matrix3d ik;
 	ik = K;
 	ik = ik.inverse().eval();
 
-	Eigen::Vector3d Pi(opX*K(0,0)/point(2), opY*K(0,0)/point(2),K(0,0));
+	Eigen::Vector3d Pi(pro(0)*K(0,0)/point(2), pro(1)*K(0,0)/point(2),K(0,0));
 
 	Eigen::Vector3d a;
 	a = ik*Pi;
@@ -633,9 +635,6 @@ void Progeo::saveToFile (std::string filename)
 	node_rt_matrix = xmlNewChild(root_node, NULL, BAD_CAST "rt_matrix", NULL);
 
 	xmlDocSetRootElement(doc, root_node);
-
-	//updateKMatrix();
-	//updateRTMatrix();
 
 	// Camera position
 	xmlNewChild(node_position, NULL, BAD_CAST "x", BAD_CAST double2char(position(0)));

@@ -27,7 +27,7 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <stdio.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include "geometry.h"
 #include "cvfast.h"
 #include "structs.h"

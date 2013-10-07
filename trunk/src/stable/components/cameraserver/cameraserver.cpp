@@ -26,7 +26,7 @@
 
 #include <jderobot/camera.h>
 #include <jderobot/image.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 
 
 //Opencv
