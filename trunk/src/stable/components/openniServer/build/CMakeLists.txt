@@ -62,7 +62,6 @@ link_directories(${gsl_LIBRARIES_DIRS})
 #link_directories(${libgnomecanvasmm_LIBRARY_DIRS})
 
   # FIND AND CHECK OTHER DEPENDENCES
-include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/openni2/CMakeLists.txt)
 include(${DEPS_DIR}/nite2/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)

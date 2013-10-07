@@ -41,7 +41,6 @@ PKG_CHECK_MODULES(gsl REQUIRED gsl)
 include_directories(${gsl_INCLUDE_DIRS})
 link_directories(${gsl_LIBRARIES_DIRS})
 
-include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
 include(${DEPS_DIR}/opencv/CMakeLists.txt)
 include(${DEPS_DIR}/opengl/CMakeLists.txt)

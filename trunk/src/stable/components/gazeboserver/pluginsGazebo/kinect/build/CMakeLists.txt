@@ -20,7 +20,6 @@ add_definitions(${PCL_DEFINITIONS})
 include(${DEPS_DIR}/ice/CMakeLists.txt)
 #include(${DEPS_DIR}/pcl/CMakeLists.txt)
 include(${DEPS_DIR}/opencv/CMakeLists.txt)
-include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 
 add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/../../../.. ${CMAKE_CURRENT_SOURCE_DIR}/../../../..)
 add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/..)

@@ -5,7 +5,6 @@ SET( INTERFACES_CPP_DIR /usr/local/lib)
 
 include_directories(
 	/usr/local/include/jderobot
-	/usr/local/include/gearbox
 )
 SET( CMAKE_CXX_FLAGS "-lIce -lIceUtil" ) # Opciones para el compilador
 
@@ -20,7 +19,6 @@ TARGET_LINK_LIBRARIES(cameraserver
     ${INTERFACES_CPP_DIR}/jderobot/libjderobotutil.so
 	${INTERFACES_CPP_DIR}/jderobot/libcolorspacesmm.so
 	${OpenCV_LIBS}
-	/usr/local/lib/gearbox/libGbxIceUtilAcfr.so
 
 )
 	

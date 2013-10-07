@@ -72,12 +72,6 @@ IF(NOT Ice_LIBRARIES)
 ENDIF()
 
 
-#PKG_CHECK_MODULES(gearbox gearbox)
-#include_directories(${gearbox_INCLUDE_DIRS})
-#link_directories(${gearbox_LIBRARY_DIRS})
-#message(STATUS "${gearbox_LIBRARY_DIRS}")
-#message(STATUS "${gearbox_INCLUDE_DIRS}")
-
 
 set( CMAKE_CXX_FLAGS "-Wno-deprecated -Wl,-rpath ./" ) # Opciones para el compilador
 

@@ -48,7 +48,6 @@ include(FindPkgConfig)
 #include_directories(${gtkglextmm_INCLUDE_DIRS})
 #link_directories(${gtkglextmm_LIBRARY_DIRS})
 
-include(${DEPS_DIR}/gearbox/CMakeLists.txt)
 include(${DEPS_DIR}/ice/CMakeLists.txt)
 include(${DEPS_DIR}/opencv/CMakeLists.txt)
 

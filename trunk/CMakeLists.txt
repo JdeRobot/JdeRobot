@@ -5,20 +5,11 @@ cmake_minimum_required(VERSION 2.8)
 # ENV VARS
 SET(gladedir ./)
 SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Deps) # Directorio donde se encuentran las dependencias
-
-#comprobamos si tenemos gearbox y si no desactivamos todos los componentes que dependan de él
-include(${DEPS_DIR}/gearbox/CMakeLists.txt)
-
-
 SET( INTERFACES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/interfaces/cpp) # Directorio con las interfaces ICE en C++
 SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/libs) # Directorio donde se encuentran las librerias propias de jderobot
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/interfaces/slice) # Directorio donde se encuentran las interfaces ICE
 SET( LIBS_NEEDED  colorspaces jderobotutil progeo pioneer fuzzylib visionlib parallelIce ) # Librerias de las que depende el componente
 
-IF( Gearbox_INCLUDE_DIR ) 
-	#librerías que dependen de gearbox
-	SET( LIBS_NEEDED   ${LIBS_NEEDED} bgfgsegmentation jderobotice )
-ENDIF()
 
 
 # MACRO to get the list of subdirectories
@@ -39,12 +30,6 @@ macro(list_subdirectories retval curdir return_relative)
   set(${retval} ${list_of_dirs})
 endmacro()
 
-
-#TODO: Fix the dependencies of GearBox
-IF( Gearbox_INCLUDE_DIR ) 
-	#librerías que dependen de gearbox
-	SET( COMPONENTS  ${COMPONENTS}  bgfglab replayer wiimoteServer)
-ENDIF()
 
 
 

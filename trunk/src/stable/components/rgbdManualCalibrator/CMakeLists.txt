@@ -13,7 +13,8 @@ add_executable (rgbdManualCalibrator ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES( rgbdManualCalibrator
  ${GLUT_LIBRARIES}
- ${opencv_LIBRARIES}
+${opencv_LIBRARIES}
+    ${OpenCVGUI_LIBRARIES}
  ${gtkmm_LIBRARIES}
  ${libglademm_LIBRARIES}
  ${gthread_LIBRARIES}
