@@ -92,6 +92,7 @@ include_directories(${eigen_INCLUDE_DIRS})
 
 
 
+link_directories(${INTERFACES_CPP_DIR}/jderobot)
 FOREACH(LibFile ${LIBS_NEEDED})
     link_directories(${LIBS_DIR}/${LibFile})
     MESSAGE("${LIBS_DIR}/${LibFile}")
