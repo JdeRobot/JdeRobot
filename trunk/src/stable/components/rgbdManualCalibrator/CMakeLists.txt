@@ -13,8 +13,8 @@ add_executable (rgbdManualCalibrator ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES( rgbdManualCalibrator
  ${GLUT_LIBRARIES}
-${opencv_LIBRARIES}
-    ${OpenCVGUI_LIBRARIES}
+ ${opencv_LIBRARIES}
+ ${OpenCVGUI_LIBRARIES}
  ${gtkmm_LIBRARIES}
  ${libglademm_LIBRARIES}
  ${gthread_LIBRARIES}
@@ -24,6 +24,7 @@ ${opencv_LIBRARIES}
  ${ZeroCIce_LIBRARIES}
  ${OpenCV_LIBRARIES}
  ${gsl_LIBRARIES}
+ ${CMAKE_THREAD_LIBS_INIT}
  jderobotutil
  colorspacesmm
  JderobotInterfaces

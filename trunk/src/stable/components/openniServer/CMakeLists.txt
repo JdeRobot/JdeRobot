@@ -50,7 +50,8 @@ IF(OPENNI2_LIB)
         JderobotInterfaces
 	${OPENNI2_LIB}/libOpenNI2.so
 	${NITE2_LIB}/libNiTE2.so
-	${Boost_LIBRARIES}	
+	${Boost_LIBRARIES}
+        ${LIBXML2_LIBRARIES}
 	)
 	else()
 	TARGET_LINK_LIBRARIES(openniServer
@@ -65,6 +66,7 @@ IF(OPENNI2_LIB)
         JderobotInterfaces
 	${OPENNI2_LIB}/libOpenNI2.so
         ${Boost_LIBRARIES}
+        ${LIBXML2_LIBRARIES}
 	)
 	endif()
 ENDIF()
