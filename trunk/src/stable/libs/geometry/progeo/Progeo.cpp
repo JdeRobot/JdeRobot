@@ -417,7 +417,7 @@ void Progeo::backproject(Eigen::Vector3d point, Eigen::Vector4d& pro)
 	ik = K;
 	ik = ik.inverse().eval();
 
-	Eigen::Vector3d Pi(pro(0)*K(0,0)/point(2), pro(1)*K(0,0)/point(2),K(0,0));
+	Eigen::Vector3d Pi(point(0)*K(0,0)/point(2), point(1)*K(0,0)/point(2),K(0,0));
 
 	Eigen::Vector3d a;
 	a = ik*Pi;
@@ -449,10 +449,17 @@ void Progeo::backproject(Eigen::Vector3d point, Eigen::Vector4d& pro)
 
 	b = Translate*b;
 
-	pro(0) = b(0)/b(3);
+	/*pro(0) = b(0)/b(3);
 	pro(1) = b(1)/b(3);
 	pro(2) = b(2)/b(3);
+	pro(3) = b(3);*/
+
+	/*OJO*/
+	pro(0) = b(2)/b(3);
+	pro(1) = b(0)/b(3);
+	pro(2) = b(1)/b(3);
 	pro(3) = b(3);
+	
 }
 
 void Progeo::setPosition (Eigen::Vector4d pos)
@@ -478,6 +485,12 @@ void Progeo::setImageSize (int width, int height)
 {
 	rows = height;
 	columns = width;
+}
+
+void Progeo::setFoaRoll(Eigen::Vector4d Foa, float Roll)
+{
+	this->foa=Foa;
+	this->roll=Roll;
 }
 
 void Progeo::updateRTMatrix()
@@ -691,5 +704,260 @@ void Progeo::saveToFile (std::string filename)
 	xmlFreeDoc(doc);
 	xmlCleanupParser();
 }
+
+void Progeo::readFromFile(std::string filename){
+	xmlDocPtr doc;
+	xmlNodePtr cur, curAux, curAux_child;
+	doc = xmlParseFile(filename.c_str());
+	if (doc == NULL ) {
+		fprintf(stderr,"Document not parsed successfully. \n");
+	return;
+	}
+	cur = xmlDocGetRootElement(doc);
+	if (cur == NULL) {
+		fprintf(stderr,"empty document\n");
+		xmlFreeDoc(doc);
+		return;
+	}
+	if (xmlStrcmp(cur->name, (const xmlChar *) "calibration_camera")) {
+		fprintf(stderr,"document of the wrong type, root node != calibration_camera");
+		xmlFreeDoc(doc);
+		return;
+	}
+	while (cur != NULL) {
+		if ((!xmlStrcmp(cur->name, (const xmlChar *)"calibration_camera"))){
+
+			xmlChar *key;
+			curAux = cur->xmlChildrenNode;
+
+			while (curAux != NULL) {
+				if ((!xmlStrcmp(curAux->name, (const xmlChar *)"roll"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					this->roll = atof((const char*)key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"fdistx"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					this->fdistx = atof((const char*)key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"fdisty"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					this->fdisty = atof((const char*)key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"u0"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					this->u0 = atof((const char*)key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"v0"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					this->v0 = atof((const char*)key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"skew"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					this->skew = atof((const char*)key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"rows"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					this->rows = atof((const char*)key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"columns"))) {
+					key = xmlNodeListGetString(doc, curAux->xmlChildrenNode, 1);
+					this->columns = atof((const char*)key);
+					xmlFree(key);
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"position"))) {
+					curAux_child = curAux->xmlChildrenNode;
+					
+					while (curAux_child != NULL) {
+						if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"x"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->position(0) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"y"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->position(1) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"z"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->position(2) = atof((const char*)key);
+							xmlFree(key);
+
+						}
+						curAux_child = curAux_child->next;
+					}
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"foa"))) {
+					curAux_child = curAux->xmlChildrenNode;
+					
+					while (curAux_child != NULL) {
+						if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"x"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->foa(0) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"y"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->foa(1) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"z"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->foa(2) = atof((const char*)key);
+							xmlFree(key);
+
+						}
+						curAux_child = curAux_child->next;
+					}
+				}else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"k_matrix"))) {
+					curAux_child = curAux->xmlChildrenNode;
+					
+					while (curAux_child != NULL) {
+						if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k11"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->K(0,0) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k12"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->K(0,1) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k13"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->K(0,2) = atof((const char*)key);
+							xmlFree(key);
+
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k21"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->K(1,0) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k22"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->K(1,1) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k23"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->K(1,2) = atof((const char*)key);
+							xmlFree(key);
+
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k31"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->K(2,0) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k32"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->K(2,1) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"k33"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->K(2,2) = atof((const char*)key);
+							xmlFree(key);
+
+
+						}
+						curAux_child = curAux_child->next;
+					}
+				} else if ((!xmlStrcmp(curAux->name, (const xmlChar *)"rt_matrix"))) {
+					curAux_child = curAux->xmlChildrenNode;
+					
+					while (curAux_child != NULL) {
+						if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt11"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(0,0) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt12"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(0,1) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt13"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(0,2) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt14"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(0,3) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt21"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(1,0) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt22"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(1,1) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt23"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(1,2) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt24"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(1,3) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt31"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(2,0) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt32"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(2,1) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt33"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(2,2) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt34"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(2,3) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt41"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(3,0) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt42"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(3,1) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt43"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(3,2) = atof((const char*)key);
+							xmlFree(key);
+
+						} else if ((!xmlStrcmp(curAux_child->name, (const xmlChar *)"rt44"))) {
+							key = xmlNodeListGetString(doc, curAux_child->xmlChildrenNode, 1);
+							this->RT(3,3) = atof((const char*)key);
+							xmlFree(key);
+
+						}
+						curAux_child = curAux_child->next;
+					}
+				}
+				curAux = curAux->next;
+			}
+		}
+		cur = cur->next;
+	}
+
+	xmlFreeDoc(doc);
+}
+
 
 }

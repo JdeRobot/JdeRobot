@@ -66,6 +66,7 @@ public:
 	void setKMatrix (Eigen::Matrix3d KMatrix);
 	void setRTMatrix (Eigen::Matrix4d RTMatrix);
 	void setImageSize (int width, int height);
+	void setFoaRoll(Eigen::Vector4d Foa, float Roll);
 
 	Eigen::Vector4d getPosition() {return position; };
 	Eigen::Vector4d getFoa() {return foa; };
@@ -81,6 +82,8 @@ public:
 	void optical2pixel (Eigen::Vector3d &point);
 
 	void saveToFile (std::string filename);
+	void readFromFile(std::string filename);
+	//void backproject(cv::Point point, cv::Point3f* cam, cv::Point3f* pro);
 
 
 private:
