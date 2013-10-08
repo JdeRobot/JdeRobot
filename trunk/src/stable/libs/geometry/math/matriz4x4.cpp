@@ -39,21 +39,21 @@ namespace math
     }
 
     //////////////////////////////////////////////////
-    void Matriz4x4::setScale( Vector3 &_s)
+    void Matriz4x4::setScale( Eigen::Vector3d &_s)
     {
-      matriz(0, 0) = _s.getX();
-      matriz(1, 1) = _s.getY();
-      matriz(2, 2) = _s.getZ();
+      matriz(0, 0) = _s(0);
+      matriz(1, 1) = _s(1);
+      matriz(2, 2) = _s(2);
       matriz(3, 3) = 1.0;
     }
 
 
     //////////////////////////////////////////////////
-    void Matriz4x4::setTranslate( Vector3 &_t)
+    void Matriz4x4::setTranslate( Eigen::Vector3d &_t)
     {
-        matriz(0, 3) = _t.getX();
-        matriz(1, 3) = _t.getY();
-        matriz(2, 3) = _t.getZ();
+        matriz(0, 3) = _t(0);
+        matriz(1, 3) = _t(1);
+        matriz(2, 3) = _t(2);
     }
 
     Matriz4x4 Matriz4x4::operator*(Matriz3x3 _mat) const
@@ -104,17 +104,17 @@ namespace math
         return result;
     }
 
-    Vector3 Matriz4x4::operator*(Vector3 &_vec) const
+    Eigen::Vector3d Matriz4x4::operator*(Eigen::Vector3d &_vec) const
     {
-        Vector3 result;
-        result.setX( matriz(0, 0)*_vec.getX() + matriz(0, 1)*_vec.getY() +
-                     matriz(0, 2)*_vec.getZ() + matriz(0, 3));
+        Eigen::Vector3d result;
+        result(0) = matriz(0, 0)*_vec(0) + matriz(0, 1)*_vec(1) +
+                     matriz(0, 2)*_vec(2) + matriz(0, 3);
 
-        result.setY( matriz(1, 0)*_vec.getX() + matriz(1, 1)*_vec.getY() +
-                     matriz(1, 2)*_vec.getZ() + matriz(1, 3));
+        result(1) = matriz(1, 0)*_vec(0) + matriz(1, 1)*_vec(1) +
+                     matriz(1, 2)*_vec(2) + matriz(1, 3);
 
-        result.setZ( matriz(2, 0)*_vec.getX() + matriz(2, 1)*_vec.getY() +
-                     matriz(2, 2)*_vec.getZ() + matriz(2, 3));
+        result(2) = matriz(2, 0)*_vec(0) + matriz(2, 1)*_vec(1) +
+                     matriz(2, 2)*_vec(2) + matriz(2, 3);
         return result;
     }
 }

@@ -1,5 +1,6 @@
 #include "malla.h"
-namespace files_3D {
+namespace Geometry {
+
     Malla::Malla()
     {
     }
@@ -63,49 +64,49 @@ namespace files_3D {
     }
 
     //////////////////////////////////////////////////
-    math::Vector3 Malla::getMax() const
+    Eigen::Vector3d Malla::getMax() const
     {
-      math::Vector3 max;
+      Eigen::Vector3d max;
       std::vector<SubMalla*>::const_iterator iter;
 
-      max.setX( -std::numeric_limits<float>::max());
-      max.setY( -std::numeric_limits<float>::max());
-      max.setZ( -std::numeric_limits<float>::max());
+      max(0) = -std::numeric_limits<float>::max();
+      max(1) = -std::numeric_limits<float>::max();
+      max(2) = -std::numeric_limits<float>::max();
 
       for (iter = this->submeshes.begin(); iter != this->submeshes.end(); ++iter)
       {
         if ((*iter)->getVertexCount() <= 2)
           continue;
 
-        math::Vector3 smax = (*iter)->getMax();
+        Eigen::Vector3d smax = (*iter)->getMax();
 
-        max.setX(std::max(max.getX(), smax.getX()));
-        max.setY(std::max(max.getY(), smax.getY()));
-        max.setZ(std::max(max.getZ(), smax.getZ()));
+        max(0) =std::max(max(0), smax(0));
+        max(1) =std::max(max(1), smax(1));
+        max(2) =std::max(max(2), smax(2));
       }
 
       return max;
     }
 
     //////////////////////////////////////////////////
-    math::Vector3 Malla::getMin() const
+    Eigen::Vector3d Malla::getMin() const
     {
-      math::Vector3 min;
+      Eigen::Vector3d min;
       std::vector<SubMalla *>::const_iterator iter;
 
-      min.setX( std::numeric_limits<float>::max());
-      min.setY( std::numeric_limits<float>::max());
-      min.setZ( std::numeric_limits<float>::max());
+      min(0) = std::numeric_limits<float>::max();
+      min(1) = std::numeric_limits<float>::max();
+      min(2) = std::numeric_limits<float>::max();
 
       for (iter = this->submeshes.begin(); iter != this->submeshes.end(); ++iter)
       {
         if ((*iter)->getVertexCount() <= 2)
           continue;
 
-        math::Vector3 smin = (*iter)->getMin();
-        min.setX(std::min(min.getX(), smin.getX()));
-        min.setY(std::min(min.getY(), smin.getY()));
-        min.setZ(std::min(min.getZ(), smin.getZ()));
+        Eigen::Vector3d smin = (*iter)->getMin();
+        min(0) = std::min(min(0), smin(0));
+        min(1) = std::min(min(1), smin(1));
+        min(2) = std::min(min(2), smin(2));
       }
 
       return min;

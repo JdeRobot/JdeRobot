@@ -5,8 +5,6 @@
 
 #include <eigen3/Eigen/Dense>
 
-#include "vector3.h"
-
 namespace math
 {
     class Matriz3x3

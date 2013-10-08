@@ -6,3 +6,6 @@
 #include "math/Point3D.h"
 #include "math/Segment2D.h"
 #include "math/Segment3D.h"
+
+/*Collada*/
+#include "collada/colladaparser.h"

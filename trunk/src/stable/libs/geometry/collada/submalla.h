@@ -1,11 +1,11 @@
 #ifndef SUBMALLA_H
 #define SUBMALLA_H
 
+#include <iostream>
 #include <vector>
+#include <eigen3/Eigen/Dense>
 
-#include "../math/vector3.h"
-#include "../math/vector2d.h"
-namespace files_3D {
+namespace Geometry {
 
     class SubMalla
     {
@@ -28,20 +28,20 @@ namespace files_3D {
         int getPrimitiveType() const;
 
 
-        void addVertex(const math::Vector3 &_v);
+        void addVertex(const Eigen::Vector3d &_v);
         void addIndex(unsigned int _i);
         unsigned int getVertexCount() const;
 
-        void addNormal(const math::Vector3 &_n);
+        void addNormal(const Eigen::Vector3d &_n);
         unsigned int getNormalCount() const;
 
 
         void addTexCoord(double _u, double _v);
         unsigned int getTexCoordCount() const;
 
-        math::Vector3 getVertex(unsigned int _i) const;
-        math::Vector3 getNormal(unsigned int _i) const;
-        math::Vector2d getTexCoord(unsigned int _i) const;
+        Eigen::Vector3d getVertex(unsigned int _i) const;
+        Eigen::Vector3d getNormal(unsigned int _i) const;
+        Eigen::Vector2d getTexCoord(unsigned int _i) const;
 
         unsigned int getIndex(unsigned int _i) const;
         unsigned int getIndexCount() const;
@@ -52,23 +52,23 @@ namespace files_3D {
 
 
         void center();
-        math::Vector3 getMax() const;
-        math::Vector3 getMin() const;
+        Eigen::Vector3d getMax() const;
+        Eigen::Vector3d getMin() const;
 
-        void translate(const math::Vector3 &_vec);
+        void translate(const Eigen::Vector3d &_vec);
 
         void FillArrays(float **_vertArr, int **_indArr) ;
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /// \brief the vertex array
-        private: std::vector< math::Vector3 > vertices;
+        private: std::vector< Eigen::Vector3d > vertices;
 
         /// \brief the normal array
-        private: std::vector< math::Vector3 > normals;
+        private: std::vector< Eigen::Vector3d > normals;
 
         /// \brief the texture coordinate array
-        private: std::vector< math::Vector2d > texCoords;
+        private: std::vector< Eigen::Vector2d > texCoords;
 
         /// \brief the vertex index array
         private: std::vector<unsigned int> indices;

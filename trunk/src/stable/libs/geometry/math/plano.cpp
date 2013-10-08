@@ -9,15 +9,15 @@ Plano::Plano(float A, float B, float C, float D)
 }
 
 //http://paulbourke.net/geometry/pointlineplane/
-Plano::Plano(math::Vector3 p1, math::Vector3 p2, math::Vector3 p3)
+Plano::Plano(Eigen::Vector3d p1, Eigen::Vector3d p2, Eigen::Vector3d p3)
 {
-    this->A = p1.getY()*(p2.getZ() - p3.getZ()) + p2.getY()*(p3.getZ() - p1.getZ()) + p3.getY()*(p1.getZ() - p2.getZ());
+    this->A = p1(1)*(p2(2) - p3(2)) + p2(1)*(p3(2) - p1(2)) + p3(1)*(p1(2) - p2(2));
 
-    this->B = p1.getZ()*(p2.getX() - p3.getX()) + p2.getZ()*(p3.getX() - p1.getX()) + p3.getZ()*(p1.getX() - p2.getX());
+    this->B = p1(2)*(p2(0) - p3(0)) + p2(2)*(p3(0) - p1(0)) + p3(2)*(p1(0) - p2(0));
 
-    this->C = p1.getX()*(p2.getY() - p3.getY()) + p2.getX()*(p3.getY() - p1.getY()) + p3.getX()*(p1.getY() - p2.getY());
+    this->C = p1(0)*(p2(1) - p3(1)) + p2(0)*(p3(1) - p1(1)) + p3(0)*(p1(1) - p2(1));
 
-    this->D = -(p1.getX()*(p2.getY()*p3.getZ() - p3.getY()*p2.getZ()) + p2.getX()*(p3.getY()*p1.getZ() - p1.getY()*p3.getZ()) + p3.getX()*(p1.getY()*p2.getZ() - p2.getY()*p1.getZ()));
+    this->D = -(p1(0)*(p2(1)*p3(2) - p3(1)*p2(2)) + p2(0)*(p3(1)*p1(2) - p1(1)*p3(2)) + p3(0)*(p1(1)*p2(2) - p2(1)*p1(2)));
 
 }
 
@@ -72,9 +72,9 @@ float Plano::distanciaAPunto(float x, float y, float z)
     return 10000000;
 }
 
-float Plano::distanciaAPunto(math::Vector3 p)
+float Plano::distanciaAPunto(Eigen::Vector3d p)
 {
-    float numerador = A*p.getX() + B*p.getY() + C*p.getZ() + D;
+    float numerador = A*p(0) + B*p(1) + C*p(2) + D;
     float denominador = sqrt( pow(A, 2) + pow(B, 2) + pow(C, 2));
 
     if(denominador!=0)
@@ -88,31 +88,31 @@ float Plano::calculateU(float A, float B, float C, float D, float px, float py, 
     return -1;
 }
 
-math::Vector3 Plano::InterConRecta(math::Vector3 p, math::Vector3 q)
+Eigen::Vector3d Plano::InterConRecta(Eigen::Vector3d p, Eigen::Vector3d q)
 {
-    math::Vector3 result(0,0,0);
+    Eigen::Vector3d result(0,0,0);
 
-    float u = calculateU(A, B, C, D, p.getX(), p.getY(), p.getZ(), q.getX(), q.getY(), q.getZ()) ;
+    float u = calculateU(A, B, C, D, p(0), p(1), p(2), q(0), q(1), q(2)) ;
     //std::cout << "U: " << u << std::endl;
     if( u <= 1 && u >= 0){
-        result.setX(p.getX() + u*(q.getX()-p.getX()));
-        result.setY(p.getY() + u*(q.getY()-p.getY()));
-        result.setZ(p.getZ() + u*(q.getZ()-p.getZ()));
+        result(0) = p(0) + u*(q(0)-p(0));
+        result(1) = p(1) + u*(q(1)-p(1));
+        result(2) = p(2) + u*(q(2)-p(2));
         //std::cout << "X: " << X  << " Y: " << Y << " Z: " << Z << std::endl;
     }
     return result;
 }
 
-math::Vector3 Plano::InterConRecta(float px, float py, float pz, float qx, float qy, float qz)
+Eigen::Vector3d Plano::InterConRecta(float px, float py, float pz, float qx, float qy, float qz)
 {
-    math::Vector3 result(0,0,0);
+    Eigen::Vector3d result(0,0,0);
 
     float u = calculateU(A, B, C, D, px, py, pz, qx, qy, qz) ;
     //std::cout << "U: " << u << std::endl;
     if( u <= 1 && u >= 0){
-        result.setX(px + u*(qx-px));
-        result.setY(py + u*(qy-py));
-        result.setZ(pz + u*(qz-pz));
+        result(0) = px + u*(qx-px);
+        result(1) = py + u*(qy-py);
+        result(2) = pz + u*(qz-pz);
         //std::cout << "X: " << X  << " Y: " << Y << " Z: " << Z << std::endl;
     }
     return result;
@@ -126,17 +126,17 @@ math::Vector3 Plano::InterConRecta(float px, float py, float pz, float qx, float
 // A* (px + vx*t) + B(py + vy*t) +C(pz+vz*t) + D = 0;
 // (-A*px - D - B*py - C*pz) = (A *vx *t + B *vy *t + C *vz *t)
 // t = (-A*px - D - B*py - C*pz)/ (A*vx + B*vy + C* vz)
-math::Vector3 Plano::proyeccionOrtogonal(float px, float py, float pz, float vx, float vy, float vz)
+Eigen::Vector3d Plano::proyeccionOrtogonal(float px, float py, float pz, float vx, float vy, float vz)
 {
     float t = (-A*px - B*py - C*pz - D )/(A*vx + B*vy + C*vz );
-    math::Vector3 result(px+vx*t, py+vy*t, pz+vz*t);
+    Eigen::Vector3d result(px+vx*t, py+vy*t, pz+vz*t);
     return result;
 }
 
-math::Vector3 Plano::proyeccionOrtogonal(math::Vector3 p, float vx, float vy, float vz)
+Eigen::Vector3d Plano::proyeccionOrtogonal(Eigen::Vector3d p, float vx, float vy, float vz)
 {
-    float t = (-A*p.getX() - B*p.getY() - C*p.getZ() - D )/(A*vx + B*vy + C*vz );
-    math::Vector3 result(p.getX()+vx*t, p.getY()+vy*t, p.getZ()+vz*t);
+    float t = (-A*p(0) - B*p(1) - C*p(2) - D )/(A*vx + B*vy + C*vz );
+    Eigen::Vector3d result(p(0)+vx*t, p(1)+vy*t, p(2)+vz*t);
     return result;
 }
 

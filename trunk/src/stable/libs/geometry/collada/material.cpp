@@ -1,6 +1,7 @@
 #include "material.h"
 
-namespace files_3D {
+namespace Geometry {
+
     unsigned int Material::counter = 0;
 
     Material::Material()

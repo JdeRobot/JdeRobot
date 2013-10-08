@@ -64,6 +64,7 @@ public:
   /*Operators*/
   Point3D& operator =(const Point3D &pt);
   friend std::ostream& operator <<(std::ostream &o,const Point3D &p);
+  friend std::istream &operator >>(std::istream &in, Point3D &p);
   
 private:
 

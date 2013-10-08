@@ -18,13 +18,15 @@
 #include "../math/utils.h"
 #include "../math/matriz4x4.h"
 #include "../math/matriz3x3.h"
-#include "../math/vector3.h"
 #include "../math/plano.h"
 #include "../math/segmento.h"
+#include "../math/Point3D.h"
+#include <eigen3/Eigen/Dense>
 
 #include <GL/glut.h>
 #include <GL/gl.h>
-namespace files_3D {
+
+namespace Geometry {
 
     class ColladaParser
     {
@@ -64,16 +66,16 @@ namespace files_3D {
 
         void loadVertices(const std::string &_id,
                         const math::Matriz4x4 &_transform,
-                        std::vector<math::Vector3> &_verts,
-                        std::vector<math::Vector3> &_norms);
+                        std::vector<Eigen::Vector3d> &_verts,
+                        std::vector<Eigen::Vector3d> &_norms);
 
         void loadNormals(const std::string &_id,
                                         const math::Matriz4x4 &_transform,
-                                        std::vector<math::Vector3> &_values);
+                                        std::vector<Eigen::Vector3d> &_values);
 
         void loadPositions(const std::string &_id,
                             const math::Matriz4x4 &_transform,
-                            std::vector<math::Vector3> &_values);
+                            std::vector<Eigen::Vector3d> &_values);
 
         void loadController(TiXmlElement *_contrXml,
               TiXmlElement *_skelXml, const math::Matriz4x4 _transform, Malla *_mesh);
@@ -91,7 +93,7 @@ namespace files_3D {
                                           Malla *_mesh);
         Material *loadMaterial(const std::string &_name);
         void loadTexCoords(const std::string &_id,
-                                          std::vector<math::Vector2d> &_values);
+                                          std::vector<Eigen::Vector2d> &_values);
         // collada filename
         private: std::string filename;
         private: std::string path;

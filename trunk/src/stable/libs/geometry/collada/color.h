@@ -2,7 +2,8 @@
 #define COLOR_H
 
 #include <iostream>
-namespace files_3D {
+namespace Geometry {
+
     class Color
     {
     public:

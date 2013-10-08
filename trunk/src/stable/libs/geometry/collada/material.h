@@ -7,10 +7,11 @@
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-namespace files_3D {
+
+namespace Geometry {
+
     class Material
     {
     public:

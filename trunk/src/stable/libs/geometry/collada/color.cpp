@@ -1,5 +1,6 @@
 #include "color.h"
-namespace files_3D {
+namespace Geometry {
+
     Color::Color()
     {
     }

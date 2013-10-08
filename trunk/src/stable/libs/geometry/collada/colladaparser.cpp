@@ -1,8 +1,8 @@
 #include "colladaparser.h"
-namespace files_3D {
 
-    ColladaParser::ColladaParser(std::string filename, bool to2D, double scalemap, double scale)
-    {
+namespace Geometry {
+
+    ColladaParser::ColladaParser(std::string filename, bool to2D, double scalemap, double scale) {
         TiXmlDocument xmlDoc;
 
         this->filename = filename;
@@ -141,18 +141,18 @@ namespace files_3D {
 
                 unsigned int indice =submalla->getIndex(k);
 
-                math::Vector3 v= submalla->getVertex(indice);
+                Eigen::Vector3d v= submalla->getVertex(indice);
                 if(submalla->getNormalCount()>0){
-                    math::Vector3 normals= submalla->getNormal(indice);
-                    glNormal3f(normals.vector(0), normals.vector(1), normals.vector(2));
+                    Eigen::Vector3d normals= submalla->getNormal(indice);
+                    glNormal3f(normals(0), normals(1), normals(2));
                 }
 
                 if(submalla->getTexCoordCount()>0){
-                    math::Vector2d text= submalla->getTexCoord(indice);
-                    glTexCoord2f(text.vector(0), text.vector(1));
+                    Eigen::Vector2d text= submalla->getTexCoord(indice);
+                    glTexCoord2f(text(0), text(1));
 
                 }
-                glVertex3f(v.vector(0), v.vector(1), v.vector(2));
+                glVertex3f(v(0), v(1), v(2));
 
                 if(k%3==2)
                     glEnd();
@@ -357,20 +357,22 @@ namespace files_3D {
         if (_elem->FirstChildElement("scale"))
         {
             std::string scaleStr = _elem->FirstChildElement("scale")->GetText();
-            math::Vector3 scale;
-            scale = boost::lexical_cast<math::Vector3>(scaleStr);
+            Point3D scale;
+            scale = boost::lexical_cast<Point3D>(scaleStr);
             math::Matriz4x4 scaleMat;
-            scaleMat.setScale(scale);
+            Eigen::Vector3d scalev(scale.getPoint()(0), scale.getPoint()(1), scale.getPoint()(2));
+            scaleMat.setScale(scalev);
             transform = transform * scaleMat;
         }
 
         if (_elem->FirstChildElement("translate"))
         {
           std::string transStr = _elem->FirstChildElement("translate")->GetText();
-          math::Vector3 translate;
-          translate = boost::lexical_cast<math::Vector3>(transStr);
+          Point3D translate;
+          translate = boost::lexical_cast<Point3D>(transStr);
           // translate *= this->meter;
-          transform.setTranslate(translate);
+          Eigen::Vector3d translatev(translate.getPoint()(0), translate.getPoint()(1), translate.getPoint()(2));
+          transform.setTranslate(translatev);
         }
 
         TiXmlElement *rotateXml = _elem->FirstChildElement("rotate");
@@ -378,7 +380,7 @@ namespace files_3D {
         while (rotateXml)
         {
           math::Matriz3x3 mat;
-          math::Vector3 axis;
+          Eigen::Vector3d axis;
           double angle;
 
           std::string rotateStr = rotateXml->GetText();
@@ -388,12 +390,12 @@ namespace files_3D {
 
           iss >> x >> y >> z;
 
-          axis.setX(x);
-          axis.setY(y);
-          axis.setZ(z);
+          axis(0) = x;
+          axis(1) = y;
+          axis(2) = z;
 
           iss >> angle;
-          mat.setFromAxis(axis.getX(), axis.getY(), axis.getZ(), angle*3.1416/180);
+          mat.setFromAxis(axis(0), axis(1), axis(2), angle*3.1416/180);
           transform = transform * mat;
 
           rotateXml = rotateXml->NextSiblingElement("rotate");
@@ -409,8 +411,8 @@ namespace files_3D {
     /////////////////////////////////////////////////
     void ColladaParser::loadVertices(const std::string &_id,
                     const math::Matriz4x4 &_transform,
-                    std::vector<math::Vector3> &_verts,
-                    std::vector<math::Vector3> &_norms)
+                    std::vector<Eigen::Vector3d> &_verts,
+                    std::vector<Eigen::Vector3d> &_norms)
     {
       TiXmlElement *verticesXml = this->getElementId(this->colladaXml,
                                                      "vertices", _id);
@@ -442,7 +444,7 @@ namespace files_3D {
     /////////////////////////////////////////////////
     void ColladaParser::loadPositions(const std::string &_id,
                         const math::Matriz4x4 &_transform,
-                        std::vector<math::Vector3> &_values)
+                        std::vector<Eigen::Vector3d> &_values)
     {
       TiXmlElement *sourceXml = this->getElementId("source", _id);
       TiXmlElement *floatArrayXml = sourceXml->FirstChildElement("float_array");
@@ -460,7 +462,7 @@ namespace files_3D {
       end = strs.end();
       for (iter = strs.begin(); iter != end; iter += 3)
       {
-        math::Vector3 vec(math::parseFloat(*iter), math::parseFloat(*(iter+1)),
+        Eigen::Vector3d vec(math::parseFloat(*iter), math::parseFloat(*(iter+1)),
             math::parseFloat(*(iter+2)));
         vec = _transform * vec;
         _values.push_back(vec);
@@ -470,7 +472,7 @@ namespace files_3D {
     /////////////////////////////////////////////////
     void ColladaParser::loadNormals(const std::string &_id,
                                     const math::Matriz4x4 &_transform,
-                                    std::vector<math::Vector3> &_values)
+                                    std::vector<Eigen::Vector3d> &_values)
     {
       TiXmlElement *normalsXml = this->getElementId("source", _id);
       if (!normalsXml)
@@ -490,12 +492,12 @@ namespace files_3D {
       std::istringstream iss(valueStr);
       do
       {
-        math::Vector3 vec;
+        Eigen::Vector3d vec;
         float x, y, z;
         iss >> x >> y >> z;
-        vec.setX(x);
-        vec.setY(y);
-        vec.setZ(z);
+        vec(0) = x;
+        vec(1) = y;
+        vec(2) = z;
 
         if (iss)
         {
@@ -551,8 +553,8 @@ namespace files_3D {
       // std::string semantic = inputXml->Attribute("semantic");
       std::string source = inputXml->Attribute("source");
 
-      std::vector<math::Vector3> verts;
-      std::vector<math::Vector3> norms;
+      std::vector<Eigen::Vector3d> verts;
+      std::vector<Eigen::Vector3d> norms;
       this->loadVertices(source, _transform, verts, norms);
 
       TiXmlElement *pXml = _xml->FirstChildElement("p");
@@ -608,9 +610,9 @@ namespace files_3D {
 
       TiXmlElement *polylistInputXml = _polylistXml->FirstChildElement("input");
 
-      std::vector<math::Vector3> verts;
-      std::vector<math::Vector3> norms;
-      std::vector<math::Vector2d> texcoords;
+      std::vector<Eigen::Vector3d> verts;
+      std::vector<Eigen::Vector3d> norms;
+      std::vector<Eigen::Vector2d> texcoords;
 
       math::Matriz4x4 bindShapeMat(math::Matriz4x4::IDENTITY);
       //if (_mesh->HasSkeleton())
@@ -659,14 +661,14 @@ namespace files_3D {
       TiXmlElement *pXml = _polylistXml->FirstChildElement("p");
       std::string pStr = pXml->GetText();
 
-      std::vector<math::Vector3> vertNorms(verts.size());
+      std::vector<Eigen::Vector3d> vertNorms(verts.size());
       std::vector<int> vertNormsCounts(verts.size());
       std::fill(vertNormsCounts.begin(), vertNormsCounts.end(), 0);
 
       int *values = new int[inputs.size()];
       std::map<std::string, int>::iterator end = inputs.end();
       std::map<std::string, int>::iterator iter;
-      math::Vector2d vec;
+      Eigen::Vector2d vec;
 
       std::vector<std::string> strs;
       boost::split(strs, pStr, boost::is_any_of("   "));
@@ -736,8 +738,8 @@ namespace files_3D {
               }
               else if (iter->first == "TEXCOORD")
               {
-                  subMalla->addTexCoord(texcoords[values[iter->second]].getX(),
-                                        texcoords[values[iter->second]].getY());
+                  subMalla->addTexCoord(texcoords[values[iter->second]](0),
+                                        texcoords[values[iter->second]](1));
               }
               // else
               // gzerr << "Unhandled semantic[" << iter->first << "]\n";
@@ -752,7 +754,7 @@ namespace files_3D {
 
     /////////////////////////////////////////////////
     void ColladaParser::loadTexCoords(const std::string &_id,
-                                      std::vector<math::Vector2d> &_values)
+                                      std::vector<Eigen::Vector2d> &_values)
     {
       int stride = 0;
       int texCount = 0;
@@ -845,7 +847,7 @@ namespace files_3D {
       for (int i = 0; i < totCount; i += stride)
       {
         // We only handle 2D texture coordinates right now.
-        _values.push_back(math::Vector2d(boost::lexical_cast<double>(values[i]),
+        _values.push_back(Eigen::Vector2d(boost::lexical_cast<double>(values[i]),
               1.0 - boost::lexical_cast<double>(values[i+1])));
       }
     }
@@ -879,9 +881,9 @@ namespace files_3D {
 
       TiXmlElement *trianglesInputXml = _trianglesXml->FirstChildElement("input");
 
-      std::vector<math::Vector3> verts;
-      std::vector<math::Vector3> norms;
-      std::vector<math::Vector2d> texcoords;
+      std::vector<Eigen::Vector3d> verts;
+      std::vector<Eigen::Vector3d> norms;
+      std::vector<Eigen::Vector2d> texcoords;
 
       // A list of all the input values.
       std::list<std::pair<std::string, int> > inputs;
@@ -919,14 +921,14 @@ namespace files_3D {
       }
       std::string pStr = pXml->GetText();
 
-      std::vector<math::Vector3> vertNorms(verts.size());
+      std::vector<Eigen::Vector3d> vertNorms(verts.size());
       std::vector<int> vertNormsCounts(verts.size());
       std::fill(vertNormsCounts.begin(), vertNormsCounts.end(), 0);
 
       int *values = new int[inputs.size()];
       std::list<std::pair<std::string, int> >::iterator end = inputs.end();
       std::list<std::pair<std::string, int> >::iterator iter;
-      math::Vector2d vec;
+      Eigen::Vector2d vec;
 
       std::vector<std::string> strs;
       boost::split(strs, pStr, boost::is_any_of("   "));
@@ -967,8 +969,8 @@ namespace files_3D {
           else if ((*iter).first == "TEXCOORD" && !already)
           {
             already = true;
-            subMalla->addTexCoord(texcoords[values[(*iter).second]].getX(),
-                                  texcoords[values[(*iter).second]].getY());
+            subMalla->addTexCoord(texcoords[values[(*iter).second]](0),
+                                  texcoords[values[(*iter).second]](1));
           }
           // else
           // gzerr << "Unhandled semantic[" << (*iter).first << "]\n";
@@ -1347,8 +1349,9 @@ namespace files_3D {
       return mat;
     }
 
-    void ColladaParser::worldTo2D()
-    {
+    void ColladaParser::worldTo2D() {
+      Point3D p3d1, p3d2;
+      
 
         std::vector<Segmento> listaSegmentos;
 
@@ -1360,7 +1363,7 @@ namespace files_3D {
             Plano plano2(0, 0, 1, 400.0);
             Plano p_proyeccion(0, 0, 1, 0);
 
-            math::Vector3 inter1;
+            Eigen::Vector3d inter1;
 
             int triangulo = 0;
             int indice_triangulo = 0;
@@ -1374,16 +1377,18 @@ namespace files_3D {
                     triangulo = 0;
                 }
 
-                math::Vector3 v1= submalla->getVertex(indice%3 + indice_triangulo*3);
-                math::Vector3 v2= submalla->getVertex((indice+1)%3 + indice_triangulo*3);
+                Eigen::Vector3d v1= submalla->getVertex(indice%3 + indice_triangulo*3);
+                Eigen::Vector3d v2= submalla->getVertex((indice+1)%3 + indice_triangulo*3);
 
                 inter1 = plano1.InterConRecta(v1, v2);
 
-                if(inter1.getX()!=0 && inter1.getY()!=0 && inter1.getZ()!=0 ){
-                    math::Vector3 proyeccion1 = p_proyeccion.proyeccionOrtogonal(v1, p_proyeccion.getCoefA(), p_proyeccion.getCoefB(), p_proyeccion.getCoefC());
-                    math::Vector3 proyeccion2 = p_proyeccion.proyeccionOrtogonal(v2, p_proyeccion.getCoefA(), p_proyeccion.getCoefB(), p_proyeccion.getCoefC());
+                if(inter1(0)!=0 && inter1(1)!=0 && inter1(2)!=0 ){
+                    Eigen::Vector3d proyeccion1 = p_proyeccion.proyeccionOrtogonal(v1, p_proyeccion.getCoefA(), p_proyeccion.getCoefB(), p_proyeccion.getCoefC());
+                    Eigen::Vector3d proyeccion2 = p_proyeccion.proyeccionOrtogonal(v2, p_proyeccion.getCoefA(), p_proyeccion.getCoefB(), p_proyeccion.getCoefC());
 
-                    double dist = proyeccion1.distance(proyeccion2);
+                    p3d1.set(proyeccion1);
+                    p3d2.set(proyeccion2);
+                    double dist = p3d1.distanceTo(p3d2);
 
                     if(dist > 1){
                         listaSegmentos.push_back(Segmento(proyeccion1,proyeccion2));
@@ -1392,11 +1397,13 @@ namespace files_3D {
 
                 inter1 = plano2.InterConRecta(v1, v2);
 
-                if(inter1.getX()!=0 && inter1.getY()!=0 && inter1.getZ()!=0 ){
-                    math::Vector3 proyeccion1 = p_proyeccion.proyeccionOrtogonal(v1, p_proyeccion.getCoefA(), p_proyeccion.getCoefB(), p_proyeccion.getCoefC());
-                    math::Vector3 proyeccion2 = p_proyeccion.proyeccionOrtogonal(v2, p_proyeccion.getCoefA(), p_proyeccion.getCoefB(), p_proyeccion.getCoefC());
+                if(inter1(0)!=0 && inter1(1)!=0 && inter1(2)!=0 ){
+                    Eigen::Vector3d proyeccion1 = p_proyeccion.proyeccionOrtogonal(v1, p_proyeccion.getCoefA(), p_proyeccion.getCoefB(), p_proyeccion.getCoefC());
+                    Eigen::Vector3d proyeccion2 = p_proyeccion.proyeccionOrtogonal(v2, p_proyeccion.getCoefA(), p_proyeccion.getCoefB(), p_proyeccion.getCoefC());
 
-                    double dist = proyeccion1.distance(proyeccion2);
+                    p3d1.set(proyeccion1);
+                    p3d2.set(proyeccion2);
+                    double dist = p3d1.distanceTo(p3d2);
 
                     if(dist > 1){
                         listaSegmentos.push_back(Segmento(proyeccion1,proyeccion2));
@@ -1406,12 +1413,12 @@ namespace files_3D {
 
 //            int verticesDentroSandwich = 0;
 //            float distanciaEntrePlanos = plano2.distanciaAPunto(0, 0, 1);
-//            std::vector<math::Vector3> vectorProyecciones;
+//            std::vector<Eigen::Vector3d> vectorProyecciones;
 
 //            for(int k = 0; k < submalla->getVertexCount()-1; k++){
 //                unsigned int indice =submalla->getIndex(k);
 
-//                math::Vector3 v1= submalla->getVertex(indice);
+//                Eigen::Vector3d v1= submalla->getVertex(indice);
 
 //                float distanciaEntrePlanos1_1 = plano1.distanciaAPunto(v1);
 
@@ -1430,8 +1437,8 @@ namespace files_3D {
 //                for(int k = 0; k < submalla->getVertexCount()-1; k++){
 //                    unsigned int indice =submalla->getIndex(k);
 
-//                    math::Vector3 v1= submalla->getVertex(indice);
-//                    math::Vector3 v2= submalla->getVertex(indice);
+//                    Eigen::Vector3d v1= submalla->getVertex(indice);
+//                    Eigen::Vector3d v2= submalla->getVertex(indice);
 
 //                    float dist = v1.distance(v2);
 
@@ -1443,10 +1450,10 @@ namespace files_3D {
         }
 
 
-        math::Vector3 max = mesh->getMax();
-        math::Vector3 min = mesh->getMin();
-        image.create((max.getY() - min.getY()),
-                     (max.getX() - min.getY()),
+        Eigen::Vector3d max = mesh->getMax();
+        Eigen::Vector3d min = mesh->getMin();
+        image.create((max(1) - min(1)),
+                     (max(0) - min(1)),
                      CV_8UC3);
 
         image = cv::Scalar(255, 255, 255);
@@ -1456,8 +1463,8 @@ namespace files_3D {
 
         for(int i = 0; i < listaSegmentos.size(); i++){
             cv::line(image,
-                     cv::Point2f((listaSegmentos[i].x1 - min.getX()), (listaSegmentos[i].y1 - min.getY())),
-                     cv::Point2f((listaSegmentos[i].x2 - min.getX()), (listaSegmentos[i].y2 - min.getY())),
+                     cv::Point2f((listaSegmentos[i].x1 - min(0)), (listaSegmentos[i].y1 - min(1))),
+                     cv::Point2f((listaSegmentos[i].x2 - min(0)), (listaSegmentos[i].y2 - min(1))),
                      cv::Scalar(0, 0, 0),
                      3);
             fprintf(fp, "%.2f %.2f %.2f %.2f\n", listaSegmentos[i].x1, listaSegmentos[i].y1,
@@ -1469,8 +1476,7 @@ namespace files_3D {
 
     }
 
-    cv::Mat ColladaParser::getWorld2D()
-    {
+    cv::Mat ColladaParser::getWorld2D() {
         return this->image.clone();
     }
 

@@ -14,14 +14,14 @@ Segmento::Segmento(float x1, float y1, float z1, float x2, float y2, float z2)
 	this->z2 = z2;
 }
 
-Segmento::Segmento(math::Vector3 p, math::Vector3 q)
+Segmento::Segmento(Eigen::Vector3d p, Eigen::Vector3d q)
 {
-    this->x1 = p.getX();
-    this->y1 = p.getY();
-    this->z1 = p.getZ();
-    this->x2 = q.getX();
-    this->y2 = q.getY();
-    this->z2 = q.getZ();
+    this->x1 = p(0);
+    this->y1 = p(1);
+    this->z1 = p(2);
+    this->x2 = q(0);
+    this->y2 = q(1);
+    this->z2 = q(2);
 }
 
 

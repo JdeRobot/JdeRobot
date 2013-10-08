@@ -101,3 +101,17 @@ operator <<(std::ostream &o,const Point3D &p) {
   return o;
 }
 
+std::istream&
+operator >>(std::istream &in, Point3D &p) {
+  // Skip white spaces
+  in.setf(std::ios_base::skipws);
+
+  double x, y, z;
+
+  in >> x >> y >> z;
+  p.point(0) = x;
+  p.point(1) = y;
+  p.point(2) = z;
+  return in;
+}
+

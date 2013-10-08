@@ -1,5 +1,6 @@
 #include "submalla.h"
-namespace files_3D {
+namespace Geometry {
+
     SubMalla::SubMalla()
     {
         materialIndex = -1;
@@ -18,12 +19,12 @@ namespace files_3D {
     //////////////////////////////////////////////////
     void SubMalla::Scale(double _factor)
     {
-      for (std::vector<math::Vector3>::iterator iter = this->vertices.begin();
+      for (std::vector<Eigen::Vector3d>::iterator iter = this->vertices.begin();
            iter != this->vertices.end(); ++iter)
       {
-          (*iter).vector(0) *= _factor;
-          (*iter).vector(1) *= _factor;
-          (*iter).vector(2) *= _factor;
+          (*iter)(0) *= _factor;
+          (*iter)(1) *= _factor;
+          (*iter)(2) *= _factor;
       }
     }
 
@@ -40,7 +41,7 @@ namespace files_3D {
     }
 
     //////////////////////////////////////////////////
-    void SubMalla::addVertex(const math::Vector3 &_v)
+    void SubMalla::addVertex(const Eigen::Vector3d &_v)
     {
       this->vertices.push_back(_v);
     }
@@ -58,7 +59,7 @@ namespace files_3D {
     }
 
     //////////////////////////////////////////////////
-    math::Vector3 SubMalla::getVertex(unsigned int _i) const
+    Eigen::Vector3d SubMalla::getVertex(unsigned int _i) const
     {
       if (_i >= this->vertices.size())
         std::cout << "Index too large\n";
@@ -67,7 +68,7 @@ namespace files_3D {
     }
 
     //////////////////////////////////////////////////
-    math::Vector3 SubMalla::getNormal(unsigned int _i) const
+    Eigen::Vector3d SubMalla::getNormal(unsigned int _i) const
     {
       if (_i >= this->normals.size())
         std::cout <<"Index too large";
@@ -94,7 +95,7 @@ namespace files_3D {
     }
 
     //////////////////////////////////////////////////
-    void SubMalla::addNormal(const math::Vector3 &_n)
+    void SubMalla::addNormal(const Eigen::Vector3d &_n)
     {
       this->normals.push_back(_n);
     }
@@ -102,7 +103,7 @@ namespace files_3D {
     //////////////////////////////////////////////////
     void SubMalla::addTexCoord(double _u, double _v)
     {
-      this->texCoords.push_back(math::Vector2d(_u, _v));
+      this->texCoords.push_back(Eigen::Vector2d(_u, _v));
     }
 
     //////////////////////////////////////////////////
@@ -128,7 +129,7 @@ namespace files_3D {
     }
 
     //////////////////////////////////////////////////
-    math::Vector2d SubMalla::getTexCoord(unsigned int _i) const
+    Eigen::Vector2d SubMalla::getTexCoord(unsigned int _i) const
     {
       if (_i >= this->texCoords.size())
         std::cout << "Index too large";
@@ -139,9 +140,9 @@ namespace files_3D {
     //////////////////////////////////////////////////
     void SubMalla::center()
     {
-     math::Vector3 _center(0, 0, 0);
+     Eigen::Vector3d _center(0, 0, 0);
 
-      math::Vector3 min, max, half;
+      Eigen::Vector3d min, max, half;
       min = this->getMin();
       max = this->getMax();
       half = (max - min) * 0.5;
@@ -150,9 +151,9 @@ namespace files_3D {
     }
 
     //////////////////////////////////////////////////
-    void SubMalla::translate(const math::Vector3 &_vec)
+    void SubMalla::translate(const Eigen::Vector3d &_vec)
     {
-      for (std::vector<math::Vector3>::iterator iter = this->vertices.begin();
+      for (std::vector<Eigen::Vector3d>::iterator iter = this->vertices.begin();
            iter != this->vertices.end(); ++iter)
       {
         (*iter) += _vec;
@@ -160,42 +161,42 @@ namespace files_3D {
     }
 
     //////////////////////////////////////////////////
-    math::Vector3 SubMalla::getMax() const
+    Eigen::Vector3d SubMalla::getMax() const
     {
-      math::Vector3 max;
-      std::vector<math::Vector3>::const_iterator iter;
+      Eigen::Vector3d max;
+      std::vector<Eigen::Vector3d>::const_iterator iter;
 
-      max.setX( -std::numeric_limits<float>::max());
-      max.setY( -std::numeric_limits<float>::max());
-      max.setZ( -std::numeric_limits<float>::max());
+      max(0) = -std::numeric_limits<float>::max();
+      max(1) = -std::numeric_limits<float>::max();
+      max(2) = -std::numeric_limits<float>::max();
 
       for (iter = this->vertices.begin(); iter != this->vertices.end(); ++iter)
       {
-        math::Vector3 v = (*iter);
-        max.setX(std::max(max.getX(), v.getX()));
-        max.setY(std::max(max.getY(), v.getY()));
-        max.setZ(std::max(max.getZ(), v.getZ()));
+        Eigen::Vector3d v = (*iter);
+        max(0) = std::max(max(0), v(0));
+        max(1) = std::max(max(1), v(1));
+        max(2) = std::max(max(2), v(2));
       }
 
       return max;
     }
 
     //////////////////////////////////////////////////
-    math::Vector3 SubMalla::getMin() const
+    Eigen::Vector3d SubMalla::getMin() const
     {
-      math::Vector3 min;
-      std::vector<math::Vector3>::const_iterator iter;
+      Eigen::Vector3d min;
+      std::vector<Eigen::Vector3d>::const_iterator iter;
 
-      min.setX( std::numeric_limits<float>::max());
-      min.setY( std::numeric_limits<float>::max());
-      min.setZ( std::numeric_limits<float>::max());
+      min(0) = std::numeric_limits<float>::max();
+      min(1) = std::numeric_limits<float>::max();
+      min(2) = std::numeric_limits<float>::max();
 
       for (iter = this->vertices.begin(); iter != this->vertices.end(); ++iter)
       {
-        math::Vector3 v = (*iter);
-        min.setX(std::min(min.getX(), v.getX()));
-        min.setY(std::min(min.getY(), v.getY()));
-        min.setZ(std::min(min.getZ(), v.getZ()));
+        Eigen::Vector3d v = (*iter);
+        min(0) = std::min(min(0), v(0));
+        min(1) = std::min(min(1), v(1));
+        min(2) = std::min(min(2), v(2));
 
       }
 
@@ -210,7 +211,7 @@ namespace files_3D {
       if (this->vertices.size() == 0 || this->indices.size() == 0)
         std::cout << "No vertices or indices\n";
 
-      std::vector< math::Vector3 >::const_iterator viter;
+      std::vector< Eigen::Vector3d >::const_iterator viter;
       std::vector< unsigned int >::const_iterator iiter;
       unsigned int i;
 
@@ -225,9 +226,9 @@ namespace files_3D {
 
       for (viter = this->vertices.begin(), i = 0; viter != this->vertices.end();
           ++viter){
-          (*_vertArr)[i++] = static_cast<float>((*viter).vector(0));
-          (*_vertArr)[i++] = static_cast<float>((*viter).vector(1));
-          (*_vertArr)[i++] = static_cast<float>((*viter).vector(2));
+          (*_vertArr)[i++] = static_cast<float>((*viter)(0));
+          (*_vertArr)[i++] = static_cast<float>((*viter)(1));
+          (*_vertArr)[i++] = static_cast<float>((*viter)(2));
       }
 
       for (iiter = this->indices.begin(), i = 0;

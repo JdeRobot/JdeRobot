@@ -6,7 +6,8 @@
 
 #include "submalla.h"
 #include "material.h"
-namespace files_3D {
+namespace Geometry {
+
     class Malla
     {
     public:
@@ -21,8 +22,8 @@ namespace files_3D {
 
         void Scale(double _factor);
 
-        math::Vector3 getMax() const;
-        math::Vector3 getMin() const;
+        Eigen::Vector3d getMax() const;
+        Eigen::Vector3d getMin() const;
 
 
         /// \brief The name of the mesh
