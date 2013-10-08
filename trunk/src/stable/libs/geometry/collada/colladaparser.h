@@ -114,6 +114,10 @@ namespace Geometry {
 
     public: cv::Mat image;
 
+    private:
+
+      int ite;
+
 
     };
 }

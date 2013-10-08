@@ -47,15 +47,17 @@ namespace Geometry {
 
             mesh->Scale(1/scalemap);
         }
+
+        this->ite = 0;
     }
 
-    int ite = 0;
+
 
     void ColladaParser::draw()
     {
 
-        if(ite==0){
-            ite++;
+        if(this->ite==0){
+            this->ite++;
             std::vector<std::string> listaNombres;
             std::vector<unsigned int> listaTexturas;
             for(int i = 0; i < this->mesh->getSubMeshCount();i++){
