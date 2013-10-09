@@ -38,6 +38,7 @@
 #include <libxml/xmlreader.h>
 #include <libxml/xpath.h>
 #include <libxml/tree.h>
+#include <cv.h>
 
 namespace Progeo {
 
@@ -83,7 +84,7 @@ public:
 
 	void saveToFile (std::string filename);
 	void readFromFile(std::string filename);
-	//void backproject(cv::Point point, cv::Point3f* cam, cv::Point3f* pro);
+	void backprojectCV(Eigen::Vector3d point, Eigen::Vector4d& pro);
 
 
 private:

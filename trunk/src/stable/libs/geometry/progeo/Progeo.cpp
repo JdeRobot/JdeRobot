@@ -462,6 +462,119 @@ void Progeo::backproject(Eigen::Vector3d point, Eigen::Vector4d& pro)
 	
 }
 
+
+void Progeo::backprojectCV(Eigen::Vector3d point, Eigen::Vector4d& pro)
+{
+	//GRAPHIC_TO_OPTICAL
+	//int opX = this->rows -1 -point(1);
+	//int opY = point(0);
+
+	/*Eigen::Matrix3d ik;
+	ik = K;
+	ik = ik.inverse().eval();
+*/
+	//Eigen::Vector3d Pi(point(0)/point(2), point(1)/point(2),1);
+
+
+
+
+//float k;
+	std::string line;
+	float p;
+
+	cv::Point3f foa;
+	cv::Mat myK = cv::Mat(cv::Size(3,3),CV_32FC1);
+	cv::Mat myR = cv::Mat(cv::Size(3,3),CV_32FC1);
+		
+	
+
+	myK.at<float>(0,0)=K(0,0);
+	myK.at<float>(0,1)=K(0,1);
+	myK.at<float>(0,2)=K(0,2);
+	myK.at<float>(1,0)=K(1,0);
+	myK.at<float>(1,1)=K(1,1);
+	myK.at<float>(1,2)=K(1,2);
+	myK.at<float>(2,0)=K(2,0);
+	myK.at<float>(2,1)=K(2,1);
+	myK.at<float>(2,2)=K(2,2);
+
+
+	myR.at<float>(0,0)=RT(0,0);
+	myR.at<float>(0,1)=RT(0,1);
+	myR.at<float>(0,2)=RT(0,2);
+	myR.at<float>(1,0)=RT(1,0);
+	myR.at<float>(1,1)=RT(1,1);
+	myR.at<float>(1,2)=RT(1,2);
+	myR.at<float>(2,0)=RT(2,0);
+	myR.at<float>(2,1)=RT(2,1);
+	myR.at<float>(2,2)=RT(2,2);
+
+
+	cv::Mat ik=cv::Mat(myK.size(), myK.type());
+	cv::invert(myK,ik);
+
+	
+	cv::Mat Pi=cv::Mat(cv::Size(1,3),CV_32FC1);
+	Pi.at<float>(0,0)=(float)point(0)/point(2);
+	Pi.at<float>(0,1)=(float)point(1)/point(2);
+	Pi.at<float>(0,2)=1.;
+	
+	cv::Mat a;
+	a=ik*Pi;
+
+	cv::Mat aH=cv::Mat(cv::Size(1,4), CV_32FC1);
+	aH.at<float>(0,0)=a.at<float>(0,0);
+	aH.at<float>(0,1)=a.at<float>(0,1);
+	aH.at<float>(0,2)=a.at<float>(0,2);
+	aH.at<float>(0,3)=1.;
+
+	cv::Mat rT;
+	cv::transpose(myR,rT);
+
+	cv::Mat rTH=cv::Mat(cv::Size(4,4),CV_32FC1, cv::Scalar(0));
+	for (int i=0; i<3; i++)
+		for (int j=0; j<3; j++)
+			rTH.at<float>(i,j)=rT.at<float>(i,j);
+	rTH.at<float>(3,3)=1.;
+	
+	
+	cv::Mat b;
+	b=rTH*aH;
+	
+	cv::Mat iT=cv::Mat(cv::Size(4,4),CV_32FC1, cv::Scalar(0));
+	iT.at<float>(0,0)=1.;
+	iT.at<float>(1,1)=1;
+	iT.at<float>(2,2)=1;
+	iT.at<float>(3,3)=1;
+	iT.at<float>(0,3)=position(0);
+	iT.at<float>(1,3)=position(1);
+	iT.at<float>(2,3)=position(2);
+	cv::Mat Pw;
+	Pw=iT*b;
+	
+
+	pro(0)=Pw.at<float>(0,0);
+	pro(1)=Pw.at<float>(0,1);
+	pro(2)=Pw.at<float>(0,2);
+	pro(3) = 1;
+
+
+
+	/*pro(0) = b(0)/b(3);
+	pro(1) = b(1)/b(3);
+	pro(2) = b(2)/b(3);
+	pro(3) = b(3);*/
+
+	/*OJO*/
+	/*pro(0) = b(0)/b(3);
+	pro(1) = b(1)/b(3);
+	pro(2) = b(2)/b(3);
+	pro(3) = b(3);*/
+	
+}
+
+
+
 void Progeo::setPosition (Eigen::Vector4d pos)
 {
 	position = pos;
