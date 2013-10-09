@@ -1,11 +1,10 @@
 #ifndef VISIONLIB_H
 #define VISIONLIB_H
 
-#include <geometry.h>
-#include <cvfast.h>
-#include <image.h>
-#include <structs.h>
-#include <progeo/progeo.h>
+#include <visionlib/imgAnalyze/geometry.h>
+#include <visionlib/imgAnalyze/image.h>
+#include <visionlib/imgAnalyze/structs.h>
 #include <visionlib/cvFast/cvfast.h>
+#include <progeo/progeo.h>
 
 #endif
