@@ -39,6 +39,7 @@ if (${QT_COMPILE})
     )
 			       
     target_link_libraries(introrob_qt
+        ${CMAKE_THREAD_LIBS_INIT}
         ${OpenCV_LIBRARIES}
 	    ${QT_LIBRARIES_JDE}
         JderobotInterfaces
