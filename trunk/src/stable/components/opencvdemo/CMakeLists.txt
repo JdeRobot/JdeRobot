@@ -22,7 +22,7 @@ TARGET_LINK_LIBRARIES(opencvdemo
     colorspacesmm
     JderobotInterfaces
     jderobotutil
-    ${Gearbox_LIBRARIES}
+#    ${Gearbox_LIBRARIES}
     ${ZeroCIce_LIBRARIES}
 
 

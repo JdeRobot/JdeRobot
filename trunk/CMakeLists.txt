@@ -88,6 +88,7 @@ include(${DEPS_DIR}/boost/CMakeLists.txt)
 include(${DEPS_DIR}/alut/CMakeLists.txt)
 include(${DEPS_DIR}/tinyxml/CMakeLists.txt)
 include(${DEPS_DIR}/gtk2/CMakeLists.txt)
+include(${DEPS_DIR}/qt/CMakeLists.txt)
 
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
