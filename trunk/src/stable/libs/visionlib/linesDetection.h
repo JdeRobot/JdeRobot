@@ -28,11 +28,8 @@
 #include <opencv/highgui.h>
 #include <stdio.h>
 #include <visionlib/colorspaces/colorspacesmm.h>
-#include "geometry.h"
-#include "cvfast.h"
-#include "structs.h"
-#include "image.h"
 #include <sys/time.h>
+#include "image.h"
 
 using namespace visionLibrary;
 using namespace std;

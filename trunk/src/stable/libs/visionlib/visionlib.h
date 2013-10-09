@@ -6,5 +6,6 @@
 #include <image.h>
 #include <structs.h>
 #include <progeo/progeo.h>
+#include <visionlib/cvFast/cvfast.h>
 
 #endif

@@ -113,6 +113,11 @@ FOREACH (lib ${LIB_FILES})
 	INSTALL (FILES ${lib} DESTINATION /usr/local/lib/jderobot)
 ENDFOREACH(lib)
 
+FILE(GLOB LIB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/libs/visionlib/*/*.so)
+FOREACH (lib ${LIB_FILES})
+	INSTALL (FILES ${lib} DESTINATION /usr/local/lib/jderobot)
+ENDFOREACH(lib)
+
 
 FILE(GLOB_RECURSE HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/libs/*.h)
 FOREACH(currentSourceFile ${HEADERS_FILES})
