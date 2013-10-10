@@ -1,3 +1,5 @@
+if (pcl_LIBRARIES)
+
 include_directories( 
 	${GAZEBO_INCLUDE_DIRS}
     ${INTERFACES_CPP_DIR}
@@ -11,15 +13,17 @@ link_directories(
 	${GAZEBO_LIBRARY_DIRS} 
 	)
 
-set( CMAKE_CXX_FLAGS "-Wall -lpcl_filters" ) # Opciones para el compilador
+set( CMAKE_CXX_FLAGS "-Wall" ) # Opciones para el compilador
 
 add_library(kinectPlugin SHARED kinectPlugin.cc)
 
 target_link_libraries(kinectPlugin 
     JderobotInterfaces
     jderobotutil
-	${GAZEBO_libraries} 
-    ${PCL_LIBRARIES}  
+    ${GAZEBO_libraries} 
+    ${pcl_LIBRARIES}  
     ${OpenCV_LIBRARIES}
     ${ZeroCIce_LIBRARIES}
 )
+
+endif()
