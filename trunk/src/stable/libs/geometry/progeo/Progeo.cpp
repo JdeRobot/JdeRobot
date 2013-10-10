@@ -391,11 +391,12 @@ int Progeo::project(Eigen::Vector4d in, Eigen::Vector3d &out)
 
 	out = K*a.head(3);
 
-	// optical 2 graphics
+	
 	out(0) = out(0)/out(2);
 	out(1) = out(1)/out(2);
 	out(2) = 1.0;
 
+	// optical 2 graphics
 	double aux = out(0);
 	out(0) = out(1);
 	out(1) = this->rows-1-aux;
@@ -417,10 +418,14 @@ void Progeo::backproject(Eigen::Vector3d point, Eigen::Vector4d& pro)
 	ik = K;
 	ik = ik.inverse().eval();
 
-	Eigen::Vector3d Pi(point(0)*K(0,0)/point(2), point(1)*K(0,0)/point(2),K(0,0));
+	//std::cout << "punto: " << point(0) << ", " << point(1) << ", " << point(2) << std::endl;
+
+	Eigen::Vector3d Pi(point(0)/point(2), point(1)/point(2),1);
 
 	Eigen::Vector3d a;
 	a = ik*Pi;
+
+	//std::cout << "a: " << a(0) << ", " << a(1) << ", " << a(2) << std::endl;
 
 	Eigen::Vector4d aH;
 	aH(0) = a(0);
@@ -439,25 +444,23 @@ void Progeo::backproject(Eigen::Vector3d point, Eigen::Vector4d& pro)
 
 	Eigen::Vector4d b;
 
-	b = RT2*aH;
+	b = RT2.transpose()*aH;
+
+	//std::cout << "b: " << b(0) << ", " << b(1) << ", " << b(2) << std::endl;
 
 	Eigen::Matrix4d Translate;
 	Translate.setIdentity();
-	Translate(0, 3) = position(0);
-	Translate(1, 3) = position(1);
-	Translate(2, 3) = position(2);
+	Translate(0, 3) = RT(0,3)/RT(3,3);
+	Translate(1, 3) = RT(1,3)/RT(3,3);
+	Translate(2, 3) = RT(2,3)/RT(3,3);
 
 	b = Translate*b;
 
-	/*pro(0) = b(0)/b(3);
-	pro(1) = b(1)/b(3);
-	pro(2) = b(2)/b(3);
-	pro(3) = b(3);*/
 
 	/*OJO*/
-	pro(0) = b(2)/b(3);
-	pro(1) = b(0)/b(3);
-	pro(2) = b(1)/b(3);
+	pro(0) = b(0)/b(3);
+	pro(1) = b(1)/b(3);
+	pro(2) = b(2)/b(3);
 	pro(3) = b(3);
 	
 }
@@ -528,6 +531,11 @@ void Progeo::backprojectCV(Eigen::Vector3d point, Eigen::Vector4d& pro)
 	aH.at<float>(0,2)=a.at<float>(0,2);
 	aH.at<float>(0,3)=1.;
 
+	std::cout << " -------------------- " << std::endl;
+	std::cout << "a= " << a << std::endl;
+	std::cout << aH << std::endl;
+//	std::cout 
+
 	cv::Mat rT;
 	cv::transpose(myR,rT);
 
@@ -540,6 +548,8 @@ void Progeo::backprojectCV(Eigen::Vector3d point, Eigen::Vector4d& pro)
 	
 	cv::Mat b;
 	b=rTH*aH;
+
+	std::cout << "b= " << a << std::endl;
 	
 	cv::Mat iT=cv::Mat(cv::Size(4,4),CV_32FC1, cv::Scalar(0));
 	iT.at<float>(0,0)=1.;
@@ -677,17 +687,17 @@ void Progeo::updateRTMatrix()
 	RT(0,0) = double(RC(0,0)*RAB(0,0) + RC(0,1)*RAB(1,0) + RC(0,2)*RAB(2,0));
 	RT(0,1) = double(RC(0,0)*RAB(0,1) + RC(0,1)*RAB(1,1) + RC(0,2)*RAB(2,1));
 	RT(0,2) = double(RC(0,0)*RAB(0,2) + RC(0,1)*RAB(1,2) + RC(0,2)*RAB(2,2));
-	RT(0,3) = double(-position(0)*RT(0,0) -position(1)*RT(0,1) -position(2)*RT(0,2));
+	RT(0,3) = position(0);
 
 	RT(1,0) = double(RC(1,0)*RAB(0,0) + RC(1,1)*RAB(1,0) + RC(1,2)*RAB(2,0));
 	RT(1,1) = double(RC(1,0)*RAB(0,1) + RC(1,1)*RAB(1,1) + RC(1,2)*RAB(2,1));
 	RT(1,2) = double(RC(1,0)*RAB(0,2) + RC(1,1)*RAB(1,2) + RC(1,2)*RAB(2,2));
-	RT(1,3) = double(-position(0)*RT(1,0) -position(1)*RT(1,1) -position(2)*RT(1,2));
+	RT(1,3) = position(1);
 
 	RT(2,0) = double(RC(2,0)*RAB(0,0) + RC(2,1)*RAB(1,0) + RC(2,2)*RAB(2,0));
 	RT(2,1) = double(RC(2,0)*RAB(0,1) + RC(2,1)*RAB(1,1) + RC(2,2)*RAB(2,1));
 	RT(2,2) = double(RC(2,0)*RAB(0,2) + RC(2,1)*RAB(1,2) + RC(2,2)*RAB(2,2));
-	RT(2,3) = double(-position(0)*RT(2,0) -position(1)*RT(2,1) -position(2)*RT(2,2));
+	RT(2,3) = position(2);
 
     RT(3,0) = 0.;
     RT(3,1) = 0.;
