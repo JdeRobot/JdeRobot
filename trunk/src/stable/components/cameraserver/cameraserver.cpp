@@ -82,6 +82,9 @@ class CameraI: virtual public jderobot::Camera {
 
             imageDescription->size = imageDescription->width * imageDescription->height * CV_ELEM_SIZE(imageFmt->cvType);
             imageDescription->format = imageFmt->name;
+ 
+	    // mirror image
+	    mirror = prop->getPropertyAsIntWithDefault(prefix+"Mirror",0);
 
             //fill pipeline cfg
             uri = prop->getProperty(prefix+"Uri");
@@ -165,6 +168,8 @@ class CameraI: virtual public jderobot::Camera {
 
                     int cycle_control = 1000/mycamera->framerateN;
 
+			std::cout << cycle_control << std::endl;
+
                     while(1){
 
                         gettimeofday(&a,NULL);
@@ -193,15 +198,22 @@ class CameraI: virtual public jderobot::Camera {
                             count++;
                         }
 
+			
+			if (mycamera->mirror)
+			{
+				cv::Mat dst;
+				cv::flip(frame, frame, 1);
+			}
+			
+
                         IceUtil::Time t = IceUtil::Time::now();
                         reply->timeStamp.seconds = (long)t.toSeconds();
                         reply->timeStamp.useconds = (long)t.toMicroSeconds() - reply->timeStamp.seconds*1000000;
 
-//                        pthread_mutex_lock (&mycamera->cameraI->mutex);
                         reply->pixelData.resize(frame.rows*frame.cols*3);
 
                         memcpy( &(reply->pixelData[0]), (unsigned char *) frame.data, frame.rows*frame.cols*3);
-//                        pthread_mutex_unlock (&mycamera->cameraI->mutex);
+
 
                        { //critical region start
                            IceUtil::Mutex::Lock sync(requestsMutex);
@@ -217,18 +229,17 @@ class CameraI: virtual public jderobot::Camera {
 
                         diff = (totalb-totala)/1000;
                         diff = cycle-diff;
-
-                        //std::cout << "Gazeboserver takes " << diff << " ms " << mycamera->fileName << std::endl;
-
+			//std::cout << "CameraServer takes " << diff << " ms ";
+                        
                         if (diff < 0 || diff > cycle_control)
-                            diff = cycle_control;
+                            diff = 0.;
                         else
                             diff = cycle_control - diff;
 
+			//std::cout <<  " and sleep " << diff << " ms " << std::endl;
                         /*Sleep Algorithm*/
                         usleep(diff * 1000);
-//                        if (diff < 33)
-//                            usleep(33 * 1000);
+
                     }
                 }
 
@@ -244,6 +255,7 @@ class CameraI: virtual public jderobot::Camera {
         jderobot::CameraDescriptionPtr cameraDescription;
         ReplyTaskPtr replyTask;
         cv::VideoCapture cap;
+	int mirror;
 
 }; // end class CameraI
 
