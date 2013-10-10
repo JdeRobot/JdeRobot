@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1997-2013 JDE Developers TeamkinectViewer.camRGB
+ *  Copyright (C) 1997-2013 JDE Developers TeamrgbdViewer.camRGB
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,29 +19,26 @@
 
  */
 
-#ifndef KINECTVIEWER_MYPROGEO_H
-#define KINECTVIEWER_MYPROGEO_H
+#ifndef rgbdViewer_MYPROGEO_H
+#define rgbdViewer_MYPROGEO_H
 
-#include <progeo/progeo.h>
+#include <geometry/progeo/Progeo.h>
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <vector>
+#include <cmath>
 
 /* GRAPHIC coordenates to OPTICAL coordenates */
-#define WORKING_IMG_HEIGHT 480
-#define GRAPHIC_TO_OPTICAL_X(x,y) (WORKING_IMG_HEIGHT-1-y)
-#define GRAPHIC_TO_OPTICAL_Y(x,y) (x)
-#define OPTICAL_TO_GRAPHIC_X(x,y) (y)
-#define OPTICAL_TO_GRAPHIC_Y(x,y) (WORKING_IMG_HEIGHT-1-x)
 
 #define MAX_CAMERAS 8
 #define MAX_BUFFER 1024
 
-namespace kinectViewer {
+namespace rgbdViewer {
   class myprogeo {
 	public:
-	myprogeo();
+	myprogeo(int nCam, int w, int h);
 	~myprogeo();
 	void load_cam(char *fich_in,int cam, int w, int h);
 	void mybackproject(float x, float y, float* xp, float* yp, float* zp, float* camx, float* camy, float* camz, int cam);
@@ -49,12 +46,17 @@ namespace kinectViewer {
 	void mygetcameraposition(float *x, float *y, float *z, int cam);
 	void mygetcamerafoa(float *x, float *y, float *z, int cam);
 	void mygetcamerasize(float *w, float *h, int cam);
-	TPinHoleCamera getCamera(int camera);
+	Progeo::Progeo* getCamera(int camera);
+	void new_camera();
 
 	private:
+		void pixel2optical(float*x,float*y);
+		void optical2pixel(float* x, float* y); 
+		
 		/* cameras */
-		TPinHoleCamera cameras[MAX_CAMERAS];
+		Progeo::Progeo* cameras[MAX_CAMERAS];
+		int w,h;
   };
 } // namespace
 
-#endif /*KINECTVIEWER_MYPROGEO_H*/
+#endif /*rgbdViewer_MYPROGEO_H*/

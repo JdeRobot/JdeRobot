@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1997-2013 JDE Developers TeamkinectViewer.camRGB
+ *  Copyright (C) 1997-2013 JDE Developers TeamrgbdViewer.camRGB
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
 
  */
 
-#ifndef kinectViewer_VIEW_H
-#define kinectViewer_VIEW_H
+#ifndef rgbdViewer_VIEW_H
+#define rgbdViewer_VIEW_H
 
 #include <string>
 #include <iostream>
@@ -34,14 +34,14 @@
 #include "myprogeo.h"
 #include <cv.h>
 #include <highgui.h>
-#include "util3d.h"
+//#include "util3d.h"
 
-namespace kinectViewer {
-  class kinectViewergui {
+namespace rgbdViewer {
+  class rgbdViewergui {
 		public:
 
-		  kinectViewergui(bool rgb, bool depth,bool pointCloud , std::string path, std::string path_rgb, std::string path_ir, int width, int height, float cycle);
-		  virtual ~kinectViewergui();
+		  rgbdViewergui(bool rgb, bool depth,bool pointCloud , std::string path, std::string path_rgb, std::string path_ir, int width, int height, float cycle);
+		  virtual ~rgbdViewergui();
 
 			/*Return true if the windows is visible*/
 		  bool isVisible();
@@ -84,7 +84,7 @@ namespace kinectViewer {
 			Gtk::RadioButton *w_radio_mode_pointcloud;
 			Gtk::RadioButton *w_radio_mode_image;
 			Gtk::Button *w_button_clear_lines;
-			util3d* util;
+			//util3d* util;
 			DrawArea* world;
 			int cWidth, cHeight;
 			int reconstructMode;
@@ -125,4 +125,4 @@ namespace kinectViewer {
   };
 } // namespace
 
-#endif /*kinectViewer_VIEW_H*/
+#endif /*rgbdViewer_VIEW_H*/

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1997-2013 JDE Developers TeamkinectViewer.camRGB
+ *  Copyright (C) 1997-2013 JDE Developers TeamrgbdViewer.camRGB
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
 #include <jderobot/pointcloud.h>
-#include "kinectViewergui.h"
+#include "rgbdViewergui.h"
 #include "pthread.h"
 #include "parallelIce/cameraClient.h"
 #include "parallelIce/pointcloudClient.h"
@@ -36,7 +36,7 @@
 
 #define MAX_COMPONENTS 20	
 
-kinectViewer::kinectViewergui* kinectViewergui_ptx;
+rgbdViewer::rgbdViewergui* rgbdViewergui_ptx;
 
 jderobot::cameraClient* camRGB=NULL;
 jderobot::cameraClient* camDEPTH=NULL;
@@ -56,7 +56,7 @@ void *gui_thread(void* arg){
 		long long int totalpost=0;
 
 		//std::cout << "******************************** entro" << std::endl;
-		while(kinectViewergui_ptx->isVisible() && ! kinectViewergui_ptx->isClosed()){
+		while(rgbdViewergui_ptx->isVisible() && ! rgbdViewergui_ptx->isClosed()){
 			//std::cout << "******************************** entro1" << std::endl;
 			gettimeofday(&post,NULL);
 			totalpost=post.tv_sec*1000000+post.tv_usec;
@@ -70,23 +70,23 @@ void *gui_thread(void* arg){
 
 
 			if ((rgb.rows!=0)&&(depth.rows!=0)){
-				kinectViewergui_ptx->updateAll(rgb,depth, cloud);
+				rgbdViewergui_ptx->updateAll(rgb,depth, cloud);
 			}
 			else if (rgb.rows!=0){
-				kinectViewergui_ptx->updateRGB(rgb);
+				rgbdViewergui_ptx->updateRGB(rgb);
 			}
 			else if (depth.rows!=0){
-				kinectViewergui_ptx->updateDEPTH(depth);
+				rgbdViewergui_ptx->updateDEPTH(depth);
 			}
 			else{	
-				kinectViewergui_ptx->updatePointCloud(cloud);
+				rgbdViewergui_ptx->updatePointCloud(cloud);
 			}
 			if (totalpre !=0){
-				if ((totalpost - totalpre) > kinectViewergui_ptx->getCycle() ){
-					std::cout<<"-------- kinectViewer: timeout-" << std::endl;
+				if ((totalpost - totalpre) > rgbdViewergui_ptx->getCycle() ){
+					std::cout<<"-------- rgbdViewer: timeout-" << std::endl;
 				}
 				else{
-					usleep(kinectViewergui_ptx->getCycle() - (totalpost - totalpre));
+					usleep(rgbdViewergui_ptx->getCycle() - (totalpost - totalpre));
 				}
 			}
 			totalpre=totalpost;
@@ -139,8 +139,8 @@ int main(int argc, char** argv){
 		std::cerr <<"Error :" << msg << std::endl;
 		return 1;
 	}
-	if (prop->getPropertyAsIntWithDefault("kinectViewer.CameraRGBActive",0)){
-		camRGB = new jderobot::cameraClient(ic,"kinectViewer.CameraRGB.",false);
+	if (prop->getPropertyAsIntWithDefault("rgbdViewer.CameraRGBActive",0)){
+		camRGB = new jderobot::cameraClient(ic,"rgbdViewer.CameraRGB.",false);
 		if (camRGB != NULL){
 			rgbCamSelected=true;
 			camRGB->start();
@@ -148,8 +148,8 @@ int main(int argc, char** argv){
 		}
 
 	}
-	if (prop->getPropertyAsIntWithDefault("kinectViewer.CameraDEPTHActive",0)){
-		camDEPTH = new jderobot::cameraClient(ic,"kinectViewer.CameraDEPTH.",false);
+	if (prop->getPropertyAsIntWithDefault("rgbdViewer.CameraDEPTHActive",0)){
+		camDEPTH = new jderobot::cameraClient(ic,"rgbdViewer.CameraDEPTH.",false);
 		if (camDEPTH != NULL){
 			depthCamSelected=true;
 			camDEPTH->start();
@@ -158,8 +158,8 @@ int main(int argc, char** argv){
 	}
 
 
-	if (prop->getPropertyAsIntWithDefault("kinectViewer.pointCloudActive",0)){
-		pcClient = new jderobot::pointcloudClient(ic,"kinectViewer.pointCloud.",false);
+	if (prop->getPropertyAsIntWithDefault("rgbdViewer.pointCloudActive",0)){
+		pcClient = new jderobot::pointcloudClient(ic,"rgbdViewer.pointCloud.",false);
 		if (pcClient!= NULL){
 			pcClient->start();
 			pointCloudSelected=true;
@@ -167,15 +167,15 @@ int main(int argc, char** argv){
 		}
 	}
 
-	globalHeight=prop->getPropertyAsIntWithDefault("kinectViewer.Height",240);
-	globalWidth=prop->getPropertyAsIntWithDefault("kinectViewer.Width",320);
-	int fps=prop->getPropertyAsIntWithDefault("kinectViewer.Fps",10);
+	globalHeight=prop->getPropertyAsIntWithDefault("rgbdViewer.Height",240);
+	globalWidth=prop->getPropertyAsIntWithDefault("rgbdViewer.Width",320);
+	int fps=prop->getPropertyAsIntWithDefault("rgbdViewer.Fps",10);
 	float cycle=(float)(1/(float)fps)*1000000;
 
 
 	std::cout << rgbCamSelected <<", " << depthCamSelected << ", " << pointCloudSelected << std::endl;
 
-	kinectViewergui_ptx = new kinectViewer::kinectViewergui(rgbCamSelected,depthCamSelected, pointCloudSelected, prop->getProperty("kinectViewer.WorldFile"), prop->getProperty("kinectViewer.camRGB"), prop->getProperty("kinectViewer.camIR"),globalWidth,globalHeight, cycle);
+	rgbdViewergui_ptx = new rgbdViewer::rgbdViewergui(rgbCamSelected,depthCamSelected, pointCloudSelected, prop->getProperty("rgbdViewer.WorldFile"), prop->getProperty("rgbdViewer.camRGB"), prop->getProperty("rgbdViewer.camIR"),globalWidth,globalHeight, cycle);
 	
 	if (create_gui){
 		pthread_create(&threads[n_components], &attr, gui_thread,NULL);
@@ -183,8 +183,8 @@ int main(int argc, char** argv){
 	}
 
 
-	if (kinectViewergui_ptx == NULL)
-		throw "kinectViewer: Could not create the grafic interface";
+	if (rgbdViewergui_ptx == NULL)
+		throw "rgbdViewer: Could not create the grafic interface";
 	for (i = 0; i < n_components; i++) {
 		pthread_join(threads[i], NULL);
 	}

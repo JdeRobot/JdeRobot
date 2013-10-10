@@ -1,4 +1,4 @@
-SET(SOURCE_FILES kinectViewer.cpp drawarea.cpp kinectViewergui.cpp myprogeo.cpp util3d.cpp)
+SET(SOURCE_FILES rgbdViewer.cpp drawarea.cpp rgbdViewergui.cpp myprogeo.cpp)
 
 add_definitions(-DGLADE_DIR="${gladedir}")
 
@@ -14,10 +14,10 @@ include_directories(
     ${gtkglextmm_INCLUDE_DIRS}
 )
 
-add_executable (kinectViewer ${SOURCE_FILES})
+add_executable (rgbdViewer ${SOURCE_FILES})
 
 
-TARGET_LINK_LIBRARIES(kinectViewer
+TARGET_LINK_LIBRARIES(rgbdViewer
     ${CMAKE_THREAD_LIBS_INIT} 
     ${GLUT_LIBRARIES}
     ${OpenCV_LIBRARIES}
@@ -29,6 +29,7 @@ TARGET_LINK_LIBRARIES(kinectViewer
     JderobotInterfaces
     jderobotutil
     progeo
+	geometry
     pioneer
     parallelIce
     ${gsl_LIBRARIES}

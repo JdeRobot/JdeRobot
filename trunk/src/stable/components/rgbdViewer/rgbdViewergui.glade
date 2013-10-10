@@ -2,8 +2,8 @@
 <glade-interface>
   <!-- interface-requires gtk+ 2.16 -->
   <!-- interface-naming-policy project-wide -->
-  <widget class="GtkWindow" id="kinectViewer">
-    <property name="title" translatable="yes">kinectViewer</property>
+  <widget class="GtkWindow" id="rgbdViewer">
+    <property name="title" translatable="yes">rgbdViewer</property>
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>

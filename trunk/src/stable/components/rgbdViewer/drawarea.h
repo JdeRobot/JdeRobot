@@ -62,7 +62,7 @@ typedef struct SoRtype {
   float roll;
 } SofReference;
 
-namespace kinectViewer {
+namespace rgbdViewer {
 	class DrawArea : public Gtk::DrawingArea, public Gtk::GL::Widget<DrawArea>
 	{
 	public:
