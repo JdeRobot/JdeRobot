@@ -29,12 +29,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* GRAPHIC coordenates to OPTICAL coordenates */
-#define WORKING_IMG_HEIGHT 480
-#define GRAPHIC_TO_OPTICAL_X(x,y) (WORKING_IMG_HEIGHT-1-y)
-#define GRAPHIC_TO_OPTICAL_Y(x,y) (x)
-#define OPTICAL_TO_GRAPHIC_X(x,y) (y)
-#define OPTICAL_TO_GRAPHIC_Y(x,y) (WORKING_IMG_HEIGHT-1-x)
 
 #define MAX_CAMERAS 8
 #define MAX_BUFFER 1024
@@ -55,7 +49,10 @@ public:
 
 private:
     /* cameras */
+	void pixel2optical(float*x,float*y);
+	void optical2pixel(float* x, float* y); 
     TPinHoleCamera cameras[MAX_CAMERAS];
+	int w,h;
 };
 } // namespace
 

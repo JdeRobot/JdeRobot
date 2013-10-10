@@ -154,14 +154,18 @@ void myprogeo::load_cam(char *fich_in,int cam, int w, int h)
         std::cout << w << ", " << h << std::endl;
         this->cameras[cam].fdistx=515;
         this->cameras[cam].fdisty=515;
-        this->cameras[cam].u0=h/2;
-        this->cameras[cam].v0=w/2;
+        this->cameras[cam].v0=h/2;
+        this->cameras[cam].u0=w/2;
         this->cameras[cam].position.X=0;
         this->cameras[cam].position.Y=0;
         this->cameras[cam].position.Z=0;
         this->cameras[cam].foa.X=0;
         this->cameras[cam].foa.Y=1;
         this->cameras[cam].foa.Z=0;
+		this->cameras[cam].columns=w;
+		this->cameras[cam].rows=h;
+		this->w=w;
+		this->h=h;
         update_camera_matrix(&cameras[cam]);
 
 
@@ -185,6 +189,23 @@ void myprogeo::load_cam(char *fich_in,int cam, int w, int h)
     display_camerainfo(cameras[cam]);
 }
 
+void myprogeo::pixel2optical(float*x,float*y){
+	int localX=*x;
+	int localY=*y;
+
+	*x= this->h-1-localY;
+	*y= localX;
+}
+
+void myprogeo::optical2pixel(float*x,float*y){
+
+	int localX=*x;
+	int localY=*y;
+
+	*x= localY;
+	*y= this->h-1-localX;
+}
+
 
 void
 myprogeo::mybackproject(float x, float y, float* xp, float* yp, float* zp, float* camx, float* camy, float* camz, int cam) {
@@ -194,8 +215,9 @@ myprogeo::mybackproject(float x, float y, float* xp, float* yp, float* zp, float
 
 
 
-    p.x=GRAPHIC_TO_OPTICAL_X(x,y);
-    p.y=GRAPHIC_TO_OPTICAL_Y(x,y);
+    pixel2optical(&x, &y);
+	p.x=x;
+	p.y=y;
     p.h=1;
     backproject(&pro,p,cameras[cam]);
     *xp=pro.X;
