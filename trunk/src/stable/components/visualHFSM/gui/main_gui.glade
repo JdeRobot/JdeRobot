@@ -1,0 +1,1135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkWindow" id="VisualHFSM">
+    <property name="width_request">1024</property>
+    <property name="height_request">768</property>
+    <property name="visible">True</property>
+    <property name="can_focus">True</property>
+    <property name="title" translatable="yes">VisualHFSM</property>
+    <property name="default_width">1024</property>
+    <property name="default_height">768</property>
+    <property name="destroy_with_parent">True</property>
+    <child>
+      <object class="GtkHBox" id="hbox_visualhfsm">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkAlignment" id="alignment_total_treeview">
+            <property name="width_request">180</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="top_padding">10</property>
+            <property name="bottom_padding">15</property>
+            <property name="left_padding">20</property>
+            <property name="right_padding">5</property>
+            <child>
+              <object class="GtkFrame" id="frame_treeview">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkAlignment" id="alignment_treeview">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="left_padding">12</property>
+                    <child>
+                      <object class="GtkTreeView" id="treeview">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">treestore</property>
+                        <property name="reorderable">True</property>
+                        <property name="enable_tree_lines">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview_selection"/>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="label_treeview">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Tree&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkAlignment" id="alignment_total_schema">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="double_buffered">False</property>
+            <property name="hexpand">True</property>
+            <property name="top_padding">10</property>
+            <property name="bottom_padding">15</property>
+            <property name="left_padding">5</property>
+            <property name="right_padding">5</property>
+            <child>
+              <object class="GtkFrame" id="frame_schema">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="double_buffered">False</property>
+                <property name="hexpand">True</property>
+                <property name="label_xalign">0</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkViewport" id="viewport_schema">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="double_buffered">False</property>
+                    <property name="hexpand">True</property>
+                    <child>
+                      <placeholder/>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="label_schema">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Schema&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkAlignment" id="alignment_total_options">
+            <property name="width_request">300</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="top_padding">10</property>
+            <property name="bottom_padding">15</property>
+            <property name="left_padding">5</property>
+            <property name="right_padding">20</property>
+            <property name="hexpand">False</property>
+            <child>
+              <object class="GtkFrame" id="frame_options">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkAlignment" id="alignment_options">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="left_padding">12</property>
+                    <child>
+                      <object class="GtkVBox" id="vbox_options">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkAlignment" id="alignment_navigation">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="top_padding">10</property>
+                            <property name="bottom_padding">5</property>
+                            <property name="left_padding">5</property>
+                            <property name="right_padding">5</property>
+                            <child>
+                              <object class="GtkFrame" id="frame_navigation">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label_xalign">0</property>
+                                <property name="shadow_type">in</property>
+                                <child>
+                                  <object class="GtkAlignment" id="alignment_nav_button">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="left_padding">12</property>
+                                    <child>
+                                      <object class="GtkTable" id="table_button_up">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="n_rows">3</property>
+                                        <property name="n_columns">5</property>
+                                        <child>
+                                          <object class="GtkButton" id="button_up">
+                                            <property name="label" translatable="yes">UP</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="use_action_appearance">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                            <property name="x_options">GTK_FILL</property>
+                                            <property name="y_options"></property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed14">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed15">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed16">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed17">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="right_attach">4</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed18">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">4</property>
+                                            <property name="right_attach">5</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed19">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed20">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed21">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed22">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="right_attach">4</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed23">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">4</property>
+                                            <property name="right_attach">5</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed24">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed25">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed26">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="right_attach">4</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed27">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">4</property>
+                                            <property name="right_attach">5</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child type="label">
+                                  <object class="GtkLabel" id="label_navigation">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">&lt;b&gt;Navigation&lt;/b&gt;</property>
+                                    <property name="use_markup">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkAlignment" id="alignment_figures">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="top_padding">5</property>
+                            <property name="bottom_padding">5</property>
+                            <property name="left_padding">5</property>
+                            <property name="right_padding">5</property>
+                            <child>
+                              <object class="GtkFrame" id="frame_figures">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label_xalign">0</property>
+                                <property name="shadow_type">in</property>
+                                <child>
+                                  <object class="GtkAlignment" id="alignment_figs_buttons">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="left_padding">12</property>
+                                    <child>
+                                      <object class="GtkTable" id="table_buttons_figures">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="n_rows">3</property>
+                                        <property name="n_columns">5</property>
+                                        <child>
+                                          <object class="GtkButton" id="button_transition">
+                                            <property name="label" translatable="yes">Transition</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="use_action_appearance">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                            <property name="x_options"></property>
+                                            <property name="y_options"></property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkButton" id="button_state">
+                                            <property name="label" translatable="yes">State</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="use_action_appearance">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="right_attach">4</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                            <property name="x_options"></property>
+                                            <property name="y_options"></property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed1">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed2">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed3">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed4">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed5">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed6">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed7">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed8">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed9">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="right_attach">4</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed10">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">4</property>
+                                            <property name="right_attach">5</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed11">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">4</property>
+                                            <property name="right_attach">5</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed12">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="right_attach">4</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed13">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">4</property>
+                                            <property name="right_attach">5</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child type="label">
+                                  <object class="GtkLabel" id="label_figures">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">&lt;b&gt;Figures&lt;/b&gt;</property>
+                                    <property name="use_markup">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkAlignment" id="alignment_save_open">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="top_padding">5</property>
+                            <property name="bottom_padding">5</property>
+                            <property name="left_padding">5</property>
+                            <property name="right_padding">5</property>
+                            <child>
+                              <object class="GtkFrame" id="frame_save_open">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label_xalign">0</property>
+                                <property name="shadow_type">in</property>
+                                <child>
+                                  <object class="GtkAlignment" id="alignment_save_open_buttons">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="left_padding">12</property>
+                                    <child>
+                                      <object class="GtkTable" id="table_buttons_save_open">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="n_rows">3</property>
+                                        <property name="n_columns">3</property>
+                                        <child>
+                                          <object class="GtkButton" id="button_save">
+                                            <property name="label" translatable="yes">Save</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="use_action_appearance">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                            <property name="x_options"></property>
+                                            <property name="y_options"></property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkButton" id="button_save_as">
+                                            <property name="label" translatable="yes">Save as</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="use_action_appearance">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                            <property name="x_options"></property>
+                                            <property name="y_options"></property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkButton" id="button_open">
+                                            <property name="label" translatable="yes">Open</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="use_action_appearance">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                            <property name="x_options"></property>
+                                            <property name="y_options"></property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed28">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed29">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed30">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed31">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed32">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed33">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child type="label">
+                                  <object class="GtkLabel" id="label_save_open">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">&lt;b&gt;Save/Open&lt;/b&gt;</property>
+                                    <property name="use_markup">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkAlignment" id="alignment_subautomata_data">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="top_padding">5</property>
+                            <property name="bottom_padding">5</property>
+                            <property name="left_padding">5</property>
+                            <property name="right_padding">5</property>
+                            <child>
+                              <object class="GtkFrame" id="frame_subautomata_data">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label_xalign">0</property>
+                                <property name="shadow_type">in</property>
+                                <child>
+                                  <object class="GtkAlignment" id="alignment_subautomata_dat">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="left_padding">12</property>
+                                    <child>
+                                      <object class="GtkTable" id="table_buttons_subautomata_data">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="n_rows">3</property>
+                                        <property name="n_columns">3</property>
+                                        <child>
+                                          <object class="GtkButton" id="button_interfaces">
+                                            <property name="label" translatable="yes">Interfaces</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="use_action_appearance">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                            <property name="x_options"></property>
+                                            <property name="y_options"></property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkButton" id="button_timer">
+                                            <property name="label" translatable="yes">Timer</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="use_action_appearance">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                            <property name="x_options"></property>
+                                            <property name="y_options"></property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkButton" id="button_variables">
+                                            <property name="label" translatable="yes">Variables</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="use_action_appearance">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                            <property name="x_options"></property>
+                                            <property name="y_options"></property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed34">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed35">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed36">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed37">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed38">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed39">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child type="label">
+                                  <object class="GtkLabel" id="label_subautomata_data">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">&lt;b&gt;Subautomata data&lt;/b&gt;</property>
+                                    <property name="use_markup">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkAlignment" id="alignment_code_compile">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="top_padding">5</property>
+                            <property name="bottom_padding">10</property>
+                            <property name="left_padding">5</property>
+                            <property name="right_padding">5</property>
+                            <child>
+                              <object class="GtkFrame" id="frame_code_compile">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label_xalign">0</property>
+                                <property name="shadow_type">in</property>
+                                <child>
+                                  <object class="GtkAlignment" id="alignment_code_compil">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="left_padding">12</property>
+                                    <child>
+                                      <object class="GtkTable" id="table_buttons_code_compile">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="n_rows">3</property>
+                                        <property name="n_columns">5</property>
+                                        <child>
+                                          <object class="GtkButton" id="button_generate_code">
+                                            <property name="label" translatable="yes">Generate code</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="use_action_appearance">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                            <property name="x_options"></property>
+                                            <property name="y_options"></property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkButton" id="button_compile">
+                                            <property name="label" translatable="yes">Compile</property>
+                                            <property name="use_action_appearance">False</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="receives_default">True</property>
+                                            <property name="use_action_appearance">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="right_attach">4</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                            <property name="x_options"></property>
+                                            <property name="y_options"></property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed40">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed41">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed42">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed43">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="right_attach">4</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed44">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">4</property>
+                                            <property name="right_attach">5</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed45">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed46">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="right_attach">2</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed47">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed48">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">3</property>
+                                            <property name="right_attach">4</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed49">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">4</property>
+                                            <property name="right_attach">5</property>
+                                            <property name="top_attach">2</property>
+                                            <property name="bottom_attach">3</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed50">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">3</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed51">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkFixed" id="fixed52">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">4</property>
+                                            <property name="right_attach">5</property>
+                                            <property name="top_attach">1</property>
+                                            <property name="bottom_attach">2</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child type="label">
+                                  <object class="GtkLabel" id="label_code_compile">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">&lt;b&gt;Code and compile&lt;/b&gt;</property>
+                                    <property name="use_markup">True</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="label_options">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Options&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkTreeStore" id="treestore"/>
+</interface>
