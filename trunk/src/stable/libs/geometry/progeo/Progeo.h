@@ -79,6 +79,9 @@ public:
 	void updateRTMatrix();
 	void displayCameraInfo();
 
+	int getImageWidth() { return columns;};
+	int getImageHeight() { return rows;};
+
 	void pixel2optical (Eigen::Vector3d &point);
 	void optical2pixel (Eigen::Vector3d &point);
 
