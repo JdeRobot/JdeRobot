@@ -1,0 +1,38 @@
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/borjamon/naopruebas/naoserver2/build-robot/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: se ingresa al directorio «/home/borjamon/naopruebas/naoserver2/build-robot/CMakeFiles/CMakeTmp»
+/usr/bin/cmake -E cmake_progress_report /home/borjamon/naopruebas/naoserver2/build-robot/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.c.o
+/home/borjamon/naoqi-sdk-1.12-linux32/ctc/cross/bin/i686-pc-linux-gnu-gcc   --sysroot /home/borjamon/naoqi-sdk-1.12-linux32/ctc//sysroot// -DOE_CROSS_BUILD  -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-2.8/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec.dir/link.txt --verbose=1
+/home/borjamon/naoqi-sdk-1.12-linux32/ctc/cross/bin/i686-pc-linux-gnu-gcc   --sysroot /home/borjamon/naoqi-sdk-1.12-linux32/ctc//sysroot// -DOE_CROSS_BUILD  -DCHECK_FUNCTION_EXISTS=pthread_create  -Wl,--sysroot,/home/borjamon/naoqi-sdk-1.12-linux32/ctc//sysroot// CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.c.o  -o cmTryCompileExec -rdynamic -lpthreads 
+/home/borjamon/naoqi-sdk-1.12-linux32/ctc/cross/bin/..//i486-pc-linux-gnu/i686-pc-linux-gnu/binutils-bin/2.19.1/ld: cannot find -lpthreads
+collect2: ld returned 1 exit status
+make[1]: se sale del directorio «/home/borjamon/naopruebas/naoserver2/build-robot/CMakeFiles/CMakeTmp»
+make[1]: *** [cmTryCompileExec] Error 1
+make: *** [cmTryCompileExec/fast] Error 2
+
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/borjamon/naopruebas/naoserver2/build-robot/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: se ingresa al directorio «/home/borjamon/naopruebas/naoserver2/build-robot/CMakeFiles/CMakeTmp»
+/usr/bin/cmake -E cmake_progress_report /home/borjamon/naopruebas/naoserver2/build-robot/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.c.o
+/home/borjamon/naoqi-sdk-1.12-linux32/ctc/cross/bin/i686-pc-linux-gnu-gcc   --sysroot /home/borjamon/naoqi-sdk-1.12-linux32/ctc//sysroot// -DOE_CROSS_BUILD  -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-2.8/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec.dir/link.txt --verbose=1
+/home/borjamon/naoqi-sdk-1.12-linux32/ctc/cross/bin/i686-pc-linux-gnu-gcc   --sysroot /home/borjamon/naoqi-sdk-1.12-linux32/ctc//sysroot// -DOE_CROSS_BUILD  -DCHECK_FUNCTION_EXISTS=pthread_create  -Wl,--sysroot,/home/borjamon/naoqi-sdk-1.12-linux32/ctc//sysroot// CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.c.o  -o cmTryCompileExec -rdynamic -lpthreads 
+/home/borjamon/naoqi-sdk-1.12-linux32/ctc/cross/bin/..//i486-pc-linux-gnu/i686-pc-linux-gnu/binutils-bin/2.19.1/ld: cannot find -lpthreads
+collect2: ld returned 1 exit status
+make[1]: se sale del directorio «/home/borjamon/naopruebas/naoserver2/build-robot/CMakeFiles/CMakeTmp»
+make[1]: *** [cmTryCompileExec] Error 1
+make: *** [cmTryCompileExec/fast] Error 2
+
+

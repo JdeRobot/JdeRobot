@@ -1,0 +1,43 @@
+FILE(REMOVE_RECURSE
+  "CMakeFiles/naohead.dir/interfaces/cpp/jderobot/exceptions.cpp.o"
+  "CMakeFiles/naohead.dir/interfaces/cpp/jderobot/containers.cpp.o"
+  "CMakeFiles/naohead.dir/interfaces/cpp/jderobot/datetime.cpp.o"
+  "CMakeFiles/naohead.dir/interfaces/cpp/jderobot/common.cpp.o"
+  "CMakeFiles/naohead.dir/interfaces/cpp/jderobot/image.cpp.o"
+  "CMakeFiles/naohead.dir/interfaces/cpp/jderobot/camera.cpp.o"
+  "CMakeFiles/naohead.dir/interfaces/cpp/jderobot/motors.cpp.o"
+  "CMakeFiles/naohead.dir/interfaces/cpp/jderobot/encoders.cpp.o"
+  "CMakeFiles/naohead.dir/interfaces/cpp/jderobot/pose3dmotors.cpp.o"
+  "CMakeFiles/naohead.dir/interfaces/cpp/jderobot/pose3dencoders.cpp.o"
+  "CMakeFiles/naohead.dir/interfaces/cpp/jderobot/naomotions.cpp.o"
+  "CMakeFiles/naohead.dir/functions/vision/ImageInput.cpp.o"
+  "CMakeFiles/naohead.dir/functions/vision/ImageHandler.cpp.o"
+  "CMakeFiles/naohead.dir/functions/vision/colorFilter/SimpleColorFilter.cpp.o"
+  "CMakeFiles/naohead.dir/functions/Dictionary.cpp.o"
+  "CMakeFiles/naohead.dir/functions/NaoServerCamera.cpp.o"
+  "CMakeFiles/naohead.dir/functions/NaoServerMotors.cpp.o"
+  "CMakeFiles/naohead.dir/functions/NaoServerMotions.cpp.o"
+  "CMakeFiles/naohead.dir/hinges/HingeMotors.cpp.o"
+  "CMakeFiles/naohead.dir/hinges/NeckMotors.cpp.o"
+  "CMakeFiles/naohead.dir/hinges/LeftShoulderMotors.cpp.o"
+  "CMakeFiles/naohead.dir/hinges/RightShoulderMotors.cpp.o"
+  "CMakeFiles/naohead.dir/hinges/LeftElbowMotors.cpp.o"
+  "CMakeFiles/naohead.dir/hinges/RightElbowMotors.cpp.o"
+  "CMakeFiles/naohead.dir/hinges/LeftHipMotors.cpp.o"
+  "CMakeFiles/naohead.dir/hinges/RightHipMotors.cpp.o"
+  "CMakeFiles/naohead.dir/hinges/LeftKneeMotors.cpp.o"
+  "CMakeFiles/naohead.dir/hinges/RightKneeMotors.cpp.o"
+  "CMakeFiles/naohead.dir/hinges/LeftAnkleMotors.cpp.o"
+  "CMakeFiles/naohead.dir/hinges/RightAnkleMotors.cpp.o"
+  "CMakeFiles/naohead.dir/naoserver.cpp.o"
+  "CMakeFiles/naohead.dir/mainServer.cpp.o"
+  "sdk/lib/naoqi/libnaohead.pdb"
+  "sdk/lib/naoqi/libnaohead.so"
+  "CMakeFiles/CMakeRelink.dir/libnaohead.pdb"
+  "CMakeFiles/CMakeRelink.dir/libnaohead.so"
+)
+
+# Per-language clean rules from dependency scanning.
+FOREACH(lang CXX)
+  INCLUDE(CMakeFiles/naohead.dir/cmake_clean_${lang}.cmake OPTIONAL)
+ENDFOREACH(lang)
