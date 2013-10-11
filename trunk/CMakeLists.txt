@@ -121,9 +121,17 @@ ENDFOREACH(lib)
 
 
 FILE(GLOB_RECURSE HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/libs/*.h)
+message("test de librerías")
 FOREACH(currentSourceFile ${HEADERS_FILES})
-    string(REGEX REPLACE ".*/(.*/).*.h" "\\1" new_source1 ${currentSourceFile})
-    INSTALL (FILES ${currentSourceFile} DESTINATION /usr/local/include/jderobot/${new_source1})
+		message( ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/libs/)
+		message( ${currentSourceFile})
+    string(REGEX REPLACE "(.*/).*.h" "\\1" new_source1 ${currentSourceFile})
+		string(REGEX REPLACE  "${CMAKE_CURRENT_SOURCE_DIR}/src/stable/libs" "" new_source2 ${new_source1})
+
+
+		message("replaced: ${new_source1}")
+	message("replaced2: ${new_source2}")
+    INSTALL (FILES ${currentSourceFile} DESTINATION /usr/local/include/jderobot/${new_source2})
 ENDFOREACH(currentSourceFile)
 
 # Install libraries headers
