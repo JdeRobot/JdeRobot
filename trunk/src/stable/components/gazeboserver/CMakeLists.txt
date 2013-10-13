@@ -1,5 +1,4 @@
-
-if (${GAZEBO_COMPILE})
+if (GAZEBO_INCLUDE_DIRS)
 
 include_directories(
 	${GAZEBO_INCLUDE_DIRS}
