@@ -13,7 +13,7 @@ link_directories(
 	${GAZEBO_LIBRARY_DIRS} 
 	)
 
-set( CMAKE_CXX_FLAGS "-Wall" ) # Opciones para el compilador
+set( CMAKE_CXX_FLAGS "-Wall -lpcl_filters" ) # Opciones para el compilador
 
 add_library(kinectPlugin SHARED kinectPlugin.cc)
 
