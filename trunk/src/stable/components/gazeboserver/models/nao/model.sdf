@@ -1,0 +1,1388 @@
+<?xml version='1.0'?>
+<sdf version='1.3'>
+    <model name="nao_robot">
+        <!-- LEFT LEG -->
+        <link name="left_foot">
+            <pose>-0.005 0 0 0 0 0</pose>
+            <inertial>
+                <mass>1.6184</mass>         <!--
+                <pose>0 0 0 0 0 0</pose>    
+                <inertia>
+                    <ixx>0.00026944182</ixx>
+                    <ixy>-0.00000569572</ixy>
+                    <ixz>0.00013937948</ixz>
+                    <iyy>0.0006443425</iyy>
+                    <iyz>0.00001874092</iyz>
+                    <izz>0.00052575675</izz>
+                </inertia>                  -->
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.09 .16 .03419</size>
+                    </box>
+                </geometry>
+            </collision>
+            <!--
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.09 .16 .03419</size>
+                    </box>
+                </geometry>
+            </visual>
+            -->            
+            <visual name="visual">
+                <pose>0 0 0 -1.57 0 0</pose>
+                <geometry>
+                    <mesh>
+                        <uri>model://nao_robot/meshes/pieizquierdo.dae</uri>
+                        <scale>0.09 0.09 0.075</scale>
+                    </mesh>
+                </geometry>
+            </visual> 
+        </link>
+        
+        <link name="leftankle_pitch">
+            <pose>-0.005 0 0.03 0 0 0</pose>
+            <inertial>
+                <mass>0.01</mass>
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </collision>
+            
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </visual>
+            
+        </link> 
+        
+        <link name="left_shin">
+            <pose>0 -0.03 .075 0 0 0</pose>
+            <inertial>
+                <mass>0.29142</mass>                            <!--
+                <pose>0.00453 0.00225 -0.04936 0 0 0</pose>     
+                <inertia>
+                    <ixx>0.00118207967</ixx>
+                    <ixy>0.00000063362</ixy>
+                    <ixz>0.00003649697</ixz>
+                    <iyy>0.00112865226</iyy>
+                    <iyz>0.00003949523</iyz>
+                    <izz>0.00019322744</izz>
+                </inertia>                                      -->
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.08 .08 .1139</size>
+                    </box>
+                </geometry>
+            </collision>
+            <!--
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.08 .08 .1139</size>
+                    </box>
+                </geometry>
+            </visual>
+            -->
+            <visual name="visual">
+                <pose>0 0 0 -1.57 0 0</pose>
+                <geometry>
+                    <mesh>
+                        <uri>model://nao_robot/meshes/espinillaizquierda.dae</uri>
+                        <scale>0.075 0.075 0.075</scale>
+                    </mesh>
+                </geometry>
+            </visual>
+        </link>
+        
+        <link name="left_thigh">
+            <pose>0 -0.03 .195 0 0 0</pose>
+            <inertial>
+                <mass>0.38968</mass>                            <!--
+                <pose>0.00138 0.00221 -0.05373 0 0 0</pose>     
+                <inertia>
+                    <ixx>0.00163671962</ixx>
+                    <ixy>0.00000092451</ixy>
+                    <ixz>0.00008530668</ixz>
+                    <iyy>0.00159107278</iyy>
+                    <iyz>0.0000383616</iyz>
+                    <izz>0.00030374342</izz>
+                </inertia>                                      -->
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.08 .08 .117</size>
+                    </box>
+                </geometry>
+            </collision>
+            <!--
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.08 .08 .117</size>
+                    </box>
+                </geometry>
+            </visual>
+            -->
+            <visual name="visual">
+                <pose>0 0 0 -1.57 0 0</pose>
+                <geometry>
+                    <mesh>
+                        <uri>model://nao_robot/meshes/musloizquierdo.dae</uri>
+                        <scale>0.075 0.075 0.075</scale>
+                    </mesh>
+                </geometry>
+            </visual> 
+        </link>
+        
+        <!-- RIGHT LEG -->
+        <link name="right_foot">
+            <pose>0.165 0 0 0 0 0</pose>
+            <inertial>
+                <mass>1.6171</mass>             <!--
+                <pose>0 0 0 0 0 0</pose>        
+                <inertia>
+                    <ixx>0.00026930201</ixx>    
+                    <ixy>0.00000587505</ixy>
+                    <ixz>0.00013913328</ixz>
+                    <iyy>0.00064347385</iyy>
+                    <iyz>-0.00001884917</iyz>
+                    <izz>0.00052534077</izz>
+                </inertia>                      -->
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.09 .16 .03419</size>
+                    </box>
+                </geometry>
+            </collision>
+            <!--
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.09 .16 .03419</size>
+                    </box>
+                </geometry>   
+            </visual>
+            -->
+            <visual name="visual">
+                <pose>0 0 0 -1.57 0 0</pose>
+                <geometry>
+                    <mesh>
+                        <uri>model://nao_robot/meshes/piederecho.dae</uri>
+                        <scale>0.09 0.09 0.075</scale>
+                    </mesh>
+                </geometry>
+            </visual>
+        </link>
+        
+        <link name="rightankle_pitch">
+            <pose>0.165 0 0.03 0 0 0</pose>
+            <inertial>
+                <mass>0.01</mass>
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </collision>
+            
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </visual>
+            
+        </link>  
+        
+        <link name="right_shin">
+            <pose>0.16 -0.03 .075 0 0 0</pose>
+            <inertial>
+                <mass>0.29163</mass>                            <!--
+                <pose>0.00394 -0.00221 -0.04938 0 0 0</pose>    
+                <inertia>
+                    <ixx>0.00118282956</ixx>
+                    <ixy>-0.0000008965</ixy>
+                    <ixz>0.0000279969</ixz>
+                    <iyy>0.00112827851</iyy>
+                    <iyz>-0.00003847604</iyz>
+                    <izz>0.00019145277</izz>
+                </inertia>                                      -->
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.08 .08 .1139</size>
+                    </box>
+                </geometry>
+            </collision>
+            <!--
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.08 .08 .1139</size>
+                    </box>
+                </geometry>
+            </visual>
+            -->
+            <visual name="visual">
+                <pose>0 0 0 -1.57 0 0</pose>
+                <geometry>
+                    <mesh>
+                        <uri>model://nao_robot/meshes/espinilladerecha.dae</uri>
+                        <scale>0.075 0.075 0.075</scale>
+                    </mesh>
+                </geometry>
+            </visual>
+        </link>
+        
+        <link name="righthip_yawpitch">
+            <pose>0.16 -0.03 0.27 0 0 0</pose>
+            <inertial>
+                <mass>0.01</mass>
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </collision>
+            
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </visual>
+            
+        </link>
+        
+        <link name="righthip_roll">
+            <pose>0.16 -0.03 0.27 0 0 0</pose>
+            <inertial>
+                <mass>0.01</mass>
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </collision>
+            
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </visual>
+            
+        </link>
+        
+        <link name="right_thigh">
+            <pose>0.16 -0.03 .195 0 0 0</pose>
+            <inertial>
+                <mass>0.38976</mass>                            <!--
+                <pose>0.00139 -0.00225 -0.05374 0 0 0</pose>    
+                <inertia>
+                    <ixx>0.00163748205</ixx>
+                    <ixy>-0.00000083954</ixy>
+                    <ixz>0.00008588301</ixz>
+                    <iyy>0.00159221403</iyy>
+                    <iyz>-0.00003917626</iyz>
+                    <izz>0.00030397824</izz>
+                </inertia>                                      -->
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.08 .08 .117</size>
+                    </box>
+                </geometry>
+            </collision>
+            <!--
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.08 .08 .117</size>
+                    </box>
+                </geometry>
+            </visual>
+            -->
+            <visual name="visual">
+                <pose>0 0 0 -1.57 0 0</pose>
+                <geometry>
+                    <mesh>
+                        <uri>model://nao_robot/meshes/musloderecho.dae</uri>
+                        <scale>0.075 0.075 0.075</scale>
+                    </mesh>
+                </geometry>
+            </visual>
+        </link>
+        
+        <link name="body_hexa">
+            <pose>0.08 -0.03 0.37 0 0 0</pose>
+            <inertial>
+                <mass>1.04956</mass>                            <!--
+                <pose>-0.00413 0.00009 0.04342 0 0 0</pose>     
+                <inertia>
+                    <ixx>0.00506234058</ixx>
+                    <ixy>0.00001431158</ixy>
+                    <ixz>0.00015519082</ixz>
+                    <iyy>0.00488013591</iyy>
+                    <iyz>-0.00002707934</iyz>
+                    <izz>0.00161030006</izz>
+                </inertia>                                      -->
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.2 .1 .2295</size>
+                    </box>
+                </geometry>
+            </collision>
+            <!--
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.2 .1 .2295</size>
+                    </box>
+                </geometry>
+            </visual>
+            -->
+            <visual name="visual">
+                <pose>0 0 0 0 0 3.14</pose>
+                <geometry>
+                    <mesh>
+                        <uri>model://nao_robot/meshes/cuerpo.dae</uri>
+                        <scale>0.14 0.14 0.14</scale>
+                    </mesh>
+                </geometry>
+            </visual>
+        </link>
+        
+        <!-- LEFT ARM -->
+        <link name="leftshoulder_pitch">
+            <pose>-0.06 -0.03 0.49 0 0 0</pose>
+            <inertial>
+                <mass>0.01</mass>
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </collision>
+            
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </visual>
+            
+        </link>  
+        
+        <link name="left_upper_arm">
+            <pose>-0.06 -0.03 0.45 0 0 0</pose>
+            <inertial>
+                <mass>0.15777</mass>                    <!--
+                <pose>0 0.00563 0.0033 0 0 0</pose>     
+                <inertia>
+                    <ixx>0.00009389993</ixx>
+                    <ixy>-0.00004714452</ixy>
+                    <ixz>-0.00002699471</ixz>
+                    <iyy>0.00037151879</iyy>
+                    <iyz>-0.00000245977</iyz>
+                    <izz>0.00034190083</izz>
+                </inertia>                              -->
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.06 .06 .105</size>
+                    </box>
+                </geometry>
+            </collision>
+            <!--
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.06 .06 .105</size>
+                    </box>
+                </geometry>
+            </visual>
+            -->
+            <visual name="visual">
+                <pose>0 0 0 0 3.14 3.14</pose>
+                <geometry>
+                    <mesh>
+                        <uri>model://nao_robot/meshes/bicepsizquierdo.dae</uri>
+                        <scale>0.11 0.11 0.11</scale>
+                    </mesh>
+                </geometry>
+            </visual> 
+        </link>
+        
+        <link name="leftelbow_yaw">
+            <pose>-0.06 -0.03 0.39 0 0 0</pose>
+            <inertial>
+                <mass>0.01</mass>
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </collision>
+            
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </visual>
+            
+        </link>
+        
+        <link name="left_lower_arm">
+            <pose>-0.05 -0.03 0.35 0 0 0</pose>
+            <inertial>
+                <mass>0.07761</mass>                    <!--
+                <pose>0 0.00281 0.00076 0 0 0</pose>    
+                <inertia>
+                    <ixx>0.0000253322</ixx>
+                    <ixy>-0.00000234271</ixy>
+                    <ixz>0.00000007459</ixz>
+                    <iyy>0.0000891322</iyy>
+                    <iyz>-0.00000002655</iyz>
+                    <izz>0.00008728726</izz>
+                </inertia>                              -->
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.06 .06 .05595</size>
+                    </box>
+                </geometry>
+            </collision>
+            <!--
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.06 .06 .05595</size>
+                    </box>
+                </geometry>
+            </visual>
+            -->
+            <visual name="visual">
+                <pose>0 0 0 0 3.14 -1.57</pose>
+                <geometry>
+                    <mesh>
+                        <uri>model://nao_robot/meshes/antebrazoizquierdo.dae</uri>
+                        <scale>0.11 0.11 0.11</scale>
+                    </mesh>
+                </geometry>
+            </visual>
+        </link>
+<!--        
+        <link name="left_hand">
+            <pose>-0.07 -0.03 0.276 0 0 0</pose>
+            <inertial>
+                <mass>0.18533</mass>
+                <pose>0 -0.00088 0.00308 0 0 0</pose>
+                <inertia>
+                    <ixx>0.00007054933</ixx>
+                    <ixy>0.00000571599</ixy>
+                    <ixz>-0.00002247437</ixz>
+                    <iyy>0.00035606232</iyy>
+                    <iyz>0.00000317771</iyz>
+                    <izz>0.00035191933</izz>
+                </inertia>
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.06 .06 .06275</size>
+                    </box>
+                </geometry>
+            </collision>
+            
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.06 .06 .06275</size>
+                    </box>
+                </geometry>
+            </visual>
+        </link>
+-->        
+        <!-- RIGHT ARM -->
+        <link name="rightshoulder_pitch">
+            <pose>0.2 -0.03 0.49 0 0 0</pose>
+            <inertial>
+                <mass>0.01</mass>
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </collision>
+            
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </visual>
+            
+        </link>        
+        
+        <link name="right_upper_arm">
+            <pose>0.22 -0.03 0.45 0 0 0</pose>
+            <inertial>
+                <mass>0.15794</mass>                    <!--
+                <pose>0 -0.00952 0.0032 0 0 0</pose>    
+                <inertia>
+                    <ixx>0.00011012031</ixx>
+                    <ixy>0.00007669131</ixy>
+                    <ixz>-0.00002604607</ixz>
+                    <iyy>0.00036757653</iyy>
+                    <iyz>0.00001219828</iyz>
+                    <izz>0.00035461772</izz>
+                </inertia>                              -->
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.06 .06 .105</size>
+                    </box>
+                </geometry>
+            </collision>
+            <!--
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.06 .06 .105</size>
+                    </box>
+                </geometry>
+            </visual>
+            -->
+            <visual name="visual">
+                <pose>0 0 0 0 3.14 0</pose>
+                <geometry>
+                    <mesh>
+                        <uri>model://nao_robot/meshes/bicepsderecho.dae</uri>
+                        <scale>0.11 0.11 0.11</scale>
+                    </mesh>
+                </geometry>
+            </visual>
+        </link>
+        
+        <link name="rightelbow_yaw">
+            <pose>0.22 -0.03 0.39 0 0 0</pose>
+            <inertial>
+                <mass>0.01</mass>
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </collision>
+            
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </visual>
+        </link>     
+        
+        <link name="right_lower_arm">
+            <pose>0.22 -0.03 0.35 0 0 0</pose>
+            <inertial>
+                <mass>0.07778</mass>                    <!--
+                <pose>0 -0.00281 0.0009 0 0 0</pose>    
+                <inertia>
+                    <ixx>0.0000253907</ixx>
+                    <ixy>0.00000233243</ixy>
+                    <ixz>-0.00000060117</ixz>
+                    <iyy>0.00008922036</iyy>
+                    <iyz>0.00000002694</iyz>
+                    <izz>0.00008724843</izz>
+                </inertia>                              -->
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.06 .06 .05595</size>
+                    </box>
+                </geometry>
+            </collision>
+            <!--
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.06 .06 .05595</size>
+                    </box>
+                </geometry>
+            </visual>
+            -->
+            <visual name="visual">
+                <pose>0 0 0 0 3.14 1.57</pose>
+                <geometry>
+                    <mesh>
+                        <uri>model://nao_robot/meshes/antebrazoderecho.dae</uri>
+                        <scale>0.11 0.11 0.11</scale>
+                    </mesh>
+                </geometry>
+            </visual> 
+        </link>
+<!--        
+        <link name="right_hand">
+            <pose>0.23 -0.03 0.276 0 0 0</pose>
+            <inertial>
+                <mass>0.18533</mass>
+                <pose>0 -0.00088 0.00308 0 0 0</pose>
+                <inertia>
+                    <ixx>0.00007054933</ixx>
+                    <ixy>0.00000571599</ixy>
+                    <ixz>-0.00002247437</ixz>
+                    <iyy>0.00035606232</iyy>
+                    <iyz>0.00000317771</iyz>
+                    <izz>0.00035191933</izz>
+                </inertia>
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.06 .06 .06275</size>
+                    </box>
+                </geometry>
+            </collision>
+            
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.06 .06 .06275</size>
+                    </box>
+                </geometry>
+            </visual>
+        </link>
+-->
+        <!-- HEAD -->
+        <link name="head_pan">
+            <pose>0.08 -0.03 0.51 0 0 0</pose>
+            <inertial>
+                <mass>0.01</mass>
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </collision>
+            
+            <visual name="visual">
+                <geometry>
+                    <box>
+                        <size>.001 .001 .001</size>
+                    </box>
+                </geometry>
+            </visual>
+        </link>
+        
+        <link name="head_tilt">
+            <pose>0.08 -0.03 0.59 0 0 0</pose>
+            <inertial>
+                <mass>0.60533</mass>                        <!--
+                <pose>-0.00112 0.00003 0.05258 0 0 0</pose> 
+                <inertia>
+                    <ixx>0.00263129518</ixx>
+                    <ixy>0.00000878814</ixy>
+                    <ixz>0.00004098466</ixz>
+                    <iyy>0.00249112488</iyy>
+                    <iyz>-0.00002995792</iyz>
+                    <izz>0.00098573565</izz>
+                </inertia>                                  -->
+            </inertial>
+            
+            <collision name="collision">
+                <geometry>
+                    <sphere>
+                        <radius>.1</radius>
+                    </sphere>
+                </geometry>
+            </collision>
+            <!--
+            <visual name="visual">
+                <geometry>
+                    <sphere>
+                        <radius>.1</radius>
+                    </sphere>
+                </geometry>
+            </visual>
+            -->
+            <visual name="visual">
+                <pose>0 0 -0.02 0 0 3.14</pose>
+                <geometry>
+                    <mesh>
+                        <uri>model://nao_robot/meshes/cabeza.dae</uri>
+                        <scale>0.12 0.12 0.12</scale>
+                    </mesh>
+                </geometry>
+            </visual>
+        </link>
+        
+        <link name="camera_head_top">
+            <pose>0.08 -0.0179 0.608 1.57 -0.0209 -1.57</pose>
+            <inertial>
+                <mass>0.05</mass>
+            </inertial>
+        
+            <sensor name='cam_sensor_top' type='camera'>
+        	    <pose>0 0 0 1.57 0 3.14</pose>
+                <update_rate>20</update_rate>
+                <camera>
+                    <horizontal_fov>1.57</horizontal_fov>
+                    <image>
+              	        <width>640</width>
+              	        <height>480</height>
+              	        <format>R8G8B8</format>
+                    </image>
+                    <clip>
+		                <near>0.5</near>
+		                <far>5</far>
+                    </clip>
+                </camera>
+                <plugin name='camera_nao' filename='libcamera_nao.so'/>
+            </sensor>
+            
+	 	    <visual name="visual">
+                <geometry>
+                    <mesh>
+                        <uri>model://pioneer2dxJde/meshes/sonyvid30/sonyvid30_top.dae</uri>
+                        <scale>2 2 1.3</scale>
+                    </mesh>
+                </geometry>
+            </visual>  
+
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>0.1 0.1 0.1</size>
+                    </box>
+                </geometry>
+                <surface>
+                    <friction>
+                        <ode>
+                            <mu>100000.0</mu>
+                            <mu2>100000.0</mu2>
+                            <slip1>0.0</slip1>
+                            <slip2>0.0</slip2>
+                        </ode>
+                    </friction>
+                </surface>
+            </collision>
+        </link>
+        
+        <link name="camera_head_bottom">
+            <pose>0.08 -0.001 0.5653 1.57 -0.6929 -1.57</pose>
+            <inertial>
+                <mass>0.05</mass>
+            </inertial>
+        
+            <sensor name='cam_sensor_bottom' type='camera'>
+        	    <pose>0 0 0 1.57 0 3.14</pose>
+                <update_rate>20</update_rate>
+                <camera>
+                    <horizontal_fov>1.57</horizontal_fov>
+                    <image>
+              	        <width>640</width>
+              	        <height>480</height>
+              	        <format>R8G8B8</format>
+                    </image>
+                    <clip>
+		                <near>0.5</near>
+		                <far>5</far>
+                    </clip>
+                </camera>
+                <plugin name='camera_nao' filename='libcamera_nao.so'/>
+            </sensor>
+            
+	 	    <visual name="visual">
+                <geometry>
+                    <mesh>
+                        <uri>model://pioneer2dxJde/meshes/sonyvid30/sonyvid30_top.dae</uri>
+                        <scale>2 2 1.3</scale>
+                    </mesh>
+                </geometry>
+            </visual>  
+
+            <collision name="collision">
+                <geometry>
+                    <box>
+                        <size>0.1 0.1 0.1</size>
+                    </box>
+                </geometry>
+                <surface>
+                    <friction>
+                        <ode>
+                            <mu>100000.0</mu>
+                            <mu2>100000.0</mu2>
+                            <slip1>0.0</slip1>
+                            <slip2>0.0</slip2>
+                        </ode>
+                    </friction>
+                </surface>
+            </collision>
+        </link>
+        
+        <!-- JOINTS -->
+        
+        <!-- LEFT LEG -->
+        <joint type="revolute" name="lankle_pitch">
+            <pose>0 0 -0.041 0 0 0</pose>
+            <child>left_shin</child>
+            <parent>leftankle_pitch</parent>
+            <axis>                      <!--
+                <limit>
+                    <lower>-1.189516</lower>
+                    <upper>0.922747</upper>
+                </limit>
+                <xyz>1 0 0</xyz>        -->
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>        
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="lankle_roll">
+            <pose>0 0 0 0 0 0</pose>
+            <child>leftankle_pitch</child>
+            <parent>left_foot</parent>
+            <axis>                      <!--
+                <limit>
+                    <lower>-0.397880</lower>
+                    <upper>0.769001</upper>
+                </limit>
+                <xyz>0 1 0</xyz>        --> 
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>        
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="left_knee">
+            <pose>0 0 -0.046 0 0 0</pose>
+            <child>left_thigh</child>
+            <parent>left_shin</parent>
+            <axis>                      <!--
+                <limit>
+                    <lower>-0.092346</lower>
+                    <upper>2.112528</upper>
+                </limit>
+                <xyz>0 0 1</xyz>        -->
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>
+            </axis>
+        </joint>
+        
+        <!-- RIGHT LEG -->
+        <joint type="revolute" name="rankle_pitch">
+            <pose>0 0 -0.041 0 0 0</pose>
+            <child>right_shin</child>
+            <parent>rightankle_pitch</parent>
+            <axis>                      <!--
+                <limit>
+                    <lower>-1.186448</lower>
+                    <upper>0.932056</upper>
+                </limit>
+                <xyz>1 0 0</xyz>        -->
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>       
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="rankle_roll">
+            <pose>0 0 0 0 0 0</pose>
+            <child>rightankle_pitch</child>
+            <parent>right_foot</parent>
+            <axis>                      <!--
+                <limit>
+                    <lower>-0.785875</lower>
+                    <upper>0.388676</upper>
+                </limit>
+                <xyz>0 1 0</xyz>        -->
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>    
+            </axis>
+        </joint>
+
+        <joint type="revolute" name="right_knee">
+            <pose>0 0 -0.046 0 0 0</pose>
+            <child>right_thigh</child>
+            <parent>right_shin</parent>
+            <axis>                      <!--
+                <limit>
+                    <lower>-0.103083</lower>
+                    <upper>2.120198</upper>
+                </limit>
+                <xyz>0 0 1</xyz>        -->
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>        
+            </axis>
+        </joint>
+        
+        <!-- HIPS -->
+        <joint type="revolute" name="left_hip">
+            <pose>-0.08 0 -0.1 0 0 0</pose>
+            <child>body_hexa</child>
+            <parent>left_shin</parent>
+            <axis>
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="rhip_yawpitch">
+            <pose>0.08 0 -0.1 0 0 0</pose>
+            <child>body_hexa</child>
+            <parent>righthip_yawpitch</parent>
+            <axis>      <!--
+                <limit>
+                    <lower>-1.145303</lower>
+                    <upper>0.740810</upper>
+                </limit>
+                <xyz>0 0 1</xyz>        -->
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="rhip_roll">
+            <pose>0 0 0 0 0 0</pose>
+            <child>righthip_yawpitch</child>
+            <parent>righthip_roll</parent>
+            <axis>          <!--
+                <limit>
+                    <lower>-0.738321</lower>
+                    <upper>0.414754</upper>
+                </limit>
+                <xyz>0 1 0</xyz>        -->
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="rhip_pitch">
+            <pose>0 0 0 0 0 0</pose>
+            <child>righthip_roll</child>
+            <parent>right_thigh</parent>
+            <axis>      <!--
+                <limit>
+                    <lower>-1.772308</lower>
+                    <upper>0.485624</upper>
+                </limit>
+                <xyz>1 0 0</xyz>        -->
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>
+            </axis>
+        </joint>
+        
+        <!-- BODY -->        
+<!--        <joint type="revolute" name="body">
+            <pose>0 0 -0.088 1.57 0 0</pose>
+            <child>body_hexa</child>
+            <parent>body_cylinder</parent>
+            <axis>
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>
+            </axis>
+        </joint>    -->
+        
+        <!-- LEFT ARM -->
+        <joint type="revolute" name="lshoulder_pitch">
+            <pose>-0.14 0 0.12 0 0 0</pose>
+            <child>body_hexa</child>
+            <parent>leftshoulder_pitch</parent>
+            <axis>                      
+                <limit>
+                    <lower>-3.6564734</lower>
+                    <upper>0.5148734</upper>
+                </limit>
+                <xyz>1 0 0</xyz>        <!--
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>        -->
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="lshoulder_roll">
+            <pose>0 0 0 0 0 0</pose>
+            <child>leftshoulder_pitch</child>
+            <parent>left_upper_arm</parent>
+            <axis>                      
+                <limit>
+                    <lower>-1.3265</lower>
+                    <upper>0.3142</upper>
+                </limit>
+                <xyz>0 1 0</xyz>        <!--
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>        -->
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="lelbow_yaw">
+            <pose>0 0 -0.059 0 0 0</pose>
+            <child>left_upper_arm</child>
+            <parent>leftelbow_yaw</parent>
+            <axis>                      
+                <limit>
+                    <lower>-2.0857</lower>
+                    <upper>2.0857</upper>
+                </limit>
+                <xyz>0 0 1</xyz>        <!--
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>        -->
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="lelbow_roll">
+            <pose>0 0 0 0 0 0</pose>
+            <child>leftelbow_yaw</child>
+            <parent>left_lower_arm</parent>
+            <axis>                      
+                <limit>
+                    <lower>-0.0349</lower>
+                    <upper>1.5446</upper>
+                </limit>
+                <xyz>0 1 0</xyz>        <!--
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>        -->
+            </axis>
+        </joint>
+<!--        
+        <joint type="revolute" name="left_wrist">
+            <pose>0 0 -0.015 0 0 0</pose>
+            <child>left_lower_arm</child>
+            <parent>left_hand</parent>
+            <axis>
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>
+            </axis>
+        </joint>
+-->
+        
+        <!-- RIGHT ARM -->
+        <joint type="revolute" name="rshoulder_pitch">
+            <pose>0.12 0 0.12 0 0 0</pose>
+            <child>body_hexa</child>
+            <parent>rightshoulder_pitch</parent>
+            <axis>                      
+                <limit>
+                    <lower>-3.6564734</lower>
+                    <upper>0.5148734</upper>
+                </limit>
+                <xyz>1 0 0</xyz>        <!--
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>        -->
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="rshoulder_roll">
+            <pose>0 0 0 0 0 0</pose>
+            <child>rightshoulder_pitch</child>
+            <parent>right_upper_arm</parent>
+            <axis>                      
+                <limit>
+                    <lower>-0.3142</lower>
+                    <upper>1.3265</upper>
+                </limit>
+                <xyz>0 1 0</xyz>        <!--
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>        -->
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="relbow_yaw">
+            <pose>0 0 -0.059 0 0 0</pose>
+            <child>right_upper_arm</child>
+            <parent>rightelbow_yaw</parent>
+            <axis>                      
+                <limit>
+                    <lower>-2.0857</lower>
+                    <upper>2.0857</upper>
+                </limit>
+                <xyz>0 0 1</xyz>        <!--
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>        -->
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="relbow_roll">
+            <pose>0 0 0.0 0 0 0</pose>
+            <child>rightelbow_yaw</child>
+            <parent>right_lower_arm</parent>
+            <axis>                      
+                <limit>
+                    <lower>-1.5446</lower>
+                    <upper>0.0349</upper>
+                </limit>
+                <xyz>0 1 0</xyz>        <!--
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>        -->
+            </axis>
+        </joint>
+<!--        
+        <joint type="revolute" name="right_wrist">
+            <pose>0 0 -0.015 0 0 0</pose>
+            <child>right_lower_arm</child>
+            <parent>right_hand</parent>
+            <axis>
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>
+            </axis>
+        </joint>
+-->        
+        <!-- NECK -->
+        <joint type="revolute" name="neck_pan">
+            <pose>0 0 0.14 0 0 0</pose>
+            <child>body_hexa</child>
+            <parent>head_pan</parent>
+            <axis> 
+                <limit>
+                    <lower>-2.0857</lower>
+                    <upper>2.0857</upper>
+                </limit>
+                <xyz>0 0 1</xyz>        <!--
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>        -->
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="neck_tilt">
+            <pose>0 0 0 0 0 0</pose>
+            <child>head_pan</child>
+            <parent>head_tilt</parent>
+            <axis>  
+                <limit>
+                    <lower>-0.6720</lower>
+                    <upper>0.5149</upper>
+                </limit>
+                <xyz>1 0 0</xyz>        <!--
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>        -->
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="camera_top">
+            <pose>0 0 0 0 0 0</pose>
+            <child>head_tilt</child>
+            <parent>camera_head_top</parent>
+            <axis>
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>
+            </axis>
+        </joint>
+        
+        <joint type="revolute" name="camera_bottom">
+            <pose>0 0 0 0 0 0</pose>
+            <child>head_tilt</child>
+            <parent>camera_head_bottom</parent>
+            <axis>
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>
+            </axis>
+        </joint>
+        
+        <!-- PLUGINS -->    
+        <plugin filename="libposeneck.so" name="poseneck">
+            <bottom_joint_pose3dencodersneck_pan>neck_pan</bottom_joint_pose3dencodersneck_pan>
+            <top_joint_pose3dencodersneck_tilt>neck_tilt</top_joint_pose3dencodersneck_tilt>
+            <torque>5</torque>
+        </plugin>
+       <!--
+        <plugin filename="libpose3dencodersneckvelocity.so" name="pose3dencodersneckvelocity">
+            <bottom_joint_pose3dencodersneckvel_pan>neck_pan</bottom_joint_pose3dencodersneckvel_pan>
+            <top_joint_pose3dencodersneckvel_tilt>neck_tilt</top_joint_pose3dencodersneckvel_tilt>
+            <torque>5</torque>
+        </plugin>
+       -->
+        <plugin filename="libposerightshoulder.so" name="poserightshoulder">
+            <joint_pose3dencodersrightshoulder_pitch>rshoulder_pitch</joint_pose3dencodersrightshoulder_pitch>
+            <joint_pose3dencodersrightshoulder_roll>rshoulder_roll</joint_pose3dencodersrightshoulder_roll>
+            <torque>5</torque>
+        </plugin>
+        
+        <plugin filename="libposeleftshoulder.so" name="poseleftshoulder">
+            <joint_pose3dencodersleftshoulder_pitch>lshoulder_pitch</joint_pose3dencodersleftshoulder_pitch>
+            <joint_pose3dencodersleftshoulder_roll>lshoulder_roll</joint_pose3dencodersleftshoulder_roll>
+            <torque>5</torque>
+        </plugin>
+        
+        <plugin filename="libposerightelbow.so" name="poserightelbow">
+            <joint_pose3dencodersrightelbow_yaw>relbow_yaw</joint_pose3dencodersrightelbow_yaw>
+            <joint_pose3dencodersrightelbow_roll>relbow_roll</joint_pose3dencodersrightelbow_roll>
+            <torque>5</torque>
+        </plugin>  
+        
+        <plugin filename="libposeleftelbow.so" name="poseleftelbow">
+            <joint_pose3dencodersleftelbow_yaw>lelbow_yaw</joint_pose3dencodersleftelbow_yaw>
+            <joint_pose3dencodersleftelbow_roll>lelbow_roll</joint_pose3dencodersleftelbow_roll>
+            <torque>5</torque>
+        </plugin>
+        <!--
+        <plugin filename="libpose3dencodership.so" name="pose3dencodership">
+            <joint_pose3dencodersrhip_yawpitch>rhip_yawpitch</joint_pose3dencodersrhip_yawpitch>
+            <joint_pose3dencodersrhip_roll>rhip_roll</joint_pose3dencodersrhip_roll>
+            <joint_pose3dencodersrhip_pitch>rhip_pitch</joint_pose3dencodersrhip_pitch>
+            <torque>5</torque>
+        </plugin> 
+        --> <!--
+        <plugin filename="libpose3dencodersankle.so" name="pose3dencodersankle">
+            <joint_pose3dencodersrightankle_pitch>rankle_pitch</joint_pose3dencodersrightankle_pitch>
+            <joint_pose3dencodersrightankle_roll>rankle_roll</joint_pose3dencodersrightankle_roll>
+            <torque>5</torque>
+        </plugin>
+        
+        <plugin filename="libpose3dencodersleftankle.so" name="pose3dencodersleftankle">
+            <joint_pose3dencodersleftankle_pitch>lankle_pitch</joint_pose3dencodersleftankle_pitch>
+            <joint_pose3dencodersleftankle_roll>lankle_roll</joint_pose3dencodersleftankle_roll>
+            <torque>5</torque>
+        </plugin>       -->
+        
+<!--        
+        <plugin filename="libpose3dencodersknee.so" name="pose3dencodersknee">
+            <joint_pose3dencodersrightknee_pitch>right_knee</joint_pose3dencodersrightknee_pitch>
+            <torque>5</torque>
+        </plugin>
+-->
+    </model>
+</sdf>
