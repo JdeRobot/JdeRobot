@@ -1,5 +1,3 @@
-if (GAZEBO_INCLUDE_DIRS)
-
 include_directories(
 	${GAZEBO_INCLUDE_DIRS}
     ${INTERFACES_CPP_DIR}
@@ -51,5 +49,3 @@ target_link_libraries(poseleftelbow ${GAZEBO_libraries}
 	${GAZEBO_libraries} 
 	${ZeroCIce_LIBRARIES}
 )
-
-ENDIF()
