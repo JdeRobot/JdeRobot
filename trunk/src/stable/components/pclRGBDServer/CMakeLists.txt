@@ -16,13 +16,14 @@ if(with_pcl)
     add_executable (pclRGBDServer  ${SOURCE_FILES})
 
     TARGET_LINK_LIBRARIES(pclRGBDServer 
+      ${CMAKE_THREAD_LIBS_INIT}
       ${ZeroCIce_LIBRARIES}
       ${pcl_LIBRARIES}
       ${OpenCV_LIBRARIES}
       JderobotInterfaces
       jderobotutil
       ${openni_LIBRARIES}
-	  ${Boost_LIBRARIES}
+      ${Boost_LIBRARIES}
     )
 
 endif()
