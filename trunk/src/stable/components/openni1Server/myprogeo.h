@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef openni1Server_MYPROGEO_H
-#define openni1Server_MYPROGEO_H
+#ifndef OPENNISERVER_MYPROGEO_H
+#define OPENNISERVER_MYPROGEO_H
 
 #include <progeo/progeo.h>
 #include <iostream>
@@ -29,34 +29,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* GRAPHIC coordenates to OPTICAL coordenates */
-#define WORKING_IMG_HEIGHT 480
-#define GRAPHIC_TO_OPTICAL_X(x,y) (WORKING_IMG_HEIGHT-1-y)
-#define GRAPHIC_TO_OPTICAL_Y(x,y) (x)
-#define OPTICAL_TO_GRAPHIC_X(x,y) (y)
-#define OPTICAL_TO_GRAPHIC_Y(x,y) (WORKING_IMG_HEIGHT-1-x)
 
 #define MAX_CAMERAS 8
 #define MAX_BUFFER 1024
 
 namespace openni1Server {
-  class myprogeo {
-	public:
-	myprogeo();
-	~myprogeo();
-	int load_cam_line(FILE *myfile,int cam);
-	void load_cam(char *fich_in,int cam, int w, int h);
-	void mybackproject(float x, float y, float* xp, float* yp, float* zp, float* camx, float* camy, float* camz, int cam);
-	void myproject(float x, float y, float z, float* xp, float* yp, int cam);
-	void mygetcameraposition(float *x, float *y, float *z, int cam);
-	void mygetcamerafoa(float *x, float *y, float *z, int cam);
-	void mygetcamerasize(float *w, float *h, int cam);
-	TPinHoleCamera getCamera(int camera);
+class myprogeo {
+public:
+    myprogeo();
+    ~myprogeo();
+    int load_cam_line(FILE *myfile,int cam);
+    void load_cam(char *fich_in,int cam, int w, int h);
+    void mybackproject(float x, float y, float* xp, float* yp, float* zp, float* camx, float* camy, float* camz, int cam);
+    void myproject(float x, float y, float z, float* xp, float* yp, int cam);
+    void mygetcameraposition(float *x, float *y, float *z, int cam);
+    void mygetcamerafoa(float *x, float *y, float *z, int cam);
+    void mygetcamerasize(float *w, float *h, int cam);
+    TPinHoleCamera getCamera(int camera);
 
-	private:
-		/* cameras */
-		TPinHoleCamera cameras[MAX_CAMERAS];
-  };
+private:
+    /* cameras */
+	void pixel2optical(float*x,float*y);
+	void optical2pixel(float* x, float* y); 
+    TPinHoleCamera cameras[MAX_CAMERAS];
+	int w,h;
+};
 } // namespace
 
 #endif /*KINECTVIEWER_MYPROGEO_H*/
