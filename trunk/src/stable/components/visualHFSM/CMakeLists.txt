@@ -1,4 +1,4 @@
-IF (VISUALHFSM_COMPILE)
+IF (goocanvasmm_INCLUDE_DIRS)
 
 SET( SOURCE_FILES_VISUALHFSM point.cpp node.cpp transition.cpp guinode.cpp subautomata.cpp guitransition.cpp guisubautomata.cpp generate.cpp popups/editnodedialog.cpp popups/edittransitiondialog.cpp popups/funvardialog.cpp popups/importdialog.cpp popups/loadfiledialog.cpp popups/renamedialog.cpp popups/renametransitiondialog.cpp popups/savefiledialog.cpp popups/timerdialog.cpp savefile.cpp xmlparser.cpp visualhfsm.cpp main.cpp )
 
