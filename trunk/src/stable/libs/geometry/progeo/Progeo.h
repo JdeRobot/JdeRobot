@@ -67,10 +67,12 @@ public:
 	void setKMatrix (Eigen::Matrix3d KMatrix);
 	void setRTMatrix (Eigen::Matrix4d RTMatrix);
 	void setImageSize (int width, int height);
-	void setFoaRoll(Eigen::Vector4d Foa, float Roll);
+	void setFoa(Eigen::Vector4d Foa);
+	void setRoll(float Roll);
 
 	Eigen::Vector4d getPosition() {return position; };
 	Eigen::Vector4d getFoa() {return foa; };
+	float getRoll() {return roll; };
 
 	void backproject(Eigen::Vector3d point, Eigen::Vector4d& pro);
 	int project(Eigen::Vector4d in, Eigen::Vector3d &out);

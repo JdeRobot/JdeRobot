@@ -610,9 +610,13 @@ void Progeo::setImageSize (int width, int height)
 	columns = width;
 }
 
-void Progeo::setFoaRoll(Eigen::Vector4d Foa, float Roll)
-{
+void Progeo::setFoa(Eigen::Vector4d Foa){
 	this->foa=Foa;
+}
+
+
+void Progeo::setRoll( float Roll)
+{
 	this->roll=Roll;
 }
 

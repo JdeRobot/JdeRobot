@@ -93,7 +93,8 @@ void myprogeo::load_cam(char *fich_in,int cam, int w, int h)
 		foa(1)=1;
 		foa(2)=0;
 		foa(3)=1;
-		this->cameras[cam]->setFoaRoll(foa,0.);
+		this->cameras[cam]->setFoa(foa);
+		this->cameras[cam]->setRoll(0);
 
 		//this->cameras[cam]->updateKMatrix();
 		this->cameras[cam]->updateRTMatrix();
