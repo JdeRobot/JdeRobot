@@ -13,15 +13,16 @@ if(with_pcl)
     link_directories(${pcl_LIBRARIES})
     include_directories(${pcl_INCLUDE_DIR})
 
-    add_executable (kinectServer  ${SOURCE_FILES})
+    add_executable (pclRGBDServer  ${SOURCE_FILES})
 
-    TARGET_LINK_LIBRARIES(kinectServer 
+    TARGET_LINK_LIBRARIES(pclRGBDServer 
       ${ZeroCIce_LIBRARIES}
       ${pcl_LIBRARIES}
       ${OpenCV_LIBRARIES}
       JderobotInterfaces
       jderobotutil
       ${openni_LIBRARIES}
+	  ${Boost_LIBRARIES}
     )
 
 endif()
