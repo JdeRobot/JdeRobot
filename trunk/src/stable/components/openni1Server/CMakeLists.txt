@@ -16,8 +16,6 @@ IF(openni_LIBRARIES)
 
 	    add_executable (openni1Server ${SOURCE_FILES})
 
-        FIND_PACKAGE(libusb-1.0 REQUIRED)
-        MESSAGE(STATUS ${usb_LIBRARIES})
         TARGET_LINK_LIBRARIES(openni1Server
             progeo
             colorspacesmm
