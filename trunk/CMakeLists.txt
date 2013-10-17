@@ -91,6 +91,7 @@ include(${DEPS_DIR}/gtk2/CMakeLists.txt)
 include(${DEPS_DIR}/qt/CMakeLists.txt)
 include(${DEPS_DIR}/gtk3/CMakeLists.txt)
 include(${DEPS_DIR}/kobuki/CMakeLists.txt)
+include(${DEPS_DIR}/libusb/CMakeLists.txt)
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
 
