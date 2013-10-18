@@ -63,6 +63,10 @@ void Point::move ( float dx, float dy ) {
 	this->y += dy;
 }
 
+bool Point::equals ( Point p ) {
+	return ((this->x == p.getX()) && (this->y == p.getY()));
+}
+
 Point Point::calculateGoodArrowPosition ( Point p ) {
 	float distance_op = this->y - p.getY();
 	float distance_ad = this->x - p.getX();

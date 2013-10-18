@@ -65,10 +65,10 @@ typedef enum TypeInitial {
 } TypeInitial;
 
 // Definition of this class
-class VisualHFSM : public Gtk::Window {
+class VisualHFSM : public Gtk::Dialog {
 public:
     // Constructor
-    VisualHFSM ();
+    VisualHFSM ( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade );
         
     // Destructor
     virtual ~VisualHFSM ();
@@ -78,8 +78,18 @@ public:
     void on_load_file ( std::string path );
 
 private:
+    Glib::RefPtr<Gtk::Builder> refBuilder;
+
+    // Menu
+    Gtk::ImageMenuItem *imagemenuitem_new, *imagemenuitem_open, *imagemenuitem_save;
+    Gtk::ImageMenuItem *imagemenuitem_saveas, *imagemenuitem_quit;
+    Gtk::ImageMenuItem *imagemenuitem_state, *imagemenuitem_transition;
+    Gtk::ImageMenuItem *imagemenuitem_interfaces, *imagemenuitem_timer, *imagemenuitem_variables;
+    Gtk::ImageMenuItem *imagemenuitem_configfile, *imagemenuitem_generatecode;
+    Gtk::ImageMenuItem *imagemenuitem_compile, *imagemenuitem_about;
+    
     // Main window
-    Gtk::Viewport* viewport_schema;
+    Gtk::ScrolledWindow* scrolledwindow_schema;
     Goocanvas::Canvas* canvas;
 
     // For the draggin item
@@ -94,11 +104,9 @@ private:
 
     // GroupModel for the items
     Glib::RefPtr<Goocanvas::ItemModel> root;
-    // The scrolled window that contains everything
-    Gtk::ScrolledWindow* sw;
 
     // The treeview
-    //Tree model columns:
+    // Tree model columns:
     class ModelColumns : public Gtk::TreeModel::ColumnRecord {
     public:
         ModelColumns () { add(m_col_id); add(m_col_name); }
@@ -142,13 +150,7 @@ private:
     std::list <GuiSubautomata> subautomataList;
     GuiSubautomata* currentSubautomata;
 
-    // Buttons
-    Gtk::Button *button_up, *button_transition, *button_state, *button_save;
-    Gtk::Button *button_save_as, *button_open, *button_interfaces;
-    Gtk::Button *button_timer, *button_variables, *button_generate_code, *button_compile;
-
     // For files (load and save)
-    Gtk::Button *button_cancelfile, *button_openfile, *button_savefile;
     std::string filepath;
     SaveFileDialog* sfdialog;
     LoadFileDialog* lfdialog;
@@ -207,18 +209,23 @@ private:
     bool on_transition_leave_notify_event ( const Glib::RefPtr<Goocanvas::Item>& item,
                                             GdkEventCrossing* event );
 
-    // Of buttons
-    void on_options_clicked_up ();
-    void on_options_clicked_transition ();
-    void on_options_clicked_state ();
-    void on_options_clicked_save ();
-    void on_options_clicked_save_as ();
-    void on_options_clicked_open ();
-    void on_options_clicked_interfaces ();
-    void on_options_clicked_timer ();
-    void on_options_clicked_variables ();
-    void on_options_clicked_generate_code ();
-    void on_options_clicked_compile ();
+    // Of Menu
+    void on_menubar_clicked_new ();
+    void on_menubar_clicked_open ();
+    void on_menubar_clicked_save ();
+    void on_menubar_clicked_save_as ();
+    void on_menubar_clicked_quit ();
+    void on_menubar_clicked_state ();
+    void on_menubar_clicked_transition ();
+    void on_menubar_clicked_interfaces ();
+    void on_menubar_clicked_timer ();
+    void on_menubar_clicked_variables ();
+    void on_menubar_clicked_configfile ();
+    void on_menubar_clicked_generate_code ();
+    void on_menubar_clicked_compile ();
+    void on_menubar_clicked_about ();
+    
+    void on_menubar_clicked_up (); // deprecated
 
     // General
     GuiSubautomata* getSubautomata ( int idSubautomata );

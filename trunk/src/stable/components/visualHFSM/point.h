@@ -46,6 +46,7 @@ public:
 
 	// Another functions
 	void move ( float dx, float dy );
+	bool equals ( Point p );
 
 	Point calculateGoodArrowPosition ( Point p );
 	Point midpoint ( Point p );

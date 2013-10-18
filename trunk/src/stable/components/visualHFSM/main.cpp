@@ -19,12 +19,32 @@
  */
 
 #include "visualhfsm.h"
-#include <gtkmm/application.h>
 
-int main(int argc, char *argv[]) {
+int main (int argc, char **argv) {
     Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "jderobot.visualhfsm");
 
-    VisualHFSM visualhfsm;
+    //Load the Glade file and instiate its widgets:
+    Glib::RefPtr<Gtk::Builder> refBuilder = Gtk::Builder::create();
+    try {
+        refBuilder->add_from_file("gui/main_gui.glade");
+    } catch ( const Glib::FileError& ex ) {
+        std::cerr << BEGIN_RED << "FileError: " << ex.what() << END_COLOR << std::endl;
+        return 1;
+    } catch ( const Glib::MarkupError& ex ) {
+        std::cerr << BEGIN_RED << "MarkupError: " << ex.what() << END_COLOR << std::endl;
+        return 1;
+    } catch ( const Gtk::BuilderError& ex ) {
+        std::cerr << BEGIN_RED << "BuilderError: " << ex.what() << END_COLOR << std::endl;
+        return 1;
+    }
 
-    return app->run(visualhfsm);
+    //Get the GtkBuilder-instantiated dialog::
+    VisualHFSM* visualhfsm = 0;
+    refBuilder->get_widget_derived("DialogDerived", visualhfsm);
+    if (visualhfsm) //Start:
+        app->run(*visualhfsm);
+
+    delete visualhfsm;
+
+    return 0;
 }

@@ -134,6 +134,9 @@ public:
 	Glib::RefPtr<Goocanvas::RectModel> getLastMidpoint ();
 	Glib::RefPtr<Goocanvas::TextModel> getLastTextTransition ();
 
+	int getNumberOfAutotransitions ( Glib::RefPtr<Goocanvas::Item> item );
+	int getNumberOfAutotransitions ( Point point );
+
 	// Another functions for transitions
 	void changeGuiTransitionWidth ( const Glib::RefPtr<Goocanvas::Item>& item, float width );
 	void editGuiTransition ( Glib::RefPtr<Goocanvas::Item> item );

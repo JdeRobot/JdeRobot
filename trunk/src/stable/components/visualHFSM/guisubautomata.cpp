@@ -266,7 +266,7 @@ void GuiSubautomata::removeGuiNode ( Glib::RefPtr<Goocanvas::Item> item ) {
 void GuiSubautomata::removeGuiNode ( int id ) {
     this->removeGuiTransitionsWith(id);
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
-    while ( (!nodeListIterator->getId() != id) &&
+    while ( (nodeListIterator->getId() != id) &&
             (nodeListIterator != this->nodeList.end()) )
         nodeListIterator++;
 
@@ -309,8 +309,8 @@ void GuiSubautomata::removeGuiTransitionsWith ( Glib::RefPtr<Goocanvas::Item> it
 void GuiSubautomata::removeGuiTransitionsWith ( int id ) {
     std::list<GuiTransition>::iterator nodeTransIterator = this->transitionList.begin();
     while (nodeTransIterator != this->transitionList.end()) {
-        if ( (nodeTransIterator->getIdOrigin() != id) && 
-            (nodeTransIterator->getIdDestiny() != id) ) {
+        if ( (nodeTransIterator->getIdOrigin() == id) || 
+            (nodeTransIterator->getIdDestiny() == id) ) {
             nodeTransIterator = this->transitionList.erase(nodeTransIterator);
         } else if (nodeTransIterator != this->transitionList.end()) {
             nodeTransIterator++;
@@ -336,8 +336,6 @@ GuiSubautomata GuiSubautomata::copy () {
     gsubautomata.setInterfaces(this->interfaces);
     gsubautomata.setNodeList(&gnodelist);
     gsubautomata.setTransList(&gtranslist);
-
-    std::cout << "hasta aquiiiiiiii???" << std::endl;
 
     return gsubautomata;
 }
@@ -602,6 +600,32 @@ Glib::RefPtr<Goocanvas::TextModel> GuiSubautomata::getLastTextTransition () {
     return nodeTransIterator->getTextModel();
 }
 
+int GuiSubautomata::getNumberOfAutotransitions ( Glib::RefPtr<Goocanvas::Item> item ) {
+    int number = 0;
+
+    for ( std::list<GuiTransition>::iterator transListIterator = this->transitionList.begin();
+            transListIterator != this->transitionList.end(); transListIterator++ ) {
+        if ( (transListIterator->hasThisItem(item)) &&
+                (transListIterator->getIdOrigin() == transListIterator->getIdDestiny()) )
+            number++;
+    }
+
+    return number;
+}
+
+int GuiSubautomata::getNumberOfAutotransitions ( Point point ) {
+    int number = 0;
+
+    for ( std::list<GuiTransition>::iterator transListIterator = this->transitionList.begin();
+            transListIterator != this->transitionList.end(); transListIterator++ ) {
+        if ( (point.equals(transListIterator->getPoint())) &&
+                (transListIterator->getIdOrigin() == transListIterator->getIdDestiny()) )
+            number++;
+    }
+
+    return number;
+}
+
 /*************************************************************
  * ANOTHER FUNCTIONS FOR TRANSITIONS
  *************************************************************/
@@ -646,14 +670,31 @@ void GuiSubautomata::moveGuiTransition ( const Glib::RefPtr<Goocanvas::Item>& it
             }
 
             if (nodeTransIterator != this->transitionList.end()) {
-                Point ppoint = this->getPoint(item);
+                Point porigin = this->getPoint(nodeTransIterator->getItemOrigin());
+                Point pfinal = this->getPoint(nodeTransIterator->getItemFinal());
 
-                Point point = ppoint.calculateGoodArrowPosition(this->getPoint(nodeTransIterator->getItemMidpoint()));
+                if (porigin.equals(pfinal)) {
+                    float xcenter = porigin.getX();
+                    porigin.setX(xcenter - RADIUS_NORMAL + 2);
+                    pfinal.setX(xcenter + RADIUS_NORMAL - 2);
 
-                if (nodeTransIterator->isOrigin(item))
-                    nodeTransIterator->moveLeftItem(0, point.getX(), point.getY());
-                else
-                    nodeTransIterator->moveRightItem(1, point.getX(), point.getY());
+                    Point midpoint = this->getPoint(nodeTransIterator->getItemMidpoint());
+                    Point poriginmid = porigin.calculateGoodArrowPosition(midpoint);
+                    Point pfinalmid = porigin.calculateGoodArrowPosition(midpoint);
+
+                    nodeTransIterator->moveLeftItem(0, poriginmid.getX(), poriginmid.getY());
+                    nodeTransIterator->moveRightItem(1, pfinalmid.getX(), pfinalmid.getY());
+                } else {
+                    Point ppoint = this->getPoint(item);
+
+                    Point point = ppoint.calculateGoodArrowPosition(this->getPoint(nodeTransIterator->getItemMidpoint()));
+
+                    if (nodeTransIterator->isOrigin(item))
+                        nodeTransIterator->moveLeftItem(0, point.getX(), point.getY());
+                    else
+                        nodeTransIterator->moveRightItem(1, point.getX(), point.getY());
+                }
+
 
                 nodeTransIterator++;
             }
@@ -669,9 +710,15 @@ void GuiSubautomata::moveJustGuiTransition ( const Glib::RefPtr<Goocanvas::Item>
         nodeTransIterator++;
 
     if (nodeTransIterator != this->transitionList.end()) {
-        nodeTransIterator->moveMidpoint(dx, dy,
-                            this->getPoint(nodeTransIterator->getItemOrigin()),
-                            this->getPoint(nodeTransIterator->getItemFinal()));
+        Point porigin = this->getPoint(nodeTransIterator->getItemOrigin());
+        Point pfinal = this->getPoint(nodeTransIterator->getItemFinal());
+        if (porigin.equals(pfinal)) {
+            float xcenter = porigin.getX();
+            porigin.setX(xcenter - RADIUS_NORMAL + 2);
+            pfinal.setX(xcenter + RADIUS_NORMAL - 2);
+        }
+        
+        nodeTransIterator->moveMidpoint(dx, dy, porigin, pfinal);
     }
 }
 

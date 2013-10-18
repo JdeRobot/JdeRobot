@@ -589,6 +589,8 @@ void Generate::generateCmake () {
 	this->fs << std::endl;
 	this->fs << "SET( CMAKE_CXX_FLAGS \"-lpthread -lIce\" ) # Opciones para el compilador" << std::endl;
 	this->fs << std::endl;
+	this->fs << "SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})" << std::endl;
+	this->fs << std::endl;
 	this->fs << "include_directories (" << std::endl;
 	this->fs << "\t${INTERFACES_CPP_DIR}" << std::endl;
 	this->fs << "\t${LIBS_DIR}" << std::endl;

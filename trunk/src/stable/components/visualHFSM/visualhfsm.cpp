@@ -23,38 +23,112 @@
 /*************************************************************
  * CONSTRUCTOR
  *************************************************************/
-VisualHFSM::VisualHFSM () {
-    if (this->get_all_widgets() != -1) {
-        this->assign_signals();
+VisualHFSM::VisualHFSM ( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade )
+:   Gtk::Dialog(cobject),
+    refBuilder(refGlade)
+{
+    // GETTING WIDGETS
+    // Get the menu items
+    refBuilder->get_widget("imagemenuitem_new", this->imagemenuitem_new);
+    refBuilder->get_widget("imagemenuitem_open", this->imagemenuitem_open);
+    refBuilder->get_widget("imagemenuitem_save", this->imagemenuitem_save);
+    refBuilder->get_widget("imagemenuitem_saveas", this->imagemenuitem_saveas);
+    refBuilder->get_widget("imagemenuitem_quit", this->imagemenuitem_quit);
+    refBuilder->get_widget("imagemenuitem_state", this->imagemenuitem_state);
+    refBuilder->get_widget("imagemenuitem_transition", this->imagemenuitem_transition);
+    refBuilder->get_widget("imagemenuitem_interfaces", this->imagemenuitem_interfaces);
+    refBuilder->get_widget("imagemenuitem_timer", this->imagemenuitem_timer);
+    refBuilder->get_widget("imagemenuitem_variables", this->imagemenuitem_variables);
+    refBuilder->get_widget("imagemenuitem_configfile", this->imagemenuitem_configfile);
+    refBuilder->get_widget("imagemenuitem_generatecode", this->imagemenuitem_generatecode);
+    refBuilder->get_widget("imagemenuitem_compile", this->imagemenuitem_compile);
+    refBuilder->get_widget("imagemenuitem_about", this->imagemenuitem_about);
 
-        this->refTreeModel = Gtk::TreeStore::create(this->m_Columns);
-        this->treeview->set_model(this->refTreeModel);
+    // Get the windows
+    refBuilder->get_widget("scrolledwindow_schema", this->scrolledwindow_schema);
 
-        //Add the TreeView's view columns:
-        this->treeview->append_column("ID", this->m_Columns.m_col_id);
-        this->treeview->append_column("Name", this->m_Columns.m_col_name);
+    // Get the treeview
+    refBuilder->get_widget("treeview", this->treeview);
 
-        this->root = Goocanvas::GroupModel::create();
-        this->canvas->set_root_item_model(root);
-        this->canvas->set_visible(true);
-        this->viewport_schema->add(*(this->canvas));
-        show_all_children();
+    // ASSIGNING SIGNALS
+    // Of the menu items
+    this->imagemenuitem_new->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_new));
+    this->imagemenuitem_open->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_open));
+    this->imagemenuitem_save->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_save));
+    this->imagemenuitem_saveas->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_save_as));
+    this->imagemenuitem_quit->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_quit));
+    this->imagemenuitem_state->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_state));
+    this->imagemenuitem_transition->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_transition));
+    this->imagemenuitem_interfaces->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_interfaces));
+    this->imagemenuitem_timer->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_timer));
+    this->imagemenuitem_variables->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_variables));
+    this->imagemenuitem_configfile->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_configfile));
+    this->imagemenuitem_generatecode->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_generate_code));
+    this->imagemenuitem_compile->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_compile));
+    this->imagemenuitem_about->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_about));
 
-        this->create_menu_transition();
-        this->create_menu_item();
-        this->create_menu_paste();
+    // Of the windows
+    this->scrolledwindow_schema->signal_event().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_schema_event));
+    
+    // Create the canvas    
+    this->canvas = Gtk::manage(new Goocanvas::Canvas());
+    this->canvas->signal_item_created().connect(sigc::mem_fun(*this,
+                                        &VisualHFSM::on_item_created));
 
-        this->copyPressed = false;
+    // And the treeview's tree model
+    this->refTreeModel = Gtk::TreeStore::create(this->m_Columns);
+    this->treeview->set_model(this->refTreeModel);
 
-        this->id = 1;
-        GuiSubautomata guisub(id, 0);
-        this->subautomataList.push_back(guisub);
-        this->currentSubautomata = this->getSubautomata(id);
-        this->id++;
+    //Add the TreeView's view columns:
+    this->treeview->append_column("ID", this->m_Columns.m_col_id);
+    this->treeview->append_column("Name", this->m_Columns.m_col_name);
 
-        this->idguinode = 1;
-        this->idguitransition = 1;
-    }
+    this->state = NONE;
+
+    this->root = Goocanvas::GroupModel::create();
+    this->canvas->set_root_item_model(root);
+    this->canvas->set_visible(true);
+    this->scrolledwindow_schema->add(*(this->canvas));
+
+    Glib::RefPtr<Gdk::Screen> screen = this->get_screen();
+    int width = screen->get_width();
+    int height = screen->get_height();
+
+    Goocanvas::Bounds bounds;
+    this->canvas->get_bounds(bounds);
+    bounds.set_x2(width);
+    bounds.set_y2(height * 2);
+    this->canvas->set_bounds(bounds);
+
+    this->create_menu_transition();
+    this->create_menu_item();
+    this->create_menu_paste();
+
+    this->copyPressed = false;
+
+    this->id = 1;
+    GuiSubautomata guisub(id, 0);
+    this->subautomataList.push_back(guisub);
+    this->currentSubautomata = this->getSubautomata(id);
+    this->id++;
+
+    this->idguinode = 1;
+    this->idguitransition = 1;
 }
 
 /*************************************************************
@@ -65,80 +139,6 @@ VisualHFSM::~VisualHFSM () {}
 /*************************************************************
  * INTERNAL METHODS
  *************************************************************/
-int VisualHFSM::get_all_widgets () {
-    int returned = 0;
-    // Load the GtkBuilder file and instantiate its widgets:
-    Glib::RefPtr<Gtk::Builder> refBuilder = Gtk::Builder::create();
-    try {
-        refBuilder->add_from_file("gui/main_gui.glade");
-    } catch (const Glib::FileError& ex) {
-        std::cerr << BEGIN_RED << "FileError: " << ex.what() << END_COLOR << std::endl;
-        returned = -1;
-    } catch(const Glib::MarkupError& ex) {
-        std::cerr << BEGIN_RED << "MarkupError: " << ex.what() << END_COLOR << std::endl;
-        returned = -1;
-    } catch(const Gtk::BuilderError& ex) {
-        std::cerr << BEGIN_RED << "BuilderError: " << ex.what() << END_COLOR << std::endl;
-        returned = -1;
-    }
-
-    if (returned == 0) {
-        // Get the windows
-        refBuilder->get_widget("viewport_schema", this->viewport_schema);
-
-        // Get the treeview
-        refBuilder->get_widget("treeview", this->treeview);
-
-        // Get the buttons
-        refBuilder->get_widget("button_up", this->button_up);
-        refBuilder->get_widget("button_transition", this->button_transition);
-        refBuilder->get_widget("button_state", this->button_state);
-        refBuilder->get_widget("button_save", this->button_save);
-        refBuilder->get_widget("button_save_as", this->button_save_as);
-        refBuilder->get_widget("button_open", this->button_open);
-        refBuilder->get_widget("button_interfaces", this->button_interfaces);
-        refBuilder->get_widget("button_timer", this->button_timer);
-        refBuilder->get_widget("button_variables", this->button_variables);
-        refBuilder->get_widget("button_generate_code", this->button_generate_code);
-        refBuilder->get_widget("button_compile", this->button_compile);
-    }
-
-    return returned;
-}
-
-void VisualHFSM::assign_signals () {
-    // Events
-    this->button_up->signal_clicked().connect(sigc::mem_fun(this,
-                                    &VisualHFSM::on_options_clicked_up));
-    this->button_transition->signal_clicked().connect(sigc::mem_fun(this,
-                                    &VisualHFSM::on_options_clicked_transition));
-    this->button_state->signal_clicked().connect(sigc::mem_fun(this,
-                                    &VisualHFSM::on_options_clicked_state));
-    this->button_save->signal_clicked().connect(sigc::mem_fun(this,
-                                    &VisualHFSM::on_options_clicked_save));
-    this->button_save_as->signal_clicked().connect(sigc::mem_fun(this,
-                                    &VisualHFSM::on_options_clicked_save_as));
-    this->button_open->signal_clicked().connect(sigc::mem_fun(this,
-                                    &VisualHFSM::on_options_clicked_open));
-    this->button_interfaces->signal_clicked().connect(sigc::mem_fun(this,
-                                    &VisualHFSM::on_options_clicked_interfaces));
-    this->button_timer->signal_clicked().connect(sigc::mem_fun(this,
-                                    &VisualHFSM::on_options_clicked_timer));
-    this->button_variables->signal_clicked().connect(sigc::mem_fun(this,
-                                    &VisualHFSM::on_options_clicked_variables));
-    this->button_generate_code->signal_clicked().connect(sigc::mem_fun(this,
-                                    &VisualHFSM::on_options_clicked_generate_code));
-    this->button_compile->signal_clicked().connect(sigc::mem_fun(this,
-                                    &VisualHFSM::on_options_clicked_compile));
-
-    this->viewport_schema->signal_event().connect(sigc::mem_fun(this,
-                                    &VisualHFSM::on_schema_event));
-
-    this->canvas = Gtk::manage(new Goocanvas::Canvas());
-    this->canvas->signal_item_created().connect(sigc::mem_fun(this,
-                                    &VisualHFSM::on_item_created));
-}
-
 void VisualHFSM::create_menu_transition () {
     this->actionGroupTransition = Gtk::ActionGroup::create();
     this->actionGroupTransition->add(Gtk::Action::create("ContextMenu", "Context Menu"));
@@ -167,7 +167,8 @@ void VisualHFSM::create_menu_transition () {
     }
 
     //Get the menu:
-    this->menuPopupTransition = dynamic_cast<Gtk::Menu*>(this->UIManagerTransition->get_widget("/PopupMenuTransition")); 
+    this->menuPopupTransition = dynamic_cast<Gtk::Menu*>(
+                    this->UIManagerTransition->get_widget("/PopupMenuTransition")); 
     if (!this->menuPopupTransition)
         g_warning("menu not found");
 }
@@ -233,7 +234,8 @@ void VisualHFSM::create_menu_paste () {
     }
 
     //Get the menu:
-    this->menuPopupPaste = dynamic_cast<Gtk::Menu*>(this->UIManagerPaste->get_widget("/PopupMenuPaste")); 
+    this->menuPopupPaste = dynamic_cast<Gtk::Menu*>(
+                    this->UIManagerPaste->get_widget("/PopupMenuPaste")); 
     if(!this->menuPopupPaste)
         g_warning("menu paste not found");
 }
@@ -243,7 +245,8 @@ void VisualHFSM::create_new_state ( int idSubautomataSon ) {
         std::cout << BEGIN_GREEN << VISUAL << "Creating state with ID: " << this->idguinode << END_COLOR << std::endl;
 
 
-    this->currentSubautomata->newGuiNode(this->idguinode, idSubautomataSon, this->event_x, this->event_y);
+    this->currentSubautomata->newGuiNode(this->idguinode, idSubautomataSon,
+                                                this->event_x, this->event_y);
     std::string nameNode = this->currentSubautomata->getLastGuiNodeName();
 
     if (this->currentSubautomata->getId() == 1) {
@@ -251,7 +254,8 @@ void VisualHFSM::create_new_state ( int idSubautomataSon ) {
         row[m_Columns.m_col_id] = this->idguinode;
         row[m_Columns.m_col_name] = nameNode;
     } else {
-        this->fillTreeView(nameNode, refTreeModel->children(), this->getIdNodeInSubautomata(this->currentSubautomata->getIdFather()));
+        this->fillTreeView(nameNode, refTreeModel->children(),
+                    this->getIdNodeInSubautomata(this->currentSubautomata->getIdFather()));
     }
 
 
@@ -281,7 +285,20 @@ void VisualHFSM::create_new_transition ( const Glib::RefPtr<Goocanvas::Item>& it
     Point porigin = this->currentSubautomata->getPoint(this->lastItem);
     Point pfinal = this->currentSubautomata->getPoint(this->theOtherItem);
 
-    this->currentSubautomata->newGuiTransition(porigin, pfinal, this->idguitransition);
+    if (porigin.equals(pfinal)) { // autotransition!
+        float xcenter = porigin.getX();
+        porigin.setX(xcenter - RADIUS_NORMAL + 2);
+        pfinal.setX(xcenter + RADIUS_NORMAL - 2);
+
+        int numberAutotrans = this->currentSubautomata->getNumberOfAutotransitions(item);
+
+        Point pmidpoint(xcenter, porigin.getY() + (2 + 3 * numberAutotrans) * RADIUS_NORMAL);
+
+        this->currentSubautomata->newGuiTransition(porigin, pfinal, pmidpoint, this->idguitransition);
+    } else {
+        this->currentSubautomata->newGuiTransition(porigin, pfinal, this->idguitransition);
+    }
+
     this->idguitransition++;
 
     this->state = TRANS_LEFT;
@@ -304,7 +321,19 @@ void VisualHFSM::create_new_transition ( Point origin, Point final, Point midpoi
     if (DEBUG)
         std::cout << BEGIN_GREEN << VISUAL << "Creating transition" << END_COLOR << std::endl;
 
-    this->currentSubautomata->newGuiTransition(origin, final, midpoint, idTransition);
+    if (origin.equals(final)) { // autotransition!
+        float xcenter = origin.getX();
+        origin.setX(xcenter - RADIUS_NORMAL + 2);
+        final.setX(xcenter + RADIUS_NORMAL - 2);
+
+        int numberAutotrans = this->currentSubautomata->getNumberOfAutotransitions(origin);
+
+        Point pmidpoint(xcenter, origin.getY() + (2 + 3 * numberAutotrans) * RADIUS_NORMAL);
+
+        this->currentSubautomata->newGuiTransition(origin, final, pmidpoint, idTransition);
+    } else {
+        this->currentSubautomata->newGuiTransition(origin, final, midpoint, idTransition);
+    }
 
     this->state = TRANS_LEFT;
     this->root->add_child(this->currentSubautomata->getLastLeftLine());
@@ -390,7 +419,6 @@ void VisualHFSM::on_menu_state_remove () {
     GuiNode* gnode = this->currentSubautomata->getGuiNode(this->selectedItem);
     if (gnode != NULL) {
         this->removeFromTreeView(gnode->getId(), this->refTreeModel->children());
-//        this->removeRecursively(this->getSubautomata(this->getIdSubautomataWithNode(gnode->getIdSubautomataSon())), gnode);
         this->removeRecursively(this->currentSubautomata, gnode);
 
         if (DEBUG)
@@ -424,8 +452,10 @@ bool VisualHFSM::on_schema_event ( GdkEvent* event ) {
             && (event->button.button == 1)) { // create an state
         this->create_new_state(0);
         this->idguinode++;
+    } else if ((event->button.button == 2) && (event->type == GDK_BUTTON_RELEASE)) {
+        this->on_menubar_clicked_up();
     } else if ((event->button.button == 3) && this->copyPressed && !this->showingMenuPopup) {
-        if(menuPopupPaste) {
+        if (menuPopupPaste) {
             std::cout << BEGIN_GREEN << VISUAL << "Showing popup paste" << END_COLOR << std::endl;
             menuPopupPaste->popup(((GdkEventButton*)event)->button, ((GdkEventButton*)event)->time);
         }
@@ -573,7 +603,7 @@ bool VisualHFSM::on_item_button_press_event ( const Glib::RefPtr<Goocanvas::Item
 
 bool VisualHFSM::on_item_button_release_event ( const Glib::RefPtr<Goocanvas::Item>& item,
                                                 GdkEventButton* event) {
-    if (event->button == 1) {
+    if ((event->button == 1)) {
         dragging.reset();
 
         if (DEBUG)
@@ -588,7 +618,7 @@ bool VisualHFSM::on_item_button_release_event ( const Glib::RefPtr<Goocanvas::It
 
                 this->state = NONE;
             }
-            transitionsCounter += 1;
+            transitionsCounter++;
         }
     }
     
@@ -597,7 +627,7 @@ bool VisualHFSM::on_item_button_release_event ( const Glib::RefPtr<Goocanvas::It
 
 bool VisualHFSM::on_item_motion_notify_event (  const Glib::RefPtr<Goocanvas::Item>& item,
                                                 GdkEventMotion* event) {
-    if (item && dragging && item == dragging) {
+    if (item && dragging && (item == dragging)) {
         double new_x = event->x;
         double new_y = event->y;
 
@@ -668,7 +698,7 @@ bool VisualHFSM::on_transition_button_release_event ( const Glib::RefPtr<Goocanv
 
 bool VisualHFSM::on_transition_motion_notify_event ( const Glib::RefPtr<Goocanvas::Item>& item,
                                                      GdkEventMotion* event) {
-    if (item && dragging && item == dragging) {
+    if (item && dragging && (item == dragging)) {
         double new_x = event->x;
         double new_y = event->y;
 
@@ -705,9 +735,181 @@ bool VisualHFSM::on_transition_leave_notify_event ( const Glib::RefPtr<Goocanvas
 }
 
 /*************************************************************
- * OF THE BUTTONS
+ * OF THE MENU
  *************************************************************/
-void VisualHFSM::on_options_clicked_up () {
+void VisualHFSM::on_menubar_clicked_new () {
+    this->removeAllGui();
+    this->removeAllSubautomata();
+}
+
+void VisualHFSM::on_menubar_clicked_open () {
+    lastButton = OPEN;
+
+    if (DEBUG)
+        std::cout << BEGIN_GREEN << VISUAL << "Open automata" << END_COLOR << std::endl;
+
+    this->lfdialog = new LoadFileDialog();
+    this->lfdialog->init();
+    this->lfdialog->signal_path().connect(sigc::mem_fun(this,
+                                        &VisualHFSM::on_load_file));
+}
+
+void VisualHFSM::on_menubar_clicked_save () {
+    lastButton = SAVE;
+
+    if (DEBUG)
+        std::cout << BEGIN_GREEN << VISUAL << "Save automata" << END_COLOR << std::endl;
+
+    if (this->filepath.empty())
+        this->on_menubar_clicked_save_as();
+    else
+        this->on_save_file(this->filepath);
+}
+
+void VisualHFSM::on_menubar_clicked_save_as () {
+    lastButton = SAVE_AS;
+
+    if (DEBUG)
+        std::cout << BEGIN_GREEN << VISUAL << "Save as..." << END_COLOR << std::endl;
+
+    this->sfdialog = new SaveFileDialog();
+    this->sfdialog->init();
+    this->sfdialog->signal_path().connect(sigc::mem_fun(this,
+                                        &VisualHFSM::on_save_file));
+}
+
+void VisualHFSM::on_menubar_clicked_quit () {
+    this->hide(); // hide() will cause main::run() to end
+}
+
+void VisualHFSM::on_menubar_clicked_state () {
+    lastButton = STATE;
+
+    if (DEBUG)
+        std::cout << BEGIN_GREEN << VISUAL << "Create a state?" << END_COLOR << std::endl;
+}
+
+void VisualHFSM::on_menubar_clicked_transition () {
+    lastButton = TRANSITION;
+    transitionsCounter = 0;
+
+    if (DEBUG)
+        std::cout << BEGIN_GREEN << VISUAL << "Create a transition?" << END_COLOR << std::endl;
+}
+
+void VisualHFSM::on_menubar_clicked_interfaces () {
+    lastButton = INTERFACES;
+
+    if (DEBUG)
+        std::cout << BEGIN_GREEN << VISUAL << "Import interfaces" << END_COLOR << std::endl;
+
+    ImportDialog* idialog = new ImportDialog(this->currentSubautomata);
+    idialog->init();
+}
+
+void VisualHFSM::on_menubar_clicked_timer () {
+    lastButton = TIMER;
+
+    if (DEBUG)
+        std::cout << BEGIN_GREEN << VISUAL << "Timer of this automata" << END_COLOR << std::endl;
+
+    TimerDialog* tdialog = new TimerDialog(this->currentSubautomata);
+    tdialog->init();
+}
+
+void VisualHFSM::on_menubar_clicked_variables () {
+    lastButton = VARIABLES;
+
+    if (DEBUG)
+        std::cout << BEGIN_GREEN << VISUAL << "Variables for this automata" << END_COLOR << std::endl;
+
+    FunVarDialog* fvdialog = new FunVarDialog(this->currentSubautomata);
+    fvdialog->init();
+}
+
+void VisualHFSM::on_menubar_clicked_configfile () {
+    lastButton = VARIABLES;
+
+    if (DEBUG)
+        std::cout << BEGIN_GREEN << VISUAL << "Config file for this automata" << END_COLOR << std::endl;
+}
+
+void VisualHFSM::on_menubar_clicked_generate_code () {
+    lastButton = GENERATE_CODE;
+
+    if (this->filepath.compare(std::string("")) != 0) {
+        if (DEBUG)
+            std::cout << BEGIN_GREEN << VISUAL << "Generating code..." << END_COLOR << std::endl;
+        
+        MySaxParser parser;
+        parser.set_substitute_entities(true);
+        parser.parse_file(this->filepath);
+
+        std::string cpppath(this->filepath);
+        std::string cfgpath(this->filepath);
+        std::string cmakepath(this->filepath);
+        if ( (this->replace(cpppath, std::string(".xml"), std::string(".cpp"))) &&
+                (this->replace(cfgpath, std::string(".xml"), std::string(".cfg"))) &&
+                (this->replaceFile(cmakepath, std::string("/"), std::string("CMakeLists.txt"))) ) {
+            Generate generate(parser.getListSubautomata(), cpppath, cfgpath, cmakepath);
+            generate.init();
+        } else {
+            std::cout << BEGIN_GREEN << VISUAL << "Impossible to generate code" << END_COLOR << std::endl;
+        }
+    } else {
+        std::cout << BEGIN_YELLOW << VISUAL << "You must save the project first" << END_COLOR << std::endl;
+    }
+
+}
+
+void VisualHFSM::on_menubar_clicked_compile () {
+    lastButton = COMPILE;
+
+    std::string cpppath(this->filepath);
+    this->replace(cpppath, std::string(".xml"), std::string(".cpp"));
+
+    struct stat buffer;
+
+    if ( (this->filepath.compare(std::string("")) != 0) && (stat (cpppath.c_str(), &buffer) == 0) ) {
+        if (DEBUG)
+            std::cout << BEGIN_GREEN << VISUAL << "Starting compilation..." << END_COLOR << std::endl;
+        
+        std::string directory(this->filepath);
+
+        size_t last_pos = directory.find_last_of(std::string("/"));
+        if (last_pos == std::string::npos) {
+            std::cout << "Impossible to compile" << std::endl;
+            return;
+        }
+
+        directory.erase(last_pos + 1, std::string::npos);
+        std::string directoryBuild(directory + "build");
+
+        std::string hoption("-H" + directory);
+        std::string boption("-B" + directoryBuild);
+        
+        std::string cmake("cmake " + hoption + " " + boption);
+        std::string make("make -C " + directoryBuild);
+
+        system(cmake.c_str());
+        system(make.c_str());
+        
+        if (DEBUG)
+            std::cout << BEGIN_GREEN << VISUAL << "Please, check if the compilation was succesful" << END_COLOR << std::endl;
+    } else {
+        std::cout << BEGIN_YELLOW << VISUAL << "You must save the project and generate the code first" << END_COLOR << std::endl;
+    }
+
+}
+
+void VisualHFSM::on_menubar_clicked_about () {
+    lastButton = COMPILE;
+
+    if (DEBUG)
+        std::cout << BEGIN_GREEN << VISUAL << "About" << END_COLOR << std::endl;
+}
+
+void VisualHFSM::on_menubar_clicked_up () { // Deprecated
     lastButton = UP;
 
     if (DEBUG)
@@ -725,140 +927,6 @@ void VisualHFSM::on_options_clicked_up () {
         if (DEBUG)
             std::cout << BEGIN_GREEN << VISUAL << "Got the father" << END_COLOR << std::endl;
     }
-}
-
-void VisualHFSM::on_options_clicked_transition () {
-    lastButton = TRANSITION;
-    transitionsCounter = 0;
-
-    if (DEBUG)
-        std::cout << BEGIN_GREEN << VISUAL << "Create a transition?" << END_COLOR << std::endl;
-}
-
-void VisualHFSM::on_options_clicked_state () {
-    lastButton = STATE;
-
-    if (DEBUG)
-        std::cout << BEGIN_GREEN << VISUAL << "Create a state?" << END_COLOR << std::endl;
-}
-
-void VisualHFSM::on_options_clicked_save () {
-    lastButton = SAVE;
-
-    if (DEBUG)
-        std::cout << BEGIN_GREEN << VISUAL << "Save automata" << END_COLOR << std::endl;
-
-    if (this->filepath.empty())
-        this->on_options_clicked_save_as();
-    else
-        this->on_save_file(this->filepath);
-}
-
-void VisualHFSM::on_options_clicked_save_as () {
-    lastButton = SAVE_AS;
-
-    if (DEBUG)
-        std::cout << BEGIN_GREEN << VISUAL << "Save as..." << END_COLOR << std::endl;
-
-    this->sfdialog = new SaveFileDialog();
-    this->sfdialog->init();
-    this->sfdialog->signal_path().connect(sigc::mem_fun(this,
-                                        &VisualHFSM::on_save_file));
-}
-
-void VisualHFSM::on_options_clicked_open () {
-    lastButton = OPEN;
-
-    if (DEBUG)
-        std::cout << BEGIN_GREEN << VISUAL << "Open automata" << END_COLOR << std::endl;
-
-    this->lfdialog = new LoadFileDialog();
-    this->lfdialog->init();
-    this->lfdialog->signal_path().connect(sigc::mem_fun(this,
-                                        &VisualHFSM::on_load_file));
-}
-
-void VisualHFSM::on_options_clicked_interfaces () {
-    lastButton = INTERFACES;
-
-    if (DEBUG)
-        std::cout << BEGIN_GREEN << VISUAL << "Import interfaces" << END_COLOR << std::endl;
-
-    ImportDialog* idialog = new ImportDialog(this->currentSubautomata);
-    idialog->init();
-}
-
-void VisualHFSM::on_options_clicked_timer () {
-    lastButton = TIMER;
-
-    if (DEBUG)
-        std::cout << BEGIN_GREEN << VISUAL << "Timer of this automata" << END_COLOR << std::endl;
-
-    TimerDialog* tdialog = new TimerDialog(this->currentSubautomata);
-    tdialog->init();
-}
-
-void VisualHFSM::on_options_clicked_variables () {
-    lastButton = VARIABLES;
-
-    if (DEBUG)
-        std::cout << BEGIN_GREEN << VISUAL << "Variables for this automata" << END_COLOR << std::endl;
-
-    FunVarDialog* fvdialog = new FunVarDialog(this->currentSubautomata);
-    fvdialog->init();
-}
-
-void VisualHFSM::on_options_clicked_generate_code () {
-    lastButton = GENERATE_CODE;
-
-    if (DEBUG)
-        std::cout << BEGIN_GREEN << VISUAL << "Generating code..." << END_COLOR << std::endl;
-
-    MySaxParser parser;
-    parser.set_substitute_entities(true);
-    parser.parse_file(this->filepath);
-
-    std::string cpppath(this->filepath);
-    std::string cfgpath(this->filepath);
-    std::string cmakepath(this->filepath);
-    if ( (this->replace(cpppath, std::string(".xml"), std::string(".cpp"))) &&
-            (this->replace(cfgpath, std::string(".xml"), std::string(".cfg"))) &&
-            (this->replaceFile(cmakepath, std::string("/"), std::string("CMakeLists.txt"))) ) {
-        Generate generate(parser.getListSubautomata(), cpppath, cfgpath, cmakepath);
-        generate.init();
-    } else {
-        std::cout << BEGIN_GREEN << VISUAL << "Impossible to generate code" << END_COLOR << std::endl;
-    }
-}
-
-void VisualHFSM::on_options_clicked_compile () {
-    lastButton = COMPILE;
-
-    if (DEBUG)
-        std::cout << BEGIN_GREEN << VISUAL << "Starting compilation?" << END_COLOR << std::endl;
-
-    std::string directory(this->filepath);
-
-    size_t last_pos = directory.find_last_of(std::string("/"));
-    if (last_pos == std::string::npos) {
-        std::cout << "Impossible to compile" << std::endl;
-        return;
-    }
-
-    directory.erase(last_pos + 1, std::string::npos);
-    std::string directoryBuild(directory + "build");
-
-    std::string hoption("-H" + directory);
-    std::string boption("-B" + directoryBuild);
-    
-    std::string cmake("cmake " + hoption + " " + boption);
-    std::string make("make -C " + directoryBuild);
-
-    system(cmake.c_str());
-    system(make.c_str());
-    
-    if (DEBUG)
-        std::cout << BEGIN_GREEN << VISUAL << "Compilation done!" << END_COLOR << std::endl;
 }
 
 /*************************************************************
@@ -1112,22 +1180,19 @@ int VisualHFSM::getIdNodeInSubautomata ( int subautomataId ) {
 
 void VisualHFSM::removeRecursively ( GuiSubautomata* guisub, GuiNode* gnode ) {
     int idSubautomataSon = gnode->getIdSubautomataSon();
-    if (idSubautomataSon == 0) {
-        this->remove(guisub, gnode);
-    } else {
-        std::cout << "entramos con id guisub: " << guisub->getId() << std::endl;
+    if (idSubautomataSon != 0) {
         GuiSubautomata* subautomata = this->getSubautomata(idSubautomataSon);
-        std::list<GuiNode>* guiNodeList = subautomata->getListGuiNodes();
-        for ( std::list<GuiNode>::iterator guiNodeListIterator = guiNodeList->begin();
-                guiNodeListIterator != guiNodeList->end(); guiNodeListIterator++ ) {
+        std::list<GuiNode> guiNodeList = *(subautomata->getListGuiNodes());
+        for ( std::list<GuiNode>::iterator guiNodeListIterator = guiNodeList.begin();
+                guiNodeListIterator != guiNodeList.end(); guiNodeListIterator++ ) {
             this->removeRecursively(subautomata, &*guiNodeListIterator);
         }
-        this->remove(guisub, gnode);
     }
+    
+    this->remove(guisub, gnode);
 }
 
 void VisualHFSM::remove ( GuiSubautomata* guisub, GuiNode* gnode ) {
-    std::cout << "removing node with id: " << gnode->getId() << " from the automata with id: " << guisub->getId() << std::endl;
     root->remove_child(root->find_child(gnode->getEllipse()));
     root->remove_child(root->find_child(gnode->getEllipseInitial()));
     root->remove_child(root->find_child(gnode->getText()));
