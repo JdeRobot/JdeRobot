@@ -29,7 +29,7 @@
 class SaveFile {
 public:
 	// Constructor
-	SaveFile ( std::string filepath, std::list<GuiSubautomata>* subautomataList );
+	SaveFile ( std::string filepath, std::list<GuiSubautomata>* subautomataList, std::string config );
 
 	// Destructor
 	virtual ~SaveFile ();
@@ -39,7 +39,7 @@ public:
 
 private:
 	// Data structure
-	std::string filepath;
+	std::string filepath, config;
 	std::list<GuiSubautomata>* subautomataList;
 };
 

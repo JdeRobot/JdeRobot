@@ -147,7 +147,7 @@ public:
 private:
 	// Data structure
 	int id, idFather;
-	std::string timing, variables, functions;
+	std::string timing, variables, functions, config;
 	std::list<std::string> interfaces;
 	std::list<GuiNode> nodeList;
 	std::list<GuiTransition> transitionList;

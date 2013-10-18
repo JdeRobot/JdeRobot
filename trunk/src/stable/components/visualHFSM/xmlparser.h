@@ -49,7 +49,8 @@ typedef enum Element {
     E_LIB,
     E_ITERATION,
     E_VARS,
-    E_FUNCTIONS
+    E_FUNCTIONS,
+    E_CONFIGFILE
 } Element;
 
 // Definition of this class
@@ -63,6 +64,7 @@ public:
 
     // Getters
     std::list<SubAutomata> getListSubautomata ();
+    std::string getConfigFile ();
 
 protected:
     // Overrides:
@@ -81,6 +83,7 @@ private:
     // Data structure
     std::list <SubAutomata> subautomataList;
     std::map<std::string, Element> mapStringValues;
+    std::string configfile;
 
     bool state;
     float x;

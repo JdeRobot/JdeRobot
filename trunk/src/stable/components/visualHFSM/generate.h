@@ -43,7 +43,8 @@ class Generate {
 public:
 	// Constructor
 	Generate ( std::list<SubAutomata> subautomataList, std::string cpppath,
-								std::string cfgpath, std::string cmakepath );
+								std::string cfgpath, std::string cmakepath,
+								std::string configfile );
 
 	// Destructor
 	virtual ~Generate ();
@@ -53,7 +54,7 @@ public:
 
 private:
 	std::list<SubAutomata> subautomataList;
-	std::string path, cfgpath, cmakepath;
+	std::string path, cfgpath, cmakepath, configfile;
 	std::fstream fs;
 	std::map<TabEnum, std::string> mapTab;
 

@@ -23,9 +23,10 @@
 /*************************************************************
  * CONSTRUCTOR
  *************************************************************/
-SaveFile::SaveFile ( std::string filepath, std::list<GuiSubautomata>* subautomataList ) {
+SaveFile::SaveFile ( std::string filepath, std::list<GuiSubautomata>* subautomataList, std::string config ) {
 	this->filepath = std::string(filepath);
 	this->subautomataList = subautomataList;
+	this->config = std::string(config);
 }
 
 /*************************************************************
@@ -148,6 +149,9 @@ void SaveFile::init () {
 			xmlpp::Element* nodeFunctions = nodeSubautomata->add_child("functions");
 			nodeFunctions->set_child_text(subListIterator->getFunctions());
 		}
+
+		xmlpp::Element* nodeConfig = nodeRoot->add_child("config");
+		nodeConfig->set_child_text(this->config);
 
 		document.write_to_file(this->filepath, "UTF-8");
 

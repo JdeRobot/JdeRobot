@@ -24,11 +24,13 @@
  * CONSTRUCTOR
  *************************************************************/
 Generate::Generate ( std::list<SubAutomata> subautomataList, std::string cpppath,
-										std::string cfgpath, std::string cmakepath ) {
+										std::string cfgpath, std::string cmakepath,
+										std::string configfile ) {
 	this->subautomataList = subautomataList;
 	this->path = cpppath;
 	this->cfgpath = cfgpath;
 	this->cmakepath = cmakepath;
+	this->configfile = configfile;
 
 	this->mapTab[T_ZERO] = std::string();
 	this->mapTab[T_ONE] = std::string("\t");
@@ -60,7 +62,9 @@ int Generate::init () {
 
 		this->fs.open(this->cfgpath.c_str(), std::fstream::out);
 		if (this->fs.is_open()) {
-			this->generateCfg();
+			this->fs << this->configfile << std::endl;
+			this->fs.flush();
+			// this->generateCfg();
 			this->fs.close();
 		}
 		

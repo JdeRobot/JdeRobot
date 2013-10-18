@@ -129,6 +129,8 @@ VisualHFSM::VisualHFSM ( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builde
 
     this->idguinode = 1;
     this->idguitransition = 1;
+
+    this->createConfigFile();
 }
 
 /*************************************************************
@@ -832,6 +834,11 @@ void VisualHFSM::on_menubar_clicked_configfile () {
 
     if (DEBUG)
         std::cout << BEGIN_GREEN << VISUAL << "Config file for this automata" << END_COLOR << std::endl;
+
+    this->cfdialog = new ConfigFileDialog(this->configfile);
+    this->cfdialog->init();
+    this->cfdialog->signal_config().connect(sigc::mem_fun(this,
+                                        &VisualHFSM::on_config_text));
 }
 
 void VisualHFSM::on_menubar_clicked_generate_code () {
@@ -851,7 +858,7 @@ void VisualHFSM::on_menubar_clicked_generate_code () {
         if ( (this->replace(cpppath, std::string(".xml"), std::string(".cpp"))) &&
                 (this->replace(cfgpath, std::string(".xml"), std::string(".cfg"))) &&
                 (this->replaceFile(cmakepath, std::string("/"), std::string("CMakeLists.txt"))) ) {
-            Generate generate(parser.getListSubautomata(), cpppath, cfgpath, cmakepath);
+            Generate generate(parser.getListSubautomata(), cpppath, cfgpath, cmakepath, this->configfile);
             generate.init();
         } else {
             std::cout << BEGIN_GREEN << VISUAL << "Impossible to generate code" << END_COLOR << std::endl;
@@ -946,7 +953,7 @@ void VisualHFSM::on_save_file ( std::string path ) {
     if (DEBUG)
         std::cout << BEGIN_GREEN << VISUAL << "Saving file... " << this->filepath << END_COLOR << std::endl;
 
-    SaveFile savefile(this->filepath, &this->subautomataList);
+    SaveFile savefile(this->filepath, &this->subautomataList, this->configfile);
     savefile.init();
 }
 
@@ -963,12 +970,20 @@ void VisualHFSM::on_load_file ( std::string path ) {
         parser.set_substitute_entities(true);
         parser.parse_file(filepath);
 
+        this->configfile = parser.getConfigFile();
+
         this->removeAllGui();
         if (!this->loadSubautomata(parser.getListSubautomata()))
-            std::cout << "ERROR loading subautomata" << std::endl;
+            std::cout << BEGIN_RED << VISUAL << "ERROR loading subautomata" << END_COLOR << std::endl;
     } catch ( const xmlpp::exception& ex ) {
         std::cout << "libxml++ exception: " << ex.what() << std::endl;
     }
+}
+
+void VisualHFSM::on_config_text ( std::string config ) {
+    this->configfile = std::string(config);
+
+    delete this->cfdialog;
 }
 
 GuiSubautomata* VisualHFSM::getSubautomata ( int idSubautomata ) {
@@ -1027,7 +1042,6 @@ int VisualHFSM::loadSubautomata ( std::list<SubAutomata> subList ) {
             this->event_y = nodePoint->getY();
             this->idguinode = idNode;
             this->create_new_state(nodeListIterator->getIdSubautomataSon());
-            std::cout << "Es nodo inicial: " << nodeListIterator->isInitial() << std::endl;
             this->currentSubautomata->setIsInitialLastGuiNode(nodeListIterator->isInitial());
             this->currentSubautomata->setNameLastGuiNode(nodeListIterator->getName());
             this->currentSubautomata->setCodeLastGuiNode(nodeListIterator->getCode());
@@ -1228,4 +1242,19 @@ int VisualHFSM::getIdSubautomataWithNode ( int idNode ) {
     }
 
     return id;
+}
+
+void VisualHFSM::createConfigFile () {
+    this->configfile += "comp.HeadMotors.Proxy=NeckMotors:default -h 192.168.14.113 -p 10000\r\n";
+    this->configfile += "comp.HeadSpeed.Proxy=NeckSpeed:default -h 192.168.14.113 -p 10000\r\n";
+    this->configfile += "comp.LeftShoulderMotors.Proxy=LeftShoulderMotors:default -h 192.168.14.113 -p 10000\r\n";
+    this->configfile += "comp.RightShoulderMotors.Proxy=RightShoulderMotors:default -h 192.168.14.113 -p 10000\r\n";
+    this->configfile += "comp.LeftElbowMotors.Proxy=LeftElbowMotors:default -h 192.168.14.113 -p 10000\r\n";
+    this->configfile += "comp.RightElbowMotors.Proxy=RightElbowMotors:default -h 192.168.14.113 -p 10000\r\n";
+    this->configfile += "comp.LeftHipMotors.Proxy=LeftHipMotors:default -h 192.168.14.113 -p 10000\r\n";
+    this->configfile += "comp.RightHipMotors.Proxy=RightHipMotors:default -h 192.168.14.113 -p 10000\r\n";
+    this->configfile += "comp.LeftKneeMotors.Proxy=LeftKneeMotors:default -h 192.168.14.113 -p 10000\r\n";
+    this->configfile += "comp.RightKneeMotors.Proxy=RightKneeMotors:default -h 192.168.14.113 -p 10000\r\n";
+    this->configfile += "comp.LeftAnkleMotors.Proxy=LeftAnkleMotors:default -h 192.168.14.113 -p 10000\r\n";
+    this->configfile += "comp.RightAnkleMotors.Proxy=RightAnkleMotors:default -h 192.168.14.113 -p 10000\r\n";
 }

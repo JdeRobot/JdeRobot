@@ -32,6 +32,7 @@
 #include "savefile.h"
 #include "generate.h"
 #include "guisubautomata.h"
+#include "popups/configfiledialog.h"
 #include "popups/funvardialog.h"
 #include "popups/importdialog.h"
 #include "popups/loadfiledialog.h"
@@ -76,6 +77,7 @@ public:
     // Methods for signals from save and load files
     void on_save_file ( std::string path );
     void on_load_file ( std::string path );
+    void on_config_text ( std::string config );
 
 private:
     Glib::RefPtr<Gtk::Builder> refBuilder;
@@ -151,9 +153,10 @@ private:
     GuiSubautomata* currentSubautomata;
 
     // For files (load and save)
-    std::string filepath;
+    std::string filepath, configfile;
     SaveFileDialog* sfdialog;
     LoadFileDialog* lfdialog;
+    ConfigFileDialog* cfdialog;
 
     Button lastButton;
 
@@ -245,6 +248,8 @@ private:
     void remove ( GuiSubautomata* guisub, GuiNode* gnode );
 
     int getIdSubautomataWithNode ( int idNode );
+
+    void createConfigFile ();
 }; // Class VisualHFSM
 
 #endif // VISUALHFSM_H

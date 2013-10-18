@@ -41,6 +41,7 @@ MySaxParser::MySaxParser () : xmlpp::SaxParser() {
     this->mapStringValues["iteration_time"] = E_ITERATION;
     this->mapStringValues["variables"] = E_VARS;
     this->mapStringValues["functions"] = E_FUNCTIONS;
+    this->mapStringValues["config"] = E_CONFIGFILE;
 }
 
 /*************************************************************
@@ -53,6 +54,10 @@ MySaxParser::~MySaxParser () {}
  *************************************************************/
 std::list<SubAutomata> MySaxParser::getListSubautomata () {
     return this->subautomataList;
+}
+
+std::string MySaxParser::getConfigFile () {
+    return this->configfile;
 }
 
 /*************************************************************
@@ -173,6 +178,9 @@ void MySaxParser::on_start_element ( const Glib::ustring& name,
             this->option = E_FUNCTIONS;
             this->code.clear();
             break;
+        case E_CONFIGFILE:
+            this->option = E_CONFIGFILE;
+            break;
         default:
             break;
     }
@@ -202,6 +210,8 @@ void MySaxParser::on_end_element ( const Glib::ustring& name ) {
             break;
         case E_FUNCTIONS:
             this->subautomata->setFunctions(this->code);
+            break;
+        case E_CONFIGFILE:
             break;
         default:
             break;
@@ -276,6 +286,10 @@ void MySaxParser::on_characters ( const Glib::ustring& text ) {
         }
         case E_FUNCTIONS: {
             this->code += text;
+            break;
+        }
+        case E_CONFIGFILE: {
+            this->configfile += text;
             break;
         }
         default:
