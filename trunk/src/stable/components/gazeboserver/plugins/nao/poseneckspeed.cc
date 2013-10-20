@@ -93,7 +93,7 @@ namespace gazebo {
             this->neckspeed.joint_pan->SetVelocity(0, this->neckspeed.motorsdata.panSpeed);
             this->neckspeed.joint_pan->SetMaxForce(0, this->stiffness);
         } else {
-            this->neckspeed.joint_tilt->SetVelocity(0, this->neckspeed.motorsdata.panSpeed);
+            this->neckspeed.joint_tilt->SetVelocity(0, this->neckspeed.motorsdata.tiltSpeed);
             this->neckspeed.joint_tilt->SetMaxForce(0, this->stiffness);
         }
 
