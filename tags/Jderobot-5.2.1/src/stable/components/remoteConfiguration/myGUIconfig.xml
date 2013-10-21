@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<myComponent>
+	<Configuration>
+		<GUI_options>
+			<GUI_active>toggle</GUI_active>
+			<show_opengl>toggle</show_opengl>
+			<debug>toggle</debug>
+		</GUI_options>
+	</Configuration>
+	<Segmentation>
+		<filter>
+			<color>
+				<r>inputbox</r>
+				<g>inputbox</g>
+				<b>inputbox</b>
+			</color>	
+		</filter>
+	</Segmentation>	
+	<save>button</save>	
+</myComponent>

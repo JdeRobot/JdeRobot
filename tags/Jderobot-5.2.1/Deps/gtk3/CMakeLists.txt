@@ -1,0 +1,10 @@
+include(FindPkgConfig)
+
+PKG_CHECK_MODULES(gtk3 QUIET gtk+-3.0)
+PKG_CHECK_MODULES(gtkmm3 QUIET gtkmm-3.0)
+PKG_CHECK_MODULES(goocanvasmm QUIET goocanvasmm-2.0)
+IF (goocanvasmm_INCLUDE_DIRS)
+    MESSAGE("*** Goocanvasmm LIBRARIES FOUND")
+ELSE()
+    MESSAGE("*** Goocanvasmm LIBRARIES NOT FOUND")
+ENDIF()

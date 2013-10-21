@@ -1,0 +1,66 @@
+AL::ALValue names, values;
+names.arraySetSize(21);
+values.arraySetSize(21);
+
+names[0] = "HeadYaw";
+values[0] = 0;
+
+names[1] = "HeadPitch";
+values[1] = 0;
+
+names[2] = "LShoulderPitch";
+values[2] = 1.83616;
+
+names[3] = "LShoulderRoll";
+values[3] = 0.191708;
+
+names[4] = "LElbowYaw";
+values[4] = -1.47268;
+
+names[5] = "LElbowRoll";
+values[5] = -0.524586;
+
+names[6] = "LHipYawPitch";
+values[6] = 0;
+
+names[7] = "LHipRoll";
+values[7] = -0.00302604;
+
+names[8] = "LHipPitch";
+values[8] = -0.390954;
+
+names[9] = "LKneePitch";
+values[9] = 0.943368;
+
+names[10] = "LAnklePitch";
+values[10] = -0.555350;
+
+names[11] = "LAnkleRoll";
+values[11] = 0.00310996;
+
+names[12] = "RHipRoll";
+values[12] = 0.00302604;
+
+names[13] = "RHipPitch";
+values[13] = -0.390954;
+
+names[14] = "RKneePitch";
+values[14] = 0.943368;
+
+names[15] = "RAnklePitch";
+values[15] = -0.555350;
+
+names[16] = "RAnkleRoll";
+values[16] = 0.00310996;
+
+names[17] = "RShoulderPitch";
+values[17] = 1.83616;
+
+names[18] = "RShoulderRoll";
+values[18] = -0.191708;
+
+names[19] = "RElbowYaw";
+values[19] = 1.47268;
+
+names[20] = "RElbowRoll";
+values[20] = 0.524586;

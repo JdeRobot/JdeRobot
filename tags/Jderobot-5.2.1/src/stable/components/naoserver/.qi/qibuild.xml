@@ -1,0 +1,4 @@
+<qibuild version="1">
+  <defaults config="robot" />
+  <build />
+</qibuild>

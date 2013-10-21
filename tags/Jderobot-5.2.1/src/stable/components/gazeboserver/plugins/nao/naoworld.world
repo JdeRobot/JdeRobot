@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<sdf version="1.3">
+  <world name="default">
+    <!-- Ground -->
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <!-- My robots -->
+    <include>
+      <uri>model://nao_robot</uri>
+      <pose>0.08 0 0 0 0 3.14</pose>
+    </include>
+
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    
+    <!-- A ball -->
+<!--    <include>
+        <uri>model://pelota</uri>
+        <pose>0 -2 0 0 0 0</pose>
+    </include>
+
+    <include>
+	<uri>model://pelota_verde</uri>
+	<pose>-0.5 -2.3 0 0 0 0</pose>
+    </include>
+-->
+  </world>
+</sdf>
