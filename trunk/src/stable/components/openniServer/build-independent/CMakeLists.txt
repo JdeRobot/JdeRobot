@@ -10,17 +10,47 @@ include_directories(
 
 add_executable (openniServer  ${SOURCE_FILES})
 
-#automated opencv
 include(FindPkgConfig)
-PKG_CHECK_MODULES(opencv REQUIRED opencv)
-include_directories(${opencv_INCLUDE_DIRS})
-link_directories(${opencv_LIBRARY_DIRS})
+#manual opencv
+FIND_PATH( OpenCV_INCLUDE_DIR NAMES cv.h  PATHS ENV C++LIB ENV PATH PATH_SUFFIXES include/opencv/)
+IF( OpenCV_INCLUDE_DIR )
+	MESSAGE("OpenCV was found in: ${OpenCV_INCLUDE_DIR}")
+	
+    FIND_LIBRARY( OpenCV_LIBRARY1 NAMES opencv_core PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
+    FIND_LIBRARY( OpenCV_LIBRARY2 NAMES opencv_highgui PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
+    FIND_LIBRARY( OpenCV_LIBRARY3 NAMES opencv_contrib PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
+    FIND_LIBRARY( OpenCV_LIBRARY4 NAMES opencv_calib3d PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
+    FIND_LIBRARY( OpenCV_LIBRARY5 NAMES opencv_flann PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
+    FIND_LIBRARY( OpenCV_LIBRARY6 NAMES opencv_gpu PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
+    FIND_LIBRARY( OpenCV_LIBRARY7 NAMES opencv_imgproc PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
+    FIND_LIBRARY( OpenCV_LIBRARY8 NAMES opencv_legacy PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
+    FIND_LIBRARY( OpenCV_LIBRARY9 NAMES opencv_ml PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
+    FIND_LIBRARY( OpenCV_LIBRARY11 NAMES opencv_objdetect PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
+    FIND_LIBRARY( OpenCV_LIBRARY14 NAMES opencv_video PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
+    SET (OpenCV_LIBRARIES ${OpenCV_LIBRARY1} ${OpenCV_LIBRARY5}  ${OpenCV_LIBRARY7}  ${OpenCV_LIBRARY9}  ${OpenCV_LIBRARY14} )
+    SET (OpenCVGUI_LIBRARIES ${OpenCV_LIBRARY2} ${OpenCV_LIBRARY3} ${OpenCV_LIBRARY4} ${OpenCV_LIBRARY6} ${OpenCV_LIBRARY8} ${OpenCV_LIBRARY11})
+    IF( OpenCV_LIBRARIES )
+		#MESSAGE("OPENCV LIBRARY FOUND IN ${OpenCV_LIBRARIES}")
+    ENDIF( OpenCV_LIBRARIES )
+ENDIF(OpenCV_INCLUDE_DIR)
+
+IF (NOT  OpenCV_INCLUDE_DIR)
+	MESSAGE("*** OpenCV not found")
+ENDIF()
+
+link_directories(${OpenCV_LIBRARIES})
+include_directories(${OpenCV_INCLUDE_DIR})
+
+
+
+
+
 #automated gsl
 PKG_CHECK_MODULES(gsl REQUIRED gsl)
 include_directories(${gsl_INCLUDE_DIRS})
 link_directories(${gsl_LIBRARY_DIRS})
 
-
+find_package(Threads)
 
 
 #manual openni libraries
@@ -94,24 +124,26 @@ if  ( NITE2_LIB )
 	endif()
 
 	TARGET_LINK_LIBRARIES(openniServer
-	  ${opencv_LIBRARIES}
+		${CMAKE_THREAD_LIBS_INIT}
+	  ${OpenCV_LIBRARIES}
+		${OpenCVGUI_LIBRARIES}
 	  ${gsl_LIBRARIES}
 	  ${Ice_LIBRARIES}
 	  ${LIBS_DIR}/libcolorspacesmm.so
 	  ${LIBS_DIR}/libJderobotInterfaces.so
-	  ${LIBS_DIR}/libjderobotutil.so
 	  ${LIBS_DIR}/libprogeo.so
 	  ${OPENNI2_LIB}/libOpenNI2.so
 	  ${NITE2_LIB}/libNiTE2.so
 	)
 else()
 	TARGET_LINK_LIBRARIES(openniServer
-	  ${opencv_LIBRARIES}
+		${CMAKE_THREAD_LIBS_INIT}
+	  ${OpenCV_LIBRARIES}
+		${OpenCVGUI_LIBRARIES}
 	  ${gsl_LIBRARIES}
 	  ${Ice_LIBRARIES}
 	  ${LIBS_DIR}/libcolorspacesmm.so
 	  ${LIBS_DIR}/libJderobotInterfaces.so
-	  ${LIBS_DIR}/libjderobotutil.so
 	  ${LIBS_DIR}/libprogeo.so
 	  ${OPENNI2_LIB}/libOpenNI2.so
 	)
