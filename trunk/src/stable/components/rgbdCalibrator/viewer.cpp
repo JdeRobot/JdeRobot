@@ -38,7 +38,7 @@ namespace rgbdCalibrator{
 const std::string gladepath = std::string(GLADE_DIR) +
 		std::string("/rgbdCalibrator.glade");
 
-const std::string pathImage = "./images2/";
+const std::string pathImage = "./images/";
 
 
 Viewer::Viewer()
@@ -102,6 +102,18 @@ bool Viewer::isVisible(){
 
 void Viewer::display( const colorspaces::Image& imageColor, const colorspaces::Image& imageDepth )
 {
+
+	// Draw optical center
+	for (int i = -2; i<=2; i++)
+			for (int j =-2; j<=2; j++)
+			{
+				int pixel = (imageColor.width*(imageColor.height/2+j)+(imageColor.width/2+i))*3;
+				imageColor.data[pixel] = 255;
+				imageColor.data[pixel+1] = 0;
+				imageColor.data[pixel+2] = 0;
+			}
+
+
 	colorspaces::ImageRGB8 img_rgb8(imageColor);//conversion will happen if needed
 	Glib::RefPtr<Gdk::Pixbuf> imgBuffColor =
 			Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8.data,
@@ -114,6 +126,8 @@ void Viewer::display( const colorspaces::Image& imageColor, const colorspaces::I
 
 	gtkimage_color->clear();
 	gtkimage_color->set(imgBuffColor);
+
+
 
 	gtkimage_color2->clear();
 	gtkimage_color2->set(imgBuffColor);
@@ -332,9 +346,7 @@ bool Viewer::on_eventbox_extrinsics_clicked(GdkEventButton * event)
 		if (res == false)
 		{
 			Eigen::Vector3d p2D ((int) event->x, (int) event->y, 1.0);
-			Eigen::Vector4d p3D;
-			mCalibration->BackProjectWithDepth (p2D, mImageDepth, p3D);
-			mCalibration->test(p3D);
+			mCalibration->test(p2D, mImageDepth);
 		}
 
 		pthread_mutex_unlock(&mutex);

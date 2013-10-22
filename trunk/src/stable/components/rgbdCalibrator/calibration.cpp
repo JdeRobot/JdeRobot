@@ -21,14 +21,10 @@
 
 #include <calibration.h>
 #include <iostream> 
-#include "../../libs/geometry/math/Point3D.h"
-#include "../../libs/geometry/math/Segment3D.h"
-#include <../../libs/progeo/progeo.h>
 
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h> 
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_multifit.h>
+#include <progeo/progeo.h>
+
+
 
 
 using namespace cv;
@@ -40,6 +36,7 @@ namespace rgbdCalibrator{
 // You can see in OpenCV samples:
 //     - samples/cpp/tutorial_code/calib3d/camera_calibration/
 
+TPinHoleCamera myCamA;
 
 Calibration::Calibration(): mProgeo(NULL)
 {
@@ -178,7 +175,7 @@ double Calibration::computeReprojectionErrors( const vector<vector<Point3f> >& o
 
 void progeo_old_test ()
 {
-	TPinHoleCamera myCamA;
+
 	xmlReader(&myCamA, "./cameraB.xml");
 	display_camerainfo(myCamA);
 
@@ -186,13 +183,14 @@ void progeo_old_test ()
 	display_camerainfo(myCamA);
 
 	HPoint2D pixel;
-	pixel.x =224.;
-	pixel.y =18.;
+	pixel.x =180.;
+	pixel.y =59.;
 	pixel.h = 1.;
 
 	std::cout << pixel.x << " , " << pixel.y << std::endl;
 
 	HPoint3D p3D;
+
 	backproject(&p3D, pixel, myCamA);
 
 	std::cout << p3D.X << " , " << p3D.Y << " , " << p3D.Z << std::endl;
@@ -244,15 +242,29 @@ void Calibration::initProgeo()
 	RT(3,2) = double(0.);
 	RT(3,3) = double(1.);
 
+	/*
 	mProgeo = new Progeo::Progeo(posCamera, K, RT, 320, 240);
 	mProgeo->updateRTMatrix();
 	mProgeo->displayCameraInfo();
 	mProgeo->saveToFile("./CameraA.xml");
+	*/
 
-	Eigen::Vector3d pixel(224.0, 18., 1.0);
+	mProgeo = new Progeo::Progeo("./cameraB.xml");
+	mProgeo->updateKMatrix();
+	mProgeo->updateRTMatrix();
+	mProgeo->displayCameraInfo();
+
+	Eigen::Vector3d pixel(59.0, 59., 1.0);
 	Eigen::Vector4d p3d;
+
+	mProgeo->pixel2optical(pixel);
+
 	mProgeo->backproject(pixel,p3d);
 	std::cout << "Pixel: " << pixel << std::endl;
+	std::cout << "P3d: " << p3d << std::endl;
+
+
+	mProgeo->backprojectCV(pixel,p3d);
 	std::cout << "P3d: " << p3d << std::endl;
 
 
@@ -304,26 +316,53 @@ Calibration::BackProjectWithDepth (const Eigen::Vector3d pixel,
 
 void Calibration::initPatternPoints()
 {
-	// Down line, right to left
-	mPatternPoints.push_back(Eigen::Vector4d (120.,0.,0.,1.));
-	mPatternPoints.push_back(Eigen::Vector4d (60.0,0.,0.,1.));
+
+	/* big pattern */
+/*
+	mPatternPoints.push_back(Eigen::Vector4d (-412.,0.,0.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (-262.,0.,0.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (-112.,0.,0.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (112.,0.,0.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (262.,0.,0.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (412.,0.,0.,1.));
+*/
+
+	mPatternPoints.push_back(Eigen::Vector4d (0.,-410.,630.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (0.,-260.,630.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (0.,-110.,630.,1.));
+	//mPatternPoints.push_back(Eigen::Vector4d (0.,110.,630.,1.));
+	//mPatternPoints.push_back(Eigen::Vector4d (0.,260.,630.,1.));
+	//mPatternPoints.push_back(Eigen::Vector4d (0.,410.,630.,1.));
+
+	mPatternPoints.push_back(Eigen::Vector4d (-408.,0.,1310.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (-258.,0.,1310.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (-108.,0.,1310.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (108.,0.,1310.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (258.,0.,1310.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (408.,0.,1310.,1.));
+
+	/* small pattern (cube)
+
+    // Down line, right to left
+	mPatternPoints.push_back(Eigen::Vector4d (0.,120.,0.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (0.,60.,0.,1.));
 	mPatternPoints.push_back(Eigen::Vector4d (0.,0.,0.,1.));
-	mPatternPoints.push_back(Eigen::Vector4d (0.,0.,60.,1.));
-	mPatternPoints.push_back(Eigen::Vector4d (0.,0.,120.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (60.,0.,0.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (120.,0.,0.,1.));
 
 	// Up line, right to left
-	mPatternPoints.push_back(Eigen::Vector4d (120.,120.,0.,1.));
-	mPatternPoints.push_back(Eigen::Vector4d (60.,120.,0.,1.));
-	mPatternPoints.push_back(Eigen::Vector4d (0.,120.,0.,1.));
-	mPatternPoints.push_back(Eigen::Vector4d (0.,120.,60.,1.));
 	mPatternPoints.push_back(Eigen::Vector4d (0.,120.,120.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (0.,60.,120.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (0.,0.,120.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (60.,0.,120.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (120.,0.,120.,1.));
 
 	// Middle line, right to left
-	mPatternPoints.push_back(Eigen::Vector4d (120.,60.,0.,1.));
-	mPatternPoints.push_back(Eigen::Vector4d (0.,60.,0.,1.));
-	mPatternPoints.push_back(Eigen::Vector4d (0.,60.,120.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (0.,120.,60.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (0.,0.,60.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (120.,0.,60.,1.));
 
-
+	 */
 }
 
 bool Calibration::addPatternPixel (Eigen::Vector3d pixel, const colorspaces::Image depthData)
@@ -336,8 +375,8 @@ bool Calibration::addPatternPixel (Eigen::Vector3d pixel, const colorspaces::Ima
 	if (mPixelPoints.size() == mPatternPoints.size())
 	{
 
-		std::cout << "\tPixels" << "\t\t" << "Pixel(Image)\tPixel(progeo)\tDistance" << "\t"
-				  << "Backproject"  << "\t\t\t" << "Fran Point" << "\t\t" << "Pattern"
+		std::cout << "\tPixels" << "\t\t" << "Graphic Pixel\tOptical Pixel\tDistance" << "\t" <<
+				  "Transformado Real\t\t" << "Pattern"
 				  <<std::endl;
 
 		for (int i=0; i<mPixelPoints.size(); i++)
@@ -349,54 +388,98 @@ bool Calibration::addPatternPixel (Eigen::Vector3d pixel, const colorspaces::Ima
 
 			Eigen::Vector4d pCamera(0.,0.,1000000.,0.);
 
-			Eigen::Vector3d pixelChoosen;
+			Eigen::Vector3d pixelGraphic;
 
 			// We use a window of 5x5 pixels to avoid errors of the depth image
 			for (int x=-2; x<=2; x++) {
-
 				for (int y=-2;y<=2; y++) {
-					Eigen::Vector3d pixel(mPixelPoints[i](0)+x,mPixelPoints[i](1)+y,1.0);
+					int px, py;
+					if (mPixelPoints[i](0)+x < 0)
+						px = 0;
+					else if (mPixelPoints[i](0)+x >= mProgeo->getImageWidth())
+						px = mProgeo->getImageWidth()-1;
+					else
+						px = mPixelPoints[i](0)+x;
+
+					if (mPixelPoints[i](1)+y < 0)
+						py = 0;
+					else if (mPixelPoints[i](1)+y >= mProgeo->getImageHeight())
+						py = mProgeo->getImageHeight()-1;
+					else
+						py = mPixelPoints[i](1)+y;
+
+					Eigen::Vector3d pixel(px,py,1.0);
 					Eigen::Vector4d aux;
-					BackProjectWithDepth (pixel, depthData, aux);
+					getRealPoint(pixel, depthData, aux);
 
 					if (aux(2) != 0 && aux(2) < pCamera(2)) {
 						pCamera = aux;
-						pixelChoosen = pixel;
+						pixelGraphic = pixel;
 					}
 				}
 			}
 
+			// We want to get the center of sphera (3cm or radius)
+			//pCamera(1) = pCamera(1) - 30;
+			//pCamera(1) = pCamera(1) + 100;
+
 			mCameraPoints.push_back(pCamera);
 
-			// Pixel Image
-			std::cout << "(" << pixelChoosen[0] << "," << pixelChoosen[1] << ")  \t";
+			// Pixel Graphic
+			std::cout << "(" << pixelGraphic[0] << "," << pixelGraphic[1] << ")  \t";
 
-			mProgeo->pixel2optical(pixelChoosen);
+			Eigen::Vector3d pixelOptical;
+			pixelOptical = pixelGraphic;
+			mProgeo->pixel2optical(pixelOptical);
 
 			// Pixel Progeo
-			std::cout << "(" << pixelChoosen[0] << "," << pixelChoosen[1] << ")  \t";
+			std::cout << "(" << pixelOptical[0] << "," << pixelOptical[1] << ")  \t";
 
 			// Distance
-			float depth = (int)depthData.data[((depthData.cols*(int)pixelChoosen(1))+(int)pixelChoosen(0))*3+1]<<8 | (int)depthData.data[((depthData.cols*(int)pixelChoosen(1))+(int)pixelChoosen(0))*3+2];
-			std::cout << depth << "\t\t";
+			float depth = (int)depthData.data[((depthData.cols*(int)pixelGraphic(1))+(int)pixelGraphic(0))*3+1]<<8 | (int)depthData.data[((depthData.cols*(int)pixelGraphic(1))+(int)pixelGraphic(0))*3+2];
+			std::cout << depth << "\t";
 
+			/*
 			// Pixel backProject
 			Eigen::Vector4d aux3D;
-			mProgeo->backproject(pixelChoosen, aux3D);
+			mProgeo->backproject(pixelOptical, aux3D);
 			std::cout << "(" << aux3D[0] << "," << aux3D[1] << "," << aux3D[2] << ")\t";
 
+			Eigen::Vector4d pos = mProgeo->getPosition();
+			Eigen::Vector4d p;
+
+			mProgeo->backproject(pixelOptical,p);
+
+			float modulo = sqrt(double(1/(((pos(0)-p(0))*(pos(0)-p(0)) + (pos(1)-p(1))*(pos(1)-p(1)) + (pos(2)-p(2))*(pos(2)-p(2))))));
+
+			Eigen::Vector4d u;
+			u(0) = (p(0)-pos(0)) * modulo;
+			u(1) = (p(1)-pos(1)) * modulo;
+			u(2) = (p(2)-pos(2)) * modulo;
+
+			float distance = (int)depthData.data[((depthData.cols*(int)pixelGraphic(1))+(int)pixelGraphic(0))*3+1]<<8 | (int)depthData.data[((depthData.cols*(int)pixelGraphic(1))+(int)pixelGraphic(0))*3+2];
+
+			Eigen::Vector4d p3DPH;
+			p3DPH(0) = distance*u(0) + pos(0);
+			p3DPH(1) = distance*u(1) + pos(0);
+			p3DPH(2) = distance*u(2) + pos(0);
+
+			std::cout << "\t(" << p3DPH[0] << "," << p3DPH[1] << "," << p3DPH[2] << ")\t";
+			 */
 
 			// fix bug about projection's progeo
 			Eigen::Vector4d p3D;
-			getRealPoint(pixelChoosen, depthData, p3D);
+			getRealPoint(pixelGraphic, depthData, p3D);
 			std::cout << "\t(" << p3D[0] << "," << p3D[1] << "," << p3D[2] << ")\t\t";
-
 
 			std::cout << "(" << mPatternPoints[i](0) << ","
 					<< mPatternPoints[i](1) << ","
 					<< mPatternPoints[i](2) << ")";
 
 			std::cout << std::endl;
+
+
+
 		}
 
 		mPairPoints.clear();
@@ -438,6 +521,7 @@ void Calibration::getRealPoint(const Eigen::Vector3d pixel,
 
 	float depth = (int)depthData.data[((depthData.cols*(int)pixel(1))+(int)pixel(0))*3+1]<<8 | (int)depthData.data[((depthData.cols*(int)pixel(1))+(int)pixel(0))*3+2];
 
+
 	if (depth == 0)
 	{
 		res3D(0) = 0.;
@@ -448,7 +532,9 @@ void Calibration::getRealPoint(const Eigen::Vector3d pixel,
 	}
 
 	Eigen::Vector4d p3D;
-	mProgeo->backproject(pixel, p3D);
+	Eigen::Vector3d pixelOptical = pixel;
+	mProgeo->pixel2optical(pixelOptical);
+	mProgeo->backproject(pixelOptical, p3D);
 
 	//std::cout << "-> p3D: " << p3D << std::endl;
 
@@ -502,21 +588,31 @@ void Calibration::getRealPoint(const Eigen::Vector3d pixel,
 	res3D(0) = t*u(0) + camPosition(0);
 	res3D(1) = t*u(1) + camPosition(1);
 	res3D(2) = t*u(2) + camPosition(2);
-
+	res3D(3) = 1.0;
 }
 
 
-void Calibration::test(Eigen::Vector4d pCamera)
+void Calibration::test(Eigen::Vector3d pixel, const colorspaces::Image depthData)
 {
 	std::cout << "====== TEST ====== " << std::endl;
-	std::cout << pCamera << std::endl;
+
+	Eigen::Vector4d pCamera;
+	getRealPoint(pixel, depthData, pCamera);
+	std::cout << "Pto ref Cámara: (" << pCamera(0) << "," << pCamera(1) << "," << pCamera(2) << ")  - ";
+	std::cout << "Dist: " << sqrt( (pCamera(0)*pCamera(0)) + (pCamera(1)*pCamera(1)) + (pCamera(2)*pCamera(2))) << std::endl;
 
 	Eigen::Vector4d s = mRTsolution * pCamera;
-	std::cout << s << std::endl;
+	std::cout << "Pto ref Patron: (" << s(0) << "," << s(1) << "," << s(2) << ")  - ";
+
+	std::cout << "Dist: " << sqrt( (s(0)*s(0)) + (s(1)*s(1)) + (s(2)*s(2))) << std::endl;
+
+	float depth = (int)depthData.data[((depthData.cols*(int)pixel(1))+(int)pixel(0))*3+1]<<8 | (int)depthData.data[((depthData.cols*(int)pixel(1))+(int)pixel(0))*3+2];
+	std::cout << "Real Dist Xtion: " << depth << std::endl;
 }
 
 void Calibration::LSO()
 {
+
 
 	gsl_matrix *ertm=gsl_matrix_alloc(4,4);
 	double chisq;
@@ -530,7 +626,7 @@ void Calibration::LSO()
 	c=gsl_vector_alloc(12);
 	work = gsl_multifit_linear_alloc (mPairPoints.size()*3,12);
 	double x1,y1,z1,x2,y2,z2;
-	//preaparamos la matriz de ecuaciones
+
 
 	for (int i=0; i<mPairPoints.size(); i++){
 		x1=mPairPoints[i].first(0);
@@ -558,6 +654,8 @@ void Calibration::LSO()
 		gsl_matrix_set(x, i*3+2,11, 1);
 		gsl_vector_set(y,i*3+2, z1);
 	}
+
+	//print_gsl_matrix(x);
 
 	gsl_multifit_linear(x,y,c,cov,&chisq,work);
 	gsl_multifit_linear_free(work);
@@ -587,9 +685,23 @@ void Calibration::LSO()
 	//gsl_matrix_fprintf(stdout,ertm,"%f");
 
 	std::cout << mRTsolution << std::endl;
-
-
-
 }
+
+
+void Calibration::print_gsl_matrix (const gsl_matrix *m)
+{
+
+	for (size_t i = 0; i < m->size1; i++) {
+		for (size_t j = 0; j < m->size2; j++) {
+
+			double item = gsl_matrix_get(m, i, j);
+			std::cout << item << "\t";
+		}
+
+		std::cout << std::endl;
+	}
+	std::cout << std::endl << std::endl;
+}
+
 
 }

@@ -28,12 +28,24 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <cmath>
 #include <string>
+
+#include <boost/tuple/tuple.hpp>
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
+
+#include <geometry/math/Point3D.h>
+#include <geometry/math/Segment3D.h>
+#include <geometry/progeo/Progeo.h>
 #include <visionlib/colorspaces/colorspacesmm.h>
 #include <jderobot/camera.h>
-#include "../../libs/geometry/math/Point3D.h"
-#include <boost/tuple/tuple.hpp>
 
-#include "../../libs/geometry/progeo/Progeo.h"
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_multifit.h>
+
 using namespace cv;
 
 namespace rgbdCalibrator
@@ -66,7 +78,7 @@ namespace rgbdCalibrator
 
     Eigen::Matrix4d getRTSolution() { return mRTsolution; };
 
-    void test(Eigen::Vector4d pCamera);
+    void test(Eigen::Vector3d pixel, const colorspaces::Image depthData);
 
   private:
 
@@ -90,7 +102,7 @@ namespace rgbdCalibrator
     void initPatternPoints();
 
     void LSO();
-   
+    void print_gsl_matrix (const gsl_matrix *m);
 
     void calcBoardCornerPositions(Size boardSize, 
 				  float squareSize, 
