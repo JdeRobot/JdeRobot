@@ -13,7 +13,7 @@ TARGET_LINK_LIBRARIES(colorspacesshare  ${OpenCV_LIBRARIES})
 
 add_library (colorspacesmmshare SHARED imagecv.cpp imagecv.h uncopyable.h)
 
-TARGET_LINK_LIBRARIES(colorspacesmmshare ${OpenCV_LIBRARIES})
+TARGET_LINK_LIBRARIES(colorspacesmmshare ${OpenCV_LIBRARIES} ${OpenCVGUI_LIBRARIES})
 
 set_target_properties(colorspacesmmshare PROPERTIES OUTPUT_NAME colorspacesmm)
 set_target_properties(colorspacesshare PROPERTIES OUTPUT_NAME colorspaces)
