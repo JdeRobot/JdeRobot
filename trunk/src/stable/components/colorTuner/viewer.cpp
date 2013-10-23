@@ -24,7 +24,7 @@
 #include <cmath>
 #include <cv.h>
 #include <highgui.h>
-#include <colorspaces/colorspaces.h>
+#include <visionlib/colorspaces/colorspaces.h>
 
 namespace cameraview{
 
@@ -1460,7 +1460,7 @@ bool colorTuner::on_yuv_image_space_button_release_event (GdkEventButton *event)
 						                        image->width,
 						                        image->height,
 						                        image->widthStep);
-	std::cout << image->depth << std::endl;
+
     	displayFrameRate();
         mainwindow->resize(1,1);
         while (gtkmain.events_pending())

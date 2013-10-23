@@ -27,7 +27,7 @@
 #include <IceUtil/Thread.h>
 #include <IceUtil/Time.h>
 #include <string>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <highgui.h>
 
 #define PI 3.141592654
