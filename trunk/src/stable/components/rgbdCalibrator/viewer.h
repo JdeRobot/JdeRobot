@@ -97,6 +97,7 @@ namespace rgbdCalibrator{
 
     std::vector<colorspaces::Image> mDepthVector;
     const int MAX_MAPS;
+    bool handlerDepth;
 
     // Extrinsics variables
 

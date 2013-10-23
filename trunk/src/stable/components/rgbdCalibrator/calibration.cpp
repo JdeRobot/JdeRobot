@@ -242,12 +242,12 @@ void Calibration::initProgeo()
 	RT(3,2) = double(0.);
 	RT(3,3) = double(1.);
 
-	/*
+
 	mProgeo = new Progeo::Progeo(posCamera, K, RT, 320, 240);
 	mProgeo->updateRTMatrix();
 	mProgeo->displayCameraInfo();
 	mProgeo->saveToFile("./CameraA.xml");
-	*/
+
 
 	/*
 	mProgeo = new Progeo::Progeo("./cameraB.xml");
@@ -367,20 +367,23 @@ void Calibration::initPatternPoints()
 	 */
 }
 
-void Calibration::getBestDepth (const Eigen::Vector3d pixel, const std::vector<colorspaces::Image> depthVector,
+void Calibration::getBestDepth (const Eigen::Vector3d pixel, std::vector<colorspaces::Image> depthVector,
 		colorspaces::Image& depthData, Eigen::Vector4d& res3D, Eigen::Vector3d& bestPixel)
 {
 
 	const int WINDOW_SIZE = 5;
-	res3D(2) = 100000.0;
 
 
-	for (std::vector<colorspaces::Image>::iterator it; it != depthVector.end(); ++it)
+	res3D(2) = 1000000.0;
+
+
+	for (std::vector<colorspaces::Image>::iterator it = depthVector.begin() ; it != depthVector.end(); ++it)
 	{
 
 		// We use a window of 5x5 pixels to avoid errors of the depth image
 		for (int x=-(WINDOW_SIZE/2); x<=(WINDOW_SIZE/2); x++) {
 			for (int y=-(WINDOW_SIZE/2);y<=(WINDOW_SIZE/2); y++) {
+
 				int px, py;
 				if (pixel(0)+x < 0)
 					px = 0;
@@ -396,26 +399,23 @@ void Calibration::getBestDepth (const Eigen::Vector3d pixel, const std::vector<c
 				else
 					py =pixel(1)+y;
 
-				Eigen::Vector3d pixel(px,py,1.0);
+				Eigen::Vector3d pixelChoosen(px,py,1.0);
 				Eigen::Vector4d aux;
-				getRealPoint(pixel, (colorspaces::Image)(*it), aux);
 
-				if (aux(2) != 0 && aux(2) < res3D(2)) {
+				getRealPoint(pixelChoosen, (colorspaces::Image)*it, aux);
+
+				if (aux(2) != 0 && abs(aux(2)) < abs(res3D(2))) {
 					res3D = aux;
 					bestPixel = pixel;
 					depthData = *it;
 				}
 			}
 		}
-
 	}
-
-
-
 }
 
 
-bool Calibration::addPatternPixel (Eigen::Vector3d pixel, const std::vector<colorspaces::Image> depthVector)
+bool Calibration::addPatternPixel (Eigen::Vector3d pixel, std::vector<colorspaces::Image> depthVector)
 {
 	mPixelPoints.push_back(pixel);
 
@@ -429,7 +429,8 @@ bool Calibration::addPatternPixel (Eigen::Vector3d pixel, const std::vector<colo
 				  "Transformado Real\t\t" << "Pattern"
 				  <<std::endl;
 
-		const colorspaces::Image depthData;
+
+		colorspaces::Image depthData;
 
 		for (int i=0; i<mPixelPoints.size(); i++)
 		{
@@ -439,9 +440,11 @@ bool Calibration::addPatternPixel (Eigen::Vector3d pixel, const std::vector<colo
 					<< mPixelPoints[i](1) << ")  \t";
 
 			Eigen::Vector4d pCamera(0.,0.,1000000.,0.);
-
 			Eigen::Vector3d pixelGraphic;
 
+			getBestDepth(mPixelPoints[i], depthVector, depthData, pCamera, pixelGraphic);
+
+			/*
 			// We use a window of 5x5 pixels to avoid errors of the depth image
 			for (int x=-2; x<=2; x++) {
 				for (int y=-2;y<=2; y++) {
@@ -470,6 +473,7 @@ bool Calibration::addPatternPixel (Eigen::Vector3d pixel, const std::vector<colo
 					}
 				}
 			}
+			*/
 
 			// We want to get the center of sphera (3cm or radius)
 			//pCamera(1) = pCamera(1) - 30;
@@ -571,10 +575,11 @@ void Calibration::getRealPoint(const Eigen::Vector3d pixel,
 		Eigen::Vector4d& res3D)
 {
 
+	const float MIN_SIZE_XTION = 500.0;
+
 	float depth = (int)depthData.data[((depthData.cols*(int)pixel(1))+(int)pixel(0))*3+1]<<8 | (int)depthData.data[((depthData.cols*(int)pixel(1))+(int)pixel(0))*3+2];
 
-
-	if (depth == 0)
+	if (depth == 0 || depth < MIN_SIZE_XTION )
 	{
 		res3D(0) = 0.;
 		res3D(1) = 0.;
@@ -644,12 +649,18 @@ void Calibration::getRealPoint(const Eigen::Vector3d pixel,
 }
 
 
-void Calibration::test(Eigen::Vector3d pixel, const colorspaces::Image depthData)
+void Calibration::test(Eigen::Vector3d pixel, std::vector<colorspaces::Image> depthVector)
 {
 	std::cout << "====== TEST ====== " << std::endl;
 
-	Eigen::Vector4d pCamera;
-	getRealPoint(pixel, depthData, pCamera);
+	Eigen::Vector4d pCamera(0.,0.,1000000.,0.);
+	Eigen::Vector3d pixelGraphic;
+	colorspaces::Image depthData;
+
+	getBestDepth(pixel, depthVector, depthData, pCamera, pixelGraphic);
+
+	//getRealPoint(pixelGraphic, depthData, pCamera);
+
 	std::cout << "Pto ref Cámara: (" << pCamera(0) << "," << pCamera(1) << "," << pCamera(2) << ")  - ";
 	std::cout << "Dist: " << sqrt( (pCamera(0)*pCamera(0)) + (pCamera(1)*pCamera(1)) + (pCamera(2)*pCamera(2))) << std::endl;
 
