@@ -249,6 +249,7 @@ void Calibration::initProgeo()
 	mProgeo->saveToFile("./CameraA.xml");
 	*/
 
+	/*
 	mProgeo = new Progeo::Progeo("./cameraB.xml");
 	mProgeo->updateKMatrix();
 	mProgeo->updateRTMatrix();
@@ -269,6 +270,7 @@ void Calibration::initProgeo()
 
 
 	progeo_old_test();
+	*/
 }
 
 
@@ -365,7 +367,55 @@ void Calibration::initPatternPoints()
 	 */
 }
 
-bool Calibration::addPatternPixel (Eigen::Vector3d pixel, const colorspaces::Image depthData)
+void Calibration::getBestDepth (const Eigen::Vector3d pixel, const std::vector<colorspaces::Image> depthVector,
+		colorspaces::Image& depthData, Eigen::Vector4d& res3D, Eigen::Vector3d& bestPixel)
+{
+
+	const int WINDOW_SIZE = 5;
+	res3D(2) = 100000.0;
+
+
+	for (std::vector<colorspaces::Image>::iterator it; it != depthVector.end(); ++it)
+	{
+
+		// We use a window of 5x5 pixels to avoid errors of the depth image
+		for (int x=-(WINDOW_SIZE/2); x<=(WINDOW_SIZE/2); x++) {
+			for (int y=-(WINDOW_SIZE/2);y<=(WINDOW_SIZE/2); y++) {
+				int px, py;
+				if (pixel(0)+x < 0)
+					px = 0;
+				else if (pixel(0)+x >= mProgeo->getImageWidth())
+					px = mProgeo->getImageWidth()-1;
+				else
+					px = pixel(0)+x;
+
+				if (pixel(1)+y < 0)
+					py = 0;
+				else if (pixel(1)+y >= mProgeo->getImageHeight())
+					py = mProgeo->getImageHeight()-1;
+				else
+					py =pixel(1)+y;
+
+				Eigen::Vector3d pixel(px,py,1.0);
+				Eigen::Vector4d aux;
+				getRealPoint(pixel, (colorspaces::Image)(*it), aux);
+
+				if (aux(2) != 0 && aux(2) < res3D(2)) {
+					res3D = aux;
+					bestPixel = pixel;
+					depthData = *it;
+				}
+			}
+		}
+
+	}
+
+
+
+}
+
+
+bool Calibration::addPatternPixel (Eigen::Vector3d pixel, const std::vector<colorspaces::Image> depthVector)
 {
 	mPixelPoints.push_back(pixel);
 
@@ -378,6 +428,8 @@ bool Calibration::addPatternPixel (Eigen::Vector3d pixel, const colorspaces::Ima
 		std::cout << "\tPixels" << "\t\t" << "Graphic Pixel\tOptical Pixel\tDistance" << "\t" <<
 				  "Transformado Real\t\t" << "Pattern"
 				  <<std::endl;
+
+		const colorspaces::Image depthData;
 
 		for (int i=0; i<mPixelPoints.size(); i++)
 		{

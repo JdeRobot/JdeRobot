@@ -43,7 +43,7 @@ const std::string pathImage = "./images/";
 
 Viewer::Viewer()
 : gtkmain(0,0),frameCount(0),
-  intrinsicsEnable(0),contPhoto(1),hsvFilter(NULL), mFrameBlob(NULL) {
+  intrinsicsEnable(0),contPhoto(1),hsvFilter(NULL), mFrameBlob(NULL), MAX_MAPS(25) {
 
 	std::cout << "Loading glade\n";
 
@@ -112,6 +112,15 @@ void Viewer::display( const colorspaces::Image& imageColor, const colorspaces::I
 				imageColor.data[pixel+1] = 0;
 				imageColor.data[pixel+2] = 0;
 			}
+
+	// Save depth map in map vector (just save 25 maps)
+	std::vector<colorspaces::Image>::iterator it = mDepthVector.begin();
+	mDepthVector.insert(it, imageDepth);
+
+	if (mDepthVector.size() > MAX_MAPS)
+		mDepthVector.erase(mDepthVector.begin() + MAX_MAPS, mDepthVector.end());
+	else if (mDepthVector.size() == MAX_MAPS -1)
+		std::cout << "* Depth vector is already filled!" << std::endl;
 
 
 	colorspaces::ImageRGB8 img_rgb8(imageColor);//conversion will happen if needed
@@ -338,10 +347,8 @@ bool Viewer::on_eventbox_extrinsics_clicked(GdkEventButton * event)
 	if (mCalibration){
 
 		pthread_mutex_lock(&mutex);
-		bool res = mCalibration->addPatternPixel (Eigen::Vector3d ((int) event->x,
-				(int) event->y,
-				1.0),
-				mImageDepth);
+		bool res = mCalibration->addPatternPixel (
+				Eigen::Vector3d ((int) event->x, (int) event->y, 1.0), mDepthVector);
 
 		if (res == false)
 		{

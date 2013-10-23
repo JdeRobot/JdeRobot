@@ -31,82 +31,71 @@
 
 
 int main(int argc, char** argv){
-  int status;
-  rgbdCalibrator::Viewer viewer;
-  Ice::CommunicatorPtr ic;
+	int status;
+	rgbdCalibrator::Viewer viewer;
+	Ice::CommunicatorPtr ic;
 
-  try{
-    ic = Ice::initialize(argc,argv);
-    Ice::ObjectPrx base = ic->propertyToProxy("rgbdCalibrator.CameraColor.Proxy");
-    if (0==base)
-      throw "Could not create proxy";
+	try{
+		ic = Ice::initialize(argc,argv);
+		Ice::ObjectPrx base = ic->propertyToProxy("rgbdCalibrator.CameraColor.Proxy");
+		if (0==base)
+			throw "Could not create proxy";
 
-    /*cast to CameraPrx*/
-    jderobot::CameraPrx cprxColor = jderobot::CameraPrx::checkedCast(base);
-    if (0==cprxColor)
-      throw "Invalid proxy";
+		/*cast to CameraPrx*/
+		jderobot::CameraPrx cprxColor = jderobot::CameraPrx::checkedCast(base);
+		if (0==cprxColor)
+			throw "Invalid proxy";
 
-    Ice::ObjectPrx base2 = ic->propertyToProxy("rgbdCalibrator.CameraDepth.Proxy");
-    if (base2 == 0)
-      throw "Could not create proxy";
+		Ice::ObjectPrx base2 = ic->propertyToProxy("rgbdCalibrator.CameraDepth.Proxy");
+		if (base2 == 0)
+			throw "Could not create proxy";
 
-    /*cast to CameraPrx*/
-    jderobot::CameraPrx cprxDepth = jderobot::CameraPrx::checkedCast(base2);
-    if (0==cprxDepth)
-      throw "Invalid proxy";
-
-    
-    while(viewer.isVisible()){
-
-      
-      jderobot::ImageDataPtr data = cprxColor->getImageData();
-      colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(data->description->format);
-      if (!fmt)
-	throw "Format not supported";
-
-      colorspaces::Image imgColor(data->description->width,
-				  data->description->height,
-				  fmt,
-				  &(data->pixelData[0]));
+		/*cast to CameraPrx*/
+		jderobot::CameraPrx cprxDepth = jderobot::CameraPrx::checkedCast(base2);
+		if (0==cprxDepth)
+			throw "Invalid proxy";
 
 
-      
-      jderobot::ImageDataPtr data2 = cprxDepth->getImageData();
-      colorspaces::Image::FormatPtr fmt2 =  colorspaces::Image::Format::searchFormat(data2->description->format);
-      if (!fmt2)
-	throw "Format not supported";
-
-      colorspaces::Image imgDepth(data2->description->width,
-				  data2->description->height,
-				  fmt2,
-				  &(data2->pixelData[0]));
-      
-
-      /*
-      float depth = (int)data2->pixelData[((data2->description->width*(int)120)+(int)160)*3+1]<<8 | (int)data2->pixelData[((data2->description->width*(int)120)+(int)160)*3+2];
-      
-      std::cout << "- Depth (160,120) = " << depth << std::endl;
-
-      depth = (int)imgDepth.data[((imgDepth.cols*(int)120)+(int)160)*3+1]<<8 | (int)imgDepth.data[((imgDepth.cols*(int)120)+(int)160)*3+2];
-
-      std::cout << "* Depth (160,120) = " << depth << std::endl;
-      */
+		while(viewer.isVisible()){
 
 
-      viewer.display(imgColor, imgDepth);
-    }
+			jderobot::ImageDataPtr data = cprxColor->getImageData();
+			colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(data->description->format);
+			if (!fmt)
+				throw "Format not supported";
 
-  }catch (const Ice::Exception& ex) {
-    std::cerr << ex << std::endl;
-    status = 1;
-  } catch (const char* msg) {
-    std::cerr << msg << std::endl;
-    status = 1;
-  }
+			colorspaces::Image imgColor(data->description->width,
+					data->description->height,
+					fmt,
+					&(data->pixelData[0]));
 
-  if (ic)
-    ic->destroy();
-  return status;
+
+
+			jderobot::ImageDataPtr data2 = cprxDepth->getImageData();
+			colorspaces::Image::FormatPtr fmt2 =  colorspaces::Image::Format::searchFormat(data2->description->format);
+			if (!fmt2)
+				throw "Format not supported";
+
+			colorspaces::Image imgDepth(data2->description->width,
+					data2->description->height,
+					fmt2,
+					&(data2->pixelData[0]));
+
+
+			viewer.display(imgColor, imgDepth);
+		}
+
+	}catch (const Ice::Exception& ex) {
+		std::cerr << ex << std::endl;
+		status = 1;
+	} catch (const char* msg) {
+		std::cerr << msg << std::endl;
+		status = 1;
+	}
+
+	if (ic)
+		ic->destroy();
+	return status;
 }
 
 

@@ -74,7 +74,7 @@ namespace rgbdCalibrator
 			       Eigen::Vector4d& res3D);
 
     bool addPatternPixel (Eigen::Vector3d pixel, 
-			  const colorspaces::Image depthData);
+			  const std::vector<colorspaces::Image> depthVector);
 
     Eigen::Matrix4d getRTSolution() { return mRTsolution; };
 
@@ -94,6 +94,9 @@ namespace rgbdCalibrator
     std::vector<std::pair<Eigen::Vector4d,Eigen::Vector4d> > mPairPoints;
 
     void initProgeo();
+
+    void getBestDepth (const Eigen::Vector3d pixel, const std::vector<colorspaces::Image> depthVector,
+    		colorspaces::Image& depthData, Eigen::Vector4d& res3D, Eigen::Vector3d& bestPixel);
 
     void getRealPoint(const Eigen::Vector3d pixel,
 		       const colorspaces::Image depthData,
