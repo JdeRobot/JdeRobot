@@ -17,6 +17,8 @@ IF(OPENNI2_LIB)
         ${LIBS_DIR}/
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/cameras
+	${NITE2_INC}
+		
     )
 
     add_executable (openniServer ${SOURCE_FILES})
@@ -31,6 +33,9 @@ IF(OPENNI2_LIB)
 
 
 	if  ( NITE2_LIB )
+		set_property ( SOURCE openniServer.cpp
+			PROPERTY COMPILE_DEFINITIONS WITH_NITE2=1
+		)
 		#copy nite libs to local path
 		if (NOT IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/NiTE2)
 			message ("--CMake will install local NiTE2 lib and Driver")
