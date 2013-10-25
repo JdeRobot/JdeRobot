@@ -1,8 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'q4serialport.h'
 **
-** Created: Mon Mar 19 03:08:45 2012
-**      by: The Qt Meta Object Compiler version 62 (Qt 4.6.2)
+** Created by: The Qt Meta Object Compiler version 63 (Qt 4.8.6)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -10,8 +9,8 @@
 #include "q4serialport/q4serialport.h"
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'q4serialport.h' doesn't include <QObject>."
-#elif Q_MOC_OUTPUT_REVISION != 62
-#error "This file was generated using the moc from 4.6.2. It"
+#elif Q_MOC_OUTPUT_REVISION != 63
+#error "This file was generated using the moc from 4.8.6. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -20,7 +19,7 @@ QT_BEGIN_MOC_NAMESPACE
 static const uint qt_meta_data_QSerialPort[] = {
 
  // content:
-       4,       // revision
+       6,       // revision
        0,       // classname
        0,    0, // classinfo
        2,   14, // methods
@@ -44,9 +43,26 @@ static const char qt_meta_stringdata_QSerialPort[] = {
     "slotNotifierActivated()\0"
 };
 
+void QSerialPort::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        QSerialPort *_t = static_cast<QSerialPort *>(_o);
+        switch (_id) {
+        case 0: _t->readyRead((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 1: _t->slotNotifierActivated(); break;
+        default: ;
+        }
+    }
+}
+
+const QMetaObjectExtraData QSerialPort::staticMetaObjectExtraData = {
+    0,  qt_static_metacall 
+};
+
 const QMetaObject QSerialPort::staticMetaObject = {
     { &QIODevice::staticMetaObject, qt_meta_stringdata_QSerialPort,
-      qt_meta_data_QSerialPort, 0 }
+      qt_meta_data_QSerialPort, &staticMetaObjectExtraData }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
@@ -72,11 +88,8 @@ int QSerialPort::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        switch (_id) {
-        case 0: readyRead((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 1: slotNotifierActivated(); break;
-        default: ;
-        }
+        if (_id < 2)
+            qt_static_metacall(this, _c, _id, _a);
         _id -= 2;
     }
     return _id;

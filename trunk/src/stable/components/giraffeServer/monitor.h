@@ -19,7 +19,7 @@
 #ifndef MONITOR_H
 #define MONITOR_H
 
-#include <JointMotor.h>
+#include <jderobot/jointmotor.h>
 #include <Ice/Ice.h>
 #include <QtCore>
 

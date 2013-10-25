@@ -19,7 +19,7 @@
 #ifndef SERVO_H
 #define SERVO_H
 
-#include <JointMotor.h>
+#include <jderobot/jointmotor.h>
 #include <QtCore>
 #include <math.h>
 

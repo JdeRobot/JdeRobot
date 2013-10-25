@@ -88,17 +88,17 @@ namespace giraffeClient {
   void View::display(const colorspaces::Image& image)
   {
 		/*Manage image*/
-		this->controller->drawWorld(image);
+		//this->controller->drawWorld(image);
 
 		/*Set image*/
-		colorspaces::ImageRGB8 img_rgb8(image);//conversion will happen if needed
-		Glib::RefPtr<Gdk::Pixbuf> imgBuff = Gdk::Pixbuf::create_from_data((const guint8*)img_rgb8.data,
+		colorspaces::ImageRGB8 img_rgb888(image);//conversion will happen if needed
+		Glib::RefPtr<Gdk::Pixbuf> imgBuff = Gdk::Pixbuf::create_from_data((const guint8*)img_rgb888.data,
 				    Gdk::COLORSPACE_RGB,
 				    false,
 				    8,
-				    img_rgb8.width,
-				    img_rgb8.height,
-				    img_rgb8.step); 
+				    img_rgb888.width,
+				    img_rgb888.height,
+				    img_rgb888.step); 
     gtk_image->clear();
     gtk_image->set(imgBuff);
 

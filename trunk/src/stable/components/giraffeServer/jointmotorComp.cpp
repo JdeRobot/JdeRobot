@@ -139,11 +139,16 @@ int JointMotorComp::run(int argc, char* argv[])
 	//Monitor thread
 	Monitor *monitor = new Monitor( &params, &busParams , communicator(), PARAMETERS_SET_WAIT_CONDITION);
 	monitor->start();
-	
+
 	usleep(10000);
-	if ( worker->isFinished() )
-	  return status;
-	
+    if ( worker->isFinished() )
+    {
+      std::cout << "worker->isFinished()" << std::endl;
+      return status;
+    }
+    else
+    	std::cout << "worker not finished" << std::endl;
+
 	//Start up de ther server
 	try
 	{

@@ -25,7 +25,7 @@
 
 #include <string>
 #include <iostream>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <jderobot/jointmotor.h>
 #include "cameraconf.h"
 

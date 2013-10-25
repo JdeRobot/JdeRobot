@@ -24,7 +24,7 @@
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
 #include <jderobot/camera.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include "view.h"
 #include <jderobot/jointmotor.h>
 
@@ -38,6 +38,8 @@ int main(int argc, char** argv){
 	Ice::CommunicatorPtr ic;
 	RoboCompJointMotor::MotorParamsList motorsparams;
 	RoboCompJointMotor::MotorStateMap motorsstate;
+
+	std::cout << "init " << std::endl;
 
 	try{
 		ic = Ice::initialize(argc,argv);
@@ -62,13 +64,16 @@ int main(int argc, char** argv){
 			throw "Invalid proxy";	
 
 		/*Create Controller and View*/
+		//std::cout << "Antes del view:" << std::endl;
 		controller = new giraffeClient::Controller(jprx);
 		view = new giraffeClient::View(controller);
 
 		/*Show params of motors*/
+
+		/*
 		motorsparams = jprx->getAllMotorParams();
 
-		cout << "Motors params:" << endl;
+		std::cout << "Motors params:" << std::endl;
 		for(vector<RoboCompJointMotor::MotorParams>::iterator it = motorsparams.begin(); it != motorsparams.end(); it++) {
 			cout << endl;
 			cout << "Name: " << (*it).name << endl;
@@ -80,30 +85,30 @@ int main(int argc, char** argv){
 			cout << "inverted: " << (*it).invertedSign << endl;
 		}
 
-		/*Get current pos of motors*/
+		//Get current pos of motors
 		jprx->getAllMotorState(motorsstate);
 		view->setInitialValues(motorsstate["neck"].pos, motorsstate["tilt"].pos, motorsstate["leftPan"].pos, motorsstate["rightPan"].pos);
 		view->setRealValues(motorsstate["neck"].pos, motorsstate["tilt"].pos, motorsstate["leftPan"].pos, motorsstate["rightPan"].pos);
-
+*/
 		while(view->isVisible()){
 
 			/*Get status of motors*/
-			jprx->getAllMotorState(motorsstate);
+			//jprx->getAllMotorState(motorsstate);
 
-			view->setRealValues(motorsstate["neck"].pos, motorsstate["tilt"].pos, motorsstate["leftPan"].pos, motorsstate["rightPan"].pos);
+			//view->setRealValues(motorsstate["neck"].pos, motorsstate["tilt"].pos, motorsstate["leftPan"].pos, motorsstate["rightPan"].pos);
 
 			/*Get image*/
-      jderobot::ImageDataPtr data = cprx->getImageData();
-      colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(data->description->format);
-      if (!fmt)
+			jderobot::ImageDataPtr data = cprx->getImageData();
+			colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(data->description->format);
+			if (!fmt)
 				throw "Format not supported";
 
-      colorspaces::Image image(data->description->width,
-			       data->description->height,
-			       fmt,
-			       &(data->pixelData[0]));
+			colorspaces::Image image(data->description->width,
+					data->description->height,
+					fmt,
+					&(data->pixelData[0]));
 
-      view->display(image);
+			view->display(image);
 			usleep(10*1000);
 		}
 	}catch (const Ice::Exception& ex) {

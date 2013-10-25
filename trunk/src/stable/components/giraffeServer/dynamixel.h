@@ -23,7 +23,7 @@
 #include <q4serialport/q4serialport.h>
 #include <QtCore>
 #include "iostream"
-#include "JointMotor.h"
+#include <jderobot/jointmotor.h>
 
 #define BROADCAST 0xFE
 #define SYNC_WRITE 0x83

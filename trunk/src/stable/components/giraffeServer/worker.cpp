@@ -207,6 +207,8 @@ void Worker::getMotorParams( const QString & motor , RoboCompJointMotor::MotorPa
 
 RoboCompJointMotor::MotorParamsList Worker::getAllMotorParams( )
 {
+	std::cout << "Worker::getAllMotorParams" << std::endl;
+
   RoboCompJointMotor::MotorParamsList list;
   
   foreach( Servo *s, handler->motors)

@@ -36,6 +36,7 @@ Monitor::~Monitor()
 
 void Monitor::run()
 {
+
   forever
   {
 	if ( initializedOk == false)

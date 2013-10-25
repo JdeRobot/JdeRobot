@@ -24,7 +24,7 @@
 #include "handler.h"
 #include "dynamixel.h"
 //#include "fakehandler.h"
-#include <JointMotor.h>
+#include <jderobot/jointmotor.h>
 //#include <megaroboticshandler.h>
 #include <servo.h>
 

@@ -24,7 +24,7 @@
 
 // ICE includes
 #include <Ice/Ice.h>
-#include <JointMotor.h>
+#include <jderobot/jointmotor.h>
 
 // User includes...
 #include "worker.h"
