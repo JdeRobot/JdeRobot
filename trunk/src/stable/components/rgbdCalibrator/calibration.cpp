@@ -332,9 +332,9 @@ void Calibration::initPatternPoints()
 	mPatternPoints.push_back(Eigen::Vector4d (0.,-410.,630.,1.));
 	mPatternPoints.push_back(Eigen::Vector4d (0.,-260.,630.,1.));
 	mPatternPoints.push_back(Eigen::Vector4d (0.,-110.,630.,1.));
-	//mPatternPoints.push_back(Eigen::Vector4d (0.,110.,630.,1.));
-	//mPatternPoints.push_back(Eigen::Vector4d (0.,260.,630.,1.));
-	//mPatternPoints.push_back(Eigen::Vector4d (0.,410.,630.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (0.,110.,630.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (0.,260.,630.,1.));
+	mPatternPoints.push_back(Eigen::Vector4d (0.,410.,630.,1.));
 
 	mPatternPoints.push_back(Eigen::Vector4d (-408.,0.,1310.,1.));
 	mPatternPoints.push_back(Eigen::Vector4d (-258.,0.,1310.,1.));
@@ -646,6 +646,19 @@ void Calibration::getRealPoint(const Eigen::Vector3d pixel,
 	res3D(1) = t*u(1) + camPosition(1);
 	res3D(2) = t*u(2) + camPosition(2);
 	res3D(3) = 1.0;
+}
+
+void Calibration::saveFile(std::string fileName, Eigen::Vector4d offset)
+{
+
+	mRTsolution(0,3) += offset(0);
+	mRTsolution(1,3) += offset(1);
+	mRTsolution(2,3) += offset(2);
+
+	mProgeo->setRTMatrix(mRTsolution);
+	mProgeo->saveToFile(fileName, false);
+
+	std::cout << "Calibration file saved OK in: " << fileName << std::endl;
 }
 
 

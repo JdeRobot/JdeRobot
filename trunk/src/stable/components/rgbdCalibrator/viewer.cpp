@@ -63,6 +63,10 @@ Viewer::Viewer()
 	refXml->get_widget("bt_intrinsic_calib", btIntrinsic);
 	refXml->get_widget("eventbox", ebImage);
 	refXml->get_widget("eb_extrinsics", ebImageExtrinsics);
+	refXml->get_widget("et_offset_x", etOffsetX);
+	refXml->get_widget("et_offset_y", etOffsetY);
+	refXml->get_widget("et_offset_z", etOffsetZ);
+	refXml->get_widget("bt_save", btSave);
 
 	// connect signals
 	btTakePhoto->signal_clicked().connect(sigc::mem_fun(this,&Viewer::on_bt_take_photo_clicked));
@@ -72,6 +76,7 @@ Viewer::Viewer()
 
 	ebImageExtrinsics->signal_button_press_event().connect(sigc::mem_fun(this, &Viewer::on_eventbox_extrinsics_clicked));
 
+	btSave->signal_clicked().connect(sigc::mem_fun(this,&Viewer::on_bt_save_clicked));
 	// start the timer for calculating the number of frames per second
 	// the images are being displayed at
 	oldFrameTime = IceUtil::Time::now();
@@ -80,6 +85,8 @@ Viewer::Viewer()
 	RGB2HSV_createTable();
 
 	mCalibration = new Calibration();
+
+	on_bt_intrinsic();
 
 	pthread_mutex_init(&mutex, NULL);
 
@@ -414,6 +421,21 @@ bool Viewer::on_eventbox_clicked(GdkEventButton * event)
 		"[" << vmin << " " << vmax << "] " << std::endl;
 
 	return true;
+}
+
+void Viewer::on_bt_save_clicked()
+{
+	Eigen::Vector4d offset;
+	std::string strX (etOffsetX->get_buffer()->get_text());
+	offset(0) = atoi(strX.c_str());
+
+	std::string strY (etOffsetY->get_buffer()->get_text());
+	offset(1) = atoi(strY.c_str());
+
+	std::string strZ (etOffsetZ->get_buffer()->get_text());
+	offset(2) = atoi(strZ.c_str());
+
+	mCalibration->saveFile("file.xml", offset);
 }
 
 void Viewer::on_bt_take_photo_clicked()

@@ -78,6 +78,8 @@ namespace rgbdCalibrator
 
     Eigen::Matrix4d getRTSolution() { return mRTsolution; };
 
+    void saveFile(std::string fileName, Eigen::Vector4d offset);
+
     void test(Eigen::Vector3d pixel, std::vector<colorspaces::Image> depthVector);
 
   private:

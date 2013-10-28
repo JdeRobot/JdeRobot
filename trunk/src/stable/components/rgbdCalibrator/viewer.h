@@ -64,12 +64,16 @@ namespace rgbdCalibrator{
     Gtk::Label* lbSleepPhoto;
     Gtk::Button* btTakePhoto;
     Gtk::Button* btIntrinsic;
+    Gtk::Button* btSave;
     Gtk::Entry* etSleepPhoto;
     Gtk::Entry* etNumPhoto;
     Gtk::TextView* tvStatus;
     Gtk::EventBox* ebImage;
     Gtk::EventBox* ebImageExtrinsics;
     Gtk::Main gtkmain;
+    Gtk::Entry* etOffsetX;
+    Gtk::Entry* etOffsetY;
+    Gtk::Entry* etOffsetZ;
   
     //! display the frame rate of the received images
     void displayFrameRate();
@@ -104,6 +108,7 @@ namespace rgbdCalibrator{
     // onclicks
     bool on_eventbox_clicked(GdkEventButton * event);
     bool on_eventbox_extrinsics_clicked(GdkEventButton * event);
+    void on_bt_save_clicked();
     void on_bt_take_photo_clicked ();
     void on_bt_intrinsic();
     

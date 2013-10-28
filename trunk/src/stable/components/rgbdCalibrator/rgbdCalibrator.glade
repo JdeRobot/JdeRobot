@@ -235,7 +235,7 @@
           </widget>
           <packing>
             <property name="x">381</property>
-            <property name="y">147</property>
+            <property name="y">153</property>
           </packing>
         </child>
         <child>
@@ -259,26 +259,26 @@
         </child>
         <child>
           <widget class="GtkImage" id="hsv_image">
-            <property name="width_request">320</property>
-            <property name="height_request">240</property>
+            <property name="width_request">0</property>
+            <property name="height_request">0</property>
             <property name="visible">True</property>
             <property name="stock">gtk-missing-image</property>
           </widget>
           <packing>
-            <property name="x">358</property>
-            <property name="y">306</property>
+            <property name="x">28</property>
+            <property name="y">571</property>
           </packing>
         </child>
         <child>
           <widget class="GtkImage" id="blob_image">
-            <property name="width_request">320</property>
-            <property name="height_request">240</property>
+            <property name="width_request">0</property>
+            <property name="height_request">0</property>
             <property name="visible">True</property>
             <property name="stock">gtk-missing-image</property>
           </widget>
           <packing>
-            <property name="x">688</property>
-            <property name="y">306</property>
+            <property name="x">375</property>
+            <property name="y">571</property>
           </packing>
         </child>
         <child>
@@ -296,8 +296,92 @@
             </child>
           </widget>
           <packing>
-            <property name="x">28</property>
-            <property name="y">577</property>
+            <property name="x">377</property>
+            <property name="y">306</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkLabel" id="label7">
+            <property name="width_request">113</property>
+            <property name="height_request">48</property>
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">Position Offset</property>
+          </widget>
+          <packing>
+            <property name="x">738</property>
+            <property name="y">317</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkLabel" id="label8">
+            <property name="width_request">29</property>
+            <property name="height_request">117</property>
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">X:
+
+Y:
+
+Z:</property>
+          </widget>
+          <packing>
+            <property name="x">714</property>
+            <property name="y">370</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkEntry" id="et_offset_x">
+            <property name="width_request">98</property>
+            <property name="height_request">25</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="invisible_char">&#x25CF;</property>
+            <property name="text" translatable="yes">0</property>
+          </widget>
+          <packing>
+            <property name="x">751</property>
+            <property name="y">379</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkEntry" id="et_offset_y">
+            <property name="width_request">98</property>
+            <property name="height_request">25</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="invisible_char">&#x25CF;</property>
+            <property name="text" translatable="yes">0</property>
+          </widget>
+          <packing>
+            <property name="x">751</property>
+            <property name="y">416</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkEntry" id="et_offset_z">
+            <property name="width_request">98</property>
+            <property name="height_request">25</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="invisible_char">&#x25CF;</property>
+            <property name="text" translatable="yes">0</property>
+          </widget>
+          <packing>
+            <property name="x">751</property>
+            <property name="y">453</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkButton" id="bt_save">
+            <property name="label" translatable="yes">Save</property>
+            <property name="width_request">96</property>
+            <property name="height_request">34</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </widget>
+          <packing>
+            <property name="x">754</property>
+            <property name="y">508</property>
           </packing>
         </child>
       </widget>
