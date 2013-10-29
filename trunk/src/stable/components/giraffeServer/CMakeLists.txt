@@ -1,3 +1,5 @@
+if (${QT_COMPILE})
+
 SET( SOURCE_FILES jointmotorComp.cpp jointmotorI.cpp worker.cpp dynamixel.cpp monitor.cpp servo.cpp q4serialport/q4serialport.cpp moc_monitor.cpp  moc_q4serialport.cpp  moc_worker.cpp)
 
 
@@ -21,3 +23,4 @@ TARGET_LINK_LIBRARIES(giraffeServer
     QtCore
     QtGui
 )
+endif()
