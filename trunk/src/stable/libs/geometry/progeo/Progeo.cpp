@@ -750,7 +750,7 @@ const char* Progeo::double2char(double d)
 	return ss.str().c_str();
 }
 
-void Progeo::saveToFile (std::string filename)
+void Progeo::saveToFile (std::string filename, bool updateMatrix)
 {
 	xmlDocPtr doc = NULL;
 	xmlNodePtr root_node = NULL;
@@ -759,8 +759,11 @@ void Progeo::saveToFile (std::string filename)
 	xmlNodePtr node_k_matrix = NULL;
 	xmlNodePtr node_rt_matrix = NULL;
 
-	updateKMatrix();
-	updateRTMatrix();
+	if (updateMatrix)
+	{
+		updateKMatrix();
+		updateRTMatrix();
+	}
 
 	char buff[256];
 	int i, j;

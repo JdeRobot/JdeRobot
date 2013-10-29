@@ -87,7 +87,7 @@ public:
 	void pixel2optical (Eigen::Vector3d &point);
 	void optical2pixel (Eigen::Vector3d &point);
 
-	void saveToFile (std::string filename);
+	void saveToFile (std::string filename, bool updateMatrix=true);
 	void readFromFile(std::string filename);
 	void backprojectCV(Eigen::Vector3d point, Eigen::Vector4d& pro);
 
