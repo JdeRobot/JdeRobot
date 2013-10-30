@@ -1001,10 +1001,22 @@ bool colorTuner::on_yuv_image_space_button_release_event (GdkEventButton *event)
         g = (float)(unsigned int) (unsigned char)imageDemo->imageData[indice+1];
         b = (float)(unsigned int) (unsigned char)imageDemo->imageData[indice+2];   
         
+        std::fstream fs;
+        fs.open("filterRGB.txt", std::fstream::out);
+        if (fs.is_open()) {
+            fs << r << "\r\n" << g << "\r\n" << b << std::endl;
+            fs.close();
+        }
         
         h = getH(r, g, b);
         s = getS(r, g, b);
         v = getV(r, g, b);
+        
+        fs.open("filterHSV.txt", std::fstream::out);
+        if (fs.is_open()) {
+            fs << h << "\r\n" << s << "\r\n" << v << std::endl;
+            fs.close();
+        }
               
         pthread_mutex_unlock(&mutex);
         

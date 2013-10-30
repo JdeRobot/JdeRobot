@@ -29,6 +29,8 @@
 #include <string>
 #include <visionlib/colorspaces/colorspacesmm.h>
 #include <highgui.h>
+#include <sstream>
+#include <fstream>
 
 #define PI 3.141592654
 #define SQUARE(a) (a)*(a)
