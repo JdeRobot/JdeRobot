@@ -70,6 +70,8 @@ public:
 	void setFoa(Eigen::Vector4d Foa);
 	void setRoll(float Roll);
 
+	Eigen::Matrix3d getKMatrix(){return K;};
+	Eigen::Matrix4d	getRTMatrix(){return RT;};
 	Eigen::Vector4d getPosition() {return position; };
 	Eigen::Vector4d getFoa() {return foa; };
 	float getRoll() {return roll; };

@@ -940,11 +940,13 @@ private:
 
 					int playerdetection = prop->getPropertyAsIntWithDefault("openniServer.PlayerDetection",0);
 					int fps =prop->getPropertyAsIntWithDefault("openniServer.pointCloud.Fps",10);
+					bool extra =(bool)prop->getPropertyAsIntWithDefault("openniServer.ExtraCalibration",0);
+					std::cout << "EXTRA: " << extra << std::endl;
 					#ifndef WITH_NITE2
 						playerdetection=0;
 					#endif
 						pthread_mutex_init(&this->localMutex, NULL);
-					   replyCloud = new ReplyCloud(this,prop->getProperty("openniServer.calibration"), playerdetection, depthVideoMode.getResolutionX(), depthVideoMode.getResolutionY(),fps);
+					   replyCloud = new ReplyCloud(this,prop->getProperty("openniServer.calibration"), playerdetection, depthVideoMode.getResolutionX(), depthVideoMode.getResolutionY(),fps, extra);
 					   this->control=replyCloud->start();
 				}
 
@@ -963,7 +965,7 @@ private:
 		   private:
 			 class ReplyCloud :public IceUtil::Thread{
 		       public: 
-		       	ReplyCloud (pointCloudI* pcloud, std::string filepath,  int playerDetection, int widthIn, int heightIn, int fpsIn) : data(new jderobot::pointCloudData()), data2(new jderobot::pointCloudData()), _done(false)
+		       	ReplyCloud (pointCloudI* pcloud, std::string filepath,  int playerDetection, int widthIn, int heightIn, int fpsIn, bool extra) : data(new jderobot::pointCloudData()), data2(new jderobot::pointCloudData()), _done(false)
 		        	{
 					path=filepath;
 					segmentation=playerDetection;
@@ -972,13 +974,13 @@ private:
 					fps=fpsIn;
 					myCloud=pcloud;
 					mypro=NULL;
-
+					withExtraCalibration=extra;
 				}
 		       
 		        void run()
 		        {
-				mypro= new openniServer::myprogeo();
-				mypro->load_cam((char*)path.c_str(),0, cWidth, cHeight);
+		        	mypro= new openniServer::myprogeo(1,cWidth,cHeight);
+		        	mypro->load_cam((char*)path.c_str(),0, cWidth, cHeight,withExtraCalibration );
 				
 
 
@@ -1039,6 +1041,12 @@ private:
 									auxP.x=t*ux + camx;
 									auxP.y=t*uy+ camy;
 									auxP.z=t*uz + camz;
+
+
+									if (withExtraCalibration){
+										mypro->applyExtraCalibration(&auxP.x, &auxP.y, &auxP.z);
+									}
+
 									if ( segmentation){
 										auxP.id=pixelsID[i];
 									}
@@ -1093,6 +1101,7 @@ private:
 				int segmentation;
 				pointCloudI* myCloud;
 				bool _done;
+				bool withExtraCalibration;
 		      
 		    };
 

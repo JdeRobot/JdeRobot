@@ -24,8 +24,12 @@
 
 
 namespace openniServer {
-myprogeo::myprogeo() {
-    std::cout << "CREADO" << std::endl;
+myprogeo::myprogeo(int nCam, int w, int h) {
+	for (int i=0; i< nCam; i++){
+		cameras[i]=new Progeo::Progeo();
+	}
+	this->w=w;
+	this->h=h;
 }
 
 myprogeo::~myprogeo() {
@@ -33,160 +37,81 @@ myprogeo::~myprogeo() {
 
 
 /* gets the calibration of the camera from a file */
-int myprogeo::load_cam_line(FILE *myfile,int cam)
+void myprogeo::load_cam(char *fich_in,int cam, int w, int h, bool fileFromCalibrator)
 {
-    char word1[MAX_BUFFER],word2[MAX_BUFFER];
-    int i=0;
-    char buffer_file[MAX_BUFFER];
-    double roll;
+	std::cout << "Loading camera: " << cam << std::endl;
 
-    buffer_file[0]=fgetc(myfile);
-    if (feof(myfile)) return EOF;
-    if (buffer_file[0]==(char)255) return EOF;
-    if (buffer_file[0]=='#') {
-        while(fgetc(myfile)!='\n');
-        return 0;
-    }
-    if (buffer_file[0]==' ') {
-        while(buffer_file[0]==' ') buffer_file[0]=fgetc(myfile);
-    }
-    if (buffer_file[0]=='\t') {
-        while(buffer_file[0]=='\t') buffer_file[0]=fgetc(myfile);
-    }
+    if (fileFromCalibrator){
+    	std::cout << "File loaded as extra calibration " << std::endl;
+    	this->cameras[cam]->readFromFile(std::string(fich_in));
 
-    //Captures a line and then we will process it with sscanf checking that the last character is \n. We can't doit with fscanf because this function does not difference \n from blank space.
-    while((buffer_file[i]!='\n') &&
-            (buffer_file[i] != (char)255) &&
-            (i<MAX_BUFFER-1) ) {
-        buffer_file[++i]=fgetc(myfile);
-    }
+    	this->RT2=this->cameras[cam]->getRTMatrix();
+    	Eigen::Vector4d pos;
+		pos(0)=0;
+		pos(1)=0;
+		pos(2)=0;
+		pos(3)=1;
+		this->cameras[cam]->setPosition (pos);
 
-    if (i >= MAX_BUFFER-1) {
-        printf("%s...\n", buffer_file);
-        printf ("Line too long in config file!\n");
-        return -1;
-    }
-    buffer_file[++i]='\0';
-
-
-    if (sscanf(buffer_file,"%s",word1)!=1) return 0;
-    // return EOF; empty line
-    else {
-        if (strcmp(word1,"positionX")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].position.X=(float)atof(word2);
-        }
-        else if (strcmp(word1,"positionY")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].position.Y=(float)atof(word2);
-        }
-        else if (strcmp(word1,"positionZ")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].position.Z=(float)atof(word2);
-        }
-        else if (strcmp(word1,"positionH")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].position.H=(float)atof(word2);
-        }
-        else if (strcmp(word1,"FOApositionX")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].foa.X=(float)atof(word2);
-        }
-        else if (strcmp(word1,"FOApositionY")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].foa.Y=(float)atof(word2);
-        }
-        else if (strcmp(word1,"FOApositionZ")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].foa.Z=(float)atof(word2);
-        }
-        else if (strcmp(word1,"FOApositionH")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].foa.H=(float)atof(word2);
-        }
-        else if (strcmp(word1,"roll")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].roll=(float)atof(word2);
-        }
-        else if (strcmp(word1,"f")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].fdistx=(float)atof(word2);
-            cameras[cam].fdisty=(float)atof(word2);
-        }
-        else if (strcmp(word1,"fx")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].fdistx=(float)atof(word2);
-        }
-        else if (strcmp(word1,"fy")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].fdisty=(float)atof(word2);
-        }
-        else if (strcmp(word1,"skew")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].skew=(float)atof(word2);
-        }
-        else if (strcmp(word1,"u0")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].u0=(float)atof(word2);
-        }
-        else if (strcmp(word1,"v0")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].v0=(float)atof(word2);
-        }
-        else if (strcmp(word1,"columns")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].columns=(int)atoi(word2);
-        }
-        else if (strcmp(word1,"rows")==0) {
-            sscanf(buffer_file,"%s %s",word1,word2);
-            cameras[cam].rows=(int)atoi(word2);
-        }
-    }
-    return 1;
-}
-
-/* gets the calibration of the camera from a file */
-void myprogeo::load_cam(char *fich_in,int cam, int w, int h)
-{
-    FILE *entrada;
-    int i;
-    if (strlen(fich_in) ==0 ) {
-        std::cout << w << ", " << h << std::endl;
-        this->cameras[cam].fdistx=515;
-        this->cameras[cam].fdisty=515;
-        this->cameras[cam].v0=h/2;
-        this->cameras[cam].u0=w/2;
-        this->cameras[cam].position.X=0;
-        this->cameras[cam].position.Y=0;
-        this->cameras[cam].position.Z=0;
-        this->cameras[cam].foa.X=0;
-        this->cameras[cam].foa.Y=1;
-        this->cameras[cam].foa.Z=0;
-		this->cameras[cam].columns=w;
-		this->cameras[cam].rows=h;
-		this->w=w;
-		this->h=h;
-        update_camera_matrix(&cameras[cam]);
-
+		Eigen::Vector4d foa;
+		foa(0)=0;
+		foa(1)=1;
+		foa(2)=0;
+		foa(3)=1;
+		this->cameras[cam]->setFoa(foa);
+		this->cameras[cam]->setRoll(0);
+		this->cameras[cam]->updateRTMatrix();
 
     }
-    else {
-        xmlReader(&(this->cameras[cam]), fich_in);
-        update_camera_matrix(&cameras[cam]);
+    else{
+		if (strlen(fich_in) ==0 ) {
+			std::cout << "Setting standard calibration" << std::endl;
+
+			Eigen::Matrix3d K;
+			K(0,0) = 511;
+			K(0,1) = 0;
+			K(0,2) = w/2;
+
+			K(1,0) = 0;
+			K(1,1) = 511;
+			K(1,2) = h/2;
+
+			K(2,0) = 0;
+			K(2,1) = 0;
+			K(2,2) = 1;
+
+			this->cameras[cam]->setKMatrix(K);
+
+			Eigen::Vector4d pos;
+			pos(0)=0;
+			pos(1)=0;
+			pos(2)=0;
+			pos(3)=1;
+			this->cameras[cam]->setPosition (pos);
+
+			Eigen::Vector4d foa;
+			foa(0)=0;
+			foa(1)=1;
+			foa(2)=0;
+			foa(3)=1;
+			this->cameras[cam]->setFoa(foa);
+			this->cameras[cam]->setRoll(0);
+
+			//this->cameras[cam]->updateKMatrix();
+			this->cameras[cam]->updateRTMatrix();
+
+
+		}
+		else {
+			std::cout << "Loading standard calibration file " << std::endl;
+			this->cameras[cam]->readFromFile(std::string(fich_in));
+			this->cameras[cam]->updateKMatrix();
+			this->cameras[cam]->updateRTMatrix();
+		}
     }
-    /*this->cameras[cam].position.H=1;
-    this->cameras[cam].foa.H=1;*/
 
-    /*std::cout << fich_in << std::endl;
-    entrada=fopen(fich_in,"r");
-    if(entrada==NULL){
-     printf("tracker3D: camera input calibration file %s does not exits\n",fich_in);
-    }else{
-     do{i=load_cam_line(entrada,cam);}while(i!=EOF);
-     fclose(entrada);
-    } */
 
-    display_camerainfo(cameras[cam]);
+    this->cameras[cam]->displayCameraInfo();
 }
 
 void myprogeo::pixel2optical(float*x,float*y){
@@ -208,65 +133,97 @@ void myprogeo::optical2pixel(float*x,float*y){
 
 
 void
-myprogeo::mybackproject(float x, float y, float* xp, float* yp, float* zp, float* camx, float* camy, float* camz, int cam) {
-    HPoint2D p;
-    HPoint3D pro;
+myprogeo::mybackproject(float x, float y, float* xp, float* yp, float* zp, float* camx, float* camy, float* camz, int cam){
+
+	Eigen::Vector3d p;
+	Eigen::Vector4d pro;
+
+
+	pixel2optical(&x, &y);
+	p(0)=x;
+	p(1)=y;
+	p(2)=1;
+
+	this->cameras[cam]->backproject(p,pro);
+	*xp=pro(0);
+	*yp=pro(1);
+	*zp=pro(2);
 
 
 
+	Eigen::Vector4d pos;
 
-    pixel2optical(&x, &y);
-	p.x=x;
-	p.y=y;
-    p.h=1;
-    backproject(&pro,p,cameras[cam]);
-    *xp=pro.X;
-    *yp=pro.Y;
-    *zp=pro.Z;
+	pos=this->cameras[cam]->getPosition();
 
-    *camx=cameras[cam].position.X;
-    *camy=cameras[cam].position.Y;
-    *camz=cameras[cam].position.Z;
+	*camx=pos(0);
+	*camy=pos(1);
+	*camz=pos(2);
 }
 
 void
-myprogeo::myproject(float x, float y, float z, float* xp, float* yp, int cam) {
-    HPoint2D p;
-    HPoint3D p3;
+myprogeo::myproject(float x, float y, float z, float* xp, float* yp, int cam){
+	Eigen::Vector3d p;
+	Eigen::Vector4d p3;
 
-    p3.X=x;
-    p3.Y=y;
-    p3.Z=z;
-    p3.H=1;
+	p3(0)=x;
+	p3(1)=y;
+	p3(2)=z;
+	p3(3)=1;
 
-    project(p3, &p, cameras[cam]);
-    *xp=p.x;
-    *yp=p.y;
+	this->cameras[cam]->project(p3,p);
+	*xp=p(0);
+	*yp=p(1);
 }
 
 void
-myprogeo::mygetcameraposition(float *x, float *y, float *z, int cam) {
-    *x=cameras[cam].position.X;
-    *y=cameras[cam].position.Y;
-    *z=cameras[cam].position.Z;
+myprogeo::mygetcameraposition(float *x, float *y, float *z, int cam){
+	Eigen::Vector4d pos;
+
+	pos=this->cameras[cam]->getPosition();
+
+	*x=pos(0);
+	*y=pos(1);
+	*z=pos(2);
 }
 
 void
-myprogeo::mygetcamerafoa(float *x, float *y, float *z, int cam) {
-    *x=cameras[cam].foa.X;
-    *y=cameras[cam].foa.Y;
-    *z=cameras[cam].foa.Z;
+myprogeo::mygetcamerafoa(float *x, float *y, float *z, int cam){
+	Eigen::Vector4d foa;
+
+	foa=this->cameras[cam]->getFoa();
+	*x=foa(0);
+	*y=foa(1);
+	*z=foa(2);
 }
 
 void
-myprogeo::mygetcamerasize(float *w, float *h, int cam) {
-    *w = cameras[cam].columns;
-    *h = cameras[cam].rows;
+myprogeo::mygetcamerasize(float *w, float *h, int cam){
+	*w = this->w;
+	*h = this->h;
 }
 
-TPinHoleCamera
-myprogeo::getCamera(int camera) {
-    return cameras[camera];
+void
+myprogeo::applyExtraCalibration(float *x, float *y, float *z){
+	Eigen::Vector4d pos;
+
+	pos(0)=*x;
+	pos(1)=*y;
+	pos(2)=*z;
+	pos(3)=1;
+
+	//std::cout << "pre: " << pos << std::endl;
+
+	pos=this->RT2*pos;
+	//std::cout << "post: " << pos << std::endl;
+
+	*x=pos(0);
+	*y=pos(1);
+	*z=pos(2);
+}
+
+Progeo::Progeo*
+myprogeo::getCamera(int camera){
+	return cameras[camera];
 }
 
 } //namespace

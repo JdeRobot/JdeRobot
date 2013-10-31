@@ -23,7 +23,7 @@
 #ifndef OPENNISERVER_MYPROGEO_H
 #define OPENNISERVER_MYPROGEO_H
 
-#include <progeo/progeo.h>
+#include <geometry/progeo/Progeo.h>
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
@@ -36,23 +36,26 @@
 namespace openniServer {
 class myprogeo {
 public:
-    myprogeo();
+    myprogeo(int nCam, int w, int h);
     ~myprogeo();
-    int load_cam_line(FILE *myfile,int cam);
-    void load_cam(char *fich_in,int cam, int w, int h);
+    void load_cam(char *fich_in,int cam, int w, int h, bool fileFromCalibrator);
     void mybackproject(float x, float y, float* xp, float* yp, float* zp, float* camx, float* camy, float* camz, int cam);
     void myproject(float x, float y, float z, float* xp, float* yp, int cam);
     void mygetcameraposition(float *x, float *y, float *z, int cam);
     void mygetcamerafoa(float *x, float *y, float *z, int cam);
     void mygetcamerasize(float *w, float *h, int cam);
-    TPinHoleCamera getCamera(int camera);
+    Progeo::Progeo* getCamera(int camera);
+    void new_camera();
+    void applyExtraCalibration(float *x, float *y, float *z);
+
 
 private:
     /* cameras */
 	void pixel2optical(float*x,float*y);
 	void optical2pixel(float* x, float* y); 
-    TPinHoleCamera cameras[MAX_CAMERAS];
+	Progeo::Progeo* cameras[MAX_CAMERAS];
 	int w,h;
+	Eigen::Matrix4d RT2; //transformada para la configuración del calibrador
 };
 } // namespace
 

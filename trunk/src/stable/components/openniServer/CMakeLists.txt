@@ -50,7 +50,7 @@ IF(OPENNI2_LIB)
         ${OpenCVGUI_LIBRARIES} 
         ${gsl_LIBRARIES}
         jderobotutil
-        progeo
+        geometry
         colorspacesmm
         JderobotInterfaces
 	${OPENNI2_LIB}/libOpenNI2.so
@@ -66,7 +66,7 @@ IF(OPENNI2_LIB)
         ${OpenCVGUI_LIBRARIES}
 	${gsl_LIBRARIES}
         jderobotutil
-        progeo
+        geometry
         colorspacesmm
         JderobotInterfaces
 	${OPENNI2_LIB}/libOpenNI2.so
