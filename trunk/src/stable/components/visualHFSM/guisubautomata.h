@@ -45,10 +45,11 @@ public:
 	void setFunctions ( std::string functions );
 	void setTime ( std::string timing );
 	void setVariables ( std::string variables );
-	void setInterfaces ( std::list<std::string>& interfaces );
 
 	void setNodeList ( std::list<GuiNode>* list );
 	void setTransList ( std::list<GuiTransition>* list );
+
+	void setToZero ( int idChild );
 
 	// Getters
 	int getId ();
@@ -56,7 +57,6 @@ public:
 	std::string getFunctions ();
 	std::string getTime ();
 	std::string getVariables ();
-	std::list<std::string>* getInterfaces ();
 	std::list<GuiNode>* getListGuiNodes ();
 	std::list<GuiTransition>* getListGuiTransitions ();
 	std::list<GuiTransition> getAllGuiTransitionsWith ( Glib::RefPtr<Goocanvas::Item> item );
@@ -70,8 +70,8 @@ public:
 	void hideAll ();
 	void showAll ();
 	void removeAll ();
+	bool checkAll ();
 	bool isNodeListEmpty ();
-	bool findInterface ( std::string interface );
 	void newGuiNode ( int id, int idSubautomataSon, float x, float y );
 	void removeGuiNode ( Glib::RefPtr<Goocanvas::Item> item );
 	void removeGuiNode ( int id );
@@ -97,11 +97,12 @@ public:
 	Glib::RefPtr<Goocanvas::EllipseModel> getLastEllipseInit ();
 	Glib::RefPtr<Goocanvas::TextModel> getLastTextNode ();
 
+	std::string getGuiNodeName ( const Glib::RefPtr<Goocanvas::Item>& item );
 	std::string getLastGuiNodeName ();
 	int getLastGuiNodeIdFatherState ();
 
 	Glib::RefPtr<Goocanvas::Item> getGuiNodeItem ( int id );
-	int getGuinodeId ( Glib::RefPtr<Goocanvas::Item> item );
+	int getGuinodeId ( const Glib::RefPtr<Goocanvas::Item>& item );
 
 	int getFirstIdNode ();
 
@@ -148,7 +149,6 @@ private:
 	// Data structure
 	int id, idFather;
 	std::string timing, variables, functions, config;
-	std::list<std::string> interfaces;
 	std::list<GuiNode> nodeList;
 	std::list<GuiTransition> transitionList;
 }; // Class GuiSubautomata

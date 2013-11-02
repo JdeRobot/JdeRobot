@@ -23,10 +23,13 @@
 /*************************************************************
  * CONSTRUCTOR
  *************************************************************/
-SaveFile::SaveFile ( std::string filepath, std::list<GuiSubautomata>* subautomataList, std::string config ) {
+SaveFile::SaveFile ( std::string filepath, std::list<GuiSubautomata>* subautomataList,
+												std::list<IceInterface>& listInterfaces,
+												std::list<std::string> listLibraries ) {
 	this->filepath = std::string(filepath);
 	this->subautomataList = subautomataList;
-	this->config = std::string(config);
+	this->listInterfaces = listInterfaces;
+	this->listLibraries = listLibraries;
 }
 
 /*************************************************************
@@ -132,26 +135,40 @@ void SaveFile::init () {
 				nodeTransChild->set_child_text(guiTransIterator->getCodeTrans());
 			}
 
-			xmlpp::Element* nodeLibs = nodeSubautomata->add_child("libraries");
-			std::list<std::string>* listLibs = subListIterator->getInterfaces();
-			for ( std::list<std::string>::iterator listLibsIterator = listLibs->begin();
-					listLibsIterator != listLibs->end(); listLibsIterator++ ) {
-				xmlpp::Element* nodelib = nodeLibs->add_child("lib");
-				nodelib->set_child_text(*listLibsIterator);
-			}
+			xmlpp::Element* nodeChildSubautomata = nodeSubautomata->add_child("iteration_time");
+			nodeChildSubautomata->set_child_text(subListIterator->getTime());
 
-			xmlpp::Element* nodeTiming = nodeSubautomata->add_child("iteration_time");
-			nodeTiming->set_child_text(subListIterator->getTime());
+			nodeChildSubautomata = nodeSubautomata->add_child("variables");
+			nodeChildSubautomata->set_child_text(subListIterator->getVariables());
 
-			xmlpp::Element* nodeVariables = nodeSubautomata->add_child("variables");
-			nodeVariables->set_child_text(subListIterator->getVariables());
+			nodeChildSubautomata = nodeSubautomata->add_child("functions");
+			nodeChildSubautomata->set_child_text(subListIterator->getFunctions());
+		}
 
-			xmlpp::Element* nodeFunctions = nodeSubautomata->add_child("functions");
-			nodeFunctions->set_child_text(subListIterator->getFunctions());
+		xmlpp::Element* nodeLibs = nodeRoot->add_child("libraries");
+		for ( std::list<std::string>::iterator listLibsIterator = this->listLibraries.begin();
+				listLibsIterator != this->listLibraries.end(); listLibsIterator++ ) {
+			xmlpp::Element* nodelib = nodeLibs->add_child("lib");
+			nodelib->set_child_text(*listLibsIterator);
 		}
 
 		xmlpp::Element* nodeConfig = nodeRoot->add_child("config");
-		nodeConfig->set_child_text(this->config);
+		for ( std::list<IceInterface>::iterator listInterfacesIterator = this->listInterfaces.begin();
+				listInterfacesIterator != this->listInterfaces.end(); listInterfacesIterator++ ) {
+			xmlpp::Element* nodeIceInterface = nodeConfig->add_child("iceinterface");
+
+			xmlpp::Element* nodeConfigChild = nodeIceInterface->add_child("nameinterface");
+			nodeConfigChild->set_child_text(listInterfacesIterator->getName());
+
+			nodeConfigChild = nodeIceInterface->add_child("ip");
+			nodeConfigChild->set_child_text(listInterfacesIterator->getIp());
+
+			nodeConfigChild = nodeIceInterface->add_child("port");
+			nodeConfigChild->set_child_text(listInterfacesIterator->getPort());
+
+			nodeConfigChild = nodeIceInterface->add_child("interface");
+			nodeConfigChild->set_child_text(listInterfacesIterator->getInterface());
+		}
 
 		document.write_to_file(this->filepath, "UTF-8");
 

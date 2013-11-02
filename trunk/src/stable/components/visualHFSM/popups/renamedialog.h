@@ -21,6 +21,8 @@
 #ifndef RENAMEDIALOG_H
 #define RENAMEDIALOG_H
 
+#include <sigc++/sigc++.h>
+
 #include "../guinode.h"
 
 // Definition of this class
@@ -35,6 +37,10 @@ public:
 	// Popup initializer
 	void init ();
 
+	// signal accessor:
+ 	typedef sigc::signal<void, int, std::string> type_signal;
+  	type_signal signal_change_node ();
+
 protected:
 	// Data structure
 	GuiNode* gnode;
@@ -47,6 +53,8 @@ protected:
 	void on_button_accept ();
 	void on_button_cancel ();
 	bool on_key_released ( GdkEventKey* event );
+
+	type_signal m_signal;
 };
 
 #endif // RENAMEDIALOG_H

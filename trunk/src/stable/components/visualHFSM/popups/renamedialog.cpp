@@ -77,7 +77,10 @@ void RenameDialog::init () {
  *************************************************************/
 void RenameDialog::on_button_accept () {
 	this->gnode->changeText(this->entry_text->get_text());
+    int id = this->gnode->getId();
+    std::string name = this->gnode->getName();
 	delete this->dialog;
+    this->m_signal.emit(id, name);
 }
 
 void RenameDialog::on_button_cancel () {
@@ -89,4 +92,8 @@ bool RenameDialog::on_key_released ( GdkEventKey* event ) {
         this->on_button_accept();
 
     return true;
+}
+
+RenameDialog::type_signal RenameDialog::signal_change_node () {
+    return m_signal;
 }

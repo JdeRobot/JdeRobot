@@ -32,9 +32,10 @@
 #include "savefile.h"
 #include "generate.h"
 #include "guisubautomata.h"
+#include "iceinterface.h"
 #include "popups/configfiledialog.h"
 #include "popups/funvardialog.h"
-#include "popups/importdialog.h"
+#include "popups/librariesdialog.h"
 #include "popups/loadfiledialog.h"
 #include "popups/timerdialog.h"
 #include "popups/savefiledialog.h"
@@ -46,9 +47,9 @@ typedef enum Button {
     SAVE,
     SAVE_AS,
     OPEN,
-    INTERFACES,
     TIMER,
     VARIABLES,
+    LIBRARIES,
     GENERATE_CODE,
     COMPILE,
     ANY
@@ -77,7 +78,9 @@ public:
     // Methods for signals from save and load files
     void on_save_file ( std::string path );
     void on_load_file ( std::string path );
-    void on_config_text ( std::string config );
+    void on_config_text ( std::list<IceInterface>& listInterfaces );
+    void on_additional_libraries ( std::list<std::string> listLibraries );
+    void on_change_node_name ( int id, std::string name );
 
 private:
     Glib::RefPtr<Gtk::Builder> refBuilder;
@@ -86,7 +89,7 @@ private:
     Gtk::ImageMenuItem *imagemenuitem_new, *imagemenuitem_open, *imagemenuitem_save;
     Gtk::ImageMenuItem *imagemenuitem_saveas, *imagemenuitem_quit;
     Gtk::ImageMenuItem *imagemenuitem_state, *imagemenuitem_transition;
-    Gtk::ImageMenuItem *imagemenuitem_interfaces, *imagemenuitem_timer, *imagemenuitem_variables;
+    Gtk::ImageMenuItem *imagemenuitem_timer, *imagemenuitem_variables, *imagemenuitem_libraries;
     Gtk::ImageMenuItem *imagemenuitem_configfile, *imagemenuitem_generatecode;
     Gtk::ImageMenuItem *imagemenuitem_compile, *imagemenuitem_about;
     
@@ -152,11 +155,18 @@ private:
     std::list <GuiSubautomata> subautomataList;
     GuiSubautomata* currentSubautomata;
 
+    std::string nameNode;
+
     // For files (load and save)
-    std::string filepath, configfile;
+    std::string filepath;
+    std::list<IceInterface> listInterfaces;
+    std::map<std::string, std::string> mapInterfacesHeader;
+    std::list<std::string> listLibraries;
     SaveFileDialog* sfdialog;
     LoadFileDialog* lfdialog;
     ConfigFileDialog* cfdialog;
+    LibrariesDialog* ldialog;
+    RenameDialog* rdialog;
 
     Button lastButton;
 
@@ -185,6 +195,8 @@ private:
     void on_menu_canvas_paste ();
 
     // Of the treeview
+    bool fillTreeView ( std::string nameNode, Gtk::TreeModel::Children child, int idNodeFather );
+    bool removeFromTreeView ( int id, Gtk::TreeModel::Children child );
 
     // Of the schema
     bool on_schema_event ( GdkEvent* event );
@@ -223,6 +235,7 @@ private:
     void on_menubar_clicked_interfaces ();
     void on_menubar_clicked_timer ();
     void on_menubar_clicked_variables ();
+    void on_menubar_clicked_libraries ();
     void on_menubar_clicked_configfile ();
     void on_menubar_clicked_generate_code ();
     void on_menubar_clicked_compile ();
@@ -236,20 +249,18 @@ private:
     int loadSubautomata ( std::list<SubAutomata> subautomataList );
     void removeAllGui ();
     void removeAllSubautomata ();
-    bool hasEnding ( std::string const &fullString, std::string const &ending );
-    bool replaceFile ( std::string& str, const std::string& character, std::string to );
-    bool replace ( std::string& str, const std::string& from, const std::string& to );
 
-    bool fillTreeView ( std::string nameNode, Gtk::TreeModel::Children child, int idNodeFather );
-    bool removeFromTreeView ( int id, Gtk::TreeModel::Children child );
     int getIdNodeInSubautomata ( int subautomataId );
-
-    void removeRecursively ( GuiSubautomata* guisub, GuiNode* gnode );
-    void remove ( GuiSubautomata* guisub, GuiNode* gnode );
-
     int getIdSubautomataWithNode ( int idNode );
 
-    void createConfigFile ();
+    void remove ( GuiSubautomata* guisub, GuiNode* gnode );
+    void removeRecursively ( GuiSubautomata* guisub, GuiNode* gnode );
+
+    bool hasEnding ( std::string const &fullString, std::string const &ending );
+    bool replace ( std::string& str, const std::string& from, const std::string& to );
+    bool replaceFile ( std::string& str, const std::string& character, std::string to );
+
+    bool checkAll ();
 }; // Class VisualHFSM
 
 #endif // VISUALHFSM_H

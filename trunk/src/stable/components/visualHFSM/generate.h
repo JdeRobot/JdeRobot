@@ -26,8 +26,10 @@
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <algorithm>
 
 #include "subautomata.h"
+#include "iceinterface.h"
 
  typedef enum TabEnum {
     T_ZERO,
@@ -44,7 +46,9 @@ public:
 	// Constructor
 	Generate ( std::list<SubAutomata> subautomataList, std::string cpppath,
 								std::string cfgpath, std::string cmakepath,
-								std::string configfile );
+								std::list<IceInterface>* listInterfaces,
+								std::map<std::string, std::string> mapInterfacesHeader,
+								std::list<std::string> listLibraries );
 
 	// Destructor
 	virtual ~Generate ();
@@ -54,9 +58,12 @@ public:
 
 private:
 	std::list<SubAutomata> subautomataList;
-	std::string path, cfgpath, cmakepath, configfile;
+	std::string path, cfgpath, cmakepath;
+	std::list<IceInterface>* listInterfaces;
 	std::fstream fs;
 	std::map<TabEnum, std::string> mapTab;
+	std::map<std::string, std::string> mapInterfacesHeader;
+	std::list<std::string> listLibraries;
 
 	void generateHeaders ();
 	void generateGenericHeaders ();

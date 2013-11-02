@@ -42,6 +42,11 @@ MySaxParser::MySaxParser () : xmlpp::SaxParser() {
     this->mapStringValues["variables"] = E_VARS;
     this->mapStringValues["functions"] = E_FUNCTIONS;
     this->mapStringValues["config"] = E_CONFIGFILE;
+    this->mapStringValues["iceinterface"] = E_ICEINTERFACE;
+    this->mapStringValues["nameinterface"] = E_INTERFACENAME;
+    this->mapStringValues["ip"] = E_INTERFACEIP;
+    this->mapStringValues["port"] = E_INTERFACEPORT;
+    this->mapStringValues["interface"] = E_INTERFACEINTERFACE;
 }
 
 /*************************************************************
@@ -56,8 +61,12 @@ std::list<SubAutomata> MySaxParser::getListSubautomata () {
     return this->subautomataList;
 }
 
-std::string MySaxParser::getConfigFile () {
-    return this->configfile;
+std::list<IceInterface>& MySaxParser::getConfigFile () {
+    return this->listConfig;
+}
+
+std::list<std::string> MySaxParser::getListLibs () {
+    return this->listLibraries;
 }
 
 /*************************************************************
@@ -163,6 +172,7 @@ void MySaxParser::on_start_element ( const Glib::ustring& name,
         }
         case E_LIBRARIES:
             this->option = E_LIBRARIES;
+            this->listLibraries.clear();
             break;
         case E_LIB:
             this->option = E_LIB;
@@ -180,6 +190,22 @@ void MySaxParser::on_start_element ( const Glib::ustring& name,
             break;
         case E_CONFIGFILE:
             this->option = E_CONFIGFILE;
+            break;
+        case E_ICEINTERFACE:
+            this->iceinterface = new IceInterface();
+            this->option = E_ICEINTERFACE;
+            break;
+        case E_INTERFACENAME:
+            this->option = E_INTERFACENAME;
+            break;
+        case E_INTERFACEIP:
+            this->option = E_INTERFACEIP;
+            break;
+        case E_INTERFACEPORT:
+            this->option = E_INTERFACEPORT;
+            break;
+        case E_INTERFACEINTERFACE:
+            this->option = E_INTERFACEINTERFACE;
             break;
         default:
             break;
@@ -202,16 +228,13 @@ void MySaxParser::on_end_element ( const Glib::ustring& name ) {
             this->transition->setTrans(this->type, this->code);
             break;
         case E_LIB:
-            this->listInterfaces.push_back(this->code);
-            break;
-        case E_LIBRARIES:
-            this->subautomata->setInterfaces(this->listInterfaces);
-            this->listInterfaces.clear();
+            this->listLibraries.push_back(this->code);
             break;
         case E_FUNCTIONS:
             this->subautomata->setFunctions(this->code);
             break;
-        case E_CONFIGFILE:
+        case E_ICEINTERFACE:
+            this->listConfig.push_back(*this->iceinterface);
             break;
         default:
             break;
@@ -289,7 +312,23 @@ void MySaxParser::on_characters ( const Glib::ustring& text ) {
             break;
         }
         case E_CONFIGFILE: {
-            this->configfile += text;
+//            this->configfile += text;
+            break;
+        }
+        case E_INTERFACENAME: {
+            this->iceinterface->setName(text);
+            break;
+        }
+        case E_INTERFACEIP: {
+            this->iceinterface->setIp(text);
+            break;
+        }
+        case E_INTERFACEPORT: {
+            this->iceinterface->setPort(text);
+            break;
+        }
+        case E_INTERFACEINTERFACE: {
+            this->iceinterface->setInterface(text);
             break;
         }
         default:

@@ -48,10 +48,6 @@ void GuiSubautomata::setVariables ( std::string variables ) {
     this->variables = variables;
 }
 
-void GuiSubautomata::setInterfaces ( std::list<std::string>& interfaces ) {
-    this->interfaces = interfaces;
-}
-
 void GuiSubautomata::setNodeList ( std::list<GuiNode>* list ) {
     this->nodeList.clear();
     for ( std::list<GuiNode>::iterator nodeListIterator = list->begin();
@@ -64,6 +60,16 @@ void GuiSubautomata::setTransList ( std::list<GuiTransition>* list ) {
     for ( std::list<GuiTransition>::iterator transListIterator = list->begin();
             transListIterator != list->end(); transListIterator++ )
         this->transitionList.push_back(*transListIterator);
+}
+
+void GuiSubautomata::setToZero ( int idChild ) {
+    std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
+    while ( (nodeListIterator->getIdSubautomataSon() != idChild) &&
+            (nodeListIterator != this->nodeList.end()) )
+        nodeListIterator++;
+
+    if (nodeListIterator != this->nodeList.end())
+        nodeListIterator->setIdSubautomataSon(0);
 }
 
 /*************************************************************
@@ -89,10 +95,6 @@ std::string GuiSubautomata::getVariables () {
     return this->variables;
 }
 
-std::list<std::string>* GuiSubautomata::getInterfaces () {
-    return &this->interfaces;
-}
-
 std::list<GuiNode>* GuiSubautomata::getListGuiNodes () {
     return &this->nodeList;
 }
@@ -101,6 +103,7 @@ std::list<GuiTransition>* GuiSubautomata::getListGuiTransitions () {
     return &this->transitionList;
 }
 
+// Get all GuiTransitions with the specified item
 std::list<GuiTransition> GuiSubautomata::getAllGuiTransitionsWith (
                                                 Glib::RefPtr<Goocanvas::Item> item ) {
     std::list<GuiTransition> guiTransitionList;
@@ -115,6 +118,7 @@ std::list<GuiTransition> GuiSubautomata::getAllGuiTransitionsWith (
     return guiTransitionList;
 }
 
+// Get all GuiTransitions with the specified ID
 std::list<GuiTransition> GuiSubautomata::getAllGuiTransitionsWith ( int id ) {
     std::list<GuiTransition> guiTransitionList;
 
@@ -129,6 +133,7 @@ std::list<GuiTransition> GuiSubautomata::getAllGuiTransitionsWith ( int id ) {
     return guiTransitionList;
 }
 
+// Get the GuiNode* to the specified item
 GuiNode* GuiSubautomata::getGuiNode ( Glib::RefPtr<Goocanvas::Item> item ) {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
     while ( (!nodeListIterator->hasThisItem(item)) &&
@@ -141,6 +146,7 @@ GuiNode* GuiSubautomata::getGuiNode ( Glib::RefPtr<Goocanvas::Item> item ) {
     return NULL;
 }
 
+// Get the GuiTransition* to the specified item
 GuiTransition* GuiSubautomata::getGuiTransition ( Glib::RefPtr<Goocanvas::Item> item ) {
     std::list<GuiTransition>::iterator nodeTransIterator = this->transitionList.begin();
     while ( (!nodeTransIterator->hasThisItem(item)) &&
@@ -153,6 +159,7 @@ GuiTransition* GuiSubautomata::getGuiTransition ( Glib::RefPtr<Goocanvas::Item> 
     return NULL;
 }
 
+// Get the point associated to the item, both states and transitions
 Point GuiSubautomata::getPoint ( Glib::RefPtr<Goocanvas::Item> item ) {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
     while ( (!nodeListIterator->hasThisItem(item)) &&
@@ -173,6 +180,7 @@ Point GuiSubautomata::getPoint ( Glib::RefPtr<Goocanvas::Item> item ) {
 /*************************************************************
  * ANOTHER FUNCTIONS
  *************************************************************/
+// Hide all states and transitions
 void GuiSubautomata::hideAll () {
     if (DEBUG)
         std::cout << BEGIN_GREEN << GUISUB << "Hiding (" << this->id << "). Node list size: " << this->nodeList.size() << END_COLOR << std::endl;
@@ -190,6 +198,7 @@ void GuiSubautomata::hideAll () {
     }
 }
 
+// Show all the states and transitions
 void GuiSubautomata::showAll () {
     if (DEBUG)
         std::cout << BEGIN_GREEN << GUISUB << "Showing (" << this->id << "). Node list size: " << this->nodeList.size() << END_COLOR << std::endl;
@@ -197,7 +206,6 @@ void GuiSubautomata::showAll () {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
     while ( nodeListIterator != this->nodeList.end() ) {
         nodeListIterator->show();
-//        nodeListIterator->isVisible();
         nodeListIterator++;
     }
 
@@ -208,6 +216,7 @@ void GuiSubautomata::showAll () {
     }
 }
 
+// Remove all the states and transitions
 void GuiSubautomata::removeAll () {
     if (DEBUG)
         std::cout << BEGIN_GREEN << GUISUB << "Removing (" << this->id << "). Node list size: " << this->nodeList.size() << END_COLOR << std::endl;
@@ -216,31 +225,45 @@ void GuiSubautomata::removeAll () {
     this->transitionList.clear();
 }
 
+// Check if it is all ok
+bool GuiSubautomata::checkAll () {
+    for ( std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
+            nodeListIterator != this->nodeList.end(); nodeListIterator++ ) {
+        // The name is not empty
+        if (nodeListIterator->getName().compare("") == 0)
+            return false;
+
+        // There are no repeated names
+        std::list<GuiNode>::iterator aux = nodeListIterator;
+        aux++;
+        for ( std::list<GuiNode>::iterator second = aux;
+                second != this->nodeList.end(); second++ ) {
+            if (nodeListIterator->getName().compare(second->getName()) == 0)
+                return false;
+        }
+    }
+
+    // All the transitions have a code
+    for ( std::list<GuiTransition>::iterator transListIterator = this->transitionList.begin();
+            transListIterator != this->transitionList.end(); transListIterator++ ) {
+        if (transListIterator->getCodeTrans().compare("") == 0)
+            return false;
+    }
+
+    return true;
+}
+
 // Is node list empty?
 bool GuiSubautomata::isNodeListEmpty () {
     return this->nodeList.empty();
 }
 
-bool GuiSubautomata::findInterface ( std::string interface ) {
-    bool found = false;
-
-    std::list<std::string>::iterator interfacesIterator = this->interfaces.begin();
-    while ( (!found) && (interfacesIterator != this->interfaces.end()) ) {
-        std::size_t pos = interfacesIterator->find(interface);
-        found = (pos != std::string::npos);
-        interfacesIterator++;
-    }
-
-    return found;
-}
-
 void GuiSubautomata::newGuiNode ( int id, int idSubautomataSon, float x, float y ) {
     GuiNode gnode(id, idSubautomataSon, x, y);
     this->nodeList.push_back(gnode);
-//    delete gnode;
 }
 
-// Removes the node with the Goocanvas::Item 'item'
+// Remove the node with the Goocanvas::Item 'item'
 void GuiSubautomata::removeGuiNode ( Glib::RefPtr<Goocanvas::Item> item ) {
     this->removeGuiTransitionsWith(item);
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
@@ -262,7 +285,7 @@ void GuiSubautomata::removeGuiNode ( Glib::RefPtr<Goocanvas::Item> item ) {
     }
 }
 
-// Removes the node with the id 'id'
+// Remove the node with the id 'id'
 void GuiSubautomata::removeGuiNode ( int id ) {
     this->removeGuiTransitionsWith(id);
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
@@ -284,7 +307,7 @@ void GuiSubautomata::removeGuiNode ( int id ) {
     }
 }
 
-// Creates a new GuiTransition
+// Create a new GuiTransition
 void GuiSubautomata::newGuiTransition ( Point origin, Point final, int id ) {
     GuiTransition gtransition(origin, final, id);
     this->transitionList.push_back(gtransition);
@@ -295,6 +318,7 @@ void GuiSubautomata::newGuiTransition ( Point origin, Point final, Point midpoin
     this->transitionList.push_back(gtransition);
 }
 
+// Remove a GuiTransition with the specified item
 void GuiSubautomata::removeGuiTransitionsWith ( Glib::RefPtr<Goocanvas::Item> item ) {
     std::list<GuiTransition>::iterator nodeTransIterator = this->transitionList.begin();
     while (nodeTransIterator != this->transitionList.end()) {
@@ -306,6 +330,7 @@ void GuiSubautomata::removeGuiTransitionsWith ( Glib::RefPtr<Goocanvas::Item> it
     }
 }
 
+// Remove a GuiTransition with the specified ID
 void GuiSubautomata::removeGuiTransitionsWith ( int id ) {
     std::list<GuiTransition>::iterator nodeTransIterator = this->transitionList.begin();
     while (nodeTransIterator != this->transitionList.end()) {
@@ -318,6 +343,7 @@ void GuiSubautomata::removeGuiTransitionsWith ( int id ) {
     }
 }
 
+// Copy a subautomata
 GuiSubautomata GuiSubautomata::copy () {
     std::list<GuiNode> gnodelist;
     for ( std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
@@ -333,7 +359,6 @@ GuiSubautomata GuiSubautomata::copy () {
     gsubautomata.setFunctions(std::string(this->functions));
     gsubautomata.setTime(std::string(this->timing));
     gsubautomata.setVariables(std::string(this->variables));
-    gsubautomata.setInterfaces(this->interfaces);
     gsubautomata.setNodeList(&gnodelist);
     gsubautomata.setTransList(&gtranslist);
 
@@ -347,7 +372,7 @@ GuiSubautomata GuiSubautomata::copy () {
  /*************************************************************
  * SETTERS FOR NODES
  *************************************************************/
-// Sets the items for a node with the Goocanvas::Item 'item'
+// Set the items for a node with the Goocanvas::Item 'item'
 void GuiSubautomata::setGuiNodeItems (  const Glib::RefPtr<Goocanvas::Item>& item,
                                         Glib::RefPtr<Goocanvas::Item> selectedItem,
                                         Glib::RefPtr<Goocanvas::Item> textItem ) {
@@ -356,6 +381,7 @@ void GuiSubautomata::setGuiNodeItems (  const Glib::RefPtr<Goocanvas::Item>& ite
     nodeListIterator->setItems(item, selectedItem, textItem);
 }
 
+// Set the ID of the subautomata son of the specified item
 void GuiSubautomata::setIdSubautomataSon ( int id, const Glib::RefPtr<Goocanvas::Item>& item ) {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
     while ( (!nodeListIterator->hasThisItem(item)) &&
@@ -405,6 +431,19 @@ Glib::RefPtr<Goocanvas::TextModel> GuiSubautomata::getLastTextNode () {
     return nodeListIterator->getText();
 }
 
+std::string GuiSubautomata::getGuiNodeName ( const Glib::RefPtr<Goocanvas::Item>& item ) {
+    std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
+    while ( (!nodeListIterator->hasThisItem(item)) &&
+            (nodeListIterator != this->nodeList.end()) )
+        nodeListIterator++;
+
+    if (nodeListIterator == this->nodeList.end())
+        std::cout << "en el end!!!" << std::endl;
+    std::cout << "returning " << nodeListIterator->getName() << std::endl;
+
+    return nodeListIterator->getName();
+}
+
 std::string GuiSubautomata::getLastGuiNodeName () {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.end();
     nodeListIterator--;
@@ -420,7 +459,7 @@ Glib::RefPtr<Goocanvas::Item> GuiSubautomata::getGuiNodeItem ( int id ) {
     return nodeListIterator->getItem();
 }
 
-int GuiSubautomata::getGuinodeId ( Glib::RefPtr<Goocanvas::Item> item ) {
+int GuiSubautomata::getGuinodeId ( const Glib::RefPtr<Goocanvas::Item>& item ) {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
     while ( (!nodeListIterator->hasThisItem(item)) &&
             (nodeListIterator != this->nodeList.end()) )
@@ -448,7 +487,7 @@ int GuiSubautomata::getIdSubautomataSon ( const Glib::RefPtr<Goocanvas::Item>& i
 /*************************************************************
  * ANOTHER FUNCTIONS FOR NODES
  *************************************************************/
-// Changes the node width with the Goocanvas::Item 'item'
+// Change the node width with the Goocanvas::Item 'item'
 void GuiSubautomata::changeGuiNodeWidth ( const Glib::RefPtr<Goocanvas::Item>& item, float width ) {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
     while ( (!nodeListIterator->hasThisItem(item)) &&
@@ -468,7 +507,7 @@ void GuiSubautomata::checkLastGuiNodeForInitial () {
         nodeListIterator->setAsInitial(false);
 }
 
-// Edits the node with the Goocanvas::Item 'item'
+// Edit the node with the Goocanvas::Item 'item'
 void GuiSubautomata::editGuiNode ( Glib::RefPtr<Goocanvas::Item> item ) {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
     while ( (!nodeListIterator->hasThisItem(item)) && (nodeListIterator != this->nodeList.end()) )
@@ -483,7 +522,7 @@ void GuiSubautomata::editGuiNode ( Glib::RefPtr<Goocanvas::Item> item ) {
     }
 }
 
-// Marks the node with the Goocanvas::Item 'item' as initial
+// Mark the node with the Goocanvas::Item 'item' as initial
 // If there is another node marked as initial, it first removes that mark
 void GuiSubautomata::markGuiNodeAsInitial ( Glib::RefPtr<Goocanvas::Item> item ) {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
@@ -504,7 +543,7 @@ void GuiSubautomata::markGuiNodeAsInitial ( Glib::RefPtr<Goocanvas::Item> item )
     }
 }
 
-// Moves the node (all its items)
+// Move the node (all its items)
 void GuiSubautomata::moveGuiNode (  const Glib::RefPtr<Goocanvas::Item>& item,
                                     double dx, double dy ) {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
@@ -516,7 +555,7 @@ void GuiSubautomata::moveGuiNode (  const Glib::RefPtr<Goocanvas::Item>& item,
         nodeListIterator->moveItems(dx, dy);
 }
 
-// Renames the node with the Goocanvas::Item 'item'
+// Rename the node with the Goocanvas::Item 'item'
 void GuiSubautomata::renameGuiNode ( Glib::RefPtr<Goocanvas::Item> item ) {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
     while ( (!nodeListIterator->hasThisItem(item)) && (nodeListIterator != this->nodeList.end()) )
@@ -654,7 +693,7 @@ void GuiSubautomata::editGuiTransition ( Glib::RefPtr<Goocanvas::Item> item ) {
     }
 }
 
-// Moves the transitions of the item (all its items)
+// Move the transitions of the item (all its items)
 void GuiSubautomata::moveGuiTransition ( const Glib::RefPtr<Goocanvas::Item>& item ) {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
     while ( (!nodeListIterator->hasThisItem(item)) &&

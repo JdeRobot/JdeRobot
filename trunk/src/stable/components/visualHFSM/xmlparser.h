@@ -31,6 +31,7 @@
 #include "node.h"
 #include "transition.h"
 #include "subautomata.h"
+#include "iceinterface.h"
 
 typedef enum Element {
     E_VISUALHFSM,
@@ -50,7 +51,12 @@ typedef enum Element {
     E_ITERATION,
     E_VARS,
     E_FUNCTIONS,
-    E_CONFIGFILE
+    E_CONFIGFILE,
+    E_ICEINTERFACE,
+    E_INTERFACENAME,
+    E_INTERFACEIP,
+    E_INTERFACEPORT,
+    E_INTERFACEINTERFACE
 } Element;
 
 // Definition of this class
@@ -64,7 +70,8 @@ public:
 
     // Getters
     std::list<SubAutomata> getListSubautomata ();
-    std::string getConfigFile ();
+    std::list<IceInterface>& getConfigFile ();
+    std::list<std::string> getListLibs ();
 
 protected:
     // Overrides:
@@ -83,7 +90,8 @@ private:
     // Data structure
     std::list <SubAutomata> subautomataList;
     std::map<std::string, Element> mapStringValues;
-    std::string configfile;
+    std::list<IceInterface> listConfig;
+    std::list<std::string> listLibraries;
 
     bool state;
     float x;
@@ -95,8 +103,8 @@ private:
     Transition* transition;
     Node* node;
     Point* point;
+    IceInterface* iceinterface;
 
-    std::list<std::string> listInterfaces;
     std::string code;
 
     // Private functions

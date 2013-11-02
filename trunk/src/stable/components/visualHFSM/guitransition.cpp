@@ -343,9 +343,6 @@ void GuiTransition::moveMidpoint ( float dx, float dy, Point leftpoint, Point ri
 
 	Point origin = leftpoint.calculateGoodArrowPosition(this->point);
     Point final = rightpoint.calculateGoodArrowPosition(this->point);
-    
-//    std::cout << "point.x: " << this->point.getX() << std::endl;
-//	std::cout << "point.y: " << this->point.getY() << std::endl;
 
     this->moveLeftItem(0, origin.getX(), origin.getY());
     this->moveLeftItem(1, this->point.getX(), this->point.getY());

@@ -18,33 +18,51 @@
  *
  */
 
-#ifndef SAVEFILE_H
-#define SAVEFILE_H
+#ifndef LIBRARIESDIALOG_H
+#define LIBRARIESDIALOG_H
 
-#include <libxml++/libxml++.h>
+#include <iostream>
+#include <stdio.h>
+#include <fstream>
+#include <sstream>
+#include <gtkmm-3.0/gtkmm.h>
+#include <sigc++/sigc++.h>
 
-#include "guisubautomata.h"
-#include "iceinterface.h"
+#include "../common.h"
 
 // Definition of this class
-class SaveFile {
+class LibrariesDialog {
 public:
 	// Constructor
-	SaveFile ( std::string filepath, std::list<GuiSubautomata>* subautomataList,
-				std::list<IceInterface>& listInterfaces, std::list<std::string> listLibraries );
+	LibrariesDialog ( std::list<std::string> listLibraries );
 
 	// Destructor
-	virtual ~SaveFile ();
+	virtual ~LibrariesDialog ();
 
-	// Initializer
+	// Popup initializer
 	void init ();
+
+	// signal accessor:
+ 	typedef sigc::signal<void, std::list<std::string> > type_signal;
+  	type_signal signal_libraries ();
 
 private:
 	// Data structure
-	std::string filepath;
-	std::list<IceInterface> listInterfaces;
-	std::list<GuiSubautomata>* subautomataList;
+	Gtk::Dialog* dialog;
+	Gtk::Button *button_accept, *button_cancel, *button_confirm;
+	Gtk::Grid* grid;
+	Gtk::Entry* entry_name;
+
+	int row;
 	std::list<std::string> listLibraries;
+	
+	// Private methods
+	void on_button_confirm ();
+	void on_button_delete ( int row );
+	void on_button_accept ();
+	void on_button_cancel ();
+
+	type_signal m_signal;
 };
 
-#endif // SAVEFILE_H
+#endif // LIBRARIESDIALOG_H

@@ -25,12 +25,16 @@
  *************************************************************/
 Generate::Generate ( std::list<SubAutomata> subautomataList, std::string cpppath,
 										std::string cfgpath, std::string cmakepath,
-										std::string configfile ) {
+										std::list<IceInterface>* listInterfaces,
+										std::map<std::string, std::string> mapInterfacesHeader,
+										std::list<std::string> listLibraries ) {
 	this->subautomataList = subautomataList;
 	this->path = cpppath;
 	this->cfgpath = cfgpath;
 	this->cmakepath = cmakepath;
-	this->configfile = configfile;
+	this->listInterfaces = listInterfaces;
+	this->mapInterfacesHeader = mapInterfacesHeader;
+	this->listLibraries = listLibraries;
 
 	this->mapTab[T_ZERO] = std::string();
 	this->mapTab[T_ONE] = std::string("\t");
@@ -62,9 +66,7 @@ int Generate::init () {
 
 		this->fs.open(this->cfgpath.c_str(), std::fstream::out);
 		if (this->fs.is_open()) {
-			this->fs << this->configfile << std::endl;
-			this->fs.flush();
-			// this->generateCfg();
+			this->generateCfg();
 			this->fs.close();
 		}
 		
@@ -84,25 +86,23 @@ void Generate::generateHeaders () {
 }
 
 void Generate::generateGenericHeaders () {
-	this->fs << "#include <iostream>" << std::endl;
-	this->fs << "#include <stdio.h>" << std::endl;
-	this->fs << std::endl;
 	this->fs << "#include <Ice/Ice.h>" << std::endl;
 	this->fs << "#include <IceUtil/IceUtil.h>" << std::endl;
+	this->fs << std::endl;
+	for ( std::list<std::string>::iterator listLibsIterator = this->listLibraries.begin();
+			listLibsIterator != this->listLibraries.end(); listLibsIterator++ )
+		this->fs << "#include <" << *listLibsIterator << ">" << std::endl;
 	this->fs << std::endl;
 	this->fs.flush();
 }
 
 void Generate::generateSpecificHeaders () {
-	for ( std::list<SubAutomata>::iterator subListIterator = this->subautomataList.begin();
-            subListIterator != this->subautomataList.end(); subListIterator++ ) {
-		std::list<std::string>* interfacesList = subListIterator->getInterfaces();
-		for ( std::list<std::string>::iterator intListIterator = interfacesList->begin();
-				intListIterator != interfacesList->end(); intListIterator++ )
-			this->fs << "#include " << *intListIterator << std::endl;
-		this->fs << std::endl;
-		this->fs.flush();
-	}
+	for ( std::list<IceInterface>::iterator listInterfacesIterator = this->listInterfaces->begin();
+			listInterfacesIterator != this->listInterfaces->end(); listInterfacesIterator++ )
+		this->fs << "#include <jderobot/" << this->mapInterfacesHeader[listInterfacesIterator->getInterface()] << ".h>" << std::endl;
+
+	this->fs << std::endl;
+	this->fs.flush();
 }
 
 void Generate::generateEnums () {
@@ -167,20 +167,9 @@ void Generate::generateVariables () {
 	this->fs << std::endl;
 	this->fs.flush();
 
-	this->fs << "jderobot::CameraPrx cameraprx;" << std::endl;
-	this->fs << "jderobot::MotorsPrx motorsprx;" << std::endl;
-	this->fs << "jderobot::NaoMotionsPrx motions;" << std::endl;
-	this->fs << "jderobot::Pose3DMotorsPrx head;" << std::endl;
-	this->fs << "jderobot::Pose3DMotorsPrx leftshoulder;" << std::endl;
-	this->fs << "jderobot::Pose3DMotorsPrx rightshoulder;" << std::endl;
-	this->fs << "jderobot::Pose3DMotorsPrx leftelbow;" << std::endl;
-	this->fs << "jderobot::Pose3DMotorsPrx rightelbow;" << std::endl;
-	this->fs << "jderobot::Pose3DMotorsPrx lefthip;" << std::endl;
-	this->fs << "jderobot::Pose3DMotorsPrx righthip;" << std::endl;
-	this->fs << "jderobot::Pose3DMotorsPrx leftknee;" << std::endl;
-	this->fs << "jderobot::Pose3DMotorsPrx rightknee;" << std::endl;
-	this->fs << "jderobot::Pose3DMotorsPrx leftankle;" << std::endl;
-	this->fs << "jderobot::Pose3DMotorsPrx rightankle;" << std::endl;
+	for ( std::list<IceInterface>::iterator listInterfacesIterator = this->listInterfaces->begin();
+			listInterfacesIterator != this->listInterfaces->end(); listInterfacesIterator++ )
+		this->fs << "jderobot::" << listInterfacesIterator->getInterface() << "Prx " << listInterfacesIterator->getName() << "prx;" << std::endl;
 	this->fs << std::endl;
 	this->fs.flush();
 }
@@ -385,148 +374,18 @@ void Generate::generateMain () {
 	this->fs << "\t\tic = Ice::initialize(argc, argv);" << std::endl;
 	this->fs << std::endl;
 
-	this->fs << "\t\t// Contact to camera" << std::endl;
-	this->fs << "\t\tIce::ObjectPrx camera = ic->propertyToProxy(\"comp.Camera.Proxy\");" << std::endl;
-	this->fs << "\t\tif (camera == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with camera\";" << std::endl;
-	this->fs << "\t\tcameraprx = jderobot::CameraPrx::checkedCast(camera);" << std::endl;
-	this->fs << "\t\tif (cameraprx == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.Camera.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Camera connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
-
-	this->fs << "\t\t// Contact to motors (for walking)" << std::endl;
-	this->fs << "\t\tIce::ObjectPrx motors = ic->propertyToProxy(\"comp.Motors.Proxy\");" << std::endl;
-	this->fs << "\t\tif (motors == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with motors\";" << std::endl;
-	this->fs << "\t\tmotorsprx = jderobot::MotorsPrx::checkedCast(motors);" << std::endl;
-	this->fs << "\t\tif (motorsprx == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.Motors.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Motors connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
-
-	this->fs.flush();
-
-	this->fs << "\t\t// Contact to motors (for different actions)" << std::endl;
-	this->fs << "\t\tIce::ObjectPrx motionsPrx = ic->propertyToProxy(\"comp.Motions.Proxy\");" << std::endl;
-	this->fs << "\t\tif (motionsPrx == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with motions\";" << std::endl;
-	this->fs << "\t\tmotions = jderobot::NaoMotionsPrx::checkedCast(motionsPrx);" << std::endl;
-	this->fs << "\t\tif (motions == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.Motions.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Motions connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
-
-	this->fs << "\t\t// Contact to head motors" << std::endl;
-	this->fs << "\t\tIce::ObjectPrx headmotors = ic->propertyToProxy(\"comp.HeadMotors.Proxy\");" << std::endl;
-	this->fs << "\t\tif (headmotors == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with head motors\";" << std::endl;
-	this->fs << "\t\thead = jderobot::Pose3DMotorsPrx::checkedCast(headmotors);" << std::endl;
-	this->fs << "\t\tif (head == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.HeadMotors.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Head motors connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
-
-	this->fs << "\t\t// Contact to shoulders motors" << std::endl;
-	this->fs << "\t\tIce::ObjectPrx leftshouldermotors = ic->propertyToProxy(\"comp.LeftShoulderMotors.Proxy\");" << std::endl;
-	this->fs << "\t\tif (leftshouldermotors == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with left shoulder motors\";" << std::endl;
-	this->fs << "\t\tleftshoulder = jderobot::Pose3DMotorsPrx::checkedCast(leftshouldermotors);" << std::endl;
-	this->fs << "\t\tif (leftshoulder == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.LeftShoulderMotors.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Left shoulder connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
-
-	this->fs.flush();
-
-	this->fs << "\t\tIce::ObjectPrx rightshouldermotors = ic->propertyToProxy(\"comp.RightShoulderMotors.Proxy\");" << std::endl;
-	this->fs << "\t\tif (rightshouldermotors == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with right shoulder motors\";" << std::endl;
-	this->fs << "\t\trightshoulder = jderobot::Pose3DMotorsPrx::checkedCast(rightshouldermotors);" << std::endl;
-	this->fs << "\t\tif (rightshoulder == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.RightShoulderMotors.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Right shoulder connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
-
-	this->fs << "\t\t// Contact to elbows motors" << std::endl;
-	this->fs << "\t\tIce::ObjectPrx leftelbowmotors = ic->propertyToProxy(\"comp.LeftElbowMotors.Proxy\");" << std::endl;
-	this->fs << "\t\tif (leftelbowmotors == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with right elbow motors\";" << std::endl;
-	this->fs << "\t\tleftelbow = jderobot::Pose3DMotorsPrx::checkedCast(leftelbowmotors);" << std::endl;
-	this->fs << "\t\tif (leftelbow == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.LeftElbowMotors.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Left elbow connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
-
-	this->fs << "\t\tIce::ObjectPrx rightelbowmotors = ic->propertyToProxy(\"comp.RightElbowMotors.Proxy\");" << std::endl;
-	this->fs << "\t\tif (rightelbowmotors == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with right elbow motors\";" << std::endl;
-	this->fs << "\t\trightelbow = jderobot::Pose3DMotorsPrx::checkedCast(rightelbowmotors);" << std::endl;
-	this->fs << "\t\tif (rightelbow == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.RightElbowMotors.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Right elbow connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
-
-	this->fs.flush();
-
-	this->fs << "\t\t// Contact to hips motors" << std::endl;
-	this->fs << "\t\tIce::ObjectPrx lefthipmotors = ic->propertyToProxy(\"comp.LeftHipMotors.Proxy\");" << std::endl;
-	this->fs << "\t\tif (lefthipmotors == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with left hip motors\";" << std::endl;
-	this->fs << "\t\tlefthip = jderobot::Pose3DMotorsPrx::checkedCast(lefthipmotors);" << std::endl;
-	this->fs << "\t\tif (lefthip == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.LeftHipMotors.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Left hip connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
-
-	this->fs << "\t\tIce::ObjectPrx righthipmotors = ic->propertyToProxy(\"comp.RightHipMotors.Proxy\");" << std::endl;
-	this->fs << "\t\tif (righthipmotors == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with right hip motors\";" << std::endl;
-	this->fs << "\t\trighthip = jderobot::Pose3DMotorsPrx::checkedCast(righthipmotors);" << std::endl;
-	this->fs << "\t\tif (righthip == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.RightHipMotors.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Right hip connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
-
-	this->fs << "\t\t// Contact to knees motors" << std::endl;
-	this->fs << "\t\tIce::ObjectPrx leftkneemotors = ic->propertyToProxy(\"comp.LeftKneeMotors.Proxy\");" << std::endl;
-	this->fs << "\t\tif (leftkneemotors == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with left knee motors\";" << std::endl;
-	this->fs << "\t\tleftknee = jderobot::Pose3DMotorsPrx::checkedCast(leftkneemotors);" << std::endl;
-	this->fs << "\t\tif (leftknee == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.LeftKneeMotors.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Left knee connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
-
-	this->fs.flush();
-
-	this->fs << "\t\tIce::ObjectPrx rightkneemotors = ic->propertyToProxy(\"comp.RightKneeMotors.Proxy\");" << std::endl;
-	this->fs << "\t\tif (rightkneemotors == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with right knee motors\";" << std::endl;
-	this->fs << "\t\trightknee = jderobot::Pose3DMotorsPrx::checkedCast(rightkneemotors);" << std::endl;
-	this->fs << "\t\tif (rightknee == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.RightKneeMotors.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Right knee motors connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
-
-	this->fs << "\t\t// Contact to ankles motors" << std::endl;
-	this->fs << "\t\tIce::ObjectPrx leftanklemotors = ic->propertyToProxy(\"comp.LeftAnkleMotors.Proxy\");" << std::endl;
-	this->fs << "\t\tif (leftanklemotors == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with left ankle motors\";" << std::endl;
-	this->fs << "\t\tleftankle = jderobot::Pose3DMotorsPrx::checkedCast(leftanklemotors);" << std::endl;
-	this->fs << "\t\tif (leftankle == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.LeftAnkleMotors.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Left ankle motors connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
-
-	this->fs << "\t\tIce::ObjectPrx rightanklemotors = ic->propertyToProxy(\"comp.RightAnkleMotors.Proxy\");" << std::endl;
-	this->fs << "\t\tif (rightanklemotors == 0)" << std::endl;
-	this->fs << "\t\t\t throw \"Could not create proxy with right ankle motors\";" << std::endl;
-	this->fs << "\t\trightankle = jderobot::Pose3DMotorsPrx::checkedCast(rightanklemotors);" << std::endl;
-	this->fs << "\t\tif (rightankle == 0)" << std::endl;
-	this->fs << "\t\t\tthrow \"Invalid proxy naooperator.RightAnkleMotors.Proxy\";" << std::endl;
-	this->fs << "\t\tstd::cout << \"Right ankle motors connected\" << std::endl;" << std::endl;
-	this->fs << std::endl;
+	for ( std::list<IceInterface>::iterator listInterfacesIterator = this->listInterfaces->begin();
+			listInterfacesIterator != this->listInterfaces->end(); listInterfacesIterator++ ) {
+		this->fs << "\t\t// Contact to " << listInterfacesIterator->getName() << std::endl;
+		this->fs << "\t\tIce::ObjectPrx " << listInterfacesIterator->getName() << " = ic->propertyToProxy(\"automata." << listInterfacesIterator->getName() << ".Proxy\");" << std::endl;
+		this->fs << "\t\tif (" << listInterfacesIterator->getName() << " == 0)" << std::endl;
+		this->fs << "\t\t\tthrow \"Could not create proxy with " << listInterfacesIterator->getName() << "\";" << std::endl;
+		this->fs << "\t\t" << listInterfacesIterator->getName() << "prx = jderobot::" << listInterfacesIterator->getInterface() << "Prx::checkedCast(" << listInterfacesIterator->getName() << ");" << std::endl;
+		this->fs << "\t\tif (" << listInterfacesIterator->getName() << "prx == 0)" << std::endl;
+		this->fs << "\t\t\tthrow \"Invalid proxy automata." << listInterfacesIterator->getName() << ".Proxy\";" << std::endl;
+		this->fs << "\t\tstd::cout << \"" << listInterfacesIterator->getName() << " connected\" << std::endl;" << std::endl;
+		this->fs << std::endl;
+	}
 
 	this->fs.flush();
 
@@ -564,19 +423,9 @@ void Generate::generateMain () {
 }
 
 void Generate::generateCfg () {
-	this->fs << "comp.HeadMotors.Proxy=NeckMotors:default -h 192.168.14.113 -p 10000" << std::endl;
-	this->fs << "comp.HeadSpeed.Proxy=NeckSpeed:default -h 192.168.14.113 -p 10000" << std::endl;
-	this->fs << "comp.LeftShoulderMotors.Proxy=LeftShoulderMotors:default -h 192.168.14.113 -p 10000" << std::endl;
-	this->fs << "comp.RightShoulderMotors.Proxy=RightShoulderMotors:default -h 192.168.14.113 -p 10000" << std::endl;
-	this->fs << "comp.LeftElbowMotors.Proxy=LeftElbowMotors:default -h 192.168.14.113 -p 10000" << std::endl;
-	this->fs << "comp.RightElbowMotors.Proxy=RightElbowMotors:default -h 192.168.14.113 -p 10000" << std::endl;
-	this->fs << "comp.LeftHipMotors.Proxy=LeftHipMotors:default -h 192.168.14.113 -p 10000" << std::endl;
-	this->fs << "comp.RightHipMotors.Proxy=RightHipMotors:default -h 192.168.14.113 -p 10000" << std::endl;
-	this->fs << "comp.LeftKneeMotors.Proxy=LeftKneeMotors:default -h 192.168.14.113 -p 10000" << std::endl;
-	this->fs << "comp.RightKneeMotors.Proxy=RightKneeMotors:default -h 192.168.14.113 -p 10000" << std::endl;
-	this->fs << "comp.LeftAnkleMotors.Proxy=LeftAnkleMotors:default -h 192.168.14.113 -p 10000" << std::endl;
-	this->fs << "comp.RightAnkleMotors.Proxy=RightAnkleMotors:default -h 192.168.14.113 -p 10000" << std::endl;
-
+	for ( std::list<IceInterface>::iterator listInterfacesIterator = this->listInterfaces->begin();
+			listInterfacesIterator != this->listInterfaces->end(); listInterfacesIterator++ )
+		this->fs << "automata." << listInterfacesIterator->getName() << ".Proxy=" << listInterfacesIterator->getName() << ":default -h " << listInterfacesIterator->getIp() << " -p " << listInterfacesIterator->getPort() << std::endl;
 	this->fs.flush();
 }
 

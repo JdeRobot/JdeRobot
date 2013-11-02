@@ -1,3 +1,6 @@
+#!/bin/bash
+
+<<LICENSE
 /*
  *  Copyright (C) 1997-2013 JDERobot Developers Team
  *
@@ -17,34 +20,20 @@
  *  Authors : Borja Menéndez <borjamonserrano@gmail.com>
  *
  */
+LICENSE
 
-#ifndef SAVEFILE_H
-#define SAVEFILE_H
+allInterfaces=`egrep -ri interface $1 | awk '{ if ($2 == "interface") print $1 $3 }' | sort`
+for interface in $allInterfaces
+do
+    class=`echo $interface | cut -f1 -d: | cut -f7 -d/ | cut -f1 -d.`
+    theInterface=`echo $interface | cut -f2 -d:`
+    i="$((${#theInterface}-1))"
+    last=${theInterface:$i:1}
+    if [ $last == "{" ]; then
+        echo "${theInterface%?} $class"
+    else
+        echo "$theInterface $class"
+    fi
+done
 
-#include <libxml++/libxml++.h>
-
-#include "guisubautomata.h"
-#include "iceinterface.h"
-
-// Definition of this class
-class SaveFile {
-public:
-	// Constructor
-	SaveFile ( std::string filepath, std::list<GuiSubautomata>* subautomataList,
-				std::list<IceInterface>& listInterfaces, std::list<std::string> listLibraries );
-
-	// Destructor
-	virtual ~SaveFile ();
-
-	// Initializer
-	void init ();
-
-private:
-	// Data structure
-	std::string filepath;
-	std::list<IceInterface> listInterfaces;
-	std::list<GuiSubautomata>* subautomataList;
-	std::list<std::string> listLibraries;
-};
-
-#endif // SAVEFILE_H
+exit 0

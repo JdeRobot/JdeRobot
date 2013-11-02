@@ -1,8 +1,30 @@
 IF (goocanvasmm_INCLUDE_DIRS)
 
-SET( SOURCE_FILES_VISUALHFSM point.cpp node.cpp transition.cpp guinode.cpp subautomata.cpp guitransition.cpp guisubautomata.cpp generate.cpp popups/configfiledialog.cpp popups/editnodedialog.cpp popups/edittransitiondialog.cpp popups/funvardialog.cpp popups/importdialog.cpp popups/loadfiledialog.cpp popups/renamedialog.cpp popups/renametransitiondialog.cpp popups/savefiledialog.cpp popups/timerdialog.cpp savefile.cpp xmlparser.cpp visualhfsm.cpp main.cpp )
-
-#SET( CMAKE_CXX_FLAGS "-g -Wall -fpermissive" ) # Opciones para el compilador
+SET( SOURCE_FILES_VISUALHFSM
+	iceinterface.cpp
+	point.cpp
+	node.cpp
+	transition.cpp
+	guinode.cpp
+	subautomata.cpp
+	guitransition.cpp
+	guisubautomata.cpp
+	generate.cpp
+	popups/configfiledialog.cpp
+	popups/editnodedialog.cpp
+	popups/edittransitiondialog.cpp
+	popups/funvardialog.cpp
+	popups/librariesdialog.cpp
+	popups/loadfiledialog.cpp
+	popups/renamedialog.cpp
+	popups/renametransitiondialog.cpp
+	popups/savefiledialog.cpp
+	popups/timerdialog.cpp
+	savefile.cpp
+	xmlparser.cpp
+	visualhfsm.cpp
+	main.cpp
+)
 
 include_directories (
     ${INTERFACES_CPP_DIR}

@@ -23,16 +23,19 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <fstream>
+#include <sstream>
 #include <gtkmm-3.0/gtkmm.h>
 #include <sigc++/sigc++.h>
 
 #include "../common.h"
+#include "../iceinterface.h"
 
 // Definition of this class
 class ConfigFileDialog {
 public:
 	// Constructor
-	ConfigFileDialog ( std::string config );
+	ConfigFileDialog ( std::list<IceInterface>& listInterfaces, std::map<std::string, std::string> mapInterfacesHeader );
 
 	// Destructor
 	virtual ~ConfigFileDialog ();
@@ -41,19 +44,34 @@ public:
 	void init ();
 
 	//signal accessor:
-  	typedef sigc::signal<void, std::string> type_signal;
+ 	typedef sigc::signal<void, std::list<IceInterface>& > type_signal;
   	type_signal signal_config ();
 
 private:
 	// Data structure
 	Gtk::Dialog* dialog;
-	Gtk::Button* button_accept;
-	Gtk::Button* button_cancel;
-	Gtk::TextView *textview;
+	Gtk::Button *button_accept, *button_cancel, *button_confirm;
+	Gtk::Grid* grid;
+	Gtk::Entry *entry_name, *entry_ip, *entry_port;
+	Gtk::ComboBox* combobox_interface;
 
-	std::string configfile;
+	int row;
+	std::list<IceInterface> listInterfaces;
+	std::map<std::string, std::string> mapInterfacesHeader;
+
+	class ModelColumns : public Gtk::TreeModel::ColumnRecord {
+    public:
+        ModelColumns () { add(m_col_name); }
+
+        Gtk::TreeModelColumn<Glib::ustring> m_col_name;
+    };
+    ModelColumns m_Columns;
+
+    Glib::RefPtr<Gtk::ListStore> refTreeModel;
 	
 	// Private methods
+	void on_button_confirm ();
+	void on_button_delete ( int row );
 	void on_button_accept ();
 	void on_button_cancel ();
 

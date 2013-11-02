@@ -31,6 +31,11 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-missing-image</property>
   </object>
+  <object class="GtkImage" id="image15">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-missing-image</property>
+  </object>
   <object class="GtkImage" id="image2">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -57,11 +62,6 @@
     <property name="stock">gtk-missing-image</property>
   </object>
   <object class="GtkImage" id="image7">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-missing-image</property>
-  </object>
-  <object class="GtkImage" id="image8">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-missing-image</property>
@@ -230,17 +230,6 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkImageMenuItem" id="imagemenuitem_interfaces">
-                            <property name="label">_Interfaces</property>
-                            <property name="use_action_appearance">False</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="use_underline">True</property>
-                            <property name="image">image8</property>
-                            <property name="use_stock">False</property>
-                          </object>
-                        </child>
-                        <child>
                           <object class="GtkImageMenuItem" id="imagemenuitem_timer">
                             <property name="label">_Timer</property>
                             <property name="use_action_appearance">False</property>
@@ -276,6 +265,17 @@
                       <object class="GtkMenu" id="menu_actions">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkImageMenuItem" id="imagemenuitem_libraries">
+                            <property name="label">Additional _libraries</property>
+                            <property name="use_action_appearance">False</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="use_underline">True</property>
+                            <property name="image">image15</property>
+                            <property name="use_stock">False</property>
+                          </object>
+                        </child>
                         <child>
                           <object class="GtkImageMenuItem" id="imagemenuitem_configfile">
                             <property name="label">Config _file</property>

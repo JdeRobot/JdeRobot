@@ -18,33 +18,40 @@
  *
  */
 
-#ifndef SAVEFILE_H
-#define SAVEFILE_H
+#ifndef ICEINTERFACE_H
+#define ICEINTERFACE_H
 
-#include <libxml++/libxml++.h>
+#include <iostream>
+#include <stdio.h>
 
-#include "guisubautomata.h"
-#include "iceinterface.h"
-
-// Definition of this class
-class SaveFile {
+class IceInterface {
 public:
 	// Constructor
-	SaveFile ( std::string filepath, std::list<GuiSubautomata>* subautomataList,
-				std::list<IceInterface>& listInterfaces, std::list<std::string> listLibraries );
+	IceInterface ();
+	IceInterface ( std::string name, std::string ip, std::string port, std::string interface );
 
 	// Destructor
-	virtual ~SaveFile ();
+	virtual ~IceInterface ();
 
-	// Initializer
-	void init ();
+	// Setters
+	void setAll ( std::string name, std::string ip, std::string port, std::string interface );
+	void setName ( std::string name );
+	void setIp ( std::string ip );
+	void setPort ( std::string port );
+	void setInterface ( std::string interface );
+
+	// Getters
+	std::string getName ();
+	std::string getIp ();
+	std::string getPort ();
+	std::string getInterface ();
+
+	// Another functions
+	bool equals ( IceInterface* iceinterface );
+	bool equals ( std::string name, std::string ip, std::string port, std::string interface );
 
 private:
-	// Data structure
-	std::string filepath;
-	std::list<IceInterface> listInterfaces;
-	std::list<GuiSubautomata>* subautomataList;
-	std::list<std::string> listLibraries;
+	std::string name, ip, port, interface;
 };
 
-#endif // SAVEFILE_H
+#endif // ICEINTERFACE_H
