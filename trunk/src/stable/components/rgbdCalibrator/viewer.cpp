@@ -87,7 +87,7 @@ Viewer::Viewer()
 	mCalibration = new Calibration();
 
 	on_bt_intrinsic();
-
+	
 	pthread_mutex_init(&mutex, NULL);
 
 
@@ -109,6 +109,7 @@ bool Viewer::isVisible(){
 
 void Viewer::display( const colorspaces::Image& imageColor, const colorspaces::Image& imageDepth )
 {
+
 
 	// Draw optical center
 	for (int i = -2; i<=2; i++)
@@ -538,6 +539,10 @@ void Viewer::on_bt_intrinsic()
 	for ( boost::filesystem::directory_iterator itr( pathImage ); itr != end_itr; ++itr )
 	{
 
+		if ( itr->path().generic_string().find("jpg") == std::string::npos )
+			continue;
+
+		std::cout << itr->path().generic_string() << std::endl;
 		Mat view;
 		view = imread(itr->path().c_str(), CV_LOAD_IMAGE_COLOR);
 
