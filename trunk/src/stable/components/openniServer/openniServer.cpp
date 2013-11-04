@@ -429,10 +429,11 @@ public:
 	//fill imageDescription
 	imageDescription->width = colorVideoMode.getResolutionX();
 	imageDescription->height = colorVideoMode.getResolutionY();
-	int playerdetection = prop->getPropertyAsIntWithDefault(prefix+"PlayerDetection",0);
+	int cameraSegmentation = prop->getPropertyAsIntWithDefault(prefix+"PlayerDetection",0);
+	int segmentation = prop->getPropertyAsIntWithDefault("openniServer.PlayerDetection",0);
 
 	#ifndef WITH_NITE2
-		playerdetection=0;
+		segmentation=0;
 	#endif
 	int fps = prop->getPropertyAsIntWithDefault(prefix+"fps",5);
 	//we use formats according to colorspaces
@@ -444,7 +445,7 @@ public:
 	imageDescription->format = imageFmt->name;
 
 	std::cout << "Starting thread for camera: " << cameraDescription->name << std::endl;
-	replyTask = new ReplyTask(this,fps, playerdetection);
+	replyTask = new ReplyTask(this,fps,segmentation, cameraSegmentation);
 
 	this->control=replyTask->start();//my own thread
 	}
@@ -485,8 +486,9 @@ public:
 private:
 	class ReplyTask: public IceUtil::Thread{
 	public:
-		ReplyTask(CameraRGB* camera, int fps, int playerdetection):mycameravga(camera),_done(false) {
-		segmentation=playerdetection;
+		ReplyTask(CameraRGB* camera, int fps, int playerdetection, int colorSegementation):mycameravga(camera),_done(false) {
+		this->segmentation=playerdetection;
+		this->colorSegmentation=colorSegementation;
 		this->fps=fps;
       }
 		
@@ -553,8 +555,8 @@ private:
 							break;
 						case 1:
 							#ifdef WITH_NITE2
-							if (segmentation){
-								pixelsID[(y*m_colorFrame.getWidth() + x)]= *pLabels;
+							pixelsID[(y*m_colorFrame.getWidth() + x)]= *pLabels;
+							if (colorSegmentation){
 								if (*pLabels!=0)
 								{
 									srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 0] = colors[*pLabels][0];
@@ -566,13 +568,13 @@ private:
 									srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 1] = 0;
 									srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 2] = 0;
 								}
-								++pLabels;
 							}
 							else{
 								srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 0] = pImage->r;
 								srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 1] = pImage->g;
 								srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 2] = pImage->b;
 							}
+							++pLabels;
 							#endif
 							break;
 						case 2:
@@ -642,6 +644,7 @@ private:
 		IceUtil::Mutex requestsMutex;
 		std::list<jderobot::AMD_ImageProvider_getImageDataPtr> requests;
 		int segmentation;
+		int colorSegmentation;
 		int fps;
 		bool _done;
 
@@ -943,7 +946,11 @@ private:
 					bool extra =(bool)prop->getPropertyAsIntWithDefault("openniServer.ExtraCalibration",0);
 					std::cout << "EXTRA: " << extra << std::endl;
 					#ifndef WITH_NITE2
+						std::cout << "SIN NITE " << std::endl;
 						playerdetection=0;
+					#else
+						std::cout << "CON NITE" << std::endl;
+						std::cout << "detection: " << playerdetection << std::endl;
 					#endif
 						pthread_mutex_init(&this->localMutex, NULL);
 					   replyCloud = new ReplyCloud(this,prop->getProperty("openniServer.calibration"), playerdetection, depthVideoMode.getResolutionX(), depthVideoMode.getResolutionY(),fps, extra);
@@ -1046,7 +1053,6 @@ private:
 									if (withExtraCalibration){
 										mypro->applyExtraCalibration(&auxP.x, &auxP.y, &auxP.z);
 									}
-
 									if ( segmentation){
 										auxP.id=pixelsID[i];
 									}
