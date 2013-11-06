@@ -110,12 +110,12 @@ add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/src)
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/interfaces/cpp/jderobot/libJderobotInterfaces.so DESTINATION /usr/local/lib/jderobot)
 
 # install all libraries 
-FILE(GLOB LIB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/libs/*/*.so.*)
+FILE(GLOB LIB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/libs/*/*.so*)
 FOREACH (lib ${LIB_FILES})
 	INSTALL (FILES ${lib} DESTINATION /usr/local/lib/jderobot)
 ENDFOREACH(lib)
 
-FILE(GLOB LIB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/libs/visionlib/*/*.so.*)
+FILE(GLOB LIB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/libs/visionlib/*/*.so*)
 FOREACH (lib ${LIB_FILES})
 	INSTALL (FILES ${lib} DESTINATION /usr/local/lib/jderobot)
 ENDFOREACH(lib)
