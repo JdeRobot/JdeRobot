@@ -52,23 +52,22 @@ cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool deb
 		std::cerr << msg << std::endl;
 		std::cout << prefix + " Not camera provided" << std::endl;
 	}
+	_done=false;
 }
 
 cameraClient::~cameraClient() {
 	// TODO Auto-generated destructor stub
+	_done=true;
 }
 
 void
 cameraClient::run(){
 	jderobot::ImageDataPtr dataPtr;
 	colorspaces::Image::FormatPtr fmt;
-	struct timeval post;
-	long long int totalpre=0;
-	long long int totalpost=0;
-	while (this->isAlive()){
-		gettimeofday(&post,NULL);
-		totalpost=post.tv_sec*1000000+post.tv_usec;
+	IceUtil::Time last;
 
+	last=IceUtil::Time::now();
+	while (!(_done)){
 		dataPtr = this->prx->getImageData();
 		fmt = colorspaces::Image::Format::searchFormat(dataPtr->description->format);
 		if (!fmt)
@@ -83,16 +82,16 @@ cameraClient::run(){
 		localData.copyTo(this->data);
 		this->controlMutex.unlock();
 
-		if (totalpre !=0){
-			if ((totalpost - totalpre) > this->cycle ){
-				if (this->debug)
-					std::cout<<"--------" << prefix << " adquisition timeout-" << std::endl;
-			}
-			else{
-				usleep(this->cycle - (totalpost - totalpre));
-			}
+		if ((IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()) > this->cycle ){
+			//if (this->debug)
+				std::cout<<"--------" << prefix << " adquisition timeout-" << std::endl;
 		}
-		totalpre=totalpost;
+		else{
+			usleep(this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
+		}
+
+		this->refreshRate=(int)(1000000/(IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
+		last=IceUtil::Time::now();
 	}
 }
 

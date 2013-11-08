@@ -42,6 +42,7 @@ public:
 
 	//callbacks
 	cv::Mat getImage();
+	int getRfreshRate(){return refreshRate;};
 private:
 	cv::Mat data;
 	jderobot::CameraPrx prx;
@@ -50,6 +51,8 @@ private:
 	IceUtil::Mutex controlMutex;
 	std::string prefix;
 	bool debug;
+	bool _done;
+	int refreshRate;
 
 };
 

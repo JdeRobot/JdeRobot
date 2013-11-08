@@ -40,6 +40,7 @@ public:
 	virtual void run();
 
 	std::vector<jderobot::RGBPoint>  getData();
+	int getRfreshRate(){return refreshRate;};
 
 
 private:
@@ -49,6 +50,8 @@ private:
 	long long int cycle;
 	IceUtil::Mutex controlMutex;
 	bool debug;
+	bool _done;
+	int refreshRate;
 
 };
 

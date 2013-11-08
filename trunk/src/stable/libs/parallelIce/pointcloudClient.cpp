@@ -49,21 +49,23 @@ pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, 
 		std::cerr << msg << std::endl;
 		std::cout <<  prefix + " Not camera provided" << std::endl;
 	}
+	_done=false;
 
 }
 
 pointcloudClient::~pointcloudClient() {
 	// TODO Auto-generated destructor stub
+	this->_done=true;
 }
 
 void pointcloudClient::run(){
 
-	struct timeval post;
-	long long int totalpre=0;
-	long long int totalpost=0;
-	while (1){
-		gettimeofday(&post,NULL);
-		totalpost=post.tv_sec*1000000+post.tv_usec;
+	IceUtil::Time last;
+
+	last=IceUtil::Time::now();
+
+	while (!(_done)){
+
 
 		jderobot::pointCloudDataPtr localCloud=this->prx->getCloudData();
 
@@ -72,16 +74,15 @@ void pointcloudClient::run(){
 		std::copy( localCloud->p.begin(), localCloud->p.end(), this->data.begin() );
 
 		this->controlMutex.unlock();
-		if (totalpre !=0){
-			if ((totalpost - totalpre) > this->cycle ){
-				if (this->debug)
-					std::cout<< prefix << ": pointCloud adquisition timeout-" << std::endl;
-			}
-			else{
-				usleep(this->cycle - (totalpost - totalpre));
-			}
+		if ((IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()) > this->cycle ){
+			if (this->debug)
+				std::cout<< prefix << ": pointCloud adquisition timeout-" << std::endl;
 		}
-		totalpre=totalpost;
+		else{
+			usleep(this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
+		}
+		this->refreshRate=(int)(1000000/(IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
+		last=IceUtil::Time::now();
 	}
 }
 
