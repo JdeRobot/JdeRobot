@@ -50,6 +50,7 @@ pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, 
 		std::cout <<  prefix + " Not camera provided" << std::endl;
 	}
 	_done=false;
+	this->pauseStatus=false;
 
 }
 
@@ -58,6 +59,18 @@ pointcloudClient::~pointcloudClient() {
 	this->_done=true;
 }
 
+void pointcloudClient::pause(){
+	this->pauseStatus=true;
+}
+
+void pointcloudClient::resume(){
+	this->controlMutex.lock();
+		this->pauseStatus=false;
+		this->sem.broadcast();
+	this->controlMutex.unlock();
+}
+
+
 void pointcloudClient::run(){
 
 	IceUtil::Time last;
@@ -65,7 +78,10 @@ void pointcloudClient::run(){
 	last=IceUtil::Time::now();
 
 	while (!(_done)){
-
+		if (pauseStatus){
+			IceUtil::Mutex::Lock sync(this->controlMutex);
+			this->sem.wait(sync);
+		}
 
 		jderobot::pointCloudDataPtr localCloud=this->prx->getCloudData();
 

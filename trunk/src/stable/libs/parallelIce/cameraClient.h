@@ -43,6 +43,10 @@ public:
 	//callbacks
 	cv::Mat getImage();
 	int getRefreshRate(){return refreshRate;};
+	void pause();
+	void resume();
+	bool getPause(){return pauseStatus;};
+
 private:
 	cv::Mat data;
 	jderobot::CameraPrx prx;
@@ -53,6 +57,9 @@ private:
 	bool debug;
 	bool _done;
 	int refreshRate;
+	bool pauseStatus;
+
+	IceUtil::Cond sem;
 
 };
 

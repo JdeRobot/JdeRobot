@@ -19,37 +19,38 @@
 
  */
 
-
-#ifndef POINTCLOUDCLIENT_H_
-#define POINTCLOUDCLIENT_H_
+#ifndef LASERCLIENT_H_
+#define LASERCLIENT_H_
 
 #include <IceUtil/IceUtil.h>
 #include <iostream>
 #include <Ice/Ice.h>
-#include <jderobot/pointcloud.h>
+#include <jderobot/laser.h>
 #include <cv.h>
 #include <sstream>
 #include <fstream>
 
 namespace jderobot {
 
-class pointcloudClient: public IceUtil::Thread {
+
+class laserClient: public IceUtil::Thread {
 public:
-	pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug);
-	virtual ~pointcloudClient();
+	laserClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug);
+	virtual ~laserClient();
 	virtual void run();
 
-	std::vector<jderobot::RGBPoint>  getData();
+	std::vector<int>  getData();
 	int getRefreshRate(){return refreshRate;};
 	void pause();
 	void resume();
 	bool getPause(){return pauseStatus;};
 
 
+
 private:
 	std::string prefix;
-	std::vector<jderobot::RGBPoint> data;
-	jderobot::pointCloudPrx prx;
+	std::vector<int> data;
+	jderobot::LaserPrx prx;
 	long long int cycle;
 	IceUtil::Mutex controlMutex;
 	bool debug;
@@ -61,5 +62,6 @@ private:
 
 };
 
+
 } /* namespace jderobot */
-#endif /* POINTCLOUDCLIENT_H_ */
+#endif /* LASERCLIENT_H_ */

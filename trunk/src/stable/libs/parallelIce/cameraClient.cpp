@@ -53,12 +53,26 @@ cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool deb
 		std::cout << prefix + " Not camera provided" << std::endl;
 	}
 	_done=false;
+	this->pauseStatus=false;
 }
 
 cameraClient::~cameraClient() {
 	// TODO Auto-generated destructor stub
 	_done=true;
 }
+
+
+void cameraClient::pause(){
+	this->pauseStatus=true;
+}
+
+void cameraClient::resume(){
+	this->controlMutex.lock();
+		this->pauseStatus=false;
+		this->sem.broadcast();
+	this->controlMutex.unlock();
+}
+
 
 void
 cameraClient::run(){
@@ -68,6 +82,11 @@ cameraClient::run(){
 
 	last=IceUtil::Time::now();
 	while (!(_done)){
+		if (pauseStatus){
+			IceUtil::Mutex::Lock sync(this->controlMutex);
+			this->sem.wait(sync);
+		}
+
 		dataPtr = this->prx->getImageData();
 		fmt = colorspaces::Image::Format::searchFormat(dataPtr->description->format);
 		if (!fmt)
@@ -83,7 +102,7 @@ cameraClient::run(){
 		this->controlMutex.unlock();
 
 		if ((IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()) > this->cycle ){
-			//if (this->debug)
+			if (this->debug)
 				std::cout<<"--------" << prefix << " adquisition timeout-" << std::endl;
 		}
 		else{
