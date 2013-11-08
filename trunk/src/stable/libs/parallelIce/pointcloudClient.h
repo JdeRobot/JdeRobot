@@ -40,7 +40,7 @@ public:
 	virtual void run();
 
 	std::vector<jderobot::RGBPoint>  getData();
-	int getRfreshRate(){return refreshRate;};
+	int getRefreshRate(){return refreshRate;};
 
 
 private:

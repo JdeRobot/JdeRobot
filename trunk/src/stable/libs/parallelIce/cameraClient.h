@@ -42,7 +42,7 @@ public:
 
 	//callbacks
 	cv::Mat getImage();
-	int getRfreshRate(){return refreshRate;};
+	int getRefreshRate(){return refreshRate;};
 private:
 	cv::Mat data;
 	jderobot::CameraPrx prx;
