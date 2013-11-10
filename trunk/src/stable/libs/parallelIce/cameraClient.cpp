@@ -80,8 +80,12 @@ cameraClient::run(){
 	colorspaces::Image::FormatPtr fmt;
 	IceUtil::Time last;
 
+	int iterIndex = 0;
+	int totalRefreshRate = 0;
+
 	last=IceUtil::Time::now();
 	while (!(_done)){
+		iterIndex ++;
 		if (pauseStatus){
 			IceUtil::Mutex::Lock sync(this->controlMutex);
 			this->sem.wait(sync);
@@ -109,8 +113,17 @@ cameraClient::run(){
 			usleep(this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
 		}
 
-		this->refreshRate=(int)(1000000/(IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
+		int rate =(int)(1000000/(IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
+		totalRefreshRate =  totalRefreshRate + rate;
+		this->refreshRate= totalRefreshRate / iterIndex;		
 		last=IceUtil::Time::now();
+
+		if (iterIndex == INT_MAX) 
+		{
+			iterIndex = 0;
+			std::cout << "*** Reinicio contador" << std::endl;
+		}
+		
 	}
 }
 

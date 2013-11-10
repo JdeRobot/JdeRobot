@@ -30,7 +30,7 @@
 #include <cv.h>
 #include <sstream>
 #include <fstream>
-
+#include <climits>
 
 namespace jderobot {
 
