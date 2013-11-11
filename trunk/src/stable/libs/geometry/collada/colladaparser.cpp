@@ -15,7 +15,7 @@ namespace Geometry {
         }
         this->colladaXml = xmlDoc.FirstChildElement("COLLADA");
         if (!this->colladaXml){
-            std::cout << "Falta la etiqueta Collada" << std::endl;
+            std::cout << "Collada label not found" << std::endl;
             return;
         }
         if (std::string(this->colladaXml->Attribute("version")) != "1.4.0" &&
@@ -1454,8 +1454,8 @@ namespace Geometry {
 
         Eigen::Vector3d max = mesh->getMax();
         Eigen::Vector3d min = mesh->getMin();
-        image.create((max(1) - min(1)),
-                     (max(0) - min(1)),
+        image.create((max(0) - min(0)+5),
+                     (max(1) - min(1)+5),
                      CV_8UC3);
 
         image = cv::Scalar(255, 255, 255);
@@ -1465,8 +1465,8 @@ namespace Geometry {
 
         for(int i = 0; i < listaSegmentos.size(); i++){
             cv::line(image,
-                     cv::Point2f((listaSegmentos[i].x1 - min(0)), (listaSegmentos[i].y1 - min(1))),
-                     cv::Point2f((listaSegmentos[i].x2 - min(0)), (listaSegmentos[i].y2 - min(1))),
+                     cv::Point2f((listaSegmentos[i].y1 - min(1)), (listaSegmentos[i].x1 - min(0))),
+                     cv::Point2f((listaSegmentos[i].y2 - min(1)), (listaSegmentos[i].x2 - min(0))),
                      cv::Scalar(0, 0, 0),
                      3);
             fprintf(fp, "%.2f %.2f %.2f %.2f\n", listaSegmentos[i].x1, listaSegmentos[i].y1,
