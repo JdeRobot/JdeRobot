@@ -59,6 +59,7 @@ else()
     add_executable (followball ${SOURCE_FILES_FOLLOWBALL})
 
     TARGET_LINK_LIBRARIES ( followball
+	${CMAKE_THREAD_LIBS_INIT}
         JderobotInterfaces
         jderobotutil
         ${gtk20_LIBRARIES}
