@@ -1460,8 +1460,8 @@ namespace Geometry {
 
         image = cv::Scalar(255, 255, 255);
 
-        FILE* fp;
-        fp = fopen("lineas.txt", "w");
+        //FILE* fp;
+        //fp = fopen("lineas.txt", "w");
 
         for(int i = 0; i < listaSegmentos.size(); i++){
             cv::line(image,
@@ -1469,12 +1469,12 @@ namespace Geometry {
                      cv::Point2f((listaSegmentos[i].y2 - min(1)), (listaSegmentos[i].x2 - min(0))),
                      cv::Scalar(0, 0, 0),
                      3);
-            fprintf(fp, "%.2f %.2f %.2f %.2f\n", listaSegmentos[i].x1, listaSegmentos[i].y1,
-                            listaSegmentos[i].x2, listaSegmentos[i].y2);
+        //    fprintf(fp, "%.2f %.2f %.2f %.2f\n", listaSegmentos[i].x1, listaSegmentos[i].y1,
+        //                    listaSegmentos[i].x2, listaSegmentos[i].y2);
         }
-        cv::imwrite("mapa.jpg", image);
+        //cv::imwrite("mapa.jpg", image);
 
-        fclose(fp);
+        //fclose(fp);
 
     }
 
