@@ -118,11 +118,8 @@ cameraClient::run(){
 		this->refreshRate= totalRefreshRate / iterIndex;		
 		last=IceUtil::Time::now();
 
-		if (iterIndex == INT_MAX) 
-		{
+		if (iterIndex == INT_MAX)
 			iterIndex = 0;
-			std::cout << "*** Reinicio contador" << std::endl;
-		}
 		
 	}
 }
