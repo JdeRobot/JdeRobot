@@ -354,6 +354,12 @@ bool Gui::on_button_press_motors_canvas(GdkEvent* event) {
     float event_y = event->button.y;
     static gboolean dragging = FALSE;
 
+    if(event_x < 0) event_x = 0;
+    if(event_y < 0) event_y = 0;
+
+    if(event_x > 200) event_x = 200;
+    if(event_y > 200) event_y = 200;
+
     switch (event->type) {
         case GDK_BUTTON_PRESS:
 
