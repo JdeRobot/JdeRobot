@@ -34,7 +34,7 @@
 #include <jderobot/camera.h>
 #include <jderobot/pose3dmotors.h>
 #include <jderobot/pose3dencoders.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include "SharedMemory.h"
 
 class controlICE {

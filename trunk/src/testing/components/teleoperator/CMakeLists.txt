@@ -13,14 +13,15 @@ add_executable (teleoperatorPC  ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(teleoperatorPC 
     ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
-    ${LIBS_DIR}/jderobotice/libjderobotice.so
     ${LIBS_DIR}/jderobotutil/libjderobotutil.so
-    ${LIBS_DIR}/colorspaces/libcolorspacesmm.so
+    ${LIBS_DIR}/visionlib/colorspaces/libcolorspacesmm.so
     ${OpenCV_LIBRARIES}        
+    ${OpenCVGUI_LIBRARIES}
 	${ZeroCIce_LIBRARIES}    
 	${gtkmm_LIBRARIES}  
 	${gtkmm3_LIBRARIES}  	
 	${gthread_LIBRARIES}
 	${Gearbox_LIBRARIES}
+    ${CMAKE_THREAD_LIBS_INIT}
 )
 

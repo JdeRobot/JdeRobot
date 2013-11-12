@@ -23,10 +23,10 @@
 #ifndef GUI_H
 #define	GUI_H
 
-#include <colorspaces/colorspacesmm.h>
-#include<gtk-2.0/gtk/gtk.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
+#include <gtk-2.0/gtk/gtk.h>
 //#include<gtk-2.0/gdk/gdk.h>
-#include<gtkmm-2.4/gtkmm.h>
+#include <gtkmm-2.4/gtkmm.h>
 #include <gtkmm/drawingarea.h>
 //#include <gdkmm/pixbuf.h>
 //#include <gdkmm-3.0/gdkmm/pixbuf.h>

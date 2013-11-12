@@ -31,7 +31,7 @@
 #include <jderobot/camera.h>
 #include <jderobot/pose3dmotors.h>
 #include <jderobot/pose3dencoders.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include "Gui.h"
 
 #ifndef SHAREDMEMORY_H
