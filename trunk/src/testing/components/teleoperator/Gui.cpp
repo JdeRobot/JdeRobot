@@ -58,6 +58,7 @@ Gui::Gui(SharedMemory *interfacesData) : gtkmain(0, 0) {
     this->motors_canvas->signal_event().connect(sigc::mem_fun(this, &Gui::on_button_press_motors_canvas));
     this->stop_button->signal_clicked().connect(sigc::mem_fun(this, &Gui::stop_button_clicked));
     this->check_motors->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_motors_clicked));
+    this->motors_window->signal_hide().connect(sigc::mem_fun(this, &Gui::on_motors_window_hide));
     //Init widgets
     this->motors_canvas->add_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::VISIBILITY_NOTIFY_MASK | Gdk::BUTTON1_MOTION_MASK);
     this->motors_canvas->get_size_request(this->previous_event_x, this->previous_event_y);
@@ -70,6 +71,7 @@ Gui::Gui(SharedMemory *interfacesData) : gtkmain(0, 0) {
     this->builder->get_widget("check_encoders", this->check_encoders);
     //SIGNALS
     this->check_encoders->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_encoders_clicked));
+    this->encoders_window->signal_hide().connect(sigc::mem_fun(this, &Gui::on_encoders_window_hide));
     //LABELS
     this->builder->get_widget("encoders_x", this->encoders_x);
     this->builder->get_widget("encoders_y", this->encoders_y);
@@ -85,6 +87,7 @@ Gui::Gui(SharedMemory *interfacesData) : gtkmain(0, 0) {
     this->builder->get_widget("check_laser", this->check_laser);
     //SIGNALS
     this->check_laser->signal_toggled().connect(sigc::mem_fun(this, &Gui::check_laser_clicked));
+    this->laser_window->signal_hide().connect(sigc::mem_fun(this, &Gui::on_laser_window_hide));
     //END_LASER
 
     //CAMERAS
@@ -391,6 +394,22 @@ bool Gui::on_button_press_motors_canvas(GdkEvent* event) {
 
     }
 }
+
+void Gui::on_motors_window_hide(){
+    if(check_motors->get_active())
+        this->check_motors->set_active(false);
+}
+
+void Gui::on_encoders_window_hide(){
+    if(check_encoders->get_active())
+        this->check_encoders->set_active(false);
+}
+
+void Gui::on_laser_window_hide(){
+    if(check_laser->get_active())
+        this->check_laser->set_active(false);
+}
+
 
 void Gui::stop_button_clicked() {
     this->previous_event_x = 100;

@@ -56,6 +56,7 @@ private:
     Gtk::CheckButton* check_motors;
     bool motorsShowed;
     bool on_button_press_motors_canvas(GdkEvent* event);
+    void on_motors_window_hide();
     void stop_button_clicked();
     int previous_event_x, previous_event_y, cameras_previous_event_x, cameras_previous_event_y;
     void displayMotorsData();
@@ -79,6 +80,7 @@ private:
     Gtk::Label* encoders_y;
     Gtk::Label* encoders_theta;
     bool encodersShowed;
+    void on_encoders_window_hide();
     void displayEncodersData();
     void check_encoders_clicked();
     //END_ENCODERS   
@@ -87,6 +89,7 @@ private:
     Gtk::DrawingArea* laser_canvas;
     Gtk::Window* laser_window;
     Gtk::ToggleButton* check_laser;
+    void on_laser_window_hide();
     void check_laser_clicked();
     void drawLaser();
     bool laserShowed;
