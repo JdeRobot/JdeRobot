@@ -14,7 +14,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- *  Authors : Borja Menéndez <borjamonserrano@gmail.com>
+ *  Authors : Borja Menéndez Moreno <b.menendez.moreno@gmail.com>
+ *            José María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
@@ -197,6 +198,7 @@ private:
     // Of the treeview
     bool fillTreeView ( std::string nameNode, Gtk::TreeModel::Children child, int idNodeFather );
     bool removeFromTreeView ( int id, Gtk::TreeModel::Children child );
+    bool changeNameInTreeView ( int id, std::string nameNode, Gtk::TreeModel::Children child );
 
     // Of the schema
     bool on_schema_event ( GdkEvent* event );

@@ -14,7 +14,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- *  Authors : Borja Menéndez <borjamonserrano@gmail.com>
+ *  Authors : Borja Menéndez Moreno <b.menendez.moreno@gmail.com>
+ *            José María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
@@ -123,6 +124,7 @@ VisualHFSM::VisualHFSM ( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builde
 
     this->id = 1;
     GuiSubautomata guisub(id, 0);
+    guisub.setTime(TIME_DEFAULT);
     this->subautomataList.push_back(guisub);
     this->currentSubautomata = this->getSubautomata(id);
     this->id++;
@@ -214,17 +216,7 @@ void VisualHFSM::on_additional_libraries ( std::list<std::string> listLibraries 
 
 // Receive the signal of name changed in a state for changing it in the treeview
 void VisualHFSM::on_change_node_name ( int id, std::string name ) {
-    typedef Gtk::TreeModel::Children type_children;
-    type_children children = this->refTreeModel->children();
-    type_children::iterator childrenIterator = children.begin();
-    while ( childrenIterator != children.end() ) {
-        Gtk::TreeModel::Row row = *childrenIterator;
-        if (row[m_Columns.m_col_id] == id) {
-            row[m_Columns.m_col_name] = name;
-            break;
-        } else
-            childrenIterator++;
-    }
+    this->changeNameInTreeView(id, name, this->refTreeModel->children());
 }
 
 /*************************************************************
@@ -593,6 +585,24 @@ bool VisualHFSM::removeFromTreeView ( int id, Gtk::TreeModel::Children child ) {
     return cont;
 }
 
+// Change a name of a state in the treeview
+bool VisualHFSM::changeNameInTreeView ( int id, std::string nameNode, Gtk::TreeModel::Children child ) {
+    bool cont = true;
+    Gtk::TreeModel::Children::iterator iter = child.begin();
+    while ( cont && (iter != child.end()) ) {
+        Gtk::TreeModel::Row therow = *iter;
+        if (therow[m_Columns.m_col_id] == id) {
+            therow[m_Columns.m_col_name] = nameNode;
+            cont = false;
+        } else {
+            cont = this->changeNameInTreeView(id, nameNode, therow.children());
+            iter++;
+        }
+    }
+
+    return cont;
+}
+
 /*************************************************************
  * OF THE SCHEMA
  *************************************************************/
@@ -733,6 +743,7 @@ bool VisualHFSM::on_item_button_press_event ( const Glib::RefPtr<Goocanvas::Item
                 
                 this->currentSubautomata->setIdSubautomataSon(id, item);
                 GuiSubautomata newSubautomata(id, this->currentSubautomata->getId());
+                newSubautomata.setTime(TIME_DEFAULT);
                 subautomataList.push_back(newSubautomata);
                 this->currentSubautomata = this->getSubautomata(id);
                 id++;

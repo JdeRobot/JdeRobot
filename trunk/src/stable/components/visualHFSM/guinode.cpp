@@ -14,7 +14,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- *  Authors : Borja Menéndez <borjamonserrano@gmail.com>
+ *  Authors : Borja Menéndez Moreno <b.menendez.moreno@gmail.com>
+ *            José María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
@@ -220,15 +221,20 @@ void GuiNode::changeLineWidthInitial ( float newLineWidthInitial ) {
 }
 
 void GuiNode::changeText ( std::string newText ) {
+	double x;
+	#ifdef GLIBMM_PROPERTIES_ENABLED
+    x = this->ellipse->property_x();
+    #else
+    x = this->ellipse->get_property("x");
+    #endif //GLIBMM_PROPERTIES_ENABLED
+
 	this->node.setName(newText);
 	#ifdef GLIBMM_PROPERTIES_ENABLED
     this->text->property_text() = newText;
-    this->text->property_x() = this->point.getX() - newText.size() * PIXELS_PER_LETTER;
-    this->text->property_y() = this->point.getY() - Y_NODE_IDEAL;
+    this->text->property_x() = x - newText.size() * PIXELS_PER_LETTER;
     #else
     this->text->set_property("text", newText);
-    this->text->set_property("x", this->point.getX() - newText.size() * PIXELS_PER_LETTER);
-    this->text->set_property("y", this->point.getY() - Y_NODE_IDEAL);
+    this->text->set_property("x", x - newText.size() * PIXELS_PER_LETTER);
     #endif //GLIBMM_PROPERTIES_ENABLED
 }
 
