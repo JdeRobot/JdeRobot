@@ -52,6 +52,10 @@ cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool deb
 		std::cerr << msg << std::endl;
 		std::cout << prefix + " Not camera provided" << std::endl;
 	}
+
+	jderobot::ImageDataPtr data = this->prx->getImageData();
+
+	this->size=cv::Size(data->description->width,data->description->height);
 	_done=false;
 	this->pauseStatus=false;
 }
@@ -118,8 +122,11 @@ cameraClient::run(){
 		this->refreshRate= totalRefreshRate / iterIndex;		
 		last=IceUtil::Time::now();
 
-		if (iterIndex == INT_MAX)
+		if (iterIndex == INT_MAX) 
+		{
 			iterIndex = 0;
+			std::cout << "*** Reinicio contador" << std::endl;
+		}
 		
 	}
 }

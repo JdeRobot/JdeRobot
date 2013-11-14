@@ -46,6 +46,7 @@ public:
 	void pause();
 	void resume();
 	bool getPause(){return pauseStatus;};
+	cv::Size getSize(){return size;};
 
 private:
 	cv::Mat data;
@@ -58,6 +59,7 @@ private:
 	bool _done;
 	int refreshRate;
 	bool pauseStatus;
+	cv::Size size;
 
 	IceUtil::Cond sem;
 
