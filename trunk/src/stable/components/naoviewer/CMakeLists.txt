@@ -2,7 +2,7 @@ IF (goocanvasmm_INCLUDE_DIRS)
 
 SET( SOURCE_FILES_NAOOPERATOR sensors.cpp control.cpp naooperator.cpp displayer.cpp main.cpp )
 
-SET( CMAKE_CXX_FLAGS "-ldl -lrt -lpthread -lIce" ) # Opciones para el compilador
+SET( CMAKE_CXX_FLAGS "-ldl -lrt -pthread -lIce" ) # Opciones para el compilador
 
 include_directories (
     ${INTERFACES_CPP_DIR}
