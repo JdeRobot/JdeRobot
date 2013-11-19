@@ -91,7 +91,8 @@ public:
 
 	void saveToFile (std::string filename, bool updateMatrix=true);
 	void readFromFile(std::string filename);
-	void backprojectCV(Eigen::Vector3d point, Eigen::Vector4d& pro);
+	int displayline(Eigen::Vector3d p1, Eigen::Vector3d p2, Eigen::Vector3d& a, Eigen::Vector3d& b);
+
 
 
 private:

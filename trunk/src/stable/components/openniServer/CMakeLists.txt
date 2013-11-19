@@ -29,7 +29,6 @@ IF(OPENNI2_LIB)
 		set (concat "/")
 		file (COPY ${OPENNI2_LIB}/OpenNI2 DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
 	endif()
-	message ("-----------------------------------" ${LIBS_DIR})
 
 
 	if  ( NITE2_LIB )

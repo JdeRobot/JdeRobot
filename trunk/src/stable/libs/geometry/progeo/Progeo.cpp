@@ -27,6 +27,8 @@
 
 namespace Progeo {
 
+#define BIGNUM 1.0e4
+
 Progeo::Progeo()
 {
 }
@@ -397,9 +399,9 @@ int Progeo::project(Eigen::Vector4d in, Eigen::Vector3d &out)
 	out(2) = 1.0;
 
 	// optical 2 graphics
-	double aux = out(0);
+	/*double aux = out(0);
 	out(0) = out(1);
-	out(1) = this->rows-1-aux;
+	out(1) = this->rows-1-aux;*/
 
 	if (out(2)!=0.) {
 		return 1;
@@ -464,125 +466,6 @@ void Progeo::backproject(Eigen::Vector3d point, Eigen::Vector4d& pro)
 	pro(3) = b(3);
 	
 }
-
-
-void Progeo::backprojectCV(Eigen::Vector3d point, Eigen::Vector4d& pro)
-{
-	//GRAPHIC_TO_OPTICAL
-	//int opX = this->rows -1 -point(1);
-	//int opY = point(0);
-
-	/*Eigen::Matrix3d ik;
-	ik = K;
-	ik = ik.inverse().eval();
-*/
-	//Eigen::Vector3d Pi(point(0)/point(2), point(1)/point(2),1);
-
-
-
-
-//float k;
-	std::string line;
-	float p;
-
-	cv::Point3f foa;
-	cv::Mat myK = cv::Mat(cv::Size(3,3),CV_32FC1);
-	cv::Mat myR = cv::Mat(cv::Size(3,3),CV_32FC1);
-		
-	
-
-	myK.at<float>(0,0)=K(0,0);
-	myK.at<float>(0,1)=K(0,1);
-	myK.at<float>(0,2)=K(0,2);
-	myK.at<float>(1,0)=K(1,0);
-	myK.at<float>(1,1)=K(1,1);
-	myK.at<float>(1,2)=K(1,2);
-	myK.at<float>(2,0)=K(2,0);
-	myK.at<float>(2,1)=K(2,1);
-	myK.at<float>(2,2)=K(2,2);
-
-
-	myR.at<float>(0,0)=RT(0,0);
-	myR.at<float>(0,1)=RT(0,1);
-	myR.at<float>(0,2)=RT(0,2);
-	myR.at<float>(1,0)=RT(1,0);
-	myR.at<float>(1,1)=RT(1,1);
-	myR.at<float>(1,2)=RT(1,2);
-	myR.at<float>(2,0)=RT(2,0);
-	myR.at<float>(2,1)=RT(2,1);
-	myR.at<float>(2,2)=RT(2,2);
-
-
-	cv::Mat ik=cv::Mat(myK.size(), myK.type());
-	cv::invert(myK,ik);
-
-	
-	cv::Mat Pi=cv::Mat(cv::Size(1,3),CV_32FC1);
-	Pi.at<float>(0,0)=(float)point(0)/point(2);
-	Pi.at<float>(0,1)=(float)point(1)/point(2);
-	Pi.at<float>(0,2)=1.;
-	
-	cv::Mat a;
-	a=ik*Pi;
-
-	cv::Mat aH=cv::Mat(cv::Size(1,4), CV_32FC1);
-	aH.at<float>(0,0)=a.at<float>(0,0);
-	aH.at<float>(0,1)=a.at<float>(0,1);
-	aH.at<float>(0,2)=a.at<float>(0,2);
-	aH.at<float>(0,3)=1.;
-
-	std::cout << " -------------------- " << std::endl;
-	std::cout << "a= " << a << std::endl;
-	std::cout << aH << std::endl;
-//	std::cout 
-
-	cv::Mat rT;
-	cv::transpose(myR,rT);
-
-	cv::Mat rTH=cv::Mat(cv::Size(4,4),CV_32FC1, cv::Scalar(0));
-	for (int i=0; i<3; i++)
-		for (int j=0; j<3; j++)
-			rTH.at<float>(i,j)=rT.at<float>(i,j);
-	rTH.at<float>(3,3)=1.;
-	
-	
-	cv::Mat b;
-	b=rTH*aH;
-
-	std::cout << "b= " << a << std::endl;
-	
-	cv::Mat iT=cv::Mat(cv::Size(4,4),CV_32FC1, cv::Scalar(0));
-	iT.at<float>(0,0)=1.;
-	iT.at<float>(1,1)=1;
-	iT.at<float>(2,2)=1;
-	iT.at<float>(3,3)=1;
-	iT.at<float>(0,3)=position(0);
-	iT.at<float>(1,3)=position(1);
-	iT.at<float>(2,3)=position(2);
-	cv::Mat Pw;
-	Pw=iT*b;
-	
-
-	pro(0)=Pw.at<float>(0,0);
-	pro(1)=Pw.at<float>(0,1);
-	pro(2)=Pw.at<float>(0,2);
-	pro(3) = 1;
-
-
-
-	/*pro(0) = b(0)/b(3);
-	pro(1) = b(1)/b(3);
-	pro(2) = b(2)/b(3);
-	pro(3) = b(3);*/
-
-	/*OJO*/
-	/*pro(0) = b(0)/b(3);
-	pro(1) = b(1)/b(3);
-	pro(2) = b(2)/b(3);
-	pro(3) = b(3);*/
-	
-}
-
 
 
 void Progeo::setPosition (Eigen::Vector4d pos)
@@ -780,14 +663,14 @@ void Progeo::saveToFile (std::string filename, bool updateMatrix)
 	xmlDocSetRootElement(doc, root_node);
 
 	// Camera position
-	xmlNewChild(node_position, NULL, BAD_CAST "x", BAD_CAST double2char(position(0)));
-	xmlNewChild(node_position, NULL, BAD_CAST "y", BAD_CAST double2char(position(1)));
-	xmlNewChild(node_position, NULL, BAD_CAST "z", BAD_CAST double2char(position(2)));
+	xmlNewChild(node_position, NULL, BAD_CAST "x", BAD_CAST double2char((double)(position(0))));
+	xmlNewChild(node_position, NULL, BAD_CAST "y", BAD_CAST double2char((double)(position(1))));
+	xmlNewChild(node_position, NULL, BAD_CAST "z", BAD_CAST double2char((double)(position(2))));
 
 	// Foa position
-	xmlNewChild(node_foa, NULL, BAD_CAST "x", BAD_CAST double2char(foa(0)));
-	xmlNewChild(node_foa, NULL, BAD_CAST "y", BAD_CAST double2char(foa(1)));
-	xmlNewChild(node_foa, NULL, BAD_CAST "z", BAD_CAST double2char(foa(2)));
+	xmlNewChild(node_foa, NULL, BAD_CAST "x", BAD_CAST double2char((double)foa(0)));
+	xmlNewChild(node_foa, NULL, BAD_CAST "y", BAD_CAST double2char((double)foa(1)));
+	xmlNewChild(node_foa, NULL, BAD_CAST "z", BAD_CAST double2char((double)foa(2)));
 
 
 	// Intrisic parameters
@@ -801,34 +684,34 @@ void Progeo::saveToFile (std::string filename, bool updateMatrix)
 	xmlNewChild(root_node, NULL, BAD_CAST "columns", BAD_CAST double2char(columns));
 
 	// K Matrix
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k11", BAD_CAST double2char(K(0,0)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k12", BAD_CAST double2char(K(0,1)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k13", BAD_CAST double2char(K(0,2)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k21", BAD_CAST double2char(K(1,0)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k22", BAD_CAST double2char(K(1,1)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k23", BAD_CAST double2char(K(1,2)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k31", BAD_CAST double2char(K(2,0)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k32", BAD_CAST double2char(K(2,1)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k33", BAD_CAST double2char(K(2,2)));
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k11", BAD_CAST double2char((double)K(0,0)));
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k12", BAD_CAST double2char((double)K(0,1)));
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k13", BAD_CAST double2char((double)K(0,2)));
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k21", BAD_CAST double2char((double)K(1,0)));
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k22", BAD_CAST double2char((double)K(1,1)));
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k23", BAD_CAST double2char((double)K(1,2)));
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k31", BAD_CAST double2char((double)K(2,0)));
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k32", BAD_CAST double2char((double)K(2,1)));
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k33", BAD_CAST double2char((double)K(2,2)));
 
 
 	// RT Matrix
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt11", BAD_CAST double2char(RT(0,0)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt12", BAD_CAST double2char(RT(0,1)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt13", BAD_CAST double2char(RT(0,2)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt14", BAD_CAST double2char(RT(0,3)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt21", BAD_CAST double2char(RT(1,0)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt22", BAD_CAST double2char(RT(1,1)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt23", BAD_CAST double2char(RT(1,2)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt24", BAD_CAST double2char(RT(1,3)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt31", BAD_CAST double2char(RT(2,0)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt32", BAD_CAST double2char(RT(2,1)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt33", BAD_CAST double2char(RT(2,2)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt34", BAD_CAST double2char(RT(2,3)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt41", BAD_CAST double2char(RT(3,0)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt42", BAD_CAST double2char(RT(3,1)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt43", BAD_CAST double2char(RT(3,2)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt44", BAD_CAST double2char(RT(3,3)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt11", BAD_CAST double2char((double)RT(0,0)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt12", BAD_CAST double2char((double)RT(0,1)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt13", BAD_CAST double2char((double)RT(0,2)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt14", BAD_CAST double2char((double)RT(0,3)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt21", BAD_CAST double2char((double)RT(1,0)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt22", BAD_CAST double2char((double)RT(1,1)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt23", BAD_CAST double2char((double)RT(1,2)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt24", BAD_CAST double2char((double)RT(1,3)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt31", BAD_CAST double2char((double)RT(2,0)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt32", BAD_CAST double2char((double)RT(2,1)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt33", BAD_CAST double2char((double)RT(2,2)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt34", BAD_CAST double2char((double)RT(2,3)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt41", BAD_CAST double2char((double)RT(3,0)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt42", BAD_CAST double2char((double)RT(3,1)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt43", BAD_CAST double2char((double)RT(3,2)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt44", BAD_CAST double2char((double)RT(3,3)));
 
 	xmlSaveFormatFileEnc(filename.c_str(), doc, "UTF-8", 1);
 	xmlFreeDoc(doc);
@@ -1087,6 +970,187 @@ void Progeo::readFromFile(std::string filename){
 	}
 
 	xmlFreeDoc(doc);
+}
+
+int Progeo::displayline(Eigen::Vector3d p1, Eigen::Vector3d p2, Eigen::Vector3d& a, Eigen::Vector3d& b)
+/* it takes care of important features: before/behind the focal plane, inside/outside the image frame */
+{
+
+	Eigen::Vector3d l,l0,l1,l2,l3; /* in fact lines in homogeneous coordinates */
+	Eigen::Vector3d pa,pb,i0,i1,i2,i3,gooda,goodb;
+  int mycase=0;
+  float Xmax,Xmin,Ymax,Ymin;
+  float papb=0.;
+
+  Xmin=0.;
+  Xmax=this->rows-1.;
+  Ymin=0.;
+  Ymax=this->columns-1.;
+  /* Watchout!: they can't reach camera.rows or camera.columns, their are not valid values for the pixels */
+
+  l0(1)=0.; l0(1)=1.; l0(2)=-Ymin;
+  l1(1)=0.; l1(1)=1.; l1(2)=-Ymax;
+  l2(1)=1.; l2(1)=0.; l2(2)=-Xmax;
+  l3(1)=1.; l3(1)=0.; l3(2)=-Xmin;
+
+  if ((p1(2)<0.)&&(p2(2)<0.)){
+    /* both points behind the focal plane: don't display anything */
+    mycase=10;
+
+  }else{
+    if ((p1(2)>0.)&&(p2(2)<0.)){
+        /* p1 before the focal plane, p2 behind */
+		/*Calculates p2 = p1 + -inf(p2-p1)*/
+		p2(0) = p1(1) + (-BIGNUM)*(p2(1)-p1(1));
+		p2(1) = p1(1) + (-BIGNUM)*(p2(1)-p1(1));
+		p2(2)=-p2(2);/* undo the "project" trick to get the right value */
+    }else if ((p1(2)<0.)&&(p2(2)>0.)){
+        /* p2 before the focal plane, p1 behind */
+		/*Calculates p1 = p2 + -inf(p1-p2)*/
+		p1(1) = p2(1) + (-BIGNUM)*(p1(1)-p2(1));
+		p1(1) = p2(1) + (-BIGNUM)*(p1(1)-p2(1));
+		p1(2)=-p1(2);/* undo the "project" trick to get the right value */
+    }
+
+    /* both points before the focal plane */
+    if ((p1(1)>=Xmin) && (p1(1)<Xmax+1) && (p1(1)>=Ymin) && (p1(1)<Ymax+1) &&
+	(p2(1)>=Xmin) && (p2(1)<Xmax+1) && (p2(1)>=Ymin) && (p2(1)<Ymax+1)){
+      /* both inside the image limits */
+
+      gooda(1)=p1(1); gooda(1)=p1(1); gooda(2)=p1(2);
+      goodb(1)=p2(1); goodb(1)=p2(1); goodb(2)=p2(2);
+      mycase=2;
+
+    }else if ((p1(1)>=Xmin) && (p1(1)<Xmax+1) && (p1(1)>=Ymin) && (p1(1)<Ymax+1) &&
+	      ((p2(1)<Xmin) || (p2(1)>=Xmax+1) || (p2(1)<Ymin) || (p2(1)>=Ymax+1))){
+      /* p1 inside, p2 outside */
+      gooda(1)=p1(1); gooda(1)=p1(1); gooda(2)=p1(2);
+      goodb(1)=p1(1); goodb(1)=p1(1); goodb(2)=p1(2);
+      pa(1)=p1(1); pa(1)=p1(1); pa(2)=p1(2);
+      pb(1)=p2(1); pb(1)=p2(1); pb(2)=p2(2);
+      mycase=3;
+
+    }else if ((p2(1)>=Xmin) && (p2(1)<Xmax+1) && (p2(1)>=Ymin) && (p2(1)<Ymax+1) &&
+	      ((p1(1)<Xmin) || (p1(1)>=Xmax+1) || (p1(1)<Ymin) || (p1(1)>=Ymax+1))){
+      /* p2 inside, p1 outside */
+
+      gooda(1)=p2(1); gooda(1)=p2(1); gooda(2)=p2(2);
+      goodb(1)=p2(1); goodb(1)=p2(1); goodb(2)=p2(2);
+      pa(1)=p2(1); pa(1)=p2(1); pa(2)=p2(2);
+      pb(1)=p1(1); pb(1)=p1(1); pb(2)=p1(2);
+      mycase=4;
+
+    }else{
+      /* both outside */
+      pa(1)=p2(1); pa(1)=p2(1); pa(2)=p2(2);
+      pb(1)=p1(1); pb(1)=p1(1); pb(2)=p1(2);
+      mycase=5;
+    }
+    l(1)=pa(1)*pb(2)-pb(1)*pa(2); l(1)=pb(1)*pa(2)-pa(1)*pb(2); l(2)=pa(1)*pb(1)-pb(1)*pa(1);
+    i0(1)=l(1)*l0(2)-l(2)*l0(1); i0(1)=l(2)*l0(1)-l(1)*l0(2); i0(2)=l(1)*l0(1)-l(1)*l0(1);
+    i1(1)=l(1)*l1(2)-l(2)*l1(1); i1(1)=l(2)*l1(1)-l(1)*l1(2); i1(2)=l(1)*l1(1)-l(1)*l1(1);
+    i2(1)=l(1)*l2(2)-l(2)*l2(1); i2(1)=l(2)*l2(1)-l(1)*l2(2); i2(2)=l(1)*l2(1)-l(1)*l2(1);
+    i3(1)=l(1)*l3(2)-l(2)*l3(1); i3(1)=l(2)*l3(1)-l(1)*l3(2); i3(2)=l(1)*l3(1)-l(1)*l3(1);
+    if (i0(2)!=0.) i0(1)=i0(1)/i0(2); i0(1)=i0(1)/i0(2); i0(2)=1.;
+    if (i1(2)!=0.) i1(1)=i1(1)/i1(2); i1(1)=i1(1)/i1(2); i1(2)=1.;
+    if (i2(2)!=0.) i2(1)=i2(1)/i2(2); i2(1)=i2(1)/i2(2); i2(2)=1.;
+    if (i3(2)!=0.) i3(1)=i3(1)/i3(2); i3(1)=i3(1)/i3(2); i3(2)=1.;
+
+    papb=(pb(1)-pa(1))*(pb(1)-pa(1))+(pb(1)-pa(1))*(pb(1)-pa(1));
+
+	float maxdot = -1;
+
+    if (i0(2)!=0.){
+      if ((i0(1)>=Xmin) && (i0(1)<Xmax+1) && (i0(1)>=Ymin) && (i0(1)<Ymax+1)){
+	if ((((pb(1)-pa(1))*(i0(1)-pa(1))+(pb(1)-pa(1))*(i0(1)-pa(1)))>=0.) &&
+	    (((pb(1)-pa(1))*(i0(1)-pa(1))+(pb(1)-pa(1))*(i0(1)-pa(1)))<papb) &&
+		(((pb(1)-pa(1))*(i0(1)-pa(1))+(pb(1)-pa(1))*(i0(1)-pa(1)))>maxdot)){
+	  if ((mycase==3)||(mycase==4)||(mycase==6)){
+	    goodb(1)=i0(1); goodb(1)=i0(1); goodb(2)=i0(2);
+		maxdot = (pb(1)-pa(1))*(i0(1)-pa(1))+(pb(1)-pa(1))*(i0(1)-pa(1));
+
+	  }else if (mycase==5){
+	    gooda(1)=i0(1); gooda(1)=i0(1); gooda(2)=i0(2);
+	    goodb(1)=i0(1); goodb(1)=i0(1); goodb(2)=i0(2);
+	    mycase=6;
+	  }
+	}
+      }
+    }else; /* i0 at infinite, parallel lines */
+
+    if (i1(2)!=0.){
+      if ((i1(1)>=Xmin) && (i1(1)<Xmax+1) && (i1(1)>=Ymin) && (i1(1)<Ymax+1)){
+	if ((((pb(1)-pa(1))*(i1(1)-pa(1))+(pb(1)-pa(1))*(i1(1)-pa(1)))>=0.)&&
+	    (((pb(1)-pa(1))*(i1(1)-pa(1))+(pb(1)-pa(1))*(i1(1)-pa(1)))<papb) &&
+		(((pb(1)-pa(1))*(i1(1)-pa(1))+(pb(1)-pa(1))*(i1(1)-pa(1)))>maxdot)){
+	  if ((mycase==3)||(mycase==4)||(mycase==6)){
+	    goodb(1)=i1(1); goodb(1)=i1(1); goodb(2)=i1(2);
+		maxdot = (pb(1)-pa(1))*(i1(1)-pa(1))+(pb(1)-pa(1))*(i1(1)-pa(1));
+
+	  }else if (mycase==5){
+	    gooda(1)=i1(1); gooda(1)=i1(1); gooda(2)=i1(2);
+	    goodb(1)=i1(1); goodb(1)=i1(1); goodb(2)=i1(2);
+	    mycase=6;
+	  }
+	}
+      }
+    }else; /* i1 at infinite, parallel lines */
+
+    if (i2(2)!=0.){
+      if ((i2(1)>=Xmin) && (i2(1)<Xmax+1) && (i2(1)>=Ymin) && (i2(1)<Ymax+1)){
+	if ((((pb(1)-pa(1))*(i2(1)-pa(1))+(pb(1)-pa(1))*(i2(1)-pa(1)))>=0.)&&
+	    (((pb(1)-pa(1))*(i2(1)-pa(1))+(pb(1)-pa(1))*(i2(1)-pa(1)))<papb) &&
+	    (((pb(1)-pa(1))*(i2(1)-pa(1))+(pb(1)-pa(1))*(i2(1)-pa(1)))>maxdot)){
+	  if ((mycase==3)||(mycase==4)||(mycase==6)){
+	    goodb(1)=i2(1); goodb(1)=i2(1); goodb(2)=i2(2);
+		maxdot = (pb(1)-pa(1))*(i2(1)-pa(1))+(pb(1)-pa(1))*(i2(1)-pa(1));
+
+	  }else if (mycase==5){
+	    gooda(1)=i2(1); gooda(1)=i2(1); gooda(2)=i2(2);
+	    goodb(1)=i2(1); goodb(1)=i2(1); goodb(2)=i2(2);
+	    mycase=6;
+	  }
+	}
+      }
+    }else; /* i2 at infinite, parallel lines */
+
+    if (i3(2)!=0.){
+      if  ((i3(1)>=Xmin) && (i3(1)<Xmax+1) && (i3(1)>=Ymin) && (i3(1)<Ymax+1)){
+	if ((((pb(1)-pa(1))*(i3(1)-pa(1))+(pb(1)-pa(1))*(i3(1)-pa(1)))>=0.) &&
+	    (((pb(1)-pa(1))*(i3(1)-pa(1))+(pb(1)-pa(1))*(i3(1)-pa(1)))<papb) &&
+	    (((pb(1)-pa(1))*(i3(1)-pa(1))+(pb(1)-pa(1))*(i3(1)-pa(1)))>maxdot)){
+	  if ((mycase==3)||(mycase==4)||(mycase==6)){
+	    goodb(1)=i3(1); goodb(1)=i3(1); goodb(2)=i3(2);
+		maxdot = (pb(1)-pa(1))*(i3(1)-pa(1))+(pb(1)-pa(1))*(i3(1)-pa(1));
+
+	  }else if (mycase==5){
+	    gooda(1)=i3(1); gooda(1)=i3(1); gooda(2)=i3(2);
+	    goodb(1)=i3(1); goodb(1)=i3(1); goodb(2)=i3(2);
+	    mycase=6;
+	  }
+	}
+      }
+    }else; /* i3 at infinite, parallel lines */
+
+  }
+
+  /*if (debug==1){
+    printf("p3: x=%.f y=%.f h=%.f\np2: x=%.f, y=%.f h=%.f\n",p1(1),p1(1),p1(2),p2(1),p2(1),p2(2));
+    printf("case: %d\n i0: x=%.1f y=%.1f z=%.f dot=%.2f\n i1: x=%.1f y=%.1f z=%.f dot=%.2f\n i2: x=%.1f y=%.1f z=%.f dot=%.2f\n i3: x=%.1f y=%.1f z=%.f dot=%.2f\n",mycase,
+	   i0(1),i0(1),i0(2),((pb(1)-pa(1))*(i0(1)-pa(1))+(pb(1)-pa(1))*(i0(1)-pa(1))),
+	   i1(1),i1(1),i1(2),((pb(1)-pa(1))*(i1(1)-pa(1))+(pb(1)-pa(1))*(i1(1)-pa(1))),
+	   i2(1),i2(1),i2(2),((pb(1)-pa(1))*(i2(1)-pa(1))+(pb(1)-pa(1))*(i2(1)-pa(1))),
+	   i3(1),i3(1),i3(2),((pb(1)-pa(1))*(i3(1)-pa(1))+(pb(1)-pa(1))*(i3(1)-pa(1))));
+    printf("gooda:  x=%.f y=%.f z=%.f\n",gooda(1),gooda(1),gooda(2));
+    printf("goodb:  x=%.f y=%.f z=%.f\n",goodb(1),goodb(1),goodb(2));
+  }*/
+
+  a(0)=gooda(1); b(0)=goodb(1);
+  a(1)=gooda(1); b(1)=goodb(1);
+  a(2)=gooda(2); b(2)=goodb(2);
+
+  if((mycase!=2)&&(mycase!=3)&&(mycase!=4)&&(mycase!=6)) return 0;
+  else return 1;
 }
 
 
