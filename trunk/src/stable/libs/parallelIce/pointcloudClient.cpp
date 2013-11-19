@@ -74,8 +74,6 @@ void pointcloudClient::resume(){
 void pointcloudClient::run(){
 
 	IceUtil::Time last;
-	int iterIndex = 0;
-	int totalRefreshRate = 0;
 
 	last=IceUtil::Time::now();
 
@@ -99,15 +97,8 @@ void pointcloudClient::run(){
 		else{
 			usleep(this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
 		}
-		iterIndex++;
-		int rate =(int)(1000000/(IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
-		totalRefreshRate =  totalRefreshRate + rate;
-		this->refreshRate= totalRefreshRate / iterIndex;
+		this->refreshRate=(int)(1000000/(IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
 		last=IceUtil::Time::now();
-
-		if (iterIndex == INT_MAX)
-			iterIndex = 0;
-
 	}
 }
 
