@@ -54,6 +54,7 @@
 #define PID_NUI_MOTOR 0x02b0
 #define NUM_THREADS 5
 #define MAX_LENGHT 10000
+#define SAMPLE_READ_WAIT_TIMEOUT 2000
 
 #define CHECK_RC(rc, what)                                      \
 if (rc != openni::STATUS_OK)                                         \
@@ -90,6 +91,7 @@ int deviceMode; //videmode for device streamings
 IceUtil::Mutex controlMutex;
 IceUtil::Cond sem;
 int mirrorDepth, mirrorRGB;
+int debug;
 
 
 namespace openniServer{
@@ -107,10 +109,8 @@ openni::VideoMode colorVideoMode;
 
 
 
-
-struct timeval a,b;
-
 int segmentationType; //0 ninguna, 1 NITE
+int mainFPS;
 
 
 
@@ -137,6 +137,8 @@ void* updateThread(void*)
 
 	//getting the Uri of the selected device
 	deviceUri = deviceList[SELCAM].getUri();
+
+
 
 	//getting the device from the uri
 	openni::VideoStream depth;
@@ -228,13 +230,14 @@ void* updateThread(void*)
 		{
 			std::cout << "OpenniServer: error at set depth videoMode: " << openni::OpenNI::getExtendedError() << std::endl;
 		}
-		/*std::cout << "depth" << std::endl;
-		for(int i=0;i < depthSensorInfo->getSupportedVideoModes().getSize();i++)
-		{
-			openni::VideoMode videoMode = depthSensorInfo->getSupportedVideoModes()[i];
-			//std::cout << "done" << std::endl;
-			std::cout << "fps: " << videoMode.getFps() << "x: " << videoMode.getResolutionX() << "y " <<  videoMode.getResolutionY() << std::endl;
-		}*/
+		if (debug){
+			std::cout << "OpenniServer: depth modes" << std::endl;
+			for(int i=0;i < depthSensorInfo->getSupportedVideoModes().getSize();i++)
+			{
+				openni::VideoMode videoMode = depthSensorInfo->getSupportedVideoModes()[i];
+				std::cout << "fps: " << videoMode.getFps() << "x: " << videoMode.getResolutionX() << "y " <<  videoMode.getResolutionY() << std::endl;
+			}
+		}
 		depthVideoMode = depth.getVideoMode();
 		depth.start();
 
@@ -248,13 +251,14 @@ void* updateThread(void*)
 			std::cout << "OpenniServer: error at set color videoMode: " << openni::OpenNI::getExtendedError() << std::endl;
 			color.destroy();
 		}
-		/*std::cout << "color" << std::endl;
-		for(int i=0;i < colorSensorInfo->getSupportedVideoModes().getSize();i++)
-		{
-			openni::VideoMode videoMode = colorSensorInfo->getSupportedVideoModes()[i];
-			//std::cout << "done" << std::endl;
-			std::cout << "fps: " << videoMode.getFps() << "x: " << videoMode.getResolutionX() << "y " <<  videoMode.getResolutionY() << std::endl;
-		}*/
+		if (debug){
+			std::cout << "OpenniServer color modes:" << std::endl;
+			for(int i=0;i < colorSensorInfo->getSupportedVideoModes().getSize();i++)
+			{
+				openni::VideoMode videoMode = colorSensorInfo->getSupportedVideoModes()[i];
+				std::cout << "fps: " << videoMode.getFps() << "x: " << videoMode.getResolutionX() << "y " <<  videoMode.getResolutionY() << std::endl;
+			}
+		}
 		colorVideoMode = color.getVideoMode();
 		srcRGB = new cv::Mat(cv::Size(colorVideoMode.getResolutionX(),colorVideoMode.getResolutionY()),CV_8UC3);
 		color.start();
@@ -268,7 +272,6 @@ void* updateThread(void*)
 		if (rc != openni::STATUS_OK)
 		{
 			std::cout << "OpenniServer: error at set registration: " << openni::OpenNI::getExtendedError() << std::endl;
-			//color.destroy();
 		}
 	}
 
@@ -283,7 +286,6 @@ void* updateThread(void*)
 		if (rc != openni::STATUS_OK)
 		{
 			std::cout << "OpenniServer: error at set syncronization: " << openni::OpenNI::getExtendedError() << std::endl;
-			//color.destroy();
 		}
 		if (depth.isValid() && color.isValid())
 		{
@@ -309,20 +311,19 @@ void* updateThread(void*)
 	distances.resize(depth.getVideoMode().getResolutionX()*depth.getVideoMode().getResolutionY());
 	pixelsID.resize(depth.getVideoMode().getResolutionX()*depth.getVideoMode().getResolutionY());
 
-	/*std::cout << "aqui" << std::endl;
-	m_device.Device::setDepthColorSyncEnabled(true);
-	std::cout << "2" << std::endl;*/
 
 
 	//NITE
 		#ifdef WITH_NITE2
 
-		m_pUserTracker = new nite::UserTracker;
-		nite::NiTE::initialize();
+		if (segmentationType){
+			m_pUserTracker = new nite::UserTracker;
+			nite::NiTE::initialize();
 
-		if (m_pUserTracker->create(&m_device) != nite::STATUS_OK)
-		{
-			std::cout << "OpenniServer: Couldn't create userTracker " << std::endl;
+			if (m_pUserTracker->create(&m_device) != nite::STATUS_OK)
+			{
+				std::cout << "OpenniServer: Couldn't create userTracker " << std::endl;
+			}
 		}
 		#endif
 
@@ -334,29 +335,37 @@ void* updateThread(void*)
 
 
 	//diferente en arm que en x86???
+	int cycle=(float)(1/(float)mainFPS)*1000000;
+	IceUtil::Time lastIT=IceUtil::Time::now();
+	bool first=true;
 
-
-	struct timeval Na, Nb;
-
-	gettimeofday(&Na,NULL);
 
 	while(componentAlive){
-		long long int timeInicio = Na.tv_sec*1000000+Na.tv_usec;
-		gettimeofday(&Nb,NULL);
-		long long int timeNew = Nb.tv_sec*1000000+Nb.tv_usec;
-		//std::cout << "Tiempo completo: " << (timeNew - timeInicio)/1000 << std::endl;
-		gettimeofday(&Na,NULL);
 
-		pthread_mutex_lock(&mutex);
+
 
 		int changedIndex;
 
-		openni::Status rc = openni::OpenNI::waitForAnyStream(m_streams, 2, &changedIndex);
-
+		openni::Status rc;
+		try{
+			rc=openni::OpenNI::waitForAnyStream(m_streams, 2, &changedIndex,SAMPLE_READ_WAIT_TIMEOUT);
+			if (rc != openni::STATUS_OK)
+			{
+				std::cout<< "Wait failed! (timeout is " << SAMPLE_READ_WAIT_TIMEOUT <<  "ms) " << openni::OpenNI::getExtendedError() << std::endl;
+				continue;
+			}
+		}
+		catch ( std::exception& ex) {
+			std::cerr << ex.what() << std::endl;
+		}
 
 		if (rc != openni::STATUS_OK)
 		{
 			std::cout << "Wait failed" << std::endl;
+		}
+		else if(first){
+			std::cout << "OpenniServer initialized" << std::endl;
+			first=false;
 		}
 		/*switch (changedIndex)
 		{
@@ -371,6 +380,8 @@ void* updateThread(void*)
 			break;
 		}*/
 
+		pthread_mutex_lock(&mutex);
+
 		if (cameraD)
 			depth.readFrame(&m_depthFrame);
 		if (cameraR){
@@ -381,7 +392,7 @@ void* updateThread(void*)
 		//nite
 
 		#ifdef WITH_NITE2
-			if (segmentationType==1){
+			if (segmentationType){
 				rcN = m_pUserTracker->readFrame(&userTrackerFrame);
 				m_depthFrame = userTrackerFrame.getDepthFrame();
 				if (rcN != nite::STATUS_OK)
@@ -396,10 +407,30 @@ void* updateThread(void*)
 
 
 		pthread_mutex_unlock(&mutex);
-		//OJO it control
-		usleep(1000);
+		if ((IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()) > cycle ){
+			if (debug)
+				std::cout<<"-------- openniServer: MAIN openni timeout-" << std::endl;
+		}
+		else{
+			usleep(cycle - (IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()));
+		}
+		lastIT=IceUtil::Time::now();
 
    }
+	if (cameraD){
+		depth.stop();
+		depth.destroy();
+	}
+	if (cameraR){
+		color.stop();
+		color.destroy();
+	}
+
+	if (segmentationType){
+		nite::NiTE::shutdown();
+	}
+
+
    return NULL;
 }
 
@@ -429,11 +460,10 @@ public:
 	//fill imageDescription
 	imageDescription->width = colorVideoMode.getResolutionX();
 	imageDescription->height = colorVideoMode.getResolutionY();
-	int cameraSegmentation = prop->getPropertyAsIntWithDefault(prefix+"PlayerDetection",0);
-	int segmentation = prop->getPropertyAsIntWithDefault("openniServer.PlayerDetection",0);
+	int playerdetection = prop->getPropertyAsIntWithDefault(prefix+"PlayerDetection",0);
 
 	#ifndef WITH_NITE2
-		segmentation=0;
+		playerdetection=0;
 	#endif
 	int fps = prop->getPropertyAsIntWithDefault(prefix+"fps",5);
 	//we use formats according to colorspaces
@@ -445,17 +475,15 @@ public:
 	imageDescription->format = imageFmt->name;
 
 	std::cout << "Starting thread for camera: " << cameraDescription->name << std::endl;
-	replyTask = new ReplyTask(this,fps,segmentation, cameraSegmentation);
+	replyTask = new ReplyTask(this,fps, playerdetection);
 
 	this->control=replyTask->start();//my own thread
 	}
 
 	virtual ~CameraRGB(){
-		std::cout << "-------------------------------------------Stopping and joining thread for camera: " << cameraDescription->name << std::endl;
+		std::cout << "Stopping and joining thread for camera: " << cameraDescription->name << std::endl;
 		replyTask->destroy();
 		this->control.join();
-		color.stop();
-		color.destroy();
 	}
     
 	virtual jderobot::ImageDescriptionPtr getImageDescription(const Ice::Current& c){
@@ -486,9 +514,8 @@ public:
 private:
 	class ReplyTask: public IceUtil::Thread{
 	public:
-		ReplyTask(CameraRGB* camera, int fps, int playerdetection, int colorSegementation):mycameravga(camera),_done(false) {
-		this->segmentation=playerdetection;
-		this->colorSegmentation=colorSegementation;
+		ReplyTask(CameraRGB* camera, int fps, int playerdetection):mycameravga(camera),_done(false) {
+		segmentation=playerdetection;
 		this->fps=fps;
       }
 		
@@ -506,18 +533,13 @@ private:
 		cv::Mat dst_resize;
 
 
-		struct timeval a, b;
+
 		int cycle; // duración del ciclo
-		long totala;
-		long totalpre=0;
-		long diff;
 
 		cycle=(float)(1/(float)fps)*1000000;
 		
-	
+		IceUtil::Time lastIT=IceUtil::Time::now();
 		while(!(_done)){
-			gettimeofday(&a,NULL);
-			totala=a.tv_sec*1000000+a.tv_usec;
 			pthread_mutex_lock(&mutex);
 		    IceUtil::Time t = IceUtil::Time::now();
 		    reply->timeStamp.seconds = (long)t.toSeconds();
@@ -555,8 +577,8 @@ private:
 							break;
 						case 1:
 							#ifdef WITH_NITE2
-							pixelsID[(y*m_colorFrame.getWidth() + x)]= *pLabels;
-							if (colorSegmentation){
+							if (segmentation){
+								pixelsID[(y*m_colorFrame.getWidth() + x)]= *pLabels;
 								if (*pLabels!=0)
 								{
 									srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 0] = colors[*pLabels][0];
@@ -568,13 +590,13 @@ private:
 									srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 1] = 0;
 									srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 2] = 0;
 								}
+								++pLabels;
 							}
 							else{
 								srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 0] = pImage->r;
 								srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 1] = pImage->g;
 								srcRGB->data[(y*m_colorFrame.getWidth() + x)*3 + 2] = pImage->b;
 							}
-							++pLabels;
 							#endif
 							break;
 						case 2:
@@ -618,20 +640,19 @@ private:
 			}//critical region end
 
 			pthread_mutex_unlock(&mutex);
-			/*gettimeofday(&b,NULL);
-			totalb=b.tv_sec*1000000+b.tv_usec;*/
-			if (totalpre !=0){
-				if ((totala - totalpre) > cycle ){
-					std::cout<<"-------- openniServer: WARNING- RGB timeout-" << std::endl; 
-				}
-				else{
-					usleep(cycle - (totala - totalpre));
-				}
+
+
+			if ((IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()) > cycle ){
+				if (debug)
+					std::cout<<"-------- openniServer: WARNING- RGB timeout-" << std::endl;
+			}
+			else{
+				usleep(cycle - (IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()));
 			}
 			/*if (totalpre !=0){
 				std::cout << "rgb: " <<  1000000/(totala-totalpre) << std::endl;
 			}*/
-			totalpre=totala;
+			lastIT=IceUtil::Time::now();
 		}
 	}
     virtual void destroy(){
@@ -644,7 +665,6 @@ private:
 		IceUtil::Mutex requestsMutex;
 		std::list<jderobot::AMD_ImageProvider_getImageDataPtr> requests;
 		int segmentation;
-		int colorSegmentation;
 		int fps;
 		bool _done;
 
@@ -714,10 +734,9 @@ public:
 
 	virtual ~CameraDEPTH(){
 		std::cout << "Stopping and joining thread for camera: " << cameraDescription->name << std::endl;
+
 		replyTask->destroy();
 		this->control.join();
-		depth.stop();
-		depth.destroy();
 	}
     
 	virtual jderobot::ImageDescriptionPtr getImageDescription(const Ice::Current& c){
@@ -770,20 +789,15 @@ private:
 		reply->pixelData.resize(mycameradepth->imageDescription->width*mycameradepth->imageDescription->height*3);
 		cv::Mat dst_resize(cv::Size(mycameradepth->imageDescription->width, mycameradepth->imageDescription->height),CV_8UC3);
 		cv::Mat src(cv::Size(mycameradepth->imageDescription->width, mycameradepth->imageDescription->height),CV_8UC3);
-		struct timeval a, b;
 		int cycle; // duración del ciclo
-		long totalb,totala;
-		long totalpre=0;
-		long diff;
+		IceUtil::Time lastIT;
+
 
 		//std::cout << "FPS depth: " << fps << std::endl;
 		cycle=(float)(1/(float)fps)*1000000;
 
-		
-	
+		lastIT=IceUtil::Time::now();
 		while(!(_done)){
-			gettimeofday(&a,NULL);
-			totala=a.tv_sec*1000000+a.tv_usec;
 			pthread_mutex_lock(&mutex);
 			src=cv::Scalar(0, 0, 0);
 
@@ -882,19 +896,17 @@ private:
 			pthread_mutex_unlock(&mutex);
 			/*gettimeofday(&b,NULL);
 			totalb=b.tv_sec*1000000+b.tv_usec;*/
-			if (totalpre !=0){
-				if ((totala - totalpre) > cycle ){
-					std::cout<<"-------- openniServer: WARNING- DEPTH timeout-" << std::endl; 
-				}
-				else{
-					usleep(cycle - (totala-totalpre));
-				}
+			if ((IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()) > cycle ){
+				if (debug)
+					std::cout<<"-------- openniServer: WARNING- DEPTH timeout-" << std::endl;
+			}
+			else{
+				usleep(cycle - (IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()));
 			}
 			/*if (totalpre !=0){
 				std::cout << "depth: " <<  1000000/(totala-totalpre) << std::endl;
 			}*/
-			totalpre=totala;
-			
+			lastIT=IceUtil::Time::now();
 		}
 	}
 	
@@ -944,13 +956,8 @@ private:
 					int playerdetection = prop->getPropertyAsIntWithDefault("openniServer.PlayerDetection",0);
 					int fps =prop->getPropertyAsIntWithDefault("openniServer.pointCloud.Fps",10);
 					bool extra =(bool)prop->getPropertyAsIntWithDefault("openniServer.ExtraCalibration",0);
-					std::cout << "EXTRA: " << extra << std::endl;
 					#ifndef WITH_NITE2
-						std::cout << "SIN NITE " << std::endl;
 						playerdetection=0;
-					#else
-						std::cout << "CON NITE" << std::endl;
-						std::cout << "detection: " << playerdetection << std::endl;
 					#endif
 						pthread_mutex_init(&this->localMutex, NULL);
 					   replyCloud = new ReplyCloud(this,prop->getProperty("openniServer.calibration"), playerdetection, depthVideoMode.getResolutionX(), depthVideoMode.getResolutionY(),fps, extra);
@@ -991,17 +998,14 @@ private:
 				
 
 
-				struct timeval a, b;
+
 				int cycle; // duración del ciclo
-				long totala;
-				long totalpre=0;
+
 
 				cycle=(float)(1/(float)fps)*1000000;
-
+				IceUtil::Time lastIT=IceUtil::Time::now();
 				while(!(_done)){
 					float distance;
-					gettimeofday(&a,NULL);
-					totala=a.tv_sec*1000000+a.tv_usec;
 					pthread_mutex_lock(&mutex);
 					//creamos una copia local de la imagen de color y de las distancias.
 					cv::Mat localRGB;
@@ -1053,6 +1057,7 @@ private:
 									if (withExtraCalibration){
 										mypro->applyExtraCalibration(&auxP.x, &auxP.y, &auxP.z);
 									}
+
 									if ( segmentation){
 										auxP.id=pixelsID[i];
 									}
@@ -1066,18 +1071,17 @@ private:
 							//}
 						}
 					pthread_mutex_unlock(&(this->myCloud->localMutex));
-					if (totalpre !=0){
-						if ((totala - totalpre) > cycle ){
-							std::cout<<"-------- openniServer: WARNING- POINTCLOUD timeout-" << std::endl; 
-						}
-						else{
-							usleep(cycle - (totala - totalpre));
-						}
+					if ((IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()) > cycle ){
+						if (debug)
+							std::cout<<"-------- openniServer: WARNING- POINTCLOUD timeout-" << std::endl;
+					}
+					else{
+						usleep(cycle - (IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()));
 					}
 					/*if (totalpre !=0){
 						std::cout << "cloud: " <<  1000000/(totala-totalpre) << std::endl;
 					}*/
-					totalpre=totala;
+					lastIT=IceUtil::Time::now();
 		        }
 		    }
 		        
@@ -1150,9 +1154,10 @@ void exitApplication(int s){
 	pthread_join(updateThread, NULL);
 
 
+
 	m_device.close();
 	openni::OpenNI::shutdown();
-	exit(1);
+	exit(0);
 
 }
 
@@ -1195,6 +1200,7 @@ int main(int argc, char** argv){
 	int leds = prop->getPropertyAsIntWithDefault(componentPrefix + ".KinectLedsActive",0);
 	int pointCloud = prop->getPropertyAsIntWithDefault(componentPrefix + ".pointCloudActive",0);
 	openniServer::segmentationType= prop->getPropertyAsIntWithDefault(componentPrefix + ".PlayerDetection",0);
+	debug = prop->getPropertyAsIntWithDefault(componentPrefix + ".Debug",0);
 	mirrorDepth = prop->getPropertyAsIntWithDefault(componentPrefix + ".CameraDEPTH.Mirror",0);
 	mirrorRGB = prop->getPropertyAsIntWithDefault(componentPrefix + ".CameraRGB.Mirror",0);
 	deviceMode=prop->getPropertyAsIntWithDefault(componentPrefix + ".Mode", 0);
@@ -1209,7 +1215,7 @@ int main(int argc, char** argv){
 	}
 
 	SELCAM = prop->getPropertyAsIntWithDefault(componentPrefix + ".deviceId",0);
-	std::cout << "Selected device: " << SELCAM << std::endl;
+	std::cout << "OpenniServer: Selected device: " << SELCAM << std::endl;
 	int nCameras=0;
 
 
@@ -1247,19 +1253,17 @@ int main(int argc, char** argv){
 
 	nCameras=cameraR + cameraD;
 	//g_context =  new xn::Context;
-	std::cout << "NCAMERAS = " << nCameras << std::endl;
 	pthread_mutex_init(&mutex, NULL);
 	if ((nCameras>0)||(pointCloud)){
-
-
 		pthread_create(&updateThread, NULL, &openniServer::updateThread, NULL);
-
 	}
 
 
 	//bloqueo hasta que se inicialice el dispositivo
 	IceUtil::Mutex::Lock sync(controlMutex);
 	sem.wait(sync);
+
+	sync.release();
 
 
 	if (cameraR){
@@ -1272,7 +1276,7 @@ int main(int argc, char** argv){
 		std::cout << "Creating camera " << cameraName << std::endl;
 		camRGB = new openniServer::CameraRGB(objPrefix,prop);
 		adapter->add(camRGB, ic->stringToIdentity(cameraName));
-		std::cout<<"              -------- openniServer: Component: CameraRGB created successfully   --------" << std::endl;
+		std::cout<<"              -------- openniServer: Component: CameraRGB created successfully(" << Endpoints << "@" << cameraName << std::endl;
 	}
 	if (cameraD){
 		std::string objPrefix(componentPrefix + ".CameraDEPTH.");
@@ -1285,7 +1289,7 @@ int main(int argc, char** argv){
 		camDEPTH = new openniServer::CameraDEPTH(objPrefix,prop);
 		adapter->add(camDEPTH, ic->stringToIdentity(cameraName));
 		//test camera ok
-		std::cout<<"              -------- openniServer: Component: CameraDEPTH created successfully   --------" << std::endl;
+		std::cout<<"              -------- openniServer: Component: CameraDEPTH created successfully(" << Endpoints << "@" << cameraName << std::endl;
 	}
 	if (pointCloud){
 		std::string objPrefix(componentPrefix + ".PointCloud.");
@@ -1293,13 +1297,11 @@ int main(int argc, char** argv){
 		std::cout << "Creating pointcloud1 " << Name << std::endl;
 		pc1 = new openniServer::pointCloudI(objPrefix,prop);
 		adapter->add(pc1 , ic->stringToIdentity(Name));
-		std::cout<<"              -------- openniServer: Component: PointCloud created successfully   --------" << std::endl;
+		std::cout<<"              -------- openniServer: Component: PointCloud created successfully(" << Endpoints << "@" << Name << std::endl;
 	}
-
-	std::cout << "done" << std::endl;
-
 	adapter->activate();
 	ic->waitForShutdown();
+	adapter->destroy();
 
 	if (!killed)
 		exitApplication(0);
