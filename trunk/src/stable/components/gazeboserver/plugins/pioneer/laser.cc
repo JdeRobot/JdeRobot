@@ -36,7 +36,7 @@ namespace gazebo
 		{
 		  // Don't forget to load the camera plugin
 		  RayPlugin::Load(_parent,_sdf);
-		  this->parentSensor =  boost::shared_dynamic_cast<sensors::RaySensor>(_parent);
+		  this->parentSensor =  boost::dynamic_pointer_cast<sensors::RaySensor>(_parent);
 		  
 		} 
 

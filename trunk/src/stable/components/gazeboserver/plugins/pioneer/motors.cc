@@ -68,7 +68,7 @@ namespace gazebo {
     void Motors::Init() {
         this->wheelSeparation = this->leftJoint->GetAnchor(0).Distance(this->rightJoint->GetAnchor(0));
         std::cout << "Wheel Separation:" << this->wheelSeparation << std::endl;
-        physics::EntityPtr parent = boost::shared_dynamic_cast<physics::Entity > (this->leftJoint->GetChild());
+        physics::EntityPtr parent = boost::dynamic_pointer_cast<physics::Entity > (this->leftJoint->GetChild());
 
         math::Box bb = parent->GetBoundingBox();
 
