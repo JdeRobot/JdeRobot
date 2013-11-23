@@ -426,9 +426,11 @@ void* updateThread(void*)
 		color.destroy();
 	}
 
+		#ifdef WITH_NITE2
 	if (segmentationType){
 		nite::NiTE::shutdown();
 	}
+		#endif
 
 
    return NULL;
