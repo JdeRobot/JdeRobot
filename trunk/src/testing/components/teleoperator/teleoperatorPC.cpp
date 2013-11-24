@@ -57,8 +57,8 @@ int main(int argc, char** argv) {
             totala = a.tv_sec * 1000000 + a.tv_usec;
 
             control->checkInterfaces(); //Check if interfaces are activated and init/end them
-            control->getDataGazebo(); //Get sensor data from gazebo
-            control->sendDataGazebo(); //Send data to Gazebo
+            control->getData(); //Get sensor data
+            control->sendData(); //Send data to interfaces
 
             gettimeofday(&b, NULL);
             totalb = b.tv_sec * 1000000 + b.tv_usec;

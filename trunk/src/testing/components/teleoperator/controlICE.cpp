@@ -21,32 +21,31 @@
  */
 
 #include "controlICE.h"
-#include "Gui.h"
 
 controlICE::controlICE(SharedMemory *interfacesData) {
     this->interfacesData = interfacesData;
 
-    interfacesData->imagesReady = FALSE;
-    interfacesData->encodersReady = FALSE;
-    interfacesData->laserReady = FALSE;
-    interfacesData->motorsInterface.activated = FALSE;
-    interfacesData->motorsInterface.checkInit = FALSE;
-    interfacesData->motorsInterface.checkEnd = FALSE;
-    interfacesData->encodersInterface.activated = FALSE;
-    interfacesData->encodersInterface.checkInit = FALSE;
-    interfacesData->encodersInterface.checkEnd = FALSE;
-    interfacesData->laserInterface.activated = FALSE;
-    interfacesData->laserInterface.checkInit = FALSE;
-    interfacesData->laserInterface.checkEnd = FALSE;
-    interfacesData->camerasInterface.activated = FALSE;
-    interfacesData->camerasInterface.checkInit = FALSE;
-    interfacesData->camerasInterface.checkEnd = FALSE;
-    interfacesData->pose3DEncodersInterface.activated = FALSE;
-    interfacesData->pose3DEncodersInterface.checkInit = FALSE;
-    interfacesData->pose3DEncodersInterface.checkEnd = FALSE;
-    interfacesData->pose3DMotorsInterface.activated = FALSE;
-    interfacesData->pose3DMotorsInterface.checkInit = FALSE;
-    interfacesData->pose3DMotorsInterface.checkEnd = FALSE;
+    interfacesData->imagesReady = false;
+    interfacesData->encodersReady = false;
+    interfacesData->laserReady = false;
+    interfacesData->motorsInterface.activated = false;
+    interfacesData->motorsInterface.checkInit = false;
+    interfacesData->motorsInterface.checkEnd = false;
+    interfacesData->encodersInterface.activated = false;
+    interfacesData->encodersInterface.checkInit = false;
+    interfacesData->encodersInterface.checkEnd = false;
+    interfacesData->laserInterface.activated = false;
+    interfacesData->laserInterface.checkInit = false;
+    interfacesData->laserInterface.checkEnd = false;
+    interfacesData->camerasInterface.activated = false;
+    interfacesData->camerasInterface.checkInit = false;
+    interfacesData->camerasInterface.checkEnd = false;
+    interfacesData->pose3DEncodersInterface.activated = false;
+    interfacesData->pose3DEncodersInterface.checkInit = false;
+    interfacesData->pose3DEncodersInterface.checkEnd = false;
+    interfacesData->pose3DMotorsInterface.activated = false;
+    interfacesData->pose3DMotorsInterface.checkInit = false;
+    interfacesData->pose3DMotorsInterface.checkEnd = false;
 
     interfacesData->Pose3DMotorsDataToSendLeft.tilt = 0;
     interfacesData->Pose3DMotorsDataToSendLeft.pan = 0;
@@ -61,36 +60,74 @@ controlICE::controlICE(const controlICE& orig) {
 controlICE::~controlICE() {
 }
 
-void controlICE::getDataGazebo() {
+void controlICE::getData() {
     if (interfacesData->motorsInterface.activated) {
-        interfacesData->motorsDataReceived.v = mprx->getV();
-        interfacesData->motorsDataReceived.w = mprx->getW();
-        interfacesData->motorsDataReceived.l = mprx->getL();
+        try{
+            interfacesData->motorsDataReceived.v = mprx->getV();
+            interfacesData->motorsDataReceived.w = mprx->getW();
+            interfacesData->motorsDataReceived.l = mprx->getL();
+        }catch(const Ice::Exception& ex) {
+            std::cerr << ex << std::endl;
+
+            interfacesData->motorsInterface.checkEnd = true;
+        }
     }
     if (interfacesData->laserInterface.activated) {
-        interfacesData->laserDataReceived = lprx->getLaserData();
-        interfacesData->laserReady = TRUE;
+        interfacesData->laserReady = false;
+        try{
+            interfacesData->laserDataReceived = lprx->getLaserData();
+            interfacesData->laserReady = true;
+        }catch(const Ice::Exception& ex) {
+            std::cerr << ex << std::endl;
+
+            interfacesData->laserInterface.checkEnd = true;
+        }
     }
     if (interfacesData->pose3DEncodersInterface.activated) {
-        interfacesData->Pose3DEncodersDataReceivedLeft = p3deprxLeft->getPose3DEncodersData();
-        interfacesData->Pose3DEncodersDataReceivedRight = p3deprxRight->getPose3DEncodersData();
+        try{
+            interfacesData->Pose3DEncodersDataReceivedLeft = p3deprxLeft->getPose3DEncodersData();
+            interfacesData->Pose3DEncodersDataReceivedRight = p3deprxRight->getPose3DEncodersData();
+        }catch(const Ice::Exception& ex) {
+            std::cerr << ex << std::endl;
+
+            interfacesData->pose3DEncodersInterface.checkEnd = true;
+        }
     }
     pthread_mutex_lock(&interfacesData->imagesData_mutex);
     if (interfacesData->camerasInterface.activated) {
-        interfacesData->imagesReady = FALSE;
+        interfacesData->imagesReady = false;
+        try{
+            interfacesData->imageDataLeftReceived = cprxLeft->getImageData();
+            interfacesData->imageDataRightReceived = cprxRight->getImageData();
 
-        interfacesData->imageDataLeftReceived = cprxLeft->getImageData();
-        interfacesData->imageDataRightReceived = cprxRight->getImageData();
+            createImage1();
+            createImage2();
 
-        createImage1();
-        createImage2();
-        interfacesData->imagesReady = TRUE;
+            interfacesData->imagesReady = true;
+
+        }catch(const Ice::Exception& ex) {
+            std::cerr << ex << std::endl;
+
+            interfacesData->camerasInterface.checkEnd = true;
+        }catch(const char* ex){
+            std::cerr << ex << std::endl;
+
+            interfacesData->camerasInterface.checkEnd = true;
+        }
+
     }
     pthread_mutex_unlock(&interfacesData->imagesData_mutex);
 
     if (interfacesData->encodersInterface.activated) {
-        interfacesData->encodersDataReceived = eprx->getEncodersData();
-        interfacesData->encodersReady = TRUE;
+        interfacesData->encodersReady = false;
+        try{
+            interfacesData->encodersDataReceived = eprx->getEncodersData();
+            interfacesData->encodersReady = true;
+        }catch(const Ice::Exception& ex) {
+            std::cerr << ex << std::endl;
+
+            interfacesData->encodersInterface.checkEnd = true;
+        }
 
 
     }
@@ -139,27 +176,38 @@ void controlICE::createImage2() {
             this->image2->widthStep);
 }
 
-void controlICE::sendDataGazebo() {
+void controlICE::sendData() {
 
 
     if (interfacesData->motorsInterface.activated) {
-        mprx->setV(interfacesData->motorsDataToSend.v);
-        mprx->setW(interfacesData->motorsDataToSend.w);
+        try{
+            mprx->setV(interfacesData->motorsDataToSend.v);
+            mprx->setW(interfacesData->motorsDataToSend.w);
+        }catch(const Ice::Exception& ex) {
+            std::cerr << ex << std::endl;
+
+            interfacesData->motorsInterface.checkEnd = true;
+        }
     }
 
     if (interfacesData->pose3DMotorsInterface.activated) {
+        try{
+            interfacesData->Pose3DMotorsDataLeft = new jderobot::Pose3DMotorsData();
 
-        interfacesData->Pose3DMotorsDataLeft = new jderobot::Pose3DMotorsData();
+            interfacesData->Pose3DMotorsDataLeft->tilt = interfacesData->Pose3DMotorsDataToSendLeft.tilt;
+            interfacesData->Pose3DMotorsDataLeft->pan = interfacesData->Pose3DMotorsDataToSendLeft.pan;
+            p3dmprxLeft->setPose3DMotorsData(interfacesData->Pose3DMotorsDataLeft);
 
-        interfacesData->Pose3DMotorsDataLeft->tilt = interfacesData->Pose3DMotorsDataToSendLeft.tilt;
-        interfacesData->Pose3DMotorsDataLeft->pan = interfacesData->Pose3DMotorsDataToSendLeft.pan;
-        p3dmprxLeft->setPose3DMotorsData(interfacesData->Pose3DMotorsDataLeft);
+            interfacesData->Pose3DMotorsDataRight = new jderobot::Pose3DMotorsData();
 
-        interfacesData->Pose3DMotorsDataRight = new jderobot::Pose3DMotorsData();
+            interfacesData->Pose3DMotorsDataRight->tilt = interfacesData->Pose3DMotorsDataToSendRight.tilt;
+            interfacesData->Pose3DMotorsDataRight->pan = interfacesData->Pose3DMotorsDataToSendRight.pan;
+            p3dmprxRight->setPose3DMotorsData(interfacesData->Pose3DMotorsDataRight);
+        }catch(const Ice::Exception& ex) {
+            std::cerr << ex << std::endl;
 
-        interfacesData->Pose3DMotorsDataRight->tilt = interfacesData->Pose3DMotorsDataToSendRight.tilt;
-        interfacesData->Pose3DMotorsDataRight->pan = interfacesData->Pose3DMotorsDataToSendRight.pan;
-        p3dmprxRight->setPose3DMotorsData(interfacesData->Pose3DMotorsDataRight);
+            interfacesData->pose3DMotorsInterface.checkEnd = true;
+        }
     }
 
 
@@ -187,14 +235,19 @@ void controlICE::initLaser() {
         if (0 == this->lprx)
             throw "Invalid proxy introrob.Laser.Proxy";
 
-        std::cout << "Laser added" << std::endl;
+        interfacesData->laserInterface.activated = true;
 
+        std::cout << "Laser added" << std::endl;
 
     } catch (const Ice::Exception& ex) {
         std::cerr << ex << std::endl;
     } catch (const char* msg) {
         std::cerr << msg << std::endl;
     }
+
+    // Couldn't activate correctly... ensure deactivation
+    if(!interfacesData->laserInterface.activated)
+        interfacesData->laserInterface.checkEnd=true;
 
 }
 
@@ -203,12 +256,16 @@ void controlICE::endLaser() {
 
         this->icLaser->shutdown();
         this->icLaser->destroy();
+
         std::cout << "Laser removed" << std::endl;
+
     } catch (const Ice::Exception& ex) {
         std::cerr << ex << std::endl;
     } catch (const char* msg) {
         std::cerr << msg << std::endl;
     }
+
+    interfacesData->laserInterface.activated = false;
 
 }
 
@@ -241,6 +298,7 @@ void controlICE::initPose3DEncoders() {
             throw "Invalid proxy introrob.Pose3DEncodersRight.Proxy";
 
 
+        interfacesData->pose3DEncodersInterface.activated = true;
         std::cout << "Pose3Dencoders added" << std::endl;
 
 
@@ -250,6 +308,10 @@ void controlICE::initPose3DEncoders() {
         std::cerr << msg << std::endl;
     }
 
+    // Couldn't activate correctly... ensure deactivation
+    if(!interfacesData->pose3DEncodersInterface.activated)
+        interfacesData->pose3DEncodersInterface.checkEnd=true;
+
 }
 
 void controlICE::endPose3DEncoders() {
@@ -257,6 +319,7 @@ void controlICE::endPose3DEncoders() {
 
         this->icPose3DEncoders->shutdown();
         this->icPose3DEncoders->destroy();
+
         std::cout << "Pose3Dencoders removed" << std::endl;
 
     } catch (const Ice::Exception& ex) {
@@ -265,6 +328,7 @@ void controlICE::endPose3DEncoders() {
         std::cerr << msg << std::endl;
     }
 
+    interfacesData->pose3DEncodersInterface.activated = false;
 }
 
 void controlICE::initPose3DMotors() {
@@ -296,6 +360,7 @@ void controlICE::initPose3DMotors() {
             throw "Invalid proxy introrob.Pose3DMotorsRight.Proxy";
 
 
+        interfacesData->pose3DMotorsInterface.activated = true;
         std::cout << "Pose3DMotors added" << std::endl;
 
 
@@ -305,6 +370,10 @@ void controlICE::initPose3DMotors() {
         std::cerr << msg << std::endl;
     }
 
+    // Couldn't activate correctly... ensure deactivation
+    if(!interfacesData->pose3DMotorsInterface.activated)
+        interfacesData->pose3DMotorsInterface.checkEnd=true;
+
 }
 
 void controlICE::endPose3DMotors() {
@@ -312,6 +381,7 @@ void controlICE::endPose3DMotors() {
 
         this->icPose3DMotors->shutdown();
         this->icPose3DMotors->destroy();
+
         std::cout << "Pose3DMotors removed" << std::endl;
 
     } catch (const Ice::Exception& ex) {
@@ -319,6 +389,8 @@ void controlICE::endPose3DMotors() {
     } catch (const char* msg) {
         std::cerr << msg << std::endl;
     }
+
+    interfacesData->pose3DMotorsInterface.activated = false;
 
 }
 
@@ -341,6 +413,7 @@ void controlICE::initMotors() {
         if (0 == this->mprx)
             throw "Invalid proxy introrob.Motors.Proxy";
 
+        interfacesData->motorsInterface.activated = true;
         std::cout << "Motors added" << std::endl;
 
 
@@ -350,6 +423,10 @@ void controlICE::initMotors() {
         std::cerr << msg << std::endl;
     }
 
+    // Couldn't activate correctly... ensure deactivation
+    if(!interfacesData->motorsInterface.activated)
+        interfacesData->motorsInterface.checkEnd=true;
+
 }
 
 void controlICE::endMotors() {
@@ -357,6 +434,7 @@ void controlICE::endMotors() {
 
         this->icMotors->shutdown();
         this->icMotors->destroy();
+
         std::cout << "Motors removed" << std::endl;
 
     } catch (const Ice::Exception& ex) {
@@ -364,6 +442,8 @@ void controlICE::endMotors() {
     } catch (const char* msg) {
         std::cerr << msg << std::endl;
     }
+
+    interfacesData->motorsInterface.activated = false;
 
 }
 
@@ -386,6 +466,7 @@ void controlICE::initEncoders() {
         if (0 == this->eprx)
             throw "Invalid proxy introrob.Encoders.Proxy";
 
+        interfacesData->encodersInterface.activated = true;
         std::cout << "Encoders added" << std::endl;
 
 
@@ -395,6 +476,10 @@ void controlICE::initEncoders() {
         std::cerr << msg << std::endl;
     }
 
+    // Couldn't activate correctly... ensure deactivation
+    if(!interfacesData->encodersInterface.activated)
+        interfacesData->encodersInterface.checkEnd=true;
+
 }
 
 void controlICE::endEncoders() {
@@ -402,6 +487,7 @@ void controlICE::endEncoders() {
 
         this->icEncoders->shutdown();
         this->icEncoders->destroy();
+
         std::cout << "Encoders removed" << std::endl;
 
     } catch (const Ice::Exception& ex) {
@@ -410,6 +496,7 @@ void controlICE::endEncoders() {
         std::cerr << msg << std::endl;
     }
 
+    interfacesData->encodersInterface.activated = false;
 }
 
 void controlICE::initCameras() {
@@ -441,6 +528,7 @@ void controlICE::initCameras() {
             throw "Invalid proxy introrob.CameraRight.Proxy";
 
 
+        interfacesData->camerasInterface.activated = true;
         std::cout << "Cameras added" << std::endl;
 
 
@@ -450,6 +538,11 @@ void controlICE::initCameras() {
         std::cerr << msg << std::endl;
     }
 
+    // Couldn't activate correctly... ensure deactivation
+    if(!interfacesData->camerasInterface.activated)
+        interfacesData->camerasInterface.checkEnd=true;
+
+
 }
 
 void controlICE::endCameras() {
@@ -457,6 +550,7 @@ void controlICE::endCameras() {
 
         this->icCameras->shutdown();
         this->icCameras->destroy();
+
         std::cout << "Cameras removed" << std::endl;
 
     } catch (const Ice::Exception& ex) {
@@ -465,74 +559,64 @@ void controlICE::endCameras() {
         std::cerr << msg << std::endl;
     }
 
+    interfacesData->camerasInterface.activated = false;
+
 }
 
 void controlICE::checkInterfaces() {
 
     if (interfacesData->laserInterface.checkInit) {
         this->initLaser();
-        interfacesData->laserInterface.activated = TRUE;
-        interfacesData->laserInterface.checkInit = FALSE;
+        interfacesData->laserInterface.checkInit = false;
     }
     if (interfacesData->laserInterface.checkEnd) {
         this->endLaser();
-        interfacesData->laserInterface.activated = FALSE;
-        interfacesData->laserInterface.checkEnd = FALSE;
+        interfacesData->laserInterface.checkEnd = false;
     }
 
     if (interfacesData->camerasInterface.checkInit) {
         this->initCameras();
-        interfacesData->camerasInterface.activated = TRUE;
-        interfacesData->camerasInterface.checkInit = FALSE;
+        interfacesData->camerasInterface.checkInit = false;
     }
     if (interfacesData->camerasInterface.checkEnd) {
         this->endCameras();
-        interfacesData->camerasInterface.activated = FALSE;
-        interfacesData->camerasInterface.checkEnd = FALSE;
+        interfacesData->camerasInterface.checkEnd = false;
     }
 
     if (interfacesData->pose3DEncodersInterface.checkInit) {
         this->initPose3DEncoders();
-        interfacesData->pose3DEncodersInterface.activated = TRUE;
-        interfacesData->pose3DEncodersInterface.checkInit = FALSE;
+        interfacesData->pose3DEncodersInterface.checkInit = false;
     }
     if (interfacesData->pose3DEncodersInterface.checkEnd) {
         this->endPose3DEncoders();
-        interfacesData->pose3DEncodersInterface.activated = FALSE;
-        interfacesData->pose3DEncodersInterface.checkEnd = FALSE;
+        interfacesData->pose3DEncodersInterface.checkEnd = false;
     }
 
     if (interfacesData->pose3DMotorsInterface.checkInit) {
         this->initPose3DMotors();
-        interfacesData->pose3DMotorsInterface.activated = TRUE;
-        interfacesData->pose3DMotorsInterface.checkInit = FALSE;
+        interfacesData->pose3DMotorsInterface.checkInit = false;
     }
     if (interfacesData->pose3DMotorsInterface.checkEnd) {
         this->endPose3DMotors();
-        interfacesData->pose3DMotorsInterface.activated = FALSE;
-        interfacesData->pose3DMotorsInterface.checkEnd = FALSE;
+        interfacesData->pose3DMotorsInterface.checkEnd = false;
     }
 
     if (interfacesData->motorsInterface.checkInit) {
         this->initMotors();
-        interfacesData->motorsInterface.activated = TRUE;
-        interfacesData->motorsInterface.checkInit = FALSE;
+        interfacesData->motorsInterface.checkInit = false;
     }
     if (interfacesData->motorsInterface.checkEnd) {
         this->endMotors();
-        interfacesData->motorsInterface.activated = FALSE;
-        interfacesData->motorsInterface.checkEnd = FALSE;
+        interfacesData->motorsInterface.checkEnd = false;
     }
 
     if (interfacesData->encodersInterface.checkInit) {
         this->initEncoders();
-        interfacesData->encodersInterface.activated = TRUE;
-        interfacesData->encodersInterface.checkInit = FALSE;
+        interfacesData->encodersInterface.checkInit = false;
     }
     if (interfacesData->encodersInterface.checkEnd) {
         this->endEncoders();
-        interfacesData->encodersInterface.activated = FALSE;
-        interfacesData->encodersInterface.checkEnd = FALSE;
+        interfacesData->encodersInterface.checkEnd = false;
     }
 
 }

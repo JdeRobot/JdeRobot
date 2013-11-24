@@ -23,7 +23,6 @@
 #ifndef GUI_H
 #define	GUI_H
 
-#include <visionlib/colorspaces/colorspacesmm.h>
 #include <gtk-2.0/gtk/gtk.h>
 //#include<gtk-2.0/gdk/gdk.h>
 #include <gtkmm-2.4/gtkmm.h>
@@ -111,6 +110,8 @@ private:
     void check_pose3d_clicked();
     void displayCameras();
     bool on_button_press_cameras_canvas(GdkEvent* event);
+    void on_images_window_hide();
+    void on_teleoperatorCameras_window_hide();
     void cameras_handler();
     void displayPose3DEncodersData();
     void Pose3Dencoders2widget(float* v, float* w);

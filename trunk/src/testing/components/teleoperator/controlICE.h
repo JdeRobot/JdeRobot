@@ -43,8 +43,8 @@ public:
     controlICE(const controlICE& orig);
     virtual ~controlICE();
 
-    void getDataGazebo();
-    void sendDataGazebo();
+    void getData();
+    void sendData();
     void initLaser();
     void endLaser();
     void initPose3DMotors();
