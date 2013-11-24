@@ -5,11 +5,11 @@ cmake_minimum_required(VERSION 2.8)
 # ENV VARS
 SET(gladedir ./)
 SET (COMPONENT teleoperatorPC)
-SET( INTERFACES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../interfaces/cpp) # Directorio con las interfaces ICE en C++
-SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs) # Directorio donde se encuentran las librerias propias de jderobot
-SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../interfaces/slice) # Directorio donde se encuentran las interfaces ICE
-SET( LIBS_NEEDED   jderobotutil colorspaces ) # Librerias de las que depende el componente
-SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../Deps) # Directorio donde se encuentran las dependencias
+SET( INTERFACES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../stable/interfaces/cpp) # Directorio con las interfaces ICE en C++
+SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../stable/libs) # Directorio donde se encuentran las librerias propias de jderobot
+SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../stable/interfaces/slice) # Directorio donde se encuentran las interfaces ICE
+SET( LIBS_NEEDED jderobotutil colorspaces ) # Librerias de las que depende el componente
+SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Deps) # Directorio donde se encuentran las dependencias
 
 
 ###################
@@ -34,14 +34,15 @@ PKG_CHECK_MODULES(gthread REQUIRED gthread-2.0)
 include_directories(${gthread_INCLUDE_DIRS})
 link_directories(${gthread_LIBRARY_DIRS})
 
+FIND_PACKAGE(Threads REQUIRED)
   # FIND AND CHECK OTHER DEPENDENCES
 include(${DEPS_DIR}/ice/CMakeLists.txt)
 include(${DEPS_DIR}/opencv/CMakeLists.txt)
 
 include_directories(${LIBS_DIR}/progeo)
 
+
   # START RECURSIVE
-add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/../../.. ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 

@@ -7,7 +7,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-set( CMAKE_CXX_FLAGS "-lglut -lgsl -lgslcblas -g" ) # Opciones para el compilador
+#set( CMAKE_CXX_FLAGS "" ) # Opciones para el compilador
 
 add_executable (teleoperatorPC  ${SOURCE_FILES})
 
@@ -17,11 +17,10 @@ TARGET_LINK_LIBRARIES(teleoperatorPC
     ${LIBS_DIR}/visionlib/colorspaces/libcolorspacesmm.so
     ${OpenCV_LIBRARIES}        
     ${OpenCVGUI_LIBRARIES}
-	${ZeroCIce_LIBRARIES}    
-	${gtkmm_LIBRARIES}  
-	${gtkmm3_LIBRARIES}  	
-	${gthread_LIBRARIES}
-	${Gearbox_LIBRARIES}
+    ${ZeroCIce_LIBRARIES}    
+    ${gtkmm_LIBRARIES}  
+    ${gtkmm3_LIBRARIES}     
+    ${gthread_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
