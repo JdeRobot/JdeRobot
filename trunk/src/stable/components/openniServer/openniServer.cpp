@@ -55,6 +55,7 @@
 #define NUM_THREADS 5
 #define MAX_LENGHT 10000
 #define SAMPLE_READ_WAIT_TIMEOUT 2000
+#define RETRY_MAX_TIMES 10
 
 #define CHECK_RC(rc, what)                                      \
 if (rc != openni::STATUS_OK)                                         \
@@ -86,6 +87,7 @@ bool componentAlive;
 pthread_t updateThread;
 int deviceMode; //videmode for device streamings
 
+int retry_times = 0;
 
 //block to wait the device initialization
 IceUtil::Mutex controlMutex;
@@ -118,6 +120,7 @@ void* updateThread(void*)
 {
 
 	openni::Status rc = openni::STATUS_OK;
+
 	rc = openni::OpenNI::initialize();
 	if (rc != openni::STATUS_OK)
 	{
@@ -352,6 +355,12 @@ void* updateThread(void*)
 			if (rc != openni::STATUS_OK)
 			{
 				std::cout<< "Wait failed! (timeout is " << SAMPLE_READ_WAIT_TIMEOUT <<  "ms) " << openni::OpenNI::getExtendedError() << std::endl;
+				retry_times++;
+				if (retry_times > RETRY_MAX_TIMES)
+				{
+					std::cout << "Retry Max Times exceeded!. Force Exit!!" << std::endl;
+					exit(-1);
+				}
 				continue;
 			}
 		}

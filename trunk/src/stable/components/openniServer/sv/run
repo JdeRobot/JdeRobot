@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Enter your sudo pass for reset usb device automatically
+PASS_SUDO=
+
+mkdir -p ../log/
+echo "Restarting openniServer ... " `date` >> ../log/system.log
+
+killall -9 openniServer &> /dev/null
+cd ..
+./openniServer --Ice.Config=openniServer.cfg
+
+cd sv/
+echo ${PASS_SUDO} | sudo -S ./xtionUsbReset.sh
+
+sleep 5
