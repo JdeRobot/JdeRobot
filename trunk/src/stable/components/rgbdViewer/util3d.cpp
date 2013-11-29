@@ -22,7 +22,7 @@
 #include "util3d.h"
 
 
-namespace kinectViewer{
+namespace rgbdViewer{
 
 util3d::util3d(myprogeo* p){
 	mypro = p;
@@ -31,39 +31,41 @@ util3d::util3d(myprogeo* p){
 util3d::~util3d(){
 }
 
-int util3d::cvDrawline(cv::Mat image,HPoint2D p1, HPoint2D p2, cv::Scalar color,int cam){
-  HPoint2D gooda,goodb;
+int util3d::cvDrawline(cv::Mat image,Eigen::Vector3d p1, Eigen::Vector3d p2, cv::Scalar color,int cam){
+  Eigen::Vector3d gooda,goodb;
   CvPoint pt1,pt2;
-	TPinHoleCamera camera;
+  Progeo::Progeo* camera;
 
 	camera=mypro->getCamera(cam);
-  if(displayline(p1,p2,&gooda,&goodb,camera)==1){
-	pt1.x=(int)gooda.y; pt1.y=camera.rows-1-(int)gooda.x;
-	pt2.x=(int)goodb.y; pt2.y=camera.rows-1-(int)goodb.x;
+ /* if(camera->displayline(p1,p2,gooda,goodb)==1){
+	pt1.x=(int)gooda(1);
+	pt1.y=camera->getImageHeight()-1-(int)gooda(0);
+	pt2.x=(int)goodb(1);
+	pt2.y=camera->getImageWidth()-1-(int)goodb(0);
 	cv::line(image,pt1,pt2,color,2,1,0);
 	return 1;
-  }
+  }*/
   return 0;
 }
 
 void util3d::draw_room(cv::Mat image,int cam, float lines[][8], int n_lines){
   	int i,j;
-  	HPoint2D a,b;
-  	HPoint3D a3A,a3B,a3C,a3D;
-  	TPinHoleCamera camera;
+  	Eigen::Vector3d a,b;
+  	Eigen::Vector4d a3A,a3B,a3C,a3D;
+  	Progeo::Progeo* camera;
 
 	camera=mypro->getCamera(cam);
   	for(i=0;i<n_lines;i++){
-		a3A.X=lines[i][0];
-		a3A.Y=lines[i][1];
-		a3A.Z=lines[i][2];
-		a3A.H=lines[i][3];
-		a3B.X=lines[i][4];
-		a3B.Y=lines[i][5];
-		a3B.Z=lines[i][6];
-		a3B.H=lines[i][7];
-		project(a3A,&a,camera);
-		project(a3B,&b,camera);
+		a3A(0)=lines[i][0];
+		a3A(1)=lines[i][1];
+		a3A(2)=lines[i][2];
+		a3A(3)=lines[i][3];
+		a3B(0)=lines[i][4];
+		a3B(1)=lines[i][5];
+		a3B(2)=lines[i][6];
+		a3B(3)=lines[i][7];
+		camera->project(a3A,a);
+		camera->project(a3B,b);
 		cvDrawline(image,a,b,CV_RGB(0,0,0),cam);
   }
 }

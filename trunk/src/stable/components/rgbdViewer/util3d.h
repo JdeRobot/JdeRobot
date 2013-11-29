@@ -22,13 +22,16 @@
 #ifndef KINECTVIEWER_UTIL3D_H
 #define KINECTVIEWER_UTIL3D_H
 
-#include "cv.h"
+#include <cv.h>
 #include "myprogeo.h"
+#include <eigen3/Eigen/Dense>
+#include <geometry/progeo/Progeo.h>
 
 
 
 
-namespace kinectViewer {
+
+namespace rgbdViewer {
 class util3d {
 	public:
 		util3d(myprogeo* p);
@@ -36,7 +39,7 @@ class util3d {
 		void draw_room(cv::Mat image,int cam, float lines[][8], int n_lines);
 
 	private:
-		int cvDrawline(cv::Mat image,HPoint2D p1, HPoint2D p2, cv::Scalar color,int cam);
+		int cvDrawline(cv::Mat image,Eigen::Vector3d p1, Eigen::Vector3d p2, cv::Scalar color,int cam);
 		myprogeo* mypro;
 	};
 }

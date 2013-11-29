@@ -31,7 +31,6 @@ myprogeo::myprogeo(int nCam, int w, int h){
 	}
 	this->w=w;
 	this->h=h;
-	std::cout << "CREADO" << std::endl;
 }
 
 myprogeo::~myprogeo(){

@@ -34,6 +34,7 @@ namespace rgbdViewer {
 	DrawArea::DrawArea(BaseObjectType* cobject, const Glib::RefPtr<Gnome::Glade::Xml>& builder)
 	: Gtk::DrawingArea(cobject), Gtk::GL::Widget<DrawArea>() {
 
+
 		this->refresh_time = 50; //ms
 		this->numlines=0;
 		this->post_p=0;
@@ -86,12 +87,12 @@ namespace rgbdViewer {
  		glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
 
 		/*GL Camera Position and FOA*/
-		this->glcam_pos.X=-100.;
-		this->glcam_pos.Y=-100.;
-		this->glcam_pos.Z=200.;
-		this->glcam_foa.X=100;
-		this->glcam_foa.Y=100.;
-		this->glcam_foa.Z=20.;
+		this->glcam_pos.x=-100.;
+		this->glcam_pos.y=-100.;
+		this->glcam_pos.z=200.;
+		this->glcam_foa.x=100;
+		this->glcam_foa.y=100.;
+		this->glcam_foa.z=20.;
 
     this->scale = 50;
     this->radius = 20.0;
@@ -105,43 +106,43 @@ namespace rgbdViewer {
 	DrawArea::~DrawArea() {	}
 
 	void DrawArea::setToCamera1 () {
-		this->glcam_pos.X=0.;
-		this->glcam_pos.Y=(int)MAXWORLD*10/1.2;
-		this->glcam_pos.Z=150.;
+		this->glcam_pos.x=0.;
+		this->glcam_pos.y=(int)MAXWORLD*10/1.2;
+		this->glcam_pos.z=150.;
 
-		this->glcam_foa.X=0.;
-		this->glcam_foa.Y=0.;
-		this->glcam_foa.Z=0.;
+		this->glcam_foa.x=0.;
+		this->glcam_foa.y=0.;
+		this->glcam_foa.z=0.;
 	}
 
 	void DrawArea::setToCamera2 () {
-		this->glcam_pos.X=-(int)MAXWORLD*10/1.2;
-		this->glcam_pos.Y=0.;
-		this->glcam_pos.Z=150.;
+		this->glcam_pos.x=-(int)MAXWORLD*10/1.2;
+		this->glcam_pos.y=0.;
+		this->glcam_pos.z=150.;
 
-		this->glcam_foa.X=0.;
-		this->glcam_foa.Y=0.;
-		this->glcam_foa.Z=0.;
+		this->glcam_foa.x=0.;
+		this->glcam_foa.y=0.;
+		this->glcam_foa.z=0.;
 	}
 
 	void DrawArea::setToCamera3 () {
-		this->glcam_pos.X=0.;
-		this->glcam_pos.Y=-(int)MAXWORLD*10/1.2;
-		this->glcam_pos.Z=150.;
+		this->glcam_pos.x=0.;
+		this->glcam_pos.y=-(int)MAXWORLD*10/1.2;
+		this->glcam_pos.z=150.;
 
-		this->glcam_foa.X=0.;
-		this->glcam_foa.Y=0.;
-		this->glcam_foa.Z=0.;
+		this->glcam_foa.x=0.;
+		this->glcam_foa.y=0.;
+		this->glcam_foa.z=0.;
 	}
 
 	void DrawArea::setToCamera4 () {
-		this->glcam_pos.X=(int)MAXWORLD*10/1.2;
-		this->glcam_pos.Y=0.;
-		this->glcam_pos.Z=150.;
+		this->glcam_pos.x=(int)MAXWORLD*10/1.2;
+		this->glcam_pos.y=0.;
+		this->glcam_pos.z=150.;
 
-		this->glcam_foa.X=0.;
-		this->glcam_foa.Y=0.;
-		this->glcam_foa.Z=0.;
+		this->glcam_foa.x=0.;
+		this->glcam_foa.y=0.;
+		this->glcam_foa.z=0.;
 	}
 
 	void DrawArea::readFile(std::string path){
@@ -149,12 +150,12 @@ namespace rgbdViewer {
 	}
 
 	void DrawArea::setToPioneerCamera () {
-		this->glcam_pos.X = ((10000.)*(cos(this->robottheta)) - (0.*sin(this->robottheta)) + this->robotx)/100.;
-		this->glcam_pos.Y = ((10000.)*(-sin(this->robottheta)) + (0.+cos(this->robottheta)) + this->roboty)/100.;
-		this->glcam_pos.Z = 150.;
-		this->glcam_foa.X = this->robotx/100.;
-		this->glcam_foa.Y = this->roboty/100.;
-		this->glcam_foa.Z = 0.;
+		this->glcam_pos.x = ((10000.)*(cos(this->robottheta)) - (0.*sin(this->robottheta)) + this->robotx)/100.;
+		this->glcam_pos.y = ((10000.)*(-sin(this->robottheta)) + (0.+cos(this->robottheta)) + this->roboty)/100.;
+		this->glcam_pos.z = 150.;
+		this->glcam_foa.x = this->robotx/100.;
+		this->glcam_foa.y = this->roboty/100.;
+		this->glcam_foa.z = 0.;
 	}
 
 	void DrawArea::InitOGL (int w, int h) {
@@ -223,8 +224,8 @@ namespace rgbdViewer {
 		glLoadIdentity();
 
 		/*pos cam		pto central	vector up*/
-		gluLookAt(this->glcam_pos.X, this->glcam_pos.Y, this->glcam_pos.Z,
-							this->glcam_foa.X, this->glcam_foa.Y, this->glcam_foa.Z,
+		gluLookAt((double)this->glcam_pos.x, (double)this->glcam_pos.y, (double)this->glcam_pos.z,
+							(double)this->glcam_foa.x, (double)this->glcam_foa.y, (double)this->glcam_foa.z,
 							0., 0., 1.);
 
 		/*Draw world*/
@@ -424,9 +425,9 @@ namespace rgbdViewer {
 			if ((y - old_y) > 0.0) lati += desp;
 			else if ((y - old_y) < 0.0) lati -= desp;
 
-			this->glcam_pos.X=radius*cosf(lati)*cosf(longi) + this->glcam_foa.X;
-			this->glcam_pos.Y=radius*cosf(lati)*sinf(longi) + this->glcam_foa.Y;
-			this->glcam_pos.Z=radius*sinf(lati) + this->glcam_foa.Z;
+			this->glcam_pos.x=radius*cosf(lati)*cosf(longi) + this->glcam_foa.x;
+			this->glcam_pos.y=radius*cosf(lati)*sinf(longi) + this->glcam_foa.y;
+			this->glcam_pos.z=radius*sinf(lati) + this->glcam_foa.z;
 		}
 
 		/* if right mouse button is toggled */
@@ -437,9 +438,9 @@ namespace rgbdViewer {
 			if ((y - old_y) > 0.0) lati += desp;
 			else if ((y - old_y) < 0.0) lati -= desp;
 
-			this->glcam_foa.X=-radius*cosf(lati)*cosf(longi) + this->glcam_pos.X;
-			this->glcam_foa.Y=-radius*cosf(lati)*sinf(longi) + this->glcam_pos.Y;
-			this->glcam_foa.Z=-radius*sinf(lati) + this->glcam_pos.Z;
+			this->glcam_foa.x=-radius*cosf(lati)*cosf(longi) + this->glcam_pos.x;
+			this->glcam_foa.y=-radius*cosf(lati)*sinf(longi) + this->glcam_pos.y;
+			this->glcam_foa.z=-radius*sinf(lati) + this->glcam_pos.z;
 		}
 
 		old_x=x;
@@ -450,28 +451,28 @@ namespace rgbdViewer {
 	bool DrawArea::on_drawarea_scroll(GdkEventScroll * event) {
 		float vx, vy, vz;
 
-		vx = (this->glcam_foa.X - this->glcam_pos.X)/radius;
-		vy = (this->glcam_foa.Y - this->glcam_pos.Y)/radius;
-		vz = (this->glcam_foa.Z - this->glcam_pos.Z)/radius;
+		vx = (this->glcam_foa.x - this->glcam_pos.x)/radius;
+		vy = (this->glcam_foa.y - this->glcam_pos.y)/radius;
+		vz = (this->glcam_foa.z - this->glcam_pos.z)/radius;
 
 		if (event->direction == GDK_SCROLL_UP) {
-			this->glcam_foa.X = this->glcam_foa.X + vx;
-			this->glcam_foa.Y = this->glcam_foa.Y + vy;
-			this->glcam_foa.Z = this->glcam_foa.Z + vz;
+			this->glcam_foa.x = this->glcam_foa.x + vx;
+			this->glcam_foa.y = this->glcam_foa.y + vy;
+			this->glcam_foa.z = this->glcam_foa.z + vz;
 
-			this->glcam_pos.X = this->glcam_pos.X + vx;
-			this->glcam_pos.Y = this->glcam_pos.Y + vy;
-			this->glcam_pos.Z = this->glcam_pos.Z + vz;
+			this->glcam_pos.x = this->glcam_pos.x + vx;
+			this->glcam_pos.y = this->glcam_pos.y + vy;
+			this->glcam_pos.z = this->glcam_pos.z + vz;
 		}
 
 		if (event->direction == GDK_SCROLL_DOWN) {
-			this->glcam_foa.X = this->glcam_foa.X - vx;
-			this->glcam_foa.Y = this->glcam_foa.Y - vy;
-			this->glcam_foa.Z = this->glcam_foa.Z - vz;
+			this->glcam_foa.x = this->glcam_foa.x - vx;
+			this->glcam_foa.y = this->glcam_foa.y - vy;
+			this->glcam_foa.z = this->glcam_foa.z - vz;
 
-			this->glcam_pos.X = this->glcam_pos.X - vx;
-			this->glcam_pos.Y = this->glcam_pos.Y - vy;
-			this->glcam_pos.Z = this->glcam_pos.Z - vz;
+			this->glcam_pos.x = this->glcam_pos.x - vx;
+			this->glcam_pos.y = this->glcam_pos.y - vy;
+			this->glcam_pos.z = this->glcam_pos.z - vz;
 		}
 		return true;
 	}
@@ -649,7 +650,7 @@ DrawArea::read_world_file(char* worldfile){
 	int i;
 
 	if ((myfile=fopen(worldfile,"r"))==NULL){
-		printf("rgbdViewer: cannot find config file\n");
+		std::cout << "rgbdViewer: cannot find world file" << std::endl;
 		return -1;
 	}
 

@@ -35,8 +35,10 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
-#include <progeo/progeo.h>
 #include <jderobot/pointcloud.h>
+#include <cv.h>
+
+
 #define v3f glVertex3f
 #define IMAGE_WIDTH 320
 #define IMAGE_HEIGHT 240
@@ -120,9 +122,9 @@ namespace rgbdViewer {
 
 		SofReference mypioneer;
 		int refresh_time;
-		HPoint3D glcam_pos;
-		HPoint3D glcam_foa;
-		HPoint3D cam_pos;
+		cv::Point3f glcam_pos;
+		cv::Point3f glcam_foa;
+		cv::Point3f cam_pos;
 		
 		int numpoints;
 		int numextra_lines;

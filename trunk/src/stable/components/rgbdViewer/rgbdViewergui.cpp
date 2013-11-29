@@ -21,6 +21,8 @@
 
 #include "rgbdViewergui.h"
 #include <jderobot/pointcloud.h>
+#include <string>
+#include <iostream>
 
 namespace rgbdViewer {
 rgbdViewergui::rgbdViewergui(bool rgb, bool depth,bool pointCloud , std::string path, std::string path_rgb, std::string path_ir, int width, int height, float cycle): gtkmain(0,0) {
@@ -97,6 +99,11 @@ rgbdViewergui::rgbdViewergui(bool rgb, bool depth,bool pointCloud , std::string 
     refXml->get_widget("window_gl",w_window_gl);
     refXml->get_widget("tg_gl",w_tg_gl);
     refXml->get_widget("vbox_gl",w_vbox_gl);
+    refXml->get_widget("tg_RealDistance",w_realDistance);
+    refXml->get_widget("vbox_images_tool",w_images_tool);
+    refXml->get_widget("entry1",w_entry);
+    refXml->get_widget("labelDistance",w_Distance);
+
 
     if (!cam_rgb_active) {
         w_toggle_rgb->hide();
@@ -137,6 +144,7 @@ rgbdViewergui::rgbdViewergui(bool rgb, bool depth,bool pointCloud , std::string 
     /*Show window. Note: Set window visibility to false in Glade, otherwise opengl won't work*/
     world->readFile(path);
     mainwindow->show();
+    this->distance = new cv::Mat(cv::Size(width,height),CV_32FC1,cv::Scalar(0,0,0));
 
 }
 
@@ -148,9 +156,11 @@ rgbdViewergui::~rgbdViewergui() {
 void
 rgbdViewergui::updateAll( cv::Mat imageRGB, cv::Mat imageDEPTH, std::vector<jderobot::RGBPoint> cloud )
 {
-    //std::cout << imageRGB.rows << std::endl;
 
-    cv::Mat distance(imageRGB.rows, imageRGB.cols, CV_32FC1);
+	imageRGBlocal=imageRGB;
+	imageDEPTHlocal=imageDEPTH;
+
+
     cv::Mat colorDepth(imageDEPTH.size(),imageDEPTH.type());
     CvPoint pt1,pt2;
     if (w_toggle_rgb->get_active()) {
@@ -161,8 +171,7 @@ rgbdViewergui::updateAll( cv::Mat imageRGB, cv::Mat imageDEPTH, std::vector<jder
             //util->draw_room(imageRGB,0, world->lines, world->numlines);
         }
         w_imageRGB->set(imgBuff);
-        while (gtkmain.events_pending())
-            gtkmain.iteration();
+
     }
     if (w_toggle_depth->get_active()||((reconstruct_depth_activate)&&(reconstructMode==0))) {
 
@@ -174,11 +183,13 @@ rgbdViewergui::updateAll( cv::Mat imageRGB, cv::Mat imageDEPTH, std::vector<jder
         /*cv::imshow("color", colorDepth);
         cv::waitKey(1);*/
 
+        this->m_distance.lock();
         for (int x=0; x< layers[1].cols ; x++) {
             for (int y=0; y<layers[1].rows; y++) {
-                distance.at<float>(y,x) = ((int)layers[1].at<unsigned char>(y,x)<<8)|(int)layers[2].at<unsigned char>(y,x);
+                distance->at<float>(y,x) = ((int)layers[1].at<unsigned char>(y,x)<<8)|(int)layers[2].at<unsigned char>(y,x);
             }
         }
+        this->m_distance.unlock();
 
         if (w_toggle_depth->get_active()) {
             cv::Mat localDepth;
@@ -189,12 +200,14 @@ rgbdViewergui::updateAll( cv::Mat imageRGB, cv::Mat imageDEPTH, std::vector<jder
             }
             w_imageDEPTH->set(imgBuff);
         }
-        while (gtkmain.events_pending())
-            gtkmain.iteration();
+
+
+
+
     }
     if (reconstruct_depth_activate) {
         if (reconstructMode==0) {
-            add_depth_pointsImage(imageRGB, distance);
+            add_depth_pointsImage(imageRGB, *distance);
         }
         else
             add_depth_pointsCloud(cloud);
@@ -234,6 +247,7 @@ rgbdViewergui::updateRGB( cv::Mat imageRGB)
 void
 rgbdViewergui::updateDEPTH(cv::Mat imageDEPTH )
 {
+	imageDEPTHlocal=imageDEPTH;
     CvPoint pt1,pt2;
     if (w_toggle_depth->get_active()) {
         Glib::RefPtr<Gdk::Pixbuf> imgBuff =  Gdk::Pixbuf::create_from_data((const guint8*) imageDEPTH.data,Gdk::COLORSPACE_RGB,false,8,imageDEPTH.cols,imageDEPTH.rows,imageDEPTH.step);
@@ -243,9 +257,6 @@ rgbdViewergui::updateDEPTH(cv::Mat imageDEPTH )
 
         }
         w_imageDEPTH->set(imgBuff);
-        displayFrameRate();
-        while (gtkmain.events_pending())
-            gtkmain.iteration();
     }
     if (reconstruct_depth_activate) {
         if (reconstructMode!=0) {
@@ -306,7 +317,6 @@ bool rgbdViewergui::on_clicked_event_rgb(GdkEventButton* event) {
     int x,y;
     float xp,yp,zp,camx,camy,camz;
     float xu,yu,zu;
-    float k;
 
     gdk_window_at_pointer(&x,&y);
     mypro->mybackproject(x, y, &xp, &yp, &zp, &camx, &camy, &camz,0);
@@ -314,8 +324,64 @@ bool rgbdViewergui::on_clicked_event_rgb(GdkEventButton* event) {
     yu=(yp-camy)/sqrt((xp-camx)*(xp-camx) + (yp-camy)*(yp-camy) + (zp-camz)*(zp-camz));
     zu=(zp-camz)/sqrt((xp-camx)*(xp-camx) + (yp-camy)*(yp-camy) + (zp-camz)*(zp-camz));
 
-    k= 5000;
-    world->add_line(camx+k*xu,camy+k*yu,camz+k*zu,camx,camy,camz);
+    this->m_distance.lock();
+	double d=this->distance->at<float>(y,x);
+	this->m_distance.unlock();
+	if (d!=0) {
+		//std::cout << d << std::endl;
+		//d=d*10;
+		float xp,yp,zp,camx,camy,camz;
+		float ux,uy,uz;
+		float x,y;
+		float k;
+		float c1x, c1y, c1z;
+		float fx,fy,fz;
+		float fmod;
+		float t;
+		float Fx,Fy,Fz;
+
+		mypro->mybackproject(x, y, &xp, &yp, &zp, &camx, &camy, &camz,0);
+
+
+
+		//vector unitario
+		float modulo;
+
+		modulo = sqrt(1/(((camx-xp)*(camx-xp))+((camy-yp)*(camy-yp))+((camz-zp)*(camz-zp))));
+		mypro->mygetcamerafoa(&c1x, &c1y, &c1z, 0);
+
+
+		fmod = sqrt(1/(((camx-c1x)*(camx-c1x))+((camy-c1y)*(camy-c1y))+((camz-c1z)*(camz-c1z))));
+		fx = (c1x - camx)*fmod;
+		fy = (c1y - camy)*fmod;
+		fz = (c1z - camz) * fmod;
+		ux = (xp-camx)*modulo;
+		uy = (yp-camy)*modulo;
+		uz = (zp-camz)*modulo;
+
+		Fx= d*fx + camx;
+		Fy= d*fy + camy;
+		Fz= d*fz + camz;
+
+
+		/* calculamos el punto real */
+		t = (-(fx*camx) + (fx*Fx) - (fy*camy) + (fy*Fy) - (fz*camz) + (fz*Fz))/((fx*ux) + (fy*uy) + (fz*uz));
+		//imprimos la información
+		std::stringstream ss;
+		ss << d;
+		w_Distance->set_text(ss.str());
+
+	}
+	else{
+
+		d= 5000;
+		w_Distance->set_text("no measure");
+	}
+
+
+
+
+    world->add_line(camx+d*xu,camy+d*yu,camz+d*zu,camx,camy,camz);
     return true;
 }
 
@@ -324,7 +390,6 @@ bool rgbdViewergui::on_clicked_event_depth(GdkEventButton* event) {
     int x,y;
     float xp,yp,zp,camx,camy,camz;
     float xu,yu,zu;
-    float k;
 
     gdk_window_at_pointer(&x,&y);
     mypro->mybackproject(x, y, &xp, &yp, &zp, &camx, &camy, &camz,1);
@@ -332,10 +397,67 @@ bool rgbdViewergui::on_clicked_event_depth(GdkEventButton* event) {
     yu=(yp-camy)/sqrt((xp-camx)*(xp-camx) + (yp-camy)*(yp-camy) + (zp-camz)*(zp-camz));
     zu=(zp-camz)/sqrt((xp-camx)*(xp-camx) + (yp-camy)*(yp-camy) + (zp-camz)*(zp-camz));
 
-    k= 5000;
-    world->add_line(camx+k*xu,camy+k*yu,camz+k*zu,camx,camy,camz);
+    this->m_distance.lock();
+	double d=this->distance->at<float>(y,x);
+	this->m_distance.unlock();
+	if (d!=0) {
+		//std::cout << d << std::endl;
+		//d=d*10;
+		float xp,yp,zp,camx,camy,camz;
+		float ux,uy,uz;
+		float x,y;
+		float k;
+		float c1x, c1y, c1z;
+		float fx,fy,fz;
+		float fmod;
+		float t;
+		float Fx,Fy,Fz;
 
-    world->add_line(k*xu + camx,k*yu + camy,k*zu + camz,camx,camy,camz);
+		mypro->mybackproject(x, y, &xp, &yp, &zp, &camx, &camy, &camz,0);
+
+
+
+		//vector unitario
+		float modulo;
+
+		modulo = sqrt(1/(((camx-xp)*(camx-xp))+((camy-yp)*(camy-yp))+((camz-zp)*(camz-zp))));
+		mypro->mygetcamerafoa(&c1x, &c1y, &c1z, 0);
+
+
+		fmod = sqrt(1/(((camx-c1x)*(camx-c1x))+((camy-c1y)*(camy-c1y))+((camz-c1z)*(camz-c1z))));
+		fx = (c1x - camx)*fmod;
+		fy = (c1y - camy)*fmod;
+		fz = (c1z - camz) * fmod;
+		ux = (xp-camx)*modulo;
+		uy = (yp-camy)*modulo;
+		uz = (zp-camz)*modulo;
+
+		Fx= d*fx + camx;
+		Fy= d*fy + camy;
+		Fz= d*fz + camz;
+
+
+		/* calculamos el punto real */
+		t = (-(fx*camx) + (fx*Fx) - (fy*camy) + (fy*Fy) - (fz*camz) + (fz*Fz))/((fx*ux) + (fy*uy) + (fz*uz));
+		//imprimos la información
+		std::stringstream ss;
+		ss << d;
+		w_Distance->set_text(ss.str());
+
+	}
+	else{
+
+		d= 5000;
+		w_Distance->set_text("no measure");
+	}
+
+
+
+
+
+    world->add_line(camx+d*xu,camy+d*yu,camz+d*zu,camx,camy,camz);
+
+    world->add_line(d*xu + camx,d*yu + camy,d*zu + camz,camx,camy,camz);
     return true;
 }
 
@@ -376,12 +498,17 @@ rgbdViewergui::on_reconstruct_depth() {
 void
 rgbdViewergui::add_depth_pointsImage(cv::Mat imageRGB, cv::Mat distance) {
     float d;
-    //std::cout << "point image" << std::endl;
 
     world->clear_points();
     //std::cout << "inicio reconstrucción" << std::endl;
-    for (int xIm=0; xIm< cWidth; xIm++) {
-        for (int yIm=0; yIm<cHeight ; yIm++) {
+
+    int sampling= atoi(this->w_entry->get_buffer()->get_text().c_str());
+
+    if (sampling<=0){
+    	sampling=1;
+    }
+    for (int xIm=0; xIm< cWidth; xIm+=sampling) {
+        for (int yIm=0; yIm<cHeight ; yIm+=sampling) {
             d=distance.at<float>(yIm,xIm);
             if (d!=0) {
                 //std::cout << d << std::endl;
@@ -395,9 +522,6 @@ rgbdViewergui::add_depth_pointsImage(cv::Mat imageRGB, cv::Mat distance) {
                 float fmod;
                 float t;
                 float Fx,Fy,Fz;
-
-
-		
 
                 mypro->mybackproject(xIm, yIm, &xp, &yp, &zp, &camx, &camy, &camz,0);
 
@@ -427,18 +551,13 @@ rgbdViewergui::add_depth_pointsImage(cv::Mat imageRGB, cv::Mat distance) {
 
 
 
-                /*world->points[i][0]=distance*ux+camx;
-                world->points[i][1]=distance*uy+camy;
-                world->points[i][2]=distance*uz+camz;*/
-                //std::cout << c1x << "," << c1y << "," << c1f << "," << std::endl;
-                /*std::cout << xp-camx << "," << yp-camy<< "," << zp-camz << std::endl;
-                std::cout << ux << "," << uy<< "," << uz << std::endl;*/
-                //k= (80-yp)/uy;
-                //std::cout << "distancia" << distance << std::endl;
-                //std::cout<< t*ux + camx << ", " << t*uy + camy << ", " << t*uz + camz << std::endl;
-                world->add_kinect_point(t*ux + camx,t*uy+ camy,t*uz + camz,(int)imageRGB.data[3*(yIm*cWidth+xIm)],(int)imageRGB.data[3*(yIm*cWidth+xIm)+1],(int)imageRGB.data[3*(yIm*cWidth+xIm)+2]);
+                if (w_realDistance->get_active()){
+                	world->add_kinect_point(t*ux + camx,t*uy+ camy,t*uz + camz,(int)imageRGB.data[3*(yIm*cWidth+xIm)],(int)imageRGB.data[3*(yIm*cWidth+xIm)+1],(int)imageRGB.data[3*(yIm*cWidth+xIm)+2]);
+                }
+                else{
+                	world->add_kinect_point(d*ux + camx,d*uy+ camy,d*uz + camz,(int)imageRGB.data[3*(yIm*cWidth+xIm)],(int)imageRGB.data[3*(yIm*cWidth+xIm)+1],(int)imageRGB.data[3*(yIm*cWidth+xIm)+2]);
+                }
 
-                //world->add_line(distance*ux + camx,distance*uy+ camy,distance*uz + camz,camx,camy,camz);
             }
         }
     }
@@ -564,14 +683,18 @@ rgbdViewergui::on_w_radio_depth_activate() {
 
 void
 rgbdViewergui::on_w_radio_mode_pointcloud_activate() {
-    if (w_radio_mode_pointcloud->get_active())
+    if (w_radio_mode_pointcloud->get_active()){
         reconstructMode=1;
+        w_images_tool->hide();
+    }
 }
 
 void
 rgbdViewergui::on_w_radio_mode_image_activate() {
-    if (w_radio_mode_image->get_active())
+    if (w_radio_mode_image->get_active()){
         reconstructMode=0;
+        w_images_tool->show();
+    }
 }
 
 void

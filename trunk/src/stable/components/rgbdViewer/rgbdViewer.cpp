@@ -41,7 +41,7 @@ rgbdViewer::rgbdViewergui* rgbdViewergui_ptx;
 jderobot::cameraClient* camRGB=NULL;
 jderobot::cameraClient* camDEPTH=NULL;
 jderobot::pointcloudClient* pcClient=NULL;
-
+int debug;
 
 
 
@@ -51,20 +51,14 @@ void *gui_thread(void* arg){
 		std::vector<jderobot::RGBPoint> cloud;
 		cv::Mat rgb,depth;
 
-		struct timeval post;
-		long long int totalpre=0;
-		long long int totalpost=0;
+		IceUtil::Time lastIT;
 
-		//std::cout << "******************************** entro" << std::endl;
+		lastIT=IceUtil::Time::now();
 		while(rgbdViewergui_ptx->isVisible() && ! rgbdViewergui_ptx->isClosed()){
-			//std::cout << "******************************** entro1" << std::endl;
-			gettimeofday(&post,NULL);
-			totalpost=post.tv_sec*1000000+post.tv_usec;
-
 			if (camRGB!=NULL)
-				rgb=camRGB->getImage();
+				camRGB->getImage().copyTo(rgb);
 			if (camDEPTH!=NULL)
-				depth=camDEPTH->getImage();
+				camDEPTH->getImage().copyTo(depth);
 			if (pcClient!=NULL)
 				cloud=pcClient->getData();
 
@@ -81,15 +75,14 @@ void *gui_thread(void* arg){
 			else{	
 				rgbdViewergui_ptx->updatePointCloud(cloud);
 			}
-			if (totalpre !=0){
-				if ((totalpost - totalpre) > rgbdViewergui_ptx->getCycle() ){
+			if (((IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()) > rgbdViewergui_ptx->getCycle() )){
+				if (debug)
 					std::cout<<"-------- rgbdViewer: timeout-" << std::endl;
-				}
-				else{
-					usleep(rgbdViewergui_ptx->getCycle() - (totalpost - totalpre));
-				}
 			}
-			totalpre=totalpost;
+			else{
+				usleep(rgbdViewergui_ptx->getCycle() - (IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()));
+			}
+			lastIT=IceUtil::Time::now();
 
 
 		}
@@ -146,6 +139,9 @@ int main(int argc, char** argv){
 			camRGB->start();
 			create_gui=true;
 		}
+		else{
+			throw "rgbdViewer: failed to load RGB Camera";
+		}
 
 	}
 	if (prop->getPropertyAsIntWithDefault("rgbdViewer.CameraDEPTHActive",0)){
@@ -154,6 +150,9 @@ int main(int argc, char** argv){
 			depthCamSelected=true;
 			camDEPTH->start();
 			create_gui=true;
+		}
+		else{
+			throw "rgbdViewer: failed to load ÇDEPTH Camera";
 		}
 	}
 
@@ -165,18 +164,20 @@ int main(int argc, char** argv){
 			pointCloudSelected=true;
 			create_gui=true;
 		}
+		else{
+			throw "rgbdViewer: failed to load pointCloud";
+		}
 	}
 
 	globalHeight=prop->getPropertyAsIntWithDefault("rgbdViewer.Height",240);
 	globalWidth=prop->getPropertyAsIntWithDefault("rgbdViewer.Width",320);
-	int fps=prop->getPropertyAsIntWithDefault("rgbdViewer.Fps",10);
+	debug=prop->getPropertyAsIntWithDefault("rgbdViewer.Debug",320);
+	int fps=prop->getPropertyAsIntWithDefault("rgbdViewer.Fps",0);
 	float cycle=(float)(1/(float)fps)*1000000;
-
-
-	std::cout << rgbCamSelected <<", " << depthCamSelected << ", " << pointCloudSelected << std::endl;
 
 	rgbdViewergui_ptx = new rgbdViewer::rgbdViewergui(rgbCamSelected,depthCamSelected, pointCloudSelected, prop->getProperty("rgbdViewer.WorldFile"), prop->getProperty("rgbdViewer.camRGB"), prop->getProperty("rgbdViewer.camIR"),globalWidth,globalHeight, cycle);
 	
+	std::cout << create_gui << std::endl;
 	if (create_gui){
 		pthread_create(&threads[n_components], &attr, gui_thread,NULL);
 		n_components++;
@@ -196,7 +197,7 @@ int main(int argc, char** argv){
 	if (pcClient!=NULL)
 		delete pcClient;
 
-
+	std::cout << "final" << std::endl;
 	if (ic)
 		ic->destroy();
 	return status;

@@ -76,6 +76,7 @@ namespace rgbdViewer {
 			Gtk::ToggleButton *w_toggle_rgb;
 			Gtk::ToggleButton *w_toggle_depth;
 			Gtk::ImageMenuItem *w_view_controller;
+			Gtk::ToggleButton *w_realDistance;
 			Gtk::VBox * w_reconstruct_selection;
 			Gtk::VBox * w_reconstruct_mode;
 			Gtk::VBox * w_vbox_gl;
@@ -84,6 +85,14 @@ namespace rgbdViewer {
 			Gtk::RadioButton *w_radio_mode_pointcloud;
 			Gtk::RadioButton *w_radio_mode_image;
 			Gtk::Button *w_button_clear_lines;
+			Gtk::VBox *w_images_tool;
+			Gtk::Entry *w_entry;
+			Gtk::Label *w_Distance;
+
+			cv::Mat imageRGBlocal;
+			cv::Mat imageDEPTHlocal;
+
+
 			//util3d* util;
 			DrawArea* world;
 			int cWidth, cHeight;
@@ -119,6 +128,11 @@ namespace rgbdViewer {
 			void on_clicked_clear_lines();
 			void on_w_tg_gl_toggled();
 			
+
+			cv::Mat* distance;
+			//distance mutex
+			IceUtil::Mutex m_distance;
+
 
 
 
