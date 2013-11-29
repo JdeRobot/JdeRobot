@@ -13,14 +13,13 @@ include_directories(
 add_executable (teleoperatorPC  ${SOURCE_FILES})
 
 TARGET_LINK_LIBRARIES(teleoperatorPC 
-    ${INTERFACES_CPP_DIR}/jderobot/libJderobotInterfaces.so
-    ${LIBS_DIR}/jderobotutil/libjderobotutil.so
-    ${LIBS_DIR}/visionlib/colorspaces/libcolorspacesmm.so
+    JderobotInterfaces
+    jderobotutil
+    colorspacesmm
     ${OpenCV_LIBRARIES}        
     ${OpenCVGUI_LIBRARIES}
     ${ZeroCIce_LIBRARIES}    
     ${gtkmm_LIBRARIES}  
-    #${gtkmm3_LIBRARIES}     
     ${gthread_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
 )
