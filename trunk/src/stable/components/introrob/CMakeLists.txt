@@ -15,7 +15,7 @@ include_directories(
     ${libgnomecanvasmm_INCLUDE_DIRS}
 )
 
-set( CMAKE_CXX_FLAGS "") #"-lgsl -lgslcblas" ) # Opciones para el compilador
+set( CMAKE_CXX_FLAGS "-Wno-deprecated")  # Opciones para el compilador
 
 add_executable (introrob  ${SOURCE_FILES})
 TARGET_LINK_LIBRARIES(introrob

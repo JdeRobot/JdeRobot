@@ -42,7 +42,7 @@ if (COMPILEFORNAO)
 else()
     SET( SOURCE_FILES_FOLLOWBALL viewer.cpp sensors.cpp control.cpp handler.cpp main.cpp )
 
-    SET( CMAKE_CXX_FLAGS "-lpthread -lIce" ) # Opciones para el compilador
+    SET( CMAKE_CXX_FLAGS "-Wno-deprecated" ) # Opciones para el compilador
 
     include_directories (
         ${INTERFACES_CPP_DIR}
@@ -59,7 +59,6 @@ else()
     add_executable (followball ${SOURCE_FILES_FOLLOWBALL})
 
     TARGET_LINK_LIBRARIES ( followball
-	${CMAKE_THREAD_LIBS_INIT}
         JderobotInterfaces
         jderobotutil
         ${gtk20_LIBRARIES}
@@ -67,5 +66,6 @@ else()
         ${libglademm_LIBRARIES}
         ${ZeroCIce_LIBRARIES}
         ${OpenCV_LIBRARIES}
+        ${CMAKE_THREAD_LIBS_INIT}
     )
 endif()

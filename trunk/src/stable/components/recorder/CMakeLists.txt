@@ -2,7 +2,7 @@ SET(SOURCE_FILES recorder.cpp recordergui.cpp poolWriteImages.cpp poolWritePose3
 
 add_definitions(-DGLADE_DIR="${gladedir}")
 
-set( CMAKE_CXX_FLAGS "-Wno-deprecated" ) # Opciones para el compilador-lgsl -lgslcblas -lGL -lGLU -lglut -lgazebo
+set( CMAKE_CXX_FLAGS "-Wno-deprecated" ) # Opciones para el compilador
 
 include_directories(
     ${INTERFACES_CPP_DIR}
@@ -18,7 +18,7 @@ add_executable (recorder ${SOURCE_FILES})
 
 
 TARGET_LINK_LIBRARIES(recorder
-    ${CMAKE_THREAD_LIBS_INIT} 
+    ${CMAKE_THREAD_LIBS_INIT}
     ${GLUT_LIBRARIES}
     ${OpenCV_LIBRARIES}
     ${OpenCVGUI_LIBRARIES}

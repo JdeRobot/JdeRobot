@@ -8,7 +8,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-#set( CMAKE_CXX_FLAGS "" ) # Opciones para el compilador
+set( CMAKE_CXX_FLAGS "-Wno-deprecated" ) # Opciones para el compilador
 
 add_executable (teleoperatorPC  ${SOURCE_FILES})
 

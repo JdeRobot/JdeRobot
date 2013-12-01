@@ -15,9 +15,7 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_SOURCE_DIR}/..
   ${CMAKE_CURRENT_SOURCE_DIR}/../../cpp/
   ${CMAKE_CURRENT_SOURCE_DIR}/../../cpp/jderobot
-  #${ice_path}
   ${ice_path_storm}
-  #/usr/share/Ice-3.3.1/slice/
   )
 
 

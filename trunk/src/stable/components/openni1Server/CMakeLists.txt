@@ -10,8 +10,8 @@ IF(openni_LIBRARIES)
             ${LIBS_DIR}/
             ${CMAKE_CURRENT_SOURCE_DIR}
             ${CMAKE_CURRENT_SOURCE_DIR}/cameras
-	    ${nite_INCLUDE_DIR}
-	    ${ni_INCLUDE_DIR}
+            ${nite_INCLUDE_DIR}
+            ${ni_INCLUDE_DIR}
             ${LIBUSB_INCLUDE_DIRS}
         )
 
@@ -28,7 +28,7 @@ IF(openni_LIBRARIES)
             ${gsl_LIBRARIES}
             ${LIBUSB_LIBRARIES}
             ${CMAKE_THREAD_LIBS_INIT}
-	    ${LIBUSB_LIBRARY_DIRS}
+            ${LIBUSB_LIBRARY_DIRS}
         )
     ENDIF()
 ENDIF()
