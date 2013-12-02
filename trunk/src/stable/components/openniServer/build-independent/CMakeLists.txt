@@ -53,17 +53,20 @@ link_directories(${gsl_LIBRARY_DIRS})
 find_package(Threads)
 
 
-#manual openni libraries
-SET ( OPENNI2_INC $ENV{OPENNI2_INCLUDE})
-SET ( OPENNI2_LIB $ENV{OPENNI2_REDIST})
-
-if (OPENNI2_INC AND OPENNI2_LIB)
-	message(STATUS "OpenNI found at ${OPENNI2_LIB}")
-else()
-	message(FATAL_ERROR "OpenNI2 library not found")
-endif()
-include_directories(${OPENNI2_INC})
-link_directories(${OPENNI2_LIB}/libOpenNI2.so)
+FIND_PATH( OPENNI2_INC NAMES OpenNI.h  PATHS ENV C++LIB ENV PATH PATH_SUFFIXES openni2)
+IF( OPENNI2_INC )
+	message(STATUS "OpenNI2 found at ${OPENNI2_LIB}")
+	FIND_LIBRARY( OPENNI2_LIB NAMES OpenNI2 PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib/openni2 lib64/openni2)
+	FIND_PATH( OPENNI2_LIB_PATH NAMES libOpenNI2.so PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib/openni2 lib64/openni2)
+	if (NOT IS_DIRECTORY ./OpenNI2)
+		file (COPY ${OPENNI2_LIB} DESTINATION .)
+		file (COPY ${OPENNI2_LIB_PATH}/OpenNI2 DESTINATION .)
+		message("-------------CMake will install local OpenNI2 lib and Driver")
+	endif()
+	include_directories(${OPENNI2_INC})
+ELSE()
+	message("OpenNI2 library not found")
+ENDIF()
 
 
 #manual nite libraries
@@ -101,6 +104,29 @@ IF(NOT Ice_LIBRARIES)
 		MESSAGE ("*** Ice not found")
 ENDIF()
 
+FIND_PATH( LIBXML2_INCLUDE_DIR NAMES libxml/parser.h PATHS ENV C++LIB ENV PATH PATH_SUFFIXES include/libxml2/)
+IF( LIBXML2_INCLUDE_DIR )
+
+    MESSAGE("*** LIBXML2 ok: ${LIBXML2_INCLUDE_DIR}")
+    FIND_LIBRARY( LIBXML2_LIBRARY1 NAMES xml2 PATHS ENV C++LIB ENV PATH PATH_SUFFIXES lib lib64)
+   
+    SET (LIBXML2_LIBRARIES ${LIBXML2_LIBRARY1} )
+    IF( LIBXML2_LIBRARIES )
+		#MESSAGE("LIBXML2 LIBRARY FOUND IN ${LIBXML2_LIBRARIES}")
+    ENDIF(LIBXML2_LIBRARIES )
+
+ENDIF(LIBXML2_INCLUDE_DIR)
+
+IF (NOT  LIBXML2_INCLUDE_DIR)
+	MESSAGE("*** LIBXML2 not found")
+ENDIF()
+
+
+
+link_directories(${LIBXML2_LIBRARIES})
+include_directories(${LIBXML2_INCLUDE_DIR})
+
+
 
 
 set( CMAKE_CXX_FLAGS "-Wno-deprecated -Wl,-rpath ./" ) # Opciones para el compilador
@@ -132,8 +158,10 @@ if  ( NITE2_LIB )
 	  ${LIBS_DIR}/libcolorspacesmm.so
 	  ${LIBS_DIR}/libJderobotInterfaces.so
 	  ${LIBS_DIR}/libprogeo.so
-	  ${OPENNI2_LIB}/libOpenNI2.so
+	${LIBS_DIR}/libgeometry.so	
+	  ${OPENNI2_LIB}
 	  ${NITE2_LIB}/libNiTE2.so
+	${LIBXML2_LIBRARIES}
 	)
 else()
 	TARGET_LINK_LIBRARIES(openniServer
@@ -145,6 +173,8 @@ else()
 	  ${LIBS_DIR}/libcolorspacesmm.so
 	  ${LIBS_DIR}/libJderobotInterfaces.so
 	  ${LIBS_DIR}/libprogeo.so
-	  ${OPENNI2_LIB}/libOpenNI2.so
+${LIBS_DIR}/libgeometry.so
+	  ${OPENNI2_LIB}
+${LIBXML2_LIBRARIES}
 	)
 endif()

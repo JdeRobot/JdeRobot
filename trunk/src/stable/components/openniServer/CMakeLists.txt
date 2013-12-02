@@ -24,10 +24,9 @@ IF(OPENNI2_LIB)
     add_executable (openniServer ${SOURCE_FILES})
 	#copy openni libs to local path
 	if (NOT IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/OpenNI2)
-		message ("--CMake will install local OpenNI2 lib and Driver")
-		file (COPY ${OPENNI2_LIB}/libOpenNI2.so DESTINATION .)
-		set (concat "/")
-		file (COPY ${OPENNI2_LIB}/OpenNI2 DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
+		file (COPY ${OPENNI2_LIB} DESTINATION .)
+		file (COPY ${OPENNI2_LIB_PATH}/OpenNI2 DESTINATION .)
+		
 	endif()
 
 
@@ -52,7 +51,7 @@ IF(OPENNI2_LIB)
         geometry
         colorspacesmm
         JderobotInterfaces
-	${OPENNI2_LIB}/libOpenNI2.so
+	${OPENNI2_LIB}
 	${NITE2_LIB}/libNiTE2.so
 	${Boost_LIBRARIES}
         ${LIBXML2_LIBRARIES}
@@ -68,7 +67,7 @@ IF(OPENNI2_LIB)
         geometry
         colorspacesmm
         JderobotInterfaces
-	${OPENNI2_LIB}/libOpenNI2.so
+	${OPENNI2_LIB}
         ${Boost_LIBRARIES}
         ${LIBXML2_LIBRARIES}
 	)
