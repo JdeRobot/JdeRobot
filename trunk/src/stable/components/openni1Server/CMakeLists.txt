@@ -26,6 +26,7 @@ IF(openni_LIBRARIES)
             ${nite_LIBRARIES}
             ${opencv_LIBRARIES}
             ${gsl_LIBRARIES}
+            ${Boost_LIBRARIES}
             ${LIBUSB_LIBRARIES}
             ${CMAKE_THREAD_LIBS_INIT}
             ${LIBUSB_LIBRARY_DIRS}
