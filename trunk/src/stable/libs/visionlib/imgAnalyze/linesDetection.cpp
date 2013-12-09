@@ -40,7 +40,7 @@ namespace visionLibrary {
 		{4,4,4,3,3,3,3,3,2,2,2}
 	};
 
-	void linesDetection::solisAlgorithm (cv::Mat &image, std::vector<Segment2D> *segments) {
+	void linesDetection::solisAlgorithm (cv::Mat &image, std::vector<Segment2D> *segments, int ksize) {
 		cv::Mat imgTmp1,imgTmp2,imgBlack,imgLaplace;
 		CvPoint pstart, pend;
 		int i, i_jump = 6;
@@ -70,10 +70,10 @@ namespace visionLibrary {
 		cv::normalize(imgTmp1, imgTmp1, 0, 255, CV_MINMAX);
 
 		// Make a average filtering
-		cv::blur(imgTmp1,imgTmp2,cv::Size(3,3));
+		cv::blur(imgTmp1,imgTmp2,cv::Size(ksize,ksize));
 
 		//Laplace
-		cv::Laplacian(imgTmp2, imgLaplace, CV_16S, 3);
+		cv::Laplacian(imgTmp2, imgLaplace, CV_16S, ksize);
 		cv::convertScaleAbs(imgLaplace,imgTmp1);
 
 		/*Perform a binary threshold*/

@@ -37,7 +37,7 @@ using namespace std;
 namespace visionLibrary {
   class linesDetection {
 		public:
-			static void solisAlgorithm (cv::Mat &image, std::vector<Segment2D> *segments);
+			static void solisAlgorithm (cv::Mat &image, std::vector<Segment2D> *segments, int ksize=3);
 		
 		private:
 			static const int solis_cases[][11];
