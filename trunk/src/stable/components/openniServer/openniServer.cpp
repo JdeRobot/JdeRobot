@@ -55,7 +55,7 @@
 #define NUM_THREADS 5
 #define MAX_LENGHT 10000
 #define SAMPLE_READ_WAIT_TIMEOUT 2000
-#define RETRY_MAX_TIMES 10
+#define RETRY_MAX_TIMES 5
 
 #define CHECK_RC(rc, what)                                      \
 if (rc != openni::STATUS_OK)                                         \
@@ -417,7 +417,7 @@ void* updateThread(void*)
 
 		pthread_mutex_unlock(&mutex);
 		if ((IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()) > cycle ){
-			if (debug)
+			if (debug==3)
 				std::cout<<"-------- openniServer: MAIN openni timeout-" << std::endl;
 		}
 		else{
@@ -622,7 +622,10 @@ private:
 				pImageRow += rowSize;
 			}	
 	
-
+			if (debug==2){
+				cv::imshow("OpenniServer RGB", *srcRGB);
+				cv::waitKey(1);
+			}
 			//test
 			//CalculateJoints();
 
@@ -884,7 +887,10 @@ private:
 
 				pDepth += restOfRow;
 			}
-
+			if (debug==2){
+				cv::imshow("OpenniServer DEPTH", src);
+				cv::waitKey(1);
+			}
 
 		   if ((mycameradepth->imageDescription->width != m_depthFrame.getWidth()) || (mycameradepth->imageDescription->height != m_depthFrame.getHeight())){
 				//cv::resize(src,dst_resize);
