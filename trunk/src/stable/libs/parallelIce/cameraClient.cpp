@@ -109,12 +109,19 @@ cameraClient::run(){
 		localData.copyTo(this->data);
 		this->controlMutex.unlock();
 
-		if ((IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()) > this->cycle ){
+		int delay = this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds());
+
+		if (delay > this->cycle ){
 			if (this->debug)
 				std::cout<<"--------" << prefix << " adquisition timeout-" << std::endl;
 		}
 		else{
-			usleep(this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
+
+			if (delay < 1 || delay > this->cycle)
+				delay = 1;
+
+			usleep(delay);
+
 		}
 
 		int rate =(int)(1000000/(IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
