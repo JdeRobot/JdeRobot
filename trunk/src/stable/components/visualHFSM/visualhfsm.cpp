@@ -193,6 +193,7 @@ void VisualHFSM::on_load_file ( std::string path ) {
         parser.parse_file(filepath);
 
         this->listInterfaces = parser.getConfigFile();
+        this->listLibraries = parser.getListLibs();
 
         this->removeAllGui();
         if (!this->loadSubautomata(parser.getListSubautomata()))
@@ -1049,6 +1050,8 @@ void VisualHFSM::on_menubar_clicked_generate_code () {
             MySaxParser parser;
             parser.set_substitute_entities(true);
             parser.parse_file(this->filepath);
+            
+            this->listInterfaces = parser.getConfigFile();
             this->listLibraries = parser.getListLibs();
 
             std::string cpppath(this->filepath);

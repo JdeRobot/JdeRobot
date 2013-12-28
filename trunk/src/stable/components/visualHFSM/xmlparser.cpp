@@ -184,6 +184,7 @@ void MySaxParser::on_start_element ( const Glib::ustring& name,
             break;
         case E_VARS:
             this->option = E_VARS;
+            this->code.clear();
             break;
         case E_FUNCTIONS:
             this->option = E_FUNCTIONS;
@@ -230,6 +231,9 @@ void MySaxParser::on_end_element ( const Glib::ustring& name ) {
             break;
         case E_LIB:
             this->listLibraries.push_back(this->code);
+            break;
+        case E_VARS:
+            this->subautomata->setVariables(this->code);
             break;
         case E_FUNCTIONS:
             this->subautomata->setFunctions(this->code);
@@ -305,7 +309,7 @@ void MySaxParser::on_characters ( const Glib::ustring& text ) {
             break;
         }
         case E_VARS: {
-            this->subautomata->setVariables(text);
+            this->code += text;
             break;
         }
         case E_FUNCTIONS: {

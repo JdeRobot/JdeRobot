@@ -233,7 +233,7 @@ void Generate::generateSubautomatas () {
 
 		this->fs << "\twhile (true) {" << std::endl;
 		this->fs << "\t\tgettimeofday(&a, NULL);" << std::endl;
-		this->fs << "\t\ttotala = a.tv_sec * 1000000 * a.tv_usec;" << std::endl;
+		this->fs << "\t\ttotala = a.tv_sec * 1000000 + a.tv_usec;" << std::endl;
 		this->fs << std::endl;
 
 		if (id != 1) {
@@ -438,10 +438,10 @@ void Generate::generateCmake () {
 	this->fs << std::endl;
 	this->fs << "SET( SOURCE_FILES_AUTOMATA " << this->getCppName() << " )" << std::endl;
 	this->fs << std::endl;
-	this->fs << "SET( INTERFACES_CPP_DIR /usr/local/lib/jderobot )" << std::endl;
-	this->fs << "SET( LIBS_DIR /usr/local/include/jderobot )" << std::endl;
+	this->fs << "SET( INTERFACES_CPP_DIR /usr/local/include )" << std::endl;
+	this->fs << "SET( LIBS_DIR /usr/local/lib )" << std::endl;
 	this->fs << std::endl;
-	this->fs << "SET( CMAKE_CXX_FLAGS \"-lpthread -lIce\" ) # Opciones para el compilador" << std::endl;
+	this->fs << "SET( CMAKE_CXX_FLAGS \"-pthread\" ) # Opciones para el compilador" << std::endl;
 	this->fs << std::endl;
 	this->fs << "SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR})" << std::endl;
 	this->fs << std::endl;
@@ -454,9 +454,10 @@ void Generate::generateCmake () {
 	this->fs << "add_executable (automata ${SOURCE_FILES_AUTOMATA})" << std::endl;
 	this->fs << std::endl;
 	this->fs << "TARGET_LINK_LIBRARIES ( automata " << std::endl;
-	this->fs << "\t${INTERFACES_CPP_DIR}/libJderobotInterfaces.so" << std::endl;
-	this->fs << "\t${INTERFACES_CPP_DIR}/libjderobotutil.so" << std::endl;
-	this->fs << "\t/usr/lib/libIceUtil.so" << std::endl;
+	this->fs << "\t${LIBS_DIR}/jderobot/libJderobotInterfaces.so" << std::endl;
+	this->fs << "\t${LIBS_DIR}/jderobot/libjderobotutil.so" << std::endl;
+	this->fs << "\tIce" << std::endl;
+	this->fs << "\tIceUtil" << std::endl;
 	this->fs << ")" << std::endl;
 	
 	this->fs.flush();
