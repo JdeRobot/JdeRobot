@@ -27,7 +27,7 @@
 GuiTransition::GuiTransition ( Transition t, Point p )
 : transition(*(new Transition(t.getId(), t.getIdOrigin(), t.getIdDestiny())))
 , point(*(new Point(p.getX(), p.getY()))) {
-	this->transition.setTrans(t.getType(), t.getCode());
+	this->transition.setTrans(t.getType(), t.getCodeTrans());
 	this->transition.setName(t.getName());
 }
 
@@ -166,6 +166,10 @@ void GuiTransition::setIds ( int idOrigin, int idDestiny ) {
 	this->transition.setIdDestiny(idDestiny);
 }
 
+void GuiTransition::setCode ( std::string code ) {
+	this->transition.setCode(code);
+}
+
 void GuiTransition::setTrans ( std::string type, std::string code ) {
 	this->transition.setTrans(type, code);
 }
@@ -236,8 +240,12 @@ int GuiTransition::getIdDestiny () {
 	return this->transition.getIdDestiny ();
 }
 
-std::string GuiTransition::getCodeTrans () {
+std::string GuiTransition::getCode () {
 	return this->transition.getCode();
+}
+
+std::string GuiTransition::getCodeTrans () {
+	return this->transition.getCodeTrans();
 }
 
 std::string GuiTransition::getName () {

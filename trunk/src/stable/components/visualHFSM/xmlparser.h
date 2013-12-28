@@ -46,6 +46,7 @@ typedef enum Element {
     E_TRANSITION,
     E_ORIGIN,
     E_DESTINY,
+    E_TRANSCODE,
     E_TRANS, 
     E_LIBRARIES,
     E_LIB,

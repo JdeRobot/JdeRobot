@@ -185,6 +185,7 @@ private:
     // Of the menus
     void on_menu_transition_rename ();
     void on_menu_transition_edit ();
+    void on_menu_transition_code ();
     void on_menu_transition_remove ();
 
     void on_menu_state_rename ();

@@ -19,47 +19,40 @@
  *
  */
 
-#ifndef TRANSITION_H
-#define TRANSITION_H
+#ifndef EDITTRANSITIONCODEDIALOG_H
+#define EDITTRANSITIONCODEDIALOG_H
 
-#include <iostream>
 #include <string>
+#include <iostream>
+
+#include <gtkmm-3.0/gtkmm.h>
+
+#include "../guitransition.h"
 
 // Definition of this class
-class Transition {
+class EditTransitionCodeDialog {
 public:
-	// Constructors
-	Transition ();
-	Transition ( int id );
-	Transition ( int id, int idOrigin, int idDestiny );
+	// Constructor
+	EditTransitionCodeDialog ( GuiTransition* gtransition );
 
 	// Destructor
-	virtual ~Transition ();
+	virtual ~EditTransitionCodeDialog ();
+	
+	// Popup initializer
+	void init ();
 
-	// Setters
-	void setId ( int id );
-	void setIdOrigin ( int idOrigin );
-	void setIdDestiny ( int idDestiny );
-	void setCode ( std::string code );
-	void setName ( std::string name );
-	void setTrans ( std::string type, std::string code );
-
-	// Getters
-	int getId ();
-	int getIdOrigin ();
-	int getIdDestiny ();
-	std::string getCode ();
-	std::string getCodeTrans ();
-	std::string getName ();
-	std::string getType ();
-
-	// Another functions
-	Transition copy ();
-	Transition copy ( int newid );
 private:
 	// Data structure
-	int id, idOrigin, idDestiny;
-	std::string type, code, codeTrans, name;
-}; // Class Transition
+	GuiTransition* gtransition;
+	Gtk::Dialog* dialog;
+	Gtk::Button* button_accept;
+	Gtk::Button* button_cancel;
 
-#endif
+	Gtk::TextView* textview;
+	
+	// Private methods
+	void on_button_accept ();
+	void on_button_cancel ();
+};
+
+#endif // EDITTRANSITIONCODEDIALOG_H

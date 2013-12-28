@@ -13,6 +13,7 @@ SET( SOURCE_FILES_VISUALHFSM
 	popups/configfiledialog.cpp
 	popups/editnodedialog.cpp
 	popups/edittransitiondialog.cpp
+        popups/edittransitioncodedialog.cpp
 	popups/funvardialog.cpp
 	popups/librariesdialog.cpp
 	popups/loadfiledialog.cpp

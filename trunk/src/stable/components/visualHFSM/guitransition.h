@@ -50,6 +50,7 @@ public:
 					Glib::RefPtr<Goocanvas::Item> itemFinal,
 					Glib::RefPtr<Goocanvas::Item> itemText );
 	void setIds ( int idOrigin, int idDestiny );
+	void setCode ( std::string code );
 	void setTrans ( std::string type, std::string code );
 
 	// Getters
@@ -72,6 +73,7 @@ public:
 	int getId ();
 	int getIdOrigin ();
 	int getIdDestiny ();
+	std::string getCode ();
 	std::string getCodeTrans ();
 	std::string getName ();
 	std::string getTypeTrans ();

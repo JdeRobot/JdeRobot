@@ -217,7 +217,7 @@ void Generate::generateSubautomatas () {
 							(nodeListIterator != nodeList.end()) )
 						nodeListIterator++;
 
-					float ms = atof(transListIterator->getCode().c_str());
+					float ms = atof(transListIterator->getCodeTrans().c_str());
 					this->fs << mapTab[T_ONE] << "t_" << nodeListIterator->getName() << "_max = " << (ms/1000.0) << ";" << std::endl;
 
 					mapNameTime[nodeListIterator->getName()] = ms/1000.0;
@@ -281,7 +281,7 @@ void Generate::generateSubautomatas () {
 				if (transListIterator->getIdOrigin() == idNode) {
 					int idDestiny = transListIterator->getIdDestiny();
 					if (transListIterator->getType().compare("condition") == 0) {
-						this->fs << "\t\t\t\tif (" << transListIterator->getCode().c_str() << ") {" << std::endl;
+						this->fs << "\t\t\t\tif (" << transListIterator->getCodeTrans().c_str() << ") {" << std::endl;
 						this->fs << "\t\t\t\t\tsub_" << id << " = " << subListIterator->getNodeName(idDestiny) << ";" << std::endl;
 						this->fs << "\t\t\t\t}" << std::endl;
 					} else {
@@ -292,12 +292,16 @@ void Generate::generateSubautomatas () {
 						this->fs << "\t\t\t\t\tt_fin = time(NULL);" << std::endl;
 						this->fs << "\t\t\t\t\tsecs = difftime(t_fin, t_ini);" << std::endl;
 						if (id == 1) {
-							float ms = atof(transListIterator->getCode().c_str());
+							float ms = atof(transListIterator->getCodeTrans().c_str());
 							this->fs << "\t\t\t\t\tif (secs > (double) " << (ms / 1000.0) << ") {" << std::endl;
 						} else
 							this->fs << "\t\t\t\t\tif (secs > (double) t_" << subListIterator->getNodeName(idNode) << "_max) {" << std::endl;
 						this->fs << "\t\t\t\t\t\tsub_" << id << " = " << subListIterator->getNodeName(idDestiny) << ";" << std::endl;
 						this->fs << "\t\t\t\t\t\tt_activated = false;" << std::endl;
+						std::istringstream f(transListIterator->getCode());
+						std::string line;
+						while (std::getline(f, line))
+							this->fs << "\t\t\t\t\t\t" << line << std::endl;
 						if (id != 1)
 							this->fs << "\t\t\t\t\t\tt_" << subListIterator->getNodeName(idNode) << "_max = " << mapNameTime[subListIterator->getNodeName(idNode)] << ";" << std::endl;
 						this->fs << "\t\t\t\t\t}" << std::endl;

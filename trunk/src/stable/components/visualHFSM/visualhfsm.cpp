@@ -231,6 +231,8 @@ void VisualHFSM::create_menu_transition () {
                         sigc::mem_fun(this, &VisualHFSM::on_menu_transition_rename));
     this->actionGroupTransition->add(Gtk::Action::create("ContextEdit", "Edit"),
                         sigc::mem_fun(this, &VisualHFSM::on_menu_transition_edit));
+    this->actionGroupTransition->add(Gtk::Action::create("ContextCode", "Code"),
+                        sigc::mem_fun(this, &VisualHFSM::on_menu_transition_code));
     this->actionGroupTransition->add(Gtk::Action::create("ContextRemove", "Remove"),
                         sigc::mem_fun(this, &VisualHFSM::on_menu_transition_remove));
 
@@ -242,6 +244,7 @@ void VisualHFSM::create_menu_transition () {
         "   <popup name='PopupMenuTransition'>"
         "       <menuitem action='ContextRename'/>"
         "       <menuitem action='ContextEdit'/>"
+        "       <menuitem action='ContextCode'/>"
         "       <menuitem action='ContextRemove'/>"
         "  </popup>"
         "</ui>";
@@ -450,6 +453,11 @@ void VisualHFSM::on_menu_transition_rename () {
 // Edit the selected transition
 void VisualHFSM::on_menu_transition_edit () {
     this->currentSubautomata->editGuiTransition(this->selectedItem);
+}
+
+// Edit the code of the selected transition
+void VisualHFSM::on_menu_transition_code () {
+    this->currentSubautomata->editGuiTransitionCode(this->selectedItem);
 }
 
 // Remove the selected transition
@@ -1248,8 +1256,9 @@ int VisualHFSM::loadSubautomata ( std::list<SubAutomata> subList ) {
             this->theOtherItem = this->currentSubautomata->getGuiNodeItem(idDestiny);
 
             this->create_new_transition(*porigin, *pdestiny, *ptransition, idTransition);
-            this->currentSubautomata->setTransLastGuiTransition(transListIterator->getType(), transListIterator->getCode());
+            this->currentSubautomata->setTransLastGuiTransition(transListIterator->getType(), transListIterator->getCodeTrans());
             this->currentSubautomata->setNameLastGuiTransition(transListIterator->getName());
+            this->currentSubautomata->setCodeLastGuiTransition(transListIterator->getCode());
             this->state = NONE;
             
             transListIterator++;

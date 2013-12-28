@@ -30,6 +30,7 @@
 #include "guitransition.h"
 #include "popups/editnodedialog.h"
 #include "popups/edittransitiondialog.h"
+#include "popups/edittransitioncodedialog.h"
 #include "popups/renamedialog.h"
 #include "popups/renametransitiondialog.h"
 
@@ -127,6 +128,7 @@ public:
 							  	 Glib::RefPtr<Goocanvas::Item> itemFinal,
 							  	 Glib::RefPtr<Goocanvas::Item> itemText );
 	void setNameLastGuiTransition ( std::string name );
+	void setCodeLastGuiTransition ( std::string code );
 	void setTransGuiTransition ( Glib::RefPtr<Goocanvas::Item> item, std::string type, std::string code );
 	void setTransLastGuiTransition ( std::string type, std::string code );
 
@@ -142,6 +144,7 @@ public:
 	// Another functions for transitions
 	void changeGuiTransitionWidth ( const Glib::RefPtr<Goocanvas::Item>& item, float width );
 	void editGuiTransition ( Glib::RefPtr<Goocanvas::Item> item );
+	void editGuiTransitionCode ( Glib::RefPtr<Goocanvas::Item> item );
 	void moveGuiTransition ( const Glib::RefPtr<Goocanvas::Item>& item );
 	void moveJustGuiTransition ( const Glib::RefPtr<Goocanvas::Item>& item, float dx, float dy );
 	void renameGuiTransition ( Glib::RefPtr<Goocanvas::Item> item );

@@ -128,6 +128,9 @@ void SaveFile::init () {
 				nodeTransChild = nodeTransition->add_child("destiny");
 				nodeTransChild->set_child_text(ss.str());
 
+				nodeTransChild = nodeTransition->add_child("transcode");
+				nodeTransChild->set_child_text(guiTransIterator->getCode());
+
 				nodeTransChild = nodeTransition->add_child("name");
 				nodeTransChild->set_child_text(guiTransIterator->getName());
 

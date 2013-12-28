@@ -597,6 +597,12 @@ void GuiSubautomata::setNameLastGuiTransition ( std::string name ) {
     nodeTransIterator->changeText(name);
 }
 
+void GuiSubautomata::setCodeLastGuiTransition ( std::string code ) {
+    std::list<GuiTransition>::iterator nodeTransIterator = this->transitionList.end();
+    nodeTransIterator--;
+    nodeTransIterator->setCode(code);
+}
+
 void GuiSubautomata::setTransGuiTransition ( Glib::RefPtr<Goocanvas::Item> item, std::string type, std::string code ) {
     std::list<GuiTransition>::iterator nodeTransIterator = this->transitionList.begin();
     while ( (!nodeTransIterator->hasThisItem(item)) &&
@@ -691,6 +697,21 @@ void GuiSubautomata::editGuiTransition ( Glib::RefPtr<Goocanvas::Item> item ) {
 
         EditTransitionDialog* etdialog = new EditTransitionDialog(&*nodeTransIterator);
         etdialog->init();
+    }
+}
+
+void GuiSubautomata::editGuiTransitionCode ( Glib::RefPtr<Goocanvas::Item> item ) {
+    std::list<GuiTransition>::iterator nodeTransIterator = this->transitionList.begin();
+    while ( (!nodeTransIterator->hasThisItem(item)) &&
+            (nodeTransIterator != this->transitionList.end()) )
+        nodeTransIterator++;
+
+    if (nodeTransIterator != this->transitionList.end()) {
+        if (DEBUG)
+            std::cout << BEGIN_GREEN << GUISUB << "Editing transition" << END_COLOR << std::endl;
+
+        EditTransitionCodeDialog* etcdialog = new EditTransitionCodeDialog(&*nodeTransIterator);
+        etcdialog->init();
     }
 }
 

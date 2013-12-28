@@ -56,13 +56,17 @@ void Transition::setIdDestiny ( int idDestiny ) {
 	this->idDestiny = idDestiny;
 }
 
+void Transition::setCode ( std::string code ) {
+	this->code = code;
+}
+
 void Transition::setName ( std::string name ) {
 	this->name = name;
 }
 
-void Transition::setTrans ( std::string type, std::string code ) {
+void Transition::setTrans ( std::string type, std::string codeTrans ) {
 	this->type = type;
-	this->code = code;
+	this->codeTrans = codeTrans;
 }
 
 /*************************************************************
@@ -84,6 +88,10 @@ std::string Transition::getCode () {
 	return this->code;
 }
 
+std::string Transition::getCodeTrans () {
+	return this->codeTrans;
+}
+
 std::string Transition::getName () {
 	return this->name;
 }
@@ -100,7 +108,8 @@ Transition Transition::copy () {
 	newtransition.setIdOrigin(this->idOrigin);
 	newtransition.setIdDestiny(this->idDestiny);
 	newtransition.setName(this->name);
-	newtransition.setTrans(this->type, this->code);
+	newtransition.setCode(this->code);
+	newtransition.setTrans(this->type, this->codeTrans);
 
 	return newtransition;
 }
@@ -110,7 +119,8 @@ Transition Transition::copy ( int newid ) {
 	newtransition.setIdOrigin(this->idOrigin);
 	newtransition.setIdDestiny(this->idDestiny);
 	newtransition.setName(this->name);
-	newtransition.setTrans(this->type, this->code);
+	newtransition.setCode(this->code);
+	newtransition.setTrans(this->type, this->codeTrans);
 
 	return newtransition;
 }

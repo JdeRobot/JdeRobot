@@ -36,6 +36,7 @@ MySaxParser::MySaxParser () : xmlpp::SaxParser() {
     this->mapStringValues["transition"] = E_TRANSITION;
     this->mapStringValues["origin"] = E_ORIGIN;
     this->mapStringValues["destiny"] = E_DESTINY;
+    this->mapStringValues["transcode"] = E_TRANSCODE;
     this->mapStringValues["trans"] = E_TRANS;
     this->mapStringValues["libraries"] = E_LIBRARIES;
     this->mapStringValues["lib"] = E_LIB;
@@ -160,6 +161,10 @@ void MySaxParser::on_start_element ( const Glib::ustring& name,
         case E_DESTINY:
             this->option = E_DESTINY;
             break;
+        case E_TRANSCODE:
+            this->option = E_TRANSCODE;
+            this->code.clear();
+            break;
         case E_TRANS: {
             for (xmlpp::SaxParser::AttributeList::const_iterator iter = attributes.begin();
                                                             iter != attributes.end(); iter++) {
@@ -226,6 +231,9 @@ void MySaxParser::on_end_element ( const Glib::ustring& name ) {
         case E_TRANSITION:
             this->subautomata->addTransition(this->transition->copy(), this->point->copyAsPointer());
             break;
+        case E_TRANSCODE:
+            this->transition->setCode(this->code);
+            break;
         case E_TRANS:
             this->transition->setTrans(this->type, this->code);
             break;
@@ -277,6 +285,10 @@ void MySaxParser::on_characters ( const Glib::ustring& text ) {
             break;
         }
         case E_CODE: {
+            this->code += text;
+            break;
+        }
+        case E_TRANSCODE: {
             this->code += text;
             break;
         }
