@@ -416,13 +416,17 @@ void* updateThread(void*)
 
 
 		pthread_mutex_unlock(&mutex);
-		if ((IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()) > cycle ){
+		int delay = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
+		if (delay > cycle ){
 			if (debug==3)
 				std::cout<<"-------- openniServer: MAIN openni timeout-" << std::endl;
 		}
 		else{
-			usleep(cycle - (IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()));
+			if (delay <1 || delay > cycle)
+				delay = 1;
+			usleep(delay);
 		}
+
 		lastIT=IceUtil::Time::now();
 
    }
@@ -656,16 +660,16 @@ private:
 			pthread_mutex_unlock(&mutex);
 
 
-			if ((IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()) > cycle ){
-				if (debug)
-					std::cout<<"-------- openniServer: WARNING- RGB timeout-" << std::endl;
+			int delay = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
+			if (delay > cycle ){
+				if (debug==3)
+					std::cout<<"-------- openniServer: RGB openni timeout-" << std::endl;
 			}
 			else{
-				usleep(cycle - (IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()));
-			}
-			/*if (totalpre !=0){
-				std::cout << "rgb: " <<  1000000/(totala-totalpre) << std::endl;
-			}*/
+				if (delay <1 || delay > cycle)
+					delay = 1;
+				usleep(delay);
+			}	
 			lastIT=IceUtil::Time::now();
 		}
 	}
@@ -911,18 +915,19 @@ private:
 			}
 			}//critical region end
 			pthread_mutex_unlock(&mutex);
-			/*gettimeofday(&b,NULL);
-			totalb=b.tv_sec*1000000+b.tv_usec;*/
-			if ((IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()) > cycle ){
-				if (debug)
+			
+
+			int delay = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
+			if (delay > cycle ){
+				if (debug==3)
 					std::cout<<"-------- openniServer: WARNING- DEPTH timeout-" << std::endl;
 			}
 			else{
-				usleep(cycle - (IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()));
-			}
-			/*if (totalpre !=0){
-				std::cout << "depth: " <<  1000000/(totala-totalpre) << std::endl;
-			}*/
+				if (delay <1 || delay > cycle)
+					delay = 1;
+				usleep(delay);
+			}			
+			
 			lastIT=IceUtil::Time::now();
 		}
 	}
@@ -1088,16 +1093,19 @@ private:
 							//}
 						}
 					pthread_mutex_unlock(&(this->myCloud->localMutex));
-					if ((IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()) > cycle ){
-						if (debug)
-							std::cout<<"-------- openniServer: WARNING- POINTCLOUD timeout-" << std::endl;
+
+					int delay = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
+					if (delay > cycle ){
+						if (debug==3)
+							std::cout<<"-------- openniServer: POINTCLOUD openni timeout-" << std::endl;
 					}
 					else{
-						usleep(cycle - (IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()));
+						if (delay <1 || delay > cycle)
+							delay = 1;
+						usleep(delay);
 					}
-					/*if (totalpre !=0){
-						std::cout << "cloud: " <<  1000000/(totala-totalpre) << std::endl;
-					}*/
+
+					
 					lastIT=IceUtil::Time::now();
 		        }
 		    }
