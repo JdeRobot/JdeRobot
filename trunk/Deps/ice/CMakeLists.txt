@@ -15,6 +15,9 @@ FIND_PACKAGE(ZeroCIce)
 			link_directories(${ZeroCIceStorm_LIBRARY})
 			include_directories(${ZeroCIce_INCLUDE_DIR})
 			link_directories(${ZeroCIce_LIBRARIES})
+
+			SET(DEPS "${DEPS} libzeroc-ice34, libiceutil34, libicestorm34,")
+
 		ENDIF( ZeroCIceUtil_LIBRARY )
 	ENDIF( ZeroCIceStorm_LIBRARY )
 
@@ -25,3 +28,4 @@ ENDIF()
 IF(NOT  ZeroCIceUtil_LIBRARY )
 	MESSAGE("*** IceUtil not found")
 ENDIF()
+

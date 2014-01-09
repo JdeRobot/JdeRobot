@@ -17,6 +17,8 @@ IF( OpenCV_INCLUDE_DIR )
     SET (OpenCVGUI_LIBRARIES ${OpenCV_LIBRARY2} ${OpenCV_LIBRARY3} ${OpenCV_LIBRARY4} ${OpenCV_LIBRARY6} ${OpenCV_LIBRARY8} ${OpenCV_LIBRARY11})
     IF( OpenCV_LIBRARIES )
 		#MESSAGE("OPENCV LIBRARY FOUND IN ${OpenCV_LIBRARIES}")
+	SET(DEPS "${DEPS}libopencv-calib3d2.3, libopencv-contrib2.3, libopencv-core2.3, libopencv-features2d2.3, libopencv-flann2.3, libopencv-gpu2.3, libopencv-highgui2.3, libopencv-imgproc2.3, libopencv-legacy2.3, libopencv-ml2.3, libopencv-objdetect2.3, libopencv-video2.3, libcv2.3, libcvaux2.3, libhighgui2.3, libopencv-highgui2.3,")
+
     ENDIF( OpenCV_LIBRARIES )
 ENDIF(OpenCV_INCLUDE_DIR)
 

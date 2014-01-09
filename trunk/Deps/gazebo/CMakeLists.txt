@@ -16,6 +16,7 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 
 if (GAZEBO_INCLUDE_DIRS)
 	MESSAGE("*** GAZEBO LIBRARIES FOUND")
+	SET(DEPS "${DEPS} gazebo,")
 else()
 	MESSAGE("*** GAZEBO LIBRARIES NOT FOUND")
 endif()

@@ -7,6 +7,8 @@ IF( xerces_INCLUDE_DIR )
 		MESSAGE ("${xerces_INCLUDE_DIR}")
 		include_directories(${xerces_INCLUDE_DIR})
 		link_directories(${xerces_LIBRARIES})
+		set(CPACK_DEBIAN_PACKAGE_DEPENDS "libxerces-c3.1")
+
     ENDIF( xerces_LIBRARIES )
 ENDIF(xerces_INCLUDE_DIR)
 

@@ -181,6 +181,17 @@ add_custom_target(uninstall
 # Deb packages
 #
 
+# Determine current architecture
+macro(dpkg_arch VAR_NAME)
+        find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+        if (DPKG_PROGRAM) 
+          execute_process(
+            COMMAND ${DPKG_PROGRAM} --print-architecture
+            OUTPUT_VARIABLE ${VAR_NAME}
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+          )
+        endif(DPKG_PROGRAM)
+endmacro(dpkg_arch)
 
 include (InstallRequiredSystemLibraries)
 SET (CPACK_GENERATOR "DEB")
@@ -190,16 +201,21 @@ SET (CPACK_SET_DESTDIR "on")
 SET (CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 
 
-SET (VERSION 5.2.0-1)
+SET (VERSION 5.2.2-1)
 # CPack version numbers for release tarball name.
 SET (CPACK_PACKAGE_VERSION_MAJOR 5)
 SET (CPACK_PACKAGE_VERSION_MINOR 2)
-SET (CPACK_PACKAGE_VERSION_PATCH 0)
+SET (CPACK_PACKAGE_VERSION_PATCH 2)
 SET ($ {VERSION} CPACK_DEBIAN_PACKAGE_VERSION)
 
 SET (CPACK_DEBIAN_PACKAGE_PRIORITY "extra")
 SET (CPACK_DEBIAN_PACKAGE_SECTION "net")
-SET (CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+#SET (CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386")
+dpkg_arch(CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
+
+
+MESSAGE("Dependencias: ${DEPS}")
+SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${DEPS}")
 
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
     "${CMAKE_CURRENT_SOURCE_DIR}/scripts/cmake/postinst"
@@ -209,7 +225,7 @@ SET (CPACK_PACKAGE_DESCRIPTION_SUMMARY "jderobot is a software development suite
 SET (CPACK_PACKAGE_DESCRIPTION "jderobot is a software development suite for robotics applications, written in C++ language. It provides a programming environment where the robot control program is made up of a collection of several concurrent asynchronous threads named schemas. It is based on JDE cognitive architecture for autonomous robots.")
 
 SET (CPACK_PACKAGE_CONTACT "Roberto Calvo <rocapal@gsyc.urjc.es>")
-SET (CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${VERSION}_${CPACK_DEBIAN_ARCHITECTURE}")
+SET (CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 
 SET (CPACK_COMPONENTS_ALL Libraries ApplicationData)
 include (CPack Documentation)
