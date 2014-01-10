@@ -172,8 +172,9 @@ FOREACH (PLUGIN ${PLUGINS})
 	INSTALL (FILES ${SO_FILES} DESTINATION /usr/lib/gazebo-1.8/plugins-jderobot/${PLUGIN}/ )
 	FILE(GLOB_RECURSE CFG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/components/gazeboserver/plugins/${PLUGIN}/*.cfg)
 	INSTALL (FILES ${CFG_FILES} DESTINATION /usr/lib/gazebo-1.8/plugins-jderobot/${PLUGIN}/ )
-	FILE(GLOB_RECURSE WORLD_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/components/gazeboserver/plugins/${PLUGIN}/*.world)
-	INSTALL (FILES ${WORLD_FILES} DESTINATION /usr/lib/gazebo-1.8/plugins-jderobot/${PLUGIN}/ )
+	INSTALL (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/components/gazeboserver/plugins/${PLUGIN}/worlds/ 
+		 DESTINATION /usr/lib/gazebo-1.8/plugins-jderobot/${PLUGIN}/worlds/
+		 PATTERN .svn EXCLUDE)
 ENDFOREACH(PLUGIN)
 
 
