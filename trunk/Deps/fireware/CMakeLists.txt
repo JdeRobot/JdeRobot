@@ -12,7 +12,8 @@ ENDIF()
 IF(with_fireware)
     MESSAGE ("*** Fireware ok") 
     include_directories(/usr/include)
-	link_directories(/usr/lib)
+    link_directories(/usr/lib)
+    SET(DEPS "${DEPS} libdc1394-22,")
 ENDIF(with_fireware)
 
 
