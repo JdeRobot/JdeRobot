@@ -283,6 +283,10 @@ void Generate::generateSubautomatas () {
 					if (transListIterator->getType().compare("condition") == 0) {
 						this->fs << "\t\t\t\tif (" << transListIterator->getCodeTrans().c_str() << ") {" << std::endl;
 						this->fs << "\t\t\t\t\tsub_" << id << " = " << subListIterator->getNodeName(idDestiny) << ";" << std::endl;
+						std::istringstream f(transListIterator->getCode());
+						std::string line;
+						while (std::getline(f, line))
+							this->fs << "\t\t\t\t\t\t" << line << std::endl;
 						this->fs << "\t\t\t\t}" << std::endl;
 					} else {
 						this->fs << "\t\t\t\tif (!t_activated) {" << std::endl;
