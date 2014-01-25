@@ -218,7 +218,7 @@ void Generate::generateSubautomatas () {
 						nodeListIterator++;
 
 					float ms = atof(transListIterator->getCodeTrans().c_str());
-					this->fs << mapTab[T_ONE] << "t_" << nodeListIterator->getName() << "_max = " << (ms/1000.0) << ";" << std::endl;
+					this->fs << mapTab[T_ONE] << "float t_" << nodeListIterator->getName() << "_max = " << (ms/1000.0) << ";" << std::endl;
 
 					mapNameTime[nodeListIterator->getName()] = ms/1000.0;
 				}
@@ -254,9 +254,9 @@ void Generate::generateSubautomatas () {
 			this->fs << "\t\t\tif (";
 
 			int count = 0;
-			for ( std::list<Transition>::iterator nodeListIterator = transList.begin();
-					nodeListIterator != transList.end(); nodeListIterator++ ) {
-				this->fs << " sub_" << id << " == " << nodeListIterator->getName();
+			for ( std::list<Node>::iterator nodeListIterator = nodeList.begin();
+					nodeListIterator != nodeList.end(); nodeListIterator++ ) {
+				this->fs << " sub_" << id << " == " << nodeListIterator->getName() + "_ghost";
 				count++;
 				if (count != countNodes) {
 					this->fs << " ||";
@@ -264,7 +264,7 @@ void Generate::generateSubautomatas () {
 			}
 			this->fs << ") {" << std::endl;
 
-			this->fs << "\t\t\t\tsub_" << id << "(State_Sub_" << id << ")(sub_" << id << " - 1);" << std::endl;
+			this->fs << "\t\t\t\tsub_" << id << " = (State_Sub_" << id << ")(sub_" << id << " - 1);" << std::endl;
 			this->fs << "\t\t\t\tt_ini = time(NULL);" << std::endl;
 			this->fs << "\t\t\t}" << std::endl;
 		}
@@ -343,12 +343,12 @@ void Generate::generateSubautomatas () {
 				if (mapNameTime.find(nodeListIterator->getName()) != mapNameTime.end()) {
 					this->fs << "\t\t\t\tcase " << nodeListIterator->getName() << ":" << std::endl;
 					this->fs << "\t\t\t\t\tt_" << nodeListIterator->getName() << "_max = " << mapNameTime[nodeListIterator->getName()] << " - difftime(t_fin, t_ini);" << std::endl;
+					this->fs << "\t\t\t\t\tsub_" << id << " = (State_Sub_" << id << ")(sub_" << id << " + 1);" << std::endl;
 					this->fs << "\t\t\t\t\tbreak;" << std::endl;
 				} 
 			}
 			this->fs << "\t\t\t\tdefault:" << std::endl;
 			this->fs << "\t\t\t\t\tbreak;" << std::endl;
-			this->fs << "\t\t\t\tsub_" << id << " = (State_Sub_" << id << ")(sub_" << id << " + 1);" << std::endl;
 			this->fs << "\t\t\t}" << std::endl;
 			this->fs << "\t\t}" << std::endl;
 		}

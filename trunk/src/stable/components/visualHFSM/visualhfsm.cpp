@@ -194,6 +194,8 @@ void VisualHFSM::on_load_file ( std::string path ) {
 
         this->listInterfaces = parser.getConfigFile();
         this->listLibraries = parser.getListLibs();
+        
+        std::cout << "parseado" << std::endl;
 
         this->removeAllGui();
         if (!this->loadSubautomata(parser.getListSubautomata()))
@@ -1268,6 +1270,8 @@ int VisualHFSM::loadSubautomata ( std::list<SubAutomata> subList ) {
             this->currentSubautomata->hideAll();
 
         subListIterator++;
+        
+        std::cout << "subautomata loaded" << std::endl;
     }
 
     this->currentSubautomata = this->getSubautomataWithIdFather(0);

@@ -87,11 +87,11 @@ Point Point::calculateGoodArrowPosition ( Point p ) {
     						pow(possible2_final_y - p.getY(), 2.0));
 
     if (distance1 < distance2) {
-    	Point p(possible1_final_x, possible1_final_y);
-    	return p;
+    	Point point(possible1_final_x, possible1_final_y);
+    	return point;
     } else {
-    	Point p(possible2_final_x, possible2_final_y);
-    	return p;
+    	Point point(possible2_final_x, possible2_final_y);
+    	return point;
     }
 }
 
