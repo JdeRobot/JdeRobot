@@ -18,27 +18,16 @@
  *
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef RIGHTHIPENCODERS_H
+#define RIGHTHIPENCODERS_H
 
-/**
-* defines the sign of a (-1 or 1)
-*/
-#ifndef sign
-#define sign(a)   ( (a) < 0 ? -1 : 1 )
-#endif
+#include "HingeEncoders.h"
 
-const double pi = 3.1415926535897932384626433832795;
+#include "Singleton.h"
 
-/** constant for a 1 degree*/
-const double pi_180 = 3.1415926535897932384626433832795/180;
-
-/** Converts angle from degrees to rad.
- * \param degrees angle coded in degrees
- * \return angle coded in rad
- */
-inline double toRadians(double degrees){return degrees * pi_180;}
-
-inline double toDegrees(double angle){return angle * 180 / pi;}
-
-#endif
+class RightHipEncoders : public Singleton<RightHipEncoders>, public HingeEncoders {
+    public:
+        // Constructor (overriding)
+        RightHipEncoders ();
+};
+#endif // RIGHTHIPENCODERS_H

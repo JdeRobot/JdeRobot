@@ -37,7 +37,7 @@
 #include <IceE/IceE.h>
 
 #include "hinges/NeckMotors.h"
-//#include "hinges/NeckSpeed.h"
+#include "hinges/NeckSpeed.h"
 #include "hinges/LeftShoulderMotors.h"
 #include "hinges/RightShoulderMotors.h"
 #include "hinges/LeftElbowMotors.h"
@@ -48,9 +48,20 @@
 #include "hinges/RightKneeMotors.h"
 #include "hinges/LeftAnkleMotors.h"
 #include "hinges/RightAnkleMotors.h"
-//#include "hinges/NaoFollowBall.h"
 
-//#include "functions/NaoServerCamera.h"
+#include "hinges/NeckEncoders.h"
+#include "hinges/LeftShoulderEncoders.h"
+#include "hinges/RightShoulderEncoders.h"
+#include "hinges/LeftElbowEncoders.h"
+#include "hinges/RightElbowEncoders.h"
+#include "hinges/LeftHipEncoders.h"
+#include "hinges/RightHipEncoders.h"
+#include "hinges/LeftKneeEncoders.h"
+#include "hinges/RightKneeEncoders.h"
+#include "hinges/LeftAnkleEncoders.h"
+#include "hinges/RightAnkleEncoders.h"
+
+#include "functions/NaoServerCamera.h"
 #include "functions/NaoServerMotors.h"
 #include "functions/NaoServerMotions.h"
 
@@ -78,23 +89,5 @@ public:
 private:    
     pthread_t tIce;
     int myIcePort;
-    /*
-    NeckMotors* neckMotors;
-    NeckSpeed* neckSpeed;
-    LeftShoulderMotors* lshoulderMotors;
-    RightShoulderMotors* rshoulderMotors;
-    LeftElbowMotors* lelbowMotors;
-    RightElbowMotors* relbowMotors;
-    LeftHipMotors* lhipMotors;
-    RightHipMotors* rhipMotors;
-    LeftKneeMotors* lkneeMotors;
-    RightKneeMotors* rkneeMotors;
-    LeftAnkleMotors* lankleMotors;
-    RightAnkleMotors* rankleMotors;
-    
-    NaoServerCamera* naoserverCamera;
-    NaoServerMotors* naoserverMotors;
-    NaoServerMotions* naoserverMotions;
-    */
 };
 #endif // NAOSERVER_H

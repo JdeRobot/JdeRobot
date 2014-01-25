@@ -27,8 +27,8 @@ NaoServer::NaoServer ( AL::ALPtr<AL::ALBroker> broker, const std::string& name )
 ALModule(broker, name) {
     NeckMotors* neckMotors = NeckMotors::getInstance();
     neckMotors->init("NeckMotors", getParentBroker(), 1.0, 0.1);
-//    NeckSpeed* neckSpeed = NeckSpeed::getInstance();
-//    neckSpeed->init("NeckSpeed", getParentBroker(), 1.0, 0.1);
+    NeckSpeed* neckSpeed = NeckSpeed::getInstance();
+    neckSpeed->init("NeckSpeed", getParentBroker(), 1.0, 0.1);
     LeftShoulderMotors* lshoulderMotors = LeftShoulderMotors::getInstance();
     lshoulderMotors->init("LeftShoulderMotors", getParentBroker(), 1.0, 0.1);
     RightShoulderMotors* rshoulderMotors = RightShoulderMotors::getInstance();
@@ -50,11 +50,31 @@ ALModule(broker, name) {
     RightAnkleMotors* rankleMotors = RightAnkleMotors::getInstance();
     rankleMotors->init("RightAnkleMotors", getParentBroker(), 1.0, 0.1);
     
-//    NaoFollowBall* naofollowball = NaoFollowBall::getInstance();
-//    NaoFollowBall->init("NaoFollowBall", getParentBroker(), 1.0, 0.1);
+    NeckEncoders* neckEncoders = NeckEncoders::getInstance();
+    neckEncoders->init("NeckEncoders", getParentBroker());
+    LeftShoulderEncoders* lshoulderEncoders = LeftShoulderEncoders::getInstance();
+    lshoulderEncoders->init("LeftShoulderEncoders", getParentBroker());
+    RightShoulderEncoders* rshoulderEncoders = RightShoulderEncoders::getInstance();
+    rshoulderEncoders->init("RightShoulderEncoders", getParentBroker());
+    LeftElbowEncoders* lelbowEncoders = LeftElbowEncoders::getInstance();
+    lelbowEncoders->init("LeftElbowEncoders", getParentBroker());
+    RightElbowEncoders* relbowEncoders = RightElbowEncoders::getInstance();
+    relbowEncoders->init("RightElbowEncoders", getParentBroker());
+    LeftHipEncoders* lhipEncoders = LeftHipEncoders::getInstance();
+    lhipEncoders->init("LeftHipEncoders", getParentBroker());
+    RightHipEncoders* rhipEncoders = RightHipEncoders::getInstance();
+    rhipEncoders->init("RightHipEncoders", getParentBroker());
+    LeftKneeEncoders* lkneeEncoders = LeftKneeEncoders::getInstance();
+    lkneeEncoders->init("LeftKneeEncoders", getParentBroker());
+    RightKneeEncoders* rkneeEncoders = RightKneeEncoders::getInstance();
+    rkneeEncoders->init("RightKneeEncoders", getParentBroker());
+    LeftAnkleEncoders* lankleEncoders = LeftAnkleEncoders::getInstance();
+    lankleEncoders->init("LeftAnkleEncoders", getParentBroker());
+    RightAnkleEncoders* rankleEncoders = RightAnkleEncoders::getInstance();
+    rankleEncoders->init("RightAnkleEncoders", getParentBroker());
     
-//    NaoServerCamera* naoserverCamera = NaoServerCamera::getInstance();
-//    naoserverCamera->init("NaoServerCamera", getParentBroker());
+    NaoServerCamera* naoserverCamera = NaoServerCamera::getInstance();
+    naoserverCamera->init("NaoServerCamera", getParentBroker());
     NaoServerMotors* naoserverMotors = NaoServerMotors::getInstance();
     naoserverMotors->init("NaoServerMotors", getParentBroker());
     NaoServerMotions* naoserverMotions = NaoServerMotions::getInstance();
@@ -91,7 +111,7 @@ void* NaoServer::iceThread ( void* obj) {
 		Ice::ObjectAdapterPtr adapter = ic->createObjectAdapterWithEndpoints("NaoServerAdapter", endpoint.str());
 		
 		adapter->add(NeckMotors::getInstance(), ic->stringToIdentity("NeckMotors"));
-//		adapter->add(NeckSpeed::getInstance(), ic->stringToIdentity("NeckSpeed"));
+		adapter->add(NeckSpeed::getInstance(), ic->stringToIdentity("NeckSpeed"));
 		adapter->add(LeftShoulderMotors::getInstance(), ic->stringToIdentity("LeftShoulderMotors"));
 		adapter->add(RightShoulderMotors::getInstance(), ic->stringToIdentity("RightShoulderMotors"));
 		adapter->add(LeftElbowMotors::getInstance(), ic->stringToIdentity("LeftElbowMotors"));
@@ -103,9 +123,19 @@ void* NaoServer::iceThread ( void* obj) {
 		adapter->add(LeftAnkleMotors::getInstance(), ic->stringToIdentity("LeftAnkleMotors"));
 		adapter->add(RightAnkleMotors::getInstance(), ic->stringToIdentity("RightAnkleMotors"));
 		
-//		adapter->add(NaoFollowBall::getInstance(), ic->stringToIdentity("NaoFollowBall"));
+		adapter->add(NeckEncoders::getInstance(), ic->stringToIdentity("NeckEncoders"));
+		adapter->add(LeftShoulderEncoders::getInstance(), ic->stringToIdentity("LeftShoulderEncoders"));
+		adapter->add(RightShoulderEncoders::getInstance(), ic->stringToIdentity("RightShoulderEncoders"));
+		adapter->add(LeftElbowEncoders::getInstance(), ic->stringToIdentity("LeftElbowEncoders"));
+		adapter->add(RightElbowEncoders::getInstance(), ic->stringToIdentity("RightElbowEncoders"));
+		adapter->add(LeftHipEncoders::getInstance(), ic->stringToIdentity("LeftHipEncoders"));
+		adapter->add(RightHipEncoders::getInstance(), ic->stringToIdentity("RightHipEncoders"));
+		adapter->add(LeftKneeEncoders::getInstance(), ic->stringToIdentity("LeftKneeEncoders"));
+		adapter->add(RightKneeEncoders::getInstance(), ic->stringToIdentity("RightKneeEncoders"));
+		adapter->add(LeftAnkleEncoders::getInstance(), ic->stringToIdentity("LeftAnkleEncoders"));
+		adapter->add(RightAnkleEncoders::getInstance(), ic->stringToIdentity("RightAnkleEncoders"));
 		
-//		adapter->add(NaoServerCamera::getInstance(), ic->stringToIdentity("Camera"));
+		adapter->add(NaoServerCamera::getInstance(), ic->stringToIdentity("Camera"));
         adapter->add(NaoServerMotors::getInstance(), ic->stringToIdentity("Motors"));
         adapter->add(NaoServerMotions::getInstance(), ic->stringToIdentity("Motions"));
         

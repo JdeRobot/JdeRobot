@@ -18,27 +18,16 @@
  *
  */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef IMAGECONSTANTS_H
+#define IMAGECONSTANTS_H
 
-/**
-* defines the sign of a (-1 or 1)
-*/
-#ifndef sign
-#define sign(a)   ( (a) < 0 ? -1 : 1 )
-#endif
+const int UPPER_CAMERA       = 0;
+const int LOWER_CAMERA       = 1;
 
-const double pi = 3.1415926535897932384626433832795;
+const int IMG_WIDTH          = 320;
+const int IMG_HEIGHT         = 240;
+const int IMG_CHANNELS       = 3;
+const int IMG_CHANNELS_YUV   = 2;
+const int BYTES_PER_CHANNEL  = 8;
 
-/** constant for a 1 degree*/
-const double pi_180 = 3.1415926535897932384626433832795/180;
-
-/** Converts angle from degrees to rad.
- * \param degrees angle coded in degrees
- * \return angle coded in rad
- */
-inline double toRadians(double degrees){return degrees * pi_180;}
-
-inline double toDegrees(double angle){return angle * 180 / pi;}
-
-#endif
+#endif // IMAGECONSTANTS_H

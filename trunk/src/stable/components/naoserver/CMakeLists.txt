@@ -15,7 +15,6 @@ include_directories(
 	interfaces/slice
 	hinges
 	functions
-	functions/vision
 	include
 )
 
@@ -32,24 +31,18 @@ interfaces/cpp/jderobot/encoders.cpp interfaces/cpp/jderobot/encoders.h
 interfaces/cpp/jderobot/pose3dmotors.cpp interfaces/cpp/jderobot/pose3dmotors.h
 interfaces/cpp/jderobot/pose3dencoders.cpp interfaces/cpp/jderobot/pose3dencoders.h
 interfaces/cpp/jderobot/naomotions.cpp interfaces/cpp/jderobot/naomotions.h
-interfaces/cpp/jderobot/naofollowball.cpp interfaces/cpp/jderobot/naofollowball.h
 
-functions/vision/VisionDefinitions.h
-functions/vision/ImageInput.cpp functions/vision/ImageInput.h
-functions/vision/ImageHandler.cpp functions/vision/ImageHandler.h
-functions/vision/colorFilter/SimpleColorFilter.cpp functions/vision/colorFilter/SimpleColorFilter.h
 functions/Dictionary.cpp functions/Dictionary.h
-#functions/NaoServerCamera.cpp functions/NaoServerCamera.h
+functions/NaoServerCamera.cpp functions/NaoServerCamera.h
 functions/NaoServerMotors.cpp functions/NaoServerMotors.h
 functions/NaoServerMotions.cpp functions/NaoServerMotions.h
 
 hinges/Singleton.h
 hinges/Common.h
-hinges/JointControl.cpp hinges/JointControl.h
-hinges/PIDController.cpp hinges/PIDController.h
+
 hinges/HingeMotors.cpp hinges/HingeMotors.h
 hinges/NeckMotors.cpp hinges/NeckMotors.h
-#hinges/NeckSpeed.cpp hinges/NeckSpeed.h
+hinges/NeckSpeed.cpp hinges/NeckSpeed.h
 hinges/LeftShoulderMotors.cpp hinges/LeftShoulderMotors.h
 hinges/RightShoulderMotors.cpp hinges/RightShoulderMotors.h
 hinges/LeftElbowMotors.cpp hinges/LeftElbowMotors.h
@@ -60,7 +53,20 @@ hinges/LeftKneeMotors.cpp hinges/LeftKneeMotors.h
 hinges/RightKneeMotors.cpp hinges/RightKneeMotors.h
 hinges/LeftAnkleMotors.cpp hinges/LeftAnkleMotors.h
 hinges/RightAnkleMotors.cpp hinges/RightAnkleMotors.h
-#hinges/NaoFollowBall.cpp hinges/NaoFollowBall.h
+
+hinges/HingeEncoders.cpp hinges/HingeEncoders.h
+hinges/NeckEncoders.cpp hinges/NeckEncoders.h
+hinges/LeftShoulderEncoders.cpp hinges/LeftShoulderEncoders.h
+hinges/RightShoulderEncoders.cpp hinges/RightShoulderEncoders.h
+hinges/LeftElbowEncoders.cpp hinges/LeftElbowEncoders.h
+hinges/RightElbowEncoders.cpp hinges/RightElbowEncoders.h
+hinges/LeftHipEncoders.cpp hinges/LeftHipEncoders.h
+hinges/RightHipEncoders.cpp hinges/RightHipEncoders.h
+hinges/LeftKneeEncoders.cpp hinges/LeftKneeEncoders.h
+hinges/RightKneeEncoders.cpp hinges/RightKneeEncoders.h
+hinges/LeftAnkleEncoders.cpp hinges/LeftAnkleEncoders.h
+hinges/RightAnkleEncoders.cpp hinges/RightAnkleEncoders.h
+
 naoserver.cpp naoserver.h
 mainServer.cpp
 )

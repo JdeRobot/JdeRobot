@@ -23,12 +23,23 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <cmath>
+
+#include "alcore/alptr.h"
+#include "alproxies/alledsproxy.h"
+#include "alproxies/almemoryproxy.h"
+#include "alproxies/alsensorsproxy.h"
+#include "alproxies/alsonarproxy.h"
+#include "alproxies/alrobotposeproxy.h"
+#include "alproxies/almotionproxy.h"
+#include "alcommon/alproxy.h"
+#include "alcommon/albroker.h"
+#include "alcommon/almodule.h"
 
 #include <IceE/IceE.h>
 #include <pose3dmotors.h>
 
 #include "Singleton.h"
-#include "JointControl.h"
 #include "Common.h"
 
 class NeckSpeed : public Singleton<NeckSpeed>, public jderobot::Pose3DMotors {
@@ -50,31 +61,8 @@ public:
 private:
     std::string name;
     float stiffness, speed;
-    bool bPitch, bYaw, bRoll;
-    AL::ALValue jointPitch, jointYaw, jointRoll;
+    AL::ALValue jointPitch, jointYaw;
     AL::ALPtr<AL::ALMotionProxy> motion;
-    JointControl *pan, *tilt;
-    
-    float getTiltLimit ( float currentYaw, float currentVy );
-    float target;
-    
-    static const float	MAX_PANU = 80.0f;
-	static const float	MAX_PANL = 40.0f;
-	static const float 	MAX_TILT = 45.0f;
-	static const float 	MIN_TILT = -39.0f;
-	static const float	MIN_PAN_ANGLE = 5.0f;
-	static const float	MAX_PAN_ANGLE = 70.0f;
-	static const float  MIN_TILT_ANGLE = 5.0f;
-	static const float 	MAX_TILT_ANGLE = 30.0f;
-
-	static const int    MAX_TILT_VECTOR =	25;
-	static const float	MAXTILT[MAX_TILT_VECTOR];
-
-	//Velocities are expressed in %  (18,12 is ok)
-	static const float	VEL_PAN_MIN;
-	static const float	VEL_PAN_MAX;		// Real robot
-	static const float	VEL_TILT_MIN;
-	static const float	VEL_TILT_MAX;		// Real robot
     
 };
 #endif // NECKSPEED_H

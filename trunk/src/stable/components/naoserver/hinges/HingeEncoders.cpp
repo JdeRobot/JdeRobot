@@ -18,52 +18,52 @@
  *
  */
 
-#include "NeckSpeed.h"
+#include "HingeEncoders.h"
 
 /*************************************************************
  * CONSTRUCTOR
  *************************************************************/
-NeckSpeed::NeckSpeed () {
-    this->jointPitch = "HeadPitch";
-    this->jointYaw = "HeadYaw";
-}
+HingeEncoders::HingeEncoders () {}
 
 /*************************************************************
  * DESTRUCTOR
  *************************************************************/
-NeckSpeed::~NeckSpeed () {}
+HingeEncoders::~HingeEncoders () {}
 
 /*************************************************************
  * ANOTHER FUNCTIONS
  *************************************************************/
-void NeckSpeed::init ( const std::string newName,
-                       AL::ALPtr<AL::ALBroker> parentBroker,
-                       float stiffness, float speed ) {
+void HingeEncoders::init ( const std::string newName,
+                         AL::ALPtr<AL::ALBroker> parentBroker ) {
     this->name = newName;
-    this->stiffness = stiffness;
-    this->speed = speed;
     
     try {
         this->motion = parentBroker->getMotionProxy();
-        this->motion->setStiffnesses(this->jointPitch, this->stiffness);
-        this->motion->setStiffnesses(this->jointYaw, this->stiffness);
     } catch ( AL::ALError& e ) {
-		std::cerr << "[HingeMotors ()::init(): " << e.toString() << std::endl;
+		std::cerr << "[HingeEncoders ()::init(): " << e.toString() << std::endl;
 	}
 }
 
 /*************************************************************
- * POSE3DMOTORS
+ * POSE3DENCODERS
  *************************************************************/
-Ice::Int NeckSpeed::setPose3DMotorsData ( const jderobot::Pose3DMotorsDataPtr & data, const Ice::Current& ) {
-    this->motion->changeAngles(this->jointYaw, data->panSpeed * 0.42 / 2.0, std::abs(data->panSpeed));
-    this->motion->changeAngles(this->jointPitch, data->tiltSpeed * 0.32 / 2.0, std::abs(data->tiltSpeed));
-};
+jderobot::Pose3DEncodersDataPtr HingeEncoders::getPose3DEncodersData ( const Ice::Current& ) {
+    jderobot::Pose3DEncodersDataPtr pose3DEncodersData;
 
-jderobot::Pose3DMotorsDataPtr NeckSpeed::getPose3DMotorsData ( const Ice::Current& ) {
-    return NULL;
-};
-
-jderobot::Pose3DMotorsParamsPtr NeckSpeed::getPose3DMotorsParams ( const Ice::Current& ) {
-	return NULL;
+    if (this->bPitch) {
+        std::vector<float> commandAngles = this->motion->getAngles(this->jointPitch, false);
+        pose3DEncodersData->tilt = commandAngles[0];
+    }
+    
+    if (this->bYaw) {
+        std::vector<float> commandAngles = this->motion->getAngles(this->jointYaw, false);
+        pose3DEncodersData->pan = commandAngles[0];
+    }
+    
+    if (this->bPitch) {
+        std::vector<float> commandAngles = this->motion->getAngles(this->jointRoll, false);
+        pose3DEncodersData->roll = commandAngles[0];
+    }
+    
+	return pose3DEncodersData;
 };

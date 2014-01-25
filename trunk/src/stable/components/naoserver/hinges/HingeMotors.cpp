@@ -40,6 +40,10 @@ void HingeMotors::init ( const std::string newName,
     this->stiffness = stiffness;
     this->speed = speed;
     
+    this->tilt = 0.0;
+    this->pan = 0.0;
+    this->roll = 0.0;
+    
     try {
         this->motion = parentBroker->getMotionProxy();
         if (this->bPitch)
@@ -57,33 +61,35 @@ void HingeMotors::init ( const std::string newName,
  * POSE3DMOTORS
  *************************************************************/
 Ice::Int HingeMotors::setPose3DMotorsData ( const jderobot::Pose3DMotorsDataPtr & data, const Ice::Current& ) {
-    if (this->bPitch)
+    if (this->bPitch) {
+        this->tilt = data->tilt;
         this->motion->setAngles(this->jointPitch, data->tilt, this->speed);
-    if (this->bYaw)
+    }
+    
+    if (this->bYaw) {
+        this->pan = data->pan;
         this->motion->setAngles(this->jointYaw, data->pan, this->speed);
-    if (this->bRoll)
+    }
+    
+    if (this->bRoll) {
+        this->roll = data->roll;
         this->motion->setAngles(this->jointRoll, data->roll, this->speed);
-
+    }
+    
 	return 0; 
 };
 
 jderobot::Pose3DMotorsDataPtr HingeMotors::getPose3DMotorsData ( const Ice::Current& ) {
     jderobot::Pose3DMotorsDataPtr pose3DMotorsData;
 
-    if (this->bPitch) {
-        std::vector<float> commandAngles = this->motion->getAngles(this->jointPitch, false);
-        pose3DMotorsData->tilt = commandAngles[0];
-    }
+    if (this->bPitch)
+        pose3DMotorsData->tilt = this->tilt;
     
-    if (this->bYaw) {
-        std::vector<float> commandAngles = this->motion->getAngles(this->jointYaw, false);
-        pose3DMotorsData->pan = commandAngles[0];
-    }
+    if (this->bYaw)
+        pose3DMotorsData->pan = this->pan;
     
-    if (this->bPitch) {
-        std::vector<float> commandAngles = this->motion->getAngles(this->jointRoll, false);
-        pose3DMotorsData->roll = commandAngles[0];
-    }
+    if (this->bPitch)
+        pose3DMotorsData->roll = this->roll;
     
 	return pose3DMotorsData;
 };

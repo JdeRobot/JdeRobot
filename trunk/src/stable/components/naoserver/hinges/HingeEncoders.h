@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef HINGEMOTORS_H
-#define HINGEMOTORS_H
+#ifndef HINGEENCODERS_H
+#define HINGEENCODERS_H
 
 #include <iostream>
 #include <stdio.h>
@@ -36,32 +36,28 @@
 #include "alcommon/almodule.h"
 
 #include <IceE/IceE.h>
-#include <pose3dmotors.h>
+#include <pose3dencoders.h>
 
-class HingeMotors : public jderobot::Pose3DMotors {
+class HingeEncoders : public jderobot::Pose3DEncoders {
     public:
         // Constructor
-        HingeMotors ();
+        HingeEncoders ();
         
         // Destructor
-        ~HingeMotors ();
+        ~HingeEncoders ();
         
         // Setters
         
         // Another functions
-        void init ( const std::string newName, AL::ALPtr<AL::ALBroker> parentBroker, float stiffness, float speed );
+        void init ( const std::string newName, AL::ALPtr<AL::ALBroker> parentBroker );
         
-        /*Pose3DMotors*/
-	    Ice::Int setPose3DMotorsData ( const jderobot::Pose3DMotorsDataPtr & data, const Ice::Current& );
-	    jderobot::Pose3DMotorsDataPtr getPose3DMotorsData ( const Ice::Current& );
-	    jderobot::Pose3DMotorsParamsPtr getPose3DMotorsParams ( const Ice::Current& );
+        /*Pose3DEncoders*/
+	    jderobot::Pose3DEncodersDataPtr getPose3DEncodersData ( const Ice::Current& );
 	    
     protected:
         std::string name;
-        float stiffness, speed;
-        float tilt, pan, roll;
         bool bPitch, bYaw, bRoll;
         AL::ALValue jointPitch, jointYaw, jointRoll;
         AL::ALPtr<AL::ALMotionProxy> motion;
 };
-#endif // HINGEMOTORS_H
+#endif // HINGEENCODERS_H

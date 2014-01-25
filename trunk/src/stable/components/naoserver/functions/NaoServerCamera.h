@@ -38,34 +38,23 @@
 
 #include "alcore/altypes.h"
 #include "altools/alxplatform.h"
-#include "alcore/alptr.h"
-#include "alcommon/albroker.h"
-#include "alcommon/almodule.h"
 #include "alcommon/albrokermanager.h"
 #include "alcommon/altoolsmain.h"
 
-#include "alcore/alptr.h"
-#include "alproxies/alledsproxy.h"
-#include "alproxies/almemoryproxy.h"
-#include "alproxies/alsensorsproxy.h"
-#include "alproxies/alsonarproxy.h"
-#include "alproxies/alrobotposeproxy.h"
-#include "alcommon/alproxy.h"
-#include "alcommon/albroker.h"
-
-#include "Singleton.h"
-#include "ImageInput.h"
-#include "vision/colorFilter/SimpleColorFilter.h"
-#include "ImageHandler.h"
-
 #include <IceE/IceE.h>
 #include <camera.h>
+
+#include <iostream>
+#include <string>
+
+#include "ImageConstants.h"
+#include "Singleton.h"
+#include "Dictionary.h"
 
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 
 using namespace std;
-using namespace jderobot;
 
 namespace AL
 {
@@ -73,70 +62,49 @@ class ALBroker;
 }
 using namespace AL;
 
-class NaoServerCamera : public Singleton<NaoServerCamera> {
+class NaoServerCamera : public Singleton<NaoServerCamera>, public jderobot::Camera {
 public:
     // Constructor
     NaoServerCamera ();
     
     // Destructor
-    ~NaoServerCamera ();
-
-    void init ( const string newName, AL::ALPtr<AL::ALBroker> parentBroker );
-
-	/*Camera*/
-    jderobot::ImageDataPtr getImageData ();
+    virtual ~NaoServerCamera ();
     
-    ImageHandler *getImageHandler() {return _ImageHandler;};
-
-	inline SimpleColorFilter* getColorFilter() { return this->colorFilter; };
-	inline int getCam() { return cam; };
-	inline void lock() { pthread_mutex_lock(&mutex); };
-	inline void unlock() { pthread_mutex_unlock(&mutex); };
-	void setCam(const int cam);
-
-	// External methods
-	int getCamParam(const int param);
-
-	virtual void setCam (CameraType cam, const Ice::Current& c);
-	
-	long getImageTs() {return image_ts;};
-
+    /*Camera*/
+    jderobot::ImageDescriptionPtr getImageDescription ( const Ice::Current& c );
+    jderobot::ImageDataPtr getImageData ( const Ice::Current& c );
+    jderobot::CameraDescriptionPtr getCameraDescription ( const Ice::Current& c );
+    Ice::Int setCameraDescription ( const jderobot::CameraDescriptionPtr &description, const Ice::Current& c );
+    std::string startCameraStreaming ( const Ice::Current& );
+    void stopCameraStreaming ( const Ice::Current& );
+    
+    // Another functions
+    void init ( const string newName, AL::ALPtr<AL::ALBroker> parentBroker );
+    void update ();
+    
 private:
-    void initCamera();
-    bool newImage();
-    void loadCameraParams(string upper_file, string lower_file);
-
+    AL::ALVideoDeviceProxy* pcamera;
+    jderobot::ImageDescriptionPtr imgDescription;
+    
+    int cam;
+    
+    pthread_mutex_t mutex;
+    Dictionary camConfUpper, camConfLower;
+    
     static const string UPPER_CAMERA_CONFIG_FILE;
     static const string LOWER_CAMERA_CONFIG_FILE;
-
-    int cam;
-    bool camera_initialized;
-    string fLEMname;
-    AL::ALValue imgDebug, filterParams;
-    char * colorSrc;
-    IplImage *cvImage, *cvAux;
-    pthread_mutex_t mutex;
-    Dictionary	camConfUpper, camConfLower;
-    SimpleColorFilter *colorFilter;
-
-    bool imageTaken;
-
-    AL::ALVideoDeviceProxy *pcamera;
-    jderobot::ImageDescriptionPtr imgDescription;
-
-    ImageHandler * _ImageHandler;
-
-    long long lastTimeStamp;
-    long wtime;
-
-    //capture thread
-	pthread_t capture_thread;
-    bool newImageTaken;
-    char imgBuff[ImageInput::IMG_WIDTH * ImageInput::IMG_HEIGHT * ImageInput::IMG_CHANNELS_YUV];
-    long image_ts;
+    std::string fLEMname;
 
 protected:
-    static void* EntryPoint(void*);
-    void Capture();
+    char img[IMG_WIDTH * IMG_HEIGHT * IMG_CHANNELS];
+    
+    static void* updateThread ( void* obj );
+    void capture ();
+    
+    void getColorRGB ( char* source, char* destiny );
+    void getValues ( char* image, int col, int row, char &r, char &g, char &b );
+    void yuv2rgb ( unsigned char Y, unsigned char U, unsigned char V, unsigned char &R, unsigned char &G, unsigned char &B );
+    void loadCameraParams ( const string upper_file, const string lower_file );
 };
-#endif
+
+#endif // NAOSERVERCAMERA_H
