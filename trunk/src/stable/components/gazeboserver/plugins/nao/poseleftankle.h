@@ -14,7 +14,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- *  Authors : Borja Menéndez <borjamonserrano@gmail.com>
+ *  Author:     Borja Menéndez Moreno <b.menendez.moreno@gmail.com>
+ *  Co-author:  José María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
@@ -48,27 +49,28 @@ namespace gazebo {
         virtual void Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf );
         virtual void Init ();
 
-        std::string cfgfile_lefankle;
-        pthread_mutex_t mutex_lefankleencoders;
-        pthread_mutex_t mutex_lefanklemotors;
+        std::string cfgfile_leftankle;
+        pthread_mutex_t mutex_leftankleencoders;
+        pthread_mutex_t mutex_leftanklemotors;
 
-        struct lefankle_t {
-            physics::JointPtr joint_tilt, joint_pan;
-            physics::LinkPtr link_pan, link_tilt;
+        struct leftankle_t {
+            physics::JointPtr joint_pitch, joint_roll;
             encoders_t encoders;
             motorsdata_t motorsdata;
             motorsparams_t motorsparams;
         };
 
-        lefankle_t lefankle;
+        leftankle_t leftankle;
 
     private:
         void OnUpdate ();
         
         event::ConnectionPtr updateConnection;
         double stiffness;
-        int count;
         int cycle;
+        
+        float maxPitch, maxRoll, minPitch, minRoll;
+        std::string modelPitch, modelRoll;
     };
 }
 

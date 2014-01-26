@@ -14,13 +14,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- *  Authors : Borja Menéndez <borjamonserrano@gmail.com>
+ *  Author:     Borja Menéndez Moreno <b.menendez.moreno@gmail.com>
+ *  Co-author:  José María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
 #include "poseleftelbow.h"
-
-#define RADTODEG 57.29582790
 
 namespace gazebo {
 
@@ -29,52 +28,59 @@ namespace gazebo {
     PoseLeftElbow::PoseLeftElbow () {
         pthread_mutex_init(&this->mutex_leftelbowencoders, NULL);
         pthread_mutex_init(&this->mutex_leftelbowmotors, NULL);
-        this->count = 0;
         this->cycle = 50;
         this->cfgfile_leftelbow = std::string("--Ice.Config=poseleftelbow.cfg");
-        
-        this->leftelbow.motorsparams.maxPan = 1.57;
-        this->leftelbow.motorsparams.minPan = -1.57;          
-        this->leftelbow.motorsparams.maxTilt = 0.5;
-        this->leftelbow.motorsparams.minTilt = -0.5;
+        this->modelYaw = std::string("joint_poseleftelbow_pan");
+        this->modelRoll = std::string("joint_poseleftelbow_roll");
 
         std::cout << "Constructor PoseLeftElbow" << std::endl;
     }
 
     void PoseLeftElbow::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf ) {
-        // LOAD CAMERA LEFT
-        if (!_sdf->HasElement("joint_pose3dencodersleftelbow_yaw"))
-            gzerr << "pose3dencodersleftelbow plugin missing <joint_pose3dencodersleftelbow_yaw> element\n";
-        if (!_sdf->HasElement("joint_pose3dencodersleftelbow_roll"))
-            gzerr << "pose3dencodersleftelbow plugin missing <joint_pose3dencodersleftelbow_roll> element\n";
+        if (!_sdf->HasElement(this->modelYaw))
+            gzerr << "PoseLeftElbow plugin missing <" << this->modelYaw << "> element\n";
+        if (!_sdf->HasElement(this->modelRoll))
+            gzerr << "PoseLeftElbow plugin missing <" << this->modelRoll << "> element\n";
+        
+        std::string elemYaw = std::string(_sdf->GetElement(this->modelYaw)->GetValueString());
+        std::string elemRoll = std::string(_sdf->GetElement(this->modelRoll)->GetValueString());
+            
+        if (!_sdf->HasElement(elemYaw))
+            gzerr << "PoseLeftElbow plugin missing <" << elemYaw << "> element\n";
+        if (!_sdf->HasElement(elemRoll))
+            gzerr << "PoseLeftElbow plugin missing <" << elemRoll << "> element\n";
+            
+        this->leftelbow.joint_yaw = _model->GetJoint(elemYaw);
+        this->leftelbow.joint_roll = _model->GetJoint(elemRoll);
 
-        this->leftelbow.joint_pan = _model->GetJoint("lelbow_yaw");
-        this->leftelbow.joint_roll = _model->GetJoint("lelbow_roll");
+        this->maxYaw = (float) this->leftelbow.joint_yaw->GetUpperLimit(0).Radian();
+        this->minYaw = (float) this->leftelbow.joint_yaw->GetLowerLimit(0).Radian();
+        this->maxRoll = (float) this->leftelbow.joint_roll->GetUpperLimit(0).Radian();
+        this->minRoll = (float) this->leftelbow.joint_roll->GetLowerLimit(0).Radian();
 
-        if (!this->leftelbow.joint_pan)
-            gzerr << "Unable to find joint_pose3dencodersleftelbow_yaw["
-                << _sdf->GetElement("joint_pose3dencodersleftelbow_yaw")->GetValueString() << "]\n"; 
-        if (!this->leftelbow.joint_roll)
-            gzerr << "Unable to find joint_pose3dencodersleftelbow_roll["
-                << _sdf->GetElement("joint_pose3dencodersleftelbow_roll")->GetValueString() << "]\n";
-                
-        this->leftelbow.link_pan = _model->GetLink("leftelbow_yaw");
-        this->leftelbow.link_roll = _model->GetLink("left_lower_arm");
-
-        //LOAD TORQUE        
+        // Load torque
         if (_sdf->HasElement("torque"))
             this->stiffness = _sdf->GetElement("torque")->GetValueDouble();
         else {
-            gzwarn << "No torque value set for the DiffDrive plugin.\n";
+            gzwarn << "No torque value set for the left elbow plugin.\n";
             this->stiffness = 5.0;
         }
+        
+        pthread_t thr_ice;
+        pthread_create(&thr_ice, NULL, &thread_LeftElbowICE, (void*) this);
 
-        //LOAD POSE3DMOTORS
+        // Load OnUpdate method
         this->updateConnection = event::Events::ConnectWorldUpdateBegin(
                                     boost::bind(&PoseLeftElbow::OnUpdate, this));
     }
 
-    void PoseLeftElbow::Init () {}
+    void PoseLeftElbow::Init () {
+        this->leftelbow.encoders.pan = 0.0;
+        this->leftelbow.encoders.roll = 0.0;
+        
+        this->leftelbow.motorsdata.pan = 0.0;
+        this->leftelbow.motorsdata.roll = 0.0;
+    }
 
     void PoseLeftElbow::OnUpdate () {
         long totalb, totala, diff;
@@ -83,58 +89,33 @@ namespace gazebo {
         gettimeofday(&a, NULL);
         totala = a.tv_sec * 1000000 + a.tv_usec;
 
-        if (this->count == 0) {
-            this->count++;
-            pthread_t thr_ice;
-            pthread_create(&thr_ice, NULL, &thread_LeftElbowICE, (void*) this);
-        }
-
         //          ----------ENCODERS----------
-        //GET pose3dencoders data from the left elbow (PAN&TILT)
-//        this->leftelbow.encoder.pan = this->leftelbow.leftelbow_link_pan->GetRelativePose().rot.GetAsEuler().z;    
-//        this->leftelbow.encoder.roll = this->leftelbow.leftelbow_link_roll->GetRelativePose().rot.GetAsEuler().y;
+        //GET pose3dencoders data from the left elbow (PAN&ROLL)
+        pthread_mutex_lock(&this->mutex_leftelbowencoders);
         
-        this->leftelbow.encoders.pan = - this->leftelbow.joint_pan->GetAngle(0).Radian();
-        this->leftelbow.encoders.roll = - this->leftelbow.joint_roll->GetAngle(0).Radian();
+        this->leftelbow.encoders.pan = this->leftelbow.joint_yaw->GetAngle(0).Radian();
+        this->leftelbow.encoders.roll = this->leftelbow.joint_roll->GetAngle(0).Radian();
+        
+        pthread_mutex_unlock(&this->mutex_leftelbowencoders);
 
         //          ----------MOTORS----------
-        if (this->leftelbow.motorsdata.pan >= 0) {
-            if (this->leftelbow.encoders.pan < this->leftelbow.motorsdata.pan) {
-                this->leftelbow.joint_pan->SetVelocity(0, -0.1);
-                this->leftelbow.joint_pan->SetMaxForce(0, this->stiffness);
-                //std::cout << "AQUI" << std::endl;
-            } else {
-                this->leftelbow.joint_pan->SetVelocity(0, 0.1);
-                this->leftelbow.joint_pan->SetMaxForce(0, this->stiffness);
-            }
-        } else {
-            if (this->leftelbow.encoders.pan > this->leftelbow.motorsdata.pan) {
-                this->leftelbow.joint_pan->SetVelocity(0, 0.1);
-                this->leftelbow.joint_pan->SetMaxForce(0, this->stiffness);
-                //std::cout << "AQUI" << std::endl;
-            } else {
-                this->leftelbow.joint_pan->SetVelocity(0, -0.1);
-                this->leftelbow.joint_pan->SetMaxForce(0, this->stiffness);
-            }            
-        }
+        this->leftelbow.joint_yaw->SetMaxForce(0, this->stiffness);
+        this->leftelbow.joint_roll->SetMaxForce(0, this->stiffness);
         
-        if (this->leftelbow.motorsdata.roll >= 0) {
-            if (this->leftelbow.encoders.roll < this->leftelbow.motorsdata.roll) {
-                this->leftelbow.joint_roll->SetVelocity(0, -0.1);
-                this->leftelbow.joint_roll->SetMaxForce(0, this->stiffness);
-            } else {
-                this->leftelbow.joint_roll->SetVelocity(0, 0.1);
-                this->leftelbow.joint_roll->SetMaxForce(0, this->stiffness);
-            }
-        } else {
-            if (this->leftelbow.encoders.roll > this->leftelbow.motorsdata.roll) {
-                this->leftelbow.joint_roll->SetVelocity(0, 0.1);
-                this->leftelbow.joint_roll->SetMaxForce(0, this->stiffness);
-            } else {
-                this->leftelbow.joint_roll->SetVelocity(0, -0.1);
-                this->leftelbow.joint_roll->SetMaxForce(0, this->stiffness);
-            }
-        }
+        pthread_mutex_lock(&this->mutex_leftelbowmotors);
+        
+        float yawSpeed = - this->leftelbow.motorsdata.pan - this->leftelbow.encoders.pan;
+        if ((std::abs(yawSpeed) < 0.1) && (std::abs(yawSpeed) > 0.001))
+            yawSpeed = 0.1;
+        
+        float rollSpeed = - this->leftelbow.motorsdata.roll - this->leftelbow.encoders.roll;
+        if ((std::abs(rollSpeed) < 0.1) && (std::abs(rollSpeed) > 0.001))
+            rollSpeed = 0.1;
+        
+        this->leftelbow.joint_yaw->SetVelocity(0, yawSpeed);
+        this->leftelbow.joint_roll->SetVelocity(0, rollSpeed);
+
+        pthread_mutex_unlock(&this->mutex_leftelbowmotors);
 
         gettimeofday(&b, NULL);
         totalb = b.tv_sec * 1000000 + b.tv_usec;
@@ -145,18 +126,17 @@ namespace gazebo {
         if (diff < 10)
             diff = 10;
 
-        //usleep(diff*1000);
         sleep(diff / 1000);
     }
     
-    class Pose3DEncoders : virtual public jderobot::Pose3DEncoders {
+    class Pose3DEncodersLE : virtual public jderobot::Pose3DEncoders {
     public:
 
-        Pose3DEncoders ( gazebo::PoseLeftElbow* pose ) : pose3DEncodersData ( new jderobot::Pose3DEncodersData() ) {
+        Pose3DEncodersLE ( gazebo::PoseLeftElbow* pose ) : pose3DEncodersData ( new jderobot::Pose3DEncodersData() ) {
             this->pose = pose;
         }
 
-        virtual ~Pose3DEncoders () {}
+        virtual ~Pose3DEncodersLE () {}
 
         virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData ( const Ice::Current& ) {
             pthread_mutex_lock(&pose->mutex_leftelbowencoders);
@@ -184,14 +164,14 @@ namespace gazebo {
         jderobot::Pose3DEncodersDataPtr pose3DEncodersData;
     };
 
-    class Pose3DMotors : virtual public jderobot::Pose3DMotors {
+    class Pose3DMotorsLE : virtual public jderobot::Pose3DMotors {
     public:
 
-        Pose3DMotors (gazebo::PoseLeftElbow* pose) : pose3DMotorsData ( new jderobot::Pose3DMotorsData() ) {
+        Pose3DMotorsLE (gazebo::PoseLeftElbow* pose) : pose3DMotorsData ( new jderobot::Pose3DMotorsData() ) {
             this->pose = pose;
         }
 
-        virtual ~Pose3DMotors() {}
+        virtual ~Pose3DMotorsLE () {}
 
         virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData ( const Ice::Current& ) {
             pthread_mutex_lock(&pose->mutex_leftelbowmotors);
@@ -248,7 +228,6 @@ namespace gazebo {
     };
 
     void* thread_LeftElbowICE ( void* v ) {
-
         gazebo::PoseLeftElbow* leftelbow = (gazebo::PoseLeftElbow*)v;
         char* name = (char*) leftelbow->cfgfile_leftelbow.c_str();
         Ice::CommunicatorPtr ic;
@@ -261,17 +240,17 @@ namespace gazebo {
 
             prop = ic->getProperties();
             std::string EndpointsEncoders = prop->getProperty("PoseLeftElbowEncoders.Endpoints");
-            std::cout << "PoseNeckEncoders Endpoints > " << EndpointsEncoders << std::endl;
+            std::cout << "PoseLeftElbowEncoders Endpoints > " << EndpointsEncoders << std::endl;
             std::string EndpointsMotors = prop->getProperty("PoseLeftElbowMotors.Endpoints");
-            std::cout << "PoseNeckMotors Endpoints > " << EndpointsMotors << std::endl;
+            std::cout << "PoseLeftElbowMotors Endpoints > " << EndpointsMotors << std::endl;
 
             Ice::ObjectAdapterPtr AdapterEncoders =
                     ic->createObjectAdapterWithEndpoints("AdapterLeftElbowEncoders", EndpointsEncoders);
             Ice::ObjectAdapterPtr AdapterMotors =
                     ic->createObjectAdapterWithEndpoints("AdapterLeftElbowMotors", EndpointsMotors);
 
-            Ice::ObjectPtr encoders = new Pose3DEncoders(leftelbow);
-            Ice::ObjectPtr motors = new Pose3DMotors(leftelbow);
+            Ice::ObjectPtr encoders = new Pose3DEncodersLE(leftelbow);
+            Ice::ObjectPtr motors = new Pose3DMotorsLE(leftelbow);
 
             AdapterEncoders->add(encoders, ic->stringToIdentity("LeftElbowEncoders"));
             AdapterMotors->add(motors, ic->stringToIdentity("LeftElbowMotors"));

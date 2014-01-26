@@ -809,7 +809,7 @@
 		                <far>5</far>
                     </clip>
                 </camera>
-                <plugin name='camera_nao' filename='libcamera_nao.so'/>
+                <plugin name='camera_dump' filename='libcamera_nao.so'/>
             </sensor>
             
 	 	    <visual name="visual">
@@ -861,7 +861,7 @@
 		                <far>5</far>
                     </clip>
                 </camera>
-                <plugin name='camera_nao' filename='libcamera_nao.so'/>
+                <plugin name='camera_dump' filename='libcamera_nao.so'/>
             </sensor>
             
 	 	    <visual name="visual">
@@ -899,17 +899,17 @@
             <pose>0 0 -0.041 0 0 0</pose>
             <child>left_shin</child>
             <parent>leftankle_pitch</parent>
-            <axis>                      <!--
+            <axis>                      
                 <limit>
                     <lower>-1.189516</lower>
                     <upper>0.922747</upper>
                 </limit>
-                <xyz>1 0 0</xyz>        -->
+                <xyz>1 0 0</xyz>        <!--
                 <limit>
                     <lower>0</lower>
                     <upper>0</upper>
                 </limit>
-                <xyz>0 0 0</xyz>        
+                <xyz>0 0 0</xyz>        -->
             </axis>
         </joint>
         
@@ -917,17 +917,17 @@
             <pose>0 0 0 0 0 0</pose>
             <child>leftankle_pitch</child>
             <parent>left_foot</parent>
-            <axis>                      <!--
+            <axis>                      
                 <limit>
                     <lower>-0.397880</lower>
                     <upper>0.769001</upper>
                 </limit>
-                <xyz>0 1 0</xyz>        --> 
+                <xyz>0 1 0</xyz>        <!-- 
                 <limit>
                     <lower>0</lower>
                     <upper>0</upper>
                 </limit>
-                <xyz>0 0 0</xyz>        
+                <xyz>0 0 0</xyz>        -->
             </axis>
         </joint>
         
@@ -935,17 +935,17 @@
             <pose>0 0 -0.046 0 0 0</pose>
             <child>left_thigh</child>
             <parent>left_shin</parent>
-            <axis>                      <!--
+            <axis>                      
                 <limit>
                     <lower>-0.092346</lower>
                     <upper>2.112528</upper>
                 </limit>
-                <xyz>0 0 1</xyz>        -->
+                <xyz>0 0 1</xyz>        <!--
                 <limit>
                     <lower>0</lower>
                     <upper>0</upper>
                 </limit>
-                <xyz>0 0 0</xyz>
+                <xyz>0 0 0</xyz>        -->
             </axis>
         </joint>
         
@@ -954,17 +954,17 @@
             <pose>0 0 -0.041 0 0 0</pose>
             <child>right_shin</child>
             <parent>rightankle_pitch</parent>
-            <axis>                      <!--
+            <axis>                      
                 <limit>
                     <lower>-1.186448</lower>
                     <upper>0.932056</upper>
                 </limit>
-                <xyz>1 0 0</xyz>        -->
+                <xyz>1 0 0</xyz>        <!--
                 <limit>
                     <lower>0</lower>
                     <upper>0</upper>
                 </limit>
-                <xyz>0 0 0</xyz>       
+                <xyz>0 0 0</xyz>        -->
             </axis>
         </joint>
         
@@ -972,17 +972,17 @@
             <pose>0 0 0 0 0 0</pose>
             <child>rightankle_pitch</child>
             <parent>right_foot</parent>
-            <axis>                      <!--
+            <axis>                     
                 <limit>
                     <lower>-0.785875</lower>
                     <upper>0.388676</upper>
                 </limit>
-                <xyz>0 1 0</xyz>        -->
+                <xyz>0 1 0</xyz>        <!--
                 <limit>
                     <lower>0</lower>
                     <upper>0</upper>
                 </limit>
-                <xyz>0 0 0</xyz>    
+                <xyz>0 0 0</xyz>        -->
             </axis>
         </joint>
 
@@ -990,17 +990,17 @@
             <pose>0 0 -0.046 0 0 0</pose>
             <child>right_thigh</child>
             <parent>right_shin</parent>
-            <axis>                      <!--
+            <axis>                      
                 <limit>
                     <lower>-0.103083</lower>
                     <upper>2.120198</upper>
                 </limit>
-                <xyz>0 0 1</xyz>        -->
+                <xyz>0 0 1</xyz>        <!--
                 <limit>
                     <lower>0</lower>
                     <upper>0</upper>
                 </limit>
-                <xyz>0 0 0</xyz>        
+                <xyz>0 0 0</xyz>        -->
             </axis>
         </joint>
         
@@ -1322,67 +1322,78 @@
             </axis>
         </joint>
         
-        <!-- PLUGINS -->    
+        <!-- PLUGINS -->       
         <plugin filename="libposeneck.so" name="poseneck">
-            <bottom_joint_pose3dencodersneck_pan>neck_pan</bottom_joint_pose3dencodersneck_pan>
-            <top_joint_pose3dencodersneck_tilt>neck_tilt</top_joint_pose3dencodersneck_tilt>
+            <joint_poseneck_pan>neck_pan</joint_poseneck_pan>
+            <joint_poseneck_tilt>neck_tilt</joint_poseneck_tilt>
             <torque>5</torque>
         </plugin>
-       <!--
-        <plugin filename="libpose3dencodersneckvelocity.so" name="pose3dencodersneckvelocity">
-            <bottom_joint_pose3dencodersneckvel_pan>neck_pan</bottom_joint_pose3dencodersneckvel_pan>
-            <top_joint_pose3dencodersneckvel_tilt>neck_tilt</top_joint_pose3dencodersneckvel_tilt>
+        <!--
+        <plugin filename="libposeneckspeed.so" name="poseneckspeed">
+            <joint_poseneckspeed_pan>neck_pan</joint_poseneckspeed_pan>
+            <joint_poseneckspeed_tilt>neck_tilt</joint_poseneckspeed_tilt>
             <torque>5</torque>
         </plugin>
-       -->
+        -->     
         <plugin filename="libposerightshoulder.so" name="poserightshoulder">
-            <joint_pose3dencodersrightshoulder_pitch>rshoulder_pitch</joint_pose3dencodersrightshoulder_pitch>
-            <joint_pose3dencodersrightshoulder_roll>rshoulder_roll</joint_pose3dencodersrightshoulder_roll>
+            <joint_poserightshoulder_pitch>rshoulder_pitch</joint_poserightshoulder_pitch>
+            <joint_poserightshoulder_roll>rshoulder_roll</joint_poserightshoulder_roll>
             <torque>5</torque>
         </plugin>
         
         <plugin filename="libposeleftshoulder.so" name="poseleftshoulder">
-            <joint_pose3dencodersleftshoulder_pitch>lshoulder_pitch</joint_pose3dencodersleftshoulder_pitch>
-            <joint_pose3dencodersleftshoulder_roll>lshoulder_roll</joint_pose3dencodersleftshoulder_roll>
+            <joint_poseleftshoulder_tilt>lshoulder_pitch</joint_poseleftshoulder_tilt>
+            <joint_poseleftshoulder_roll>lshoulder_roll</joint_poseleftshoulder_roll>
             <torque>5</torque>
         </plugin>
         
-        <plugin filename="libposerightelbow.so" name="poserightelbow">
-            <joint_pose3dencodersrightelbow_yaw>relbow_yaw</joint_pose3dencodersrightelbow_yaw>
-            <joint_pose3dencodersrightelbow_roll>relbow_roll</joint_pose3dencodersrightelbow_roll>
+        <plugin filename="libposerightelbow.so" name="poseencodersrightelbow">
+            <joint_poserightelbow_yaw>relbow_yaw</joint_poserightelbow_yaw>
+            <joint_poserightelbow_roll>relbow_roll</joint_poserightelbow_roll>
             <torque>5</torque>
         </plugin>  
         
         <plugin filename="libposeleftelbow.so" name="poseleftelbow">
-            <joint_pose3dencodersleftelbow_yaw>lelbow_yaw</joint_pose3dencodersleftelbow_yaw>
-            <joint_pose3dencodersleftelbow_roll>lelbow_roll</joint_pose3dencodersleftelbow_roll>
+            <joint_poseleftelbow_pan>lelbow_yaw</joint_poseleftelbow_pan>
+            <joint_poseleftelbow_roll>lelbow_roll</joint_poseleftelbow_roll>
             <torque>5</torque>
         </plugin>
         <!--
-        <plugin filename="libpose3dencodership.so" name="pose3dencodership">
-            <joint_pose3dencodersrhip_yawpitch>rhip_yawpitch</joint_pose3dencodersrhip_yawpitch>
-            <joint_pose3dencodersrhip_roll>rhip_roll</joint_pose3dencodersrhip_roll>
-            <joint_pose3dencodersrhip_pitch>rhip_pitch</joint_pose3dencodersrhip_pitch>
+        <plugin filename="libposerighthip.so" name="poserighthip">
+            <joint_poserighthip_yaw>rhip_yawpitch</joint_poserighthip_yaw>
+            <joint_poserighthip_roll>rhip_roll</joint_poserighthip_roll>
+            <joint_poserighthip_pitch>rhip_pitch</joint_poserighthip_pitch>
             <torque>5</torque>
         </plugin> 
-        --> <!--
-        <plugin filename="libpose3dencodersankle.so" name="pose3dencodersankle">
-            <joint_pose3dencodersrightankle_pitch>rankle_pitch</joint_pose3dencodersrightankle_pitch>
-            <joint_pose3dencodersrightankle_roll>rankle_roll</joint_pose3dencodersrightankle_roll>
+        
+        <plugin filename="libposelefthip.so" name="poselefthip">
+            <joint_poselefthip_yaw>lhip_yawpitch</joint_poselefthip_yaw>
+            <joint_poselefthip_roll>lhip_roll</joint_poselefthip_roll>
+            <joint_poselefthip_pitch>lhip_pitch</joint_poselefthip_pitch>
+            <torque>5</torque>
+        </plugin> 
+        -->
+        <plugin filename="libposerightankle.so" name="poserightankle">
+            <joint_poserightankle_pitch>rankle_pitch</joint_poserightankle_pitch>
+            <joint_poserightankle_roll>rankle_roll</joint_poserightankle_roll>
             <torque>5</torque>
         </plugin>
         
-        <plugin filename="libpose3dencodersleftankle.so" name="pose3dencodersleftankle">
-            <joint_pose3dencodersleftankle_pitch>lankle_pitch</joint_pose3dencodersleftankle_pitch>
-            <joint_pose3dencodersleftankle_roll>lankle_roll</joint_pose3dencodersleftankle_roll>
-            <torque>5</torque>
-        </plugin>       -->
-        
-<!--        
-        <plugin filename="libpose3dencodersknee.so" name="pose3dencodersknee">
-            <joint_pose3dencodersrightknee_pitch>right_knee</joint_pose3dencodersrightknee_pitch>
+        <plugin filename="libposeleftankle.so" name="poseleftankle">
+            <joint_poseleftankle_pitch>lankle_pitch</joint_poseleftankle_pitch>
+            <joint_poseleftankle_roll>lankle_roll</joint_poseleftankle_roll>
             <torque>5</torque>
         </plugin>
--->
+        
+        <plugin filename="libposerightknee.so" name="poserightknee">
+            <joint_poserightknee_pitch>right_knee</joint_poserightknee_pitch>
+            <torque>5</torque>
+        </plugin>
+        
+        <plugin filename="libposeleftknee.so" name="poseleftknee">
+            <joint_poseleftknee_pitch>left_knee</joint_poseleftknee_pitch>
+            <torque>5</torque>
+        </plugin>
+
     </model>
 </sdf>

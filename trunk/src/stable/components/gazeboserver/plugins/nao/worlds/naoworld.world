@@ -8,7 +8,7 @@
 
     <!-- My robots -->
     <include>
-      <uri>model://nao_robot</uri>
+      <uri>model://nao</uri>
       <pose>0.08 0 0 0 0 3.14</pose>
     </include>
 

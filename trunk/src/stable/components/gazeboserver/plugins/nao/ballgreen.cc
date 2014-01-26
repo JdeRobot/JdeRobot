@@ -14,7 +14,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- *  Authors : Borja Menéndez <borjamonserrano@gmail.com>
+ *  Author:     Borja Menéndez Moreno <b.menendez.moreno@gmail.com>
+ *  Co-author:  José María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
@@ -65,11 +66,32 @@ namespace gazebo {
         }
         //          ----------ENCODERS----------
         //GET pose3dencoders data from the ball (PAN&TILT)
+        pthread_mutex_lock(&this->mutex_ballgreenencoders);
+        
         this->ballgreen.encoders.pan = - this->ballgreen.joint_pan->GetAngle(0).Radian();
         this->ballgreen.encoders.tilt = - this->ballgreen.joint_tilt->GetAngle(0).Radian();
+        
+        pthread_mutex_unlock(&this->mutex_ballgreenencoders);
 
         //          ----------MOTORS----------
-        if (this->ballgreen.motorsdata.pan > 0) {
+        this->ballgreen.joint_pan->SetMaxForce(0, this->stiffness);
+        this->ballgreen.joint_tilt->SetMaxForce(0, this->stiffness);
+        
+        pthread_mutex_lock(&this->mutex_ballgreenmotors);
+        
+        float panSpeed = this->ballgreen.encoders.pan - this->ballgreen.motorsdata.pan;
+        if ((std::abs(panSpeed) < 0.1) && (std::abs(panSpeed) > 0.001))
+            panSpeed = 0.1;
+        
+        float tiltSpeed = this->ballgreen.encoders.tilt - this->ballgreen.motorsdata.tilt;
+        if ((std::abs(tiltSpeed) < 0.1) && (std::abs(tiltSpeed) > 0.001))
+            tiltSpeed = 0.1;
+        
+        this->ballgreen.joint_pan->SetVelocity(0, panSpeed);
+        this->ballgreen.joint_tilt->SetVelocity(0, tiltSpeed);
+
+        pthread_mutex_unlock(&this->mutex_ballgreenmotors);
+/*        if (this->ballgreen.motorsdata.pan > 0) {
             if (this->ballgreen.encoders.pan < this->ballgreen.motorsdata.pan) {
                 this->ballgreen.joint_pan->SetVelocity(0, -0.3);
                 this->ballgreen.joint_pan->SetMaxForce(0, this->stiffness);
@@ -105,7 +127,7 @@ namespace gazebo {
                 this->ballgreen.joint_tilt->SetMaxForce(0, this->stiffness);
             }
         }
-
+*/
         gettimeofday(&b, NULL);
         totalb = b.tv_sec * 1000000 + b.tv_usec;
 

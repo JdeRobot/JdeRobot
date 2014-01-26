@@ -14,7 +14,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- *  Authors : Borja Menéndez <borjamonserrano@gmail.com>
+ *  Author:     Borja Menéndez Moreno <b.menendez.moreno@gmail.com>
+ *  Co-author:  José María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
@@ -53,8 +54,7 @@ namespace gazebo {
         pthread_mutex_t mutex_rightelbowmotors;
 
         struct rightelbow_t {
-            physics::JointPtr joint_pan, joint_roll;
-            physics::LinkPtr link_pan, link_roll;
+            physics::JointPtr joint_yaw, joint_roll;
             encoders_t encoders;
             motorsdata_t motorsdata;
             motorsparams_t motorsparams;
@@ -67,8 +67,10 @@ namespace gazebo {
         
         event::ConnectionPtr updateConnection;
         double stiffness;
-        int count;
         int cycle;
+        
+        float maxYaw, maxRoll, minYaw, minRoll;
+        std::string modelYaw, modelRoll;
     };
 }
 

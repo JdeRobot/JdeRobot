@@ -157,14 +157,14 @@ int Control::connect () {
         std::cout << "Head motors connected" << std::endl;
         
         // Contact to head motors (speed commands)
-        Ice::ObjectPrx headspeed = ic->propertyToProxy("naooperator.HeadSpeed.Proxy");
+/*        Ice::ObjectPrx headspeed = ic->propertyToProxy("naooperator.HeadSpeed.Proxy");
         if (headspeed == 0)
             throw "Could not create proxy with head speed";
         this->mapMotors[HEADSPEED] = jderobot::Pose3DMotorsPrx::checkedCast(headspeed);
         if (this->mapMotors[HEADSPEED] == 0)
             throw "Invalid proxy naooperator.HeadSpeed.Proxy";
         std::cout << "Head speed connected" << std::endl;
-            
+  */          
         // Contact to shoulder motors
         Ice::ObjectPrx leftshouldermotors = ic->propertyToProxy("naooperator.LeftShoulderMotors.Proxy");
         if (leftshouldermotors == 0)
@@ -198,7 +198,7 @@ int Control::connect () {
         if (this->mapMotors[RIGHTELBOWMOTORS] == 0)
             throw "Invalid proxy naooperator.RightElbowMotors.Proxy";
         std::cout << "Right elbow motors connected" << std::endl;
-            
+/*            
         // Contact to hip motors
         Ice::ObjectPrx lefthipmotors = ic->propertyToProxy("naooperator.LeftHipMotors.Proxy");
         if (lefthipmotors == 0)
@@ -215,7 +215,7 @@ int Control::connect () {
         if (this->mapMotors[RIGHTHIPMOTORS] == 0)
             throw "Invalid proxy naooperator.RightHipMotors.Proxy";
         std::cout << "Right hip motors connected" << std::endl;
-            
+*/            
         // Contact to knee motors
         Ice::ObjectPrx leftkneemotors = ic->propertyToProxy("naooperator.LeftKneeMotors.Proxy");
         if (leftkneemotors == 0)
@@ -260,7 +260,7 @@ int Control::connect () {
         if (this->cameraprx == 0)
             throw "Invalid proxy naooperator.Camera.Proxy";
         std::cout << "Camera connected" << std::endl;
-*/
+
         // Contact to motors (for walking)
         Ice::ObjectPrx motors = ic->propertyToProxy("naooperator.Motors.Proxy");
         if (motors == 0)
@@ -278,7 +278,7 @@ int Control::connect () {
         if (this->motions == 0)
             throw "Invalid proxy naooperator.Motions.Proxy";
         std::cout << "Motions connected" << std::endl;
-        
+*/
         std::cout << "All ICE interfaces connected!" << std::endl;
 
     } catch (const Ice::Exception& ex) {

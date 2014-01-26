@@ -14,13 +14,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- *  Authors : Borja Menéndez <borjamonserrano@gmail.com>
+ *  Author:     Borja Menéndez Moreno <b.menendez.moreno@gmail.com>
+ *  Co-author:  José María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
 #include "poseneck.h"
-
-#define RADTODEG 57.29582790
 
 namespace gazebo {
     GZ_REGISTER_MODEL_PLUGIN(PoseNeck)
@@ -28,53 +27,60 @@ namespace gazebo {
     PoseNeck::PoseNeck () {
         pthread_mutex_init(&this->mutex_neckencoders, NULL);
         pthread_mutex_init(&this->mutex_neckmotors, NULL);
-        this->count = 0;
         this->cycle = 50;
         this->cfgfile_neck = std::string("--Ice.Config=poseneck.cfg");
-        
-        this->neck.motorsparams.maxPan = 1.57;
-        this->neck.motorsparams.minPan = -1.57;          
-        this->neck.motorsparams.maxTilt = 0.5;
-        this->neck.motorsparams.minTilt = -0.5;
+        this->modelPan = std::string("joint_poseneck_pan");
+        this->modelTilt = std::string("joint_poseneck_tilt");
+        this->speed = 0.1;
 
         std::cout << "Constructor PoseNeck" << std::endl;
     }
 
     void PoseNeck::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf ) {
-        // LOAD CAMERA LEFT
-        if (!_sdf->HasElement("bottom_joint_pose3dencodersneck_pan"))
-            gzerr << "pose3dencodersneck plugin missing <bottom_joint_pose3dencodersneck_pan> element\n";
-        if (!_sdf->HasElement("top_joint_pose3dencodersneck_tilt"))
-            gzerr << "pose3dencodersneck plugin missing <top_joint_pose3dencodersneck_tilt> element\n";
+        if (!_sdf->HasElement(this->modelPan))
+            gzerr << "PoseNeck plugin missing <" << this->modelPan << "> element first\n";
+        if (!_sdf->HasElement(this->modelTilt))
+            gzerr << "PoseNeck plugin missing <" << this->modelTilt << "> element first\n";
+        
+        std::string elemPan = std::string(_sdf->GetElement(this->modelPan)->GetValueString());
+        std::string elemTilt = std::string(_sdf->GetElement(this->modelTilt)->GetValueString());
+            
+        if (!_sdf->HasElement(elemPan))
+            gzerr << "PoseNeck plugin missing <" << elemPan << "> element\n";
+        if (!_sdf->HasElement(elemTilt))
+            gzerr << "PoseNeck plugin missing <" << elemTilt << "> element\n";
+            
+        this->neck.joint_pan = _model->GetJoint(elemPan);
+        this->neck.joint_tilt = _model->GetJoint(elemTilt);
 
-        this->neck.joint_pan = _model->GetJoint("neck_pan");
-        this->neck.joint_tilt = _model->GetJoint("neck_tilt");
+        this->neck.motorsparams.maxPan = (float) this->neck.joint_pan->GetUpperLimit(0).Radian();
+        this->neck.motorsparams.minPan = (float) this->neck.joint_pan->GetLowerLimit(0).Radian();
+        this->neck.motorsparams.maxTilt = (float) this->neck.joint_tilt->GetUpperLimit(0).Radian();
+        this->neck.motorsparams.minTilt = (float) this->neck.joint_tilt->GetLowerLimit(0).Radian();
 
-        if (!this->neck.joint_pan)
-            gzerr << "Unable to find bottom_joint_pose3dencodersneck_pan["
-                << _sdf->GetElement("bottom_joint_pose3dencodersneck_pan")->GetValueString() << "]\n"; 
-        if (!this->neck.joint_tilt)
-            gzerr << "Unable to find top_joint_pose3dencodersneck_tilt["
-                << _sdf->GetElement("top_joint_pose3dencodersneck_tilt")->GetValueString() << "]\n";
-                
-        this->neck.link_pan = _model->GetLink("head_pan");
-        this->neck.link_tilt = _model->GetLink("head_tilt");
-
-        //LOAD TORQUE        
+        // Load torque
         if (_sdf->HasElement("torque"))
             this->stiffness = _sdf->GetElement("torque")->GetValueDouble();
         else {
-            gzwarn << "No torque value set for the DiffDrive plugin.\n";
+            gzwarn << "No torque value set for the neck plugin.\n";
             this->stiffness = 5.0;
         }
+        
+        pthread_t thr_ice;
+        pthread_create(&thr_ice, NULL, &thread_NeckICE, (void*) this);
 
-        //LOAD POSE3DMOTORS
+        // Load OnUpdate method
         this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-            boost::bind(&PoseNeck::OnUpdate, this));
-
+                                    boost::bind(&PoseNeck::OnUpdate, this));
     }
 
-    void PoseNeck::Init () {}
+    void PoseNeck::Init () {
+        this->neck.encoders.pan = 0.0;
+        this->neck.encoders.tilt = 0.0;
+        
+        this->neck.motorsdata.pan = 0.0;
+        this->neck.motorsdata.tilt = 0.0;
+    }
 
     void PoseNeck::OnUpdate () {
         long totalb, totala, diff;
@@ -83,55 +89,33 @@ namespace gazebo {
         gettimeofday(&a, NULL);
         totala = a.tv_sec * 1000000 + a.tv_usec;
 
-        if (this->count == 0) {
-            this->count++;
-            pthread_t thr_ice;
-            pthread_create(&thr_ice, NULL, &thread_NeckICE, (void*) this);
-        }
-
         //          ----------ENCODERS----------
-        //GET pose3dencoders data from the neck (PAN&TILT)
-        this->neck.encoders.pan = this->neck.link_pan->GetRelativePose().rot.GetAsEuler().z;    
-        this->neck.encoders.tilt = this->neck.link_tilt->GetRelativePose().rot.GetAsEuler().x;
+        // GET pose data from the neck (PAN&TILT)
+        pthread_mutex_lock(&this->mutex_neckencoders);
+        
+        this->neck.encoders.pan = this->neck.joint_pan->GetAngle(0).Radian();
+        this->neck.encoders.tilt = this->neck.joint_tilt->GetAngle(0).Radian();
+        
+        pthread_mutex_unlock(&this->mutex_neckencoders);
         
         //          ----------MOTORS----------
-        if (this->neck.motorsdata.pan >= 0) {
-            if (this->neck.encoders.pan < this->neck.motorsdata.pan) {
-                this->neck.joint_pan->SetVelocity(0, -0.1);
-                this->neck.joint_pan->SetMaxForce(0, this->stiffness);
-                //std::cout << "AQUI" << std::endl;
-            } else {
-                this->neck.joint_pan->SetVelocity(0, 0.1);
-                this->neck.joint_pan->SetMaxForce(0, this->stiffness);
-            }
-        } else {
-            if (this->neck.encoders.pan > this->neck.motorsdata.pan) {
-                this->neck.joint_pan->SetVelocity(0, 0.1);
-                this->neck.joint_pan->SetMaxForce(0, this->stiffness);
-                //std::cout << "AQUI" << std::endl;
-            } else {
-                this->neck.joint_pan->SetVelocity(0, -0.1);
-                this->neck.joint_pan->SetMaxForce(0, this->stiffness);
-            }            
-        }
+        this->neck.joint_pan->SetMaxForce(0, this->stiffness);
+        this->neck.joint_tilt->SetMaxForce(0, this->stiffness);
         
-        if (this->neck.motorsdata.tilt >= 0) {
-            if (this->neck.encoders.tilt < this->neck.motorsdata.tilt) {
-                this->neck.joint_tilt->SetVelocity(0, -0.1);
-                this->neck.joint_tilt->SetMaxForce(0, this->stiffness);
-            } else {
-                this->neck.joint_tilt->SetVelocity(0, 0.1);
-                this->neck.joint_tilt->SetMaxForce(0, this->stiffness);
-            }
-        } else {
-            if (this->neck.encoders.tilt > this->neck.motorsdata.tilt) {
-                this->neck.joint_tilt->SetVelocity(0, 0.1);
-                this->neck.joint_tilt->SetMaxForce(0, this->stiffness);
-            } else {
-                this->neck.joint_tilt->SetVelocity(0, -0.1);
-                this->neck.joint_tilt->SetMaxForce(0, this->stiffness);
-            }
-        }
+        pthread_mutex_lock(&this->mutex_neckmotors);
+        
+        float panSpeed = - this->neck.motorsdata.pan - this->neck.encoders.pan;
+        if ((std::abs(panSpeed) < 0.1) && (std::abs(panSpeed) > 0.001))
+            panSpeed = 0.1;
+        
+        float tiltSpeed = - this->neck.motorsdata.tilt - this->neck.encoders.tilt;
+        if ((std::abs(tiltSpeed) < 0.1) && (std::abs(tiltSpeed) > 0.001))
+            tiltSpeed = 0.1;
+        
+        this->neck.joint_pan->SetVelocity(0, panSpeed);
+        this->neck.joint_tilt->SetVelocity(0, tiltSpeed);
+
+        pthread_mutex_unlock(&this->mutex_neckmotors);
 
         gettimeofday(&b, NULL);
         totalb = b.tv_sec * 1000000 + b.tv_usec;
@@ -142,18 +126,17 @@ namespace gazebo {
         if (diff < 10)
             diff = 10;
 
-        //usleep(diff*1000);
         sleep(diff / 1000);
     }
     
-    class Pose3DEncoders : virtual public jderobot::Pose3DEncoders {
+    class Pose3DEncodersN : virtual public jderobot::Pose3DEncoders {
     public:
 
-        Pose3DEncoders ( gazebo::PoseNeck* pose ) : pose3DEncodersData ( new jderobot::Pose3DEncodersData() ) {
+        Pose3DEncodersN ( gazebo::PoseNeck* pose ) : pose3DEncodersData ( new jderobot::Pose3DEncodersData() ) {
             this->pose = pose;
         }
 
-        virtual ~Pose3DEncoders () {}
+        virtual ~Pose3DEncodersN () {}
 
         virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData ( const Ice::Current& ) {
             pthread_mutex_lock(&pose->mutex_neckencoders);
@@ -181,14 +164,14 @@ namespace gazebo {
         jderobot::Pose3DEncodersDataPtr pose3DEncodersData;
     };
 
-    class Pose3DMotors : virtual public jderobot::Pose3DMotors {
+    class Pose3DMotorsN : virtual public jderobot::Pose3DMotors {
     public:
 
-        Pose3DMotors (gazebo::PoseNeck* pose) : pose3DMotorsData ( new jderobot::Pose3DMotorsData() ) {
+        Pose3DMotorsN (gazebo::PoseNeck* pose) : pose3DMotorsData ( new jderobot::Pose3DMotorsData() ) {
             this->pose = pose;
         }
 
-        virtual ~Pose3DMotors() {}
+        virtual ~Pose3DMotorsN () {}
 
         virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData ( const Ice::Current& ) {
             pthread_mutex_lock(&pose->mutex_neckmotors);
@@ -205,7 +188,6 @@ namespace gazebo {
             pthread_mutex_unlock(&pose->mutex_neckmotors);
 
             return pose3DMotorsData;
-
         }
 
         virtual jderobot::Pose3DMotorsParamsPtr getPose3DMotorsParams ( const Ice::Current& ) {
@@ -236,7 +218,6 @@ namespace gazebo {
             pose->neck.motorsdata.tiltSpeed = data->tiltSpeed;
             
             pthread_mutex_unlock(&pose->mutex_neckmotors);
-
         }
 
         gazebo::PoseNeck* pose;
@@ -247,7 +228,6 @@ namespace gazebo {
     };
 
     void* thread_NeckICE ( void* v ) {
-
         gazebo::PoseNeck* neck = (gazebo::PoseNeck*)v;
         char* name = (char*) neck->cfgfile_neck.c_str();
         Ice::CommunicatorPtr ic;
@@ -269,8 +249,8 @@ namespace gazebo {
             Ice::ObjectAdapterPtr AdapterMotors =
                     ic->createObjectAdapterWithEndpoints("AdapterNeckMotors", EndpointsMotors);
 
-            Ice::ObjectPtr encoders = new Pose3DEncoders(neck);
-            Ice::ObjectPtr motors = new Pose3DMotors(neck);
+            Ice::ObjectPtr encoders = new Pose3DEncodersN(neck);
+            Ice::ObjectPtr motors = new Pose3DMotorsN(neck);
 
             AdapterEncoders->add(encoders, ic->stringToIdentity("NeckEncoders"));
             AdapterMotors->add(motors, ic->stringToIdentity("NeckMotors"));

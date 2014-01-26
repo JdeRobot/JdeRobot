@@ -14,13 +14,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- *  Authors : Borja Menéndez <borjamonserrano@gmail.com>
+ *  Author:     Borja Menéndez Moreno <b.menendez.moreno@gmail.com>
+ *  Co-author:  José María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
 #include "poserightankle.h"
-
-#define RADTODEG 57.29582790
 
 namespace gazebo {
     GZ_REGISTER_MODEL_PLUGIN(PoseRightAnkle)
@@ -28,52 +27,59 @@ namespace gazebo {
     PoseRightAnkle::PoseRightAnkle () {
         pthread_mutex_init(&this->mutex_rightankleencoders, NULL);
         pthread_mutex_init(&this->mutex_rightanklemotors, NULL);
-        this->count = 0;
         this->cycle = 50;
-        this->cfgfile_rightshoulder = std::string("--Ice.Config=poserightankle.cfg");
-        
-        this->rightankle.motorsparams.maxPan = 1.57;
-        this->rightankle.motorsparams.minPan = -1.57;          
-        this->rightankle.motorsparams.maxTilt = 0.5;
-        this->rightankle.motorsparams.minTilt = -0.5;
+        this->cfgfile_rightankle = std::string("--Ice.Config=poserightankle.cfg");
+        this->modelPitch = std::string("joint_poserightankle_pitch");
+        this->modelRoll = std::string("joint_poserightankle_roll");
 
         std::cout << "Constructor PoseRightAnkle" << std::endl;
     }
 
     void PoseRightAnkle::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf ) {
-        // LOAD CAMERA LEFT
-        if (!_sdf->HasElement("joint_pose3dencodersrightankle_pitch"))
-            gzerr << "pose3dencodersrightankle plugin missing <joint_pose3dencodersrightankle_pitch> element\n";
-        if (!_sdf->HasElement("joint_pose3dencodersrightankle_roll"))
-            gzerr << "pose3dencodersrightankle plugin missing <joint_pose3dencodersrightankle_roll> element\n";
+        if (!_sdf->HasElement(this->modelPitch))
+            gzerr << "PoseRightAnkle plugin missing <" << this->modelPitch << "> element\n";
+        if (!_sdf->HasElement(this->modelRoll))
+            gzerr << "PoseRightAnkle plugin missing <" << this->modelRoll << "> element\n";
+            
+        std::string elemPitch = std::string(_sdf->GetElement(this->modelPitch)->GetValueString());
+        std::string elemRoll = std::string(_sdf->GetElement(this->modelRoll)->GetValueString());
+        
+        if (!_sdf->HasElement(elemPitch))
+            gzerr << "PoseRightAnkle plugin missing <" << elemPitch << "> element\n";
+        if (!_sdf->HasElement(elemRoll))
+            gzerr << "PoseRightAnkle plugin missing <" << elemRoll << "> element\n";
+            
+        this->rightankle.joint_pitch = _model->GetJoint(elemPitch);
+        this->rightankle.joint_roll = _model->GetJoint(elemRoll);
 
-        this->rightankle.joint_roll = _model->GetJoint("rankle_roll");
-        this->rightankle.joint_tilt = _model->GetJoint("rankle_pitch");
+        this->maxPitch = (float) this->rightankle.joint_pitch->GetUpperLimit(0).Radian();
+        this->minPitch = (float) this->rightankle.joint_pitch->GetLowerLimit(0).Radian();
+        this->maxRoll = (float) this->rightankle.joint_roll->GetUpperLimit(0).Radian();
+        this->minRoll = (float) this->rightankle.joint_roll->GetLowerLimit(0).Radian();
 
-        if (!this->rightankle.joint_pose3dencoders_roll)
-            gzerr << "Unable to find joint_pose3dencodersrightankle_roll["
-                << _sdf->GetElement("joint_pose3dencodersrightankle_roll")->GetValueString() << "]\n";
-        if (!this->rightankle.joint_pose3dencoders_tilt)
-            gzerr << "Unable to find joint_pose3dencodersrightankle_pitch["
-                << _sdf->GetElement("joint_pose3dencodersrightankle_pitch")->GetValueString() << "]\n"; 
-                
-        this->rightankle.link_roll = _model->GetLink("right_foot");
-        this->rightankle.link_tilt = _model->GetLink("rightankle_pitch");
-
-        //LOAD TORQUE        
+        // Load torque
         if (_sdf->HasElement("torque"))
             this->stiffness = _sdf->GetElement("torque")->GetValueDouble();
         else {
-            gzwarn << "No torque value set for the DiffDrive plugin.\n";
+            gzwarn << "No torque value set for the left ankle plugin.\n";
             this->stiffness = 5.0;
         }
+        
+        pthread_t thr_ice;
+        pthread_create(&thr_ice, NULL, &thread_RightAnkleICE, (void*) this);
 
-        //LOAD POSE3DMOTORS
+        // Load OnUpdate method
         this->updateConnection = event::Events::ConnectWorldUpdateBegin(
                                     boost::bind(&PoseRightAnkle::OnUpdate, this));
     }
 
-    void PoseRightAnkle::Init () {}
+    void PoseRightAnkle::Init () {
+        this->rightankle.encoders.tilt = 0.0;
+        this->rightankle.encoders.roll = 0.0;
+        
+        this->rightankle.motorsdata.tilt = 0.0;
+        this->rightankle.motorsdata.roll = 0.0;
+    }
 
     void PoseRightAnkle::OnUpdate () {
         long totalb, totala, diff;
@@ -82,58 +88,33 @@ namespace gazebo {
         gettimeofday(&a, NULL);
         totala = a.tv_sec * 1000000 + a.tv_usec;
 
-        if (this->count == 0) {
-            this->count++;
-            pthread_t thr_ice;
-            pthread_create(&thr_ice, NULL, &thread_RightAnkleICE, (void*) this);
-            
-            this->rightankle.encoders.roll = 0;    
-            this->rightankle.encoders.tilt = 0;
-        } else {
-            //          ----------ENCODERS----------
-            //GET pose3dencoders data from the right ankle (PAN&TILT)
-            this->rightankle.encoders.roll = this->rightankle.link_roll->GetRelativePose().rot.GetAsEuler().y;    
-            this->rightankle.encoders.tilt = this->rightankle.link_tilt->GetRelativePose().rot.GetAsEuler().x;
-        }
+        //          ----------ENCODERS----------
+        // GET pose3dencoders data from the left ankle (TILT&ROLL)
+        pthread_mutex_lock(&this->mutex_rightankleencoders);
+        
+        this->rightankle.encoders.tilt = this->rightankle.joint_pitch->GetAngle(0).Radian();
+        this->rightankle.encoders.roll = this->rightankle.joint_roll->GetAngle(0).Radian();   
+        
+        pthread_mutex_unlock(&this->mutex_rightankleencoders);
 
         //          ----------MOTORS----------
-        if (this->rightankle.motorsdata.roll >= 0) {
-            if (this->rightankle.encoders.roll < this->rightankle.motorsdata.roll) {
-                this->rightankle.joint_roll->SetVelocity(0, -0.1);
-                this->rightankle.joint_roll->SetMaxForce(0, this->stiffness);
-                //std::cout << "AQUI" << std::endl;
-            } else {
-                this->rightankle.joint_roll->SetVelocity(0, 0.1);
-                this->rightankle.joint_roll->SetMaxForce(0, this->stiffness);
-            }
-        } else {
-            if (this->rightankle.encoders.roll > this->rightankle.motorsdata.roll) {
-                this->rightankle.joint_roll->SetVelocity(0, 0.1);
-                this->rightankle.joint_roll->SetMaxForce(0, this->stiffness);
-                //std::cout << "AQUI" << std::endl;
-            } else {
-                this->rightankle.joint_roll->SetVelocity(0, -0.1);
-                this->rightankle.joint_roll->SetMaxForce(0, this->stiffness);
-            }            
-        }
+        this->rightankle.joint_pitch->SetMaxForce(0, this->stiffness);
+        this->rightankle.joint_roll->SetMaxForce(0, this->stiffness);
         
-        if (this->rightankle.motorsdata.tilt >= 0) {
-            if (this->rightankle.encoders.tilt < this->rightankle.motorsdata.tilt) {
-                this->rightankle.joint_tilt->SetVelocity(0, -0.1);
-                this->rightankle.joint_tilt->SetMaxForce(0, this->stiffness);
-            } else {
-                this->rightankle.joint_tilt->SetVelocity(0, 0.1);
-                this->rightankle.joint_tilt->SetMaxForce(0, this->stiffness);
-            }
-        } else {
-            if (this->rightankle.encoders.tilt > this->rightankle.motorsdata.tilt) {
-                this->rightankle.joint_tilt->SetVelocity(0, 0.1);
-                this->rightankle.joint_tilt->SetMaxForce(0, this->stiffness);
-            } else {
-                this->rightankle.joint_tilt->SetVelocity(0, -0.1);
-                this->rightankle.joint_tilt->SetMaxForce(0, this->stiffness);
-            }
-        }
+        pthread_mutex_lock(&this->mutex_rightanklemotors);
+        
+        float pitchSpeed = - this->rightankle.motorsdata.tilt - this->rightankle.encoders.tilt;
+        if ((std::abs(pitchSpeed) < 0.1) && (std::abs(pitchSpeed) > 0.001))
+            pitchSpeed = 0.1;
+        
+        float rollSpeed = - this->rightankle.motorsdata.roll - this->rightankle.encoders.roll;
+        if ((std::abs(rollSpeed) < 0.1) && (std::abs(rollSpeed) > 0.001))
+            rollSpeed = 0.1;
+        
+        this->rightankle.joint_pitch->SetVelocity(0, pitchSpeed);
+        this->rightankle.joint_roll->SetVelocity(0, rollSpeed);
+
+        pthread_mutex_unlock(&this->mutex_rightanklemotors);
 
         gettimeofday(&b, NULL);
         totalb = b.tv_sec * 1000000 + b.tv_usec;
@@ -148,14 +129,14 @@ namespace gazebo {
         sleep(diff / 1000);
     }
     
-    class Pose3DEncoders : virtual public jderobot::Pose3DEncoders {
+    class Pose3DEncodersRA : virtual public jderobot::Pose3DEncoders {
     public:
 
-        Pose3DEncoders ( gazebo::PoseRightAnkle* pose ) : pose3DEncodersData ( new jderobot::Pose3DEncodersData() ) {
+        Pose3DEncodersRA ( gazebo::PoseRightAnkle* pose ) : pose3DEncodersData ( new jderobot::Pose3DEncodersData() ) {
             this->pose = pose;
         }
 
-        virtual ~Pose3DEncoders () {}
+        virtual ~Pose3DEncodersRA () {}
 
         virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData ( const Ice::Current& ) {
             pthread_mutex_lock(&pose->mutex_rightankleencoders);
@@ -183,14 +164,14 @@ namespace gazebo {
         jderobot::Pose3DEncodersDataPtr pose3DEncodersData;
     };
 
-    class Pose3DMotors : virtual public jderobot::Pose3DMotors {
+    class Pose3DMotorsRA : virtual public jderobot::Pose3DMotors {
     public:
 
-        Pose3DMotors (gazebo::PoseRightAnkle* pose) : pose3DMotorsData ( new jderobot::Pose3DMotorsData() ) {
+        Pose3DMotorsRA (gazebo::PoseRightAnkle* pose) : pose3DMotorsData ( new jderobot::Pose3DMotorsData() ) {
             this->pose = pose;
         }
 
-        virtual ~Pose3DMotors() {}
+        virtual ~Pose3DMotorsRA () {}
 
         virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData ( const Ice::Current& ) {
             pthread_mutex_lock(&pose->mutex_rightanklemotors);
@@ -269,8 +250,8 @@ namespace gazebo {
             Ice::ObjectAdapterPtr AdapterMotors =
                     ic->createObjectAdapterWithEndpoints("AdapterRightAnkleMotors", EndpointsMotors);
 
-            Ice::ObjectPtr encoders = new Pose3DEncoders(rightankle);
-            Ice::ObjectPtr motors = new Pose3DMotors(rightankle);
+            Ice::ObjectPtr encoders = new Pose3DEncodersRA(rightankle);
+            Ice::ObjectPtr motors = new Pose3DMotorsRA(rightankle);
 
             AdapterEncoders->add(encoders, ic->stringToIdentity("RightAnkleEncoders"));
             AdapterMotors->add(motors, ic->stringToIdentity("RightAnkleMotors"));

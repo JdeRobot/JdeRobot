@@ -14,13 +14,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- *  Authors : Borja Menéndez <borjamonserrano@gmail.com>
+ *  Author:     Borja Menéndez Moreno <b.menendez.moreno@gmail.com>
+ *  Co-author:  José María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
 #include "poserightknee.h"
-
-#define RADTODEG 57.29582790
 
 namespace gazebo {
     GZ_REGISTER_MODEL_PLUGIN(PoseRightKnee)
@@ -28,45 +27,48 @@ namespace gazebo {
     PoseRightKnee::PoseRightKnee () {
         pthread_mutex_init(&this->mutex_rightkneeencoders, NULL);
         pthread_mutex_init(&this->mutex_rightkneemotors, NULL);
-        this->count = 0;
         this->cycle = 50;
         this->cfgfile_rightknee = std::string("--Ice.Config=poserightknee.cfg");
-        
-        this->rightknee.motorsparams.maxPan = 1.57;
-        this->rightknee.motorsparams.minPan = -1.57;          
-        this->rightknee.motorsparams.maxTilt = 0.5;
-        this->rightknee.motorsparams.minTilt = -0.5;
+        this->modelPitch = std::string("joint_poserightknee_pitch");
 
         std::cout << "Constructor PoseRightKnee" << std::endl;
     }
 
     void PoseRightKnee::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf ) {
-        // LOAD CAMERA LEFT
-        if (!_sdf->HasElement("joint_pose3dencodersrightknee_pitch"))
-            gzerr << "pose3dencodersrightknee plugin missing <joint_pose3dencodersrightknee_pitch> element\n";
+        if (!_sdf->HasElement(this->modelPitch))
+            gzerr << "PoseRightKnee plugin missing <" << this->modelPitch << "> element\n";
+            
+        std::string elemPitch = std::string(_sdf->GetElement(this->modelPitch)->GetValueString());
+            
+        if (!_sdf->HasElement(elemPitch))
+            gzerr << "PoseRightKnee plugin missing <" << elemPitch << "> element\n";
+            
+        this->rightknee.joint_pitch = _model->GetJoint(elemPitch);
 
-        this->rightknee.joint_tilt = _model->GetJoint("right_knee");
+        this->maxPitch = (float) this->rightknee.joint_pitch->GetUpperLimit(0).Radian();
+        this->minPitch = (float) this->rightknee.joint_pitch->GetLowerLimit(0).Radian();
 
-        if (!this->rightknee.joint_tilt)
-            gzerr << "Unable to find joint_pose3dencodersrightknee_pitch["
-                << _sdf->GetElement("joint_pose3dencodersrightknee_pitch")->GetValueString() << "]\n"; 
-                
-        this->rightknee.link_tilt = _model->GetLink("right_shin");
-
-        //LOAD TORQUE        
+        // Load torque
         if (_sdf->HasElement("torque"))
             this->stiffness = _sdf->GetElement("torque")->GetValueDouble();
         else {
-            gzwarn << "No torque value set for the DiffDrive plugin.\n";
+            gzwarn << "No torque value set for the right knee plugin.\n";
             this->stiffness = 5.0;
         }
+        
+        pthread_t thr_ice;
+        pthread_create(&thr_ice, NULL, &thread_RightKneeICE, (void*) this);
 
-        //LOAD POSE3DMOTORS
+        // Load OnUpdate method
         this->updateConnection = event::Events::ConnectWorldUpdateBegin(
                                     boost::bind(&PoseRightKnee::OnUpdate, this));
     }
 
-    void PoseRightKnee::Init () {}
+    void PoseRightKnee::Init () {
+        this->rightknee.encoders.tilt = 0.0;
+        
+        this->rightknee.motorsdata.tilt = 0.0;
+    }
 
     void PoseRightKnee::OnUpdate () {
         long totalb, totala, diff;
@@ -75,34 +77,26 @@ namespace gazebo {
         gettimeofday(&a, NULL);
         totala = a.tv_sec * 1000000 + a.tv_usec;
 
-        if (this->count == 0) {
-            this->count++;
-            pthread_t thr_ice;
-            pthread_create(&thr_ice, NULL, &thread_RightKneeICE, (void*) this);
-        }
-
         //          ----------ENCODERS----------
-        //GET pose3dencoders data from the right knee (PAN&TILT)  
-        this->rightknee.encoders.tilt = this->rightknee.link_tilt->GetRelativePose().rot.GetAsEuler().x;
+        // GET pose3dencoders data from the right elbow (PAN&ROLL)
+        pthread_mutex_lock(&this->mutex_rightkneeencoders);
+        
+        this->rightknee.encoders.tilt = this->rightknee.joint_pitch->GetAngle(0).Radian();
+        
+        pthread_mutex_unlock(&this->mutex_rightkneeencoders);
 
         //          ----------MOTORS----------
-        if (this->rightknee.motorsdata.tilt >= 0) {
-            if (this->rightknee.encoders.tilt < this->rightknee.motorsdata.tilt) {
-                this->rightknee.joint_tilt->SetVelocity(0, -0.1);
-                this->rightknee.joint_tilt->SetMaxForce(0, this->stiffness);
-            } else {
-                this->rightknee.joint_tilt->SetVelocity(0, 0.1);
-                this->rightknee.joint_tilt->SetMaxForce(0, this->stiffness);
-            }
-        } else {
-            if (this->rightknee.encoders.tilt > this->rightknee.motorsdata.tilt) {
-                this->rightknee.joint_tilt->SetVelocity(0, 0.1);
-                this->rightknee.joint_tilt->SetMaxForce(0, this->stiffness);
-            } else {
-                this->rightknee.joint_tilt->SetVelocity(0, -0.1);
-                this->rightknee.joint_tilt->SetMaxForce(0, this->stiffness);
-            }
-        }
+        this->rightknee.joint_pitch->SetMaxForce(0, this->stiffness);
+        
+        pthread_mutex_lock(&this->mutex_rightkneemotors);
+        
+        float pitchSpeed = - this->rightknee.motorsdata.tilt - this->rightknee.encoders.tilt;
+        if ((std::abs(pitchSpeed) < 0.1) && (std::abs(pitchSpeed) > 0.001))
+            pitchSpeed = 0.1;
+        
+        this->rightknee.joint_pitch->SetVelocity(0, pitchSpeed);
+
+        pthread_mutex_unlock(&this->mutex_rightkneemotors);
 
         gettimeofday(&b, NULL);
         totalb = b.tv_sec * 1000000 + b.tv_usec;
@@ -113,18 +107,17 @@ namespace gazebo {
         if (diff < 10)
             diff = 10;
 
-        //usleep(diff*1000);
         sleep(diff / 1000);
     }
     
-    class Pose3DEncoders : virtual public jderobot::Pose3DEncoders {
+    class Pose3DEncodersRK : virtual public jderobot::Pose3DEncoders {
     public:
 
-        Pose3DEncoders ( gazebo::PoseRightKnee* pose ) : pose3DEncodersData ( new jderobot::Pose3DEncodersData() ) {
+        Pose3DEncodersRK ( gazebo::PoseRightKnee* pose ) : pose3DEncodersData ( new jderobot::Pose3DEncodersData() ) {
             this->pose = pose;
         }
 
-        virtual ~Pose3DEncoders () {}
+        virtual ~Pose3DEncodersRK () {}
 
         virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData ( const Ice::Current& ) {
             pthread_mutex_lock(&pose->mutex_rightkneeencoders);
@@ -152,14 +145,14 @@ namespace gazebo {
         jderobot::Pose3DEncodersDataPtr pose3DEncodersData;
     };
 
-    class Pose3DMotors : virtual public jderobot::Pose3DMotors {
+    class Pose3DMotorsRK : virtual public jderobot::Pose3DMotors {
     public:
 
-        Pose3DMotors (gazebo::PoseRightKnee* pose) : pose3DMotorsData ( new jderobot::Pose3DMotorsData() ) {
+        Pose3DMotorsRK (gazebo::PoseRightKnee* pose) : pose3DMotorsData ( new jderobot::Pose3DMotorsData() ) {
             this->pose = pose;
         }
 
-        virtual ~Pose3DMotors() {}
+        virtual ~Pose3DMotorsRK () {}
 
         virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData ( const Ice::Current& ) {
             pthread_mutex_lock(&pose->mutex_rightkneemotors);
@@ -238,8 +231,8 @@ namespace gazebo {
             Ice::ObjectAdapterPtr AdapterMotors =
                     ic->createObjectAdapterWithEndpoints("AdapterRightKneeMotors", EndpointsMotors);
 
-            Ice::ObjectPtr encoders = new Pose3DEncoders(rightknee);
-            Ice::ObjectPtr motors = new Pose3DMotors(rightknee);
+            Ice::ObjectPtr encoders = new Pose3DEncodersRK(rightknee);
+            Ice::ObjectPtr motors = new Pose3DMotorsRK(rightknee);
 
             AdapterEncoders->add(encoders, ic->stringToIdentity("RightKneeEncoders"));
             AdapterMotors->add(motors, ic->stringToIdentity("RightKneeMotors"));
@@ -260,7 +253,5 @@ namespace gazebo {
                 std::cerr << e << std::endl;
             }
         }
-
     }
-
 }

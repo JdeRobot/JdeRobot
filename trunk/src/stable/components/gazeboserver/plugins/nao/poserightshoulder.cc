@@ -14,13 +14,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- *  Authors : Borja Menéndez <borjamonserrano@gmail.com>
+ *  Author:     Borja Menéndez Moreno <b.menendez.moreno@gmail.com>
+ *  Co-author:  José María Cañas Plaza <jmplaza@gsyc.es>
  *
  */
 
 #include "poserightshoulder.h"
-
-#define RADTODEG 57.29582790
 
 namespace gazebo {
     GZ_REGISTER_MODEL_PLUGIN(PoseRightShoulder)
@@ -28,113 +27,95 @@ namespace gazebo {
     PoseRightShoulder::PoseRightShoulder () {
         pthread_mutex_init(&this->mutex_rightshoulderencoders, NULL);
         pthread_mutex_init(&this->mutex_rightshouldermotors, NULL);
-        this->count = 0;
         this->cycle = 50;
         this->cfgfile_rightshoulder = std::string("--Ice.Config=poserightshoulder.cfg");
         
-        this->rightshoulder.motorsparams.maxPan = 1.57;
-        this->rightshoulder.motorsparams.minPan = -1.57;          
-        this->rightshoulder.motorsparams.maxTilt = 0.5;
-        this->rightshoulder.motorsparams.minTilt = -0.5;
+        this->modelPitch = std::string("joint_poserightshoulder_pitch");
+        this->modelRoll = std::string("joint_poserightshoulder_roll");
 
         std::cout << "Constructor PoseRightShoulder" << std::endl;
     }
 
     void PoseRightShoulder::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf ) {
-        // LOAD CAMERA LEFT
-        if (!_sdf->HasElement("joint_pose3dencodersrightshoulder_pitch"))
-            gzerr << "pose3dencodersrightshoulder plugin missing <joint_pose3dencodersrightshoulder_pitch> element\n";
-        if (!_sdf->HasElement("joint_pose3dencodersrightshoulder_roll"))
-            gzerr << "pose3dencodersrightshoulder plugin missing <joint_pose3dencodersrightshoulder_roll> element\n";
+        if (!_sdf->HasElement(this->modelPitch))
+            gzerr << "PoseRightShoulder plugin missing <" << this->modelPitch << "> element\n";
+        if (!_sdf->HasElement(this->modelRoll))
+            gzerr << "PoseRightShoulder plugin missing <" << this->modelRoll << "> element\n";
+        
+        std::string elemPitch = std::string(_sdf->GetElement(this->modelPitch)->GetValueString());
+        std::string elemRoll = std::string(_sdf->GetElement(this->modelRoll)->GetValueString());
+            
+        if (!_sdf->HasElement(elemPitch))
+            gzerr << "PoseRightShoulder plugin missing <" << elemPitch << "> element\n";
+        if (!_sdf->HasElement(elemRoll))
+            gzerr << "PoseRightShoulder plugin missing <" << elemRoll << "> element\n";
+            
+        this->rightshoulder.joint_pitch = _model->GetJoint(elemPitch);
+        this->rightshoulder.joint_roll = _model->GetJoint(elemRoll);
 
-        this->rightshoulder.joint_roll = _model->GetJoint("rshoulder_roll");
-        this->rightshoulder.joint_tilt = _model->GetJoint("rshoulder_pitch");
+        this->maxPitch = (float) this->rightshoulder.joint_pitch->GetUpperLimit(0).Radian();
+        this->minPitch = (float) this->rightshoulder.joint_pitch->GetLowerLimit(0).Radian();
+        this->maxRoll = (float) this->rightshoulder.joint_roll->GetUpperLimit(0).Radian();
+        this->minRoll = (float) this->rightshoulder.joint_roll->GetLowerLimit(0).Radian();
 
-        if (!this->rightshoulder.joint_roll)
-            gzerr << "Unable to find joint_pose3dencodersrightshoulder_roll["
-                << _sdf->GetElement("joint_pose3dencodersrightshoulder_roll")->GetValueString() << "]\n";
-        if (!this->rightshoulder.joint_tilt)
-            gzerr << "Unable to find joint_pose3dencodersrightshoulder_pitch["
-                << _sdf->GetElement("joint_pose3dencodersrightshoulder_pitch")->GetValueString() << "]\n"; 
-                
-        this->rightshoulder.link_roll = _model->GetLink("right_upper_arm");
-        this->rightshoulder.link_tilt = _model->GetLink("rightshoulder_pitch");
-
-        //LOAD TORQUE        
+        // Load torque
         if (_sdf->HasElement("torque"))
             this->stiffness = _sdf->GetElement("torque")->GetValueDouble();
         else {
             gzwarn << "No torque value set for the DiffDrive plugin.\n";
             this->stiffness = 5.0;
         }
+        
+        pthread_t thr_ice;
+        pthread_create(&thr_ice, NULL, &thread_RightShoulderICE, (void*) this);
 
-        //LOAD POSE3DMOTORS
+        // Load OnUpdate method
         this->updateConnection = event::Events::ConnectWorldUpdateBegin(
             boost::bind(&PoseRightShoulder::OnUpdate, this));
 
     }
 
-    void PoseRightShoulder::Init () {}
+    void PoseRightShoulder::Init () {
+        this->rightshoulder.encoders.tilt = 0.0;
+        this->rightshoulder.encoders.roll = 0.0;
+        
+        this->rightshoulder.motorsdata.tilt = 0.0;
+        this->rightshoulder.motorsdata.roll = 0.0;
+    }
 
     void PoseRightShoulder::OnUpdate () {
         long totalb, totala, diff;
         struct timeval a, b;
         
         gettimeofday(&a, NULL);
-        totala = a.tv_sec * 1000000 + a.tv_usec;
-
-        if (this->count == 0) {
-            this->count++;
-            pthread_t thr_ice;
-            pthread_create(&thr_ice, NULL, &thread_RightShoulderICE, (void*) this);
-        }
 
         //          ----------ENCODERS----------
-        //GET pose3dencoders data from the right shoulder (PAN&TILT)
-//        this->rightshoulder.encoder.roll = this->rightshoulder.rightshoulder_link_roll->GetRelativePose().rot.GetAsEuler().y;    
-//        this->rightshoulder.encoder.tilt = this->rightshoulder.rightshoulder_link_tilt->GetRelativePose().rot.GetAsEuler().x;
+        // GET pose3dencoders data from the right shoulder (ROLL&TILT)
+        pthread_mutex_lock(&this->mutex_rightshoulderencoders);
         
-        this->rightshoulder.encoders.tilt = - this->rightshoulder.joint_tilt->GetAngle(0).Radian();
-        this->rightshoulder.encoders.roll = - this->rightshoulder.joint_roll->GetAngle(0).Radian();
+        this->rightshoulder.encoders.tilt = this->rightshoulder.joint_pitch->GetAngle(0).Radian();
+        this->rightshoulder.encoders.roll = this->rightshoulder.joint_roll->GetAngle(0).Radian();
+        
+        pthread_mutex_unlock(&this->mutex_rightshoulderencoders);
         
         //          ----------MOTORS----------
-        if (this->rightshoulder.motorsdata.roll >= 0) {
-            if (this->rightshoulder.encoders.roll < this->rightshoulder.motorsdata.roll) {
-                this->rightshoulder.joint_roll->SetVelocity(0, -0.1);
-                this->rightshoulder.joint_roll->SetMaxForce(0, this->stiffness);
-                //std::cout << "AQUI" << std::endl;
-            } else {
-                this->rightshoulder.joint_roll->SetVelocity(0, 0.1);
-                this->rightshoulder.joint_roll->SetMaxForce(0, this->stiffness);
-            }
-        } else {
-            if (this->rightshoulder.encoders.roll > this->rightshoulder.motorsdata.roll) {
-                this->rightshoulder.joint_roll->SetVelocity(0, 0.1);
-                this->rightshoulder.joint_roll->SetMaxForce(0, this->stiffness);
-                //std::cout << "AQUI" << std::endl;
-            } else {
-                this->rightshoulder.joint_roll->SetVelocity(0, -0.1);
-                this->rightshoulder.joint_roll->SetMaxForce(0, this->stiffness);
-            }            
-        }
+        this->rightshoulder.joint_pitch->SetMaxForce(0, this->stiffness);
+        this->rightshoulder.joint_roll->SetMaxForce(0, this->stiffness);
         
-        if (this->rightshoulder.motorsdata.tilt >= 0) {
-            if (this->rightshoulder.encoders.tilt < this->rightshoulder.motorsdata.tilt) {
-                this->rightshoulder.joint_tilt->SetVelocity(0, -0.1);
-                this->rightshoulder.joint_tilt->SetMaxForce(0, this->stiffness);
-            } else {
-                this->rightshoulder.joint_tilt->SetVelocity(0, 0.1);
-                this->rightshoulder.joint_tilt->SetMaxForce(0, this->stiffness);
-            }
-        } else {
-            if (this->rightshoulder.encoders.tilt > this->rightshoulder.motorsdata.tilt) {
-                this->rightshoulder.joint_tilt->SetVelocity(0, 0.1);
-                this->rightshoulder.joint_tilt->SetMaxForce(0, this->stiffness);
-            } else {
-                this->rightshoulder.joint_tilt->SetVelocity(0, -0.1);
-                this->rightshoulder.joint_tilt->SetMaxForce(0, this->stiffness);
-            }
-        }
+        pthread_mutex_lock(&this->mutex_rightshouldermotors);
+        
+        float pitchSpeed = - this->rightshoulder.motorsdata.tilt - this->rightshoulder.encoders.tilt;
+        if ((std::abs(pitchSpeed) > 0.001) && (std::abs(pitchSpeed) < 0.1))
+            pitchSpeed = 0.1;
+        
+        float rollSpeed = - this->rightshoulder.motorsdata.roll - this->rightshoulder.encoders.roll;
+        if ((std::abs(rollSpeed) > 0.001) && (std::abs(rollSpeed) < 0.1))
+            rollSpeed = 0.1;
+        
+        this->rightshoulder.joint_pitch->SetVelocity(0, pitchSpeed);
+        this->rightshoulder.joint_roll->SetVelocity(0, rollSpeed);
+
+        pthread_mutex_unlock(&this->mutex_rightshouldermotors);
 
         gettimeofday(&b, NULL);
         totalb = b.tv_sec * 1000000 + b.tv_usec;
@@ -145,18 +126,17 @@ namespace gazebo {
         if (diff < 10)
             diff = 10;
 
-        //usleep(diff*1000);
         sleep(diff / 1000);
     }
     
-    class Pose3DEncoders : virtual public jderobot::Pose3DEncoders {
+    class Pose3DEncodersRS : virtual public jderobot::Pose3DEncoders {
     public:
 
-        Pose3DEncoders ( gazebo::PoseRightShoulder* pose ) : pose3DEncodersData ( new jderobot::Pose3DEncodersData() ) {
+        Pose3DEncodersRS ( gazebo::PoseRightShoulder* pose ) : pose3DEncodersData ( new jderobot::Pose3DEncodersData() ) {
             this->pose = pose;
         }
 
-        virtual ~Pose3DEncoders () {}
+        virtual ~Pose3DEncodersRS () {}
 
         virtual jderobot::Pose3DEncodersDataPtr getPose3DEncodersData ( const Ice::Current& ) {
             pthread_mutex_lock(&pose->mutex_rightshoulderencoders);
@@ -184,14 +164,14 @@ namespace gazebo {
         jderobot::Pose3DEncodersDataPtr pose3DEncodersData;
     };
 
-    class Pose3DMotors : virtual public jderobot::Pose3DMotors {
+    class Pose3DMotorsRS : virtual public jderobot::Pose3DMotors {
     public:
 
-        Pose3DMotors (gazebo::PoseRightShoulder* pose) : pose3DMotorsData ( new jderobot::Pose3DMotorsData() ) {
+        Pose3DMotorsRS (gazebo::PoseRightShoulder* pose) : pose3DMotorsData ( new jderobot::Pose3DMotorsData() ) {
             this->pose = pose;
         }
 
-        virtual ~Pose3DMotors() {}
+        virtual ~Pose3DMotorsRS() {}
 
         virtual jderobot::Pose3DMotorsDataPtr getPose3DMotorsData ( const Ice::Current& ) {
             pthread_mutex_lock(&pose->mutex_rightshouldermotors);
@@ -208,7 +188,6 @@ namespace gazebo {
             pthread_mutex_unlock(&pose->mutex_rightshouldermotors);
 
             return pose3DMotorsData;
-
         }
 
         virtual jderobot::Pose3DMotorsParamsPtr getPose3DMotorsParams ( const Ice::Current& ) {
@@ -239,7 +218,6 @@ namespace gazebo {
             pose->rightshoulder.motorsdata.tiltSpeed = data->tiltSpeed;
             
             pthread_mutex_unlock(&pose->mutex_rightshouldermotors);
-
         }
 
         gazebo::PoseRightShoulder* pose;
@@ -250,7 +228,6 @@ namespace gazebo {
     };
 
     void* thread_RightShoulderICE ( void* v ) {
-
         gazebo::PoseRightShoulder* rightshoulder = (gazebo::PoseRightShoulder*)v;
         char* name = (char*) rightshoulder->cfgfile_rightshoulder.c_str();
         Ice::CommunicatorPtr ic;
@@ -272,8 +249,8 @@ namespace gazebo {
             Ice::ObjectAdapterPtr AdapterMotors =
                     ic->createObjectAdapterWithEndpoints("AdapterRightShoulderMotors", EndpointsMotors);
 
-            Ice::ObjectPtr encoders = new Pose3DEncoders(rightshoulder);
-            Ice::ObjectPtr motors = new Pose3DMotors(rightshoulder);
+            Ice::ObjectPtr encoders = new Pose3DEncodersRS(rightshoulder);
+            Ice::ObjectPtr motors = new Pose3DMotorsRS(rightshoulder);
 
             AdapterEncoders->add(encoders, ic->stringToIdentity("RightShoulderEncoders"));
             AdapterMotors->add(motors, ic->stringToIdentity("RightShoulderMotors"));

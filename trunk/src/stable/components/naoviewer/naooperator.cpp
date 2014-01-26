@@ -250,7 +250,7 @@ void NaoOperator::assignSignals () {
     
     this->mapScales[ROLL_LEFT_SHOULDER]->signal_value_changed().connect(sigc::mem_fun(this,
                                                             &NaoOperator::on_scale_roll_left_shoulder));
-                                                            
+/*                                                            
     this->mapScales[YAWPITCH_LEFT_HIP]->signal_value_changed().connect(sigc::mem_fun(this,
                                                             &NaoOperator::on_scale_yawpitch_left_hip));
                                                             
@@ -268,7 +268,7 @@ void NaoOperator::assignSignals () {
     
     this->mapScales[ROLL_RIGHT_HIP]->signal_value_changed().connect(sigc::mem_fun(this,
                                                             &NaoOperator::on_scale_roll_right_hip));
-                                                            
+*/                                                            
     this->mapScales[PITCH_RIGHT_SHOULDER]->signal_value_changed().connect(sigc::mem_fun(this,
                                                             &NaoOperator::on_scale_pitch_right_shoulder));
                                                             
@@ -320,7 +320,7 @@ void NaoOperator::assignSignals () {
     this->head_right->signal_clicked().connect(sigc::mem_fun(this, &NaoOperator::on_button_head_right));
     this->head_left->signal_clicked().connect(sigc::mem_fun(this, &NaoOperator::on_button_head_left));
     this->head_stop->signal_clicked().connect(sigc::mem_fun(this, &NaoOperator::on_button_head_stop));
-    
+/*    
     this->move_front->signal_clicked().connect(sigc::mem_fun(this, &NaoOperator::on_button_move_front));
     this->move_back->signal_clicked().connect(sigc::mem_fun(this, &NaoOperator::on_button_move_back));
     this->move_right->signal_clicked().connect(sigc::mem_fun(this, &NaoOperator::on_button_move_right));
@@ -336,6 +336,7 @@ void NaoOperator::assignSignals () {
     this->intercept->signal_clicked().connect(sigc::mem_fun(this, &NaoOperator::on_button_intercept));
     this->change_camera->signal_clicked().connect(sigc::mem_fun(this, &NaoOperator::on_button_change_camera));
     this->reset_naoqi->signal_clicked().connect(sigc::mem_fun(this, &NaoOperator::on_button_reset_naoqi));
+*/
 }
 
 void NaoOperator::on_scale_pitch_left_shoulder () {
