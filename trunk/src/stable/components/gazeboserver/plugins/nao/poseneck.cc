@@ -38,9 +38,9 @@ namespace gazebo {
 
     void PoseNeck::Load ( physics::ModelPtr _model, sdf::ElementPtr _sdf ) {
         if (!_sdf->HasElement(this->modelPan))
-            gzerr << "PoseNeck plugin missing <" << this->modelPan << "> element first\n";
+            gzerr << "PoseNeck plugin missing <" << this->modelPan << "> element\n";
         if (!_sdf->HasElement(this->modelTilt))
-            gzerr << "PoseNeck plugin missing <" << this->modelTilt << "> element first\n";
+            gzerr << "PoseNeck plugin missing <" << this->modelTilt << "> element\n";
         
         std::string elemPan = std::string(_sdf->GetElement(this->modelPan)->GetValueString());
         std::string elemTilt = std::string(_sdf->GetElement(this->modelTilt)->GetValueString());

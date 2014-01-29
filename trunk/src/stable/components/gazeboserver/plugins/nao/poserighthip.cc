@@ -260,13 +260,13 @@ namespace gazebo {
             prop = ic->getProperties();
             std::string EndpointsEncoders = prop->getProperty("PoseRightHipEncoders.Endpoints");
             std::cout << "PoseRightHipEncoders Endpoints > " << EndpointsEncoders << std::endl;
-            std::string EndpointsMotors = prop->getProperty("PoseRightHipMotors.Endpoints");
+            std::string EndpointsMotors = prop->getProperty("PoseRightHipkMotors.Endpoints");
             std::cout << "PoseRightHipMotors Endpoints > " << EndpointsMotors << std::endl;
 
             Ice::ObjectAdapterPtr AdapterEncoders =
                     ic->createObjectAdapterWithEndpoints("AdapterRightHipEncoders", EndpointsEncoders);
             Ice::ObjectAdapterPtr AdapterMotors =
-                    ic->createObjectAdapterWithEndpoints("AdapterRightHipMotors", EndpointsMotors);
+                    ic->createObjectAdapterWithEndpoints("AdapterRightHipkMotors", EndpointsMotors);
 
             Ice::ObjectPtr encoders = new Pose3DEncodersRH(righthip);
             Ice::ObjectPtr motors = new Pose3DMotorsRH(righthip);

@@ -29,7 +29,7 @@ namespace gazebo {
         pthread_mutex_init(&this->mutex_leftshouldermotors, NULL);
         this->cycle = 50;
         this->cfgfile_leftshoulder = std::string("--Ice.Config=poseleftshoulder.cfg");
-        this->modelPitch = std::string("joint_poseleftshoulder_tilt");
+        this->modelPitch = std::string("joint_poseleftshoulder_pitch");
         this->modelRoll = std::string("joint_poseleftshoulder_roll");
 
         std::cout << "Constructor PoseLeftShoulder" << std::endl;

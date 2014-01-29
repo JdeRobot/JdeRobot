@@ -30,7 +30,7 @@ namespace gazebo {
         pthread_mutex_init(&this->mutex_leftelbowmotors, NULL);
         this->cycle = 50;
         this->cfgfile_leftelbow = std::string("--Ice.Config=poseleftelbow.cfg");
-        this->modelYaw = std::string("joint_poseleftelbow_pan");
+        this->modelYaw = std::string("joint_poseleftelbow_yaw");
         this->modelRoll = std::string("joint_poseleftelbow_roll");
 
         std::cout << "Constructor PoseLeftElbow" << std::endl;

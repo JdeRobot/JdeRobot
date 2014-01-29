@@ -94,13 +94,13 @@ target_link_libraries(poserighthip ${GAZEBO_libraries}
 	${ZeroCIce_LIBRARIES}
 )
 
-#add_library(poselefthip SHARED poselefthip.cc)
-#target_link_libraries(poselefthip ${GAZEBO_libraries} 	 	
-#    Ice
-#	IceUtil
-#	JderobotInterfaces
-#	${GAZEBO_libraries} 
-#	${ZeroCIce_LIBRARIES}
+add_library(poselefthip SHARED poselefthip.cc)
+target_link_libraries(poselefthip ${GAZEBO_libraries} 	 	
+    Ice
+	IceUtil
+	JderobotInterfaces
+	${GAZEBO_libraries} 
+	${ZeroCIce_LIBRARIES}
 #)
 
 # KNEES
@@ -113,14 +113,14 @@ target_link_libraries(poserightknee ${GAZEBO_libraries}
 	${ZeroCIce_LIBRARIES}
 )
 
-#add_library(poseleftknee SHARED poseleftknee.cc)
-#target_link_libraries(poseleftknee ${GAZEBO_libraries} 	 	
-#    Ice
-#	IceUtil
-#	JderobotInterfaces
-#	${GAZEBO_libraries} 
-#	${ZeroCIce_LIBRARIES}
-#)
+add_library(poseleftknee SHARED poseleftknee.cc)
+target_link_libraries(poseleftknee ${GAZEBO_libraries} 	 	
+    Ice
+	IceUtil
+	JderobotInterfaces
+	${GAZEBO_libraries} 
+	${ZeroCIce_LIBRARIES}
+)
 
 # ANKLES
 add_library(poserightankle SHARED poserightankle.cc)
