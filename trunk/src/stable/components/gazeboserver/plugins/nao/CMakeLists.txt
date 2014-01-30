@@ -101,7 +101,7 @@ target_link_libraries(poselefthip ${GAZEBO_libraries}
 	JderobotInterfaces
 	${GAZEBO_libraries} 
 	${ZeroCIce_LIBRARIES}
-#)
+)
 
 # KNEES
 add_library(poserightknee SHARED poserightknee.cc)
