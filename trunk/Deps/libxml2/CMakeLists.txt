@@ -18,7 +18,7 @@ ENDIF(LIBXML2_INCLUDE_DIR)
 
 IF (NOT  LIBXML2_INCLUDE_DIR)
 	MESSAGE("*** LIBXML2 not found")
+ELSE()
+	link_directories(${LIBXML2_LIBRARIES})
+	include_directories(${LIBXML2_INCLUDE_DIR})
 ENDIF()
-
-link_directories(${LIBXML2_LIBRARIES})
-include_directories(${LIBXML2_INCLUDE_DIR})
