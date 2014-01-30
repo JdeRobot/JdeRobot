@@ -41,7 +41,7 @@ namespace gazebo {
         if (!_sdf->HasElement(this->modelRoll))
             gzerr << "PoseRightElbow plugin missing <" << this->modelRoll << "> element\n";
             
-        std::string elemPan = std::string(_sdf->GetElement(this->modelPan)->GetValueString());
+        std::string elemPan = std::string(_sdf->GetElement(this->modelYaw)->GetValueString());
         std::string elemRoll = std::string(_sdf->GetElement(this->modelRoll)->GetValueString());
             
         if (!_sdf->HasElement(elemPan))
@@ -49,7 +49,7 @@ namespace gazebo {
         if (!_sdf->HasElement(elemRoll))
             gzerr << "PoseRightElbow plugin missing <" << elemRoll << "> element\n";
             
-        this->rightelbow.joint_pan = _model->GetJoint(elemPan);
+        this->rightelbow.joint_yaw = _model->GetJoint(elemPan);
         this->rightelbow.joint_roll = _model->GetJoint(elemRoll);
         
 //        this->rightelbow.link_pan = this->rightelbow.joint_pan->GetParent();
