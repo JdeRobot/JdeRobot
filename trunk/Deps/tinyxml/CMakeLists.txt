@@ -16,7 +16,8 @@ ENDIF(LIBTINYXML_INCLUDE_DIR)
 
 IF (NOT  LIBTINYXML_INCLUDE_DIR)
 	MESSAGE("*** LIBTINYXML not found")
+ELSE()
+	link_directories(${LIBTINYXML_LIBRARIES})
+	include_directories(${LIBTINYXML_INCLUDE_DIR})
 ENDIF()
 
-link_directories(${LIBTINYXML_LIBRARIES})
-include_directories(${LIBTINYXML_INCLUDE_DIR})
