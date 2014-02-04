@@ -111,6 +111,10 @@ std::string NaoServerCamera::startCameraStreaming ( const Ice::Current& ) {
 
 void NaoServerCamera::stopCameraStreaming ( const Ice::Current& ) {}
 
+virtual void NaoServerCamera::reset(const Ice::Current&)
+{
+}
+
 /*************************************************************
  * ANOTHER FUNCTIONS
  *************************************************************/

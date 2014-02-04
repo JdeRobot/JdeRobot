@@ -327,6 +327,10 @@ class CameraI: virtual public jderobot::Camera {
 
 		}
 
+		virtual void reset(const Ice::Current&)
+		{
+		}
+
 	private:
 		class ReplyTask: public IceUtil::Thread  {
 			public:
@@ -474,6 +478,10 @@ class CameraII: virtual public jderobot::Camera {
 
 		virtual void stopCameraStreaming(const Ice::Current&) {
 
+		}
+
+		virtual void reset(const Ice::Current&)
+		{
 		}
 
 	private:

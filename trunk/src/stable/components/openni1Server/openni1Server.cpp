@@ -409,6 +409,10 @@ public:
 		std::cout << "Should be made anything to stop camera streaming: " + cameraDescription->name << std::endl;
 	}
 
+	virtual void reset(const Ice::Current&)
+	{
+	}
+
 	virtual Ice::Int setCameraDescription(const jderobot::CameraDescriptionPtr&, const Ice::Current&){
 		return 0;
 	}
@@ -650,6 +654,10 @@ public:
 		std::cout << "Should be made anything to stop camera streaming: " + cameraDescription->name << std::endl;
 	}
 	
+	virtual void reset(const Ice::Current&)
+	{
+	}
+
 	virtual Ice::Int setCameraDescription(const jderobot::CameraDescriptionPtr&, const Ice::Current&){
 		return 0;
 	}

@@ -61,6 +61,8 @@ module jderobot{
     
     void stopCameraStreaming();
     
+    void reset();
+    
   };
 
 }; /*module*/

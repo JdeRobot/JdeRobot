@@ -114,6 +114,11 @@ namespace replayer {
 		virtual void stopCameraStreaming(const Ice::Current&) {
 			std::cout << "Should be made anything to stop camera streaming: " << cameraDescription->name << std::endl;
 		}
+
+		virtual void reset(const Ice::Current&)
+		{
+		}
+
 		/*virtual void update(cv::Mat imageIn){
 		 imageIn.copyTo(this->image);
 		 //std::cout << "update" << endl;

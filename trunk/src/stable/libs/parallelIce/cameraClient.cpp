@@ -66,14 +66,18 @@ cameraClient::~cameraClient() {
 }
 
 
+void cameraClient::reset(){
+	this->prx->reset();
+}
+
 void cameraClient::pause(){
 	this->pauseStatus=true;
 }
 
 void cameraClient::resume(){
 	this->controlMutex.lock();
-		this->pauseStatus=false;
-		this->sem.broadcast();
+	this->pauseStatus=false;
+	this->sem.broadcast();
 	this->controlMutex.unlock();
 }
 
@@ -134,7 +138,7 @@ cameraClient::run(){
 			iterIndex = 0;
 			std::cout << "*** Reinicio contador" << std::endl;
 		}
-		
+
 	}
 }
 

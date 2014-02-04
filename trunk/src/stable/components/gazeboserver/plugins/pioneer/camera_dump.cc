@@ -135,6 +135,10 @@ class CameraI: virtual public jderobot::Camera {
 
 		}
 
+		virtual void reset(const Ice::Current&)
+		{
+		}
+
 	private:
 		class ReplyTask: public IceUtil::Thread {
 			public:

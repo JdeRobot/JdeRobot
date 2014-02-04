@@ -45,6 +45,7 @@ public:
 	int getRefreshRate(){return refreshRate;};
 	void pause();
 	void resume();
+	void reset();
 	bool getPause(){return pauseStatus;};
 	cv::Size getSize(){return size;};
 
