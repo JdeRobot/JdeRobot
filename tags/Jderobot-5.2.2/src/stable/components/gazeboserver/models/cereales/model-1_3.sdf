@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<sdf version="1.3">
+	<model name="cereales">
+ 		<static>true</static>
+      	<link name="cereales_body">       
+			<collision name='cereales_collision'>
+		      <geometry>
+		        <mesh>
+		        	<uri>model://cereales/meshes/cereales2.dae</uri>
+		        	<scale>10 10 10</scale>
+		        </mesh>
+		      </geometry>
+			</collision>
+		   
+		    <visual name="cereales_visual">
+		      <geometry>
+		        <mesh><uri>model://cereales/meshes/cereales.dae</uri>
+		        <scale>10 10 10</scale></mesh>
+		      </geometry>
+		    </visual>
+	  	</link>
+    </model>
+</sdf>

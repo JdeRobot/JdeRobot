@@ -1,0 +1,16 @@
+#Curro
+naooperator.HeadMotors.Proxy=NeckMotors:default -h 192.168.14.113 -p 10000
+naooperator.HeadSpeed.Proxy=NeckSpeed:default -h 192.168.14.113 -p 10000
+naooperator.LeftShoulderMotors.Proxy=LeftShoulderMotors:default -h 192.168.14.113 -p 10000
+naooperator.RightShoulderMotors.Proxy=RightShoulderMotors:default -h 192.168.14.113 -p 10000
+naooperator.LeftElbowMotors.Proxy=LeftElbowMotors:default -h 192.168.14.113 -p 10000
+naooperator.RightElbowMotors.Proxy=RightElbowMotors:default -h 192.168.14.113 -p 10000
+naooperator.LeftHipMotors.Proxy=LeftHipMotors:default -h 192.168.14.113 -p 10000
+naooperator.RightHipMotors.Proxy=RightHipMotors:default -h 192.168.14.113 -p 10000
+naooperator.LeftKneeMotors.Proxy=LeftKneeMotors:default -h 192.168.14.113 -p 10000
+naooperator.RightKneeMotors.Proxy=RightKneeMotors:default -h 192.168.14.113 -p 10000
+naooperator.LeftAnkleMotors.Proxy=LeftAnkleMotors:default -h 192.168.14.113 -p 10000
+naooperator.RightAnkleMotors.Proxy=RightAnkleMotors:default -h 192.168.14.113 -p 10000
+naooperator.Camera.Proxy=Camera:default -h 192.168.14.113 -p 10000
+naooperator.Motors.Proxy=Motors:default -h 192.168.14.113 -p 10000
+naooperator.Motions.Proxy=Motions:default -h 192.168.14.113 -p 10000

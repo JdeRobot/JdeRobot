@@ -1,0 +1,4 @@
+debian/tmp/usr/local/bin/*           /usr/local/bin/
+debian/tmp/usr/local/lib/*           /usr/local/lib/
+debian/tmp/usr/local/share/*         /usr/local/share/
+debian/tmp/usr/local/include/*       /usr/local/include/

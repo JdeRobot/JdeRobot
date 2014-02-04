@@ -1,0 +1,5 @@
+#!/bin/sh
+# Extract CMake macros during configure 
+
+echo "/usr/local/lib/jderobot/" > /etc/ld.so.conf.d/jderobot.conf
+ldconfig

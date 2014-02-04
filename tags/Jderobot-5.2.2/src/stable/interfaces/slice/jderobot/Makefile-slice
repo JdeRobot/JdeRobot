@@ -1,0 +1,18 @@
+JDEROBOTDIR = /usr/local
+CXXFLAGS = -I../ -I. -I $(JDEROBOTDIR)/include/jderobot 
+
+LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotIce.la \
+	$(JDEROBOTDIR)/lib/jderobot/libJderobotUtil.la \
+	$(JDEROBOTDIR)/lib/jderobot/libcolorspacesmm.la \
+	$(JDEROBOTDIR)/lib/jderobot/libJderobotInterfaces.la \
+	$(JDEROBOTDIR)/lib/jderobot/libprogeo.la \
+	$(JDEROBOTDIR)/lib/jderobot/libpioneer.la
+
+ice: pose3dencoders.ice 
+	slice2cpp -I../ pose3dencoders.ice; g++ $(CXXFLAGS) -c pose3dencoders.cpp; mv pose3dencoders.h ../../cpp/jderobot/; mv pose3dencoders.cpp ../../cpp/jderobot/; mv pose3dencoders.o ../../cpp/jderobot/
+	slice2cpp -I../ pose3dmotors.ice;  g++ $(CXXFLAGS) -c pose3dmotors.cpp;  mv pose3dmotors.h ../../cpp/jderobot/; mv pose3dmotors.cpp ../../cpp/jderobot/; mv pose3dmotors.o ../../cpp/jderobot/ 
+
+clean:
+	rm -f *.o 
+
+

@@ -1,0 +1,18 @@
+JDEROBOTDIR = /usr/local
+CXXFLAGS = -I $(JDEROBOTDIR)/include/jderobot -I../../interfaces/cpp `pkg-config --cflags opencv` `pkg-config --cflags gtkmm-2.4 libglademm-2.4 gthread-2.0 libgnomecanvas-2.0 libgnomecanvasmm-2.6` `pkg-config --cflags gtkglextmm-1.2`
+LDFLAGS = `pkg-config --libs gtkmm-2.4 libglademm-2.4 gthread-2.0 libgnomecanvas-2.0 libgnomecanvasmm-2.6` `pkg-config --libs opencv` -lgsl -lgslcblas `pkg-config --libs gtkglextmm-1.2` -lGL -lGLU -lglut
+LDADD = $(JDEROBOTDIR)/lib/jderobot/libJderobotIce.la \
+	$(JDEROBOTDIR)/lib/jderobot/libJderobotUtil.la \
+	$(JDEROBOTDIR)/lib/jderobot/libcolorspacesmm.la \
+	$(JDEROBOTDIR)/lib/jderobot/libJderobotInterfaces.la \
+	$(JDEROBOTDIR)/lib/jderobot/libprogeo.la \
+	$(JDEROBOTDIR)/lib/jderobot/libpioneer.la
+
+introrob: control.o camera.o introrob.o API.o gui.o drawarea.o pioneeropengl.o MyAlgorithms.o ../../interfaces/cpp/jderobot/pose3dmotors.o ../../interfaces/cpp/jderobot/pose3dencoders.o
+	libtool --mode=link g++ -g -O -o introrob control.o gui.o camera.o API.o MyAlgorithms.o introrob.o drawarea.o pioneeropengl.o ../../interfaces/cpp/jderobot/pose3dencoders.o ../../interfaces/cpp/jderobot/pose3dmotors.o $(LDADD) $(LDFLAGS)
+
+
+clean:
+	rm -f *.o introrob
+
+

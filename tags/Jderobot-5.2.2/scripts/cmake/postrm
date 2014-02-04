@@ -1,0 +1,4 @@
+#!/bin/sh
+
+rm -f /etc/ld.so.conf.d/jderobot.conf
+ldconfig
