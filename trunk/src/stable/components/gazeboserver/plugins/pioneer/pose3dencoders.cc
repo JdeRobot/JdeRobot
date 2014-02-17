@@ -69,7 +69,7 @@ namespace gazebo {
 
         //LOAD POSE3DMOTORS
 
-        this->updateConnection = event::Events::ConnectWorldUpdateStart(
+        this->updateConnection = event::Events::ConnectWorldUpdateBegin(
                 boost::bind(&Pose3DEncoders::OnUpdate, this));
 
 

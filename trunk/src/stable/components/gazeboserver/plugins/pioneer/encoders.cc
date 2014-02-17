@@ -16,7 +16,7 @@ namespace gazebo {
     void Encoders::Load(physics::ModelPtr _parent, sdf::ElementPtr) {
 
         model = _parent;
-        this->updateConnection = event::Events::ConnectWorldUpdateStart(
+        this->updateConnection = event::Events::ConnectWorldUpdateBegin(
                 boost::bind(&Encoders::OnUpdate, this));
     }
     
