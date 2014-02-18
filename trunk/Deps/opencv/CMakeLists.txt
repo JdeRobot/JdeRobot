@@ -35,11 +35,11 @@ IF (OpenCVHG_INCLUDE_DIR)
 
 
 	ELSE(OpenCV_INCLUDE_DIR)
-		MESSAGE("*** OpenCV not found")
+		MESSAGE( FATAL_ERROR "*** OpenCV not found")
 	ENDIF(OpenCV_INCLUDE_DIR)
 
 ELSE(OpenCVHG_INCLUDE_DIR)
 
-	MESSAGE("*** OpenCV: libhighgui-dev not found!")
+	MESSAGE(FATAL_ERROR "*** OpenCV: libhighgui-dev not found!")
 
 ENDIF(OpenCVHG_INCLUDE_DIR)
