@@ -61,22 +61,12 @@ endmacro()
 
 include(FindPkgConfig)
 
-PKG_CHECK_MODULES(gstreamer REQUIRED gstreamer-0.10) 
-include_directories(${gstreamer_INCLUDE_DIRS})
-link_directories(${gstreamer_LIBRARY_DIRS})
-
-PKG_CHECK_MODULES(gstreamerapp REQUIRED gstreamer-app-0.10)
-include_directories(${gstreamerapp_INCLUDE_DIRS})
-link_directories(${gstreamerapp_LIBRARY_DIRS})
-
 PKG_CHECK_MODULES(gsl REQUIRED gsl)
 include_directories(${gsl_INCLUDE_DIRS})
 link_directories(${gsl_LIBRARIES_DIRS})
 
 PKG_CHECK_MODULES(eigen REQUIRED eigen3)
 include_directories(${eigen_INCLUDE_DIRS})
-
-
 
 
 link_directories(${INTERFACES_CPP_DIR}/jderobot)

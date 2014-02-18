@@ -22,10 +22,10 @@ FIND_PACKAGE(ZeroCIce)
 	ENDIF( ZeroCIceStorm_LIBRARY )
 
 IF(NOT  ZeroCIceStorm_LIBRARY )
-	MESSAGE("*** IceStorm not found")
+	MESSAGE(FATAL_ERROR "*** IceStorm not found")
 ENDIF()
 
 IF(NOT  ZeroCIceUtil_LIBRARY )
-	MESSAGE("*** IceUtil not found")
+	MESSAGE(FATAL_ERROR "*** IceUtil not found")
 ENDIF()
 
