@@ -59,7 +59,7 @@ Logger::~Logger()
 }
 
 
-void Logger::setLogFile(std::string logFile)
+void Logger::setFileLog(std::string logFile)
 {
 	mLogFile = logFile;
 
@@ -77,7 +77,7 @@ void Logger::setLogFile(std::string logFile)
 
 }
 
-void Logger::setLogLevel(Levels level)
+void Logger::setFileLevel(Levels level)
 {
 	mLogLevel = level;
 }

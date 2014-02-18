@@ -60,7 +60,7 @@ namespace jderobot
 		 * @param logFile The name of file
 		 *
 		 */
-		void setLogFile (std::string logFile);
+		void setFileLog (std::string logFile);
 
 		/**
 		 * \brief Set log level for log file. Just the upper levers will be saved in file.
@@ -68,7 +68,7 @@ namespace jderobot
 		 * @param levels The level of log file
 		 *
 		 */
-		void setLogLevel (enum Levels);
+		void setFileLevel (enum Levels);
 
 		/**
 		 * \brief Set log level for screen. Just the upper levers will be shown in the screen
