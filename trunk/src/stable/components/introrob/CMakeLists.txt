@@ -21,7 +21,7 @@ INSTALL (FILES ${CMAKE_CURRENT_SOURCE_DIR}/myimage.png DESTINATION /usr/local/sh
 
 FILE(GLOB XML_FILES ${CMAKE_CURRENT_SOURCE_DIR}/cameras/*xml)
 FOREACH (xml ${XML_FILES})
-        INSTALL (FILES ${xml} DESTINATION /usr/local/share/jderobot/conf/camera/)
+        INSTALL (FILES ${xml} DESTINATION /usr/local/share/jderobot/conf/cameras/)
 ENDFOREACH(xml)
 
 
