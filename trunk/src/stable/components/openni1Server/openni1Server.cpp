@@ -30,7 +30,7 @@
 #include <jderobot/pose3dmotors.h>
 #include <jderobot/remoteCloud.h>
 #include <jderobot/remoteConfig.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include <tr1/memory>
 #include <list>
 #include <sstream>
@@ -84,7 +84,7 @@ xn::Context g_context;
 std::vector<int> pixelsID;
 //int pixelsID[640*480];
 int userGeneratorActive=0;
-int debug;
+int localDebug;
 
 
 struct KinectDevice
@@ -553,7 +553,7 @@ private:
 			pthread_mutex_unlock(&mutex);
 			if (totalpre !=0){
 				if ((totala - totalpre) > cycle ){
-					if (debug)
+					if (localDebug)
 						std::cout<<"-------- openni1Server: WARNING- RGB timeout-" << std::endl; 
 				}
 				else{
@@ -781,7 +781,7 @@ private:
 			pthread_mutex_unlock(&mutex);
 			if (totalpre !=0){
 				if ((totala - totalpre) > cycle ){
-					if (debug)
+					if (localDebug)
 						std::cout<<"-------- openni1Server: WARNING- DEPTH timeout-" << std::endl; 
 				}
 				else{
@@ -985,7 +985,7 @@ private:
 					pthread_mutex_unlock(&mutex);
 					if (totalpre !=0){
 						if ((totala - totalpre) > cycle ){
-							if (debug)
+							if (localDebug)
 								std::cout<<"-------- openni1Server: WARNING- POINTCLOUD timeout-" << std::endl; 
 						}
 						else{
@@ -1262,7 +1262,7 @@ int main(int argc, char** argv){
 	int pointCloud = prop->getPropertyAsIntWithDefault(componentPrefix + ".pointCloudActive",0);
 	int playerdetection = prop->getPropertyAsIntWithDefault(componentPrefix + ".PlayerDetection",0);
 	width=prop->getPropertyAsIntWithDefault("openni1Server.Width", 640);
-	debug=prop->getPropertyAsIntWithDefault("openni1Server.Debug", 0);
+	localDebug=prop->getPropertyAsIntWithDefault("openni1Server.Debug", 0);
 	height=prop->getPropertyAsIntWithDefault("openni1Server.Height",480);
 	int fps=prop->getPropertyAsIntWithDefault("openni1Server.Fps",30);
 
