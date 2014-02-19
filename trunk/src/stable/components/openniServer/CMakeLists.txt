@@ -17,7 +17,7 @@ IF(OPENNI2_LIB)
         ${LIBS_DIR}/
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/cameras
-	${NITE2_INC}
+		${NITE2_INC}
 		
     )
 

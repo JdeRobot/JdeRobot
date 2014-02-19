@@ -1,5 +1,5 @@
 IF(openni_LIBRARIES)
-    IF(nite_LIBRARIES)
+
 	    SET( SOURCE_FILES openni1Server.cpp myprogeo.cpp )
 	    add_definitions(-DGLADE_DIR="${gladedir}")
 
@@ -10,26 +10,48 @@ IF(openni_LIBRARIES)
             ${LIBS_DIR}/
             ${CMAKE_CURRENT_SOURCE_DIR}
             ${CMAKE_CURRENT_SOURCE_DIR}/cameras
-            ${nite_INCLUDE_DIR}
-            ${ni_INCLUDE_DIR}
+            ${openni_INCLUDE_DIR}
             ${LIBUSB_INCLUDE_DIRS}
         )
 
 	    add_executable (openni1Server ${SOURCE_FILES})
 
-        TARGET_LINK_LIBRARIES(openni1Server
-            progeo
-            colorspacesmm
-            JderobotInterfaces
-            ${ZeroCIce_LIBRARIES}
-            ${openni_LIBRARIES}
-            ${nite_LIBRARIES}
-            ${opencv_LIBRARIES}
-            ${gsl_LIBRARIES}
-            ${Boost_LIBRARIES}
-            ${LIBUSB_LIBRARIES}
-            ${CMAKE_THREAD_LIBS_INIT}
-            ${LIBUSB_LIBRARY_DIRS}
-        )
-    ENDIF()
+
+
+			IF( nite_LIBRARIES)
+
+				set_property(
+			  		SOURCE openni1Server.cpp
+			   		PROPERTY COMPILE_DEFINITIONS WITH_NITE=1
+			   	)
+				include_directories(
+				    ${nite_INCLUDE_DIR}
+		    	)
+
+			TARGET_LINK_LIBRARIES(openni1Server
+				  ${OpenCV_LIBRARIES}
+				  ${OpenCVGUI_LIBRARIES}
+				  ${gsl_LIBRARIES}
+				  ${ZeroCIce_LIBRARIES} 
+				  ${openni_LIBRARIES}
+				  ${nite_LIBRARIES}
+				  colorspacesmm
+				  JderobotInterfaces
+				  jderobotutil
+				  progeo
+				)
+		ELSE()
+			TARGET_LINK_LIBRARIES(openni1Server
+				  ${OpenCV_LIBRARIES}
+				  ${OpenCVGUI_LIBRARIES}
+				  ${gsl_LIBRARIES}
+				  ${ZeroCIce_LIBRARIES} 
+				  ${openni_LIBRARIES}
+				  colorspacesmm
+				  colorspacesmm
+				  JderobotInterfaces
+				  jderobotutil
+				  progeo
+				)
+		ENDIF()
 ENDIF()

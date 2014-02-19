@@ -44,7 +44,6 @@
 #include <XnPropNames.h>
 #include <XnUSB.h>
 #include <XnLog.h>
-#include <XnVCircleDetector.h>
 #include <XnFPSCalculator.h>
 #include <boost/thread/thread.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -52,6 +51,10 @@
 #include "myprogeo.h"
 #include <iostream>
 #include <fstream>
+
+#ifdef WITH_NITE
+	#include <XnVCircleDetector.h>
+#endif
 
 
 #define VID_MICROSOFT 0x45e
@@ -80,7 +83,8 @@ xn::Context g_context;
 /*OJO solo funciona con imágenes de 640x480, no con imágenes redimensionadas, si valdría con tamaños fijados con configuración openni, pero no hemos conseguido que funcione variar la resolución por configuración*/
 std::vector<int> pixelsID;
 //int pixelsID[640*480];
-int userGeneratorActive=1;
+int userGeneratorActive=0;
+int localDebug;
 
 
 struct KinectDevice
@@ -150,9 +154,11 @@ void UpdateCommon(KinectDevice &sensor)
         {
                 sensor.depth.GetMetaData(sensor.depthMD);
         }
+		#ifdef WITH_NITE
 	   if(sensor.g_UserGenerator.IsValid()){
             	sensor.g_UserGenerator.GetUserPixels(0,sensor.sceneMD);
 		}
+		#endif
         if (sensor.image.IsValid())
         {
                 sensor.image.GetMetaData(sensor.imageMD);
@@ -409,13 +415,13 @@ public:
 		std::cout << "Should be made anything to stop camera streaming: " + cameraDescription->name << std::endl;
 	}
 
-	virtual void reset(const Ice::Current&)
-	{
-	}
-
 	virtual Ice::Int setCameraDescription(const jderobot::CameraDescriptionPtr&, const Ice::Current&){
 		return 0;
 	}
+
+	virtual void reset(const Ice::Current&){
+
+		}
 
 private:
 	class ReplyTask: public IceUtil::Thread{
@@ -458,9 +464,10 @@ private:
 		long totalpre=0;
 		long diff;
 
-		std::cout << "FPS: " << fps << std::endl;
+		std::cout << "RGB FPS: " << fps << std::endl;
 		cycle=(float)(1/(float)fps)*1000000;
 		
+
 	
 		while(!(_done)){
 			gettimeofday(&a,NULL);
@@ -470,10 +477,14 @@ private:
 		    reply->timeStamp.seconds = (long)t.toSeconds();
 		    reply->timeStamp.useconds = (long)t.toMicroSeconds() - reply->timeStamp.seconds*1000000;
 			const XnRGB24Pixel* pImageRow = sensors[SELCAM].imageMD.RGB24Data();
-			const XnLabel* pLabels = sensors[SELCAM].sceneMD.Data();
+			const XnLabel* pLabels;
+			#ifdef WITH_NITE
+				pLabels= sensors[SELCAM].sceneMD.Data();
+			#endif
 			XnRGB24Pixel* pTexRow = g_pTexMap;
 
-			
+			/*std::cout << "antes" << std::endl;
+			std::cout << "seg: " << segmentation << std::endl;*/
 	
 			for (XnUInt y = 0; y < sensors[SELCAM].imageMD.YRes(); ++y)
 			{
@@ -482,7 +493,7 @@ private:
 	
 				for (XnUInt x = 0; x < sensors[SELCAM].imageMD.XRes(); ++x, ++pImage, ++pTex)
 				{
-					//std::cout << segmentation << std::endl;
+
 					if (segmentation){
 						pixelsID[(y*sensors[SELCAM].imageMD.XRes() + x)]= *pLabels;
 						if (*pLabels!=0)
@@ -518,7 +529,7 @@ private:
 			}	
 
 			//test
-			CalculateJoints();
+			//CalculateJoints();
 
 			
 			//cvFlip(srcRGB, NULL, 1);
@@ -542,7 +553,8 @@ private:
 			pthread_mutex_unlock(&mutex);
 			if (totalpre !=0){
 				if ((totala - totalpre) > cycle ){
-					std::cout<<"-------- openni1Server: WARNING- RGB timeout-" << std::endl; 
+					if (localDebug)
+						std::cout<<"-------- openni1Server: WARNING- RGB timeout-" << std::endl; 
 				}
 				else{
 					usleep(cycle - (totala - totalpre));
@@ -654,12 +666,12 @@ public:
 		std::cout << "Should be made anything to stop camera streaming: " + cameraDescription->name << std::endl;
 	}
 	
-	virtual void reset(const Ice::Current&)
-	{
-	}
-
 	virtual Ice::Int setCameraDescription(const jderobot::CameraDescriptionPtr&, const Ice::Current&){
 		return 0;
+	}
+
+	virtual void reset(const Ice::Current&){
+
 	}
 
 private:
@@ -723,7 +735,7 @@ private:
 				{
 					test= *pDepth;
 					
-					if ((*pLabels!=0)||(!segmentation)){
+					if ((!segmentation)||(*pLabels!=0)){
 						distances[(y*sensors[SELCAM].depthMD.XRes() + x)] = *pDepth;
 						if (*pDepth != 0)
 						{
@@ -741,7 +753,9 @@ private:
 					else{
 						distances[(y*sensors[SELCAM].depthMD.XRes() + x)] = 0;
 					}
+					#ifdef WITH_NITE
 					++pLabels;
+					#endif
 				
 				}
 				pDepthRow += sensors[SELCAM].depthMD.XRes();
@@ -767,7 +781,8 @@ private:
 			pthread_mutex_unlock(&mutex);
 			if (totalpre !=0){
 				if ((totala - totalpre) > cycle ){
-					std::cout<<"-------- openni1Server: WARNING- DEPTH timeout-" << std::endl; 
+					if (localDebug)
+						std::cout<<"-------- openni1Server: WARNING- DEPTH timeout-" << std::endl; 
 				}
 				else{
 					usleep(cycle - (totala - totalpre));
@@ -970,7 +985,8 @@ private:
 					pthread_mutex_unlock(&mutex);
 					if (totalpre !=0){
 						if ((totala - totalpre) > cycle ){
-							std::cout<<"-------- openni1Server: WARNING- POINTCLOUD timeout-" << std::endl; 
+							if (localDebug)
+								std::cout<<"-------- openni1Server: WARNING- POINTCLOUD timeout-" << std::endl; 
 						}
 						else{
 							usleep(cycle - (totala - totalpre));
@@ -1246,8 +1262,13 @@ int main(int argc, char** argv){
 	int pointCloud = prop->getPropertyAsIntWithDefault(componentPrefix + ".pointCloudActive",0);
 	int playerdetection = prop->getPropertyAsIntWithDefault(componentPrefix + ".PlayerDetection",0);
 	width=prop->getPropertyAsIntWithDefault("openni1Server.Width", 640);
+	localDebug=prop->getPropertyAsIntWithDefault("openni1Server.Debug", 0);
 	height=prop->getPropertyAsIntWithDefault("openni1Server.Height",480);
 	int fps=prop->getPropertyAsIntWithDefault("openni1Server.Fps",30);
+
+#ifndef WITH_NITE
+	playerdetection=0;
+#endif
 
 
 	SELCAM = prop->getPropertyAsIntWithDefault(componentPrefix + ".deviceId",0);
@@ -1413,8 +1434,8 @@ int main(int argc, char** argv){
 				rc = g_context.CreateAnyProductionTree(XN_NODE_TYPE_DEPTH, &query, sensors[i].depth);
 				// depth configuration:
 
-				/*XnUInt32 xNuma = sensors[i].depth.GetSupportedMapOutputModesCount();
-				cout << "Support mode: " << xNuma << endl;
+				XnUInt32 xNuma = sensors[i].depth.GetSupportedMapOutputModesCount();
+				std::cout << "Support mode: " << xNuma << std::endl;
 
 
 				XnMapOutputMode* aModeD = new XnMapOutputMode[xNuma];
@@ -1423,7 +1444,7 @@ int main(int argc, char** argv){
 				{
 					std::cout << aModeD[j].nXRes << " * " << aModeD[j].nYRes << " @" << aModeD[j].nFPS << "FPS" << std::endl;
 				}
-				delete[] aModeD;*/
+				delete[] aModeD;
 
 
 
@@ -1432,35 +1453,41 @@ int main(int argc, char** argv){
 				depth_mode.nXRes = width;
 				depth_mode.nYRes = height;
 				depth_mode.nFPS = 30;
-				sensors[i].depth.SetMapOutputMode(depth_mode);
+
 
 				CHECK_RC(rc, "Create Depth");
 				// now create a image generator over this device
 				rc = g_context.CreateAnyProductionTree(XN_NODE_TYPE_IMAGE, &query, sensors[i].image);
 				CHECK_RC(rc, "Create Image");
-				/*XnUInt32 xNumb = sensors[i].image.GetSupportedMapOutputModesCount();
-				cout << "Support mode: " << xNumb << endl;
+				XnUInt32 xNumb = sensors[i].image.GetSupportedMapOutputModesCount();
+				std::cout << "Support mode: " << xNumb << std::endl;
 				XnMapOutputMode* aModeR = new XnMapOutputMode[xNumb];
 				sensors[i].image.GetSupportedMapOutputModes( aModeR, xNumb );
 				for( unsigned int j = 0; j < xNumb; j++ )
 				{
 					std::cout << aModeR[j].nXRes << " * " << aModeR[j].nYRes << " @" << aModeR[j].nFPS << "FPS" << std::endl;
 				}
-				delete[] aModeD;*/
+				delete[] aModeD;
 
+				sensors[i].depth.SetMapOutputMode(aModeR[4]);
+
+				#ifdef WITH_NITE
 				rc = g_context.CreateAnyProductionTree(XN_NODE_TYPE_USER, &query, sensors[i].g_UserGenerator);
 				CHECK_RC(rc, "Find user generator");
+				#endif
 
 				XnMapOutputMode rgb_mode;
 					rgb_mode.nXRes = width;
 					rgb_mode.nYRes = height;
 					rgb_mode.nFPS = fps;
-					sensors[i].image.SetMapOutputMode(rgb_mode);
+					sensors[i].image.SetMapOutputMode(aModeD[4]);
+
 
 				sensors[i].depth.GetAlternativeViewPointCap().SetViewPoint(sensors[i].image);
 
-				XnCallbackHandle hUserCallbacks, hCalibrationStart, hCalibrationComplete, hPoseDetected, hCalibrationInProgress, hPoseInProgress;
 				if (playerdetection){
+					XnCallbackHandle hUserCallbacks, hCalibrationStart, hCalibrationComplete, hPoseDetected, hCalibrationInProgress, hPoseInProgress;
+
 					/*init player id array*/
 					pixelsID.resize(width*height);
 					if (!sensors[i].g_UserGenerator.IsCapabilitySupported(XN_CAPABILITY_SKELETON))
