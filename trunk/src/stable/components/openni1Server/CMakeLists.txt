@@ -35,6 +35,9 @@ IF(openni_LIBRARIES)
 				  ${ZeroCIce_LIBRARIES} 
 				  ${openni_LIBRARIES}
 				  ${nite_LIBRARIES}
+				  ${CMAKE_THREAD_LIBS_INIT}
+				  ${LIBUSB_LIBRARIES}
+				  ${Boost_LIBRARIES}
 				  colorspacesmm
 				  JderobotInterfaces
 				  jderobotutil
@@ -47,6 +50,9 @@ IF(openni_LIBRARIES)
 				  ${gsl_LIBRARIES}
 				  ${ZeroCIce_LIBRARIES} 
 				  ${openni_LIBRARIES}
+				  ${CMAKE_THREAD_LIBS_INIT}
+				  ${LIBUSB_LIBRARIES}
+				  ${Boost_LIBRARIES}
 				  colorspacesmm
 				  colorspacesmm
 				  JderobotInterfaces
