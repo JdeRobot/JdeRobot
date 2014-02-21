@@ -1,0 +1,279 @@
+
+names.arraySetSize(25);
+times.arraySetSize(25);
+keys.arraySetSize(25);
+
+names[0] = "HeadYaw";
+times[0].arraySetSize(3);
+keys[0].arraySetSize(3);
+
+times[0][0] = 0.100000;
+keys[0][0] = AL::ALValue::array(0.00149204, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[0][1] = 0.50000;
+keys[0][1] = AL::ALValue::array(0.00149204, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[0][2] = 1.50000;
+keys[0][2] = AL::ALValue::array(0.0137640, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[1] = "HeadPitch";
+times[1].arraySetSize(3);
+keys[1].arraySetSize(3);
+
+times[1][0] = 0.100000;
+keys[1][0] = AL::ALValue::array(0.0168320, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[1][1] = 0.50000;
+keys[1][1] = AL::ALValue::array(-0.0138480, AL::ALValue::array(3, -0.633333, 0.0306800), AL::ALValue::array(3, 0.500000, -0.0242211));
+times[1][2] = 3.50000;
+keys[1][2] = AL::ALValue::array(-0.647390, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[2] = "LShoulderPitch";
+times[2].arraySetSize(3);
+keys[2].arraySetSize(3);
+
+times[2][0] = 0.100000;
+keys[2][0] = AL::ALValue::array(1.82542, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[2][1] = 0.50000;
+keys[2][1] = AL::ALValue::array(0.645772, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[2][2] = 1.50000;
+keys[2][2] = AL::ALValue::array(0.768492, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[3] = "LShoulderRoll";
+times[3].arraySetSize(3);
+keys[3].arraySetSize(3);
+
+times[3][0] = 0.100000;
+keys[3][0] = AL::ALValue::array(0.190174, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[3][1] = 0.50000;
+keys[3][1] = AL::ALValue::array(1.23790, AL::ALValue::array(3, -0.633333, -0.0641212), AL::ALValue::array(3, 0.500000, 0.0506220));
+times[3][2] = 1.50000;
+keys[3][2] = AL::ALValue::array(1.28852, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[4] = "LElbowYaw";
+times[4].arraySetSize(3);
+keys[4].arraySetSize(3);
+
+times[4][0] = 0.100000;
+keys[4][0] = AL::ALValue::array(-1.47882, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[4][1] = 0.50000;
+keys[4][1] = AL::ALValue::array(-2.08567, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[4][2] = 1.50000;
+keys[4][2] = AL::ALValue::array(-2.08567, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[5] = "LElbowRoll";
+times[5].arraySetSize(3);
+keys[5].arraySetSize(3);
+
+times[5][0] = 0.100000;
+keys[5][0] = AL::ALValue::array(-0.512314, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[5][1] = 0.50000;
+keys[5][1] = AL::ALValue::array(-0.0444440, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[5][2] = 1.50000;
+keys[5][2] = AL::ALValue::array(-0.0444440, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[6] = "LWristYaw";
+times[6].arraySetSize(3);
+keys[6].arraySetSize(3);
+
+times[6][0] = 0.100000;
+keys[6][0] = AL::ALValue::array(0.00000, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[6][1] = 0.50000;
+keys[6][1] = AL::ALValue::array(0.00000, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[6][2] = 1.50000;
+keys[6][2] = AL::ALValue::array(0.00000, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[7] = "LHand";
+times[7].arraySetSize(3);
+keys[7].arraySetSize(3);
+
+times[7][0] = 0.100000;
+keys[7][0] = AL::ALValue::array(0.00000, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[7][1] = 0.50000;
+keys[7][1] = AL::ALValue::array(0.00000, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[7][2] = 1.50000;
+keys[7][2] = AL::ALValue::array(0.00000, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[8] = "RShoulderPitch";
+times[8].arraySetSize(3);
+keys[8].arraySetSize(3);
+
+times[8][0] = 0.100000;
+keys[8][0] = AL::ALValue::array(1.81630, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[8][1] = 0.50000;
+keys[8][1] = AL::ALValue::array(0.266958, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[8][2] = 1.50000;
+keys[8][2] = AL::ALValue::array(0.277696, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[9] = "RShoulderRoll";
+times[9].arraySetSize(3);
+keys[9].arraySetSize(3);
+
+times[9][0] = 0.100000;
+keys[9][0] = AL::ALValue::array(-0.202530, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[9][1] = 0.50000;
+keys[9][1] = AL::ALValue::array(-1.07844, AL::ALValue::array(3, -0.633333, 0.204481), AL::ALValue::array(3, 0.500000, -0.161432));
+times[9][2] = 1.50000;
+keys[9][2] = AL::ALValue::array(-1.30027, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[10] = "RElbowYaw";
+times[10].arraySetSize(3);
+keys[10].arraySetSize(3);
+
+times[10][0] = 0.100000;
+keys[10][0] = AL::ALValue::array(1.47873, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[10][1] = 0.50000;
+keys[10][1] = AL::ALValue::array(2.08567, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[10][2] = 1.50000;
+keys[10][2] = AL::ALValue::array(2.08567, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[11] = "RElbowRoll";
+times[11].arraySetSize(3);
+keys[11].arraySetSize(3);
+
+times[11][0] = 0.100000;
+keys[11][0] = AL::ALValue::array(0.538476, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[11][1] = 0.50000;
+keys[11][1] = AL::ALValue::array(0.204064, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[11][2] = 1.50000;
+keys[11][2] = AL::ALValue::array(0.346726, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[12] = "RWristYaw";
+times[12].arraySetSize(3);
+keys[12].arraySetSize(3);
+
+times[12][0] = 0.100000;
+keys[12][0] = AL::ALValue::array(0.00000, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[12][1] = 0.50000;
+keys[12][1] = AL::ALValue::array(0.00000, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[12][2] = 1.50000;
+keys[12][2] = AL::ALValue::array(0.00000, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[13] = "RHand";
+times[13].arraySetSize(3);
+keys[13].arraySetSize(3);
+
+times[13][0] = 0.100000;
+keys[13][0] = AL::ALValue::array(0.00000, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[13][1] = 0.50000;
+keys[13][1] = AL::ALValue::array(0.00000, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[13][2] = 1.50000;
+keys[13][2] = AL::ALValue::array(0.00000, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[14] = "LHipYawPitch";
+times[14].arraySetSize(3);
+keys[14].arraySetSize(3);
+
+times[14][0] = 0.100000;
+keys[14][0] = AL::ALValue::array(4.19617e-05, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[14][1] = 0.50000;
+keys[14][1] = AL::ALValue::array(-0.342040, AL::ALValue::array(3, -0.633333, 0.213166), AL::ALValue::array(3, 0.500000, -0.168289));
+times[14][2] = 1.50000;
+keys[14][2] = AL::ALValue::array(-1.14432, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[15] = "LHipRoll";
+times[15].arraySetSize(3);
+keys[15].arraySetSize(3);
+
+times[15][0] = 0.100000;
+keys[15][0] = AL::ALValue::array(0.00924596, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[15][1] = 0.50000;
+keys[15][1] = AL::ALValue::array(0.0905480, AL::ALValue::array(3, -0.633333, -0.0813020), AL::ALValue::array(3, 0.500000, 0.0641858));
+times[15][2] = 1.50000;
+keys[15][2] = AL::ALValue::array(0.765508, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[16] = "LHipPitch";
+times[16].arraySetSize(3);
+keys[16].arraySetSize(3);
+
+times[16][0] = 0.100000;
+keys[16][0] = AL::ALValue::array(-0.443284, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[16][1] = 0.50000;
+keys[16][1] = AL::ALValue::array(-0.645772, AL::ALValue::array(3, -0.633333, 0.202488), AL::ALValue::array(3, 0.500000, -0.159859));
+times[16][2] = 1.50000;
+keys[16][2] = AL::ALValue::array(-1.57077, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[17] = "LKneePitch";
+times[17].arraySetSize(3);
+keys[17].arraySetSize(3);
+
+times[17][0] = 0.100000;
+keys[17][0] = AL::ALValue::array(0.955640, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[17][1] = 0.50000;
+keys[17][1] = AL::ALValue::array(2.11255, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[17][2] = 1.50000;
+keys[17][2] = AL::ALValue::array(2.11228, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[18] = "LAnklePitch";
+times[18].arraySetSize(3);
+keys[18].arraySetSize(3);
+
+times[18][0] = 0.100000;
+keys[18][0] = AL::ALValue::array(-0.510864, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[18][1] = 0.50000;
+keys[18][1] = AL::ALValue::array(-1.18944, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[18][2] = 1.50000;
+keys[18][2] = AL::ALValue::array(-1.18889, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[19] = "LAnkleRoll";
+times[19].arraySetSize(3);
+keys[19].arraySetSize(3);
+
+times[19][0] = 0.100000;
+keys[19][0] = AL::ALValue::array(-0.0106960, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[19][1] = 0.50000;
+keys[19][1] = AL::ALValue::array(-0.0398420, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[19][2] = 1.50000;
+keys[19][2] = AL::ALValue::array(0.0491300, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[20] = "RHipRoll";
+times[20].arraySetSize(3);
+keys[20].arraySetSize(3);
+
+times[20][0] = 0.100000;
+keys[20][0] = AL::ALValue::array(0.00924596, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[20][1] = 0.50000;
+keys[20][1] = AL::ALValue::array(0.0491300, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[20][2] = 1.50000;
+keys[20][2] = AL::ALValue::array(-0.737812, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[21] = "RHipPitch";
+times[21].arraySetSize(3);
+keys[21].arraySetSize(3);
+
+times[21][0] = 0.100000;
+keys[21][0] = AL::ALValue::array(-0.331386, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[21][1] = 0.50000;
+keys[21][1] = AL::ALValue::array(-0.636652, AL::ALValue::array(3, -0.633333, 0.227453), AL::ALValue::array(3, 0.500000, -0.179568));
+times[21][2] = 1.50000;
+keys[21][2] = AL::ALValue::array(-1.55245, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[22] = "RKneePitch";
+times[22].arraySetSize(3);
+keys[22].arraySetSize(3);
+
+times[22][0] = 0.100000;
+keys[22][0] = AL::ALValue::array(0.921976, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[22][1] = 0.50000;
+keys[22][1] = AL::ALValue::array(2.11255, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[22][2] = 1.50000;
+keys[22][2] = AL::ALValue::array(2.11255, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[23] = "RAnklePitch";
+times[23].arraySetSize(3);
+keys[23].arraySetSize(3);
+
+times[23][0] = 0.100000;
+keys[23][0] = AL::ALValue::array(-0.590548, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[23][1] = 0.50000;
+keys[23][1] = AL::ALValue::array(-1.18574, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[23][2] = 1.50000;
+keys[23][2] = AL::ALValue::array(-1.18574, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));
+
+names[24] = "RAnkleRoll";
+times[24].arraySetSize(3);
+keys[24].arraySetSize(3);
+
+times[24][0] = 0.100000;
+keys[24][0] = AL::ALValue::array(-0.0106960, AL::ALValue::array(3, -0.0333333, -0.00000), AL::ALValue::array(3, 0.633333, 0.00000));
+times[24][1] = 0.50000;
+keys[24][1] = AL::ALValue::array(-0.0505800, AL::ALValue::array(3, -0.633333, -0.00000), AL::ALValue::array(3, 0.500000, 0.00000));
+times[24][2] = 1.50000;
+keys[24][2] = AL::ALValue::array(-0.0490460, AL::ALValue::array(3, -0.500000, -0.00000), AL::ALValue::array(3, 0.00000, 0.00000));

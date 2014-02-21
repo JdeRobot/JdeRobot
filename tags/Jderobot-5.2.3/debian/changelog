@@ -1,0 +1,35 @@
+jderobot (5.2.0-1) unstable; urgency=low
+
+  * Added cmake compilation process
+  * New structure libs and components
+  * Added openNi component
+  * Added calibrator kinnect component
+  * Added recorder/replayer component
+  * Added visualHFSM component
+  * Added wiimote component
+  * Added bgfgsegmentation lib
+  * Added geometry lib
+  * Added parallelIce lib
+  * Added vision lib
+  * Updated ICE interfaces
+  * Added some examples
+
+ -- Roberto Calvo <rocapal@gsyc.urjc.es>  Tue, 23 Jul 2013 11:44:14 +0200
+
+jderobot (5.0.4-1) unstable; urgency=low
+
+  * Bug gazeboserver fixed
+
+ -- Eduardo Perdices <eperdices@gsyc.es>  Thu, 04 Apr 2011 12:58:33 +0100
+
+jderobot (5.0.3-1) unstable; urgency=low
+
+  * Added opencvdemo component
+
+ -- Eduardo Perdices <eperdices@gsyc.es>  Thu, 01 Apr 2011 13:15:33 +0100
+
+jderobot (5.0.2-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Eduardo Perdices <eperdices@gsyc.es>  Thu, 20 Jan 2011 15:08:33 +0100

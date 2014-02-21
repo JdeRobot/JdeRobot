@@ -1,0 +1,444 @@
+//Total time=3.7
+names.arraySetSize(19);
+times.arraySetSize(19);
+keys.arraySetSize(19);
+
+names[0] = "LShoulderPitch";
+times[0].arraySetSize(9);
+keys[0].arraySetSize(9);
+names[1] = "LShoulderRoll";
+times[1].arraySetSize(9);
+keys[1].arraySetSize(9);
+names[2] = "LElbowYaw";
+times[2].arraySetSize(9);
+keys[2].arraySetSize(9);
+names[3] = "LElbowRoll";
+times[3].arraySetSize(9);
+keys[3].arraySetSize(9);
+names[4] = "LHipYawPitch";
+times[4].arraySetSize(8);
+keys[4].arraySetSize(8);
+names[5] = "LHipRoll";
+times[5].arraySetSize(10);
+keys[5].arraySetSize(10);
+names[6] = "LHipPitch";
+times[6].arraySetSize(10);
+keys[6].arraySetSize(10);
+names[7] = "LKneePitch";
+times[7].arraySetSize(10);
+keys[7].arraySetSize(10);
+names[8] = "LAnklePitch";
+times[8].arraySetSize(10);
+keys[8].arraySetSize(10);
+names[9] = "LAnkleRoll";
+times[9].arraySetSize(10);
+keys[9].arraySetSize(10);
+names[10] = "RHipRoll";
+times[10].arraySetSize(10);
+keys[10].arraySetSize(10);
+names[11] = "RHipPitch";
+times[11].arraySetSize(10);
+keys[11].arraySetSize(10);
+names[12] = "RKneePitch";
+times[12].arraySetSize(10);
+keys[12].arraySetSize(10);
+names[13] = "RAnklePitch";
+times[13].arraySetSize(10);
+keys[13].arraySetSize(10);
+names[14] = "RAnkleRoll";
+times[14].arraySetSize(10);
+keys[14].arraySetSize(10);
+names[15] = "RShoulderPitch";
+times[15].arraySetSize(9);
+keys[15].arraySetSize(9);
+names[16] = "RShoulderRoll";
+times[16].arraySetSize(9);
+keys[16].arraySetSize(9);
+names[17] = "RElbowYaw";
+times[17].arraySetSize(9);
+keys[17].arraySetSize(9);
+names[18] = "RElbowRoll";
+times[18].arraySetSize(9);
+keys[18].arraySetSize(9);
+
+float duration;
+
+duration = 0.5; //time=0.5
+times[0][0] = duration; //LShoulderPitch
+keys[0][0] = AL::ALValue::array(1.83616, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[1][0] = duration; //LShoulderRoll
+keys[1][0] = AL::ALValue::array(0.191709, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[2][0] = duration; //LElbowYaw
+keys[2][0] = AL::ALValue::array(-1.47268, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[3][0] = duration; //LElbowRoll
+keys[3][0] = AL::ALValue::array(-0.524587, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[4][0] = duration; //LHipYawPitch
+keys[4][0] = AL::ALValue::array(4.19617e-05, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.466667, 0.0));
+times[5][0] = duration; //LHipRoll
+keys[5][0] = AL::ALValue::array(-0.00302603, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[6][0] = duration; //LHipPitch
+keys[6][0] = AL::ALValue::array(-0.38806, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[7][0] = duration; //LKneePitch
+keys[7][0] = AL::ALValue::array(0.943368, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[8][0] = duration; //LAnklePitch
+keys[8][0] = AL::ALValue::array(-0.55535, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[9][0] = duration; //LAnkleRoll
+keys[9][0] = AL::ALValue::array(0.00310997, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[10][0] = duration; //RHipRoll
+keys[10][0] = AL::ALValue::array(0.0245859, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[11][0] = duration; //RHipPitch
+keys[11][0] = AL::ALValue::array(-0.38661, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[12][0] = duration; //RKneePitch
+keys[12][0] = AL::ALValue::array(0.941918, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[13][0] = duration; //RAnklePitch
+keys[13][0] = AL::ALValue::array(-0.553732, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[14][0] = duration; //RAnkleRoll
+keys[14][0] = AL::ALValue::array(-0.024502, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[15][0] = duration; //RShoulderPitch
+keys[15][0] = AL::ALValue::array(1.83471, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[16][0] = duration; //RShoulderRoll
+keys[16][0] = AL::ALValue::array(-0.190258, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[17][0] = duration; //RElbowYaw
+keys[17][0] = AL::ALValue::array(1.47413, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[18][0] = duration; //RElbowRoll
+keys[18][0] = AL::ALValue::array(0.483252, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+
+duration = 0.5; //time=1.0
+times[0][1] = (float)times[0][0] + duration; //LShoulderPitch
+keys[0][1] = AL::ALValue::array(1.74113, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[1][1] = (float)times[1][0] + duration; //LShoulderRoll
+keys[1][1] = AL::ALValue::array(0.231677, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[2][1] = (float)times[2][0] + duration; //LElbowYaw
+keys[2][1] = AL::ALValue::array(-1.5585, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[3][1] = (float)times[3][0] + duration; //LElbowRoll
+keys[3][1] = AL::ALValue::array(-0.495523, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[5][1] = (float)times[5][0] + duration; //LHipRoll
+keys[5][1] = AL::ALValue::array(0.0261799, AL::ALValue::array(2, -0.166667, -0.029206), AL::ALValue::array(2, 0.166667, 0.029206));
+times[6][1] = (float)times[6][0] + duration; //LHipPitch
+keys[6][1] = AL::ALValue::array(-0.435699, AL::ALValue::array(2, -0.166667, 0.000633566), AL::ALValue::array(2, 0.166667, -0.000633566));
+times[7][1] = (float)times[7][0] + duration; //LKneePitch
+keys[7][1] = AL::ALValue::array(1.24966, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[8][1] = (float)times[8][0] + duration; //LAnklePitch
+keys[8][1] = AL::ALValue::array(-0.797615, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[9][1] = (float)times[9][0] + duration; //LAnkleRoll
+keys[9][1] = AL::ALValue::array(0.226893, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[10][1] = (float)times[10][0] + duration; //RHipRoll
+keys[10][1] = AL::ALValue::array(0.122173, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[11][1] = (float)times[11][0] + duration; //RHipPitch
+keys[11][1] = AL::ALValue::array(-0.244346, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[12][1] = (float)times[12][0] + duration; //RKneePitch
+keys[12][1] = AL::ALValue::array(0.837758, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[13][1] = (float)times[13][0] + duration; //RAnklePitch
+keys[13][1] = AL::ALValue::array(-0.602139, AL::ALValue::array(2, -0.166667, 0.0444288), AL::ALValue::array(2, 0.166667, -0.0444288));
+times[14][1] = (float)times[14][0] + duration; //RAnkleRoll
+keys[14][1] = AL::ALValue::array(0.226893, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[15][1] = (float)times[15][0] + duration; //RShoulderPitch
+keys[15][1] = AL::ALValue::array(1.73031, AL::ALValue::array(2, -0.166667, 0.000689492), AL::ALValue::array(2, 0.166667, -0.000689492));
+times[16][1] = (float)times[16][0] + duration; //RShoulderRoll
+keys[16][1] = AL::ALValue::array(-0.259204, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[17][1] = (float)times[17][0] + duration; //RElbowYaw
+keys[17][1] = AL::ALValue::array(1.55552, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+times[18][1] = (float)times[18][0] + duration; //RElbowRoll
+keys[18][1] = AL::ALValue::array(0.54146, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.166667, 0.0));
+
+duration = 0.5; //time=1.5
+times[0][2] = (float)times[0][1] + duration; //LShoulderPitch
+keys[0][2] = AL::ALValue::array(1.74113, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.2, 0.0));
+times[1][2] = (float)times[1][1] + duration; //LShoulderRoll
+keys[1][2] = AL::ALValue::array(0.231677, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.2, 0.0));
+times[2][2] = (float)times[2][1] + duration; //LElbowYaw
+keys[2][2] = AL::ALValue::array(-1.5585, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.2, 0.0));
+times[3][2] = (float)times[3][1] + duration; //LElbowRoll
+keys[3][2] = AL::ALValue::array(-0.495523, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.2, 0.0));
+times[5][2] = (float)times[5][1] + duration; //LHipRoll
+keys[5][2] = AL::ALValue::array(0.253073, AL::ALValue::array(2, -0.166667, -0.0327249), AL::ALValue::array(2, 0.133333, 0.0261799));
+times[6][2] = (float)times[6][1] + duration; //LHipPitch
+keys[6][2] = AL::ALValue::array(-0.436332, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[7][2] = (float)times[7][1] + duration; //LKneePitch
+keys[7][2] = AL::ALValue::array(1.24966, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[8][2] = (float)times[8][1] + duration; //LAnklePitch
+keys[8][2] = AL::ALValue::array(-0.785398, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[9][2] = (float)times[9][1] + duration; //LAnkleRoll
+keys[9][2] = AL::ALValue::array(0.191986, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[10][2] = (float)times[10][1] + duration; //RHipRoll
+keys[10][2] = AL::ALValue::array(0.122173, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[11][2] = (float)times[11][1] + duration; //RHipPitch
+keys[11][2] = AL::ALValue::array(-0.436332, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[12][2] = (float)times[12][1] + duration; //RKneePitch
+keys[12][2] = AL::ALValue::array(1.41372, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[13][2] = (float)times[13][1] + duration; //RAnklePitch
+keys[13][2] = AL::ALValue::array(-0.820305, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[14][2] = (float)times[14][1] + duration; //RAnkleRoll
+keys[14][2] = AL::ALValue::array(0.226893, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[15][2] = (float)times[15][1] + duration; //RShoulderPitch
+keys[15][2] = AL::ALValue::array(1.72962, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.2, 0.0));
+times[16][2] = (float)times[16][1] + duration; //RShoulderRoll
+keys[16][2] = AL::ALValue::array(-0.259204, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.2, 0.0));
+times[17][2] = (float)times[17][1] + duration; //RElbowYaw
+keys[17][2] = AL::ALValue::array(1.55552, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.2, 0.0));
+times[18][2] = (float)times[18][1] + duration; //RElbowRoll
+keys[18][2] = AL::ALValue::array(0.54146, AL::ALValue::array(2, -0.166667, -0.0), AL::ALValue::array(2, 0.2, 0.0));
+
+duration = 0.4; //time=1.9
+times[4][1] = (float)times[4][0] + 1.4; //LHipYawPitch
+keys[4][1] = AL::ALValue::array(-0.016832, AL::ALValue::array(2, -0.466667, 0.00581643), AL::ALValue::array(2, 0.0666667, -0.000830918));
+times[5][3] = (float)times[5][2] + duration; //LHipRoll
+keys[5][3] = AL::ALValue::array(0.279253, AL::ALValue::array(2, -0.133333, -0.00819878), AL::ALValue::array(2, 0.0666667, 0.00409939));
+times[6][3] = (float)times[6][2] + duration; //LHipPitch
+keys[6][3] = AL::ALValue::array(-0.342041, AL::ALValue::array(2, -0.133333, -0.0451571), AL::ALValue::array(2, 0.0666667, 0.0225786));
+times[7][3] = (float)times[7][2] + duration; //LKneePitch
+keys[7][3] = AL::ALValue::array(1.26091, AL::ALValue::array(2, -0.133333, -0.00624985), AL::ALValue::array(2, 0.0666667, 0.00312492));
+times[8][3] = (float)times[8][2] + duration; //LAnklePitch
+keys[8][3] = AL::ALValue::array(-0.788517, AL::ALValue::array(2, -0.133333, 0.00311889), AL::ALValue::array(2, 0.0666667, -0.00155945));
+times[9][3] = (float)times[9][2] + duration; //LAnkleRoll
+keys[9][3] = AL::ALValue::array(0.204064, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.0666667, 0.0));
+times[10][3] = (float)times[10][2] + duration; //RHipRoll
+keys[10][3] = AL::ALValue::array(-0.0698132, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.0666667, 0.0));
+times[11][3] = (float)times[11][2] + duration; //RHipPitch
+keys[11][3] = AL::ALValue::array(-0.349066, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.0666667, 0.0));
+times[12][3] = (float)times[12][2] + duration; //RKneePitch
+keys[12][3] = AL::ALValue::array(0.820305, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.0666667, 0.0));
+times[13][3] = (float)times[13][2] + duration; //RAnklePitch
+keys[13][3] = AL::ALValue::array(-0.139626, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.0666667, 0.0));
+times[14][3] = (float)times[14][2] + duration; //RAnkleRoll
+keys[14][3] = AL::ALValue::array(0.204204, AL::ALValue::array(2, -0.133333, 0.0105274), AL::ALValue::array(2, 0.0666667, -0.00526372));
+
+duration = 0.2; //time=2.1
+times[0][3] = (float)times[0][2] + 0.6; //LShoulderPitch
+keys[0][3] = AL::ALValue::array(1.75179, AL::ALValue::array(2, -0.2, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[1][3] = (float)times[1][2] + 0.6; //LShoulderRoll
+keys[1][3] = AL::ALValue::array(0.239262, AL::ALValue::array(2, -0.2, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[2][3] = (float)times[2][2] + 0.6; //LElbowYaw
+keys[2][3] = AL::ALValue::array(-1.55092, AL::ALValue::array(2, -0.2, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[3][3] = (float)times[3][2] + 0.6; //LElbowRoll
+keys[3][3] = AL::ALValue::array(-0.501576, AL::ALValue::array(2, -0.2, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[4][2] = (float)times[4][1] + duration; //LHipYawPitch
+keys[4][2] = AL::ALValue::array(-0.0199001, AL::ALValue::array(2, -0.0666667, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[5][4] = (float)times[5][3] + duration; //LHipRoll
+keys[5][4] = AL::ALValue::array(0.289967, AL::ALValue::array(2, -0.0666667, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[6][4] = (float)times[6][3] + duration; //LHipPitch
+keys[6][4] = AL::ALValue::array(-0.233125, AL::ALValue::array(2, -0.0666667, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[7][4] = (float)times[7][3] + duration; //LKneePitch
+keys[7][4] = AL::ALValue::array(1.27778, AL::ALValue::array(2, -0.0666667, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[8][4] = (float)times[8][3] + duration; //LAnklePitch
+keys[8][4] = AL::ALValue::array(-0.822267, AL::ALValue::array(2, -0.0666667, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[9][4] = (float)times[9][3] + duration; //LAnkleRoll
+keys[9][4] = AL::ALValue::array(0.150374, AL::ALValue::array(2, -0.0666667, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[10][4] = (float)times[10][3] + duration; //RHipRoll
+keys[10][4] = AL::ALValue::array(0.247016, AL::ALValue::array(2, -0.0666667, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[11][4] = (float)times[11][3] + duration; //RHipPitch
+keys[11][4] = AL::ALValue::array(-0.593412, AL::ALValue::array(2, -0.0666667, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[12][4] = (float)times[12][3] + duration; //RKneePitch
+keys[12][4] = AL::ALValue::array(1.26866, AL::ALValue::array(2, -0.0666667, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[13][4] = (float)times[13][3] + duration; //RAnklePitch
+keys[13][4] = AL::ALValue::array(-0.352778, AL::ALValue::array(2, -0.0666667, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[14][4] = (float)times[14][3] + duration; //RAnkleRoll
+keys[14][4] = AL::ALValue::array(0.179519, AL::ALValue::array(2, -0.0666667, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[15][3] = (float)times[15][2] + 0.6; //RShoulderPitch
+keys[15][3] = AL::ALValue::array(1.7396, AL::ALValue::array(2, -0.2, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[16][3] = (float)times[16][2] + 0.6; //RShoulderRoll
+keys[16][3] = AL::ALValue::array(-0.230143, AL::ALValue::array(2, -0.2, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[17][3] = (float)times[17][2] + 0.6; //RElbowYaw
+keys[17][3] = AL::ALValue::array(1.54776, AL::ALValue::array(2, -0.2, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+times[18][3] = (float)times[18][2] + 0.6; //RElbowRoll
+keys[18][3] = AL::ALValue::array(0.520068, AL::ALValue::array(2, -0.2, -0.0), AL::ALValue::array(2, 0.0333333, 0.0));
+
+duration = 0.1; //time=2.2
+times[0][4] = (float)times[0][3] + duration; //LShoulderPitch
+keys[0][4] = AL::ALValue::array(1.75179, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[1][4] = (float)times[1][3] + duration; //LShoulderRoll
+keys[1][4] = AL::ALValue::array(0.239262, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[2][4] = (float)times[2][3] + duration; //LElbowYaw
+keys[2][4] = AL::ALValue::array(-1.55092, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[3][4] = (float)times[3][3] + duration; //LElbowRoll
+keys[3][4] = AL::ALValue::array(-0.501576, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[4][3] = (float)times[4][2] + duration; //LHipYawPitch
+keys[4][3] = AL::ALValue::array(-0.0199001, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[5][5] = (float)times[5][4] + duration; //LHipRoll
+keys[5][5] = AL::ALValue::array(0.289967, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[6][5] = (float)times[6][4] + duration; //LHipPitch
+keys[6][5] = AL::ALValue::array(-0.233125, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[7][5] = (float)times[7][4] + duration; //LKneePitch
+keys[7][5] = AL::ALValue::array(1.27778, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[8][5] = (float)times[8][4] + duration; //LAnklePitch
+keys[8][5] = AL::ALValue::array(-0.822267, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[9][5] = (float)times[9][4] + duration; //LAnkleRoll
+keys[9][5] = AL::ALValue::array(0.150374, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[10][5] = (float)times[10][4] + duration; //RHipRoll
+keys[10][5] = AL::ALValue::array(0.247016, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[11][5] = (float)times[11][4] + duration; //RHipPitch
+keys[11][5] = AL::ALValue::array(-0.593412, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[12][5] = (float)times[12][4] + duration; //RKneePitch
+keys[12][5] = AL::ALValue::array(1.26866, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[13][5] = (float)times[13][4] + duration; //RAnklePitch
+keys[13][5] = AL::ALValue::array(-0.352778, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[14][5] = (float)times[14][4] + duration; //RAnkleRoll
+keys[14][5] = AL::ALValue::array(0.179519, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[15][4] = (float)times[15][3] + duration; //RShoulderPitch
+keys[15][4] = AL::ALValue::array(1.7396, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[16][4] = (float)times[16][3] + duration; //RShoulderRoll
+keys[16][4] = AL::ALValue::array(-0.230143, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[17][4] = (float)times[17][3] + duration; //RElbowYaw
+keys[17][4] = AL::ALValue::array(1.54776, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[18][4] = (float)times[18][3] + duration; //RElbowRoll
+keys[18][4] = AL::ALValue::array(0.520068, AL::ALValue::array(2, -0.0333333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+
+duration = 0.4; //time=2.6
+times[0][5] = (float)times[0][4] + duration; //LShoulderPitch
+keys[0][5] = AL::ALValue::array(1.74113, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[1][5] = (float)times[1][4] + duration; //LShoulderRoll
+keys[1][5] = AL::ALValue::array(0.231677, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[2][5] = (float)times[2][4] + duration; //LElbowYaw
+keys[2][5] = AL::ALValue::array(-1.5585, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[3][5] = (float)times[3][4] + duration; //LElbowRoll
+keys[3][5] = AL::ALValue::array(-0.495523, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[4][4] = (float)times[4][3] + duration; //LHipYawPitch
+keys[4][4] = AL::ALValue::array(-0.0401426, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[5][6] = (float)times[5][5] + duration; //LHipRoll
+keys[5][6] = AL::ALValue::array(0.121228, AL::ALValue::array(2, -0.133333, 0.0493435), AL::ALValue::array(2, 0.133333, -0.0493435));
+times[6][6] = (float)times[6][5] + duration; //LHipPitch
+keys[6][6] = AL::ALValue::array(-0.326377, AL::ALValue::array(2, -0.133333, 0.0296575), AL::ALValue::array(2, 0.133333, -0.0296575));
+times[7][6] = (float)times[7][5] + duration; //LKneePitch
+keys[7][6] = AL::ALValue::array(1.24557, AL::ALValue::array(2, -0.133333, 0.0322136), AL::ALValue::array(2, 0.133333, -0.0322136));
+times[8][6] = (float)times[8][5] + duration; //LAnklePitch
+keys[8][6] = AL::ALValue::array(-0.808459, AL::ALValue::array(2, -0.133333, -0.0138073), AL::ALValue::array(2, 0.133333, 0.0138073));
+times[9][6] = (float)times[9][5] + duration; //LAnkleRoll
+keys[9][6] = AL::ALValue::array(0.227074, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[10][6] = (float)times[10][5] + duration; //RHipRoll
+keys[10][6] = AL::ALValue::array(0.12583, AL::ALValue::array(2, -0.133333, 0.0460201), AL::ALValue::array(2, 0.133333, -0.0460201));
+times[11][6] = (float)times[11][5] + duration; //RHipPitch
+keys[11][6] = AL::ALValue::array(-0.446804, AL::ALValue::array(2, -0.133333, -0.0503184), AL::ALValue::array(2, 0.133333, 0.0503184));
+times[12][6] = (float)times[12][5] + duration; //RKneePitch
+keys[12][6] = AL::ALValue::array(1.41592, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[13][6] = (float)times[13][5] + duration; //RAnklePitch
+keys[13][6] = AL::ALValue::array(-0.826783, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[14][6] = (float)times[14][5] + duration; //RAnkleRoll
+keys[14][6] = AL::ALValue::array(0.174919, AL::ALValue::array(2, -0.133333, 0.00460068), AL::ALValue::array(2, 0.133333, -0.00460068));
+times[15][5] = (float)times[15][4] + duration; //RShoulderPitch
+keys[15][5] = AL::ALValue::array(1.72962, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[16][5] = (float)times[16][4] + duration; //RShoulderRoll
+keys[16][5] = AL::ALValue::array(-0.259204, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[17][5] = (float)times[17][4] + duration; //RElbowYaw
+keys[17][5] = AL::ALValue::array(1.55552, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[18][5] = (float)times[18][4] + duration; //RElbowRoll
+keys[18][5] = AL::ALValue::array(0.54146, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+
+duration = 0.4; //time=3.0
+times[0][6] = (float)times[0][5] + duration; //LShoulderPitch
+keys[0][6] = AL::ALValue::array(1.74113, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[1][6] = (float)times[1][5] + duration; //LShoulderRoll
+keys[1][6] = AL::ALValue::array(0.231677, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[2][6] = (float)times[2][5] + duration; //LElbowYaw
+keys[2][6] = AL::ALValue::array(-1.5585, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[3][6] = (float)times[3][5] + duration; //LElbowRoll
+keys[3][6] = AL::ALValue::array(-0.495523, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[4][5] = (float)times[4][4] + duration; //LHipYawPitch
+keys[4][5] = AL::ALValue::array(0.0174533, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[5][7] = (float)times[5][6] + duration; //LHipRoll
+keys[5][7] = AL::ALValue::array(-0.00609404, AL::ALValue::array(2, -0.133333, 0.0184919), AL::ALValue::array(2, 0.133333, -0.0184919));
+times[6][7] = (float)times[6][6] + duration; //LHipPitch
+keys[6][7] = AL::ALValue::array(-0.41107, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[7][7] = (float)times[7][6] + duration; //LKneePitch
+keys[7][7] = AL::ALValue::array(0.897349, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[8][7] = (float)times[8][6] + duration; //LAnklePitch
+keys[8][7] = AL::ALValue::array(-0.579894, AL::ALValue::array(2, -0.133333, -0.0261625), AL::ALValue::array(2, 0.133333, 0.0261625));
+times[9][7] = (float)times[9][6] + duration; //LAnkleRoll
+keys[9][7] = AL::ALValue::array(0.066004, AL::ALValue::array(2, -0.133333, 0.0337621), AL::ALValue::array(2, 0.133333, -0.0337621));
+times[10][7] = (float)times[10][6] + duration; //RHipRoll
+keys[10][7] = AL::ALValue::array(-0.0291041, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[11][7] = (float)times[11][6] + duration; //RHipPitch
+keys[11][7] = AL::ALValue::array(-0.291501, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[12][7] = (float)times[12][6] + duration; //RKneePitch
+keys[12][7] = AL::ALValue::array(0.661195, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[13][7] = (float)times[13][6] + duration; //RAnklePitch
+keys[13][7] = AL::ALValue::array(-0.447886, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[14][7] = (float)times[14][6] + duration; //RAnkleRoll
+keys[14][7] = AL::ALValue::array(0.0782759, AL::ALValue::array(2, -0.133333, 0.0296714), AL::ALValue::array(2, 0.133333, -0.0296714));
+times[15][6] = (float)times[15][5] + duration; //RShoulderPitch
+keys[15][6] = AL::ALValue::array(1.72962, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[16][6] = (float)times[16][5] + duration; //RShoulderRoll
+keys[16][6] = AL::ALValue::array(-0.259204, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[17][6] = (float)times[17][5] + duration; //RElbowYaw
+keys[17][6] = AL::ALValue::array(1.55552, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+times[18][6] = (float)times[18][5] + duration; //RElbowRoll
+keys[18][6] = AL::ALValue::array(0.54146, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.133333, 0.0));
+
+duration = 0.4; //time=3.4
+times[0][7] = (float)times[0][6] + duration; //LShoulderPitch
+keys[0][7] = AL::ALValue::array(1.83471, AL::ALValue::array(2, -0.133333, -0.0019315), AL::ALValue::array(2, 0.1, 0.00144863));
+times[1][7] = (float)times[1][6] + duration; //LShoulderRoll
+keys[1][7] = AL::ALValue::array(0.190258, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.1, 0.0));
+times[2][7] = (float)times[2][6] + duration; //LElbowYaw
+keys[2][7] = AL::ALValue::array(-1.47413, AL::ALValue::array(2, -0.133333, -0.0019315), AL::ALValue::array(2, 0.1, 0.00144863));
+times[3][7] = (float)times[3][6] + duration; //LElbowRoll
+keys[3][7] = AL::ALValue::array(-0.483252, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.1, 0.0));
+times[4][6] = (float)times[4][5] + duration; //LHipYawPitch
+keys[4][6] = AL::ALValue::array(4.19617e-05, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.1, 0.0));
+times[5][8] = (float)times[5][7] + duration; //LHipRoll
+keys[5][8] = AL::ALValue::array(-0.0245859, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.1, 0.0));
+times[6][8] = (float)times[6][7] + duration; //LHipPitch
+keys[6][8] = AL::ALValue::array(-0.38661, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.1, 0.0));
+times[7][8] = (float)times[7][7] + duration; //LKneePitch
+keys[7][8] = AL::ALValue::array(0.941918, AL::ALValue::array(2, -0.133333, -0.00193381), AL::ALValue::array(2, 0.1, 0.00145036));
+times[8][8] = (float)times[8][7] + duration; //LAnklePitch
+keys[8][8] = AL::ALValue::array(-0.553732, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.1, 0.0));
+times[9][8] = (float)times[9][7] + duration; //LAnkleRoll
+keys[9][8] = AL::ALValue::array(0.024502, AL::ALValue::array(2, -0.133333, 0.0119798), AL::ALValue::array(2, 0.1, -0.00898486));
+times[10][8] = (float)times[10][7] + duration; //RHipRoll
+keys[10][8] = AL::ALValue::array(0.00302603, AL::ALValue::array(2, -0.133333, -0.0102267), AL::ALValue::array(2, 0.1, 0.00767));
+times[11][8] = (float)times[11][7] + duration; //RHipPitch
+keys[11][8] = AL::ALValue::array(-0.38806, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.1, 0.0));
+times[12][8] = (float)times[12][7] + duration; //RKneePitch
+keys[12][8] = AL::ALValue::array(0.943368, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.1, 0.0));
+times[13][8] = (float)times[13][7] + duration; //RAnklePitch
+keys[13][8] = AL::ALValue::array(-0.55535, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.1, 0.0));
+times[14][8] = (float)times[14][7] + duration; //RAnkleRoll
+keys[14][8] = AL::ALValue::array(-0.00310997, AL::ALValue::array(2, -0.133333, 0.0195767), AL::ALValue::array(2, 0.1, -0.0146826));
+times[15][7] = (float)times[15][6] + duration; //RShoulderPitch
+keys[15][7] = AL::ALValue::array(1.83616, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.1, 0.0));
+times[16][7] = (float)times[16][6] + duration; //RShoulderRoll
+keys[16][7] = AL::ALValue::array(-0.191709, AL::ALValue::array(2, -0.133333, -0.00193383), AL::ALValue::array(2, 0.1, 0.00145037));
+times[17][7] = (float)times[17][6] + duration; //RElbowYaw
+keys[17][7] = AL::ALValue::array(1.47268, AL::ALValue::array(2, -0.133333, -0.0), AL::ALValue::array(2, 0.1, 0.0));
+times[18][7] = (float)times[18][6] + duration; //RElbowRoll
+keys[18][7] = AL::ALValue::array(0.524587, AL::ALValue::array(2, -0.133333, 0.0110873), AL::ALValue::array(2, 0.1, -0.0083155));
+
+duration = 0.3; //time=3.7
+times[0][8] = (float)times[0][7] + duration; //LShoulderPitch
+keys[0][8] = AL::ALValue::array(1.83616, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[1][8] = (float)times[1][7] + duration; //LShoulderRoll
+keys[1][8] = AL::ALValue::array(0.191709, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[2][8] = (float)times[2][7] + duration; //LElbowYaw
+keys[2][8] = AL::ALValue::array(-1.47268, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[3][8] = (float)times[3][7] + duration; //LElbowRoll
+keys[3][8] = AL::ALValue::array(-0.524587, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[4][7] = (float)times[4][6] + duration; //LHipYawPitch
+keys[4][7] = AL::ALValue::array(4.19617e-05, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[5][9] = (float)times[5][8] + duration; //LHipRoll
+keys[5][9] = AL::ALValue::array(-0.00302603, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[6][9] = (float)times[6][8] + duration; //LHipPitch
+keys[6][9] = AL::ALValue::array(-0.38806, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[7][9] = (float)times[7][8] + duration; //LKneePitch
+keys[7][9] = AL::ALValue::array(0.943368, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[8][9] = (float)times[8][8] + duration; //LAnklePitch
+keys[8][9] = AL::ALValue::array(-0.55535, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[9][9] = (float)times[9][8] + duration; //LAnkleRoll
+keys[9][9] = AL::ALValue::array(0.00310997, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[10][9] = (float)times[10][8] + duration; //RHipRoll
+keys[10][9] = AL::ALValue::array(0.0245859, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[11][9] = (float)times[11][8] + duration; //RHipPitch
+keys[11][9] = AL::ALValue::array(-0.38661, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[12][9] = (float)times[12][8] + duration; //RKneePitch
+keys[12][9] = AL::ALValue::array(0.941918, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[13][9] = (float)times[13][8] + duration; //RAnklePitch
+keys[13][9] = AL::ALValue::array(-0.553732, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[14][9] = (float)times[14][8] + duration; //RAnkleRoll
+keys[14][9] = AL::ALValue::array(-0.024502, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[15][8] = (float)times[15][7] + duration; //RShoulderPitch
+keys[15][8] = AL::ALValue::array(1.83471, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[16][8] = (float)times[16][7] + duration; //RShoulderRoll
+keys[16][8] = AL::ALValue::array(-0.190258, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[17][8] = (float)times[17][7] + duration; //RElbowYaw
+keys[17][8] = AL::ALValue::array(1.47413, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[18][8] = (float)times[18][7] + duration; //RElbowRoll
+keys[18][8] = AL::ALValue::array(0.483252, AL::ALValue::array(2, -0.1, -0.0), AL::ALValue::array(2, 0.0, 0.0));
