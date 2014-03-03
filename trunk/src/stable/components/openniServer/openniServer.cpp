@@ -112,7 +112,7 @@ openni::VideoMode colorVideoMode;
 
 
 int segmentationType; //0 ninguna, 1 NITE
-int mainFPS;
+int mainFPS = 30;
 
 
 
@@ -338,7 +338,7 @@ void* updateThread(void*)
 
 
 	//diferente en arm que en x86???
-	int cycle=(float)(1/(float)mainFPS)*1000000;
+	float cycle=(float)(1/(float)mainFPS)*1000000;
 	IceUtil::Time lastIT=IceUtil::Time::now();
 	bool first=true;
 
@@ -416,14 +416,19 @@ void* updateThread(void*)
 
 
 		pthread_mutex_unlock(&mutex);
-		int delay = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
-		if (delay > cycle ){
+
+
+		int process = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
+
+		if (process > (int)cycle ){
 			if (debug==3)
-				std::cout<<"-------- openniServer: MAIN openni timeout-" << std::endl;
+				std::cout<<"-------- openniServer: Main openni timeout-" << std::endl;
 		}
 		else{
-			if (delay <1 || delay > cycle)
+			int delay = (int)cycle - process;
+			if (delay <1 || delay > (int)cycle)
 				delay = 1;
+
 			usleep(delay);
 		}
 
@@ -552,7 +557,7 @@ private:
 
 
 
-		int cycle; // duración del ciclo
+		float cycle; // duración del ciclo
 
 		cycle=(float)(1/(float)fps)*1000000;
 		
@@ -663,16 +668,20 @@ private:
 			pthread_mutex_unlock(&mutex);
 
 
-			int delay = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
-			if (delay > cycle ){
+			int process = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
+
+			if (process > (int)cycle ){
 				if (debug==3)
 					std::cout<<"-------- openniServer: RGB openni timeout-" << std::endl;
 			}
 			else{
-				if (delay <1 || delay > cycle)
+				int delay = (int)cycle - process;
+				if (delay <1 || delay > (int)cycle)
 					delay = 1;
+
 				usleep(delay);
-			}	
+			}
+
 			lastIT=IceUtil::Time::now();
 		}
 	}
@@ -923,16 +932,19 @@ private:
 			pthread_mutex_unlock(&mutex);
 			
 
-			int delay = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
-			if (delay > cycle ){
+			int process = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
+
+			if (process > (int)cycle ){
 				if (debug==3)
-					std::cout<<"-------- openniServer: WARNING- DEPTH timeout-" << std::endl;
+					std::cout<<"-------- openniServer: Depth openni timeout-" << std::endl;
 			}
 			else{
-				if (delay <1 || delay > cycle)
+				int delay = (int)cycle - process;
+				if (delay <1 || delay > (int)cycle)
 					delay = 1;
+
 				usleep(delay);
-			}			
+			}
 			
 			lastIT=IceUtil::Time::now();
 		}
@@ -1309,6 +1321,7 @@ int main(int argc, char** argv){
 		adapter->add(camRGB, ic->stringToIdentity(cameraName));
 		std::cout<<"              -------- openniServer: Component: CameraRGB created successfully(" << Endpoints << "@" << cameraName << std::endl;
 	}
+
 	if (cameraD){
 		std::string objPrefix(componentPrefix + ".CameraDEPTH.");
 		std::string cameraName = prop->getProperty(objPrefix + "Name");
@@ -1322,6 +1335,7 @@ int main(int argc, char** argv){
 		//test camera ok
 		std::cout<<"              -------- openniServer: Component: CameraDEPTH created successfully(" << Endpoints << "@" << cameraName << std::endl;
 	}
+
 	if (pointCloud){
 		std::string objPrefix(componentPrefix + ".PointCloud.");
 		std::string Name = prop->getProperty(objPrefix + "Name");
