@@ -90,13 +90,23 @@ void pointcloudClient::run(){
 		std::copy( localCloud->p.begin(), localCloud->p.end(), this->data.begin() );
 
 		this->controlMutex.unlock();
-		if ((IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()) > this->cycle ){
-			if (this->debug)
-				std::cout<< prefix << ": pointCloud adquisition timeout-" << std::endl;
+
+
+		int process = this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds());
+
+		if (process > (int)cycle ){
+			if (debug==3)
+				std::cout<<"--------" << prefix << ": pointCloud adquisition timeout-" << std::endl;
 		}
 		else{
-			usleep(this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
+			int delay = (int)cycle - process;
+			if (delay <1 || delay > (int)cycle)
+				delay = 1;
+
+			usleep(delay);
 		}
+
+
 		this->refreshRate=(int)(1000000/(IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
 		last=IceUtil::Time::now();
 	}
