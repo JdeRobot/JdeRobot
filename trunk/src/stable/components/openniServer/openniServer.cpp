@@ -43,6 +43,7 @@
 #include <opencv2/imgproc/imgproc_c.h>
 #include <opencv2/video/background_segm.hpp>
 #include <signal.h>
+#include <log/Logger.h>
 
 
 #ifdef WITH_NITE2
@@ -60,7 +61,7 @@
 #define CHECK_RC(rc, what)                                      \
 if (rc != openni::STATUS_OK)                                         \
 {                                                               \
-        std::cout << what << " failed: " << openni::OpenNI::getExtendedError() << std::endl;     \
+        std::cerr << what << " failed: " << std::string(openni::OpenNI::getExtendedError()) << std::endl;     \
                                                     \
 }
 
@@ -93,7 +94,6 @@ int retry_times = 0;
 IceUtil::Mutex controlMutex;
 IceUtil::Cond sem;
 int mirrorDepth, mirrorRGB;
-int debug;
 
 
 namespace openniServer{
@@ -112,7 +112,7 @@ openni::VideoMode colorVideoMode;
 
 
 int segmentationType; //0 ninguna, 1 NITE
-int mainFPS = 30;
+int mainFPS;
 
 
 
@@ -124,9 +124,8 @@ void* updateThread(void*)
 	rc = openni::OpenNI::initialize();
 	if (rc != openni::STATUS_OK)
 	{
-		std::cout << SELCAM << ": Initialize failed: "<<  openni::OpenNI::getExtendedError() <<std::endl;
+		jderobot::Logger::getInstance()->error(  boost::lexical_cast<std::string>(SELCAM) + ": Initialize failed: "+  std::string(openni::OpenNI::getExtendedError()));
 	}
-
 	openni::Array<openni::DeviceInfo> deviceList;
 	openni::OpenNI::enumerateDevices(&deviceList);
 
@@ -134,7 +133,7 @@ void* updateThread(void*)
 	//checking the number off connected devices
 	if (deviceList.getSize() < 1)
 	{
-		std::cout << "Missing devices" << std::endl;
+		jderobot::Logger::getInstance()->error( "Missing devices" );
 		openni::OpenNI::shutdown();
 	}
 
@@ -148,7 +147,7 @@ void* updateThread(void*)
 	rc = m_device.open(deviceUri);
 	if (rc != openni::STATUS_OK)
 	{
-		std::cout << SELCAM << " : Couldn't open device " << deviceUri << ": " << openni::OpenNI::getExtendedError() << std::endl;
+		jderobot::Logger::getInstance()->error( boost::lexical_cast<std::string>(SELCAM) + " : Couldn't open device " + std::string(deviceUri) + ": " + std::string(std::string(openni::OpenNI::getExtendedError())));
 		openni::OpenNI::shutdown();
 	}
 
@@ -163,27 +162,27 @@ void* updateThread(void*)
 			//rc = depth.start();
 			if (rc != openni::STATUS_OK)
 			{
-				std::cout << "OpenniServer: Couldn't start depth stream: "<< openni::OpenNI::getExtendedError() << std::endl;
+				jderobot::Logger::getInstance()->error( "OpenniServer: Couldn't start depth stream: "+ std::string(std::string(openni::OpenNI::getExtendedError())) );
 				depth.destroy();
 			}
 		}
 		else
 		{
-			std::cout << "OpenniServer: Couldn't find depth stream: " <<  openni::OpenNI::getExtendedError() << std::endl;
+			jderobot::Logger::getInstance()->error( "OpenniServer: Couldn't find depth stream: " +  std::string(openni::OpenNI::getExtendedError()) );
 		}
 
 		if (mirrorDepth){
 			rc=depth.setMirroringEnabled(true);
 			if (rc != openni::STATUS_OK)
 			{
-				std::cout << "OpenniServer: error at set depth mirror: " << openni::OpenNI::getExtendedError() << std::endl;
+				jderobot::Logger::getInstance()->error( "OpenniServer: error at set depth mirror: " + std::string(openni::OpenNI::getExtendedError()) );
 			}
 		}
 		else{
 			rc=depth.setMirroringEnabled(false);
 			if (rc != openni::STATUS_OK)
 			{
-				std::cout << "OpenniServer: error at set depth mirror: " << openni::OpenNI::getExtendedError() << std::endl;
+				jderobot::Logger::getInstance()->error( "OpenniServer: error at set depth mirror: " + std::string(openni::OpenNI::getExtendedError()) );
 			}
 		}
 	}
@@ -196,32 +195,29 @@ void* updateThread(void*)
 			//rc = color.start();
 			if (rc != openni::STATUS_OK)
 			{
-				std::cout << "OpenniServer: Couldn't start color stream: " << openni::OpenNI::getExtendedError() << std::endl;
+				jderobot::Logger::getInstance()->error( "OpenniServer: Couldn't start color stream: " + std::string(openni::OpenNI::getExtendedError()) );
 				color.destroy();
 			}
 		}
 		else
 		{
-			std::cout << "OpenniServer: Couldn't find color stream: " << openni::OpenNI::getExtendedError() << std::endl;
+			jderobot::Logger::getInstance()->error( "OpenniServer: Couldn't find color stream: " + std::string(openni::OpenNI::getExtendedError()) );
 		}
 		if (mirrorRGB){
 			rc=color.setMirroringEnabled(true);
 			if (rc != openni::STATUS_OK)
 			{
-				std::cout << "OpenniServer: error at set color mirror: " << openni::OpenNI::getExtendedError() << std::endl;
+				jderobot::Logger::getInstance()->error( "OpenniServer: error at set color mirror: " + std::string(openni::OpenNI::getExtendedError()) );
 			}
 		}
 		else{
 			rc=color.setMirroringEnabled(false);
 			if (rc != openni::STATUS_OK)
 			{
-				std::cout << "OpenniServer: error at set color mirror: " << openni::OpenNI::getExtendedError() << std::endl;
+				jderobot::Logger::getInstance()->error("OpenniServer: error at set color mirror: " + std::string(openni::OpenNI::getExtendedError()) );
 			}
 		}
 	}
-
-
-
 
 
 
@@ -231,15 +227,13 @@ void* updateThread(void*)
 		rc= depth.setVideoMode(depthSensorInfo->getSupportedVideoModes()[deviceMode]);
 		if (rc != openni::STATUS_OK)
 		{
-			std::cout << "OpenniServer: error at set depth videoMode: " << openni::OpenNI::getExtendedError() << std::endl;
+			jderobot::Logger::getInstance()->error( "OpenniServer: error at set depth videoMode: " + std::string(openni::OpenNI::getExtendedError()) );
 		}
-		if (debug){
-			std::cout << "OpenniServer: depth modes" << std::endl;
-			for(int i=0;i < depthSensorInfo->getSupportedVideoModes().getSize();i++)
-			{
-				openni::VideoMode videoMode = depthSensorInfo->getSupportedVideoModes()[i];
-				std::cout << "fps: " << videoMode.getFps() << "x: " << videoMode.getResolutionX() << "y " <<  videoMode.getResolutionY() << std::endl;
-			}
+		jderobot::Logger::getInstance()->info( "OpenniServer: depth modes" );
+		for(int i=0;i < depthSensorInfo->getSupportedVideoModes().getSize();i++)
+		{
+			openni::VideoMode videoMode = depthSensorInfo->getSupportedVideoModes()[i];
+			jderobot::Logger::getInstance()->info( "fps: " + boost::lexical_cast<std::string>(videoMode.getFps()) + "x: " + boost::lexical_cast<std::string>(videoMode.getResolutionX()) + "y " +  boost::lexical_cast<std::string>(videoMode.getResolutionY()) );
 		}
 		depthVideoMode = depth.getVideoMode();
 		depth.start();
@@ -251,16 +245,14 @@ void* updateThread(void*)
 		rc= color.setVideoMode(colorSensorInfo->getSupportedVideoModes()[deviceMode]);
 		if (rc != openni::STATUS_OK)
 		{
-			std::cout << "OpenniServer: error at set color videoMode: " << openni::OpenNI::getExtendedError() << std::endl;
+			jderobot::Logger::getInstance()->error("OpenniServer: error at set color videoMode: " + std::string(openni::OpenNI::getExtendedError()) );
 			color.destroy();
 		}
-		if (debug){
-			std::cout << "OpenniServer color modes:" << std::endl;
-			for(int i=0;i < colorSensorInfo->getSupportedVideoModes().getSize();i++)
-			{
-				openni::VideoMode videoMode = colorSensorInfo->getSupportedVideoModes()[i];
-				std::cout << "fps: " << videoMode.getFps() << "x: " << videoMode.getResolutionX() << "y " <<  videoMode.getResolutionY() << std::endl;
-			}
+		jderobot::Logger::getInstance()->info( "OpenniServer color modes:" );
+		for(int i=0;i < colorSensorInfo->getSupportedVideoModes().getSize();i++)
+		{
+			openni::VideoMode videoMode = colorSensorInfo->getSupportedVideoModes()[i];
+			jderobot::Logger::getInstance()->info( "fps: " + boost::lexical_cast<std::string>(videoMode.getFps()) + "x: " + boost::lexical_cast<std::string>(videoMode.getResolutionX()) + "y " +  boost::lexical_cast<std::string>(videoMode.getResolutionY()) );
 		}
 		colorVideoMode = color.getVideoMode();
 		srcRGB = new cv::Mat(cv::Size(colorVideoMode.getResolutionX(),colorVideoMode.getResolutionY()),CV_8UC3);
@@ -274,21 +266,21 @@ void* updateThread(void*)
 
 		if (rc != openni::STATUS_OK)
 		{
-			std::cout << "OpenniServer: error at set registration: " << openni::OpenNI::getExtendedError() << std::endl;
+			jderobot::Logger::getInstance()->error( "OpenniServer: error at set registration: " + std::string(openni::OpenNI::getExtendedError()) );
 		}
 	}
 
 
 
 
-	std::cout << "COLOR: fps:" << color.getVideoMode().getFps() << "w" << color.getVideoMode().getResolutionX() << "h" << color.getVideoMode().getResolutionY() << std::endl;
-	std::cout << "DEPTH: fps:" << depth.getVideoMode().getFps() << "w" << depth.getVideoMode().getResolutionX() << "h" << depth.getVideoMode().getResolutionY() << std::endl;
+	jderobot::Logger::getInstance()->info( "COLOR: fps:" + boost::lexical_cast<std::string>(color.getVideoMode().getFps()) + "w" + boost::lexical_cast<std::string>(color.getVideoMode().getResolutionX()) + "h" + boost::lexical_cast<std::string>(color.getVideoMode().getResolutionY()) );
+	jderobot::Logger::getInstance()->info( "DEPTH: fps:" + boost::lexical_cast<std::string>(depth.getVideoMode().getFps()) + "w" + boost::lexical_cast<std::string>(depth.getVideoMode().getResolutionX()) + "h" + boost::lexical_cast<std::string>(depth.getVideoMode().getResolutionY()));
 
 	if (cameraR && cameraD){
 		rc=m_device.setDepthColorSyncEnabled(true);
 		if (rc != openni::STATUS_OK)
 		{
-			std::cout << "OpenniServer: error at set syncronization: " << openni::OpenNI::getExtendedError() << std::endl;
+			jderobot::Logger::getInstance()->error( "OpenniServer: error at set syncronization: " + std::string(openni::OpenNI::getExtendedError()) );
 		}
 		if (depth.isValid() && color.isValid())
 		{
@@ -304,7 +296,7 @@ void* updateThread(void*)
 			}
 			else
 			{
-				std::cout <<  "Error - expect color and depth to be in same resolution: D: " << depthWidth << "x" << depthHeight << "C: " << colorWidth << "x" <<  colorHeight << std::endl;
+				jderobot::Logger::getInstance()->error(  "Error - expect color and depth to be in same resolution: D: " + boost::lexical_cast<std::string>(depthWidth) + "x" + boost::lexical_cast<std::string>(depthHeight) + "C: " + boost::lexical_cast<std::string>(colorWidth) + "x" +  boost::lexical_cast<std::string>(colorHeight));
 
 
 			}
@@ -325,7 +317,7 @@ void* updateThread(void*)
 
 			if (m_pUserTracker->create(&m_device) != nite::STATUS_OK)
 			{
-				std::cout << "OpenniServer: Couldn't create userTracker " << std::endl;
+				jderobot::Logger::getInstance()->error( "OpenniServer: Couldn't create userTracker " );
 			}
 		}
 		#endif
@@ -354,11 +346,11 @@ void* updateThread(void*)
 			rc=openni::OpenNI::waitForAnyStream(m_streams, 2, &changedIndex,SAMPLE_READ_WAIT_TIMEOUT);
 			if (rc != openni::STATUS_OK)
 			{
-				std::cout<< "Wait failed! (timeout is " << SAMPLE_READ_WAIT_TIMEOUT <<  "ms) " << openni::OpenNI::getExtendedError() << std::endl;
+				jderobot::Logger::getInstance()->warning( "Wait failed! (timeout is " + boost::lexical_cast<std::string>(SAMPLE_READ_WAIT_TIMEOUT) +  "ms) " + std::string(openni::OpenNI::getExtendedError()) );
 				retry_times++;
 				if (retry_times > RETRY_MAX_TIMES)
 				{
-					std::cout << "Retry Max Times exceeded!. Force Exit!!" << std::endl;
+					jderobot::Logger::getInstance()->error( "Retry Max Times exceeded!. Force Exit!!" );
 					exit(-1);
 				}
 				continue;
@@ -370,10 +362,10 @@ void* updateThread(void*)
 
 		if (rc != openni::STATUS_OK)
 		{
-			std::cout << "Wait failed" << std::endl;
+			jderobot::Logger::getInstance()->warning( "Wait failed" );
 		}
 		else if(first){
-			std::cout << "OpenniServer initialized" << std::endl;
+			jderobot::Logger::getInstance()->info( "OpenniServer initialized" );
 			first=false;
 		}
 		/*switch (changedIndex)
@@ -406,7 +398,7 @@ void* updateThread(void*)
 				m_depthFrame = userTrackerFrame.getDepthFrame();
 				if (rcN != nite::STATUS_OK)
 				{
-					std::cout << "GetNextData failed" << std::endl;
+					std::cout + "GetNextData failed" << std::endl;
 					//return;
 				}
 			}
@@ -421,8 +413,7 @@ void* updateThread(void*)
 		int process = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
 
 		if (process > (int)cycle ){
-			if (debug==3)
-				std::cout<<"-------- openniServer: Main openni timeout-" << std::endl;
+			jderobot::Logger::getInstance()->warning("-------- openniServer: Main openni timeout-" );
 		}
 		else{
 			int delay = (int)cycle - process;
@@ -473,7 +464,7 @@ public:
 	//fill cameraDescription
 	cameraDescription->name = prop->getProperty(prefix+"Name");
 	if (cameraDescription->name.size() == 0)
-		std::cout << "Camera name not configured" << std::endl;
+		jderobot::Logger::getInstance()->warning( "Camera name not configured" );
 
 	cameraDescription->shortDescription = prop->getProperty(prefix + "ShortDescription");
 
@@ -490,18 +481,18 @@ public:
 	std::string fmtStr = prop->getPropertyWithDefault(prefix+"Format","YUY2");//default format YUY2
 	imageFmt = colorspaces::Image::Format::searchFormat(fmtStr);
 	if (!imageFmt)
-		std::cout <<  "Format " << fmtStr << " unknown" << std::endl;
+		jderobot::Logger::getInstance()->warning( "Format " + fmtStr + " unknown" );
 	imageDescription->size = imageDescription->width * imageDescription->height * CV_ELEM_SIZE(imageFmt->cvType);
 	imageDescription->format = imageFmt->name;
 
-	std::cout << "Starting thread for camera: " << cameraDescription->name << std::endl;
+	jderobot::Logger::getInstance()->info( "Starting thread for camera: " + cameraDescription->name );
 	replyTask = new ReplyTask(this,fps, playerdetection);
 
 	this->control=replyTask->start();//my own thread
 	}
 
 	virtual ~CameraRGB(){
-		std::cout << "Stopping and joining thread for camera: " << cameraDescription->name << std::endl;
+		jderobot::Logger::getInstance()->info( "Stopping and joining thread for camera: " + cameraDescription->name );
 		replyTask->destroy();
 		this->control.join();
 	}
@@ -519,12 +510,12 @@ public:
 	}
 
 	virtual std::string startCameraStreaming(const Ice::Current&){
-		std::cout << "Should be made anything to start camera streaming: " << cameraDescription->name<< std::endl;
+		jderobot::Logger::getInstance()->info( "Should be made anything to start camera streaming: " + cameraDescription->name);
 		return std::string("");
 	}
 
 	virtual void stopCameraStreaming(const Ice::Current&) {
-		std::cout << "Should be made anything to stop camera streaming: " <<  cameraDescription->name << std::endl;
+		jderobot::Logger::getInstance()->info( "Should be made anything to stop camera streaming: " +  cameraDescription->name );
 	}
 	virtual void reset(const Ice::Current&)
 	{
@@ -625,7 +616,7 @@ private:
 						case 2:
 
 						default:
-							std::cout << "openniServer: Error segmentation not supported" << std::endl;
+							jderobot::Logger::getInstance()->error( "openniServer: Error segmentation not supported" );
 							break;
 					}
 
@@ -634,20 +625,15 @@ private:
 				pImageRow += rowSize;
 			}	
 	
-			if (debug==2){
+			/*if (debug==2){
 				cv::imshow("OpenniServer RGB", *srcRGB);
 				cv::waitKey(1);
-			}
+			}*/
 			//test
 			//CalculateJoints();
 
-			
-			//cvFlip(srcRGB, NULL, 1);
-			//std::cout << "camara:" <<  (int)mycameravga->imageDescription->width << "x" << (int) mycameravga->imageDescription->height << std::endl;
-			//std::cout << "xtion: " <<  m_colorFrame.getWidth() << "x" << m_colorFrame.getHeight() << std::endl;
-
 			if ((mycameravga->imageDescription->width != m_colorFrame.getWidth()) || (mycameravga->imageDescription->height != m_colorFrame.getHeight())){
-				std::cout << "Assuming kinect device with resampled on device not working" << std::endl;
+				jderobot::Logger::getInstance()->warning( "Assuming kinect device with resampled on device not working" );
 				resize(*srcRGB, dst_resize, srcRGB->size(), 0, 0, cv::INTER_LINEAR);
 				memcpy(&(reply->pixelData[0]),(unsigned char *) dst_resize.data,dst_resize.cols*dst_resize.rows * 3);
 			}
@@ -671,8 +657,7 @@ private:
 			int process = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
 
 			if (process > (int)cycle ){
-				if (debug==3)
-					std::cout<<"-------- openniServer: RGB openni timeout-" << std::endl;
+				jderobot::Logger::getInstance()->warning("-------- openniServer: RGB openni timeout-" );
 			}
 			else{
 				int delay = (int)cycle - process;
@@ -735,7 +720,7 @@ public:
 	//fill cameraDescription
 	cameraDescription->name = prop->getProperty(prefix+"Name");
 	if (cameraDescription->name.size() == 0)
-		std::cout << "Camera name not configured" << std::endl;
+		jderobot::Logger::getInstance()->warning( "Camera name not configured" );
 
 	cameraDescription->shortDescription = prop->getProperty(prefix+"ShortDescription");
 
@@ -752,18 +737,18 @@ public:
 	std::string fmtStr = prop->getPropertyWithDefault(prefix+"Format","YUY2");//default format YUY2
 	imageFmt = colorspaces::Image::Format::searchFormat(fmtStr);
 	if (!imageFmt)
-		std::cout << "Format " <<  fmtStr << " unknown" << std::endl;
+		jderobot::Logger::getInstance()->info( "Format " +  fmtStr + " unknown" );
 	imageDescription->size = imageDescription->width * imageDescription->height * CV_ELEM_SIZE(imageFmt->cvType);
 	imageDescription->format = imageFmt->name;
 
-	std::cout << "Starting thread for camera: " <<  cameraDescription->name << std::endl;
+	jderobot::Logger::getInstance()->info( "Starting thread for camera: " +  cameraDescription->name );
 	replyTask = new ReplyTask(this, imageDescription->width, imageDescription->height,fps, playerdetection);
 
 	this->control=replyTask->start();//my own thread
 	}
 
 	virtual ~CameraDEPTH(){
-		std::cout << "Stopping and joining thread for camera: " << cameraDescription->name << std::endl;
+		jderobot::Logger::getInstance()->info( "Stopping and joining thread for camera: " + cameraDescription->name );
 
 		replyTask->destroy();
 		this->control.join();
@@ -782,12 +767,12 @@ public:
 	}
 
 	virtual std::string startCameraStreaming(const Ice::Current&){
-		std::cout << "Should be made anything to start camera streaming: " << cameraDescription->name << std::endl;
+		jderobot::Logger::getInstance()->info( "Should be made anything to start camera streaming: " + cameraDescription->name );
 		return std::string("");
 	}
 
 	virtual void stopCameraStreaming(const Ice::Current&) {
-		std::cout << "Should be made anything to stop camera streaming: "  << cameraDescription->name << std::endl;
+		jderobot::Logger::getInstance()->info( "Should be made anything to stop camera streaming: "  + cameraDescription->name );
 	}
 	virtual void reset(const Ice::Current&)
 	{
@@ -826,7 +811,6 @@ private:
 		IceUtil::Time lastIT;
 
 
-		//std::cout << "FPS depth: " << fps << std::endl;
 		cycle=(float)(1/(float)fps)*1000000;
 
 		lastIT=IceUtil::Time::now();
@@ -899,22 +883,22 @@ private:
 						case 2:
 							break;
 						default:
-							std::cout << "openniServer: Error segmentation not supported" << std::endl;
+							jderobot::Logger::getInstance()->error( "openniServer: Error segmentation not supported" );
 							break;
 					}
 				}
 
 				pDepth += restOfRow;
 			}
-			if (debug==2){
+			/*if (debug==2){
 				cv::imshow("OpenniServer DEPTH", src);
 				cv::waitKey(1);
-			}
+			}*/
 
 		   if ((mycameradepth->imageDescription->width != m_depthFrame.getWidth()) || (mycameradepth->imageDescription->height != m_depthFrame.getHeight())){
 				//cv::resize(src,dst_resize);
 				cv::resize(src, dst_resize, dst_resize.size(), 0, 0, cv::INTER_LINEAR);
-				std::cout << "resize depth" << std::endl;
+				jderobot::Logger::getInstance()->warning("Assuming kinect device with resampled on device not working" );
 				memcpy(&(reply->pixelData[0]),(unsigned char *) dst_resize.data,dst_resize.cols*dst_resize.rows * 3);
 			}
 			else{
@@ -935,8 +919,7 @@ private:
 			int process = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
 
 			if (process > (int)cycle ){
-				if (debug==3)
-					std::cout<<"-------- openniServer: Depth openni timeout-" << std::endl;
+				jderobot::Logger::getInstance()->warning("-------- openniServer: Depth openni timeout-" );
 			}
 			else{
 				int delay = (int)cycle - process;
@@ -1005,7 +988,7 @@ private:
 				}
 
 			virtual ~pointCloudI(){
-				std::cout << "Stopping and joining thread for pointCloud" << std::endl;
+				jderobot::Logger::getInstance()->info( "Stopping and joining thread for pointCloud" );
 				replyCloud->destroy();
 				this->control.join();
 			}
@@ -1114,8 +1097,7 @@ private:
 
 					int delay = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
 					if (delay > cycle ){
-						if (debug==3)
-							std::cout<<"-------- openniServer: POINTCLOUD openni timeout-" << std::endl;
+						jderobot::Logger::getInstance()->info("-------- openniServer: POINTCLOUD openni timeout-" );
 					}
 					else{
 						if (delay <1 || delay > cycle)
@@ -1243,12 +1225,13 @@ int main(int argc, char** argv){
 	int leds = prop->getPropertyAsIntWithDefault(componentPrefix + ".KinectLedsActive",0);
 	int pointCloud = prop->getPropertyAsIntWithDefault(componentPrefix + ".pointCloudActive",0);
 	openniServer::segmentationType= prop->getPropertyAsIntWithDefault(componentPrefix + ".PlayerDetection",0);
-	debug = prop->getPropertyAsIntWithDefault(componentPrefix + ".Debug",0);
 	mirrorDepth = prop->getPropertyAsIntWithDefault(componentPrefix + ".CameraDEPTH.Mirror",0);
 	mirrorRGB = prop->getPropertyAsIntWithDefault(componentPrefix + ".CameraRGB.Mirror",0);
 	deviceMode=prop->getPropertyAsIntWithDefault(componentPrefix + ".Mode", 0);
+	openniServer::mainFPS=prop->getPropertyAsIntWithDefault(componentPrefix + ".Hz", 20);
 	std::string Endpoints = prop->getProperty(componentPrefix + ".Endpoints");
 	Ice::ObjectAdapterPtr adapter =ic->createObjectAdapterWithEndpoints(componentPrefix, Endpoints);
+
 
 
 
@@ -1258,7 +1241,7 @@ int main(int argc, char** argv){
 	}
 
 	SELCAM = prop->getPropertyAsIntWithDefault(componentPrefix + ".deviceId",0);
-	std::cout << "OpenniServer: Selected device: " << SELCAM << std::endl;
+	jderobot::Logger::getInstance()->info( "OpenniServer: Selected device: " + SELCAM );
 	int nCameras=0;
 
 
@@ -1316,10 +1299,10 @@ int main(int argc, char** argv){
 			cameraName = "cameraR";
 			prop->setProperty(objPrefix + "Name",cameraName);//set the value
 			}
-		std::cout << "Creating camera " << cameraName << std::endl;
+		jderobot::Logger::getInstance()->info("Creating camera " + cameraName );
 		camRGB = new openniServer::CameraRGB(objPrefix,prop);
 		adapter->add(camRGB, ic->stringToIdentity(cameraName));
-		std::cout<<"              -------- openniServer: Component: CameraRGB created successfully(" << Endpoints << "@" << cameraName << std::endl;
+		jderobot::Logger::getInstance()->info("              -------- openniServer: Component: CameraRGB created successfully(" + Endpoints + "@" + cameraName );
 	}
 
 	if (cameraD){
@@ -1329,20 +1312,20 @@ int main(int argc, char** argv){
 			cameraName = "cameraD";
 			prop->setProperty(objPrefix + "Name",cameraName);//set the value
 			}
-		std::cout << "Creating camera " <<  cameraName << std::endl;
+		jderobot::Logger::getInstance()->info( "Creating camera " +  cameraName );
 		camDEPTH = new openniServer::CameraDEPTH(objPrefix,prop);
 		adapter->add(camDEPTH, ic->stringToIdentity(cameraName));
 		//test camera ok
-		std::cout<<"              -------- openniServer: Component: CameraDEPTH created successfully(" << Endpoints << "@" << cameraName << std::endl;
+		jderobot::Logger::getInstance()->info("              -------- openniServer: Component: CameraDEPTH created successfully(" + Endpoints + "@" + cameraName );
 	}
 
 	if (pointCloud){
 		std::string objPrefix(componentPrefix + ".PointCloud.");
 		std::string Name = prop->getProperty(objPrefix + "Name");
-		std::cout << "Creating pointcloud1 " << Name << std::endl;
+		jderobot::Logger::getInstance()->info( "Creating pointcloud1 " + Name );
 		pc1 = new openniServer::pointCloudI(objPrefix,prop);
 		adapter->add(pc1 , ic->stringToIdentity(Name));
-		std::cout<<"              -------- openniServer: Component: PointCloud created successfully(" << Endpoints << "@" << Name << std::endl;
+		jderobot::Logger::getInstance()->info("              -------- openniServer: Component: PointCloud created successfully(" + Endpoints + "@" + Name );
 	}
 	adapter->activate();
 	ic->waitForShutdown();
