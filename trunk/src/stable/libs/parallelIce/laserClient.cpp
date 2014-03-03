@@ -28,6 +28,7 @@ laserClient::laserClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug
 	this->debug= debug;
 	Ice::PropertiesPtr prop;
 	prop = ic->getProperties();
+	this->refreshRate=0;
 
 	int fps=prop->getPropertyAsIntWithDefault(prefix+"Fps",10);
 	this->cycle=(float)(1/(float)fps)*1000000;
@@ -47,9 +48,10 @@ laserClient::laserClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug
 	}
 	catch (const char* msg) {
 		std::cerr << msg << std::endl;
-		std::cout <<  prefix + " Not laser provided" << std::endl;
+		jderobot::Logger::getInstance()->error(prefix + " Not laser provided");
 	}
 	_done=false;
+	this->pauseStatus=false;
 
 }
 
@@ -90,8 +92,7 @@ void laserClient::run(){
 		this->controlMutex.unlock();
 
 		if ((IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()) > this->cycle ){
-			if (this->debug)
-				std::cout<< prefix << ": pointCloud adquisition timeout-" << std::endl;
+			jderobot::Logger::getInstance()->warning(prefix + ": pointCloud adquisition timeout-");
 		}
 		else{
 			usleep(this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));

@@ -28,6 +28,7 @@ pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, 
 	this->debug= debug;
 	Ice::PropertiesPtr prop;
 	prop = ic->getProperties();
+	this->refreshRate=0;
 
 	int fps=prop->getPropertyAsIntWithDefault(prefix+"Fps",10);
 	this->cycle=(float)(1/(float)fps)*1000000;
@@ -47,7 +48,7 @@ pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, 
 	}
 	catch (const char* msg) {
 		std::cerr << msg << std::endl;
-		std::cout <<  prefix + " Not camera provided" << std::endl;
+		jderobot::Logger::getInstance()->error(prefix + " Not camera provided");
 	}
 	_done=false;
 	this->pauseStatus=false;
@@ -95,8 +96,7 @@ void pointcloudClient::run(){
 		int process = this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds());
 
 		if (process > (int)cycle ){
-			if (debug==3)
-				std::cout<<"--------" << prefix << ": pointCloud adquisition timeout-" << std::endl;
+			jderobot::Logger::getInstance()->warning(prefix + ": pointCloud adquisition timeout-");
 		}
 		else{
 			int delay = (int)cycle - process;

@@ -31,6 +31,7 @@ cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool deb
 	Ice::PropertiesPtr prop;
 	prop = ic->getProperties();
 	Ice::ObjectPrx baseCamera;
+	this->refreshRate=0;
 
 
 	int fps=prop->getPropertyAsIntWithDefault(prefix+"Fps",10);
@@ -50,7 +51,7 @@ cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool deb
 	}
 	catch (const char* msg) {
 		std::cerr << msg << std::endl;
-		std::cout << prefix + " Not camera provided" << std::endl;
+		jderobot::Logger::getInstance()->error(prefix + " Not camera provided");
 	}
 
 	jderobot::ImageDataPtr data = this->prx->getImageData();
@@ -116,8 +117,7 @@ cameraClient::run(){
 		int process = this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds());
 
 		if (process > (int)cycle ){
-			if (debug==3)
-				std::cout<<"--------" << prefix << " adquisition timeout-" << std::endl;
+			jderobot::Logger::getInstance()->warning("--------" + prefix + " adquisition timeout-");
 		}
 		else{
 			int delay = (int)cycle - process;
@@ -136,7 +136,7 @@ cameraClient::run(){
 		if (iterIndex == INT_MAX) 
 		{
 			iterIndex = 0;
-			std::cout << "*** Reinicio contador" << std::endl;
+			jderobot::Logger::getInstance()->info( "*** Counter reset");
 		}
 
 	}
