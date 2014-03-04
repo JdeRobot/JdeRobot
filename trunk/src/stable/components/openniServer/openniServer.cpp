@@ -1218,6 +1218,32 @@ int main(int argc, char** argv){
 	}
 	std::string componentPrefix("openniServer");
 
+
+	// Analyze LOG section
+
+	std::string logFile = prop->getProperty(componentPrefix + ".Log.File.Name");
+	if (logFile.size()==0)
+		jderobot::Logger::getInstance()->warning("You didn't set log file!");
+	else
+		jderobot::Logger::getInstance()->setFileLog(logFile);
+
+	std::string logLevel = prop->getProperty(componentPrefix + ".Log.File.Level");
+	if (logLevel.size()==0)
+		jderobot::Logger::getInstance()->warning("You didn't set *.Log.File.Level key!");
+	else
+		jderobot::Logger::getInstance()->setFileLevel(jderobot::Levels(boost::lexical_cast<int>(logLevel)));
+
+	std::string screenLevel = prop->getProperty(componentPrefix + ".Log.Screen.Level");
+	if (screenLevel.size()==0)
+		jderobot::Logger::getInstance()->warning("You didn't set *.Log.Screen.Level key!");
+	else
+		jderobot::Logger::getInstance()->setScreenLevel(jderobot::Levels(boost::lexical_cast<int>(screenLevel)));
+
+	jderobot::Logger::getInstance()->info("Logger:: screenLevel=" + screenLevel + " logLevel=" + logLevel + " LogFile=" + logFile);
+
+
+
+
 	cameraR = prop->getPropertyAsIntWithDefault(componentPrefix + ".CameraRGB",0);
 	cameraD = prop->getPropertyAsIntWithDefault(componentPrefix + ".CameraDEPTH",0);
 	ImageRegistration = prop->getPropertyAsIntWithDefault(componentPrefix + ".ImageRegistration",1);
