@@ -1,4 +1,4 @@
-IF(openni_LIBRARIES)
+IF(openni_LIBRARIES AND LIBUSB_INCLUDE_DIRS)
 
 	    SET( SOURCE_FILES openni1Server.cpp myprogeo.cpp )
 	    add_definitions(-DGLADE_DIR="${gladedir}")
