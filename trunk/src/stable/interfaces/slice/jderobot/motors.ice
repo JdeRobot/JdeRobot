@@ -22,7 +22,7 @@
 #ifndef MOTORS_ICE
 #define MOTORS_ICE
 
-#include <jderobot/common.ice>
+#include <common.ice>
 
 module jderobot{  
 

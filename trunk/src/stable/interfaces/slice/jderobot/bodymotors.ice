@@ -21,8 +21,8 @@
 #ifndef BODYMOTORS_ICE
 #define BODYMOTORS_ICE
 
-#include <jderobot/common.ice>
-#include <jderobot/body.ice>
+#include <common.ice>
+#include <body.ice>
 
 module jderobot{  
 

@@ -22,7 +22,7 @@
 #ifndef NAOFOLLOWBALL_ICE
 #define NAOFOLLOWBALL_ICE
 
-#include <jderobot/common.ice>
+#include <common.ice>
 
 module jderobot {
     

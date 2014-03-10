@@ -21,7 +21,7 @@
 #ifndef BODY_ICE
 #define BODY_ICE
 
-#include <jderobot/common.ice>
+#include <common.ice>
 
 module jderobot{  
 

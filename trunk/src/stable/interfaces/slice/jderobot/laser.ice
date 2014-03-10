@@ -22,7 +22,7 @@
 #ifndef LASER_ICE
 #define LASER_ICE
 
-#include <jderobot/common.ice>
+#include <common.ice>
 
 
 module jderobot{  

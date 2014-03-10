@@ -2,7 +2,7 @@
 #define VARCOLOR_ICE
 
 
-#include <jderobot/image.ice>
+#include <image.ice>
 
 module jderobot{  
 

@@ -20,7 +20,7 @@
 #ifndef REMOTECLOUD_ICE
 #define REMOTECLOUD_ICE
 
-#include <jderobot/pointcloud.ice>
+#include <pointcloud.ice>
 
 module jderobot{  
 

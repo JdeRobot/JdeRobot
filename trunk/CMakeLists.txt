@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8)
 # ENV VARS
 SET(gladedir ./)
 SET( DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Deps) # Directorio donde se encuentran las dependencias
-SET( INTERFACES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/interfaces/cpp) # Directorio con las interfaces ICE en C++
+SET( INTERFACES_CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/interfaces/cpp/jderobot ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/interfaces/cpp/) # Directorio con las interfaces ICE en C++
 SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/libs) # Directorio donde se encuentran las librerias propias de jderobot
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/interfaces/slice) # Directorio donde se encuentran las interfaces ICE
 SET( LIBS_NEEDED  colorspaces jderobotutil progeo pioneer fuzzylib visionlib parallelIce ) # Librerias de las que depende el componente
@@ -103,10 +103,12 @@ include(${DEPS_DIR}/libusb/CMakeLists.txt)
 #include(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/CMakeLists.txt)
 
 
+
 #file(READ ${CMAKE_CURRENT_SOURCE_DIR}/jderobot.cfg contents)
 
 # START RECURSIVE
 add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/src)
+
 
 
 ###################
