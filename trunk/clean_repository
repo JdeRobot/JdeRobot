@@ -30,6 +30,7 @@ for file in $mivar; do
 done
 
 rm -f src/stable/interfaces/cpp/jderobot/*
+rm -rf src/stable/interfaces/python/jderobot/*
 
 mivar=`du -a | grep "cmake_uninstall.cmake$" | awk '{print $2}'`
 
