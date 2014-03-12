@@ -398,7 +398,7 @@ void* updateThread(void*)
 				m_depthFrame = userTrackerFrame.getDepthFrame();
 				if (rcN != nite::STATUS_OK)
 				{
-					std::cout + "GetNextData failed" << std::endl;
+					std::cout << "GetNextData failed" << std::endl;
 					//return;
 				}
 			}
