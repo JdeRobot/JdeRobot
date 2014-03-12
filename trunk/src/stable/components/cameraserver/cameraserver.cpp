@@ -23,7 +23,7 @@
 
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
-
+#include <IceStorm/IceStorm.h>
 #include <jderobot/camera.h>
 #include <jderobot/image.h>
 #include <visionlib/colorspaces/colorspacesmm.h>
@@ -47,13 +47,13 @@ class CameraI: virtual public jderobot::Camera {
 
 
     public:
-    std::string name;
+
     std::string uri;
     int framerateN;
     int framerateD;
 
         CameraI(std::string propertyPrefix, Ice::CommunicatorPtr ic)
-               : prefix(propertyPrefix) {
+               : prefix(propertyPrefix), imageConsumer(), rpc_mode(false) {
 
             std::cout << "Constructor CameraI -> " << propertyPrefix << std::endl;
 
@@ -63,8 +63,8 @@ class CameraI: virtual public jderobot::Camera {
             Ice::PropertiesPtr prop = ic->getProperties();
 
             //fill cameraDescription
-            name = prop->getProperty(prefix+"Name");
-            if (name.size() == 0)
+            cameraDescription->name = prop->getProperty(prefix+"Name");
+            if (cameraDescription->name.size() == 0)
                   throw "Camera name not configured";
 
             cameraDescription->shortDescription = prop->getProperty(prefix+"ShortDescription");
@@ -100,7 +100,38 @@ class CameraI: virtual public jderobot::Camera {
 
             if(cap.isOpened()){
                 replyTask = new ReplyTask(this);
+
+                // check client/server service mode
+                int rpc = prop->getPropertyAsIntWithDefault("CameraSrv.DefaultMode",1);
+
+                if(rpc){
+                	rpc_mode=true;
+                }
+                else{
+                      // check publish/subscribe service mode
+					Ice::ObjectPrx obj = ic->propertyToProxy("CameraSrv.TopicManager");
+
+					if(obj!=0){
+						// IceStorm publisher initialization
+						IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(obj);
+						IceStorm::TopicPrx topic;
+						try{
+							topic = topicManager->retrieve(cameraDescription->name);
+						}
+						catch(const IceStorm::NoSuchTopic&){
+							topic = topicManager->create(cameraDescription->name);
+						}
+						Ice::ObjectPrx pub = topic->getPublisher()->ice_oneway();
+
+						imageConsumer=jderobot::ImageConsumerPrx::uncheckedCast(pub);
+					}
+					else{
+						imageConsumer=0;
+					}
+                }
+
                 replyTask->start(); // my own thread
+
             }else{
                 exit(-1);
             }
@@ -218,15 +249,22 @@ class CameraI: virtual public jderobot::Camera {
 
                         memcpy( &(reply->pixelData[0]), (unsigned char *) frame.data, frame.rows*frame.cols*3);
 
+                        // publish
+						if(mycamera->imageConsumer!=0){
+							//std::cout << "reply" << std::endl;
+							mycamera->imageConsumer->report(reply);
+						}
 
-                       { //critical region start
-                           IceUtil::Mutex::Lock sync(requestsMutex);
-                           while(!requests.empty()) {
-                               jderobot::AMD_ImageProvider_getImageDataPtr cb = requests.front();
-                               requests.pop_front();
-                               cb->ice_response(reply);
-                           }
-                       } //critical region end
+                       if (mycamera->rpc_mode){
+						   { //critical region start
+							   IceUtil::Mutex::Lock sync(requestsMutex);
+							   while(!requests.empty()) {
+								   jderobot::AMD_ImageProvider_getImageDataPtr cb = requests.front();
+								   requests.pop_front();
+								   cb->ice_response(reply);
+							   }
+						   } //critical region end
+                       }
 
                         gettimeofday(&b,NULL);
                         totalb=b.tv_sec*1000000+b.tv_usec;
@@ -259,6 +297,8 @@ class CameraI: virtual public jderobot::Camera {
         jderobot::CameraDescriptionPtr cameraDescription;
         ReplyTaskPtr replyTask;
         cv::VideoCapture cap;
+        bool rpc_mode;
+        jderobot::ImageConsumerPrx imageConsumer;
 	int mirror;
 
 }; // end class CameraI
@@ -274,6 +314,24 @@ int main(int argc, char** argv)
         ic = Ice::initialize(argc, argv);
 
         Ice::PropertiesPtr prop = ic->getProperties();
+
+
+
+        // check default service mode
+		/*int rpc = prop->getPropertyAsIntWithDefault("CameraSrv.DefaultMode",0);
+
+		if(rpc!=0){
+			// check publish/subscribe service mode
+			Ice::ObjectPrx obj = ic->propertyToProxy("CameraSrv.TopicManager");
+
+			if(obj==0){
+				// no service mode configuration
+				std::cerr << "Error: cameraserver needs server configuration mode\n" << std::endl;
+				fflush(NULL);
+
+				exit(0);
+			}
+		}*/
 
         std::string Endpoints = prop->getProperty("CameraSrv.Endpoints");
 
