@@ -26,7 +26,7 @@
 #include <IceStorm/IceStorm.h>
 #include <jderobot/camera.h>
 #include <jderobot/image.h>
-#include <colorspaces/colorspacesmm.h>
+#include <visionlib/colorspaces/colorspacesmm.h>
 #include "viewer.h"
 
 class ImageConsumerI: virtual public jderobot::ImageConsumer {
@@ -57,6 +57,8 @@ int main(int argc, char** argv){
   try{
     ic = Ice::initialize(argc,argv);
     std::string topicName = ic->getProperties()->getProperty("Cameraview_icestorm.Camera.TopicName");
+
+	std::cout << "Trying to conect to: " << topicName << std::endl;
 
     Ice::ObjectPrx obj=ic->propertyToProxy("Cameraview_icestorm.Camera.TopicManager");
     IceStorm::TopicManagerPrx topicManager=IceStorm::TopicManagerPrx::checkedCast(obj);
