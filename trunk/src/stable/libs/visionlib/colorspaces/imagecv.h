@@ -182,7 +182,7 @@ namespace colorspaces {
      */
     static Image* createInstance(const int width, const int height, void *const data);
     static Image& imageCvt(const Image& src, Image& dst) throw(NoConversion);
-    static const FormatPtr FORMAT_RGB8;
+    static const FormatPtr FORMAT_RGB8, FORMAT_DEPTH8;
   };
 
   /**

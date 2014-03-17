@@ -54,6 +54,7 @@ namespace colorspaces {
   //static definitions
   const Image::FormatPtr Image::FORMAT_NONE = Image::Format::createFormat("NONE",0,0,0);
   const Image::FormatPtr ImageRGB8::FORMAT_RGB8 = Image::Format::createFormat("RGB8",CV_8UC3,&ImageRGB8::createInstance,&ImageRGB8::imageCvt);
+  const Image::FormatPtr ImageRGB8::FORMAT_DEPTH8 = Image::Format::createFormat("DEPTH8",CV_8UC3,&ImageRGB8::createInstance,&ImageRGB8::imageCvt);
   const Image::FormatPtr ImageYUY2::FORMAT_YUY2 = Image::Format::createFormat("YUY2",CV_8UC2,&ImageYUY2::createInstance,&ImageYUY2::imageCvt);
   const Image::FormatPtr ImageGRAY8::FORMAT_GRAY8 = Image::Format::createFormat("GRAY8",CV_8UC1,&ImageGRAY8::createInstance,&ImageGRAY8::imageCvt);
   const Image::FormatPtr ImageHSV8::FORMAT_HSV8 = Image::Format::createFormat("HSV8",CV_8UC3,&ImageHSV8::createInstance,&ImageHSV8::imageCvt);
@@ -101,8 +102,8 @@ const Image::FormatPtr ImageNV21::FORMAT_NV21 = Image::Format::createFormat("NV2
   }
 
   Image& ImageRGB8::imageCvt(const Image& src, Image& dst) throw(NoConversion){
-    assert(src.format() == FORMAT_RGB8 && "src is not a RGB8 image");
-    if (dst.format() == FORMAT_RGB8)
+    assert((src.format() == FORMAT_RGB8 || src.format() == FORMAT_DEPTH8 ) && "src is not a RGB8 image");
+    if (dst.format() == FORMAT_RGB8 || src.format() == FORMAT_DEPTH8)
       dst = src;
     else {
       const ImageRGB8 srcRgb8(src);//cast src to rgb image
