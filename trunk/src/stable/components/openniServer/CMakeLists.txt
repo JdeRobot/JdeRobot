@@ -47,7 +47,8 @@ IF(OPENNI2_LIB)
         ${OpenCV_LIBRARIES}
         ${OpenCVGUI_LIBRARIES} 
         ${gsl_LIBRARIES}
-		logger
+	logger
+	ns
         jderobotutil
         geometry
         colorspacesmm
@@ -68,7 +69,8 @@ IF(OPENNI2_LIB)
         geometry
         colorspacesmm
         JderobotInterfaces
-		logger
+	logger
+	ns
 	${OPENNI2_LIB}
         ${Boost_LIBRARIES}
         ${LIBXML2_LIBRARIES}

@@ -44,7 +44,7 @@
 #include <opencv2/video/background_segm.hpp>
 #include <signal.h>
 #include <log/Logger.h>
-
+#include <ns/ns.h>
 
 #ifdef WITH_NITE2
 	#include "NiTE.h"
@@ -113,7 +113,6 @@ openni::VideoMode colorVideoMode;
 
 int segmentationType; //0 ninguna, 1 NITE
 int mainFPS;
-
 
 
 void* updateThread(void*)
@@ -1158,6 +1157,8 @@ bool killed;
 openniServer::CameraRGB *camRGB;
 openniServer::CameraDEPTH *camDEPTH;
 openniServer::pointCloudI *pc1;
+jderobot::ns* namingService = NULL;
+std::vector<std::string> bindNamingService;
 
 void exitApplication(int s){
 
@@ -1172,6 +1173,16 @@ void exitApplication(int s){
 	if (pc1 != NULL){
 		delete pc1;
 	}
+
+	// NamingService
+	if (namingService != NULL)
+	{
+		for(std::vector<std::string>::iterator it = bindNamingService.begin(); it!=bindNamingService.end(); it++)
+				namingService->unbind(*it);
+
+		delete(namingService);
+	}
+
 	ic->shutdown();
 
 
@@ -1258,9 +1269,6 @@ int main(int argc, char** argv){
 	std::string Endpoints = prop->getProperty(componentPrefix + ".Endpoints");
 	Ice::ObjectAdapterPtr adapter =ic->createObjectAdapterWithEndpoints(componentPrefix, Endpoints);
 
-
-
-
 	if (openniServer::segmentationType){
 		cameraR=1;
 		cameraD=1;
@@ -1317,6 +1325,22 @@ int main(int argc, char** argv){
 
 	sync.release();
 
+	// Naming Service
+	int nsActive = prop->getPropertyAsIntWithDefault("NamingService.Enabled", 0);
+
+	if (nsActive)
+	{
+		std::string ns_proxy = prop->getProperty("NamingService.Proxy");
+		try
+		{
+			namingService = new jderobot::ns(ic, ns_proxy);
+		}
+		catch (Ice::ConnectionRefusedException& ex)
+		{
+			jderobot::Logger::getInstance()->error("Impossible to connect with NameService!");
+			exit(-1);
+		}
+	}
 
 	if (cameraR){
 		std::string objPrefix(componentPrefix + ".CameraRGB.");
@@ -1329,6 +1353,14 @@ int main(int argc, char** argv){
 		camRGB = new openniServer::CameraRGB(objPrefix,prop);
 		adapter->add(camRGB, ic->stringToIdentity(cameraName));
 		jderobot::Logger::getInstance()->info("              -------- openniServer: Component: CameraRGB created successfully(" + Endpoints + "@" + cameraName );
+
+
+		if (nsActive)
+		{
+			namingService->bind(cameraName, Endpoints, camRGB->ice_staticId());
+			bindNamingService.push_back(cameraName);
+		}
+
 	}
 
 	if (cameraD){
@@ -1343,6 +1375,12 @@ int main(int argc, char** argv){
 		adapter->add(camDEPTH, ic->stringToIdentity(cameraName));
 		//test camera ok
 		jderobot::Logger::getInstance()->info("              -------- openniServer: Component: CameraDEPTH created successfully(" + Endpoints + "@" + cameraName );
+
+		if (nsActive)
+		{
+			namingService->bind(cameraName, Endpoints, camDEPTH->ice_staticId());
+			bindNamingService.push_back(cameraName);
+		}
 	}
 
 	if (pointCloud){
