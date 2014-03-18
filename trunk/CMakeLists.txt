@@ -182,24 +182,6 @@ INSTALL (FILES ${CONF_FILES} DESTINATION /usr/local/share/jderobot/conf)
 FILE(GLOB_RECURSE GLADE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/components/*.glade)
 INSTALL (FILES ${GLADE_FILES} DESTINATION /usr/local/share/jderobot/glade)
 
-# Install Gazebo Models
-INSTALL (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/components/gazeboserver/models DESTINATION /usr/local/share/jderobot/gazebo/ PATTERN .svn EXCLUDE)
-
-# Install Gazebo Plugins
-SET(PLUGINS "kinect" "nao" "pioneer")
-
-FOREACH (PLUGIN ${PLUGINS})
-	FILE(GLOB_RECURSE SO_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/components/gazeboserver/plugins/${PLUGIN}/*.so)
-	INSTALL (FILES ${SO_FILES} DESTINATION /usr/lib/gazebo-1.8/plugins-jderobot/${PLUGIN}/ )
-	FILE(GLOB_RECURSE CFG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/components/gazeboserver/plugins/${PLUGIN}/*.cfg)
-	INSTALL (FILES ${CFG_FILES} DESTINATION /usr/lib/gazebo-1.8/plugins-jderobot/${PLUGIN}/ )
-	INSTALL (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/components/gazeboserver/plugins/${PLUGIN}/worlds/ 
-		 DESTINATION /usr/lib/gazebo-1.8/plugins-jderobot/${PLUGIN}/worlds/
-		 PATTERN .svn EXCLUDE)
-ENDFOREACH(PLUGIN)
-
-
-
 
 ###################
 #                 #
