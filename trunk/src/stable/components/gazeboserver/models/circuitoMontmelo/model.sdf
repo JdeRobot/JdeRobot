@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <model name="CircuitoMontmelo">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>20 20 0.01</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <cast_shadows>false</cast_shadows>
+        <geometry>
+          <box>
+            <size>20 20 0.01</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://circuitoMontmelo/materials/scripts</uri>
+            <uri>model://circuitoMontmelo/materials/textures</uri>
+            <name>floor</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
