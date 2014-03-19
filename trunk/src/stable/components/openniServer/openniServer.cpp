@@ -470,6 +470,8 @@ public:
 	//fill imageDescription
 	imageDescription->width = colorVideoMode.getResolutionX();
 	imageDescription->height = colorVideoMode.getResolutionY();
+
+
 	int playerdetection = prop->getPropertyAsIntWithDefault(prefix+"PlayerDetection",0);
 
 	#ifndef WITH_NITE2
@@ -742,6 +744,7 @@ public:
 
 	jderobot::Logger::getInstance()->info( "Starting thread for camera: " +  cameraDescription->name );
 	replyTask = new ReplyTask(this, imageDescription->width, imageDescription->height,fps, playerdetection);
+
 
 	this->control=replyTask->start();//my own thread
 	}
@@ -1158,7 +1161,6 @@ openniServer::CameraRGB *camRGB;
 openniServer::CameraDEPTH *camDEPTH;
 openniServer::pointCloudI *pc1;
 jderobot::ns* namingService = NULL;
-std::vector<std::string> bindNamingService;
 
 void exitApplication(int s){
 
@@ -1177,8 +1179,7 @@ void exitApplication(int s){
 	// NamingService
 	if (namingService != NULL)
 	{
-		for(std::vector<std::string>::iterator it = bindNamingService.begin(); it!=bindNamingService.end(); it++)
-				namingService->unbind(*it);
+		namingService->unbindAll();
 
 		delete(namingService);
 	}
@@ -1355,11 +1356,10 @@ int main(int argc, char** argv){
 		jderobot::Logger::getInstance()->info("              -------- openniServer: Component: CameraRGB created successfully(" + Endpoints + "@" + cameraName );
 
 
-		if (nsActive)
-		{
+		if (namingService)
 			namingService->bind(cameraName, Endpoints, camRGB->ice_staticId());
-			bindNamingService.push_back(cameraName);
-		}
+
+
 
 	}
 
@@ -1376,11 +1376,9 @@ int main(int argc, char** argv){
 		//test camera ok
 		jderobot::Logger::getInstance()->info("              -------- openniServer: Component: CameraDEPTH created successfully(" + Endpoints + "@" + cameraName );
 
-		if (nsActive)
-		{
+		if (namingService)
 			namingService->bind(cameraName, Endpoints, camDEPTH->ice_staticId());
-			bindNamingService.push_back(cameraName);
-		}
+
 	}
 
 	if (pointCloud){
