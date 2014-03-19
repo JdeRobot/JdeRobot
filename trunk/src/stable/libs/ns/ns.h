@@ -67,6 +67,13 @@ namespace jderobot
 		void unbind (std::string name);
 
 		/**
+		 * \brief Send unbind petition to every component register
+		 *
+		 */
+		void unbindAll();
+
+
+		/**
 		 * \brief Send a resolve petition given a name of component
 		 *
 		 * @param name The name of component to search
@@ -92,6 +99,8 @@ namespace jderobot
 	private:
 
 		NamingServicePrx mNamingService;
+
+		std::vector<std::string> mBinds;
 
 		std::vector<std::string>& split(const std::string &s, char delim, std::vector<std::string> &elems);
 	};

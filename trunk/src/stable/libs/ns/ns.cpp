@@ -59,6 +59,8 @@ void ns::bind (std::string name, std::string Endpoint, std::string interface )
 					node->ip + ":" + boost::lexical_cast<std::string>(node->port) );
 
 	mNamingService->bind(node);
+
+	mBinds.push_back(node->name);
 }
 
 void ns::unbind (std::string name)
@@ -68,6 +70,23 @@ void ns::unbind (std::string name)
 	node->name = name;
 
 	mNamingService->unbind(node);
+
+	for (std::vector<std::string>::iterator it = mBinds.begin(); it != mBinds.end(); it++)
+	{
+		if (name.compare(*it))
+			mBinds.erase(it);
+	}
+}
+
+void ns::unbindAll()
+{
+	NamingNodePtr node = new NamingNode();
+	for (std::vector<std::string>::iterator it = mBinds.begin(); it != mBinds.end(); it++)
+	{
+		node->name = *it;
+		mNamingService->unbind(node);
+	}
+	mBinds.clear();
 }
 
 jderobot::NodeContainerPtr ns::resolveByName(std::string name)
