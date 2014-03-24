@@ -9,6 +9,7 @@ set(SRC_FILES ns.h ns.cpp)
 ADD_LIBRARY(ns SHARED ${SRC_FILES})
 
 target_link_libraries(ns 
+    JderobotInterfaces
 	${Boost_LIBRARIES}
 	${ZeroCIce_LIBRARIES}
 )
