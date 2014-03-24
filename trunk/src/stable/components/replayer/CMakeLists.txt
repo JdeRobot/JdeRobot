@@ -18,6 +18,8 @@ add_executable (replayer ${SOURCE_FILES})
 
 
 TARGET_LINK_LIBRARIES(replayer
+    ns
+    logger
     ${CMAKE_THREAD_LIBS_INIT} 
     ${GLUT_LIBRARIES}
     ${OpenCV_LIBRARIES}

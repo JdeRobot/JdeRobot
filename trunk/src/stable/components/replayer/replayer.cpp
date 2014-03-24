@@ -43,7 +43,11 @@
 #include <jderobot/laser.h>
 #include "replayergui.h"
 #include "control.h"
+#include <ns/ns.h>
 
+
+
+bool componentAlive;
 
 namespace replayer {
 
@@ -82,7 +86,7 @@ namespace replayer {
 		}
 
 		std::string getRobotName () {
-			return prop->getProperty("Replayer.RobotName");
+			return (cameraDescription->name);
 
 		}
 
@@ -974,6 +978,29 @@ namespace replayer {
 
 } //namespace
 
+jderobot::ns* namingService = NULL;
+bool killed;
+Ice::CommunicatorPtr ic;
+
+void exitApplication(int s){
+
+
+	killed=true;
+	componentAlive=false;
+
+	// NamingService
+	if (namingService != NULL)
+	{
+		namingService->unbindAll();
+
+		delete(namingService);
+	}
+
+	ic->shutdown();
+	exit(0);
+
+}
+
 
 int main(int argc, char** argv) {
 
@@ -981,25 +1008,79 @@ int main(int argc, char** argv) {
 	IceUtil::Time a = IceUtil::Time::now();
 	long long int initState=(a.toMicroSeconds())/1000;
 	int nProcs=0;
+	std::string componentPrefix("Replayer");
 
 
-	Ice::CommunicatorPtr ic;
+	componentAlive=true;
+	killed=false;
+	struct sigaction sigIntHandler;
+
+	sigIntHandler.sa_handler = exitApplication;
+	sigemptyset(&sigIntHandler.sa_mask);
+	sigIntHandler.sa_flags = 0;
+
+	sigaction(SIGINT, &sigIntHandler, NULL);
+
+
 	try{
 		ic = Ice::initialize(argc, argv);
 		Ice::PropertiesPtr prop = ic->getProperties();
 
 		replayer::controller= new replayer::control(initState);
 
-		int nCameras = prop->getPropertyAsIntWithDefault("Replayer.nCameras",0);
+
+		// Naming Service
+		int nsActive = prop->getPropertyAsIntWithDefault("NamingService.Enabled", 0);
+
+		if (nsActive)
+		{
+			std::string ns_proxy = prop->getProperty("NamingService.Proxy");
+			try
+			{
+				namingService = new jderobot::ns(ic, ns_proxy);
+			}
+			catch (Ice::ConnectionRefusedException& ex)
+			{
+				jderobot::Logger::getInstance()->error("Impossible to connect with NameService!");
+				exit(-1);
+			}
+		}
+
+		// Analyze LOG section
+
+		std::string logFile = prop->getProperty(componentPrefix + ".Log.File.Name");
+		if (logFile.size()==0)
+			jderobot::Logger::getInstance()->warning("You didn't set log file!");
+		else
+			jderobot::Logger::getInstance()->setFileLog(logFile);
+
+		std::string logLevel = prop->getProperty(componentPrefix + ".Log.File.Level");
+		if (logLevel.size()==0)
+			jderobot::Logger::getInstance()->warning("You didn't set *.Log.File.Level key!");
+		else
+			jderobot::Logger::getInstance()->setFileLevel(jderobot::Levels(boost::lexical_cast<int>(logLevel)));
+
+		std::string screenLevel = prop->getProperty(componentPrefix + ".Log.Screen.Level");
+		if (screenLevel.size()==0)
+			jderobot::Logger::getInstance()->warning("You didn't set *.Log.Screen.Level key!");
+		else
+			jderobot::Logger::getInstance()->setScreenLevel(jderobot::Levels(boost::lexical_cast<int>(screenLevel)));
+
+		jderobot::Logger::getInstance()->info("Logger:: screenLevel=" + screenLevel + " logLevel=" + logLevel + " LogFile=" + logFile);
+
+
+
+
+		int nCameras = prop->getPropertyAsIntWithDefault(componentPrefix+".nCameras",0);
 		std::cout << "Cameras to load: " << nCameras << std::endl;
-		std::string Endpoints = prop->getProperty("Replayer.Endpoints");
+		std::string Endpoints = prop->getProperty(componentPrefix+".Endpoints");
 		cameras.resize(nCameras);
-		Ice::ObjectAdapterPtr adapter =ic->createObjectAdapterWithEndpoints("Replayer", Endpoints);
+		Ice::ObjectAdapterPtr adapter =ic->createObjectAdapterWithEndpoints(componentPrefix+"", Endpoints);
 		for (int i=0; i<nCameras; i++) {//build camera objects
 			std::stringstream objIdS;
 			objIdS <<  i;
 			std::string objId = objIdS.str();
-			std::string objPrefix("Replayer.Camera." + objId + ".");
+			std::string objPrefix(componentPrefix+".Camera." + objId + ".");
 			std::string cameraName = prop->getProperty(objPrefix + "Name");
 			std::cout << "Camera name: " << cameraName << std::endl;
 
@@ -1017,15 +1098,16 @@ int main(int argc, char** argv) {
 
 
 			adapter->add(cameras[i], ic->stringToIdentity(cameraName));
-			adapter->activate();
+			if (namingService)
+						namingService->bind(cameraName, Endpoints, cameras[i]->ice_staticId());
 			nProcs++;
 		}
-		int nPointClouds = prop->getPropertyAsIntWithDefault("Replayer.nPointClouds",0);
+		int nPointClouds = prop->getPropertyAsIntWithDefault(componentPrefix+".nPointClouds",0);
 		for (int i=0; i<nPointClouds; i++) {//build camera objects
 			std::stringstream objIdS;
 			objIdS <<  i;
 			std::string objId = objIdS.str();
-			std::string objPrefix("Replayer.PointCloud." + objId + ".");
+			std::string objPrefix(componentPrefix+".PointCloud." + objId + ".");
 			std::string Name = prop->getProperty(objPrefix + "Name");
 			std::cout << "pointCloud name: " << Name << std::endl;
 
@@ -1043,15 +1125,17 @@ int main(int argc, char** argv) {
 
 
 			adapter->add(object, ic->stringToIdentity(Name));
+			if (namingService)
+				namingService->bind(Name, Endpoints, object->ice_staticId());
 			nProcs++;
 		}
 
-		int nLasers = prop->getPropertyAsIntWithDefault("Replayer.nLasers",0);
+		int nLasers = prop->getPropertyAsIntWithDefault(componentPrefix+".nLasers",0);
 		for (int i=0; i<nLasers; i++) {//build camera objects
 			std::stringstream objIdS;
 			objIdS <<  i;
 			std::string objId = objIdS.str();
-			std::string objPrefix("Replayer.laser." + objId + ".");
+			std::string objPrefix(componentPrefix+".laser." + objId + ".");
 			std::string Name = prop->getProperty(objPrefix + "Name");
 			std::cout << "laser name: " << Name << std::endl;
 
@@ -1069,17 +1153,19 @@ int main(int argc, char** argv) {
 
 
 			adapter->add(object, ic->stringToIdentity(Name));
+			if (namingService)
+				namingService->bind(Name, Endpoints, object->ice_staticId());
 			nProcs++;
 		}
 
 
 
-		int nPose3dEncoders = prop->getPropertyAsIntWithDefault("Replayer.nPose3dEncoders",0);
+		int nPose3dEncoders = prop->getPropertyAsIntWithDefault(componentPrefix+".nPose3dEncoders",0);
 		for (int i=0; i<nPose3dEncoders; i++) {//build camera objects
 			std::stringstream objIdS;
 			objIdS <<  i;
 			std::string objId = objIdS.str();
-			std::string objPrefix("Replayer.pose3dencoder." + objId + ".");
+			std::string objPrefix(componentPrefix+".pose3dencoder." + objId + ".");
 			std::string Name = prop->getProperty(objPrefix + "Name");
 			std::cout << "pose3dencoders name: " << Name << std::endl;
 
@@ -1097,15 +1183,17 @@ int main(int argc, char** argv) {
 
 
 			adapter->add(object, ic->stringToIdentity(Name));
+			if (namingService)
+				namingService->bind(Name, Endpoints, object->ice_staticId());
 			nProcs++;
 		}
 
-		int nEncoders = prop->getPropertyAsIntWithDefault("Replayer.nEncoders",0);
+		int nEncoders = prop->getPropertyAsIntWithDefault(componentPrefix+".nEncoders",0);
 		for (int i=0; i<nEncoders; i++) {//build camera objects
 			std::stringstream objIdS;
 			objIdS <<  i;
 			std::string objId = objIdS.str();
-			std::string objPrefix("Replayer.encoder." + objId + ".");
+			std::string objPrefix(componentPrefix+".encoder." + objId + ".");
 			std::string Name = prop->getProperty(objPrefix + "Name");
 			std::cout << "encoders name: " << Name << std::endl;
 
@@ -1123,14 +1211,21 @@ int main(int argc, char** argv) {
 
 
 			adapter->add(object, ic->stringToIdentity(Name));
+			if (namingService)
+				namingService->bind(Name, Endpoints, object->ice_staticId());
 			nProcs++;
 		}
 
 
-		int controllerActive = prop->getPropertyAsIntWithDefault("Replayer.replayControlActive",0);
+		int controllerActive = prop->getPropertyAsIntWithDefault(componentPrefix+".replayControl.Active",0);
 		if (controllerActive){
 			Ice::ObjectPtr rc= new replayer::replayControllerI();
-			adapter->add(rc, ic->stringToIdentity("replayControllerA"));
+			std::string objPrefix(componentPrefix+".replayControl.");
+			std::string Name = prop->getProperty(objPrefix + "Name");
+
+			adapter->add(rc, ic->stringToIdentity(Name));
+			if (namingService)
+				namingService->bind(Name, Endpoints, rc->ice_staticId());
 		}
 
 		adapter->activate();
