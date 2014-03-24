@@ -55,6 +55,38 @@ pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, 
 
 }
 
+pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug, std::string proxy)
+{
+	this->prefix=prefix;
+	this->debug= debug;
+	Ice::PropertiesPtr prop;
+	prop = ic->getProperties();
+	this->refreshRate=0;
+
+	int fps=prop->getPropertyAsIntWithDefault(prefix+"Fps",10);
+	this->cycle=(float)(1/(float)fps)*1000000;
+	try{
+		Ice::ObjectPrx basePointCloud = ic->stringToProxy(proxy);
+		if (0==basePointCloud){
+			throw prefix + " Could not create proxy";
+		}
+		else {
+			this->prx = jderobot::pointCloudPrx::checkedCast(basePointCloud);
+			if (0==this->prx)
+				throw "Invalid proxy" + prefix;
+
+		}
+	}catch (const Ice::Exception& ex) {
+		std::cerr << ex << std::endl;
+	}
+	catch (const char* msg) {
+		std::cerr << msg << std::endl;
+		jderobot::Logger::getInstance()->error(prefix + " Not camera provided");
+	}
+	_done=false;
+	this->pauseStatus=false;
+}
+
 pointcloudClient::~pointcloudClient() {
 	// TODO Auto-generated destructor stub
 	this->_done=true;
@@ -71,6 +103,9 @@ void pointcloudClient::resume(){
 	this->controlMutex.unlock();
 }
 
+void pointcloudClient::stop_thread(){
+	_done = true;
+}
 
 void pointcloudClient::run(){
 

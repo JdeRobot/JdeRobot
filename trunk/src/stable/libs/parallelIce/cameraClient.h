@@ -38,6 +38,7 @@ namespace jderobot {
 class cameraClient: public IceUtil::Thread {
 public:
 	cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug);
+	cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug, std::string proxy);
 	virtual ~cameraClient();
 	virtual void run();
 
@@ -47,6 +48,7 @@ public:
 	void pause();
 	void resume();
 	void reset();
+	void stop_thread();
 	bool getPause(){return pauseStatus;};
 	cv::Size getSize(){return size;};
 

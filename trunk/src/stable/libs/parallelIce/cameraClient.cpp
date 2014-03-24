@@ -25,7 +25,7 @@
 namespace jderobot {
 
 cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug) {
-	// TODO Auto-generated constructor stubcameraClient* client = new cameraClient;
+
 	this->prefix=prefix;
 	this->debug=debug;
 	Ice::PropertiesPtr prop;
@@ -46,6 +46,45 @@ cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool deb
 			if (0==this->prx)
 				throw "Invalid " + prefix + ".Proxy";
 		}
+	}catch (const Ice::Exception& ex) {
+		std::cerr << ex << std::endl;
+	}
+	catch (const char* msg) {
+		std::cerr << msg << std::endl;
+		jderobot::Logger::getInstance()->error(prefix + " Not camera provided");
+	}
+
+	jderobot::ImageDataPtr data = this->prx->getImageData();
+
+	this->size=cv::Size(data->description->width,data->description->height);
+	_done=false;
+	this->pauseStatus=false;
+}
+
+cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug, std::string proxy){
+
+	this->prefix=prefix;
+	this->debug=debug;
+	Ice::PropertiesPtr prop;
+	prop = ic->getProperties();
+	Ice::ObjectPrx baseCamera;
+	this->refreshRate=0;
+
+
+	int fps=prop->getPropertyAsIntWithDefault(prefix+"Fps",10);
+	this->cycle=(float)(1/(float)fps)*1000000;
+
+	try{
+			baseCamera = ic->stringToProxy(proxy);
+			if (0==baseCamera){
+				throw prefix + "Could not create proxy with Camera";
+			}
+			else {
+				this->prx= jderobot::CameraPrx::checkedCast(baseCamera);
+				if (0==this->prx)
+					throw "Invalid " + prefix + ".Proxy";
+			}
+
 	}catch (const Ice::Exception& ex) {
 		std::cerr << ex << std::endl;
 	}
@@ -130,7 +169,7 @@ cameraClient::run(){
 
 		int rate =(int)(1000000/(IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
 		totalRefreshRate =  totalRefreshRate + rate;
-		this->refreshRate= totalRefreshRate / iterIndex;		
+		this->refreshRate= totalRefreshRate / iterIndex;
 		last=IceUtil::Time::now();
 
 		if (iterIndex == INT_MAX) 
@@ -140,6 +179,11 @@ cameraClient::run(){
 		}
 
 	}
+}
+
+void cameraClient::stop_thread()
+{
+	_done = true;
 }
 
 cv::Mat cameraClient::getImage(){

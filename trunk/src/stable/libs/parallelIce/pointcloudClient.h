@@ -37,6 +37,8 @@ namespace jderobot {
 class pointcloudClient: public IceUtil::Thread {
 public:
 	pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug);
+	pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug, std::string proxy);
+
 	virtual ~pointcloudClient();
 	virtual void run();
 
@@ -46,6 +48,7 @@ public:
 	void resume();
 	bool getPause(){return pauseStatus;};
 
+	void stop_thread();
 
 private:
 	std::string prefix;
