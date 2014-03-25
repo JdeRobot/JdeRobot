@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Enter your sudo pass for reset usb device automatically
+PASS_SUDO=
+
+mkdir -p ../log/
+echo "Restarting openniServer ... " `date` >> ../log/system.log
+
+cd ..
+./openniServer --Ice.Config=config/2openniServer2.cfg
+
+sleep 5
