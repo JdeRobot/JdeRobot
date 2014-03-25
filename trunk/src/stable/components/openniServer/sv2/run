@@ -7,6 +7,6 @@ mkdir -p ../log/
 echo "Restarting openniServer ... " `date` >> ../log/system.log
 
 cd ..
-./openniServer --Ice.Config=config/openniServer2.cfg
+./openniServer --Ice.Config=config/2openniServer.cfg
 
 sleep 5
