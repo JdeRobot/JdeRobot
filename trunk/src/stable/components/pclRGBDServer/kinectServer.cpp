@@ -15,7 +15,7 @@
 #include <pcl/io/openni_grabber.h>
 #include <pcl/io/openni_camera/openni_driver.h>
 #include <pcl/io/pcd_io.h>
-//#include <pcl/visualization/cloud_viewer.h>
+#include <pcl/visualization/cloud_viewer.h>
 #include <pcl/filters/voxel_grid.h>
 
 #include "cameradepth.h"

@@ -1,5 +1,5 @@
 
-if(with_pcl)
+if(pcl_openni)
 
     SET( SOURCE_FILES kinectServer.cpp)
 
