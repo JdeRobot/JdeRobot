@@ -151,7 +151,8 @@ namespace rgbdManualCalibrator {
 		if (w_depth->get_active()){
 
 
-			cv::Mat srcDEPTH=sources[cam].DEPTH->getImage();
+			cv::Mat srcDEPTH;
+			sources[cam].DEPTH->getImage(srcDEPTH);
 
 
 			/*split channels to separate distance from image*/
@@ -179,7 +180,8 @@ namespace rgbdManualCalibrator {
 		}
 		else{
 
-			cv::Mat rgb = sources[cam].RGB->getImage();
+			cv::Mat rgb;
+			sources[cam].RGB->getImage(rgb);
 
 			controller->drawWorld(rgb,cam);
 			Glib::RefPtr<Gdk::Pixbuf> imgBuff = Gdk::Pixbuf::create_from_data((const guint8*)rgb.data,
@@ -210,7 +212,8 @@ namespace rgbdManualCalibrator {
 			this->world->clear_points();
 			for (int pos=0; pos< nCameras; pos++){
 				int colour;
-				cv::Mat srcDEPTH =sources[pos].DEPTH->getImage();
+				cv::Mat srcDEPTH;
+				sources[pos].DEPTH->getImage(srcDEPTH);
 
 				cv::Mat distance(srcDEPTH.rows, srcDEPTH.cols, CV_32FC1);
 				//split channels to separate distance from image
@@ -221,7 +224,8 @@ namespace rgbdManualCalibrator {
 					for (int y=0; y<layers[1].rows; y++){
 						distance.at<float>(y,x) = ((int)layers[1].at<unsigned char>(y,x)<<8)|(int)layers[2].at<unsigned char>(y,x);					}
 				}
-				cv::Mat rgb = sources[pos].RGB->getImage();
+				cv::Mat rgb;
+				sources[pos].RGB->getImage(rgb);
 				if (this->trueColor)
 					colour=0;
 				else
@@ -236,7 +240,8 @@ namespace rgbdManualCalibrator {
 		}
 		else{
 			this->world->clear_points();
-			cv::Mat srcDEPTH =sources[cam].DEPTH->getImage();
+			cv::Mat srcDEPTH;
+			sources[cam].DEPTH->getImage(srcDEPTH);
 
 			cv::Mat distance(srcDEPTH.rows, srcDEPTH.cols, CV_32FC1);
 			//split channels to separate distance from image
@@ -248,7 +253,8 @@ namespace rgbdManualCalibrator {
 					distance.at<float>(y,x) = ((int)layers[1].at<unsigned char>(y,x)<<8)|(int)layers[2].at<unsigned char>(y,x);					}
 			}
 
-			cv::Mat rgb = sources[cam].RGB->getImage();
+			cv::Mat rgb;
+			sources[cam].RGB->getImage(rgb);
 			this->controller->add_depth_pointsImage(distance,rgb, world, cam,5,0);
 
 

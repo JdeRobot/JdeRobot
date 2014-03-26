@@ -24,10 +24,9 @@
 
 namespace jderobot {
 
-cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug) {
+cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix) {
 
 	this->prefix=prefix;
-	this->debug=debug;
 	Ice::PropertiesPtr prop;
 	prop = ic->getProperties();
 	Ice::ObjectPrx baseCamera;
@@ -61,10 +60,9 @@ cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool deb
 	this->pauseStatus=false;
 }
 
-cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug, std::string proxy){
+cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, std::string proxy){
 
 	this->prefix=prefix;
-	this->debug=debug;
 	Ice::PropertiesPtr prop;
 	prop = ic->getProperties();
 	Ice::ObjectPrx baseCamera;
@@ -101,7 +99,6 @@ cameraClient::cameraClient(Ice::CommunicatorPtr ic, std::string prefix, bool deb
 }
 
 cameraClient::~cameraClient() {
-	// TODO Auto-generated destructor stub
 	_done=true;
 }
 
@@ -145,14 +142,10 @@ cameraClient::run(){
 			throw "Format not supported";
 		colorspaces::Image imageRGB(dataPtr->description->width,dataPtr->description->height,fmt,&(dataPtr->pixelData[0]));
 		colorspaces::ImageRGB8 img_rgb888(imageRGB);//conversion will happen if needed
-		cv::Mat localDataPtr = cv::Mat(cvSize(img_rgb888.width,img_rgb888.height), CV_8UC3, img_rgb888.data);
-		cv::Mat localData;
-		localDataPtr.copyTo(localData);
 		this->controlMutex.lock();
-		this->data.release();
-		localData.copyTo(this->data);
+		cv::Mat(cvSize(img_rgb888.width,img_rgb888.height), CV_8UC3, img_rgb888.data).copyTo(this->data);
 		this->controlMutex.unlock();
-
+		img_rgb888.release();
 		int process = this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds());
 
 		if (process > (int)cycle ){
@@ -179,6 +172,7 @@ cameraClient::run(){
 		}
 
 	}
+	this->data.release();
 }
 
 void cameraClient::stop_thread()
@@ -186,13 +180,10 @@ void cameraClient::stop_thread()
 	_done = true;
 }
 
-cv::Mat cameraClient::getImage(){
-	cv::Mat local;
+void cameraClient::getImage(cv::Mat& image){
 	this->controlMutex.lock();
-	this->data.copyTo(local);
+	this->data.copyTo(image);
 	this->controlMutex.unlock();
-	return local;
-
 }
 
 } /* namespace jderobot */

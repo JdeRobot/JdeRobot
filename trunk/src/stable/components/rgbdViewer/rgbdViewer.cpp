@@ -56,11 +56,11 @@ void *gui_thread(void* arg){
 		lastIT=IceUtil::Time::now();
 		while(rgbdViewergui_ptx->isVisible() && ! rgbdViewergui_ptx->isClosed()){
 			if (camRGB!=NULL)
-				camRGB->getImage().copyTo(rgb);
+				camRGB->getImage(rgb);
 			if (camDEPTH!=NULL)
-				camDEPTH->getImage().copyTo(depth);
+				camDEPTH->getImage(depth);
 			if (pcClient!=NULL)
-				cloud=pcClient->getData();
+				pcClient->getData(cloud);
 
 
 			if ((rgb.rows!=0)&&(depth.rows!=0)){
@@ -133,7 +133,7 @@ int main(int argc, char** argv){
 		return 1;
 	}
 	if (prop->getPropertyAsIntWithDefault("rgbdViewer.CameraRGBActive",0)){
-		camRGB = new jderobot::cameraClient(ic,"rgbdViewer.CameraRGB.",false);
+		camRGB = new jderobot::cameraClient(ic,"rgbdViewer.CameraRGB.");
 		if (camRGB != NULL){
 			rgbCamSelected=true;
 			camRGB->start();
@@ -145,7 +145,7 @@ int main(int argc, char** argv){
 
 	}
 	if (prop->getPropertyAsIntWithDefault("rgbdViewer.CameraDEPTHActive",0)){
-		camDEPTH = new jderobot::cameraClient(ic,"rgbdViewer.CameraDEPTH.",false);
+		camDEPTH = new jderobot::cameraClient(ic,"rgbdViewer.CameraDEPTH.");
 		if (camDEPTH != NULL){
 			depthCamSelected=true;
 			camDEPTH->start();
@@ -158,7 +158,7 @@ int main(int argc, char** argv){
 
 
 	if (prop->getPropertyAsIntWithDefault("rgbdViewer.pointCloudActive",0)){
-		pcClient = new jderobot::pointcloudClient(ic,"rgbdViewer.pointCloud.",false);
+		pcClient = new jderobot::pointcloudClient(ic,"rgbdViewer.pointCloud.");
 		if (pcClient!= NULL){
 			pcClient->start();
 			pointCloudSelected=true;

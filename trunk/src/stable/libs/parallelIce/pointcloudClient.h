@@ -36,13 +36,13 @@ namespace jderobot {
 
 class pointcloudClient: public IceUtil::Thread {
 public:
-	pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug);
-	pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug, std::string proxy);
+	pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix);
+	pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, std::string proxy);
 
 	virtual ~pointcloudClient();
 	virtual void run();
 
-	std::vector<jderobot::RGBPoint>  getData();
+	void getData(std::vector<jderobot::RGBPoint>& cloud);
 	int getRefreshRate(){return refreshRate;};
 	void pause();
 	void resume();
@@ -56,7 +56,6 @@ private:
 	jderobot::pointCloudPrx prx;
 	long long int cycle;
 	IceUtil::Mutex controlMutex;
-	bool debug;
 	bool _done;
 	int refreshRate;
 	bool pauseStatus;

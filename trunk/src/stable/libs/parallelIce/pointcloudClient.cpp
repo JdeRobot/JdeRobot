@@ -22,10 +22,9 @@
 
 namespace jderobot {
 
-pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug) {
+pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix) {
 	// TODO Auto-generated constructor stub
 	this->prefix=prefix;
-	this->debug= debug;
 	Ice::PropertiesPtr prop;
 	prop = ic->getProperties();
 	this->refreshRate=0;
@@ -55,10 +54,9 @@ pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, 
 
 }
 
-pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, bool debug, std::string proxy)
+pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, std::string proxy)
 {
 	this->prefix=prefix;
-	this->debug= debug;
 	Ice::PropertiesPtr prop;
 	prop = ic->getProperties();
 	this->refreshRate=0;
@@ -144,16 +142,18 @@ void pointcloudClient::run(){
 
 		this->refreshRate=(int)(1000000/(IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()));
 		last=IceUtil::Time::now();
+		usleep(100);
 	}
+	this->data.clear();
+
 }
 
-std::vector<jderobot::RGBPoint>  pointcloudClient::getData(){
-	std::vector<jderobot::RGBPoint> cloud;
+void  pointcloudClient::getData(std::vector<jderobot::RGBPoint>& cloud){
 	this->controlMutex.lock();
 	cloud.resize(this->data.size());
 	std::copy( this->data.begin(), this->data.end(), cloud.begin() );
 	this->controlMutex.unlock();
-	return cloud;
+	this->data.clear();
 }
 
 } /* namespace jderobot */
