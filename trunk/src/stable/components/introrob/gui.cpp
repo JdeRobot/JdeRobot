@@ -433,11 +433,38 @@ namespace introrob {
         }
     }
 
+    float Gui::getAspectRatio(int width1, int height1, int width2, int height2) {
+        float arw, arh;
+        arw = (float)width1 / (float)width2;
+        arh = (float)height1 / (float)height2;
+        if (arw < arh) {
+            return arh;
+        }
+        return arw;
+    }
+
     void Gui::setCamaras() {
+		// Variables para el cálculo de la relación de aspecto idóneo
         if (api->imagesReady) {
             gtk_image1->clear();
+            if (gtk_image1->get_width() < api->imgBuff->get_width() ||
+                    gtk_image1->get_height() < api->imgBuff->get_height()) {
+                // Cambiamos la resolución manteniendo la relación de aspecto
+				image1_ratio = Gui::getAspectRatio(api->imgBuff->get_width(), api->imgBuff->get_height(),
+				        gtk_image1->get_width(), gtk_image1->get_height());
+                api->imgBuff = api->imgBuff->scale_simple(api->imgBuff->get_width() / image1_ratio,
+				        api->imgBuff->get_height() / image1_ratio, Gdk::INTERP_BILINEAR);
+			}
             gtk_image1->set(api->imgBuff);
             gtk_image2->clear();
+            if (gtk_image2->get_width() < api->imgBuff2->get_width() ||
+                    gtk_image2->get_height() < api->imgBuff2->get_height()) {
+                // Cambiamos la resolución manteniendo la relación de aspecto
+				image2_ratio = Gui::getAspectRatio(api->imgBuff2->get_width(), api->imgBuff2->get_height(),
+				        gtk_image2->get_width(), gtk_image2->get_height());
+                api->imgBuff2 = api->imgBuff2->scale_simple(api->imgBuff2->get_width() / image2_ratio,
+				        api->imgBuff2->get_height() / image2_ratio, Gdk::INTERP_BILINEAR);
+			}
             gtk_image2->set(api->imgBuff2);
         }
 
@@ -504,8 +531,10 @@ namespace introrob {
         api->y_click_cameraright = y;
 
 
-        pixB.x = x;
-        pixB.y = y;
+   		int offsetx = (gtk_image2->get_width() - gtk_image2->get_pixbuf()->get_width()) / 2;
+        pixB.x = (x - offsetx) * image2_ratio;
+		int offsety = (gtk_image2->get_height() - gtk_image2->get_pixbuf()->get_height()) / 2;
+        pixB.y = (y - offsety) * image2_ratio;
         pixB.h = 1.0;
         printf("click en camera derecha, punto %f,%f\n", pixB.x, pixB.y);
         //this->calculate_projection_line(pixB,2);
@@ -519,8 +548,10 @@ namespace introrob {
         api->x_click_cameraleft = x;
         api->y_click_cameraleft = y;
 
-        pixA.x = x;
-        pixA.y = y;
+		int offsetx = (gtk_image1->get_width() - gtk_image1->get_pixbuf()->get_width()) / 2;
+        pixA.x = (x - offsetx) * image1_ratio;
+		int offsety = (gtk_image1->get_height() - gtk_image1->get_pixbuf()->get_height()) / 2;
+        pixA.y = (y - offsety) * image1_ratio;
         pixA.h = 1.0;
         printf("click en camera izquierda, punto %f,%f\n", pixA.x, pixA.y);
         //this->calculate_projection_line(pixA,1);

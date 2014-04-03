@@ -110,6 +110,7 @@ namespace introrob {
 
         // Private Methods
         void initCameras();
+        float getAspectRatio(int width1, int height1, int width2, int height2);
         void setCamaras();
         void yourCodeButton_clicked();
         void stopCodeButton_clicked();
@@ -165,6 +166,7 @@ namespace introrob {
         // Cameras
         Gtk::Image *gtk_image1;
         Gtk::Image *gtk_image2;
+		float image1_ratio, image2_ratio; // Size ratio: original image <-> GTK widget
         TPinHoleCamera myCamA, myCamB;
         HPoint2D pixA; // for pixel projection
         HPoint2D pixB; // for pixel projection	
