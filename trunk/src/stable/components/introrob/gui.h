@@ -166,7 +166,7 @@ namespace introrob {
         // Cameras
         Gtk::Image *gtk_image1;
         Gtk::Image *gtk_image2;
-		float image1_ratio, image2_ratio; // Size ratio: original image <-> GTK widget
+        float image1_ratio, image2_ratio; // Size ratio: original image <-> GTK widget
         TPinHoleCamera myCamA, myCamB;
         HPoint2D pixA; // for pixel projection
         HPoint2D pixB; // for pixel projection	
