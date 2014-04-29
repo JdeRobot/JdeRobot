@@ -38,10 +38,21 @@ bool control::getPlay(){
 	return localPlay;
 }
 
-long long int control::getTime(){
+long long int control::getSyncTime(){
 	long long int localTime;
 	this->controlMutex.lock();
 	localTime=this->newTime;
+	this->controlMutex.unlock();
+	return localTime;
+}
+
+long long int control::getRelativeTime(){
+	long long int localTime;
+	this->controlMutex.lock();
+	if (this->play)
+		localTime=IceUtil::Time::now().toMilliSeconds() - this->newTime;
+	else
+		localTime=this->timeToResume;
 	this->controlMutex.unlock();
 	return localTime;
 }
@@ -109,7 +120,6 @@ void control::setStep(int step){
 	this->controlMutex.lock();
 		IceUtil::Time n = IceUtil::Time::now();
 		long long int nowInt=(n.toMicroSeconds())/1000;
-		std::cout << "avanzo" <<  step << std::endl;
 		this->timeToResume=this->timeToResume  + step;
 		this->newTime=nowInt-this->timeToResume;
 	this->controlMutex.unlock();

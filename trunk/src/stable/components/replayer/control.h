@@ -35,7 +35,8 @@ public:
 	void lock();
 	void unlock();
 	bool getPlay();
-	long long int getTime();
+	long long int getSyncTime(); //tiempo origen para la sincronización relativa
+	long long int getRelativeTime(); //tiempo relativo de ejecución
 	long long int wait();
 	void checkStatus();
 	void stop();

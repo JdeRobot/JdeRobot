@@ -159,19 +159,19 @@ namespace replayer {
 						this->onPause=!playing;
 						while (!playing){
 							playing=controller->getPlay();
-							long long int pauseStatus= controller->getTime();
+							long long int pauseStatus= controller->getSyncTime();
 							if (pauseStatus != this->mycamera->initState){
 								this->mycamera->initState=pauseStatus;
 								break;
 							}
 							//check if w
-							std::cout << "not playing" << std::endl;
+							//std::cout << "not playing" << std::endl;
 							usleep(10000);
 							continue;
 						}
 
 						if (this->onPause){
-							this->mycamera->initState=controller->getTime();
+							this->mycamera->initState=controller->getSyncTime();
 							myfile.close();
 							myfile.open(fileName.c_str());
 						}
@@ -382,7 +382,7 @@ namespace replayer {
 							this->onPause=!playing;
 							while (!playing){
 								playing=controller->getPlay();
-								long long int pauseStatus= controller->getTime();
+								long long int pauseStatus= controller->getSyncTime();
 								if (pauseStatus != this->myPointCloud->initState){
 									this->myPointCloud->initState=pauseStatus;
 									break;
@@ -393,7 +393,7 @@ namespace replayer {
 							}
 
 							if (this->onPause){
-								this->myPointCloud->initState=controller->getTime();
+								this->myPointCloud->initState=controller->getSyncTime();
 								myfile.close();
 								myfile.open(fileName.c_str());
 							}
@@ -521,7 +521,7 @@ namespace replayer {
 							this->onPause=!playing;
 							while (!playing){
 								playing=controller->getPlay();
-								long long int pauseStatus= controller->getTime();
+								long long int pauseStatus= controller->getSyncTime();
 								if (pauseStatus != this->myLaser->initState){
 									this->myLaser->initState=pauseStatus;
 									break;
@@ -532,7 +532,7 @@ namespace replayer {
 							}
 
 							if (this->onPause){
-								this->myLaser->initState=controller->getTime();
+								this->myLaser->initState=controller->getSyncTime();
 								myfile.close();
 								myfile.open(fileName.c_str());
 							}
@@ -660,7 +660,7 @@ namespace replayer {
 								this->onPause=!playing;
 								while (!playing){
 									playing=controller->getPlay();
-									long long int pauseStatus= controller->getTime();
+									long long int pauseStatus= controller->getSyncTime();
 									if (pauseStatus != this->myPose3d->initState){
 										this->myPose3d->initState=pauseStatus;
 										break;
@@ -671,7 +671,7 @@ namespace replayer {
 								}
 
 								if (this->onPause){
-									this->myPose3d->initState=controller->getTime();
+									this->myPose3d->initState=controller->getSyncTime();
 									myfile.close();
 									myfile.open(fileName.c_str());
 								}
@@ -824,7 +824,7 @@ namespace replayer {
 								this->onPause=!playing;
 								while (!playing){
 									playing=controller->getPlay();
-									long long int pauseStatus= controller->getTime();
+									long long int pauseStatus= controller->getSyncTime();
 									if (pauseStatus != this->myEncoder->initState){
 										this->myEncoder->initState=pauseStatus;
 										break;
@@ -835,7 +835,7 @@ namespace replayer {
 								}
 
 								if (this->onPause){
-									this->myEncoder->initState=controller->getTime();
+									this->myEncoder->initState=controller->getSyncTime();
 									myfile.close();
 									myfile.open(fileName.c_str());
 								}
@@ -963,8 +963,7 @@ namespace replayer {
 				return true;
 			}
 			virtual Ice::Long getTime(const Ice::Current&){
-				//return the rurrent time
-				return 0;
+				return controller->getRelativeTime();
 			}
 			virtual bool goTo(Ice::Long seek, const Ice::Current&){
 				//set the current position to seek
@@ -1237,7 +1236,6 @@ int main(int argc, char** argv) {
 		while (1){
 			//gui->update();
 			replayer::controller->checkStatus();
-			usleep(50000);
 		}
 
 
