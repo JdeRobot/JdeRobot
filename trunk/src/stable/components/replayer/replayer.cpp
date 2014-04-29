@@ -67,7 +67,7 @@ namespace replayer {
 		   this->height=prop->getPropertyAsIntWithDefault(propertyPrefix + "ImageHeight",240);
 		   this->dataPath=prop->getProperty(propertyPrefix+"Dir");
 		   this->fileFormat=prop->getProperty(propertyPrefix+"FileFormat");
-
+                   this->format = prop->getProperty(propertyPrefix+"Format");
 		   std::cout << "PATH " << this->dataPath << std::endl;
 		   std::cout << "FORMAT: " << this->fileFormat << std::endl;
 
@@ -262,7 +262,7 @@ namespace replayer {
 				   mycamera->imageDescription->width = this->mycamera->width;
 				   mycamera->imageDescription->height = this->mycamera->height;
 				   mycamera->imageDescription->size = this->mycamera->width*this->mycamera->height*3;
-				   mycamera->imageDescription->format = "RGB8";
+				   mycamera->imageDescription->format = this->mycamera->format;
 
 					jderobot::ImageDataPtr reply(new jderobot::ImageData);
 					reply->description = mycamera->imageDescription;
@@ -336,7 +336,7 @@ namespace replayer {
 		long long int initState;
 		std::string fileFormat;
 		std::string dataPath;
-
+		std::string format;
 
 	}; // end class CameraI
 
@@ -1099,7 +1099,7 @@ int main(int argc, char** argv) {
 
 			adapter->add(cameras[i], ic->stringToIdentity(cameraName));
 			if (namingService)
-						namingService->bind(cameraName, Endpoints, cameras[i]->ice_staticId());
+						namingService->bind(cameraName, Endpoints, "::jderobot::Camera");
 			nProcs++;
 		}
 		int nPointClouds = prop->getPropertyAsIntWithDefault(componentPrefix+".nPointClouds",0);
