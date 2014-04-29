@@ -75,7 +75,7 @@ void control::checkStatus(){
 	}
 	else{
 		if (this->repeat){
-			std::cout << "--------------REINICIO" << std::endl;
+			jderobot::Logger::getInstance()->info("--------------REINICIO");
 			IceUtil::Time now = IceUtil::Time::now();
 			long long int nowInt=(now.toMicroSeconds())/1000;
 			this->newTime=nowInt;
@@ -91,7 +91,7 @@ void control::stop(){
 		this->play=false;
 		IceUtil::Time now = IceUtil::Time::now();
 		long long int nowInt=(now.toMicroSeconds())/1000;
-		std::cout << "now_ " << nowInt << std::endl;
+		//std::cout << "now_ " << nowInt << std::endl;
 
 		this->timeToResume=nowInt-this->newTime;
 	this->controlMutex.unlock();
@@ -102,8 +102,8 @@ void control::resume(){
 		this->play=true;
 		IceUtil::Time now = IceUtil::Time::now();
 		long long int nowInt=(now.toMicroSeconds())/1000;
-		std::cout << "now_ " << nowInt << std::endl;
-		std::cout << "TIEMPO RELATIVO: " << this->timeToResume << std::endl;
+		//std::cout << "now_ " << nowInt << std::endl;
+		//std::cout << "TIEMPO RELATIVO: " << this->timeToResume << std::endl;
 		this->newTime=nowInt-this->timeToResume;
 	this->controlMutex.unlock();
 }

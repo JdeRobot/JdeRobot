@@ -25,6 +25,7 @@
 #include <iostream>
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
+#include <log/Logger.h>
 
 namespace replayer {
 
