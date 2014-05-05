@@ -85,7 +85,7 @@ openni::Device			m_device;
 int cameraR, cameraD,cameraIR, ImageRegistration;
 int colors[10][3];
 int SELCAM;
-pthread_mutex_t mutex;
+IceUtil::Mutex mutex;
 bool componentAlive;
 pthread_t updateThread;
 int deviceMode; //videmode for device streamings
@@ -332,7 +332,20 @@ void* updateThread(void*)
 	for (int i=0; i<MAX_TIMES_PREHEATING; i++)
 	{
 		int changedIndex;
-		openni::OpenNI::waitForAnyStream(m_streams, 2, &changedIndex,SAMPLE_READ_WAIT_TIMEOUT);
+		openni::Status rc;
+		rc=openni::OpenNI::waitForAnyStream(m_streams, 2, &changedIndex,SAMPLE_READ_WAIT_TIMEOUT);
+		if (rc != openni::STATUS_OK)
+		{
+			jderobot::Logger::getInstance()->warning( "Wait failed! (timeout is " + boost::lexical_cast<std::string>(SAMPLE_READ_WAIT_TIMEOUT) +  "ms) " + std::string(openni::OpenNI::getExtendedError()) );
+			retry_times++;
+			if (retry_times > RETRY_MAX_TIMES)
+			{
+				jderobot::Logger::getInstance()->error( "Retry Max Times exceeded!. Force Exit!!" );
+				exit(-1);
+			}
+			continue;
+		}
+
 
 		if (changedIndex != 0)
 			continue;
@@ -354,7 +367,6 @@ void* updateThread(void*)
 
 
 	while(componentAlive){
-
 
 
 		int changedIndex;
@@ -386,26 +398,19 @@ void* updateThread(void*)
 			jderobot::Logger::getInstance()->info( "OpenniServer initialized" );
 			first=false;
 		}
-		/*switch (changedIndex)
+
+		mutex.lock();
+
+		switch (changedIndex)
 		{
-		case 0:
-			depth.readFrame(&m_depthFrame);
-			break;
-		case 1:
-			color.readFrame(&m_colorFrame);
-			break;
-		default:
-			std::cout << "Error in wait" << std::endl;
-			break;
-		}*/
-
-		pthread_mutex_lock(&mutex);
-
-		if (cameraD)
-			depth.readFrame(&m_depthFrame);
-		if (cameraR){
-			color.readFrame(&m_colorFrame);
+			case 0:
+				depth.readFrame(&m_depthFrame);
+				break;
+			case 1:
+				color.readFrame(&m_colorFrame);
+				break;
 		}
+
 
 
 		//nite
@@ -424,8 +429,8 @@ void* updateThread(void*)
 
 
 
+		mutex.unlock();
 
-		pthread_mutex_unlock(&mutex);
 
 
 		int process = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
@@ -574,13 +579,13 @@ private:
 		
 		IceUtil::Time lastIT=IceUtil::Time::now();
 		while(!(_done)){
-			pthread_mutex_lock(&mutex);
+			mutex.lock();
 		    IceUtil::Time t = IceUtil::Time::now();
 		    reply->timeStamp.seconds = (long)t.toSeconds();
 		    reply->timeStamp.useconds = (long)t.toMicroSeconds() - reply->timeStamp.seconds*1000000;
 
 			if (!m_colorFrame.isValid()){
-				pthread_mutex_unlock(&mutex);			
+				mutex.unlock();
 				continue;
 			}
 			//nite
@@ -670,8 +675,7 @@ private:
 			}
 
 			}//critical region end
-
-			pthread_mutex_unlock(&mutex);
+		    mutex.unlock();
 
 
 			int process = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
@@ -836,14 +840,14 @@ private:
 
 		lastIT=IceUtil::Time::now();
 		while(!(_done)){
-			pthread_mutex_lock(&mutex);
+			mutex.lock();
 			src=cv::Scalar(0, 0, 0);
 
 		    IceUtil::Time t = IceUtil::Time::now();
 		    reply->timeStamp.seconds = (long)t.toSeconds();
 		    reply->timeStamp.useconds = (long)t.toMicroSeconds() - reply->timeStamp.seconds*1000000;
 			if (!m_depthFrame.isValid()){
-				pthread_mutex_unlock(&mutex);
+				mutex.unlock();
 				continue;
 			}
 
@@ -934,7 +938,7 @@ private:
 				cb->ice_response(reply);
 			}
 			}//critical region end
-			pthread_mutex_unlock(&mutex);
+		    mutex.unlock();
 			
 
 			int process = IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds();
@@ -1050,13 +1054,13 @@ private:
 				IceUtil::Time lastIT=IceUtil::Time::now();
 				while(!(_done)){
 					float distance;
-					pthread_mutex_lock(&mutex);
+					mutex.lock();
 					//creamos una copia local de la imagen de color y de las distancias.
 					cv::Mat localRGB;
 					if (srcRGB->rows != 0)
 						srcRGB->copyTo(localRGB);
 					std::vector<int> localDistance(distances);
-					pthread_mutex_unlock(&mutex);
+					mutex.unlock();
 					pthread_mutex_lock(&(this->myCloud->localMutex));
 					data2->p.clear();
 					for( unsigned int i = 0 ; (i < cWidth*cHeight)&&(distances.size()>0); i=i+9) {
@@ -1333,7 +1337,6 @@ int main(int argc, char** argv){
 
 	nCameras=cameraR + cameraD;
 	//g_context =  new xn::Context;
-	pthread_mutex_init(&mutex, NULL);
 	if ((nCameras>0)||(pointCloud)){
 		pthread_create(&updateThread, NULL, &openniServer::updateThread, NULL);
 	}
