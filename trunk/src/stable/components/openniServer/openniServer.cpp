@@ -58,6 +58,8 @@
 #define SAMPLE_READ_WAIT_TIMEOUT 2000
 #define RETRY_MAX_TIMES 5
 
+#define MAX_TIMES_PREHEATING 10
+
 #define CHECK_RC(rc, what)                                      \
 if (rc != openni::STATUS_OK)                                         \
 {                                                               \
@@ -325,6 +327,21 @@ void* updateThread(void*)
 	m_streams[0] = &depth;
 	m_streams[1] = &color;
 
+	jderobot::Logger::getInstance()->info("Starting device pre-heating .... ");
+	// Repeat at least MAX_TIMES_PREHEATING to wait Xtion is not cold
+	for (int i=0; i<MAX_TIMES_PREHEATING; i++)
+	{
+		int changedIndex;
+		openni::OpenNI::waitForAnyStream(m_streams, 2, &changedIndex,SAMPLE_READ_WAIT_TIMEOUT);
+
+		if (changedIndex != 0)
+			continue;
+
+		openni::VideoFrameRef mAuxFrame;
+		depth.readFrame( &mAuxFrame );
+	}
+	jderobot::Logger::getInstance()->info("End device pre-heating");
+
 	sem.broadcast();
 
 
@@ -332,6 +349,8 @@ void* updateThread(void*)
 	float cycle=(float)(1/(float)mainFPS)*1000000;
 	IceUtil::Time lastIT=IceUtil::Time::now();
 	bool first=true;
+
+
 
 
 	while(componentAlive){
@@ -824,7 +843,7 @@ private:
 		    reply->timeStamp.seconds = (long)t.toSeconds();
 		    reply->timeStamp.useconds = (long)t.toMicroSeconds() - reply->timeStamp.seconds*1000000;
 			if (!m_depthFrame.isValid()){
-				pthread_mutex_unlock(&mutex);			
+				pthread_mutex_unlock(&mutex);
 				continue;
 			}
 
