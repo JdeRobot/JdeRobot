@@ -59,6 +59,7 @@
 #define RETRY_MAX_TIMES 5
 
 #define MAX_TIMES_PREHEATING 10
+#define SLEEP_PREHEATING 5
 
 #define CHECK_RC(rc, what)                                      \
 if (rc != openni::STATUS_OK)                                         \
@@ -353,6 +354,7 @@ void* updateThread(void*)
 		openni::VideoFrameRef mAuxFrame;
 		depth.readFrame( &mAuxFrame );
 	}
+	sleep(SLEEP_PREHEATING);
 	jderobot::Logger::getInstance()->info("End device pre-heating");
 
 	sem.broadcast();
