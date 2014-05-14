@@ -59,7 +59,7 @@
 #define RETRY_MAX_TIMES 5
 
 #define MAX_TIMES_PREHEATING 10
-#define SLEEP_PREHEATING 5
+#define SLEEP_PREHEATING 10
 
 #define CHECK_RC(rc, what)                                      \
 if (rc != openni::STATUS_OK)                                         \
