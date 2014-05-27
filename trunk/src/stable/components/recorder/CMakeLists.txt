@@ -1,4 +1,4 @@
-SET(SOURCE_FILES recorder.cpp recordergui.cpp poolWriteImages.cpp poolWritePose3dEncoders.cpp poolWriteLasers.cpp poolWritePointCloud.cpp poolWriteEncoders.cpp)
+SET(SOURCE_FILES recorder.cpp recordergui.cpp poolWriteImages.cpp poolWritePose3dEncoders.cpp poolWriteLasers.cpp poolWritePointCloud.cpp poolWriteEncoders.cpp RingBuffer.h RingBuffer.cpp)
 
 add_definitions(-DGLADE_DIR="${gladedir}")
 
@@ -31,4 +31,5 @@ TARGET_LINK_LIBRARIES(recorder
     colorspacesmm
     JderobotInterfaces
     jderobotutil
+    logger
 )

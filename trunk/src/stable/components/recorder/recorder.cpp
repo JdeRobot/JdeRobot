@@ -13,6 +13,7 @@
 #include <jderobot/pose3dmotors.h>
 #include <jderobot/pose3dencoders.h>
 #include <jderobot/pointcloud.h>
+#include <jderobot/recorder.h>
 #include <visionlib/colorspaces/colorspacesmm.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -178,6 +179,9 @@ void* encoders_pool_producer_thread(void* foo_ptr){
 }
 
 
+std::vector<recorder::poolWriteImages*> poolImages;
+Ice::ObjectAdapterPtr adapter;
+
 void exitApplication(int s){
 	globalActive=false;
 	killed=true;
@@ -230,9 +234,36 @@ void exitApplication(int s){
 			system(instruction2.str().c_str());
 	}
 
+	for (int i=0; i< poolImages.size(); i++)
+	{
+		delete(poolImages[i]);
+	}
+
    if (ic)
 	   ic->destroy();
 }
+
+
+
+class RecorderI: virtual public jderobot::recorder
+{
+public:
+
+	RecorderI() {}
+
+	virtual bool saveLog(const ::std::string& name, ::Ice::Int seconds, const ::Ice::Current& ic )
+	{
+
+		bool ret = true;
+		for (int i=0; i< poolImages.size(); i++)
+		{
+			bool log = poolImages[i]->startCustomLog(name, seconds);
+			ret = ret && log;
+		}
+
+		return ret;
+	}
+};
 
 
 int main(int argc, char** argv){
@@ -275,7 +306,7 @@ int main(int argc, char** argv){
 
 	pthread_attr_t attr;
 	//images
-	std::vector<recorder::poolWriteImages*> poolImages;
+
 	int nConsumidores;
 	int poolSize;
 	//lasers
@@ -295,6 +326,7 @@ int main(int argc, char** argv){
 	int jpgQuality;
 	std::string imageFormat;
 	std::vector<int> compression_params;
+
     
    
 	//---------------- INPUT ARGUMENTS ---------------//
@@ -355,6 +387,10 @@ int main(int argc, char** argv){
 
 		}
 
+
+		int bufferEnabled = prop->getPropertyAsIntWithDefault("Recorder.Buffer.Enabled",0);
+		int bufferSeconds = prop->getPropertyAsIntWithDefault("Recorder.Buffer.Seconds",0);
+
 		for (int i=0; i< nCameras; i++){
 			struct stat buf;
 			std::stringstream cameraPath;
@@ -381,16 +417,31 @@ int main(int argc, char** argv){
 				cprx.push_back(cprxAux);
 
 			//pool
-			recorder::poolWriteImages *temp = new recorder::poolWriteImages(cprxAux, Hz,poolSize,i+1,imageFormat,compression_params);
+			recorder::poolWriteImages *temp = new recorder::poolWriteImages(cprxAux, Hz,poolSize,i+1,imageFormat,
+					compression_params, (bufferEnabled == 0)? recorder::poolWriteImages::WRITE_FRAME : recorder::poolWriteImages::SAVE_BUFFER, bufferSeconds);
 			poolImages.push_back(temp);
 
 
 			for (int j=i*nConsumidores; j< i*nConsumidores+nConsumidores; j++){
+				std::cout << "Create consumer" << std::endl;
 				pthread_create(&consumerThreads[j], &attr, camera_pool_consumer_thread,temp);
 				totalConsumers++;
 			}
 			pthread_create(&producerThreads[i], &attr, camera_pool_producer_thread,temp);
 			totalProducers++;
+		}
+
+		if (bufferEnabled)
+		{
+			// Analyze EndPoint
+			std::string Endpoints = prop->getProperty("Recorder.Endpoints");
+			adapter =ic->createObjectAdapterWithEndpoints("Recorder", Endpoints);
+			std::string name = prop->getProperty("Recorder.Name");
+			jderobot::Logger::getInstance()->info("Creating Recorder: " + name);
+			RecorderI* recorder_prx = new RecorderI();
+			adapter->add(recorder_prx, ic->stringToIdentity(name));
+
+			adapter->activate();
 		}
 
 
@@ -615,7 +666,8 @@ int main(int argc, char** argv){
 
 				gettimeofday(&b,NULL);
 				totalb=b.tv_sec*1000000+b.tv_usec;
-				std::cout << "Recorder takes " << (totalb-totala)/1000 << " ms" << std::endl;
+				if (!bufferEnabled)
+					std::cout << "Recorder takes " << (totalb-totala)/1000 << " ms" << std::endl;
 
 				diff = (totalb-totala)/1000;
 				if(diff < 0 || diff > cycle)

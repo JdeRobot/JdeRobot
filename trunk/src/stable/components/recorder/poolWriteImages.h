@@ -32,20 +32,33 @@
 #include <jderobot/camera.h>
 #include <visionlib/colorspaces/colorspacesmm.h>
 #include <fstream>
+#include <boost/filesystem.hpp>
 
-
+#include "RingBuffer.h"
 
 namespace recorder{
 
 
 class poolWriteImages {
 public:
-	poolWriteImages(jderobot::CameraPrx prx, int freq, int poolSize, int cameraID, std::string imageFormat,  std::vector<int> compression_params);
+
+	enum MODE
+		{
+			WRITE_FRAME = 0,
+			SAVE_BUFFER,
+			WRITE_BUFFER,
+			WRITE_END_LOG
+		};
+
+	poolWriteImages(jderobot::CameraPrx prx, int freq, int poolSize, int cameraID, std::string imageFormat,  std::vector<int> compression_params, MODE mode, int bufferSeconds);
 	virtual ~poolWriteImages();
 	bool getActive();
 	//void produceImage(cv::Mat image, long long int it);
 	void consumer_thread();
 	void producer_thread( struct timeval inicio);
+
+	bool startCustomLog(std::string name, int seconds);
+
 
 
 private:
@@ -63,6 +76,16 @@ private:
 	jderobot::CameraPrx prx;
 	std::ofstream outfile;
 
+	// write log by demand
+	RingBuffer* mBuffer;
+	pthread_mutex_t mModeMutex;
+	std::string mNameLog;
+	int mLastSecondsLog;
+	int mBufferSeconds;
+
+	MODE mMode;
+	boost::posix_time::ptime mFinalInit, mFinalEnd;
+	std::ofstream logfile;
 
 	//threads
 
