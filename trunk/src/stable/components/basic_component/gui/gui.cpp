@@ -16,6 +16,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors : Maikel González <m.gonzalezbai@gmail.com>
+ *            Francisco Pérez <f.perez475@gmail.com>
  *
  */
 
@@ -23,9 +24,9 @@
 
 namespace basic_component {
 
-    Gui::Gui(Api *api) : gtkmain(0, 0) {
+    Gui::Gui(Shared* sm) : gtkmain(0, 0) {
 
-        this->api = api;
+        this->sm = sm;
 
         std::cout << "Loading glade\n";
 
@@ -36,52 +37,37 @@ namespace basic_component {
         refXml->get_widget("image1", gtk_image1);
 
         secondarywindow->show();
-
     }
 
     Gui::~Gui() {
 
     }
 
-    void Gui::ShowImages() {
-        this->updateCameras(api);
-        setCamara(*this->image1, 1);
+    void Gui::ShowImage() {
+	this->image = this->sm->getImage();
+        setCamara(this->image, 1);
     }
 
-    void Gui::updateCameras(Api *api) {
+    void Gui::display() {
 
-        colorspaces::Image::FormatPtr fmt1 = colorspaces::Image::Format::searchFormat(api->imageData1->description->format);
-        if (!fmt1)
-            throw "Format not supported";
-        this->image1 = new colorspaces::Image(api->imageData1->description->width, api->imageData1->description->height, fmt1, &(api->imageData1->pixelData[0])); // Prepare the image to use with openCV
-
-    }
-
-    void Gui::display(Api *api) {
-
-        pthread_mutex_lock(&this->api->controlGui);
-
-        ShowImages();
+        ShowImage();
         while (gtkmain.events_pending())
             gtkmain.iteration();
 
-        pthread_mutex_unlock(&this->api->controlGui);
     }
 
-    void Gui::setCamara(const colorspaces::Image& image, int id) {
+    // First parameter is the widget which will show the image and the id indicates which widget is. This is useful when we have
+    // two cameras and we want to choose which one will offer us the image.
+    void Gui::setCamara(const cv::Mat image, int id) {
 
         // Set image
-        IplImage src; // conversión a IplImage
-        src = image;
-        colorspaces::ImageRGB8 img_rgb888(image); // conversion will happen if needed
-
-        Glib::RefPtr<Gdk::Pixbuf> imgBuff = Gdk::Pixbuf::create_from_data((const guint8*) img_rgb888.data,
+        Glib::RefPtr<Gdk::Pixbuf> imgBuff = Gdk::Pixbuf::create_from_data((const guint8*) image.data,
                 Gdk::COLORSPACE_RGB,
                 false,
                 8,
-                img_rgb888.width,
-                img_rgb888.height,
-                img_rgb888.step);
+                image.cols,
+                image.rows,
+                image.step);
 
         if (id == 1) {
             gtk_image1->clear();
@@ -92,10 +78,6 @@ namespace basic_component {
         }
 
     }
-
-    void Gui::isVisible() {
-    }
-
 
 } // namespace    
 

@@ -1,12 +1,16 @@
-#include "threadsensors.h"
+#include "threadcontrol.h"
 
-ThreadSensors::ThreadSensors(Sensors* sensors)
+namespace basic_component {
+
+ThreadControl::ThreadControl(Ice::CommunicatorPtr ic, Shared* sm)
 {
-    this->sensors = sensors;
+    //Creates the control object
+    this->control = new Control(ic, sm);
 }
 
-void ThreadSensors::run()
+void ThreadControl::start()
 {
+    //Calculates the refreshing time of the control class
     struct timeval a, b;
     long totalb, totala;
     long diff;
@@ -15,7 +19,8 @@ void ThreadSensors::run()
         gettimeofday(&a, NULL);
         totala = a.tv_sec * 1000000 + a.tv_usec;
 
-        this->sensors->update();
+        //update the sensors (in this case the image taken from the camera)
+        this->control->update();
 
         gettimeofday(&b, NULL);
         totalb = b.tv_sec * 1000000 + b.tv_usec;
@@ -32,4 +37,6 @@ void ThreadSensors::run()
         if (diff < 33)
             usleep(33 * 1000);
     }
+}
+
 }

@@ -1,12 +1,11 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
-//Qt
-#include <QtGui>
-
 //ICE
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
+
+#include "../shared.h"
 
 //INTERFACES
 #include <jderobot/camera.h>
@@ -16,23 +15,24 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-class Sensors
+#include <boost/algorithm/string.hpp>
+
+namespace basic_component {
+
+class Control
 {
 public:
-    Sensors(Ice::CommunicatorPtr ic);
 
-    void update();
-    cv::Mat getImage();
+    Control(Ice::CommunicatorPtr ic, basic_component::Shared* sm);	//constructor
+    void update();					
 
 private:
-    QMutex mutex;
+
+    Shared* sm;	//Shared memory
 
     Ice::CommunicatorPtr ic;
-
     jderobot::CameraPrx cprx;
-
-    cv::Mat image;
-
 };
+}
 
 #endif // SENSORS_H

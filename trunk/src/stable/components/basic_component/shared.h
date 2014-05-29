@@ -16,15 +16,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  *  Authors : Maikel González <m.gonzalezbai@gmail.com>,
+ *            Francisco Pérez <f.perez475@gmail.com>
  *
  */
 
 
-#ifndef BASIC_COMPONENT_API_H
-#define BASIC_COMPONENT_API_H
+#ifndef BASIC_COMPONENT_SHARED_H
+#define BASIC_COMPONENT_SHARED_H
 
 
 #include <iostream>
+#include <pthread.h>
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
 #include <jderobot/camera.h>
@@ -33,19 +35,21 @@
 #include <jderobot/laser.h>
 #include <jderobot/encoders.h>
 #include <jderobot/ptencoders.h>
-#include <visionlib/colorspaces/colorspacesmm.h>
-#include <pthread.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 
 
 namespace basic_component {
-    class Api {
+    class Shared {
 	public:
-	virtual ~Api();
+	virtual ~Shared();
 	
 	    pthread_mutex_t controlGui;	
 	
 	
+	Shared();
 	    //FUNCTIONS 
 	    void RunNavigationAlgorithm();
 
@@ -57,15 +61,21 @@ namespace basic_component {
 	    int getNumLasers();
 	    jderobot::IntSeq getDistancesLaser();
 	    jderobot::EncodersDataPtr getEncodersData();
-	    colorspaces::Image* getImageCamera1();
-	    colorspaces::Image* getImageCamera2();
+	    cv::Mat getImageCamera1();
+	    cv::Mat getImageCamera2();
 
-	    //SETS	    
+	    //SETS
 	    void setMotorV(float motorV);
 	    void setMotorW(float motorW);
 	    void setMotorL(float motorL);
+//            void setImageData(jderobot::ImageDataPtr imageData);
 	    void setPTEncoders(jderobot::PTEncodersDataPtr* PTencodersData, int cameraId);
-        	    
+
+            void createImage(jderobot::ImageDataPtr data);
+	    void createEmptyImage();
+	    void updateImage(jderobot::ImageDataPtr data);
+	    cv::Mat getImage();
+        
 	    /*Shared Memory -- ignored by students*/
 	    double motorVout;
 	    double motorWout;
@@ -83,8 +93,8 @@ namespace basic_component {
 	    jderobot::PTEncodersDataPtr PTecondersData2;
             jderobot::PTMotorsData* PTmotorsData1;
             jderobot::PTMotorsData* PTmotorsData2;
-	    colorspaces::Image* image1;	// Image camera1 processed to manipulate with openCV
-	    colorspaces::Image* image2; // Image camera2 processed to manipulate with openCV
+	    cv::Mat image1;	// Image camera1 processed to manipulate with openCV
+	    cv::Mat image2; // Image camera2 processed to manipulate with openCV
 	    bool guiVisible;
 	    bool iterationControlActivated;
 	    //Variables used in NavigationAlgorithm
@@ -93,8 +103,8 @@ namespace basic_component {
 	    
 	private:
 	    //Variables used in NavigationAlgorithm
-	    colorspaces::Image* imageCamera1;
-	    colorspaces::Image* imageCamera2;
+	    cv::Mat imageCamera1;
+	    cv::Mat imageCamera2;
 	    
 	    //Functions used in NavigationAlgorithm
    	    void imageCameras2openCV();	    
