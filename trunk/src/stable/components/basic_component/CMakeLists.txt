@@ -1,5 +1,5 @@
 
-SET( SOURCE_FILES  control.cpp basic_component.cpp API.cpp gui.cpp)
+SET( SOURCE_FILES  control/control.cpp control/threadcontrol.cpp gui/gui.cpp gui/threadgui.cpp basic_component.cpp shared.cpp)
 
 
 include_directories(

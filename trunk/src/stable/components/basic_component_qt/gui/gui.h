@@ -3,19 +3,20 @@
 
 #include <QtGui>
 
-#include "../sensors/sensors.h"
+#include "../shared.h"
 
-class GUI:public QWidget
+namespace basic_component_qt {
+class Gui : public QWidget
 {
     Q_OBJECT
 
 public:
-    GUI(Sensors* sensors);
+    Gui(Shared* sm);
     void updateThreadGUI();
 
 private:
     QLabel* labelImage;
-    Sensors* sensors;
+    Shared* sm;
 
 signals:
     void signal_updateGUI();
@@ -24,5 +25,5 @@ public slots:
     void on_updateGUI_recieved();
 
 };
-
+}
 #endif // GUI_H

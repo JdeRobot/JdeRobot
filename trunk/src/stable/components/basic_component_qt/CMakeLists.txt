@@ -1,16 +1,9 @@
 if (${QT_COMPILE})
 
 
-    SET(qt_SOURCES main.cpp 
-			       sensors/threadsensors.cpp sensors/sensors.cpp
-			       gui/threadgui.cpp gui/gui.cpp
-    )
+    SET(qt_SOURCES basic_component_qt.cpp gui/gui.cpp)
 
-    SET(qt_HEADERS
-			       sensors/threadsensors.h sensors/sensors.h
-			       gui/threadgui.h gui/gui.h
-
-    )
+    SET(qt_HEADERS gui/gui.h)
 
     include_directories(
         ${INTERFACES_CPP_DIR}
@@ -22,16 +15,19 @@ if (${QT_COMPILE})
 
 
     add_executable( basic_component_qt
-                    main.cpp 
-			        sensors/threadsensors.cpp sensors/sensors.cpp
-			        gui/threadgui.cpp gui/gui.cpp
-			        ${qt_HEADERS_MOC}
+                    basic_component_qt.cpp 
+	            control/threadcontrol.cpp 
+		    control/control.cpp
+		    gui/threadgui.cpp 
+		    gui/gui.cpp 
+		    shared.cpp
+		    ${qt_HEADERS_MOC}
     )
 			       
     target_link_libraries(basic_component_qt 
         ${CMAKE_THREAD_LIBS_INIT}
         ${OpenCV_LIBRARIES}
-	    ${QT_LIBRARIES_JDE}
+        ${QT_LIBRARIES_JDE}
         JderobotInterfaces
         jderobotutil
         ${ZeroCIce_LIBRARIES}

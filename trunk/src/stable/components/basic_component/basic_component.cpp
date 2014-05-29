@@ -1,128 +1,74 @@
-#include "control.h"
-#include "API.h"
-#include "gui.h"
-#define cycle_control 100 //miliseconds
-#define cycle_gui 50 //miliseconds
+//ICE
+#include <Ice/Ice.h>
+#include <IceUtil/IceUtil.h>
+#include <pthread.h>
 
+#include "gui/threadgui.h"
+#include "gui/gui.h"
+#include "control/control.h"
+#include "control/threadcontrol.h"
 
-//Global Memory
-basic_component::Api *api;
+// Global members
 
-void *showGui(void*) {
+basic_component::ThreadControl* threadControl;
+basic_component::ThreadGui* threadGui;
 
-    struct timeval a, b;
-    long totalb, totala;
-    int cont = 0;
-    long diff;
-    basic_component::Gui *gui;
+//Launching the control "thread"
+void controlStart() {
 
-    gui = new basic_component::Gui(api);
-
-
-    while (true) {
-        gettimeofday(&a, NULL);
-        totala = a.tv_sec * 1000000 + a.tv_usec;
-
-        gui->display(api);
-
-
-        //Sleep Algorithm
-        gettimeofday(&b, NULL);
-        totalb = b.tv_sec * 1000000 + b.tv_usec;
-        diff = (totalb - totala) / 1000;
-        if (diff < 0 || diff > cycle_gui)
-            diff = cycle_gui;
-        else
-            diff = cycle_gui - diff;
-
-        /*Sleep Algorithm*/
-        usleep(diff * 1000);
-        if (diff < 33)
-            usleep(33 * 1000);
-        //printf("GUI %.30lf seconds elapsed, %d\n", diff, cont);
-        cont++;
-
-    }
+    threadControl->start();
 }
 
-int main(int argc, char** argv) {
-    pthread_t thr_gui;
+//Launching the gui thred
+void* guiThread(void*) {
 
-    basic_component::Control *control;
-    int status;
-    Ice::CommunicatorPtr ic;
-    struct timeval a, b;
-    long diff;
-    long totalb, totala;
-    bool guiActivated = 0;
-    bool controlActivated = 0;
+    threadGui->start();
+}
 
+int main(int argc, char* argv[]) {
 
-    api = new basic_component::Api();
-    control = new basic_component::Control();
+    try{
 
-    pthread_mutex_init(&api->controlGui, NULL);
+	//We initialize Ice here to be able to add some other options to the configuration file such as
+        //the posibility to show or not show the GUI.
+        Ice::CommunicatorPtr ic = Ice::initialize(argc, argv);
+        
+        //Shared memory object
+        basic_component::Shared* sm = new basic_component::Shared();
+	
+        //Creates the control&processing thread manager
+        threadControl = new basic_component::ThreadControl(ic, sm);
 
+	Ice::PropertiesPtr prop = ic->getProperties();
 
-    try {
+	//Let's check if the user want to show the gui or not. This setting must be in the .cfg file
+	std::string gui = prop->getPropertyWithDefault("basic_component.Gui", "miss");
+    	if (!boost::iequals(gui , "miss") && !boost::iequals(gui, "OFF")) {
+		
+		pthread_t t_gui;
 
-        //-----------------ICE----------------//
-        ic = Ice::initialize(argc, argv);
+		//Creates the gui thread manager
+		threadGui = new basic_component::ThreadGui(sm);
 
-        // Get driver camera
-        Ice::ObjectPrx camara1 = ic->propertyToProxy("basic_component.Camera1.Proxy");
-        if (0 == camara1)
-            throw "Could not create proxy to camera1 server";
+		//Creates the thread for the control&processing
+		pthread_create(&t_gui, NULL, &guiThread, NULL);	
+	
+	}else 
+		std::cout << "No Gui mode" << std::endl;
 
-        // cast to CameraPrx
-        control->cprx1 = jderobot::CameraPrx::checkedCast(camara1);
-        if (0 == control->cprx1)
-            throw "Invalid proxy";
-
-        //-----------------END ICE----------------//
-
-        //****************************** Processing the Control ******************************///
-        api->guiVisible = true;
-        control->UpdateSensorsICE(api);
-
-            pthread_create(&thr_gui, NULL, &showGui, NULL);
-
-        while (api->guiVisible) {
-            gettimeofday(&a, NULL);
-            totala = a.tv_sec * 1000000 + a.tv_usec;
-
-
-            control->UpdateSensorsICE(api); // Update sensors               
-
-            //Sleep Algorithm
-            gettimeofday(&b, NULL);
-            totalb = b.tv_sec * 1000000 + b.tv_usec;
-            diff = (totalb - totala) / 1000;
-            if (diff < 0 || diff > cycle_control)
-                diff = cycle_control;
-            else
-                diff = cycle_control - diff;
-
-            /*Sleep Algorithm*/
-            usleep(diff * 1000);
-            if (diff < 33)
-                usleep(33 * 1000);
-            //printf("CONTROL %.15lf seconds elapsed\n", diff);     
-        }
-
-        //****************************** END Processing the Control ******************************///
-        if (guiActivated)
-            pthread_join(thr_gui, NULL);
-
+	//We use the main thread to manage the control&processing thread, so the gui has it's own thread that is
+	//periodically updated.
+	controlStart();
+		
+	
+	
     } catch (const Ice::Exception& ex) {
         std::cerr << ex << std::endl;
-        status = 1;
+        exit(-1);
     } catch (const char* msg) {
         std::cerr << msg << std::endl;
-        status = 1;
+        exit(-1);
     }
-    if (ic)
-        ic->destroy();
     return 0;
-}
 
+}

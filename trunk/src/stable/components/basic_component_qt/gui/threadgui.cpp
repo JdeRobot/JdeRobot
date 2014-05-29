@@ -1,16 +1,17 @@
 #include "threadgui.h"
 
-threadGUI::threadGUI(Sensors* sensors)
+namespace basic_component_qt {
+ThreadGui::ThreadGui(Shared* sm)
 {
-    this->sensors = sensors;
-
-    gui = new GUI(sensors);
+    //New instace of Gui with the shared memory object.
+    gui = new Gui(sm);
     gui->show();
 
 }
 
-void threadGUI::run()
+void ThreadGui::start()
 {
+    //Calculates the refreshing time of the gui.
     struct timeval a, b;
     long totalb, totala;
     long diff;
@@ -19,6 +20,7 @@ void threadGUI::run()
         gettimeofday(&a, NULL);
         totala = a.tv_sec * 1000000 + a.tv_usec;
 
+        //updates the gui (image shown in this component)
         gui->updateThreadGUI();
 
         gettimeofday(&b, NULL);
@@ -36,4 +38,5 @@ void threadGUI::run()
         if (diff < 33)
             usleep(33 * 1000);
     }
+}
 }
