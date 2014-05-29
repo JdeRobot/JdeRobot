@@ -43,8 +43,6 @@ bool RingBuffer::addNode(RingNode node)
 {
 
 	mBuffer.push_back(node);
-	//jderobot::Logger::getInstance()->info("Buffer Size: " + boost::lexical_cast<std::string>(mBuffer.size()));
-
 	return checkBuffer();
 }
 
@@ -59,7 +57,7 @@ static void *write_thread(void* context){
 void RingBuffer::write_th()
 {
 	boost::posix_time::ptime init = boost::posix_time::microsec_clock::local_time();
-	for (std::vector<RingNode>::iterator it = mBuffer.begin(); it < mBuffer.end(); it++ )
+	for (std::vector<RingNode>::iterator it = mWriteBuffer.begin(); it < mWriteBuffer.end(); it++ )
 	{
 		std::stringstream path;
 		path << "data-" << mNameLog << "/images/camera" << it->cameraId << "/" << it->relativeTime << ".png";
@@ -68,8 +66,13 @@ void RingBuffer::write_th()
 	boost::posix_time::ptime end = boost::posix_time::microsec_clock::local_time();
 
 	boost::posix_time::time_duration total = end - init;
-	std::cout << "Total milliseconds spent: " << total.total_milliseconds() << std::endl;
-	std::cout << "Total Size: " << mBuffer.size() << std::endl;
+	std::cout << "Total milliseconds spent: " << total.total_milliseconds() << " - " << "Total Size: " << mBuffer.size() << std::endl;
+
+	for (std::vector<RingNode>::iterator it = mWriteBuffer.begin(); it < mWriteBuffer.end(); it++ )
+		it->frame.release();
+
+
+	mWriteBuffer.clear();
 
 }
 
@@ -77,6 +80,12 @@ void RingBuffer::write(std::string nameLog, std::vector<int> compression)
 {
 	mCompression = compression;
 	mNameLog = nameLog;
+
+	mWriteBuffer.resize(mBuffer.size());
+	std::copy( mBuffer.begin(), mBuffer.end(), mWriteBuffer.begin() );
+
+	//std::cout << &(mBuffer[0].frame) << std::endl;
+	//std::cout << &(mWriteBuffer[0].frame) << std::endl;
 
 	pthread_attr_init(&mAttr);
 	pthread_attr_setdetachstate(&mAttr, PTHREAD_CREATE_JOINABLE);

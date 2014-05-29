@@ -56,6 +56,7 @@ class RingBuffer
 
 		long int mMaxBufferTime;
 		std::vector<RingNode> mBuffer;
+		std::vector<RingNode> mWriteBuffer;
 		std::vector<int> mCompression;
 
 		pthread_t mThread;
