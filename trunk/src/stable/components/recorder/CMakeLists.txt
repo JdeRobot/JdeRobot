@@ -32,4 +32,5 @@ TARGET_LINK_LIBRARIES(recorder
     JderobotInterfaces
     jderobotutil
     logger
+    ns
 )

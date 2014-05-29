@@ -30,6 +30,7 @@
 #include "poolWriteLasers.h"
 #include "poolWritePointCloud.h"
 #include "poolWriteEncoders.h"
+#include <ns/ns.h>
 
 bool recording=false;
 struct timeval inicio;
@@ -181,6 +182,7 @@ void* encoders_pool_producer_thread(void* foo_ptr){
 
 std::vector<recorder::poolWriteImages*> poolImages;
 Ice::ObjectAdapterPtr adapter;
+jderobot::ns* namingService = NULL;
 
 void exitApplication(int s){
 	globalActive=false;
@@ -237,6 +239,14 @@ void exitApplication(int s){
 	for (int i=0; i< poolImages.size(); i++)
 	{
 		delete(poolImages[i]);
+	}
+
+	// NamingService
+	if (namingService != NULL)
+	{
+		namingService->unbindAll();
+
+		delete(namingService);
 	}
 
    if (ic)
@@ -433,6 +443,7 @@ int main(int argc, char** argv){
 
 		if (bufferEnabled)
 		{
+
 			// Analyze EndPoint
 			std::string Endpoints = prop->getProperty("Recorder.Endpoints");
 			adapter =ic->createObjectAdapterWithEndpoints("Recorder", Endpoints);
@@ -442,6 +453,31 @@ int main(int argc, char** argv){
 			adapter->add(recorder_prx, ic->stringToIdentity(name));
 
 			adapter->activate();
+
+
+			// Naming Service
+			int nsActive = prop->getPropertyAsIntWithDefault("NamingService.Enabled", 0);
+
+			if (nsActive)
+			{
+				std::string ns_proxy = prop->getProperty("NamingService.Proxy");
+				try
+				{
+					namingService = new jderobot::ns(ic, ns_proxy);
+				}
+				catch (Ice::ConnectionRefusedException& ex)
+				{
+					jderobot::Logger::getInstance()->error("Impossible to connect with NameService!");
+					exit(-1);
+				}
+
+				namingService->bind(name, Endpoints, recorder_prx->ice_staticId());
+
+			}
+
+
+
+
 		}
 
 
