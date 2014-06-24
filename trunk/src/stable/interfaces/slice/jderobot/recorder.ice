@@ -26,6 +26,7 @@ module jderobot{
 	interface recorder{
 		
 		bool saveLog (string name, int seconds);
+		bool saveVideo (string path, string name, int seconds);
 	};
 };
 

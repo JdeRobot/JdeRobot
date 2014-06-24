@@ -50,7 +50,7 @@ public:
 			WRITE_END_LOG
 		};
 
-	poolWriteImages(jderobot::CameraPrx prx, int freq, int poolSize, int cameraID, std::string imageFormat,  std::vector<int> compression_params, MODE mode, int bufferSeconds);
+	poolWriteImages(jderobot::CameraPrx prx, int freq, int poolSize, int cameraID, std::string imageFormat,  std::vector<int> compression_params, MODE mode, int bufferSeconds, std::string videoMode);
 	virtual ~poolWriteImages();
 	bool getActive();
 	//void produceImage(cv::Mat image, long long int it);
@@ -58,6 +58,7 @@ public:
 	void producer_thread( struct timeval inicio);
 
 	bool startCustomLog(std::string name, int seconds);
+	bool startCustomVideo(std::string path, std::string name, int seconds);
 
 
 
@@ -84,8 +85,11 @@ private:
 	int mBufferSeconds;
 
 	MODE mMode;
+	std::string mNamePathVideo;
 	boost::posix_time::ptime mFinalInit, mFinalEnd;
 	std::ofstream logfile;
+	std::string mVideoMode;
+	std::string mCamType;
 
 	//threads
 

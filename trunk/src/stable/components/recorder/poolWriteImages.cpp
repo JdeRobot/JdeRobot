@@ -9,7 +9,7 @@
 #include <libgen.h>
 
 namespace recorder{
-poolWriteImages::poolWriteImages(jderobot::CameraPrx prx, int freq, int poolSize, int cameraID,  std::string imageFormat, std::vector<int> compression_params, MODE mode, int bufferSeconds) {
+poolWriteImages::poolWriteImages(jderobot::CameraPrx prx, int freq, int poolSize, int cameraID,  std::string imageFormat, std::vector<int> compression_params, MODE mode, int bufferSeconds, std::string videoMode) {
 	// TODO Auto-generated constructor stub
 	pthread_mutex_init(&(this->mutex), NULL);
 	pthread_mutex_init(&(this->mModeMutex), NULL);
@@ -27,6 +27,7 @@ poolWriteImages::poolWriteImages(jderobot::CameraPrx prx, int freq, int poolSize
 	mBuffer = NULL;
 	mLastSecondsLog = 5;
 	mNameLog = "alarm1";
+	mVideoMode = videoMode;
 
 	if (mMode == SAVE_BUFFER)
 	{
@@ -34,6 +35,7 @@ poolWriteImages::poolWriteImages(jderobot::CameraPrx prx, int freq, int poolSize
 		mBuffer = new RingBuffer(mBufferSeconds*1000);
 	}
 
+	mCamType = this->prx->getImageData()->description->format;
 
 	std::stringstream filePath;
 	filePath << "data/images/camera" << this->cameraID << "/cameraData.jde";
@@ -51,6 +53,13 @@ poolWriteImages::~poolWriteImages() {
 bool poolWriteImages::getActive(){
 	return this->active;
 }
+
+bool poolWriteImages::startCustomVideo(std::string path, std::string name, int seconds)
+{
+	mNamePathVideo = path;
+	return startCustomLog(name, seconds);
+}
+
 
 bool poolWriteImages::startCustomLog (std::string name, int seconds)
 {
@@ -116,12 +125,40 @@ void poolWriteImages::consumer_thread(){
 			else
 			{
 				// Save buffer in memory mode == SAVE_BUFFER
+				cv::Mat saveImage;
+
+				if (mVideoMode.compare("Video")==0)
+				{
+					if (mCamType.compare("RGB8")==0)
+					{
+						saveImage.create(img2Save.size(), CV_8UC3);
+						cv::cvtColor(img2Save,saveImage,CV_BGR2RGB);
+					}
+					else if (mCamType.compare("DEPTH8_16")==0)
+					{
+						saveImage.create(img2Save.size(), CV_8UC3);
+						std::vector<cv::Mat> layers;
+						cv::split(img2Save, layers);
+						cv::cvtColor(layers[0],saveImage,CV_GRAY2RGB);
+
+					}
+					else
+					{
+						jderobot::Logger::getInstance()->warning("mCamType not recognized " + mCamType);
+					}
+				}
+				else if (mVideoMode.compare("Log")==0)
+				{
+					saveImage.create(img2Save.size(), img2Save.type());
+					img2Save.copyTo(saveImage);
+				}
+
 
 				RingBuffer::RingNode node;
 				node.cameraId = cameraID;
 				node.relativeTime = relative;
 
-				img2Save.copyTo(node.frame);
+				saveImage.copyTo(node.frame);
 				mBuffer->addNode(node);
 
 				if (currentMode == WRITE_BUFFER)
@@ -186,6 +223,32 @@ void poolWriteImages::consumer_thread(){
 						this->logfile.close();
 						jderobot::Logger::getInstance()->info("End recording log: " + mNameLog );
 
+						// Save the video
+						if (mVideoMode.compare("Video")==0)
+						{
+							std::stringstream basePath, fileData, fileImage, command, command_video, fileVideo, tmpFileVideo;
+							basePath << "data-" << mNameLog << "/images/camera" << this->cameraID << "/";
+							fileData << basePath.str() << "cameraData.jde";
+							fileImage << basePath.str() << "list.txt";
+
+							command << "cat " << fileData.str() << " | sed -e 's/$/.png/g' > " << fileImage.str();
+
+							system(command.str().c_str());
+
+							fileVideo << mNamePathVideo << "/" << mNameLog << "-" << this->cameraID << "-" << mCamType << ".avi";
+							tmpFileVideo << mNamePathVideo << "/" << mNameLog << "-" << this->cameraID << "-" << mCamType << ".mp4";
+
+							command_video << "cd " << basePath.str() << ";" ;
+							command_video << "mencoder mf://@list.txt -mf w=320:h=240:fps=10:type=png -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o " << tmpFileVideo.str() << ";" ;
+							command_video << "ffmpeg -y -i " << tmpFileVideo.str() << " -vcodec libx264 " << fileVideo.str() << ";" ;
+							command_video << "rm -f " << tmpFileVideo.str() << ";" ;
+							command_video << "cd -; rm -rf " << "data-" << mNameLog;
+
+							std::cout << command_video.str() << std::endl;
+
+							system(command_video.str().c_str());
+						}
+
 						pthread_mutex_lock(&(this->mModeMutex));
 						mMode = SAVE_BUFFER;
 						pthread_mutex_unlock(&(this->mModeMutex));
@@ -194,7 +257,7 @@ void poolWriteImages::consumer_thread(){
 					{
 						std::stringstream path;
 						path << "data-" << mNameLog << "/images/camera" << cameraID << "/" << relative << "." << imageFormat;
-						cv::imwrite(path.str(), img2Save,this->compression_params);
+						cv::imwrite(path.str(), saveImage ,this->compression_params);
 					}
 				}
 			}

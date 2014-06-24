@@ -273,6 +273,18 @@ public:
 
 		return ret;
 	}
+
+	virtual bool saveVideo(const ::std::string& path, const ::std::string& name, ::Ice::Int seconds, const ::Ice::Current& ic )
+	{
+		bool ret = true;
+		for (int i=0; i< poolImages.size(); i++)
+		{
+			bool log = poolImages[i]->startCustomVideo(path, name, seconds);
+			ret = ret && log;
+		}
+
+		return ret;
+	}
 };
 
 
@@ -400,6 +412,7 @@ int main(int argc, char** argv){
 
 		int bufferEnabled = prop->getPropertyAsIntWithDefault("Recorder.Buffer.Enabled",0);
 		int bufferSeconds = prop->getPropertyAsIntWithDefault("Recorder.Buffer.Seconds",0);
+		std::string videoMode =  prop->getProperty("Recorder.Buffer.Mode");
 
 		for (int i=0; i< nCameras; i++){
 			struct stat buf;
@@ -428,7 +441,7 @@ int main(int argc, char** argv){
 
 			//pool
 			recorder::poolWriteImages *temp = new recorder::poolWriteImages(cprxAux, Hz,poolSize,i+1,imageFormat,
-					compression_params, (bufferEnabled == 0)? recorder::poolWriteImages::WRITE_FRAME : recorder::poolWriteImages::SAVE_BUFFER, bufferSeconds);
+					compression_params, (bufferEnabled == 0)? recorder::poolWriteImages::WRITE_FRAME : recorder::poolWriteImages::SAVE_BUFFER, bufferSeconds, videoMode);
 			poolImages.push_back(temp);
 
 
