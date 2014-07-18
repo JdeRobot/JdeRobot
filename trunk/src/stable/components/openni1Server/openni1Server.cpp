@@ -1467,7 +1467,7 @@ int main(int argc, char** argv){
 				{
 					std::cout << aModeR[j].nXRes << " * " << aModeR[j].nYRes << " @" << aModeR[j].nFPS << "FPS" << std::endl;
 				}
-				delete[] aModeD;
+				delete[] aModeR;
 
 				sensors[i].depth.SetMapOutputMode(aModeR[2]);
 
