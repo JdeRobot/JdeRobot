@@ -1,0 +1,114 @@
+//Total time=1.0
+names.arraySetSize(21);
+times.arraySetSize(21);
+keys.arraySetSize(21);
+
+names[0] = "HeadYaw";
+times[0].arraySetSize(1);
+keys[0].arraySetSize(1);
+names[1] = "HeadPitch";
+times[1].arraySetSize(1);
+keys[1].arraySetSize(1);
+names[2] = "LShoulderPitch";
+times[2].arraySetSize(1);
+keys[2].arraySetSize(1);
+names[3] = "LShoulderRoll";
+times[3].arraySetSize(1);
+keys[3].arraySetSize(1);
+names[4] = "LElbowYaw";
+times[4].arraySetSize(1);
+keys[4].arraySetSize(1);
+names[5] = "LElbowRoll";
+times[5].arraySetSize(1);
+keys[5].arraySetSize(1);
+names[6] = "LHipYawPitch";
+times[6].arraySetSize(1);
+keys[6].arraySetSize(1);
+names[7] = "LHipRoll";
+times[7].arraySetSize(1);
+keys[7].arraySetSize(1);
+names[8] = "LHipPitch";
+times[8].arraySetSize(1);
+keys[8].arraySetSize(1);
+names[9] = "LKneePitch";
+times[9].arraySetSize(1);
+keys[9].arraySetSize(1);
+names[10] = "LAnklePitch";
+times[10].arraySetSize(1);
+keys[10].arraySetSize(1);
+names[11] = "LAnkleRoll";
+times[11].arraySetSize(1);
+keys[11].arraySetSize(1);
+names[12] = "RHipRoll";
+times[12].arraySetSize(1);
+keys[12].arraySetSize(1);
+names[13] = "RHipPitch";
+times[13].arraySetSize(1);
+keys[13].arraySetSize(1);
+names[14] = "RKneePitch";
+times[14].arraySetSize(1);
+keys[14].arraySetSize(1);
+names[15] = "RAnklePitch";
+times[15].arraySetSize(1);
+keys[15].arraySetSize(1);
+names[16] = "RAnkleRoll";
+times[16].arraySetSize(1);
+keys[16].arraySetSize(1);
+names[17] = "RShoulderPitch";
+times[17].arraySetSize(1);
+keys[17].arraySetSize(1);
+names[18] = "RShoulderRoll";
+times[18].arraySetSize(1);
+keys[18].arraySetSize(1);
+names[19] = "RElbowYaw";
+times[19].arraySetSize(1);
+keys[19].arraySetSize(1);
+names[20] = "RElbowRoll";
+times[20].arraySetSize(1);
+keys[20].arraySetSize(1);
+
+float duration;
+
+duration = 1.0; //time=1.0
+times[0][0] = duration; //HeadYaw
+keys[0][0] = AL::ALValue::array(-0.058334, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[1][0] = duration; //HeadPitch
+keys[1][0] = AL::ALValue::array(-0.576826, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[2][0] = duration; //LShoulderPitch
+keys[2][0] = AL::ALValue::array(0.084328, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[3][0] = duration; //LShoulderRoll
+keys[3][0] = AL::ALValue::array(1.5539, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[4][0] = duration; //LElbowYaw
+keys[4][0] = AL::ALValue::array(-0.0353239, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[5][0] = duration; //LElbowRoll
+keys[5][0] = AL::ALValue::array(-0.0367741, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[6][0] = duration; //LHipYawPitch
+keys[6][0] = AL::ALValue::array(-0.033706, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[7][0] = duration; //LHipRoll
+keys[7][0] = AL::ALValue::array(0.0629359, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[8][0] = duration; //LHipPitch
+keys[8][0] = AL::ALValue::array(0.0614019, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[9][0] = duration; //LKneePitch
+keys[9][0] = AL::ALValue::array(-0.0706059, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[10][0] = duration; //LAnklePitch
+keys[10][0] = AL::ALValue::array(0.921892, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[11][0] = duration; //LAnkleRoll
+keys[11][0] = AL::ALValue::array(-0.00149204, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[12][0] = duration; //RHipRoll
+keys[12][0] = AL::ALValue::array(-0.084328, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[13][0] = duration; //RHipPitch
+keys[13][0] = AL::ALValue::array(0.076658, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[14][0] = duration; //RKneePitch
+keys[14][0] = AL::ALValue::array(-0.078192, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[15][0] = duration; //RAnklePitch
+keys[15][0] = AL::ALValue::array(0.929646, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[16][0] = duration; //RAnkleRoll
+keys[16][0] = AL::ALValue::array(0.00157596, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[17][0] = duration; //RShoulderPitch
+keys[17][0] = AL::ALValue::array(-0.0275701, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[18][0] = duration; //RShoulderRoll
+keys[18][0] = AL::ALValue::array(-1.53558, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[19][0] = duration; //RElbowYaw
+keys[19][0] = AL::ALValue::array(-0.01078, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));
+times[20][0] = duration; //RElbowRoll
+keys[20][0] = AL::ALValue::array(0.0353239, AL::ALValue::array(2, -0.333333, -0.0), AL::ALValue::array(2, 0.0, 0.0));

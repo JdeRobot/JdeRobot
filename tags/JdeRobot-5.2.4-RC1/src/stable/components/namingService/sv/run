@@ -1,0 +1,8 @@
+#!/bin/bash
+
+mkdir -p ../log/
+echo "Restarting namingService ... " `date` >> ../log/system.log
+
+cd ..
+./namingService --Ice.Config=namingService.cfg
+
