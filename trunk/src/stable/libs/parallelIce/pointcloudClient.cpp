@@ -40,14 +40,15 @@ pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix) 
 			this->prx = jderobot::pointCloudPrx::checkedCast(basePointCloud);
 			if (0==this->prx)
 				throw "Invalid proxy" + prefix;
-
 		}
 	}catch (const Ice::Exception& ex) {
 		std::cerr << ex << std::endl;
+		throw "Invalid proxy" + prefix;
 	}
 	catch (const char* msg) {
 		std::cerr << msg << std::endl;
 		jderobot::Logger::getInstance()->error(prefix + " Not camera provided");
+		throw "Invalid proxy" + prefix;
 	}
 	_done=false;
 	this->pauseStatus=false;
@@ -76,10 +77,12 @@ pointcloudClient::pointcloudClient(Ice::CommunicatorPtr ic, std::string prefix, 
 		}
 	}catch (const Ice::Exception& ex) {
 		std::cerr << ex << std::endl;
+		throw "Invalid proxy" + prefix;
 	}
 	catch (const char* msg) {
 		std::cerr << msg << std::endl;
 		jderobot::Logger::getInstance()->error(prefix + " Not camera provided");
+		throw "Invalid proxy" + prefix;
 	}
 	_done=false;
 	this->pauseStatus=false;
@@ -117,13 +120,20 @@ void pointcloudClient::run(){
 			this->sem.wait(sync);
 		}
 
-		jderobot::pointCloudDataPtr localCloud=this->prx->getCloudData();
+		try{
+			jderobot::pointCloudDataPtr localCloud=this->prx->getCloudData();
+			this->controlMutex.lock();
+			this->data.resize(localCloud->p.size());
+			std::copy( localCloud->p.begin(), localCloud->p.end(), this->data.begin() );
+			this->controlMutex.unlock();
+		}
+		catch(...){
+			jderobot::Logger::getInstance()->warning(prefix +"error during request (connection error)");
+			usleep(5000);
 
-		this->controlMutex.lock();
-		this->data.resize(localCloud->p.size());
-		std::copy( localCloud->p.begin(), localCloud->p.end(), this->data.begin() );
+		}
 
-		this->controlMutex.unlock();
+
 
 
 		int process = this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds());

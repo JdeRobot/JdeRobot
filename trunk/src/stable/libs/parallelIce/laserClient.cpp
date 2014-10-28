@@ -83,13 +83,21 @@ void laserClient::run(){
 			this->sem.wait(sync);
 		}
 
-		jderobot::LaserDataPtr localLaser=this->prx->getLaserData();
+		try{
+			jderobot::LaserDataPtr localLaser=this->prx->getLaserData();
 
-		this->controlMutex.lock();
-		this->data.resize(localLaser->distanceData.size());
-		std::copy( localLaser->distanceData.begin(), localLaser->distanceData.end(), this->data.begin() );
+			this->controlMutex.lock();
+			this->data.resize(localLaser->distanceData.size());
+			std::copy( localLaser->distanceData.begin(), localLaser->distanceData.end(), this->data.begin() );
 
-		this->controlMutex.unlock();
+			this->controlMutex.unlock();
+		}
+		catch(...){
+			jderobot::Logger::getInstance()->warning(prefix +"error during request (connection error)");
+			usleep(5000);
+
+		}
+
 
 		if ((IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds()) > this->cycle ){
 			jderobot::Logger::getInstance()->warning(prefix + ": pointCloud adquisition timeout-");

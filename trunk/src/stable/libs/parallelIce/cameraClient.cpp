@@ -136,16 +136,24 @@ cameraClient::run(){
 			this->sem.wait(sync);
 		}
 
-		dataPtr = this->prx->getImageData();
-		fmt = colorspaces::Image::Format::searchFormat(dataPtr->description->format);
-		if (!fmt)
-			throw "Format not supported";
-		colorspaces::Image imageRGB(dataPtr->description->width,dataPtr->description->height,fmt,&(dataPtr->pixelData[0]));
-		colorspaces::ImageRGB8 img_rgb888(imageRGB);//conversion will happen if needed
-		this->controlMutex.lock();
-		cv::Mat(cvSize(img_rgb888.width,img_rgb888.height), CV_8UC3, img_rgb888.data).copyTo(this->data);
-		this->controlMutex.unlock();
-		img_rgb888.release();
+		try{
+			dataPtr = this->prx->getImageData();
+			fmt = colorspaces::Image::Format::searchFormat(dataPtr->description->format);
+			if (!fmt)
+				throw "Format not supported";
+			colorspaces::Image imageRGB(dataPtr->description->width,dataPtr->description->height,fmt,&(dataPtr->pixelData[0]));
+			colorspaces::ImageRGB8 img_rgb888(imageRGB);//conversion will happen if needed
+			this->controlMutex.lock();
+			cv::Mat(cvSize(img_rgb888.width,img_rgb888.height), CV_8UC3, img_rgb888.data).copyTo(this->data);
+			this->controlMutex.unlock();
+			img_rgb888.release();
+		}
+		catch(...){
+			jderobot::Logger::getInstance()->warning(prefix +"error during request (connection error)");
+			usleep(5000);
+
+		}
+
 		int process = this->cycle - (IceUtil::Time::now().toMicroSeconds() - last.toMicroSeconds());
 
 		if (process > (int)cycle ){
