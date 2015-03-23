@@ -59,6 +59,9 @@ $ cmake -Dbuild-default=OFF -Dbuild_introrob=ON .
 $ make
 ```
 
+# How To Contricute
+To see the collaborate workflow and coding style of `JdeRobot` community, please refer to the [wiki page](https://github.com/RoboticsURJC/JdeRobot/wiki).
+
 # Copyright and license
 
 
