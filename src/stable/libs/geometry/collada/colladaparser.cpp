@@ -1,4 +1,8 @@
 #include "colladaparser.h"
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>   // to include opencv raw drawings line line(), rectangle() etc
+#include <opencv2/objdetect/objdetect.hpp>
 
 namespace Geometry {
 

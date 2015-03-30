@@ -45,9 +45,9 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_multifit.h>
-
+#include <vector>
 using namespace cv;
-
+using namespace std;
 namespace rgbdCalibrator
 {
 

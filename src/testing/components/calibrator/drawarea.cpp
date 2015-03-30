@@ -23,7 +23,10 @@
  */
 
 #include "drawarea.h"
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 namespace calibrator {
 	const float DrawArea::MAXWORLD = 50.;
 	const float DrawArea::PI = 3.141592654;

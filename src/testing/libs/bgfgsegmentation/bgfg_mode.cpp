@@ -21,7 +21,10 @@
 
 #include "bgfgsegmentation.h"
 #include <cassert>
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 static void releaseBGModeStatModel( BGModeStatModel** _model );
 static int updateBGModeStatModel( IplImage* curr_frame,
 				  BGModeStatModel*  model );

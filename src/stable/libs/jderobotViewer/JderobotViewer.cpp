@@ -6,6 +6,10 @@
  */
 
 #include <jderobotViewer/JderobotViewer.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>   //to involve opencv2 cvtColor module
+#include <opencv2/objdetect/objdetect.hpp>
 
 namespace jderobot {
 

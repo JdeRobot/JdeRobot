@@ -32,6 +32,7 @@
 #include <math.h>
 #include <visionlib/colorspaces/colorspacesmm.h>
 
+
 #include "common.h"
 
 class Control {

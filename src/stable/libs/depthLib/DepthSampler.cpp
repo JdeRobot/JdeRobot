@@ -6,6 +6,10 @@
  */
 
 #include "DepthSampler.h"
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>   // to include cvtColor
+#include <opencv2/objdetect/objdetect.hpp>
 
 namespace jderobot {
 DepthSampler::DepthSampler(int nBins, int maxDistance, int minInd, float step){

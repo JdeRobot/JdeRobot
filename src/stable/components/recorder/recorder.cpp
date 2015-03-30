@@ -31,7 +31,10 @@
 #include "poolWritePointCloud.h"
 #include "poolWriteEncoders.h"
 #include <ns/ns.h>
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 bool recording=false;
 struct timeval inicio;
 bool globalActive=true;

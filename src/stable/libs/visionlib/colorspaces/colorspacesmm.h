@@ -24,4 +24,5 @@
 
 #include "imagecv.h"
 
+
 #endif //COLORSPACESPP_COLORSPACES_H

@@ -13,11 +13,12 @@ include_directories(
     ${libglademm_INCLUDE_DIRS}
     ${gtkglextmm_INCLUDE_DIRS}
 )
-
+find_package( OpenCV REQUIRED )
 add_executable (replayer ${SOURCE_FILES})
 
 
-TARGET_LINK_LIBRARIES(replayer
+TARGET_LINK_LIBRARIES(${OpenCV_CFLAGS} replayer
+	${OpenCV_LIBS}
     ns
     logger
     ${CMAKE_THREAD_LIBS_INIT} 

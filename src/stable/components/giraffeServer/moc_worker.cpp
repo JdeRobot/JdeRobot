@@ -14,7 +14,10 @@
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 QT_BEGIN_MOC_NAMESPACE
 static const uint qt_meta_data_Worker[] = {
 

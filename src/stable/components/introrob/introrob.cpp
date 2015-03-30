@@ -3,7 +3,10 @@
 #include "gui.h"
 #define cycle_control 50 //miliseconds
 #define cycle_gui 100 //miliseconds
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 
 //Global Memory
 introrob::Api *api;

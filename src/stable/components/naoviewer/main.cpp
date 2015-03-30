@@ -17,11 +17,17 @@
  *  Authors : Borja Menéndez <borjamonserrano@gmail.com>
  *
  */
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 #include "naooperator.h"
 #include "control.h"
 #include "displayer.h"
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 int main ( int argc, char** argv ) {
     Control* control = new Control();
 

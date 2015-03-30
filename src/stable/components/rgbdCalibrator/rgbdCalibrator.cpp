@@ -27,6 +27,14 @@
 #include "viewer.h"
 #include <cv.h>
 #include <highgui.h>
+#include <vector>
+#include <opencv2/objdetect/objdetect.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/video/video.hpp> // to include vectors
+using namespace std; // to involve vectors
+
 
 
 

@@ -12,11 +12,14 @@ include_directories(
     ${libglademm_INCLUDE_DIRS}
     ${gtkglextmm_INCLUDE_DIRS}
     )
-
+find_package( OpenCV REQUIRED )
 add_executable (rgbdManualCalibrator ${SOURCE_FILES})
 
-TARGET_LINK_LIBRARIES( rgbdManualCalibrator
+TARGET_LINK_LIBRARIES( ${OpenCV_CFLAGS} 
+rgbdManualCalibrator
+ ${OpenCV_LIBS}	
  ${GLUT_LIBRARIES}
+ 
  ${opencv_LIBRARIES}
  ${OpenCVGUI_LIBRARIES}
  ${gtkmm_LIBRARIES}
@@ -25,14 +28,27 @@ TARGET_LINK_LIBRARIES( rgbdManualCalibrator
  ${libgnomecanvas_LIBRARIES}
  ${libgnomecanvasmm_LIBRARIES}
  ${gtkglextmm_LIBRARIES}
+
  ${ZeroCIce_LIBRARIES}
  ${OpenCV_LIBRARIES}
+${OpenCVGUI_LIBRARIES}
  ${gsl_LIBRARIES}
  ${CMAKE_THREAD_LIBS_INIT}
- jderobotutil
- colorspacesmm
- JderobotInterfaces
- progeo
- parallelIce
- ${ZLIB_LIBRARIES}    
+ ${OpenCV_CFLAGS} 
+jderobotutil
+ ${OpenCV_LIBS}
+ ${OpenCV_CFLAGS} 
+colorspacesmm
+ ${OpenCV_LIBS}
+ ${OpenCV_CFLAGS} 
+JderobotInterfaces
+ ${OpenCV_LIBS}
+ ${OpenCV_CFLAGS} 
+progeo
+ ${OpenCV_LIBS}
+ ${OpenCV_CFLAGS} 
+parallelIce
+ ${OpenCV_LIBS}
+ ${Boost_LIBRARIES} ${ZLIB_LIBRARIES}
+    #-lxerces-c
 )

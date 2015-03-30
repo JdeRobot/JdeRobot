@@ -21,7 +21,10 @@
 
 #include "bgfgsegmentation.h"
 #include <iostream>
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 //fw declarations
 static void releaseBGExpStatModel( BGExpStatModel** _model );
 static int updateBGExpStatModel( IplImage* curr_frame,

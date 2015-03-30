@@ -21,7 +21,10 @@
 
 #include "bgfgsegmentation.h"
 #include <algorithm>
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 static void releaseBGMeanStatModel( BGMeanStatModel** _model );
 static int updateBGMeanStatModel( IplImage* curr_frame,
 				  BGMeanStatModel*  model );

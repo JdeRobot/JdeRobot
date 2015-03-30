@@ -13,17 +13,21 @@ include_directories (
     ${goocanvasmm_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIRS}
 )
-
+find_package( OpenCV REQUIRED )
 add_executable (naooperator ${SOURCE_FILES_NAOOPERATOR})
 
-TARGET_LINK_LIBRARIES ( naooperator 
+TARGET_LINK_LIBRARIES ( ${OpenCV_CFLAGS} naooperator
+		
+colorspacesmm
     JderobotInterfaces
     jderobotutil
+	
     ${gtkmm3_LIBRARIES}
     ${gtk3_LIBRARIES}
     ${goocanvasmm_LIBRARIES}
     ${ZeroCIce_LIBRARIES}
     ${OpenCV_LIBRARIES}
+	${OpenCV_LIBS} 
     "dl"
     "rt"
     ${CMAKE_THREAD_LIBS_INIT}

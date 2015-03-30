@@ -26,8 +26,14 @@
 #include <cv.h>
 #include <glade/glade.h>
 /*#include <highgui.h>*/
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
+#include <opencv2/video/video.hpp> // to involve ‘calcOpticalFlowPyrLK'
+#include <vector> // to include vectors
 using namespace cv;
+using namespace std; // to involve vectors
 
 #define SQUARE(a) (a)*(a)
 #define PI 3.141592654

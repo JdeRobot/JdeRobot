@@ -47,11 +47,16 @@
 #include <ns/ns.h>
 #include <zlib.h>
 #include <openssl/md5.h>
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 #ifdef WITH_NITE2
 #include "NiTE.h"
 #endif
-
+using namespace cv;
+#include <opencv2/video/video.hpp>
+#include <opencv2/video/background_segm.hpp>
 
 #define VID_MICROSOFT 0x45e
 #define PID_NUI_MOTOR 0x02b0
@@ -1104,7 +1109,9 @@ private:
 		int segmentation;
 		int fps;
 		int minToTrain;
-		cv::BackgroundSubtractorMOG2 bg;
+//		cv::BackgroundSubtractorMOG2 bg; // for opencv-2
+		cv::Ptr<BackgroundSubtractor> bg = createBackgroundSubtractorMOG2(); // for opencv-3
+
 		cv::Mat fore;
 		cv::Mat trainImage;
 		bool _done;
