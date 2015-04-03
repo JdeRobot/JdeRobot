@@ -157,20 +157,8 @@ namespace introrob {
         /*En el siguiente ejemplo se filtra el color rojo de la cámara izquierda para repintar esos píxeles a negro. Para visualizar el resultado
         debemos desplegar la ventana "WINDOW DEBUGGING" y pulsar PLAY para hacer correr nuestro código*/
         imageCameras2openCV(); //Esta función es necesario llamarla ANTES de trabajar con las imágenes de las cámaras.
-        IplImage src = *this->imageCameraLeft; //Imagen de la cámara izquierda
 
-        for (i = 0; i < src.width; i++) {
-            for (j = 0; j < src.height; j++) {
-                if (((int) (unsigned char) src.imageData[(j * src.width + i) * src.nChannels] > 120) &&
-                        ((int) (unsigned char) src.imageData[(j * src.width + i) * src.nChannels + 1] < 70) &&
-                        ((int) (unsigned char) src.imageData[(j * src.width + i) * src.nChannels + 2] < 70)) {
-                    cont++;
-                    src.imageData[(j * src.width + i) * src.nChannels] = 255; //R
-                    src.imageData[(j * src.width + i) * src.nChannels + 1] = 255; //G
-                    src.imageData[(j * src.width + i) * src.nChannels + 2] = 0; //B
-                }
-            }
-        }
+        cv::line(imageCameraLeft, cv::Point2d(0,0), cv::Point2d(imageCameraLeft.cols, imageCameraLeft.rows), cv::Scalar::all(255), 3);
 
         /* A continuacion se muestran las coordenadas de los puntos obtenidos tras hacer click en alguna de las camaras */
         //std::cout << x_click_cameraleft << std::endl; // Coordenada x del punto donde se ha hecho click en la camara izquierda
