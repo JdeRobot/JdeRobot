@@ -23,7 +23,6 @@
 #define INTROROB_GUI_H
 
 #include <math.h>
-#include <cv.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>

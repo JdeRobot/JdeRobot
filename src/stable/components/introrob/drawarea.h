@@ -27,7 +27,6 @@
 
 #include <string>
 #include <iostream>
-#include <cv.h>
 #include <pthread.h>
 #include <gtkmm.h>
 #include <gtkglmm.h>
