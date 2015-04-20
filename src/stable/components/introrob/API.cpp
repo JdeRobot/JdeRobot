@@ -57,20 +57,16 @@ namespace introrob {
         return this->encodersData;
     }
 
-    IplImage* Api::getImageCamera1() {
-        IplImage src = *this->image1;
-        IplImage* cvResultado = cvCreateImage(cvGetSize(&src), IPL_DEPTH_8U, 3);
-        cvCopy(&src, cvResultado);
+    cv::Mat Api::getImageCamera1() {
 
-        return cvResultado;
+	cv::Mat cvResultado = this->image1.clone();
+	return cvResultado;
     }
 
-    IplImage* Api::getImageCamera2() {
-        IplImage src = *this->image2;
-        IplImage* cvResultado = cvCreateImage(cvGetSize(&src), IPL_DEPTH_8U, 3);
-        cvCopy(&src, cvResultado);
+    cv::Mat Api::getImageCamera2() {
 
-        return cvResultado;
+	cv::Mat cvResultado = this->image2.clone();
+	return cvResultado;
     }
 
     void Api::setMotorV(float motorV) {
@@ -128,15 +124,13 @@ namespace introrob {
 
     void Api::imageCameras2openCV() {
         pthread_mutex_lock(&this->controlGui);
-        cvReleaseImage(&imageCameraRight);
-        this->imageCameraRight = cvCreateImage(cvSize(imageData2->description->width, imageData2->description->height), 8, 3);
 
-        memcpy((unsigned char *) imageCameraRight->imageData, &(imageData2->pixelData[0]), imageCameraRight->width * imageCameraRight->height * 3);
+	// cv::Mat processing
+	this->imageCameraRight.create(imageData2->description->height, imageData2->description->width, CV_8UC3);
+	memcpy((unsigned char *) this->imageCameraRight.data, &(imageData2->pixelData[0]), this->imageCameraRight.cols*imageCameraRight.rows*3);
 
-        cvReleaseImage(&imageCameraLeft);
-        this->imageCameraLeft = cvCreateImage(cvSize(imageData1->description->width, imageData1->description->height), 8, 3);
-
-        memcpy((unsigned char *) imageCameraLeft->imageData, &(imageData1->pixelData[0]), imageCameraLeft->width * imageCameraLeft->height * 3);
+	this->imageCameraLeft.create(imageData1->description->height, imageData1->description->width, CV_8UC3);
+	memcpy((unsigned char *) this->imageCameraLeft.data, &(imageData1->pixelData[0]), this->imageCameraLeft.cols*imageCameraLeft.rows*3);
 
         /*
         colorspaces::Image::FormatPtr fmt1 = colorspaces::Image::Format::searchFormat(imageData1->description->format);
@@ -273,22 +267,7 @@ namespace introrob {
     void Api::showMyImage() {
         int i, j;
 
-        //IplImage src = *this->imageCameraLeft;
-/*
-        IplImage* cvResultado = cvCreateImage(cvGetSize(&src), IPL_DEPTH_8U, 3);
-        cvCopy(&src, cvResultado);
-        for (i = 0; i < cvResultado->width; i++) {
-            for (j = 0; j < cvResultado->height; j++) {
-                cvResultado->imageData[j * cvResultado->widthStep + i * cvResultado->nChannels] = this->imageCameraLeft->imageData[j * this->imageCameraLeft->widthStep + i * this->imageCameraLeft->nChannels + 2]; //R
-                cvResultado->imageData[j * cvResultado->widthStep + i * cvResultado->nChannels + 1] = this->imageCameraLeft->imageData[j * this->imageCameraLeft->widthStep + i * this->imageCameraLeft->nChannels + 1]; //R
-                cvResultado->imageData[j * cvResultado->widthStep + i * cvResultado->nChannels + 2] = this->imageCameraLeft->imageData[j * this->imageCameraLeft->widthStep + i * this->imageCameraLeft->nChannels]; //R
-            }
-        }
-*/
-
-        cvShowImage("DebuggingWin", this->imageCameraLeft);
-
-
+        imshow("DebuggingWin", this->imageCameraLeft);
 
     }
 

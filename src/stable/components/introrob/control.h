@@ -68,8 +68,8 @@ namespace introrob {
         void createImage(Api *api);
         void createImage2(Api *api);
 
-        IplImage* image;
-        IplImage* image2;
+        cv::Mat image;
+        cv::Mat image2;
 
 
     }; //class
