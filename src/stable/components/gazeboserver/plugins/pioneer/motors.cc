@@ -1,3 +1,4 @@
+
 #include "motors.h"
 
 enum {
@@ -38,22 +39,22 @@ namespace gazebo {
             gzerr << "DiffDrive plugin missing <right_joint> element\n";
 
         this->leftJoint = _model->GetJoint(
-                _sdf->GetElement("left_joint")->GetValueString());
+                _sdf->GetElement("left_joint")->Get<std::string>());
         this->rightJoint = _model->GetJoint(
-                _sdf->GetElement("right_joint")->GetValueString());
+                _sdf->GetElement("right_joint")->Get<std::string>());
 
         if (_sdf->HasElement("torque"))
-            this->torque = _sdf->GetElement("torque")->GetValueDouble();
+            this->torque = _sdf->GetElement("torque")->Get<double>();
         else {
             gzwarn << "No torque value set for the DiffDrive plugin.\n";
             this->torque = 5.0;
         }
         if (!this->leftJoint)
             gzerr << "Unable to find left joint["
-                << _sdf->GetElement("left_joint")->GetValueString() << "]\n";
+                << _sdf->GetElement("left_joint")->Get<std::string>() << "]\n";
         if (!this->rightJoint)
             gzerr << "Unable to find right joint["
-                << _sdf->GetElement("right_joint")->GetValueString() << "]\n";
+                << _sdf->GetElement("right_joint")->Get<std::string>() << "]\n";
 
 
 
@@ -129,11 +130,11 @@ namespace gazebo {
 		std::cout << "rightVelDesired " << rightVelDesired << std::endl;
 		std::cout << "torque " << torque << std::endl;
 */
-        this->leftJoint->SetVelocity(0, leftVelDesired);
-        this->rightJoint->SetVelocity(0, rightVelDesired);
+        this->leftJoint->SetParam("vel", 0, leftVelDesired);
+        this->rightJoint->SetParam("vel", 0, rightVelDesired);
 
-        this->leftJoint->SetMaxForce(0, this->torque);
-        this->rightJoint->SetMaxForce(0, this->torque);
+        this->leftJoint->SetParam("fmax", 0, this->torque);
+        this->rightJoint->SetParam("fmax", 0, this->torque);
     }
 
     class MotorsI : virtual public jderobot::Motors {

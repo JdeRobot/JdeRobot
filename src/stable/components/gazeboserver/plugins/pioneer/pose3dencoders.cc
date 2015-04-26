@@ -31,10 +31,10 @@ namespace gazebo {
 
         if (!this->cameraLeft.joint_pose3dencoders_pan)
             gzerr << "Unable to find left joint pose3dencoders_pan["
-                << _sdf->GetElement("left_joint_pose3dencoders_pan")->GetValueString() << "]\n";
+                << _sdf->GetElement("left_joint_pose3dencoders_pan")->Get<std::string>() << "]\n";
         if (!this->cameraLeft.joint_pose3dencoders_tilt)
             gzerr << "Unable to find left joint pose3dencoders_tilt["
-                << _sdf->GetElement("left_joint_pose3dencoders_tilt")->GetValueString() << "]\n";
+                << _sdf->GetElement("left_joint_pose3dencoders_tilt")->Get<std::string>() << "]\n";
         this->cameraLeft.camera_link_pan = this->model->GetLink("camera_column_body_left");
         this->cameraLeft.camera_link_tilt = this->model->GetLink("camera_top_body_left");
 
@@ -51,17 +51,17 @@ namespace gazebo {
 
         if (!this->cameraRight.joint_pose3dencoders_pan)
             gzerr << "Unable to find right joint pose3dencoders_pan["
-                << _sdf->GetElement("right_joint_pose3dencoders_pan")->GetValueString() << "]\n";
+                << _sdf->GetElement("right_joint_pose3dencoders_pan")->Get<std::string>() << "]\n";
         if (!this->cameraRight.joint_pose3dencoders_tilt)
             gzerr << "Unable to find right joint pose3dencoders_tilt["
-                << _sdf->GetElement("right_joint_pose3dencoders_tilt")->GetValueString() << "]\n";
+                << _sdf->GetElement("right_joint_pose3dencoders_tilt")->Get<std::string>() << "]\n";
         this->cameraRight.camera_link_pan = this->model->GetLink("camera_column_body_right");
         this->cameraRight.camera_link_tilt = this->model->GetLink("camera_top_body_right");
 
 
         //LOAD TORQUE        
         if (_sdf->HasElement("torque"))
-            this->torque = _sdf->GetElement("torque")->GetValueDouble();
+            this->torque = _sdf->GetElement("torque")->Get<double>();
         else {
             gzwarn << "No torque value set for the DiffDrive plugin.\n";
             this->torque = 5.0;
@@ -132,79 +132,79 @@ namespace gazebo {
         
         if (this->cameraLeft.motor.pan >= 0) {
             if (this->cameraLeft.encoder.pan < this->cameraLeft.motor.pan) {
-                this->cameraLeft.joint_pose3dencoders_pan->SetVelocity(0, -0.1);
-                this->cameraLeft.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
+                this->cameraLeft.joint_pose3dencoders_pan->SetParam("vel", 0, -0.1);
+                this->cameraLeft.joint_pose3dencoders_pan->SetParam("fmax", 0, this->torque);
                 //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraLeft.joint_pose3dencoders_pan->SetVelocity(0, 0);
-                this->cameraLeft.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
+                this->cameraLeft.joint_pose3dencoders_pan->SetParam("vel", 0, 0);
+                this->cameraLeft.joint_pose3dencoders_pan->SetParam("fmax", 0, this->torque);
             }
         } else {
             if (this->cameraLeft.encoder.pan > this->cameraLeft.motor.pan) {
-                this->cameraLeft.joint_pose3dencoders_pan->SetVelocity(0, 0.1);
-                this->cameraLeft.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
+                this->cameraLeft.joint_pose3dencoders_pan->SetParam("vel", 0, 0.1);
+                this->cameraLeft.joint_pose3dencoders_pan->SetParam("fmax", 0, this->torque);
                 //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraLeft.joint_pose3dencoders_pan->SetVelocity(0, 0);
-                this->cameraLeft.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
+                this->cameraLeft.joint_pose3dencoders_pan->SetParam("vel", 0, 0);
+                this->cameraLeft.joint_pose3dencoders_pan->SetParam("fmax", 0, this->torque);
             }            
         }
         if (this->cameraRight.motor.pan >= 0) {
             if (this->cameraRight.encoder.pan < this->cameraRight.motor.pan) {
-                this->cameraRight.joint_pose3dencoders_pan->SetVelocity(0, -0.1);
-                this->cameraRight.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
+                this->cameraRight.joint_pose3dencoders_pan->SetParam("vel",0, -0.1);
+                this->cameraRight.joint_pose3dencoders_pan->SetParam("fmax",0, this->torque);
                 //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraRight.joint_pose3dencoders_pan->SetVelocity(0, 0);
-                this->cameraRight.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
+                this->cameraRight.joint_pose3dencoders_pan->SetParam("vel",0, 0);
+                this->cameraRight.joint_pose3dencoders_pan->SetParam("fmax",0, this->torque);
             }
         } else {
             if (this->cameraRight.encoder.pan > this->cameraRight.motor.pan) {
-                this->cameraRight.joint_pose3dencoders_pan->SetVelocity(0, 0.1);
-                this->cameraRight.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
+                this->cameraRight.joint_pose3dencoders_pan->SetParam("vel",0, 0.1);
+                this->cameraRight.joint_pose3dencoders_pan->SetParam("fmax",0, this->torque);
                 //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraRight.joint_pose3dencoders_pan->SetVelocity(0, 0);
-                this->cameraRight.joint_pose3dencoders_pan->SetMaxForce(0, this->torque);
+                this->cameraRight.joint_pose3dencoders_pan->SetParam("vel",0, 0);
+                this->cameraRight.joint_pose3dencoders_pan->SetParam("fmax",0, this->torque);
             }            
         }
 
         if (this->cameraLeft.motor.tilt >= 0) {
             if (this->cameraLeft.encoder.tilt < this->cameraLeft.motor.tilt) {
-                this->cameraLeft.joint_pose3dencoders_tilt->SetVelocity(0, -0.1);
-                this->cameraLeft.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
+                this->cameraLeft.joint_pose3dencoders_tilt->SetParam("vel", 0, -0.1);
+                this->cameraLeft.joint_pose3dencoders_tilt->SetParam("fmax", 0, this->torque);
                 //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraLeft.joint_pose3dencoders_tilt->SetVelocity(0, 0);
-                this->cameraLeft.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
+                this->cameraLeft.joint_pose3dencoders_tilt->SetParam("vel", 0, 0);
+                this->cameraLeft.joint_pose3dencoders_tilt->SetParam("fmax", 0, this->torque);
             }
         } else {
             if (this->cameraLeft.encoder.tilt > this->cameraLeft.motor.tilt) {
-                this->cameraLeft.joint_pose3dencoders_tilt->SetVelocity(0, 0.1);
-                this->cameraLeft.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
+                this->cameraLeft.joint_pose3dencoders_tilt->SetParam("vel", 0, 0.1);
+                this->cameraLeft.joint_pose3dencoders_tilt->SetParam("fmax",0, this->torque);
                 //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraLeft.joint_pose3dencoders_tilt->SetVelocity(0, 0);
-                this->cameraLeft.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
+                this->cameraLeft.joint_pose3dencoders_tilt->SetParam("vel", 0, 0);
+                this->cameraLeft.joint_pose3dencoders_tilt->SetParam("fmax",0, this->torque);
             }            
         }
         if (this->cameraRight.motor.tilt >= 0) {
             if (this->cameraRight.encoder.tilt < this->cameraRight.motor.tilt) {
-                this->cameraRight.joint_pose3dencoders_tilt->SetVelocity(0, -0.1);
-                this->cameraRight.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
+                this->cameraRight.joint_pose3dencoders_tilt->SetParam("vel", 0, -0.1);
+                this->cameraRight.joint_pose3dencoders_tilt->SetParam("fmax",0, this->torque);
                 //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraRight.joint_pose3dencoders_tilt->SetVelocity(0, 0);
-                this->cameraRight.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
+                this->cameraRight.joint_pose3dencoders_tilt->SetParam("vel", 0, 0);
+                this->cameraRight.joint_pose3dencoders_tilt->SetParam("fmax",0, this->torque);
             }
         } else {
             if (this->cameraRight.encoder.tilt > this->cameraRight.motor.tilt) {
-                this->cameraRight.joint_pose3dencoders_tilt->SetVelocity(0, 0.1);
-                this->cameraRight.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
+                this->cameraRight.joint_pose3dencoders_tilt->SetParam("vel", 0, 0.1);
+                this->cameraRight.joint_pose3dencoders_tilt->SetParam("fmax",0, this->torque);
                 //std::cout << "AQUI" << std::endl;
             } else {
-                this->cameraRight.joint_pose3dencoders_tilt->SetVelocity(0, 0);
-                this->cameraRight.joint_pose3dencoders_tilt->SetMaxForce(0, this->torque);
+                this->cameraRight.joint_pose3dencoders_tilt->SetParam("vel", 0, 0);
+                this->cameraRight.joint_pose3dencoders_tilt->SetParam("fmax",0, this->torque);
             }            
         }        
         

@@ -48,11 +48,12 @@ namespace gazebo
 		if(count==0){
 			std::vector<std::string> tokens;
 			nameCamera = this->parentSensor->GetCamera()->GetName();
-  			boost::split(tokens, nameCamera, boost::is_any_of("::"));
-  			boost::split(tokens, tokens[2], boost::is_any_of("("));
-			nameGlobal = tokens[0];
+			nameGlobal = nameCamera;
+  			//boost::split(tokens, nameCamera, boost::is_any_of("::"));
+  			//boost::split(tokens, tokens[2], boost::is_any_of("("));
+			//nameGlobal = tokens[0];
 			// El nombre del fichero de configuracion tiene que coincidir con el de la cámara en el .world y el .cfg 
-			nameCamera = std::string("--Ice.Config=" + tokens[0] + ".cfg"); 
+			nameCamera = std::string("--Ice.Config=" + nameCamera + ".cfg"); 
 			
 			if (count == 0){
 				pthread_t thr_gui;
@@ -92,6 +93,8 @@ class CameraI: virtual public jderobot::Camera {
 			std::cout << "Constructor CameraI" << std::endl;
 
 			imageDescription = (new jderobot::ImageDescription());
+			cameraDescription = (new jderobot::CameraDescription());
+			cameraDescription->name = "camera Introrob";
 
         	replyTask = new ReplyTask(this);
 		    replyTask->start(); // my own thread

@@ -23,7 +23,6 @@
 #define INTROROB_GUI_H
 
 #include <math.h>
-#include <cv.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
@@ -72,7 +71,7 @@ namespace introrob {
         void updateCameras(Api *api);
         void resetAPI(Api *api);
         void setDestino();
-        void prepare2draw(IplImage &image);
+        void prepare2draw(cv::Mat image);
         void calculate_projection_line(HPoint2D pix, int idcamera);
         void get3DPositionZ(TPinHoleCamera * camera, HPoint3D &res, HPoint2D in, float Z);
         void add_line(float x0, float y0, float z0, float x1, float y1, float z1, int color);

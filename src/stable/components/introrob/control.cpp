@@ -44,8 +44,8 @@ namespace introrob {
 
         pthread_mutex_lock(&api->controlGui);
         api->imagesReady = FALSE;
-        api->imageData1 = this->cprx1->getImageData( this->cprx1->getImageFormat().at(0) );
-        api->imageData2 = this->cprx2->getImageData( this->cprx2->getImageFormat().at(0) );
+        api->imageData1 = this->cprx1->getImageData( colorspaces::ImageRGB8::FORMAT_RGB8.get()->name );
+        api->imageData2 = this->cprx2->getImageData( colorspaces::ImageRGB8::FORMAT_RGB8.get()->name );
         if (api->guiReady) {
             createImage(api);
             createImage2(api);
@@ -59,10 +59,9 @@ namespace introrob {
     }
 
     void Control::createImage(Api *api) {
-        cvReleaseImage(&image);
-        this->image = cvCreateImage(cvSize(api->imageData1->description->width, api->imageData1->description->height), 8, 3);
 
-        memcpy((unsigned char *) image->imageData, &(api->imageData1->pixelData[0]), image->width * image->height * 3);
+        this->image.create(api->imageData1->description->height, api->imageData1->description->width, CV_8UC3);
+	memcpy((unsigned char *) this->image.data, &(api->imageData1->pixelData[0]), this->image.cols*image.rows*3);
 /*
         colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(api->imageData1->description->format);
 
@@ -70,35 +69,34 @@ namespace introrob {
             throw "Format not supported";
 */
         api->imgBuff =
-                Gdk::Pixbuf::create_from_data((const guint8*) this->image->imageData,
+                Gdk::Pixbuf::create_from_data((const guint8*) this->image.data,
                 Gdk::COLORSPACE_RGB,
                 false,
-                this->image->depth,
-                this->image->width,
-                this->image->height,
-                this->image->widthStep);
+                8, //this->image.depth,
+                this->image.cols,
+                this->image.rows,
+                this->image.step);
 
     }
 
     void Control::createImage2(Api *api) {
-        cvReleaseImage(&image2);
-        this->image2 = cvCreateImage(cvSize(api->imageData2->description->width, api->imageData2->description->height), 8, 3);
 
-        memcpy((unsigned char *) image2->imageData, &(api->imageData2->pixelData[0]), image2->width * image2->height * 3);
+        this->image2.create(api->imageData2->description->height, api->imageData2->description->width, CV_8UC3);
+	memcpy((unsigned char *) this->image2.data, &(api->imageData2->pixelData[0]), this->image2.cols*image2.rows*3);
 /*
         colorspaces::Image::FormatPtr fmt2 = colorspaces::Image::Format::searchFormat(api->imageData2->description->format);
 
         if (!fmt2)
             throw "Format not supported";
 */
-        api->imgBuff2 =
-                Gdk::Pixbuf::create_from_data((const guint8*) this->image2->imageData,
+         api->imgBuff2 =
+                Gdk::Pixbuf::create_from_data((const guint8*) this->image2.data,
                 Gdk::COLORSPACE_RGB,
                 false,
-                this->image2->depth,
-                this->image2->width,
-                this->image2->height,
-                this->image2->widthStep);
+                8, //this->image2.depth,
+                this->image2.cols,
+                this->image2.rows,
+                this->image2.step);
     }
 
     // Send the actuators info to Gazebo with ICE

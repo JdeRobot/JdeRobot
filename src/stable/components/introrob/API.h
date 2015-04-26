@@ -27,8 +27,8 @@
 
 //#include "camera.h"
 #include <progeo/progeo.h>
-#include <cv.h>
-#include <highgui.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
@@ -72,8 +72,8 @@ namespace introrob {
         int getNumLasers();
         jderobot::IntSeq getDistancesLaser();
         jderobot::EncodersDataPtr getEncodersData();
-        IplImage* getImageCamera1();
-        IplImage* getImageCamera2();
+        cv::Mat getImageCamera1();
+        cv::Mat getImageCamera2();
 
         //SETS
         void setMotorV(float motorV);
@@ -104,8 +104,8 @@ namespace introrob {
         jderobot::Pose3DEncodersDataPtr Pose3Dencoders2;
         jderobot::Pose3DMotorsData* Pose3DmotorsData1;
         jderobot::Pose3DMotorsData* Pose3DmotorsData2;
-        colorspaces::Image* image1; // Image camera1 processed to manipulate with openCV
-        colorspaces::Image* image2; // Image camera2 processed to manipulate with openCV
+        cv::Mat image1; // Image camera1 processed to manipulate with openCV
+        cv::Mat image2; // Image camera2 processed to manipulate with openCV
         bool guiVisible;
         bool iterationControlActivated;
         //Variables used in NavigationAlgorithm
@@ -116,20 +116,20 @@ namespace introrob {
         bool segmentoPintado;
         int numlines;
         float extra_lines[MAX_LINES][9];
-        IplImage* imageOnCamera;
+        cv::Mat imageOnCamera;
         bool showImage;
         gint x_click_cameraleft, y_click_cameraleft, x_click_cameraright, y_click_cameraright;
         TPinHoleCamera myCamA, myCamB;
         Glib::RefPtr<Gdk::Pixbuf> imgBuff2, imgBuff;
         bool imagesReady;
         bool guiReady;
-        IplImage* imageCameraLeft;
-        IplImage* imageCameraRight;
+        cv::Mat imageCameraLeft;
+        cv::Mat imageCameraRight;
 
     private:
         //Variables used in NavigationAlgorithm
-        IplImage* imageCamera1;
-        IplImage* imageCamera2;
+        cv::Mat imageCamera1;
+        cv::Mat imageCamera2;
 
         struct XYZ {
             double x;
