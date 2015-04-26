@@ -50,7 +50,7 @@
 
 		<TableLayout android:layout_width="wrap_content"
 			android:id="@+id/tableLayout2" android:layout_height="fill_parent">
-			<TableRow android:id="@+id/tableRow2" android:layout_width="@dimen/arrow_table_size"
+			<TableRow android:id="@+id/tableRow5" android:layout_width="@dimen/arrow_table_size"
 				android:layout_height="wrap_content">
 				<TextView android:id="@+id/text_empty2" android:text=""
 					android:layout_width="@dimen/arrow_button_size"
@@ -59,7 +59,7 @@
 					android:layout_width="@dimen/arrow_button_size"
 					android:layout_height="@dimen/arrow_button_size"></ImageButton>
 			</TableRow>
-			<TableRow android:id="@+id/tableRow3" android:layout_width="wrap_content"
+			<TableRow android:id="@+id/tableRow6" android:layout_width="wrap_content"
 				android:layout_height="wrap_content">
 				<ImageButton android:src="@drawable/arrow_left"
 					android:id="@+id/button_lefth" android:layout_width="@dimen/arrow_button_size"
@@ -71,7 +71,7 @@
 					android:id="@+id/button_righth" android:layout_width="@dimen/arrow_button_size"
 					android:layout_height="@dimen/arrow_button_size"></ImageButton>
 			</TableRow>
-			<TableRow android:id="@+id/tableRow4" android:layout_width="wrap_content"
+			<TableRow android:id="@+id/tableRow7" android:layout_width="wrap_content"
 				android:layout_height="wrap_content">
 				<TextView android:id="@+id/text_empty4" android:text=""
 					android:layout_width="@dimen/arrow_button_size"

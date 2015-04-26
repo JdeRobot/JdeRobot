@@ -7,7 +7,6 @@ import jderobot.LaserPrx;
 import jderobot.MotorsPrx;
 import jderobot.Pose3DMotorsData;
 import jderobot.Pose3DMotorsPrx;
-import bica.*;
 
 public final class Connection {
 	
