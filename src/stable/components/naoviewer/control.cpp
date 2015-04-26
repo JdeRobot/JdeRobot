@@ -19,7 +19,13 @@
  */
 
 #include "control.h"
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
+#include "../libs//visionlib/colorspaces/colorspacesmm.h"
+#include "../libs//visionlib/colorspaces/colorspaces.h"
+#include "../libs//visionlib/colorspaces/imagecv.h"
 /*************************************************************
  * CONSTRUCTOR
  *************************************************************/

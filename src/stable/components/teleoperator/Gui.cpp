@@ -24,7 +24,10 @@
 #include "SharedMemory.h"
 #include "sigc++/functors/mem_fun.h"
 #define PI 3.14159265
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 Gui::Gui(SharedMemory *interfacesData) : gtkmain(0, 0) {
 
     this->interfacesData = interfacesData;

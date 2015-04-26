@@ -17,7 +17,10 @@
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "monitor.h"
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 Monitor::Monitor( RoboCompJointMotor::MotorParamsList *params, RoboCompJointMotor::BusParams *busParams ,  Ice::CommunicatorPtr _communicator, 
 				  QWaitCondition * PARAMETERS_SET_WAIT_CONDITION   )
 {

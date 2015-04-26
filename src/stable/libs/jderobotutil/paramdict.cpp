@@ -21,7 +21,10 @@
 
 #include "paramdict.h"
 #include <sstream>
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 namespace jderobotutil{
   ParamDict::ParamDict(const std::string keyprefix, 
 		       const std::map<std::string, std::string>& params)

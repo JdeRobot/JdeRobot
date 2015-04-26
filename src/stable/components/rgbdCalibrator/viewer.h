@@ -33,9 +33,9 @@
 #include <jderobot/camera.h>
 #include <visionlib/colorspaces/colorspaces.h>
 #include "calibration.h"
-
+#include <vector>
 using namespace cv;
-
+using namespace std; // to involve vector
 namespace rgbdCalibrator{
 
 

@@ -31,7 +31,10 @@
 #include "viewgtk.h"
 #include "model.h"
 #include <bgfgsegmentation/bgmodelfactory.h>
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 namespace bgfglab {
   const std::string gladepath = std::string(GLADE_DIR) + std::string("/bgfglab.glade");
 

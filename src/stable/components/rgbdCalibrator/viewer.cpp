@@ -25,7 +25,10 @@
 #include <IceUtil/IceUtil.h>
 #include <boost/filesystem.hpp>
 #include <visionlib/cvBlob/cvblob.h>
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 #define DEGTORAD     (3.14159264 / 180.0)
 #define DEBUG TRUE
 

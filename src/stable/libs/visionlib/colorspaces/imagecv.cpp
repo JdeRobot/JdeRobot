@@ -7,6 +7,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdexcept>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>   //to involve opencv2 cvtColor module
+#include <opencv2/objdetect/objdetect.hpp>
 
 namespace colorspaces {
   Image::Format::Format(const std::string name, const int id, const int cvType, imageCtor ctor, imageCvt cvt)

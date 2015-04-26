@@ -1,5 +1,5 @@
  cmake_minimum_required(VERSION 2.8)
-
+find_package( OpenCV REQUIRED )
 
 SET( SOURCE_FILES ../replayer.cpp ../replayergui.cpp ../control.cpp)
 SET( LIBS_DIR /usr/local/lib/jderobot/)
@@ -58,7 +58,8 @@ set( CMAKE_CXX_FLAGS "-Wno-deprecated" ) # Opciones para el compilador
 
 
 
-TARGET_LINK_LIBRARIES(replayer
+TARGET_LINK_LIBRARIES(${OpenCV_CFLAGS} replayer
+	${OpenCV_LIBS}
   ${opencv_LIBRARIES}
   ${Ice_LIBRARIES}
   ${gtkglextmm_LIBRARIES}

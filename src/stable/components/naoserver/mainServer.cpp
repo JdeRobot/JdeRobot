@@ -21,7 +21,10 @@
 #ifndef _WIN32
 # include <signal.h>
 #endif
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 #include "alcore/altypes.h"
 #include "altools/alxplatform.h"
 #include "alcore/alptr.h"

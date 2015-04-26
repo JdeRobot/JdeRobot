@@ -17,7 +17,10 @@
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "dynamixel.h"
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 
 Dynamixel::Dynamixel(  RoboCompJointMotor::BusParams  *busParams , RoboCompJointMotor::MotorParamsList *params )
  : Handler()

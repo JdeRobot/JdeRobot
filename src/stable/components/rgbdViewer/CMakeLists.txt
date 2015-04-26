@@ -13,11 +13,12 @@ include_directories(
     ${libglademm_INCLUDE_DIRS}
     ${gtkglextmm_INCLUDE_DIRS}
 )
-
+find_package( OpenCV REQUIRED )
 add_executable (rgbdViewer ${SOURCE_FILES})
 
 
-TARGET_LINK_LIBRARIES(rgbdViewer
+TARGET_LINK_LIBRARIES(${OpenCV_CFLAGS} rgbdViewer
+	${OpenCV_LIBS}
     ${CMAKE_THREAD_LIBS_INIT} 
     ${GLUT_LIBRARIES}
     ${OpenCV_LIBRARIES}
@@ -34,5 +35,5 @@ TARGET_LINK_LIBRARIES(rgbdViewer
     parallelIce
     ${gsl_LIBRARIES}
     ${ZeroCIce_LIBRARIES}
-    ${ZLIB_LIBRARIES}
+	${ZLIB_LIBRARIES}
 )

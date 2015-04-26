@@ -18,9 +18,15 @@
  *  Authors : David Lobato Bravo <dav.lobato@gmail.com>
  *
  */
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 #include "time.h"
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 namespace jderobotutil{
   IpsCounter::IpsCounter()
     : _ips(0.0), counter(0) { 

@@ -1,6 +1,9 @@
 #include "image.h"
 #include <string>
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 namespace colorspacesice{
   Image::Image(colorspaces::Image& i)
     : colorspaces::Image(i),imageData(0) {}

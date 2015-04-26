@@ -21,7 +21,10 @@
 #include<iostream>
 #include "gui.h"
 #include "API.h"
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 namespace wiimoteClient {
     
     std::string Gui::int2str(int num) {

@@ -22,7 +22,10 @@
 #include "viewer.h" 
 #include <iostream>
 #include <cmath>
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
   const std::string gladepath = std::string("./cameraview.glade");
 
   Viewer::Viewer() 

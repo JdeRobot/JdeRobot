@@ -1,6 +1,9 @@
 #include "shared.h"
 #include <cv.h>
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 #define w 400
 
 namespace basic_component_qt {

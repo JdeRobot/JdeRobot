@@ -24,7 +24,10 @@
 #include <iostream>
 #include "viewtext.h"
 #include "model.h"
-
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 namespace bgfglab {
   ViewText::ViewText(Controller &controller) throw ()
     : View(controller) {}
