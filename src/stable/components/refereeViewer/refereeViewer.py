@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #This program paints a graph, using the parameter given by the Jderobot/getDistance Ice interface.
 #VisorPainter class re-paints on a pyplot plot and updates new data.
 #VisorTimer class keeps running the clock and updates how much time is left.
