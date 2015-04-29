@@ -1,4 +1,4 @@
-PKG_CHECK_MODULES(GAZEBO QUIET gazebo<=5.0.1 )
+PKG_CHECK_MODULES(GAZEBO QUIET gazebo<=5.1.0 )
 #include_directories(${GAZEBO_INCLUDE_DIRS})
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
