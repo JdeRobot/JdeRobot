@@ -1,0 +1,144 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+   <world name="default">
+      <include>
+         <uri>model://ground_plane</uri>
+      </include>
+      <!-- A global light source -->
+      <include>
+         <uri>model://sun</uri>
+      </include>
+      <actor name="actor">
+         <skin>
+            <filename>moonwalk.dae</filename>
+            <scale>1.0</scale>
+         </skin>
+         <pose>0 0 0 0 0 0</pose>
+         <animation name="stand">
+            <filename>stand.dae</filename>
+            <scale>1.000000</scale>
+         </animation>
+         <animation name="sit_down">
+            <filename>sit_down.dae</filename>
+            <scale>1.000000</scale>
+         </animation>
+          <animation name="sitting">
+            <filename>sitting.dae</filename>
+            <scale>1.000000</scale>
+         </animation>
+         <animation name="stand_up">
+            <filename>stand_up.dae</filename>
+            <scale>1.000000</scale>
+         </animation>
+         <script>
+            <loop>true</loop>
+            <delay_start>0.000000</delay_start>
+            <auto_start>true</auto_start>
+            <trajectory id="0" type="stand">
+		     		<waypoint>
+                  <time>0.000000</time>
+                  <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+               </waypoint>
+		       	<waypoint>
+                  <time>2.000000</time>
+                  <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+               </waypoint>
+		   </trajectory>
+		   <trajectory id="1" type="sit_down">
+            	<waypoint>
+            	<time>0.000000</time>
+                  <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+               </waypoint>
+		       	<waypoint>
+                  <time>5.000000</time>
+                  <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+               </waypoint>
+		   </trajectory>
+		   <trajectory id="2" type="sitting">
+            <waypoint>
+                  <time>0.000000</time>
+                  <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+               </waypoint>
+		       	<waypoint>
+                  <time>2.000000</time>
+                  <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+               </waypoint>
+          </trajectory>
+          <trajectory id="3" type="stand_up">
+            	<waypoint>
+            		<time>0.000000</time>
+                  <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+               </waypoint>
+               <waypoint>
+            		<time>5.000000</time>
+                  <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+               </waypoint>               
+		   </trajectory>
+		   <trajectory id="0" type="stand">
+		     		<waypoint>
+                  <time>0.000000</time>
+                  <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+               </waypoint>
+		       	<waypoint>
+                  <time>5.000000</time>
+                  <pose>0.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+               </waypoint>
+		   </trajectory>
+         </script>
+      </actor>
+      
+      
+      <actor name="actor 4">
+         <skin>
+            <filename>moonwalk.dae</filename>
+            <scale>1.0</scale>
+         </skin>
+         <pose>0 0 0 0 0 0</pose>
+          <animation name="talk_a">
+            <filename>talk_a.dae</filename>
+            <scale>1.000000</scale>
+         </animation>
+         <script>
+            <loop>false</loop>
+            <delay_start>0.000000</delay_start>
+            <auto_start>true</auto_start>
+		   <trajectory id="0" type="talk_a">
+            	<waypoint>
+            	<time>0.000000</time>
+                  <pose>5.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+               </waypoint>
+		       	<waypoint>
+                  <time>20.000000</time>
+                  <pose>5.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+               </waypoint>
+		   </trajectory>
+         </script>
+      </actor> 
+      <actor name="actor 5">
+         <skin>
+            <filename>moonwalk.dae</filename>
+            <scale>1.0</scale>
+         </skin>
+         <pose>0 0 0 0 0 0</pose>
+          <animation name="talk_b">
+            <filename>talk_b.dae</filename>
+            <scale>1.000000</scale>
+         </animation>
+         <script>
+            <loop>true</loop>
+            <delay_start>0.000000</delay_start>
+            <auto_start>true</auto_start>
+		   <trajectory id="0" type="talk_b">
+            	<waypoint>
+            	<time>0.000000</time>
+                  <pose>5.000000 0.000000 0.000000 0.000000 0.000000 0.000000</pose>
+               </waypoint>
+		       	<waypoint>
+                  <time>20.000000</time>
+                  <pose>5.000000 0.000000 0.000000 0.000000 0.000000 -0.000000</pose>
+               </waypoint>
+		   </trajectory>
+         </script>
+      </actor>  
+   </world>
+</sdf>

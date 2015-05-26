@@ -1,0 +1,215 @@
+<?xml version='1.0'?>
+<sdf version="1.4">
+<model name="carApril">
+  <pose>0 0 0 0 0 0</pose>
+  <static>false</static>
+    <link name="car">
+    	<pose>0 0 0.749745 0 0 0</pose>
+      <collision name="collision">
+            <geometry>
+              <mesh>
+            		<uri>model://carApril/meshes/model.dae</uri>
+          		</mesh>
+            </geometry>
+       </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://carApril/meshes/model.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <link name="front_right_wheel">
+        <pose>1.1 -1.70000 0.448000 0 1.5707 0</pose>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>.45</radius>
+              <length>.3</length>
+            </cylinder>
+          </geometry>
+        </collision>
+<!---->
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.45</radius>
+              <length>.3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+<!---->
+      </link>
+      <link name="front_left_wheel">
+        <pose>-1.100000 -1.70000 0.448000 0 1.5707 0</pose>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>.45</radius>
+              <length>.3</length>
+            </cylinder>
+          </geometry>
+        </collision>
+<!---->
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.45</radius>
+              <length>.3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+<!---->
+      </link>
+      
+      <link name="front_left_steering_wheel_block">
+        <pose>-1.100000 -1.70000 0.448000 0 1.5707 0</pose>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.1</length>
+            </cylinder>
+          </geometry>
+        </collision>
+<!---->
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.1</length>
+            </cylinder>
+          </geometry>
+        </visual>
+<!---->
+		</link>       
+        
+        <link name="front_right_steering_wheel_block">
+        <pose> 1.100000 -1.70000 0.448000 0 1.5707 0</pose>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.1</length>
+            </cylinder>
+          </geometry>
+        </collision>
+<!---->
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.1</length>
+            </cylinder>
+          </geometry>
+        </visual>
+<!---->
+      </link>
+      
+      <link name="rear_left_wheel">
+        <pose>1.1 1.242288 0.448000 0 1.5707 0</pose>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>.45</radius>
+              <length>.3</length>
+            </cylinder>
+          </geometry>
+        </collision>
+<!---->
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.45</radius>
+              <length>.3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+<!---->
+      </link>
+      
+      <link name="rear_right_wheel">
+        <pose>-1.1 1.242288 0.448000 0 1.5707 0</pose>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>.45</radius>
+              <length>.3</length>
+            </cylinder>
+          </geometry>
+        </collision>
+<!---->
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.45</radius>
+              <length>.3</length>
+            </cylinder>
+          </geometry>
+        </visual>
+<!---->
+      </link>
+      
+       <joint type="revolute" name="front_left_wheel_hinge">
+        <pose>0 0 0 0 0 0</pose>
+        <child>front_left_wheel</child>
+        <parent>front_left_steering_wheel_block</parent>
+        <axis>
+          <xyz>1 0 0</xyz>
+        </axis>
+      </joint>
+      <joint type="revolute" name="front_right_wheel_hinge">
+        <pose>0 0 0 0 0 0</pose>
+        <child>front_right_wheel</child>
+        <parent>front_right_steering_wheel_block</parent>
+        <axis>
+          <xyz>1 0 0</xyz>
+        </axis>
+      </joint>
+      
+      <joint type="revolute" name="front_left_steering_wheel">
+        <pose>0 0 0 0 0 0</pose>
+        <child>front_left_steering_wheel_block</child>
+        <parent>car</parent>
+        <axis>
+        	 <xyz>0 0 1</xyz>
+        	 <limit>
+              <lower>-0.52359</lower>
+              <upper>0.52359</upper>
+          </limit>
+        </axis>
+      </joint>
+      <joint type="revolute" name="front_right_steering_wheel">
+        <pose>0 0 0 0 0 0</pose>
+        <child>front_right_steering_wheel_block</child>
+        <parent>car</parent>
+        <axis>
+        <xyz>0 0 1</xyz>
+     		 <limit>
+              <lower>-0.52359</lower>
+              <upper>0.52359</upper>
+          </limit>
+        </axis>
+      </joint>
+      
+      <joint type="revolute" name="rear_right_wheel_hinge">
+        <pose>0 0 0 0 0 0</pose>
+        <child>rear_right_wheel</child>
+        <parent>car</parent>
+        <axis>
+          <xyz>1 0 0</xyz>
+        </axis>
+      </joint>
+      
+      <joint type="revolute" name="rear_left_wheel_hinge">
+        <pose>0 0 0 0 0 0</pose>
+        <child>rear_left_wheel</child>
+        <parent>car</parent>
+        <axis>
+          <xyz>1 0 0</xyz>
+        </axis>
+      </joint>
+  </model>
+</sdf>
+
