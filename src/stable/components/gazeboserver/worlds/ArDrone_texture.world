@@ -9,14 +9,29 @@
       <uri>model://sun</uri>
     </include>
     <include>
-      <uri>model://ground_plane</uri>
+      <uri>model://grass_plane</uri>
+      <pose>-25 -30 0 0 0 0</pose>
     </include>
+    <include>
+      <uri>model://grass_plane</uri>
+      <pose>-25 30 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://grass_plane</uri>
+      <pose>25 -30 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://grass_plane</uri>
+      <pose>25 30 0 0 0 0</pose>
+    </include>
+
+    <!-- quadrotor model -->
     <include>
       <uri>model://ArDrone</uri>
       <pose>50 0 0.3 0 0 3.14</pose>
     </include>
-    
-    <!--cars -->
+
+    <!-- car models -->    
     <include>
       <name>car1</name>
       <uri>model://polaris_ranger_ev</uri>
@@ -72,9 +87,8 @@
       <uri>model://polaris_ranger_ev</uri>
       <pose>-28 1.5 0.3 0 0 3.14</pose>
     </include>
-    
 
-    <!--road-->
+    <!-- road -->
     <road name="my_road">
       <width>10</width>
 	<point>-50 0 0.02</point>
