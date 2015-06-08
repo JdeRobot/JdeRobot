@@ -1,0 +1,98 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <world name="default">
+    <scene>
+      <grid>false</grid>
+    </scene>
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://grass_plane</uri>
+      <pose>-25 -30 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://grass_plane</uri>
+      <pose>-25 30 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://grass_plane</uri>
+      <pose>25 -30 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://grass_plane</uri>
+      <pose>25 30 0 0 0 0</pose>
+    </include>
+
+    <!-- quadrotor model -->
+    <include>
+      <uri>model://ArDrone</uri>
+      <pose>50 0 0.3 0 0 3.14</pose>
+    </include>
+
+    <!-- car models -->    
+    <include>
+      <name>car1</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>35 -1.5 0.3 0 0 0</pose>
+    </include>
+    <include>
+      <name>car2</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>25 -1.5 0.3 0 0 0</pose>
+    </include>
+    <include>
+      <name>car3</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>20 1.5 0.3 0 0 3.14</pose>
+    </include>
+    <include>
+      <name>car4</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>10 1.5 0.3 0 0 3.14</pose>
+    </include>
+    <include>
+      <name>car5</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>10 -1.5 0.3 0 0 0</pose>
+    </include>
+    <include>
+      <name>car6</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>0 1.8 0.3 0 0 3.14</pose>
+    </include>
+    <include>
+      <name>car7</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>-10 -1.5 0.3 0 0 0</pose>
+    </include>
+    <include>
+      <name>car8</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>-18 1.5 0.3 0 0 3.14</pose>
+    </include>
+    <include>
+      <name>car9</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>-38 -1.5 0.3 0 0 0</pose>
+    </include>
+    <include>
+      <name>car10</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>-23 1.5 0.3 0 0 3.14</pose>
+    </include>
+    <include>
+      <name>car11</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>-28 1.5 0.3 0 0 3.14</pose>
+    </include>
+
+    <!-- road -->
+    <road name="my_road">
+      <width>10</width>
+	<point>-50 0 0.02</point>
+	<point>50 0 0.02</point>
+    </road>
+  </world>
+</sdf>

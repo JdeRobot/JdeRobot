@@ -15,20 +15,56 @@
     <include>
       <uri>model://house_3</uri>
       <pose>3 6.43 0 0 0 0</pose>
-    </include>
-    <include>
+    </include> 
+<!--    <include>
       <uri>model://polaris_ranger_ev</uri>
       <pose>-1.48 -6 0.1 0 0 0</pose>
       <static>true</static>
+    </include> -->
+
+    <!-- lamp posts -->
+    <include>
+      <name>lp1</name>
+      <uri>model://lamp_post</uri>
+      <pose>5 15 0 0 0 0</pose>
     </include>
     <include>
+	  <name>lp2</name>
       <uri>model://lamp_post</uri>
-      <pose>5 13 0 0 0 0</pose>
+      <pose>-4 15 0 0 0 0</pose>
     </include>
     <include>
+	  <name>lp3</name>
       <uri>model://lamp_post</uri>
-      <pose>-4 13 0 0 0 0</pose>
+      <pose>-11.55 -10.51 0 0 0 2.237280</pose>
     </include>
+    <include>
+      <name>lp4</name>
+      <uri>model://lamp_post</uri>
+      <pose>-9.66 2.69 0 0 0 1.97</pose>
+    </include>
+    <include>
+      <name>lp5</name>
+      <uri>model://lamp_post</uri>
+      <pose>5.86 -6.93 0 0 0 -1.749755</pose>
+    </include>
+    <include>
+      <name>lp6</name>
+      <uri>model://lamp_post</uri>
+      <pose>-0.375028 -12.598122 0 0 0 -2.915598</pose>
+    </include>
+    <include>
+	  <name>lp7</name>
+      <uri>model://lamp_post</uri>
+      <pose>-19.11 11.15 0 0 0 0.4828</pose>
+    </include>
+    <include>
+      <name>lp8</name>
+      <uri>model://lamp_post</uri>
+      <pose>-23.644 1.26 0 0 0 1.748707</pose>
+    </include>
+
+    <!--mud boxes -->
     <include>
       <uri>model://mud_box</uri>
       <pose>-24 18 0 0 0 0</pose>
@@ -150,10 +186,13 @@
       <pose>16 -18 0 0 0 0</pose>
     </include>
 
+    <!-- ArDrone model --> 
     <include>
       <uri>model://ArDrone</uri>
       <pose>8 0 0.3 0 0 1.57</pose>
     </include>
+
+    <!-- Road -->
     <road name="my_road">
       <width>3</width>
 <!--      <point>0 0 0.15</point>
@@ -207,5 +246,33 @@
       <point>-7 20 0.15</point>-->
 
     </road>
+      
+    <!-- Car Models -->
+    <include>
+      <name>car1</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>7.8833 5.646 0 0 0 -1.5</pose>
+    </include>
+    <include>
+      <name>car2</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>0 10.5 0 0 0 0</pose>
+    </include>
+    <include>
+      <name>car3</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>-2 -1 0 0 0 1.57</pose>
+    </include>
+    <include>
+      <name>car4</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>-6.142191 -5.8233509 0 0 0 -0.797290</pose>
+    </include>
+    <include>
+      <name>car5</name>
+      <uri>model://polaris_ranger_ev</uri>
+      <pose>-12.266106 -4.843053 0 0 0 2.3</pose>
+    </include>
+
   </world>
 </sdf>
