@@ -62,7 +62,9 @@ class Sensors
         jderobot::ArDroneExtraPrx arextraprx;
 		bool tracking;
 		bool flying;	
-		bool rst; 
+		bool rst;
+		bool al;
+		Myalgorithm* algo; 
 
 };
 
