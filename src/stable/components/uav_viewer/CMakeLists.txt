@@ -36,6 +36,7 @@ if (${QT_COMPILE} AND ${QWT_COMPILE})
 
 	include_directories(
 		${OpenCV_INCLUDE_DIR}
+		${LIBS_DIR}
         ${Ice_INCLUDE_DIR}
 		${QWT_INCLUDE_DIR}
 		${INTERFACES_CPP_DIR})
