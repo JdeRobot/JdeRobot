@@ -19,7 +19,6 @@ class Myalgorithm {
 		void setBlobParams();
 
 	private:
-		cv::Mat frame;
 		cv::Mat fgMaskMOG;
 		cv::Ptr<cv::BackgroundSubtractor> pMOG;
 		cv::SimpleBlobDetector* simpleblobdetector;

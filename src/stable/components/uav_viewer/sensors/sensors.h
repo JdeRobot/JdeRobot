@@ -19,6 +19,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include "../algorithms/myalgorithm.h"
+
 #define LINX 0.3
 #define LINY 0.3
 #define LINZ 0.8

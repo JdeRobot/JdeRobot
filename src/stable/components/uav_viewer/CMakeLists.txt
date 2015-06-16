@@ -32,7 +32,7 @@ if (${QT_COMPILE} AND ${QWT_COMPILE})
 	INCLUDE(${QT_USE_FILE})
 	ADD_DEFINITIONS(${QT_DEFINITIONS})
 
-	SET(SOURCE_FILES ./src/main.cpp ./sensors/sensors.cpp ./resources/images.cpp)
+	SET(SOURCE_FILES ./src/main.cpp ./sensors/sensors.cpp ./resources/images.cpp ./algorithms/myalgorithm.cpp)
 
 	include_directories(
 		${OpenCV_INCLUDE_DIR}
@@ -42,6 +42,8 @@ if (${QT_COMPILE} AND ${QWT_COMPILE})
 
 	link_directories(${JDE_LIBS})
 
+#remove
+find_package(cvBlob)
 	add_executable(uav_viewer 
 		${SOURCE_FILES}
 		${qt_SOURCES} 
@@ -57,6 +59,7 @@ if (${QT_COMPILE} AND ${QWT_COMPILE})
         ${OpenCVGUI_LIBRARIES}
         ${Ice_LIBRARIES}
 		${ZeroCIce_LIBRARIES}
+		${cvBlob_LIBS}
 		JderobotInterfaces
 		jderobotutil)
 
