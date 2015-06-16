@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-#include <cvblob.h>
+#include <visionlib/cvBlob/cvblob.h>
 
 using namespace cvb;
 
