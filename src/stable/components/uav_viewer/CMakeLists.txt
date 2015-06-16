@@ -43,12 +43,12 @@ if (${QT_COMPILE} AND ${QWT_COMPILE})
 	link_directories(${JDE_LIBS})
 
 	#check cvBlobs
-	find_package(cvBlob)
-	IF (cvBlob_NOT_FOUND)
-		MESSAGE( "*** cvBlob not found" )
-	ELSE()
-		MESSAGE( STATUS "cvBlob found" )
-	ENDIF()
+	#find_package(cvBlob)
+	#IF (cvBlob_NOT_FOUND)
+	#	MESSAGE( "*** cvBlob not found" )
+	#ELSE()
+	#	MESSAGE( STATUS "cvBlob found" )
+	#ENDIF()
 
 	add_executable(uav_viewer 
 		${SOURCE_FILES}
@@ -65,7 +65,7 @@ if (${QT_COMPILE} AND ${QWT_COMPILE})
         ${OpenCVGUI_LIBRARIES}
         ${Ice_LIBRARIES}
 		${ZeroCIce_LIBRARIES}
-		${cvBlob_LIBS}
+		cvblob
 		JderobotInterfaces
 		jderobotutil)
 
