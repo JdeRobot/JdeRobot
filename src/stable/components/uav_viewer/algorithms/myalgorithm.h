@@ -6,7 +6,9 @@
 #include <cv.h>
 
 #include <iostream>
+#include <sstream>
 
+#include <string>
 #include <visionlib/cvBlob/cvblob.h>
 
 using namespace cvb;
@@ -17,6 +19,7 @@ class Myalgorithm {
 		void processImage(cv::Mat image);
 		void morphologicalTransform(cv::Mat image);
 		void setBlobParams();
+		std::string to_string(int n);
 
 	private:
 		cv::Mat fgMaskMOG;
@@ -24,11 +27,18 @@ class Myalgorithm {
 		cv::SimpleBlobDetector* simpleblobdetector;
 		cv::SimpleBlobDetector::Params params;
 		std::vector<cv::KeyPoint> keypoints;
-		IplImage* bin1;
+		IplImage* bin;
 		IplImage* frame;
 		IplImage *labelImg;
 		CvBlobs blobs;
-		CvTracks tracks;	
+		CvTracks tracks;
+		int line_pos;
+		int count;
+		int countUD;
+		int countDU;
+		CvPoint2D64f last_pos;
+		CvPoint2D64f cur_pos;
+		std::map<CvID, CvPoint2D64f> last_poses;
 };
-	
+
 
