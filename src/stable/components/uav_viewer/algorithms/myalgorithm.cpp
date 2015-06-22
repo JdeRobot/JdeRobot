@@ -3,6 +3,9 @@
 #define MARGIN 120
 #define FR_W 240
 #define FR_H 240
+#define DRONE_HEIGHT 5
+#define DRONE_VEL 0.5
+#define N_FRAMES 100
 
 Myalgorithm::Myalgorithm() {
 	pMOG = new cv::BackgroundSubtractorMOG;
@@ -11,6 +14,17 @@ Myalgorithm::Myalgorithm() {
 	countDU = 0;
 	line_pos = FR_H - MARGIN;
 	initiated = false;
+	dynamic = true;
+	vel = new jderobot::CMDVelData();
+	lmindex = 0;
+
+	cv::Point landmark1(5.0 ,5.0);
+	cv::Point landmark2(0.0, -5.0);
+	cv::Point landmark3(-3.0, -5.0);
+
+	landmarks.push_back(landmark1);
+	landmarks.push_back(landmark2);
+	landmarks.push_back(landmark3);
 }
 
 void Myalgorithm::processImage(cv::Mat& image) {
@@ -20,7 +34,6 @@ void Myalgorithm::processImage(cv::Mat& image) {
 	pMOG->operator()(image, fgMaskMOG);
 	morphologicalTransform(fgMaskMOG);
 
-	// Blob Detection
 	bin = new IplImage(fgMaskMOG);
 	frame = new IplImage(image);
 	labelImg = cvCreateImage(cvSize(image.cols,image.rows),IPL_DEPTH_LABEL,1);
@@ -59,7 +72,6 @@ void Myalgorithm::processImage(cv::Mat& image) {
 		}
 	}
 
-	//display
 	cv::line(image, cv::Point(0, line_pos), cv::Point(FR_W, line_pos), cv::Scalar(0,255,0),2);
 	cv::putText(image, "COUNT: "+to_string(count), cv::Point(10, 15), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255,255,255));
 	cv::putText(image, "UP->DOWN: "+to_string(countUD), cv::Point(10, 30), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255,255,255));
@@ -74,18 +86,55 @@ void Myalgorithm::morphologicalTransform(cv::Mat& image) {
 	cv::dilate(image,image,cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(15,15)));
 }
 
-void Myalgorithm::run(QMutex& mutex_, QMutex& mutexDrone_, cv::Mat& image, jderobot::ArDroneExtraPrx& arextraprx_, jderobot::Pose3DPrx& poseprx_, jderobot::CMDVelPrx& cmdprx_) {
-	mutex_.lock();
-	processImage(image);
-	mutex_.unlock();
+void Myalgorithm::run(QMutex& mutex_, QMutex& mutexDrone_, cv::Mat& image, jderobot::ArDroneExtraPrx& arextraprx_, jderobot::Pose3DPrx& poseprx_, jderobot::CMDVelPrx& cmdprx_, jderobot::NavdataPrx& navprx_) {
+
+	if (!dynamic) {
+		mutex_.lock();
+		processImage(image);
+		nframes++;
+		if (nframes == N_FRAMES) {
+			std::cout<<"Moving to next landmark..\n";
+			nframes = 0;
+			dynamic = true;
+			cv::destroyAllWindows();
+		}
+		mutex_.unlock();
+	}
+
 	if (!initiated) {
 		mutexDrone_.lock();
 		arextraprx_->takeoff();
+		pose = poseprx_->getPose3DData();
+		if (abs(pose->z-DRONE_HEIGHT)>0.5) {
+			vel->linearZ=DRONE_VEL;
+			cmdprx_->setCMDVelData(vel);
+		} else  {
+			vel->linearZ=0;
+			cmdprx_->setCMDVelData(vel);
+			initiated = true;
+		}
 		mutexDrone_.unlock();
-		//TODO- move to desired height
-		initiated = true;
-	}	
+	}
+
+	if (dynamic && initiated) {
+		mutexDrone_.lock();
+		pose = poseprx_->getPose3DData();
+		if (abs(pose->x-landmarks[lmindex].x)>0.5 || abs(pose->y-landmarks[lmindex].y)>0.5) {
+			vel->linearX=(landmarks[lmindex].x-pose->x)/sqrt((landmarks[lmindex].x-pose->x)*(landmarks[lmindex].x-pose->x)+(landmarks[lmindex].y-pose->y)*(landmarks[lmindex].y-pose->y));
+			vel->linearY=(landmarks[lmindex].y-pose->y)/sqrt((landmarks[lmindex].x-pose->x)*(landmarks[lmindex].x-pose->x)+(landmarks[lmindex].y-pose->y)*(landmarks[lmindex].y-pose->y));
+			cmdprx_->setCMDVelData(vel);		
+		} else {
+			vel->linearX = 0; vel->linearY = 0;
+			cmdprx_->setCMDVelData(vel);
+			dynamic = false;
+			nframes = 0;
+			lmindex++;
+			lmindex = lmindex % landmarks.size();
+		}
+		mutexDrone_.unlock();
+	}
 }
+
 void Myalgorithm::setBlobParams() {
 
 	params.minThreshold=0;

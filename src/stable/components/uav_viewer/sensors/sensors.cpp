@@ -124,7 +124,7 @@ cv::Mat Sensors::getImage()
 
     if ( al ) {
 	cv::Mat temp = result.clone();
-	algo->run(mutex, mutexDrone, temp, arextraprx, poseprx, cmdprx);
+	algo->run(mutex, mutexDrone, temp, arextraprx, poseprx, cmdprx, navprx);
     }
 
     return result;
