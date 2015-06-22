@@ -10,9 +10,10 @@ Myalgorithm::Myalgorithm() {
 	countUD = 0;
 	countDU = 0;
 	line_pos = FR_H - MARGIN;
+	initiated = false;
 }
 
-void Myalgorithm::processImage(cv::Mat image) {
+void Myalgorithm::processImage(cv::Mat& image) {
 	if (image.empty())
 		return;
 
@@ -67,12 +68,24 @@ void Myalgorithm::processImage(cv::Mat image) {
 	//cv::imshow("fgMaskMOG", fgMaskMOG);
 }
 
-void Myalgorithm::morphologicalTransform(cv::Mat image) {
+void Myalgorithm::morphologicalTransform(cv::Mat& image) {
 	//cv::erode(image,image,cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5)));
 	//cv::dilate(image,image,cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(5,5)));
 	cv::dilate(image,image,cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(15,15)));
 }
 
+void Myalgorithm::run(QMutex& mutex_, QMutex& mutexDrone_, cv::Mat& image, jderobot::ArDroneExtraPrx& arextraprx_, jderobot::Pose3DPrx& poseprx_, jderobot::CMDVelPrx& cmdprx_) {
+	mutex_.lock();
+	processImage(image);
+	mutex_.unlock();
+	if (!initiated) {
+		mutexDrone_.lock();
+		arextraprx_->takeoff();
+		mutexDrone_.unlock();
+		//TODO- move to desired height
+		initiated = true;
+	}	
+}
 void Myalgorithm::setBlobParams() {
 
 	params.minThreshold=0;
