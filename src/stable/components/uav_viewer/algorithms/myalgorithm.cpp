@@ -5,11 +5,10 @@
 #define FR_H 240
 #define DRONE_HEIGHT 5
 #define DRONE_VEL 0.5
-#define N_FRAMES 100
+#define N_FRAMES 1000
 
 Myalgorithm::Myalgorithm() {
 	pMOG = new cv::BackgroundSubtractorMOG;
-	count = 0;
 	countUD = 0;
 	countDU = 0;
 	line_pos = FR_H - MARGIN;
@@ -18,13 +17,13 @@ Myalgorithm::Myalgorithm() {
 	vel = new jderobot::CMDVelData();
 	lmindex = 0;
 
-	cv::Point landmark1(5.0 ,5.0);
-	cv::Point landmark2(0.0, -5.0);
-	cv::Point landmark3(-3.0, -5.0);
+	landmarks.push_back(cv::Point(-45.0, 0.0));
+	landmarks.push_back(cv::Point(-20.0, 0.0));
+	landmarks.push_back(cv::Point(5.0, 0.0));
+	landmarks.push_back(cv::Point(30.0, 0.0));
 
-	landmarks.push_back(landmark1);
-	landmarks.push_back(landmark2);
-	landmarks.push_back(landmark3);
+	count = 0;
+	count_arr = new int[landmarks.size()]();
 }
 
 void Myalgorithm::processImage(cv::Mat& image) {
@@ -93,8 +92,19 @@ void Myalgorithm::run(QMutex& mutex_, QMutex& mutexDrone_, cv::Mat& image, jdero
 		processImage(image);
 		nframes++;
 		if (nframes == N_FRAMES) {
-			std::cout<<"Moving to next landmark..\n";
+			std::cout<<"[Dynamic] "<<N_FRAMES<<" frames processed. Cars counted: "<<count<<". Moving to next landmark..\n";
+			std::cout<<"[Heatmap] CURRENT TRAFFIC DENSITY\n";
+			for (int c = 0; c<landmarks.size();c++) {
+				std::cout<<"Cars counted at landmark["<<c+1<<"]: "<<count_arr[c]<<"\n";
+			}
+			if (!lmindex)
+				count_arr[landmarks.size()-1]+=count;
+			else
+				count_arr[lmindex-1]+=count;
 			nframes = 0;
+			countUD = 0;
+			countDU = 0;
+			count = 0;
 			dynamic = true;
 			cv::destroyAllWindows();
 		}
@@ -112,6 +122,7 @@ void Myalgorithm::run(QMutex& mutex_, QMutex& mutexDrone_, cv::Mat& image, jdero
 			vel->linearZ=0;
 			cmdprx_->setCMDVelData(vel);
 			initiated = true;
+			std::cout<<"[Initiated] reached height "<< pose->z<<" m\n";
 		}
 		mutexDrone_.unlock();
 	}
@@ -129,6 +140,7 @@ void Myalgorithm::run(QMutex& mutex_, QMutex& mutexDrone_, cv::Mat& image, jdero
 			dynamic = false;
 			nframes = 0;
 			lmindex++;
+			std::cout<<"[Static] landmark("<<lmindex<<") reached.. Processing started\n";
 			lmindex = lmindex % landmarks.size();
 		}
 		mutexDrone_.unlock();
@@ -170,7 +182,7 @@ std::string Myalgorithm::to_string(int number){
             case 7: ones_char = '7'; break;
             case 8: ones_char = '8'; break;
             case 9: ones_char = '9'; break;
-            default : std::cout << "Trouble converting number to string.";
+            default : std::cout << "Trouble converting number to string. number: "<<ones;
         }
         number -= ones;
         number_string = ones_char + number_string;

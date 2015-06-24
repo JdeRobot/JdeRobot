@@ -45,6 +45,7 @@ class Myalgorithm {
 		int count;
 		int countUD;
 		int countDU;
+		int* count_arr;
 		CvPoint2D64f last_pos;
 		CvPoint2D64f cur_pos;
 		std::map<CvID, CvPoint2D64f> last_poses;
