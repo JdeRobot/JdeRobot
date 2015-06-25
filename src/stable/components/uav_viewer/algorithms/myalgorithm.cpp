@@ -5,7 +5,7 @@
 #define FR_H 240
 #define DRONE_HEIGHT 5
 #define DRONE_VEL 0.5
-#define N_FRAMES 1000
+#define N_FRAMES 500
 
 Myalgorithm::Myalgorithm() {
 	pMOG = new cv::BackgroundSubtractorMOG;
@@ -17,10 +17,10 @@ Myalgorithm::Myalgorithm() {
 	vel = new jderobot::CMDVelData();
 	lmindex = 0;
 
-	landmarks.push_back(cv::Point(-45.0, 0.0));
-	landmarks.push_back(cv::Point(-20.0, 0.0));
-	landmarks.push_back(cv::Point(5.0, 0.0));
-	landmarks.push_back(cv::Point(30.0, 0.0));
+	landmarks.push_back(cv::Point(45.0, 0.0));
+	landmarks.push_back(cv::Point(20.0, 0.0));
+	landmarks.push_back(cv::Point(-5.0, 0.0));
+	landmarks.push_back(cv::Point(-30.0, 0.0));
 
 	count = 0;
 	count_arr = new int[landmarks.size()]();
@@ -56,11 +56,11 @@ void Myalgorithm::processImage(cv::Mat& image) {
 			}
 			last_poses.insert(std::pair<CvID, CvPoint2D64f>(id, cur_pos));
 
-			if (cur_pos.y>line_pos && last_pos.y<line_pos) {
+			if (line_pos+10>cur_pos.y>line_pos && line_pos-10<last_pos.y<line_pos) {
 				count++;
 				countUD++;
 			}
-			if (cur_pos.y<line_pos && last_pos.y>line_pos) {
+			if (line_pos-10<cur_pos.y<line_pos && line_pos+10>last_pos.y>line_pos) {
 				count++;
 				countDU++;
 			}
@@ -76,12 +76,10 @@ void Myalgorithm::processImage(cv::Mat& image) {
 	cv::putText(image, "UP->DOWN: "+to_string(countUD), cv::Point(10, 30), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255,255,255));
 	cv::putText(image, "DOWN->UP: "+to_string(countDU), cv::Point(10, 45), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(255,255,255));
 	cv::imshow("Blobs", image);
-	//cv::imshow("fgMaskMOG", fgMaskMOG);
+	cv::imshow("fgMaskMOG", fgMaskMOG);
 }
 
 void Myalgorithm::morphologicalTransform(cv::Mat& image) {
-	//cv::erode(image,image,cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5)));
-	//cv::dilate(image,image,cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(5,5)));
 	cv::dilate(image,image,cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(15,15)));
 }
 
@@ -94,13 +92,13 @@ void Myalgorithm::run(QMutex& mutex_, QMutex& mutexDrone_, cv::Mat& image, jdero
 		if (nframes == N_FRAMES) {
 			std::cout<<"[Dynamic] "<<N_FRAMES<<" frames processed. Cars counted: "<<count<<". Moving to next landmark..\n";
 			std::cout<<"[Heatmap] CURRENT TRAFFIC DENSITY\n";
-			for (int c = 0; c<landmarks.size();c++) {
-				std::cout<<"Cars counted at landmark["<<c+1<<"]: "<<count_arr[c]<<"\n";
-			}
 			if (!lmindex)
 				count_arr[landmarks.size()-1]+=count;
 			else
 				count_arr[lmindex-1]+=count;
+			for (int c = 0; c<landmarks.size();c++) {
+				std::cout<<"Cars counted at landmark["<<c+1<<"]: "<<count_arr[c]<<"\n";
+			}
 			nframes = 0;
 			countUD = 0;
 			countDU = 0;
