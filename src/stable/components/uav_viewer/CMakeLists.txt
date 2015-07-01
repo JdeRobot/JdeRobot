@@ -32,10 +32,11 @@ if (${QT_COMPILE} AND ${QWT_COMPILE})
 	INCLUDE(${QT_USE_FILE})
 	ADD_DEFINITIONS(${QT_DEFINITIONS})
 
-	SET(SOURCE_FILES ./src/main.cpp ./sensors/sensors.cpp ./resources/images.cpp)
+	SET(SOURCE_FILES ./src/main.cpp ./sensors/sensors.cpp ./resources/images.cpp ./algorithms/myalgorithm.cpp)
 
 	include_directories(
 		${OpenCV_INCLUDE_DIR}
+		${LIBS_DIR}
         ${Ice_INCLUDE_DIR}
 		${QWT_INCLUDE_DIR}
 		${INTERFACES_CPP_DIR})
@@ -57,6 +58,7 @@ if (${QT_COMPILE} AND ${QWT_COMPILE})
         ${OpenCVGUI_LIBRARIES}
         ${Ice_LIBRARIES}
 		${ZeroCIce_LIBRARIES}
+		cvblob
 		JderobotInterfaces
 		jderobotutil)
 

@@ -19,6 +19,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include "../algorithms/myalgorithm.h"
+
 #define LINX 0.3
 #define LINY 0.3
 #define LINZ 0.8
@@ -62,7 +64,9 @@ class Sensors
         jderobot::ArDroneExtraPrx arextraprx;
 		bool tracking;
 		bool flying;	
-		bool rst; 
+		bool rst;
+		bool al;
+		Myalgorithm* algo; 
 
 };
 

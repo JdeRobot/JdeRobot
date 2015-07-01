@@ -57,6 +57,14 @@ Sensors::Sensors(Ice::CommunicatorPtr ic)
 	this->tracking=false;
 	this->flying=false;	
 	this->rst=false;
+	this->al=false;
+
+    //Algo
+    std::string alprop = prop->getProperty("UAVViewer.Algo");
+    if ( alprop=="1" ) {
+	algo = new Myalgorithm;
+	al = true;
+    }
 		
 }
 
@@ -113,6 +121,12 @@ cv::Mat Sensors::getImage()
     	cv::Size size(result.cols,IMAGE_ROWS_MAX);
     	cv::resize(result,result,size);
     }
+
+    if ( al ) {
+	cv::Mat temp = result.clone();
+	algo->run(mutex, mutexDrone, temp, arextraprx, poseprx, cmdprx, navprx);
+    }
+
     return result;
 }
 
