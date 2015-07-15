@@ -32,7 +32,7 @@ namespace gazebo
 			Sharer::getInstance()->setGzModel(this->getModel());
 
 			count++;
-			std::string name = this->model->GetName();
+			std::string name = this->model->GetLinks()[0]->GetName();
 			namePose3d = std::string("--Ice.Config=" + name + "Pose3d.cfg");
 			pthread_t thr_pose3d;
 			pthread_create(&thr_pose3d, NULL, &mainPose3d, (void*) this);
@@ -112,11 +112,28 @@ namespace gazebo
 			ic = Ice::initialize(argc, argv);
 			prop = ic->getProperties();
 
-			std::string Endpoints = prop->getProperty("Pose3d.Endpoints");
-			std::cout << "Pose3d Endpoints > " << Endpoints << std::endl;
+			std::vector<std::string> endpoints;        
+			std::string property = "";
+			for (int i=0; i<6; i++) {
+				property = "Pose3d"+boost::to_string (i)+".Endpoints";
+	        		std::string Endpoints = prop->getProperty(property);
+        			//std::cout << "Pose3d Endpoints > " << Endpoints << std::endl;
+				endpoints.push_back(Endpoints);
+        		}
 
-			Ice::ObjectAdapterPtr adapter =
-					ic->createObjectAdapterWithEndpoints("Pose3d", Endpoints);
+			bool connected = false;
+			int cont = 0;
+			Ice::ObjectAdapterPtr adapter;	
+
+			while (!connected) {
+				try {
+					adapter = ic->createObjectAdapterWithEndpoints("Pose3d", endpoints[cont]);
+					connected = true;
+					std::cout << "Connected to free endpoint: " << endpoints[cont] << std::endl;
+				}catch (Ice::SocketException& ss) {
+					cont++;
+				}
+			}
 
 			Ice::ObjectPtr object = new Pose3DI(base);
 

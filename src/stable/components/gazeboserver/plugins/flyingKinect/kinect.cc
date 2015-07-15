@@ -557,66 +557,85 @@ class CameraII: virtual public jderobot::Camera
 
 }; // end class CameraII
 
-void *mainKinect(void* v)
+void *mainKinect(void* v) 
 {
-	kinect = (gazebo::DepthCameraPlugin*)v;
 
+
+
+	kinect = (gazebo::DepthCameraPlugin*)v;
+	
 	char* name = (char*)kinect->nameKinect.c_str();
 
-	Ice::CommunicatorPtr ic;
-	int argc = 1;
+    Ice::CommunicatorPtr ic;
+    int argc = 1;
 
-	Ice::PropertiesPtr prop;
+    Ice::PropertiesPtr prop;
 	char* argv[] = {name};
-	try
-	{
-		ic = Ice::initialize(argc, argv);
-		prop = ic->getProperties();
+    try {
+        
+        ic = Ice::initialize(argc, argv);
+        prop = ic->getProperties();
 
-		std::string Endpoints = prop->getProperty("Kinect.Endpoints");
-		std::cout << "Kinect Endpoints > " << Endpoints << std::endl;
+		std::vector<std::string> endpoints;        
+		std::string property = "";
+		for (int i=0; i<6; i++) {
+			property = "Kinect"+boost::to_string (i)+".Endpoints";
+	        std::string Endpoints = prop->getProperty(property);
+        	//std::cout << "Kinect Endpoints > " << Endpoints << std::endl;
+			endpoints.push_back(Endpoints);
+        }
 
-		std::stringstream cnvrt(prop->getPropertyWithDefault("PointCloud.LeafSize","100"));
-		float size;
-		cnvrt >> size;
-		if ( cnvrt.fail() )
-		{
-			std::cout << "Couldn't read PointCloud.LeafSize property, setting to default" << std::endl;
-			size=100;
-		} else if ( size <= 0.001 )
-		{
-			std::cout << "PointCloud.LeafSize property out of bounds, setting to default" << std::endl;
-			size=100;
+        std::stringstream cnvrt(prop->getPropertyWithDefault("PointCloud.LeafSize","100"));
+        float size;
+        cnvrt >> size;
+        if (cnvrt.fail()) {
+         std::cout << "Couldn't read PointCloud.LeafSize property, setting to default" << std::endl;
+         size=100;
+        }else if(size <= 0.001){
+         std::cout << "PointCloud.LeafSize property out of bounds, setting to default" << std::endl;
+         size=100;
+        }
+        kinect->SetLeafSize(1./size);
+
+		bool connected = false;
+		int cont = 0;
+		Ice::ObjectAdapterPtr adapter;	
+
+		while (!connected) {
+			try {
+				adapter = ic->createObjectAdapterWithEndpoints("Kinect", endpoints[cont]);
+				connected = true;
+				std::cout << "Connected to free endpoint: " << endpoints[cont] << std::endl;
+			}catch (Ice::SocketException& ss) {
+				cont++;
+			}
 		}
-		kinect->SetLeafSize(1./size);
+	
 
-		Ice::ObjectAdapterPtr adapter =
-			ic->createObjectAdapterWithEndpoints("Kinect", Endpoints);
+        Ice::ObjectPtr object = new KinectI(std::string("pointcloud1"),  kinect);
+        Ice::ObjectPtr object2 = new CameraI(std::string("cameraRGB"),  kinect,colorspaces::ImageRGB8::FORMAT_RGB8.get()->name);
+        Ice::ObjectPtr object3 = new CameraII(std::string("cameraDepth"),  kinect, colorspaces::ImageRGB8::FORMAT_DEPTH8_16.get()->name);
 
-		Ice::ObjectPtr object = new KinectI(std::string("pointcloud1"),  kinect);
-		Ice::ObjectPtr object2 = new CameraI(std::string("cameraRGB"),  kinect, colorspaces::ImageRGB8::FORMAT_RGB8.get()->name);
-		Ice::ObjectPtr object3 = new CameraII(std::string("cameraDepth"),  kinect, colorspaces::ImageRGB8::FORMAT_DEPTH8_16.get()->name);
+        adapter->add(object, ic->stringToIdentity("pointcloud1"));
+        adapter->add(object2, ic->stringToIdentity("cameraRGB"));
+        adapter->add(object3, ic->stringToIdentity("cameraDepth"));
+        std::cout << "        adapter->add(object, ic->stringToIdentity(Kinect)); "  << std::endl;
+        adapter->activate();
+        ic->waitForShutdown();
+    } catch (const Ice::SocketException& ex){
+	
+    } catch (const Ice::Exception& e) {
+        std::cerr << e << std::endl;
+    } catch (const char* msg) {
+        std::cerr << msg << std::endl;
+    }
+    if (ic) {
+        try {
+            ic->destroy();
+        } catch (const Ice::Exception& e) {
+            std::cerr << e << std::endl;
+        }
+    }
 
-		adapter->add(object, ic->stringToIdentity("pointcloud1"));
-		adapter->add(object2, ic->stringToIdentity("cameraRGB"));
-		adapter->add(object3, ic->stringToIdentity("cameraDepth"));
-		adapter->activate();
-		ic->waitForShutdown();
-	} catch (const Ice::Exception& e) {
-		std::cerr << e << std::endl;
-	} catch (const char* msg) {
-		std::cerr << msg << std::endl;
-	}
-
-	if (ic)
-	{
-		try
-		{
-			ic->destroy();
-		} catch (const Ice::Exception& e) {
-			std::cerr << e << std::endl;
-		}
-	}
-
-	return NULL;
+    return NULL;
 }
