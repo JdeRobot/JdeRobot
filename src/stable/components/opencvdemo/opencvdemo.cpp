@@ -17,89 +17,95 @@
  *
  *  Authors : Rubén González Barriada <ruben.gbarriada@gmail.com>
  *						Alejandro Hernández Cordero <ahcorde@gmail.com> 
+ *            Óscar Javier García Baudet <oscar.robotica@linaresdigital.com>
  *
  */
 
 #include <Ice/Ice.h>
+
 #include <jderobot/camera.h>
 #include <visionlib/colorspaces/colorspacesmm.h>
 #include "viewer.h"
 
-int main(int argc, char** argv){
-  int status;
+int main(int argc, char** argv) {
   opencvdemo::Viewer viewer;
-  Ice::CommunicatorPtr ic;
+  Ice::CommunicatorPtr ice_communicator;
+  Ice::ObjectPrx base;
+  jderobot::CameraPrx camera_proxy = 0;
+  jderobot::ImageDataPtr image_data;
+  cv::Mat image;
 
-  try{
-    ic = Ice::initialize(argc,argv);
-    Ice::ObjectPrx base = ic->propertyToProxy("Opencvdemo.Camera.Proxy");
-    if (0==base)
+  /* Initialize Ice and load parameters from command line */
+  try {
+    ice_communicator = Ice::initialize(argc, argv);
+    base = ice_communicator->propertyToProxy("Opencvdemo.Camera.Proxy");
+    if (0 == base)
       throw "Could not create proxy";
-
-    /*cast to CameraPrx*/
-    jderobot::CameraPrx cprx = jderobot::CameraPrx::checkedCast(base);
-    if (0==cprx)
-      throw "Invalid proxy";
-
-    while(viewer.isVisible()){
-      
-			jderobot::ImageDataPtr data = cprx->getImageData(colorspaces::ImageRGB8::FORMAT_RGB8.get()->name);
-      colorspaces::Image::FormatPtr fmt = colorspaces::Image::Format::searchFormat(data->description->format);
-
-      if (!fmt)
-				throw "Format not supported";
-
-			 char * data1 = new char[data->description->width*data->description->height*3];
-
-			memcpy((unsigned char *)data1, &(data->pixelData[0]), data->description->width*data->description->height*3);
-
-			// Get input image 
-      /*colorspaces::Image image(data->description->width,
-			       data->description->height,
-			       fmt,
-			       &(data->pixelData[0]));*/
-	cv::Mat image (data->description->height, 
-		   data->description->width,
-		   CV_8UC3,
-		   &(data->pixelData[0]));
-	
-			// Get output image
-     /*colorspaces::Image image2(data->description->width,
-			       data->description->height,
-			       fmt,
-			       data1);*/
-
-      cv::Mat image2 (data->description->height,
-		 data->description->width,
-		 CV_8UC3,
-		 data1);
-
-			//std::cout << data->description->width << std::endl;
-			//std::cout << data->description->height << std::endl;
-			//cv::Size s=image2.size();
-			//std::cout << s.width << std::endl;
-			//std::cout << s.height << std::endl;
-			//std::cout << "El step de image es:\n";
-			//std::cout << image.step << std::endl;
-			//std::cout << image.data << std::endl;
-
-			// Selecting the operation
-			viewer.selection(image2);
-      
-			// Displaying the images
-			viewer.display(image,image2);
-			delete data1;
-	
-    }
-  }catch (const Ice::Exception& ex) {
-    std::cerr << ex << std::endl;
-    status = 1;
+  } catch (const Ice::Exception& ex) {
+    /* Show Ice generated error */
+    std::cerr << "ERROR: " << ex << std::endl;
+    return 1;
   } catch (const char* msg) {
     std::cerr << msg << std::endl;
-    status = 1;
+    return 1;
   }
 
-  if (ic)
-    ic->destroy();
-  return status;
+  /* While GUI is visible (user didn't close it) */
+  while (viewer.isVisible()) {
+    /* Try to get next frame */
+    try {
+      /* Get casted proxy to access all Camera methods */
+      if (camera_proxy == 0) {
+        camera_proxy = jderobot::CameraPrx::checkedCast(base);
+        if (camera_proxy == 0) {
+          std::cerr << "ERROR: Invalid proxy" << std::endl;
+          return 1;
+        }
+      }
+      /* Get next frame */
+      image_data = camera_proxy->getImageData(colorspaces::ImageRGB8::FORMAT_RGB8.get()->name);
+    } catch (const Ice::Exception& ex) {
+      /* Show an error in stderr */
+      std::cerr << "ICE error: " << ex << std::endl;
+      /* Show the default "Missing Image" icon instead input image */
+      if (viewer.isVisible()) {
+        viewer.DisplayError();
+      }
+      /* Wait 250ms before trying again */
+      usleep(250000);
+      continue;
+    }
+
+    /* Check if format is supported by colorspaces */
+    colorspaces::Image::FormatPtr format_string =
+        colorspaces::Image::Format::searchFormat(
+            image_data->description->format);
+    if (!format_string)
+      throw "Format not supported";
+
+    /* Get image with same format as origin */
+    colorspaces::Image frame(image_data->description->width,
+                             image_data->description->height, format_string,
+                             &(image_data->pixelData[0]));
+    /* Conversion to RGB8 will happen only if needed */
+    colorspaces::ImageRGB8 frame_rgb8(frame);
+    /* Convert old OpenCV image container, IplImage, to newer cv::Mat */
+    image = cv::Mat(frame_rgb8);
+
+    /* Display and process input image */
+    viewer.Display(image);
+  }
+
+  /* Free ICE resources */
+  if (ice_communicator)
+    ice_communicator->destroy();
+
+  return 0;
 }
+
+/*! \mainpage JdeRobot's OpenCV demo
+ *
+ * File opencvdemo.cpp: function main(int argc, char** argv).
+ *
+ * File viewer.cpp: Class opencvdemo.Viewer.
+ */
