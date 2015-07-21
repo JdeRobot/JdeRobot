@@ -62,6 +62,7 @@ double avg_vel;
 
 std::vector<cv::Point> landmarks;
 cv::Mat image, fgMaskMOG, heat_map, heat_mapfg;
+cv::Point drone_last_pos, drone_cur_pos;
 cv::Ptr<cv::BackgroundSubtractor> pMOG;
 IplImage* bin;
 IplImage* frame;
@@ -179,6 +180,8 @@ int main (int argc, char** argv) {
 			initiated = true;
 			std::cout<< "reached height: "<<pose->z<<" m.\n";
 			std::cout<< "[STATUS] initialized: moving to 1st checkpoint..\n";
+			drone_last_pos.x = (pose->y+50)*2.4; //std::cout << "drone_pos: " << drone_last_pos.x <<" ";
+			drone_last_pos.y = (pose->x+50)*2.4; //std::cout << drone_last_pos.y <<"\n";
 		}
 
 		if (initiated && !dynamic) {
@@ -216,32 +219,41 @@ int main (int argc, char** argv) {
 			count_active = 0;
 		}
 
-		if (dynamic && abs(landmarks[lmindex].x-pose->x)<EPS && abs(landmarks[lmindex].y-pose->y)<EPS) {
-			std::cout << "Reached checkpoint ["<<lmindex+1<<"]: X="<<pose->x<<"m, Y="<<pose->y<<"m, Z="<<pose->z<<"m\n";
-			std::cout << "[STATUS] Processing started..\n";
+		if (dynamic) {
+			if  (abs(landmarks[lmindex].x-pose->x)<EPS && abs(landmarks[lmindex].y-pose->y)<EPS) {
+				std::cout << "Reached checkpoint ["<<lmindex+1<<"]: X="<<pose->x<<"m, Y="<<pose->y<<"m, Z="<<pose->z<<"m\n";
+				std::cout << "[STATUS] Processing started..\n";
 
-			vel->linearX = 0; vel->linearY = 0; vel->linearZ = 0;
-			cmdprx->setCMDVelData(vel);
+				vel->linearX = 0; vel->linearY = 0; vel->linearZ = 0;
+				cmdprx->setCMDVelData(vel);
 
-			// process Image for N Frames
-			while (nframes<N_FRAMES) {
-				nframes++;
-				img = camprx->getImageData("RGB8");
-				image.create(img->description->height, img->description->width, CV_8UC3);
-				memcpy((unsigned char*) image.data, &(img->pixelData[0]), image.cols*image.rows*3);
-				processImage(image);
+				// process Image for N Frames
+				while (nframes<N_FRAMES) {
+					nframes++;
+					img = camprx->getImageData("RGB8");
+					image.create(img->description->height, img->description->width, CV_8UC3);
+					memcpy((unsigned char*) image.data, &(img->pixelData[0]), image.cols*image.rows*3);
+					processImage(image);
+				}
+
+				count_arr[lmindex]=count;
+				if (count_active) avg_vel/=count_active;
+				avg_vel_arr[lmindex] = avg_vel;
+				++lmindex%=landmarks.size();
+				nframes = 0;
+				count = 0;
+				countDU = 0;
+				countUD = 0;
+				std::cout << "[STATUS] Processed "<<N_FRAMES<<" frames. Moving to next checkpoint.\n";
+				dynamic = false;
 			}
-
-			count_arr[lmindex]=count;
-			if (count_active) avg_vel/=count_active;
-			avg_vel_arr[lmindex] = avg_vel;
-			++lmindex%=landmarks.size();
-			nframes = 0;
-			count = 0;
-			countDU = 0;
-			countUD = 0;
-			std::cout << "[STATUS] Processed "<<N_FRAMES<<" frames. Moving to next checkpoint.\n";
-			dynamic = false;
+			//else update drone position
+			else {
+				drone_cur_pos.x = (pose->y+50)*2.4;
+				drone_cur_pos.y = (pose->x+50)*2.4;
+				cv::line(heat_mapfg, drone_last_pos, drone_cur_pos, cv::Scalar(255, 255, 255), 2);
+				drone_last_pos = drone_cur_pos;
+			}
 		}
 	}
 
