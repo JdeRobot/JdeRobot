@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<package>
+  <name>rtabmap</name>
+  <version>0.9.0</version>
+  <description>RTAB-Map's standalone library. RTAB-Map is a RGB-D SLAM approach with real-time constraints.</description>
+  <maintainer email="matlabbe@gmail.com">Mathieu Labbe</maintainer>
+  <author>Mathieu Labbe</author>
+  <license>BSD</license>
+  <url type="website">http://introlab.github.io/rtabmap</url>
+  <url type="bugtracker">https://github.com/introlab/rtabmap/issues</url>
+  <url type="repository">https://github.com/introlab/rtabmap</url>
+
+  <buildtool_depend>cmake</buildtool_depend>
+  
+  <build_depend>libpcl-all-dev</build_depend>
+  <build_depend>libqt4-dev</build_depend>
+  <build_depend>libvtk-qt</build_depend>
+  <build_depend>libsqlite3-dev</build_depend>
+  <build_depend>zlib</build_depend>
+  <build_depend>libfreenect</build_depend>
+  <build_depend>libopenni-dev</build_depend>
+  <build_depend>libopenni2-dev</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  
+  <run_depend>libpcl-all-dev</run_depend>
+  <run_depend>libqt4-dev</run_depend>
+  <run_depend>libvtk-qt</run_depend>
+  <run_depend>libsqlite3-dev</run_depend>
+  <run_depend>zlib</run_depend>
+  <run_depend>libfreenect</run_depend>
+  <run_depend>libopenni-dev</run_depend>
+  <run_depend>libopenni2-dev</run_depend>
+  <run_depend>cv_bridge</run_depend>
+
+  <export>
+	 <build_type>cmake</build_type>
+  </export>
+</package>

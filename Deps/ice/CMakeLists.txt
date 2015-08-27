@@ -1,5 +1,3 @@
-SET(CMAKE_MODULE_PATH "${DEPS_DIR}/ice")
-
 SET(slice_path /usr/share/slice)
 FIND_PACKAGE(ZeroCIceUtil)
 FIND_PACKAGE(ZeroCIceStorm)

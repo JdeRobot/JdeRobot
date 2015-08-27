@@ -59,7 +59,7 @@ public:
 private:
 	bool newData;
 	cv::Mat data;
-  IceUtil::Cond semBlock;
+    IceUtil::Cond semBlock;
 	jderobot::CameraPrx prx;
 	long long int cycle;
 	//int type; //0 color 1 depth

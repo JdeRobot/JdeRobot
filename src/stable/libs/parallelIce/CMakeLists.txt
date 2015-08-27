@@ -5,8 +5,8 @@ include_directories(${LIBS_DIR}) # Aquí se alojan las cabeceras de las interfac
 
 include_directories( ${LIBS_DIR}/)
 
-add_library (parallelIce STATIC cameraClient.cpp  cameraClient.h  pointcloudClient.cpp  pointcloudClient.h laserClient.cpp laserClient.h)
-TARGET_LINK_LIBRARIES(parallelIce colorspacesmm logger ${Boost_LIBRARIES})
+#add_library (parallelIce STATIC cameraClient.cpp  cameraClient.h  pointcloudClient.cpp  pointcloudClient.h laserClient.cpp laserClient.h)
+#TARGET_LINK_LIBRARIES(parallelIce colorspacesmm logger ${Boost_LIBRARIES})
 
 add_library (parallelIceshare SHARED cameraClient.cpp  cameraClient.h  pointcloudClient.cpp  pointcloudClient.h laserClient.cpp laserClient.h)
 TARGET_LINK_LIBRARIES(parallelIceshare colorspacesmm logger ${Boost_LIBRARIES} ${ZLIB_LIBRARIES})

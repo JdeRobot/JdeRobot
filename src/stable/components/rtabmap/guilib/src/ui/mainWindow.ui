@@ -1,0 +1,1278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>mainWindow</class>
+ <widget class="QMainWindow" name="mainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1012</width>
+    <height>711</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>RTAB-Map : Real-Time Appearance-Based Mapping</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../GuiLib.qrc">
+    <normaloff>:/images/RTAB-Map.ico</normaloff>:/images/RTAB-Map.ico</iconset>
+  </property>
+  <property name="dockOptions">
+   <set>QMainWindow::AllowNestedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks|QMainWindow::VerticalTabs</set>
+  </property>
+  <widget class="QWidget" name="widget_mainWindow"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1012</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNew_database"/>
+    <addaction name="actionOpen_database"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_GUI_config"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_point_cloud"/>
+    <addaction name="actionExport_2D_scans_ply_pcd"/>
+    <addaction name="actionExport_2D_Grid_map_bmp_png"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose_database"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <widget class="QMenu" name="menuAdvanced">
+     <property name="title">
+      <string>Advanced</string>
+     </property>
+     <addaction name="actionDump_the_memory"/>
+     <addaction name="actionDump_the_prediction_matrix"/>
+     <addaction name="actionGenerate_map"/>
+     <addaction name="actionGenerate_local_map"/>
+     <addaction name="actionGenerate_TORO_graph_graph"/>
+     <addaction name="actionPrint_loop_closure_IDs_to_console"/>
+     <addaction name="actionSend_goal"/>
+    </widget>
+    <addaction name="actionDownload_all_clouds"/>
+    <addaction name="actionDownload_graph"/>
+    <addaction name="actionClear_cache"/>
+    <addaction name="separator"/>
+    <addaction name="actionView_high_res_point_cloud"/>
+    <addaction name="actionView_scans"/>
+    <addaction name="separator"/>
+    <addaction name="actionDelete_memory"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_working_directory"/>
+    <addaction name="menuAdvanced"/>
+   </widget>
+   <widget class="QMenu" name="menu6">
+    <property name="title">
+     <string>?</string>
+    </property>
+    <addaction name="actionHelp"/>
+    <addaction name="separator"/>
+    <addaction name="actionAbout"/>
+   </widget>
+   <widget class="QMenu" name="menuProcess">
+    <property name="title">
+     <string>Detection</string>
+    </property>
+    <widget class="QMenu" name="menuSelect_source">
+     <property name="title">
+      <string>Select source</string>
+     </property>
+     <widget class="QMenu" name="menuImage">
+      <property name="title">
+       <string>Image-only</string>
+      </property>
+      <addaction name="actionUsbCamera"/>
+      <addaction name="actionImageFiles"/>
+      <addaction name="actionVideo"/>
+     </widget>
+     <widget class="QMenu" name="menuRGB_D_camera">
+      <property name="title">
+       <string>RGB-D camera</string>
+      </property>
+      <widget class="QMenu" name="menuKinect_for_Xbox_360">
+       <property name="title">
+        <string>Kinect</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../GuiLib.qrc">
+         <normaloff>:/images/kinect_xbox_360.png</normaloff>:/images/kinect_xbox_360.png</iconset>
+       </property>
+       <addaction name="actionFreenect"/>
+       <addaction name="actionOpenNI2_kinect"/>
+       <addaction name="actionOpenNI_PCL"/>
+       <addaction name="actionOpenNI_CV"/>
+      </widget>
+      <widget class="QMenu" name="menuXtion_PRO_LIVE">
+       <property name="title">
+        <string>Xtion PRO LIVE</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../GuiLib.qrc">
+         <normaloff>:/images/xtion_pro_live.png</normaloff>:/images/xtion_pro_live.png</iconset>
+       </property>
+       <addaction name="actionOpenNI2"/>
+       <addaction name="actionOpenNI_PCL_ASUS"/>
+       <addaction name="actionOpenNI_CV_ASUS"/>
+      </widget>
+      <widget class="QMenu" name="menuSense_3D_scanner">
+       <property name="title">
+        <string>Sense 3D scanner</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../GuiLib.qrc">
+         <normaloff>:/images/sense.png</normaloff>:/images/sense.png</iconset>
+       </property>
+       <addaction name="actionOpenNI2_sense"/>
+      </widget>
+      <widget class="QMenu" name="menuKinect_v2">
+       <property name="title">
+        <string>Kinect v2</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../GuiLib.qrc">
+         <normaloff>:/images/kinect_xbox_one.png</normaloff>:/images/kinect_xbox_one.png</iconset>
+       </property>
+       <addaction name="actionFreenect2"/>
+      </widget>
+      <widget class="QMenu" name="menuBumblebee2">
+       <property name="title">
+        <string>Bumblebee2</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../GuiLib.qrc">
+         <normaloff>:/images/bumblebee2.png</normaloff>:/images/bumblebee2.png</iconset>
+       </property>
+       <addaction name="actionStereoDC1394"/>
+       <addaction name="actionStereoFlyCapture2"/>
+      </widget>
+      <addaction name="menuKinect_for_Xbox_360"/>
+      <addaction name="menuXtion_PRO_LIVE"/>
+      <addaction name="menuSense_3D_scanner"/>
+      <addaction name="menuKinect_v2"/>
+      <addaction name="menuBumblebee2"/>
+      <addaction name="actionJdeRobotInterfaces"/>
+     </widget>
+     <addaction name="menuRGB_D_camera"/>
+     <addaction name="menuImage"/>
+     <addaction name="actionDatabase"/>
+    </widget>
+    <addaction name="menuSelect_source"/>
+    <addaction name="separator"/>
+    <addaction name="actionStart"/>
+    <addaction name="actionPause"/>
+    <addaction name="actionStop"/>
+    <addaction name="separator"/>
+    <addaction name="actionPause_on_match"/>
+    <addaction name="actionPause_when_a_loop_hypothesis_is_rejected"/>
+    <addaction name="actionPause_on_local_loop_detection"/>
+    <addaction name="separator"/>
+    <addaction name="actionStore_keyframe_information"/>
+    <addaction name="separator"/>
+    <addaction name="actionSLAM_mode"/>
+    <addaction name="actionLocalization_mode"/>
+    <addaction name="separator"/>
+    <addaction name="actionReset_Odometry"/>
+    <addaction name="actionTrigger_a_new_map"/>
+   </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>Window</string>
+    </property>
+    <widget class="QMenu" name="menuShow_view">
+     <property name="title">
+      <string>Show view</string>
+     </property>
+     <addaction name="separator"/>
+    </widget>
+    <widget class="QMenu" name="menuAspect_ratio_2">
+     <property name="title">
+      <string>Aspect ratio</string>
+     </property>
+     <addaction name="action16_9"/>
+     <addaction name="action16_10"/>
+     <addaction name="action4_3"/>
+     <addaction name="separator"/>
+     <addaction name="action1080p"/>
+     <addaction name="action720p"/>
+     <addaction name="action480p"/>
+     <addaction name="action360p"/>
+     <addaction name="action240p"/>
+    </widget>
+    <addaction name="menuShow_view"/>
+    <addaction name="actionScreenshot"/>
+    <addaction name="actionAuto_screen_capture"/>
+    <addaction name="menuAspect_ratio_2"/>
+    <addaction name="separator"/>
+    <addaction name="actionPreferences"/>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionEdit_database"/>
+    <addaction name="separator"/>
+    <addaction name="actionData_recorder"/>
+    <addaction name="separator"/>
+    <addaction name="actionPost_processing"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuProcess"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuWindow"/>
+   <addaction name="menu6"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="dockWidget_posterior">
+   <property name="features">
+    <set>QDockWidget::AllDockWidgetFeatures</set>
+   </property>
+   <property name="windowTitle">
+    <string>A posteriori PDF</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="UPlot" name="posteriorPlot" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionClose_database"/>
+   <addaction name="actionNew_database"/>
+   <addaction name="actionOpen_database"/>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_statsV2">
+   <property name="floating">
+    <bool>true</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Statistics</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QVBoxLayout" name="verticalLayout_8">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <layout class="QGridLayout" name="gridLayout" columnstretch="10,0">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMinimumSize</enum>
+       </property>
+       <property name="verticalSpacing">
+        <number>2</number>
+       </property>
+       <item row="3" column="1">
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_stats_timeLimit">
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="suffix">
+          <string> ms</string>
+         </property>
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <double>99999.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>50.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>450.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_24">
+         <property name="text">
+          <string>Source</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="label_stats_source">
+         <property name="text">
+          <string>Unknown</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_stats_imgRate">
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="suffix">
+          <string> Hz</string>
+         </property>
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <double>100.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="value">
+          <double>2.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_45">
+         <property name="text">
+          <string>Elapsed time (hh:mm:ss)</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLabel" name="label_elapsedTime">
+         <property name="text">
+          <string>Unknown</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_20">
+         <property name="text">
+          <string>Current image id [Map id]</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLabel" name="label_stats_imageNumber">
+         <property name="text">
+          <string>Unknown</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>Loop closures detected</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QLabel" name="label_stats_loopClosuresDetected">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="label_38">
+         <property name="text">
+          <string>Loop closures detected 
+(only reactivated ones)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QLabel" name="label_stats_loopClosuresReactivatedDetected">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="label_15">
+         <property name="text">
+          <string>Loop closures rejected</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="QLabel" name="label_stats_loopClosuresRejected">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="doubleSpinBox_stats_imgRate_label">
+         <property name="text">
+          <string>Image rate</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_timeLimit">
+         <property name="text">
+          <string>Time limit processing</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QDoubleSpinBox" name="doubleSpinBox_stats_detectionRate">
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="suffix">
+          <string> Hz</string>
+         </property>
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <double>100.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="value">
+          <double>2.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="doubleSpinBox_stats_imgRate_label_2">
+         <property name="text">
+          <string>RTAB-Map update rate</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="rtabmap::StatsToolBox" name="statsToolBox" native="true"/>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_likelihood">
+   <property name="floating">
+    <bool>false</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Likelihood</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_4">
+    <layout class="QVBoxLayout" name="verticalLayout_6">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="UPlot" name="likelihoodPlot" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_console">
+   <property name="windowTitle">
+    <string>Console</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QVBoxLayout" name="verticalLayout_5">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="rtabmap::ConsoleWidget" name="widget_console" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_rawlikelihood">
+   <property name="windowTitle">
+    <string>Raw Likelihood</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_6">
+    <layout class="QVBoxLayout" name="verticalLayout_4">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="UPlot" name="rawLikelihoodPlot" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_cloudViewer">
+   <property name="windowTitle">
+    <string>3D Map</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_5">
+    <layout class="QVBoxLayout" name="verticalLayout_3">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="rtabmap::CloudViewer" name="widget_cloudViewer" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_loopClosureViewer">
+   <property name="windowTitle">
+    <string>3D Loop closure</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_7">
+    <layout class="QVBoxLayout" name="verticalLayout_7">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="rtabmap::LoopClosureViewer" name="widget_loopClosureViewer" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_mapVisibility">
+   <property name="floating">
+    <bool>true</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Map visibility</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_8">
+    <layout class="QVBoxLayout" name="verticalLayout_9">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="rtabmap::MapVisibilityWidget" name="widget_mapVisibility" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_graphViewer">
+   <property name="windowTitle">
+    <string>Graph view</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_9">
+    <layout class="QVBoxLayout" name="verticalLayout_10">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="rtabmap::GraphViewer" name="graphicsView_graphView"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_imageView">
+   <property name="allowedAreas">
+    <set>Qt::AllDockWidgetAreas</set>
+   </property>
+   <property name="windowTitle">
+    <string>Loop closure detection</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="layout_imageview">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,1">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_refId">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>18</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="rtabmap::ImageView" name="imageView_source" native="true"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_matchId">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>18</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="rtabmap::ImageView" name="imageView_loopClosure" native="true"/>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_odometry">
+   <property name="windowTitle">
+    <string>Odometry</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_10">
+    <layout class="QVBoxLayout" name="verticalLayout_11">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="rtabmap::ImageView" name="imageView_odometry" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="toolBar_2">
+   <property name="windowTitle">
+    <string>toolBar_2</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionStart"/>
+   <addaction name="actionPause"/>
+   <addaction name="actionStop"/>
+  </widget>
+  <action name="actionExit">
+   <property name="icon">
+    <iconset resource="../GuiLib.qrc">
+     <normaloff>:/images/system-log-out.png</normaloff>:/images/system-log-out.png</iconset>
+   </property>
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Help</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About...</string>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="text">
+    <string>Preferences...</string>
+   </property>
+  </action>
+  <action name="actionStart">
+   <property name="icon">
+    <iconset resource="../GuiLib.qrc">
+     <normaloff>:/images/Play1Normal.png</normaloff>:/images/Play1Normal.png</iconset>
+   </property>
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </action>
+  <action name="actionPause">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../GuiLib.qrc">
+     <normaloff>:/images/PauseNormalRed.png</normaloff>:/images/PauseNormalRed.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pause</string>
+   </property>
+   <property name="toolTip">
+    <string>Pause</string>
+   </property>
+  </action>
+  <action name="actionPause_on_match">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../GuiLib.qrc">
+     <normaloff>:/images/PauseOnLoop.ico</normaloff>:/images/PauseOnLoop.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Pause on loop closure detection</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="icon">
+    <iconset resource="../GuiLib.qrc">
+     <normaloff>:/images/Stop1NormalYellow.png</normaloff>:/images/Stop1NormalYellow.png</iconset>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionDump_the_memory">
+   <property name="text">
+    <string>Dump the memory</string>
+   </property>
+  </action>
+  <action name="actionPause_when_a_loop_hypothesis_is_rejected">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../GuiLib.qrc">
+     <normaloff>:/images/PauseLoopRejected.ico</normaloff>:/images/PauseLoopRejected.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Pause on loop closure rejection</string>
+   </property>
+  </action>
+  <action name="actionClear_cache">
+   <property name="text">
+    <string>Clear the cache</string>
+   </property>
+  </action>
+  <action name="actionAuto_screen_capture">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Auto screen capture...</string>
+   </property>
+  </action>
+  <action name="actionDump_the_prediction_matrix">
+   <property name="text">
+    <string>Dump the prediction matrix</string>
+   </property>
+  </action>
+  <action name="actionGenerate_map">
+   <property name="text">
+    <string>Generate graph map (*.dot)...</string>
+   </property>
+  </action>
+  <action name="actionDelete_memory">
+   <property name="text">
+    <string>Delete memory</string>
+   </property>
+  </action>
+  <action name="actionOpen_working_directory">
+   <property name="text">
+    <string>Show working directory in file browser</string>
+   </property>
+  </action>
+  <action name="action16_9">
+   <property name="text">
+    <string>16:9</string>
+   </property>
+  </action>
+  <action name="action16_10">
+   <property name="text">
+    <string>16:10</string>
+   </property>
+  </action>
+  <action name="action4_3">
+   <property name="text">
+    <string>4:3</string>
+   </property>
+  </action>
+  <action name="action360p">
+   <property name="text">
+    <string>360p</string>
+   </property>
+  </action>
+  <action name="action480p">
+   <property name="text">
+    <string>480p</string>
+   </property>
+  </action>
+  <action name="action720p">
+   <property name="text">
+    <string>720p</string>
+   </property>
+  </action>
+  <action name="action1080p">
+   <property name="text">
+    <string>1080p</string>
+   </property>
+  </action>
+  <action name="action240p">
+   <property name="text">
+    <string>240p</string>
+   </property>
+  </action>
+  <action name="actionUsbCamera">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Usb camera</string>
+   </property>
+  </action>
+  <action name="actionImageFiles">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Images...</string>
+   </property>
+  </action>
+  <action name="actionVideo">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Video...</string>
+   </property>
+  </action>
+  <action name="actionDatabase">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Database...</string>
+   </property>
+  </action>
+  <action name="actionJdeRobotInterfaces">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>JdeRobot Interfaces</string>
+   </property>
+  </action>
+  <action name="actionGenerate_local_map">
+   <property name="text">
+    <string>Generate graph local map (*.dot)...</string>
+   </property>
+  </action>
+  <action name="actionPrint_loop_closure_IDs_to_console">
+   <property name="text">
+    <string>Print loop closure IDs to console</string>
+   </property>
+  </action>
+  <action name="actionSave_point_cloud">
+   <property name="text">
+    <string>Export 3D clouds (*.ply *.pcd)...</string>
+   </property>
+  </action>
+  <action name="actionDownload_all_clouds">
+   <property name="text">
+    <string>Download all clouds (update cache)</string>
+   </property>
+  </action>
+  <action name="actionPause_on_local_loop_detection">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../GuiLib.qrc">
+     <normaloff>:/images/PauseOnLocalLoop.ico</normaloff>:/images/PauseOnLocalLoop.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Pause on local loop closure detection</string>
+   </property>
+  </action>
+  <action name="actionStore_keyframe_information">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Store rgb+d and pose of keyframes to HOME/rtabmap_keyframes</string>
+   </property>
+  </action>
+  <action name="actionSLAM_mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Mapping</string>
+   </property>
+   <property name="toolTip">
+    <string>Simultaneous Localization And Mapping (SLAM)</string>
+   </property>
+  </action>
+  <action name="actionLocalization_mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Localization</string>
+   </property>
+  </action>
+  <action name="actionReset_Odometry">
+   <property name="text">
+    <string>Reset Odometry</string>
+   </property>
+  </action>
+  <action name="actionView_high_res_point_cloud">
+   <property name="text">
+    <string>View high-res point clouds...</string>
+   </property>
+  </action>
+  <action name="actionTrigger_a_new_map">
+   <property name="text">
+    <string>Trigger a new map</string>
+   </property>
+  </action>
+  <action name="actionGenerate_TORO_graph_graph">
+   <property name="text">
+    <string>Generate TORO graph (*.graph)...</string>
+   </property>
+  </action>
+  <action name="actionDownload_graph">
+   <property name="text">
+    <string>Download graph only</string>
+   </property>
+  </action>
+  <action name="actionScreenshot">
+   <property name="text">
+    <string>Take a screenshot</string>
+   </property>
+  </action>
+  <action name="actionOpenNI_PCL">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>OpenNI-PCL</string>
+   </property>
+  </action>
+  <action name="actionFreenect">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Freenect</string>
+   </property>
+  </action>
+  <action name="actionOpenNI_CV">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>OpenNI-CV</string>
+   </property>
+  </action>
+  <action name="actionOpenNI_CV_ASUS">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>OpenNI-CV-ASUS</string>
+   </property>
+  </action>
+  <action name="actionOpenNI2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>OpenNI2</string>
+   </property>
+  </action>
+  <action name="actionOpenNI_PCL_ASUS">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>OpenNI-PCL</string>
+   </property>
+  </action>
+  <action name="actionData_recorder">
+   <property name="text">
+    <string>Data recorder...</string>
+   </property>
+  </action>
+  <action name="actionExport_2D_Grid_map_bmp_png">
+   <property name="text">
+    <string>Export 2D grid map (*.png *.bmp)...</string>
+   </property>
+  </action>
+  <action name="actionExport_2D_scans_ply_pcd">
+   <property name="text">
+    <string>Export 2D scans (*.ply *.pcd)...</string>
+   </property>
+  </action>
+  <action name="actionView_scans">
+   <property name="text">
+    <string>View scans...</string>
+   </property>
+  </action>
+  <action name="actionOpen_database">
+   <property name="icon">
+    <iconset resource="../GuiLib.qrc">
+     <normaloff>:/images/document-open.png</normaloff>:/images/document-open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open database...</string>
+   </property>
+  </action>
+  <action name="actionNew_database">
+   <property name="icon">
+    <iconset resource="../GuiLib.qrc">
+     <normaloff>:/images/document-new.png</normaloff>:/images/document-new.png</iconset>
+   </property>
+   <property name="text">
+    <string>New database...</string>
+   </property>
+  </action>
+  <action name="actionClose_database">
+   <property name="icon">
+    <iconset resource="../GuiLib.qrc">
+     <normaloff>:/images/document-save.png</normaloff>:/images/document-save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Close database</string>
+   </property>
+  </action>
+  <action name="actionEdit_database">
+   <property name="text">
+    <string>Edit database...</string>
+   </property>
+  </action>
+  <action name="actionPost_processing">
+   <property name="text">
+    <string>Post-processing...</string>
+   </property>
+  </action>
+  <action name="actionSave_GUI_config">
+   <property name="text">
+    <string>Save config</string>
+   </property>
+  </action>
+  <action name="actionFreenect2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Freenect2</string>
+   </property>
+  </action>
+  <action name="actionStereoDC1394">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>StereoDC1394</string>
+   </property>
+  </action>
+  <action name="actionOpenNI2_kinect">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>OpenNI2</string>
+   </property>
+  </action>
+  <action name="actionOpenNI2_sense">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>OpenNI2</string>
+   </property>
+  </action>
+  <action name="actionStereoFlyCapture2">
+   <property name="text">
+    <string>StereoFlyCapture2</string>
+   </property>
+  </action>
+  <action name="actionSend_goal">
+   <property name="text">
+    <string>Send a goal...</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>UPlot</class>
+   <extends>QWidget</extends>
+   <header>utilite/UPlot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>rtabmap::ImageView</class>
+   <extends>QWidget</extends>
+   <header>../include/rtabmap/gui/ImageView.h</header>
+  </customwidget>
+  <customwidget>
+   <class>rtabmap::StatsToolBox</class>
+   <extends>QWidget</extends>
+   <header>StatsToolBox.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>rtabmap::ConsoleWidget</class>
+   <extends>QWidget</extends>
+   <header>ConsoleWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>rtabmap::CloudViewer</class>
+   <extends>QWidget</extends>
+   <header>../include/rtabmap/gui/CloudViewer.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>rtabmap::LoopClosureViewer</class>
+   <extends>QWidget</extends>
+   <header>../include/rtabmap/gui/LoopClosureViewer.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>rtabmap::MapVisibilityWidget</class>
+   <extends>QWidget</extends>
+   <header>MapVisibilityWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>rtabmap::GraphViewer</class>
+   <extends>QGraphicsView</extends>
+   <header>GraphViewer.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../GuiLib.qrc"/>
+ </resources>
+ <connections/>
+</ui>

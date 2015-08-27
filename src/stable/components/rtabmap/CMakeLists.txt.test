@@ -1,0 +1,20 @@
+SET(SOURCE_FILES rtabmap.cpp)
+
+set( CMAKE_CXX_FLAGS "-Wno-deprecated" )
+
+include_directories(
+    ${INTERFACES_CPP_DIR}
+    ${LIBS_DIR}/
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+
+add_executable (rtabmap ${SOURCE_FILES})
+
+TARGET_LINK_LIBRARIES(rtabmap
+    ${CMAKE_THREAD_LIBS_INIT}
+    JderobotInterfaces
+    jderobotutil
+    parallelIce
+    ${ZeroCIce_LIBRARIES}
+    ${ZLIB_LIBRARIES}
+    )

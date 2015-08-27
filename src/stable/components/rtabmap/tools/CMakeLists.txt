@@ -1,0 +1,20 @@
+
+#ADD_SUBDIRECTORY( ConsoleApp )
+ADD_SUBDIRECTORY( ImagesJoiner )
+ADD_SUBDIRECTORY( ExtractObject )
+#ADD_SUBDIRECTORY( Camera )
+ADD_SUBDIRECTORY( CameraRGBD )
+
+IF(OPENCV_NONFREE_FOUND)
+ADD_SUBDIRECTORY( VocabularyComparison )
+ENDIF(OPENCV_NONFREE_FOUND)
+
+IF(TARGET rtabmap_gui)
+	#ADD_SUBDIRECTORY( DatabaseViewer )
+	#ADD_SUBDIRECTORY( EpipolarGeometry )
+	#ADD_SUBDIRECTORY( OdometryViewer )
+	#ADD_SUBDIRECTORY( DataRecorder )
+	#ADD_SUBDIRECTORY( Calibration )
+ELSE()
+   MESSAGE(STATUS "RTAB-Map GUI lib is not built, some tools won't be built...")
+ENDIF()
