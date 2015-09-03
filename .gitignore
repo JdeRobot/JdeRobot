@@ -1,3 +1,12 @@
+## JdeRobot
+# Interfaces
+src/stable/interfaces/cpp/
+src/stable/interfaces/python/
+src/stable/interfaces/java/
+
+
+## Build
+# CMake
 CMakeCache.txt
 CMakeFiles/
 *.cmake
@@ -7,5 +16,6 @@ CMakeFiles/
 *.cxx_parameters
 lib*.so.*
 Makefile
-src/stable/interfaces/cpp/
-src/stable/interfaces/python/
+
+# Python
+*.pyc
