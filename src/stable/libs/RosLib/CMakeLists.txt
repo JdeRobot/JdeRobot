@@ -105,10 +105,10 @@ add_library(ros_ice SHARED ${CPP_CLIENT} ${CPP_INTERFACE} src/TeleOperator.cpp)
 
 #FILE(GLOB HEADER_ROS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/RosLib/*.h)
 #FILE(GLOB HEADER_ROS_MESSAGE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/RosLib/RosIceMessage/*.h)
-#FILE(GLOB ROS_LIB ../../../../devel/lib/*.so)
+FILE(GLOB ROS_LIB ../../../../devel/lib/*.so)
 
 #INSTALL (FILES ${HEADER_ROS_FILES} DESTINATION /usr/local/include/jderobot)
 #INSTALL (FILES ${HEADER_ROS_MESSAGE_FILES} DESTINATION /usr/local/include/jderobot/RosIceMessage)
-#INSTALL (FILES ${ROS_LIB} DESTINATION /usr/local/lib/jderobot)
+INSTALL (FILES ${ROS_LIB} DESTINATION /usr/local/lib/jderobot)
 
 
