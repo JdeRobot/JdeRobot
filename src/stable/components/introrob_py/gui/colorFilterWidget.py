@@ -57,14 +57,14 @@ class ColorFilterWidget(QtGui.QWidget, Ui_Form):
         else:
             img = self.winParent.getSensor().getImage()
 
-        if img != None:
+        if img is not None:
             image = QtGui.QImage(img.data, img.shape[1], img.shape[0], img.shape[1]*img.shape[2], QtGui.QImage.Format_RGB888);
             self.inputImage.setPixmap(QtGui.QPixmap.fromImage(image))
 
 
     def setThresoldImage(self):
         img = self.winParent.getSensor().getThresoldImage()
-        if img != None:
+        if img is not None:
             image = QtGui.QImage(img.data, img.shape[1], img.shape[0], img.shape[1], QtGui.QImage.Format_Indexed8)
             self.outputFilterImage.setPixmap(QtGui.QPixmap.fromImage(image))
 
