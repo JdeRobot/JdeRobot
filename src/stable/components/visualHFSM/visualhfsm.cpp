@@ -41,8 +41,9 @@ VisualHFSM::VisualHFSM ( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builde
     refBuilder->get_widget("imagemenuitem_variables", this->imagemenuitem_variables);
     refBuilder->get_widget("imagemenuitem_libraries", this->imagemenuitem_libraries);
     refBuilder->get_widget("imagemenuitem_configfile", this->imagemenuitem_configfile);
-    refBuilder->get_widget("imagemenuitem_generatecode", this->imagemenuitem_generatecode);
+    refBuilder->get_widget("imagemenuitem_generatecppcode", this->imagemenuitem_generatecppcode);
     refBuilder->get_widget("imagemenuitem_compile", this->imagemenuitem_compile);
+    refBuilder->get_widget("imagemenuitem_generatepythoncode", this->imagemenuitem_generatepythoncode);
     refBuilder->get_widget("imagemenuitem_about", this->imagemenuitem_about);
 
     // Get the windows
@@ -50,6 +51,9 @@ VisualHFSM::VisualHFSM ( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builde
 
     // Get the treeview
     refBuilder->get_widget("treeview", this->treeview);
+
+    //Get the backbutton
+    refBuilder->get_widget("up_button", this->pUpButton);
 
     // ASSIGNING SIGNALS
     // Of the menu items
@@ -75,17 +79,21 @@ VisualHFSM::VisualHFSM ( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builde
                 sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_libraries));
     this->imagemenuitem_configfile->signal_activate().connect(
                 sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_configfile));
-    this->imagemenuitem_generatecode->signal_activate().connect(
-                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_generate_code));
+    this->imagemenuitem_generatecppcode->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_generate_cpp_code));
     this->imagemenuitem_compile->signal_activate().connect(
                 sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_compile));
+    this->imagemenuitem_generatepythoncode->signal_activate().connect(
+                sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_generate_python_code));
     this->imagemenuitem_about->signal_activate().connect(
                 sigc::mem_fun(*this, &VisualHFSM::on_menubar_clicked_about));
 
     // Of the windows
     this->scrolledwindow_schema->signal_event().connect(
                 sigc::mem_fun(*this, &VisualHFSM::on_schema_event));
-    
+    this->pUpButton->signal_clicked().connect(sigc::mem_fun(*this,
+                                        &VisualHFSM::on_up_button_clicked));
+
     // Create the canvas    
     this->canvas = Gtk::manage(new Goocanvas::Canvas());
     this->canvas->signal_item_created().connect(sigc::mem_fun(*this,
@@ -94,6 +102,8 @@ VisualHFSM::VisualHFSM ( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builde
     // And the treeview's tree model
     this->refTreeModel = Gtk::TreeStore::create(this->m_Columns);
     this->treeview->set_model(this->refTreeModel);
+    this->treeview->signal_row_activated().connect(
+                        sigc::mem_fun(*this, &VisualHFSM::on_row_activated));
 
     //Add the TreeView's view columns:
     this->treeview->append_column("ID", this->m_Columns.m_col_id);
@@ -195,9 +205,8 @@ void VisualHFSM::on_load_file ( std::string path ) {
         this->listInterfaces = parser.getConfigFile();
         this->listLibraries = parser.getListLibs();
         
-        std::cout << "parseado" << std::endl;
-
         this->removeAllGui();
+        this->clearTreeView();
         if (!this->loadSubautomata(parser.getListSubautomata()))
             std::cout << BEGIN_RED << VISUAL << "ERROR loading subautomata" << END_COLOR << std::endl;
     } catch ( const xmlpp::exception& ex ) {
@@ -578,6 +587,19 @@ bool VisualHFSM::fillTreeView ( std::string nameNode, Gtk::TreeModel::Children c
     return cont;
 }
 
+bool VisualHFSM::clearTreeView (){
+    
+    Gtk::TreeModel::Children children = this->refTreeModel->children();
+    Gtk::TreeModel::Children::iterator iter = children.begin();
+    while(iter != children.end()){
+        Gtk::TreeModel::Row row = *iter;
+        this->refTreeModel->erase(row);
+        children = this->refTreeModel->children();
+        iter = children.begin();
+    }
+    return true;
+}
+
 // Remove from the treeview
 bool VisualHFSM::removeFromTreeView ( int id, Gtk::TreeModel::Children child ) {
     bool cont = true;
@@ -929,9 +951,9 @@ bool VisualHFSM::on_transition_leave_notify_event ( const Glib::RefPtr<Goocanvas
  * OF THE MENU
  *************************************************************/
 // New automata, remove all
-// TODO: remove the treeview
 void VisualHFSM::on_menubar_clicked_new () {
     this->removeAllGui();
+    this->clearTreeView();
     this->removeAllSubautomata();
     this->filepath = std::string("");
 }
@@ -1045,49 +1067,58 @@ void VisualHFSM::on_menubar_clicked_configfile () {
                                         &VisualHFSM::on_config_text));
 }
 
-// Generate the code for the project
-void VisualHFSM::on_menubar_clicked_generate_code () {
-    lastButton = GENERATE_CODE;
+int VisualHFSM::prepareGenerateCode(){
 
-    if (this->filepath.compare(std::string("")) != 0) { // if it is not saved, save it please!
-        if (DEBUG)
-            std::cout << BEGIN_GREEN << VISUAL << "Generating code..." << END_COLOR << std::endl;
-        
-        if (this->checkAll()) { // all ok!
-            SaveFile savefile(this->filepath, &this->subautomataList, this->listInterfaces, this->listLibraries);
-            savefile.init();
-
-            MySaxParser parser;
-            parser.set_substitute_entities(true);
-            parser.parse_file(this->filepath);
-            
-            this->listInterfaces = parser.getConfigFile();
-            this->listLibraries = parser.getListLibs();
-
-            std::string cpppath(this->filepath);
-            std::string cfgpath(this->filepath);
-            std::string cmakepath(this->filepath);
-            if ( (this->replace(cpppath, std::string(".xml"), std::string(".cpp"))) &&
-                    (this->replace(cfgpath, std::string(".xml"), std::string(".cfg"))) &&
-                    (this->replaceFile(cmakepath, std::string("/"), std::string("CMakeLists.txt"))) ) {
-                Generate generate(parser.getListSubautomata(), cpppath, cfgpath, cmakepath,
-                            &(this->listInterfaces), this->mapInterfacesHeader, this->listLibraries);
-                generate.init();
-            } else {
-                std::cout << BEGIN_GREEN << VISUAL << "Impossible to generate code" << END_COLOR << std::endl;
-            }
-        } else { // show problems
-            std::cout << BEGIN_RED << VISUAL << "There are some empty important fields that cannot be empty. Possibilities:" << END_COLOR << std::endl;
-            std::cout << BEGIN_RED << VISUAL << "- Node names" << END_COLOR << std::endl;
-            std::cout << BEGIN_RED << VISUAL << "- Transition names and mode of transition" << END_COLOR << std::endl;
-            std::cout << BEGIN_RED << VISUAL << "- Repeated interfaces" << END_COLOR << std::endl;
-            std::cout << BEGIN_RED << VISUAL << "- Iteration time for each subautomata" << END_COLOR << std::endl;
-        }
-
-    } else {
+    if (this->filepath.compare(std::string("")) == 0){  // if it is not saved, save it please!
         std::cout << BEGIN_YELLOW << VISUAL << "You must save the project first" << END_COLOR << std::endl;
+        return -1;
     }
 
+    if (!this->checkAll()){ // if not all ok, show problems
+        std::cout << BEGIN_RED << VISUAL << "There are some empty important fields that cannot be empty. Possibilities:" << END_COLOR << std::endl;
+        std::cout << BEGIN_RED << VISUAL << "- Node names" << END_COLOR << std::endl;
+        std::cout << BEGIN_RED << VISUAL << "- Transition names and mode of transition" << END_COLOR << std::endl;
+        std::cout << BEGIN_RED << VISUAL << "- Repeated interfaces" << END_COLOR << std::endl;
+        std::cout << BEGIN_RED << VISUAL << "- Iteration time for each subautomata" << END_COLOR << std::endl;
+        return -1;
+    }
+
+    SaveFile savefile(this->filepath, &this->subautomataList, this->listInterfaces, this->listLibraries);
+    savefile.init();
+
+    return 0;
+}
+
+// Generate the code for the project
+void VisualHFSM::on_menubar_clicked_generate_cpp_code () {
+    lastButton = GENERATE_CPP_CODE;    
+
+    if (this->prepareGenerateCode() == 0){   
+        MySaxParser parser;
+        parser.set_substitute_entities(true);
+        parser.parse_file(this->filepath);
+
+        this->listInterfaces = parser.getConfigFile();
+        this->listLibraries = parser.getListLibs();
+
+        std::string cpppath(this->filepath);
+        std::string cfgpath(this->filepath);
+        std::string cmakepath(this->filepath);
+
+        if ( (this->replace(cpppath, std::string(".xml"), std::string(".cpp"))) &&
+            (this->replace(cfgpath, std::string(".xml"), std::string(".cfg"))) &&
+            (this->replaceFile(cmakepath, std::string("/"), std::string("CMakeLists.txt"))) ) {
+            Generate generate(parser.getListSubautomata(), cpppath, cfgpath, cmakepath,
+                &(this->listInterfaces), this->mapInterfacesHeader, this->listLibraries);
+            generate.init();
+
+            if (DEBUG)
+                std::cout << BEGIN_GREEN << VISUAL << "C++ code generated..." << END_COLOR << std::endl;
+    
+        } else {
+            std::cout << BEGIN_GREEN << VISUAL << "Impossible to generate code" << END_COLOR << std::endl;
+        }
+    }         
 }
 
 // Compile the project
@@ -1132,6 +1163,76 @@ void VisualHFSM::on_menubar_clicked_compile () {
 
 }
 
+void VisualHFSM::on_menubar_clicked_generate_python_code (){
+    this->lastButton = GENERATE_PYTHON_CODE;
+
+    if (this->prepareGenerateCode() == 0){   
+        MySaxParser parser;
+        parser.set_substitute_entities(true);
+        parser.parse_file(this->filepath);
+
+        this->listInterfaces = parser.getConfigFile();
+        this->listLibraries = parser.getListLibs();
+  
+        std::string cpppath(this->filepath);
+        std::string cfgpath(this->filepath);
+
+        if ( (this->replace(cpppath, std::string(".xml"), std::string(".py"))) &&
+            (this->replace(cfgpath, std::string(".xml"), std::string(".cfg")))) {
+
+            Generate generate(parser.getListSubautomata(), cpppath, cfgpath, "",
+                &(this->listInterfaces), this->mapInterfacesHeader, this->listLibraries);
+            generate.init_py();
+
+            if (DEBUG)
+                std::cout << BEGIN_GREEN << VISUAL << "Python code generated..." << END_COLOR << std::endl;
+    
+        } else {
+            std::cout << BEGIN_GREEN << VISUAL << "Impossible to generate code" << END_COLOR << std::endl;
+        }
+    } 
+}
+
+void VisualHFSM::on_row_activated(const Gtk::TreeModel::Path& path,
+                                    Gtk::TreeViewColumn* /* column */){
+    Gtk::TreeModel::iterator iter = this->refTreeModel->get_iter(path);
+
+    if (iter){
+        Gtk::TreeModel::Row row = *iter;
+
+        std::stringstream name;
+        name << row[m_Columns.m_col_name];
+        GuiSubautomata* gsub = this->getSubautomataByNodeName(name.str());
+
+        if (gsub == NULL)
+            return;
+
+        if (gsub->getId() != this->currentSubautomata->getId()){
+            this->currentSubautomata->hideAll();
+            this->currentSubautomata = gsub;
+            this->currentSubautomata->showAll();
+        }
+    }else{
+        std::cerr << "Couldn't get the row" << std::endl;
+    }
+}
+
+GuiSubautomata* VisualHFSM::getSubautomataByNodeName(std::string name){
+    std::list<GuiSubautomata>::iterator subIterator = this->subautomataList.begin();
+    while (subIterator != this->subautomataList.end()){
+
+        std::list<GuiNode>::iterator nodeListIter = subIterator->getListGuiNodes()->begin();
+        while (nodeListIter != subIterator->getListGuiNodes()->end()){
+            if (nodeListIter->getName().compare(name) == 0){
+                return &(*subIterator);
+            }
+            nodeListIter++;
+        }
+        subIterator++;
+    }
+    return NULL;
+}
+
 // About
 // TODO: generate it
 void VisualHFSM::on_menubar_clicked_about () {
@@ -1171,6 +1272,31 @@ void VisualHFSM::on_menubar_clicked_up () { // Deprecated
 
         if (DEBUG)
             std::cout << BEGIN_GREEN << VISUAL << "Got the father" << END_COLOR << std::endl;
+    }
+}
+
+void VisualHFSM::on_up_button_clicked (){
+    int fatherId = this->currentSubautomata->getIdFather();
+
+    if (fatherId != 0){
+        GuiSubautomata* guiSub = this->getSubautomata(fatherId);
+        if (this->currentSubautomata->isNodeListEmpty()){
+            guiSub->setToZero(this->currentSubautomata->getId());
+            std::list<GuiSubautomata>::iterator subIterator = this->subautomataList.begin();
+            while (subIterator != this->subautomataList.end()){
+                if (subIterator->getId() == this->currentSubautomata->getId()){
+                    this->subautomataList.erase(subIterator);
+                    break;
+                }
+                subIterator++;
+            }
+        }else{
+            this->currentSubautomata->hideAll();
+        }
+        this->currentSubautomata = guiSub;
+        this->currentSubautomata->showAll();
+    } else {
+        std::cout << "This subautomata doesn't have any parent." << std::endl;
     }
 }
 

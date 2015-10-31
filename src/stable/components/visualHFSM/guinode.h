@@ -50,6 +50,7 @@ public:
 	void setItems ( const Glib::RefPtr<Goocanvas::Item>& item,
 					Glib::RefPtr<Goocanvas::Item> itemInitial,
 					Glib::RefPtr<Goocanvas::Item> itemText );
+	void setItem ( const Glib::RefPtr<Goocanvas::Item>& item );
 	void setCode ( std::string code );
 
 	// Getters
@@ -64,9 +65,11 @@ public:
 	
 	int getId ();
 	int getIdSubautomataSon ();
+	int getIdSubautomataContainer();
 	std::string getCode ();
 	std::string getName ();
 	Point getPoint ();
+	Point* getPointPointer (); 
 
 	// Another functions
 	bool hasThisItem ( const Glib::RefPtr<Goocanvas::Item>& item );
@@ -79,6 +82,7 @@ public:
 	void changeLineWidth ( float newLineWidth );
 	void changeLineWidthInitial ( float newLineWidthInitial );
 	void changeText ( std::string newText );
+	void changeColor ( std::string newColor );
 	void moveItems ( double dx, double dy );
 
 	GuiNode copy ();

@@ -39,7 +39,8 @@
     T_THREE,
     T_FOUR,
     T_FIVE,
-    T_SIX
+    T_SIX,
+    T_SEVEN
 } TabEnum;
 
 class Generate {
@@ -56,7 +57,7 @@ public:
 
 	// Another functions
 	int init ();
-
+	int init_py ();
 private:
 	std::list<SubAutomata> subautomataList;
 	std::string path, cfgpath, cmakepath;
@@ -71,13 +72,30 @@ private:
 	void generateSpecificHeaders ();
 	void generateEnums ();
 	void generateVariables ();
+	void generateShutDown();
 	void generateFunctions ();
+	void generateCreateGuiSubautomataList();
 	void generateSubautomatas ();
+	void generateAutomataGui();
 	void generateMain ();
 
 	void generateCfg ();
-
 	void generateCmake ();
+
+	void generateHeaders_py ();
+	void generateGenericHeaders_py();
+	void generateSpecificHeaders_py();
+	void generateAutomataClass_py();
+	void generateAutomataInit_py();
+	void generateEnums_py();
+	void generateVariables_py();
+	void generateShutDown_py();
+	void generateSubautomatas_py();
+	void generateConnectToProxys_py();
+	void generateDestroyIc_py();
+	void generateStart_py();
+	void generaitJoin_py();
+	void generateMain_py();
 
 	std::string getCppName ();
 

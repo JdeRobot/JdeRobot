@@ -84,6 +84,16 @@ int GuiSubautomata::getIdFather () {
     return this->idFather;
 }
 
+Point* GuiSubautomata::getPointPointer ( int id ) {
+    std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
+    while (nodeListIterator != this->nodeList.end()){
+        if (nodeListIterator->getId() == id){
+            return nodeListIterator->getPointPointer();
+        }
+    }
+    return NULL;
+}
+
 std::string GuiSubautomata::getFunctions () {
     return this->functions;
 }
@@ -144,6 +154,27 @@ GuiNode* GuiSubautomata::getGuiNode ( Glib::RefPtr<Goocanvas::Item> item ) {
     if (nodeListIterator != this->nodeList.end())
         return &*nodeListIterator;
 
+    return NULL;
+}
+
+GuiNode* GuiSubautomata::getGuiNode ( int id ){
+    std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
+    while (nodeListIterator != nodeList.end()){
+        if (nodeListIterator->getId() == id)
+            return &*nodeListIterator;
+        nodeListIterator++;
+    }
+    return NULL;
+}
+
+GuiNode* GuiSubautomata::getGuiNode(std::string name){
+    std::list<GuiNode>::iterator nodeListIter = this->nodeList.begin();
+    while (nodeListIter != nodeList.end()){
+        if (nodeListIter->getName().compare(name) == 0){
+            return &(*nodeListIter);
+        }
+        nodeListIter++;
+    }
     return NULL;
 }
 
@@ -319,6 +350,24 @@ void GuiSubautomata::newGuiTransition ( Point origin, Point final, Point midpoin
     this->transitionList.push_back(gtransition);
 }
 
+void GuiSubautomata::newGuiTransition (Point orig, Point fin, Point mid, int id, int orId, int finId){
+    GuiTransition gtransition(orig, fin, mid, id);
+    gtransition.setIds(orId, finId);
+    this->transitionList.push_back(gtransition);
+}
+
+bool GuiSubautomata::replaceGuiTransition ( GuiTransition trans, int id){
+    std::list<GuiTransition>::iterator transIterator = this->transitionList.begin();
+    while ( transIterator != transitionList.end()){
+        if (transIterator->getId() == id){
+            this->transitionList.insert(transIterator, trans);
+            this->transitionList.erase(transIterator);
+            return true;
+        }
+    }
+    return false;
+}
+
 // Remove a GuiTransition with the specified item
 void GuiSubautomata::removeGuiTransitionsWith ( Glib::RefPtr<Goocanvas::Item> item ) {
     std::list<GuiTransition>::iterator nodeTransIterator = this->transitionList.begin();
@@ -382,6 +431,19 @@ void GuiSubautomata::setGuiNodeItems (  const Glib::RefPtr<Goocanvas::Item>& ite
     nodeListIterator->setItems(item, selectedItem, textItem);
 }
 
+bool GuiSubautomata::setGuiNodeItems(int id, const Glib::RefPtr<Goocanvas::Item>& item){
+
+    std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
+    while (nodeListIterator != this->nodeList.end()){
+        if (nodeListIterator->getId() == id){
+            nodeListIterator->setItem(item);
+            return true;
+        }
+        nodeListIterator++;
+    }
+    return false;
+}
+
 // Set the ID of the subautomata son of the specified item
 void GuiSubautomata::setIdSubautomataSon ( int id, const Glib::RefPtr<Goocanvas::Item>& item ) {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
@@ -409,6 +471,10 @@ void GuiSubautomata::setNameLastGuiNode ( std::string name ) {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.end();
     nodeListIterator--;
     nodeListIterator->changeText(name);
+}
+
+void GuiSubautomata::setActiveNode ( std::string name ){
+    this->activeNode = name;
 }
 
 /*************************************************************
@@ -475,14 +541,23 @@ int GuiSubautomata::getFirstIdNode () {
 
 int GuiSubautomata::getIdSubautomataSon ( const Glib::RefPtr<Goocanvas::Item>& item ) {
     std::list<GuiNode>::iterator nodeListIterator = this->nodeList.begin();
+
+
     while ( (!nodeListIterator->hasThisItem(item)) &&
-            (nodeListIterator != this->nodeList.end()) )
+            (nodeListIterator != this->nodeList.end()) ){
+        int id = nodeListIterator->getId();
         nodeListIterator++;
+    }
+       
 
     if (nodeListIterator != this->nodeList.end())
         return nodeListIterator->getIdSubautomataSon();
-
+    
     return 0;
+}
+
+std::string GuiSubautomata::getActiveNode (){
+    return this->activeNode;
 }
 
 /*************************************************************
