@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="default">
+    <!-- Ground -->
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <!-- My robots -->
+    <include>
+	<name>quadrotor2-9901</name>
+	<uri>model://ArDrone2</uri>
+	<pose>0 0 0.5 0 0 0</pose>
+    </include>
+    <include>
+	<name>quadrotor2-9902</name>
+	<uri>model://ArDrone2</uri>
+	<pose>1 0 0.5 0 0 0</pose>
+    </include>
+    <include>
+	<name>quadrotor2-9903</name>
+	<uri>model://ArDrone2</uri>
+	<pose>0 1 2 0 0 0</pose>
+    </include>
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+  </world>
+</sdf>
