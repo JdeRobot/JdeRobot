@@ -200,16 +200,28 @@ FOREACH(currentSourceFile ${HEADERS_FILES})
 	INSTALL (FILES ${currentSourceFile} DESTINATION /usr/local/include/jderobot/${new_source1})
 ENDFOREACH(currentSourceFile)
 
-# Install Executables
-list_subdirectories2( LIST_COMPONENTS ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/components/ 1)
+ # Install Executables
+list_subdirectories2( LIST_TOOLS ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/tools/ 1)
+list_subdirectories2( LIST_DRIVERS ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/drivers/ 1)
+ 
 
-FOREACH (currentBin ${LIST_COMPONENTS})
-    #SET(EXIST EXIST-NOTFOUND)
-    find_file(EXIST NAMES ${currentBin} PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src/components/${currentBin})
-    #IF (EXIST)
-    INSTALL (PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/components/${currentBin}/${currentBin} DESTINATION /usr/local/bin OPTIONAL)
-    #ENDIF(EXIST)
-    #MESSAGE("${EXIST}")
+FOREACH (currentBin ${LIST_TOOLS})
+	#SET(EXIST EXIST-NOTFOUND)
+	find_file(EXIST NAMES ${currentBin} PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src/components/${currentBin})
+	find_file(EXIST NAMES ${currentBin} PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src/tools/${currentBin})
+	#IF (EXIST)
+		INSTALL (PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/tools/${currentBin}/${currentBin} DESTINATION /usr/local/bin OPTIONAL)
+	#ENDIF(EXIST)
+	#MESSAGE("${EXIST}")
+ENDFOREACH(currentBin)
+
+FOREACH (currentBin ${LIST_DRIVERS})
+	#SET(EXIST EXIST-NOTFOUND)
+	find_file(EXIST NAMES ${currentBin} PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src/drivers/${currentBin})
+	#IF (EXIST)
+		INSTALL (PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/drivers/${currentBin}/${currentBin} DESTINATION /usr/local/bin OPTIONAL)
+	#ENDIF(EXIST)
+	#MESSAGE("${EXIST}")
 ENDFOREACH(currentBin)
 
 # Install interfaces headers
@@ -223,13 +235,12 @@ FILE(GLOB SLICE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/interfaces/slice/jd
 INSTALL (FILES ${SLICE_FILES} DESTINATION /usr/local/include/jderobot/slice)
 
 # Install CONF
-FILE(GLOB_RECURSE CONF_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/components/*.cfg)
+FILE(GLOB_RECURSE CONF_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/**.cfg)
 INSTALL (FILES ${CONF_FILES} DESTINATION /usr/local/share/jderobot/conf)
 
 # Install Glade
-FILE(GLOB_RECURSE GLADE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/components/*.glade)
+FILE(GLOB_RECURSE GLADE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/**.glade)
 INSTALL (FILES ${GLADE_FILES} DESTINATION /usr/local/share/jderobot/glade)
-
 
 
 ###################
