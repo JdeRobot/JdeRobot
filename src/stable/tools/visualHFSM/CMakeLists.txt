@@ -46,4 +46,13 @@ TARGET_LINK_LIBRARIES ( visualHFSM
     ${libxmlpp_LIBRARIES}
 )
 
+
+add_custom_command(TARGET visualHFSM POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/gui $<TARGET_FILE_DIR:visualHFSM>/gui)
+
+add_custom_command(TARGET visualHFSM POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/getinterfaces.sh $<TARGET_FILE_DIR:visualHFSM>)
+add_custom_command(TARGET visualHFSM POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/allinterfaces.txt $<TARGET_FILE_DIR:visualHFSM>)
+
 ENDIF()

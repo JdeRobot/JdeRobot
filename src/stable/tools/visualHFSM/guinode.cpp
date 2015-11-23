@@ -81,6 +81,10 @@ void GuiNode::setItems ( const Glib::RefPtr<Goocanvas::Item>& item,
 	this->itemText = itemText;
 }
 
+void GuiNode::setItem ( const Glib::RefPtr<Goocanvas::Item>& item ){
+	this->item = item;
+}
+
 void GuiNode::setCode ( std::string code ) {
 	this->node.setCode(code);
 }
@@ -132,6 +136,10 @@ Point GuiNode::getPoint () {
 	return this->point;
 }
 
+Point* GuiNode::getPointPointer (){
+	return &this->point;
+}
+
 /*************************************************************
  * ANOTHER FUNCTIONS
  *************************************************************/
@@ -141,6 +149,7 @@ bool GuiNode::itIsInitial () {
 
 bool GuiNode::hasThisItem ( const Glib::RefPtr<Goocanvas::Item>& item ) {
 	Glib::RefPtr<Goocanvas::Item> myItem = item;
+
 	return ((this->item == myItem) || (this->itemInitial == myItem) || (this->itemText == myItem));
 }
 
@@ -236,6 +245,14 @@ void GuiNode::changeText ( std::string newText ) {
     this->text->set_property("text", newText);
     this->text->set_property("x", x - newText.size() * PIXELS_PER_LETTER);
     #endif //GLIBMM_PROPERTIES_ENABLED
+}
+
+void GuiNode::changeColor ( std::string newColor ){
+	#ifdef GLIBMM_PROPERTIES_ENABLED
+	this->ellipse->property_fill_color() = newColor;
+	#else
+	this->ellipse->set_property("fill_color", Glib::ustring(newColor));
+	#endif //GLIBMM_PROPERTIES_ENABLED
 }
 
 void GuiNode::moveItems ( double dx, double dy ) {

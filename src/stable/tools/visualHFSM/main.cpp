@@ -24,6 +24,7 @@
 int main (int argc, char **argv) {
     Glib::RefPtr<Gtk::Application> app = Gtk::Application::create(argc, argv, "jderobot.visualhfsm");
 
+
     //Load the Glade file and instiate its widgets:
     Glib::RefPtr<Gtk::Builder> refBuilder = Gtk::Builder::create();
     try {
@@ -39,7 +40,7 @@ int main (int argc, char **argv) {
         return 1;
     }
 
-    //Get the GtkBuilder-instantiated dialog::
+    //Get the GtkBuilder-instantiated dialog:
     VisualHFSM* visualhfsm = 0;
     refBuilder->get_widget_derived("DialogDerived", visualhfsm);
     if (visualhfsm) //Start:
