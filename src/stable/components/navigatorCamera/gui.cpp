@@ -1,16 +1,29 @@
 #include "gui.h"
 
+#include "easyiceconfig/loader.hpp"
+#include "easyiceconfig/hardcoredlocations.h"
+
 namespace navigatorCamera {
 
-	Gui::Gui(Sharer *sharer,const std::string& gladeFile) : gtkmain(0, 0)
+	Gui::Gui(Sharer *sharer) : gtkmain(0, 0)
 	{
 
 		this->sharer = sharer;
 
 		std::cout << "Loading glade." << std::endl;
 
-		const std::string gladepath = std::string(GLADE_DIR) + gladeFile;
-		refXml = Gnome::Glade::Xml::create(gladepath);
+		std::string gladeFile;
+
+		//const std::string gladepath = std::string(GLADE_DIR) + gladeFile;
+		for (std::string path : std::split(HARDCORED_LOCATIONS, ":")){
+			if (path.empty()) continue;
+			std::string filepath(path+"/navigatorCamera.glade");
+			if (std::fileexists(filepath)){
+				gladeFile = filepath;
+				break;
+			}
+		}		
+		refXml = Gnome::Glade::Xml::create(gladeFile);
 
 		refXml->get_widget("showWindow", showWindow);
 		refXml->get_widget("RGB", RGB);

@@ -23,6 +23,7 @@
 
 const char* HARDCORED_LOCATIONS =
 "/usr/local/share/jderobot/conf\
+:/usr/local/share/jderobot/glade\
 :/usr/local/share/jderobot/gazebo/plugins/car\
 :/usr/local/share/jderobot/gazebo/plugins/flyingKinect\
 :/usr/local/share/jderobot/gazebo/plugins/kinect\

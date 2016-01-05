@@ -14,7 +14,6 @@
 // Global Memory
 navigatorCamera::Sharer *sharer;
 
-
 inline long cycleWait(long cycle, long diff)
 {
 	diff = (diff > cycle)?cycle:diff;
@@ -27,15 +26,14 @@ inline long cycleWait(long cycle, long diff)
 
 // ################################## Threads ##################################
 
-void *showGui(void* gladeFile_ptr)
+void *showGui(void*)
 {
 	struct timeval a, b;
 	long totala, totalb;
 	long diff;
 	navigatorCamera::Gui *gui;
-	std::string gladeFile = *(std::string *)gladeFile_ptr;
 
-	gui = new navigatorCamera::Gui(sharer, gladeFile);
+	gui = new navigatorCamera::Gui(sharer);
 
 	while ( gui->isVisible() )
 	{
@@ -162,7 +160,12 @@ int main(int argc, char** argv)
 		ic = Ice::initialize(argc,argv);
 		Ice::PropertiesPtr prop = ic->getProperties();
 
-		gladeFile = prop->getPropertyWithDefault(prefix + ".gladeFile", "./" + prefix + ".glade");
+		//gladeFile = prop->getPropertyWithDefault(prefix + ".gladeFile", "./" + prefix + ".glade");
+   
+
+   
+
+
 
 		guiActivated = prop->getPropertyAsIntWithDefault(prefix + ".guiActivated",1);
 		controlActivated = prop->getPropertyAsIntWithDefault(prefix + ".controlActivated",0);
@@ -197,7 +200,7 @@ int main(int argc, char** argv)
 		sharer->setGuiVisible(guiActivated);
 		sharer->setControlActive(controlActivated);
 		if ( guiActivated )
-			pthread_create(&thr_gui, NULL, &showGui, static_cast<void *>(&gladeFile));
+			pthread_create(&thr_gui, NULL, &showGui, NULL);
 
 		pthread_create(&thr_camera, NULL, &updateCamera, static_cast<void *>(camRGB));
 		
