@@ -10,7 +10,6 @@
 
 #define pi 3.14159265358979
 
-
 namespace navigatorCamera {
 
 	class Gui {
@@ -21,7 +20,7 @@ namespace navigatorCamera {
 		 * @param sharer	Sharer instance associated to this GUI.
 		 * @param gladeFile	Glade XML file path.
 		 */
-		Gui(Sharer *sharer, const std::string& gladeFile);
+		Gui(Sharer *sharer);
 
 		/// Default destructor.
 		virtual ~Gui();

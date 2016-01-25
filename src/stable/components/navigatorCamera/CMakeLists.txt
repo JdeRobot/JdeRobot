@@ -16,6 +16,7 @@ include_directories(
 	${libglademm_INCLUDE_DIRS}
 	${gtkglextmm_INCLUDE_DIRS}
 	${ZLIB_INCLUDE_DIRS}
+        ${easyiceconfig_INCLUDE_DIRS}
 )
 
 add_executable (navigatorCamera  ${SOURCE_FILES})
@@ -31,4 +32,5 @@ TARGET_LINK_LIBRARIES(navigatorCamera
 	parallelIce
 	${ZeroCIce_LIBRARIES}
 	${ZLIB_LIBRARIES}
+        ${easyiceconfig_LIBRARY_DIRS}
 )
