@@ -48,6 +48,8 @@
 #include <jderobotutil/CameraTask.h>
 #include <ns/ns.h>
 
+#include "easyiceconfig/EasyIce.h"
+
 bool flag=false; /** boolean to keep a check on signal */
 
 namespace cameraserver{
@@ -188,7 +190,7 @@ int main(int argc, char** argv)
   signal(SIGINT,signalHandler);
   Ice::CommunicatorPtr ic;
   try{
-    ic = Ice::initialize(argc, argv);
+    ic = EasyIce::initialize(argc, argv);
 
     Ice::PropertiesPtr prop = ic->getProperties();
 

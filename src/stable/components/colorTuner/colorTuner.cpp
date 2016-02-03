@@ -27,6 +27,7 @@
 #include "viewer.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include "easyiceconfig/EasyIce.h" 
 
 int main(int argc, char** argv){
     int status;
@@ -35,7 +36,7 @@ int main(int argc, char** argv){
     Ice::CommunicatorPtr ic;
     
     try{
-        ic = Ice::initialize(argc,argv);
+        ic = EasyIce::initialize(argc,argv);
         Ice::ObjectPrx base = ic->propertyToProxy("Cameraview.Camera.Proxy");
         if (0==base)
           throw "Could not create proxy";

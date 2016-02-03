@@ -12,6 +12,7 @@
 #include "control/control.h"
 #include "control/threadcontrol.h"
 #include "shared.h"
+#include "easyiceconfig/EasyIce.h"
 
 using namespace basic_component;
 
@@ -89,7 +90,7 @@ int main(int argc, char* argv[])
 	//pthread_t t_gui;
         //We initialize Ice here to be able to add some other options to the configuration file such as
         //the posibility to choose the gui mode.
-        Ice::CommunicatorPtr ic = Ice::initialize(argc, argv);
+        Ice::CommunicatorPtr ic = EasyIce::initialize(argc, argv);
 
 	Ice::PropertiesPtr prop = ic->getProperties();
 

@@ -39,7 +39,7 @@
 #include <string.h>
 #include <time.h>
 #include <geometry/progeo/Progeo.h>
-
+#include "easyiceconfig/EasyIce.h"
 
 enum Pattern { CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID };
 enum { DETECTION = 0, CAPTURING = 1, CALIBRATED = 2 };
@@ -287,7 +287,7 @@ int main(int argc, char** argv){
     std::vector<cameraData> cameras;
 
 	try{
-		ic = Ice::initialize(argc,argv);
+		ic = EasyIce::initialize(argc,argv);
 		prop = ic->getProperties();
 	}catch (const Ice::Exception& ex) {
 		std::cerr << ex << std::endl;

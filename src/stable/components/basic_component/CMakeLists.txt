@@ -18,7 +18,13 @@ target_link_libraries (guigtk
     ${gtkmm_LIBRARIES}  
     ${gtkmm3_LIBRARIES}  	
     ${gthread_LIBRARIES}
-)
+    ${easyiceconfig_INCLUDE_DIRS}
+    )
+
+	link_directories(
+		${easyiceconfig_LIBRARY_DIRS}
+	)
+
 
 include_directories(
     ${INTERFACES_CPP_DIR}
@@ -45,6 +51,7 @@ target_link_libraries(basic_component
     	colorspacesmm
     	${OpenCV_LIBRARIES}       
     	${OpenCVGUI_LIBRARIES} 
+		${easyiceconfig_LIBRARIES}
     	${ZeroCIce_LIBRARIES}   
     	guigtk dl
     )

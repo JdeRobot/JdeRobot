@@ -7,8 +7,12 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${gtkmm_INCLUDE_DIRS}
     ${libglademm_INCLUDE_DIRS}
+    ${easyiceconfig_INCLUDE_DIRS}
 )
 
+link_directories(
+    ${easyiceconfig_LIBRARY_DIRS}
+)
 
 
 add_executable (cameraCalibrator  ${SOURCE_FILES})
@@ -24,6 +28,7 @@ add_executable (cameraCalibrator  ${SOURCE_FILES})
         parallelIce
         ${ZLIB_LIBRARIES}
         #    ${Gearbox_LIBRARIES}
+        ${easyiceconfig_LIBRARIES}
         ${ZeroCIce_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT} 
 )
