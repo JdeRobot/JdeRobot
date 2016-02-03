@@ -27,6 +27,7 @@
 #include <visionlib/colorspaces/colorspacesmm.h>
 #include "viewer.h"
 #include "parallelIce/cameraClient.h"
+#include "easyiceconfig/EasyIce.h" 
 
 int main(int argc, char** argv){
 	int status;
@@ -36,7 +37,7 @@ int main(int argc, char** argv){
 	jderobot::cameraClient* camRGB;
 
 	try{
-		ic = Ice::initialize(argc,argv);
+		ic = EasyIce::initialize(argc,argv);
 		Ice::ObjectPrx base = ic->propertyToProxy("Cameraview.Camera.Proxy");
 		Ice::PropertiesPtr prop = ic->getProperties();
 
