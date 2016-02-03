@@ -7,105 +7,59 @@ Sensors::Sensors(Ice::CommunicatorPtr ic)
 
     ////////////////////////////// ENCODERS //////////////////////////////
     // Contact to ENCODERS interface
-    Ice::ObjectPrx baseEncoders = ic->propertyToProxy("introrob.Encoders.Proxy");
-    if (0 == baseEncoders) {
-		encodersON = false;
-		std::cout << "Encoders configuration not specified" <<std::endl;
-        //throw "Could not create proxy with encoders";
-	}else{
-		// Cast to encoders
 		try {
-			eprx = jderobot::EncodersPrx::checkedCast(baseEncoders);
-			if (0 == eprx)
-				throw "Invalid proxy introrob.Encoders.Proxy";
-
+			eprx = easyiceconfig::proxies::createProxy<jderobot::EncodersPrx>(ic, "introrob.Encoders.Proxy", false);
 			encodersON = true;
-			std::cout << "Encoders connected" << std::endl;
-		}catch (Ice::ConnectionRefusedException& e){
+		}catch (Ice::Exception& e){
 			encodersON=false;
-			std::cout << "Encoders inactive" << std::endl;
+			std::cout << "Encoders inactive." << std::endl;
+			std::cout << "Reason: "<< e << std::endl << std::endl;
 		}
-	}
 
 
     ////////////////////////////// CAMERA1 /////////////////////////////2
 
 	jderobot::ImageDataPtr data;
-
-    Ice::ObjectPrx baseCamera1 = ic->propertyToProxy("introrob.Camera1.Proxy");
-    if (0==baseCamera1) {
-		camera1ON = false;
-		image1.create(400, 400, CV_8UC3);
-		std::cout << "Camera1 configuration not specified" <<std::endl;
-      //throw "Could not create proxy";
-	}else{
-    /*cast to CameraPrx*/
-	try {
-		camera1 = jderobot::CameraPrx::checkedCast(baseCamera1);
-		if (0==camera1)
-		  throw "Invalid proxy";
-
+	camera1 = EasyIce::EasyProxy<jderobot::CameraPrx>(ic, "introrob.Camera1.Proxy", false);
+	if (camera1){
 		camera1ON = true;
-		std::cout << "Camera1 connected" << std::endl;
-
 		data = camera1->getImageData(camera1->getImageFormat().at(0));
 		image1.create(data->description->height, data->description->width, CV_8UC3);
-	}catch (Ice::ConnectionRefusedException& e){
+	}else{
 		camera1ON=false;
-		std::cout << "Camera1 inactive" << std::endl;
+		std::cout << "Camera1 inactive." << std::endl;
+		std::cout << "Reason: " << camera1.exception() << std::endl << std::endl;
 
 		//create an empty image if no camera connected (avoid seg. fault)
 		image1.create(400, 400, CV_8UC3);
-	}}
+	}
 
-    ////////////////////////////// CAMERA2 /////////////////////////////2
-	Ice::ObjectPrx baseCamera2 = ic->propertyToProxy("introrob.Camera2.Proxy");
-    if (0==baseCamera2) {
-		camera2ON = false;
-		image2.create(400, 400, CV_8UC3);
-		std::cout << "Camera2 configuration not specified" <<std::endl;
-      //throw "Could not create proxy";
-	}else{
-    /*cast to CameraPrx*/
-	try {
-		camera2 = jderobot::CameraPrx::checkedCast(baseCamera2);
-		if (0==camera2)
-		  throw "Invalid proxy";
-
+    ////////////////////////////// CAMERA2 /////////////////////////////
+	camera2 = EasyIce::EasyProxy<jderobot::CameraPrx>(ic, "introrob.Camera2.Proxy", false);
+	if (camera2){
 		camera2ON = true;
-		std::cout << "Camera2 connected" << std::endl;
-
 		data = camera2->getImageData(camera2->getImageFormat().at(0));
 		image2.create(data->description->height, data->description->width, CV_8UC3);
-	}catch (Ice::ConnectionRefusedException& e){
+	}else{
 		camera2ON=false;
-		std::cout << "Camera2 inactive" << std::endl;
+		std::cout << "Camera2 inactive." << std::endl;
+		std::cout << "Reason: " << camera2.exception() << std::endl << std::endl;
 
 		//create an empty image if no camera connected (avoid seg. fault)
 		image2.create(400, 400, CV_8UC3);
-	}}
+	}
 
     ////////////////////////////// LASER //////////////////////////////
 	// Contact to LASER interface
-    Ice::ObjectPrx laserICE = ic->propertyToProxy("introrob.Laser.Proxy");
-    if (0 == laserICE) {
-		laserON = false;
-		std::cout << "Laser configuration not specified" <<std::endl;
-        //throw "Could not create proxy with Laser";
-	}else{
-    // Cast to LASER
-	try {
-		laserprx = jderobot::LaserPrx::checkedCast(laserICE);
-		if (0 == laserprx){
-		   throw std::string("Invalid proxy introrob.Laser.Proxy");
-		}
-
+	laserprx = EasyIce::EasyProxy<jderobot::LaserPrx>(ic, "introrob.Laser.Proxy", false);
+	if (laserprx) {
 		laserON = true;
 		std::cout << "Laser connected" << std::endl;
-	}catch (Ice::ConnectionRefusedException& e){
+	}else{
 		laserON=false;
 		std::cout << "Laser inactive" << std::endl;
-	}}
+		std::cout << "Reason: " << laserprx.exception() << std::endl << std::endl;
+	}
 
     /*boolLaser = prop->getPropertyAsInt("introrob.Laser");
 

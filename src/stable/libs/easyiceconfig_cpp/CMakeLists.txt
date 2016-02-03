@@ -15,11 +15,14 @@ include_directories(include)
 
 set(HEADERS
     include/easyiceconfig/EasyIce.h
+    include/easyiceconfig/EasyProxy.h
     include/easyiceconfig/hardcoredlocations.h
 
     include/easyiceconfig/loader.hpp
     include/easyiceconfig/initializer.hpp
     include/easyiceconfig/injector.hpp
+
+    include/easyiceconfig/proxies.hpp
     include/easyiceconfig/debug.hpp
 
     include/easyiceconfig/stdutils.hpp
@@ -59,6 +62,9 @@ set_target_properties(test_stdutils PROPERTIES COMPILE_FLAGS "-std=c++0x")
 
 add_executable(test_loader src/tests/test_loader.cpp)
 target_link_libraries(test_loader ${PROJECT_NAME} ${Ice_LIBRARIES})
+
+add_executable(test_proxy src/tests/test_proxy.cpp)
+target_link_libraries(test_proxy ${PROJECT_NAME} ${Ice_LIBRARIES} pthread)
 
 
 ### Install

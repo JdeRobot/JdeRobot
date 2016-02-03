@@ -1,30 +1,19 @@
 #include "actuators.h"
 
+#include <easyiceconfig/proxies.hpp>
+
 Actuators::Actuators(Ice::CommunicatorPtr ic)
 {
     this->ic = ic;
-
-    // Contact to MOTORS interface
-    Ice::ObjectPrx baseMotors = ic->propertyToProxy("introrob.Motors.Proxy");
-    if (0 == baseMotors){
-        motorsON = false;
-		std::cout << "Motors configuration not specified" <<std::endl;
-
-        //throw "Could not create proxy with motors";
-	}else{
-		// Cast to motors
-		try{
-			mprx = jderobot::MotorsPrx::checkedCast(baseMotors);
-			if (0 == mprx)
-				throw "Invalid proxy introrob.Motors.Proxy";
-
-			motorsON = true;
-			std::cout << "Motors connected" << std::endl;
-		}catch (Ice::ConnectionRefusedException& e){
-			motorsON=false;
-			std::cout << "Motors inactive" << std::endl;
-		}
+	try {
+		mprx = easyiceconfig::proxies::createProxy<jderobot::MotorsPrx>(ic, "introrob.Motors.Proxy", false);
+		motorsON = true;
+	}catch (Ice::Exception& e){
+		motorsON=false;
+		std::cout << "Motors inactive." << std::endl;
+		std::cout << "Reason: "<< e << std::endl << std::endl;
 	}
+
     
     motorVout= 0;
     motorWout = 0;
