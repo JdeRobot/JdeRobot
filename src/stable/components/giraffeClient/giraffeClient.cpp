@@ -27,6 +27,7 @@
 #include <visionlib/colorspaces/colorspacesmm.h>
 #include "view.h"
 #include <jderobot/jointmotor.h>
+#include "easyiceconfig/EasyIce.h" 
 
 using namespace std;
 
@@ -42,7 +43,7 @@ int main(int argc, char** argv){
 	std::cout << "init " << std::endl;
 
 	try{
-		ic = Ice::initialize(argc,argv);
+		ic = EasyIce::initialize(argc,argv);
 		/*Get to giraffe server*/
 		Ice::ObjectPrx base1 = ic->propertyToProxy("giraffeClient.JointMotor.Proxy");
 		if (0==base1)
