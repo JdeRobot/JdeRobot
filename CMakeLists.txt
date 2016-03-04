@@ -193,8 +193,10 @@ INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/stable/interfaces/cpp/jderobot
 )
 
 # Install slice
-FILE(GLOB SLICE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/interfaces/slice/jderobot/*.ice)
-INSTALL (FILES ${SLICE_FILES} DESTINATION /usr/local/include/jderobot/slice COMPONENT core)
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/interfaces/slice/
+	DESTINATION /usr/local/share/jderobot/slice/
+	COMPONENT core
+)
 
 # Install CONF
 FILE(GLOB_RECURSE CONF_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/stable/components/*.cfg)

@@ -142,7 +142,7 @@ VisualHFSM::VisualHFSM ( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builde
     this->idguinode = 1;
     this->idguitransition = 1;
 
-    system("./getinterfaces.sh /usr/local/include/jderobot/slice > allinterfaces.txt");
+    system("./getinterfaces.sh /usr/local/share/jderobot/slice > allinterfaces.txt");
     std::ifstream infile("allinterfaces.txt");
     std::string line;
     while ( std::getline(infile, line) ) {

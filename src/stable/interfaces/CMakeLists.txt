@@ -1,16 +1,6 @@
-set(SLICE_NEW_STYLE "ON")
-if (NOT DEFINED SLICE_NEW_STYLE)
-
-include (${CMAKE_CURRENT_LIST_DIR}/slice/CMakeLists.txt)
-
-include_directories(
-        ${CMAKE_CURRENT_LIST_DIR}/cpp/jderobot
-        ${CMAKE_CURRENT_LIST_DIR}/cpp/
-)
-add_library (JderobotInterfaces SHARED ${SOURCE_FILES} ${ICE_FILES})
-TARGET_LINK_LIBRARIES(JderobotInterfaces ${ice2_LIBRARIES})
-
-else()
+#  Copyright (C) 2015 JDE Developers Team
+#  Authors:
+#    Victor Arribas <v.arribas.urjc@gmail.com> (Nov 2015)
 
 ### CMakeCache build control
 if (NOT DEFINED build_interfaces_cpp)
@@ -48,8 +38,8 @@ FILE(GLOB_RECURSE SLICE_FILES
 
 ### Trick to publich .ice files into CMake's sources
 file(GLOB_RECURSE SLICE_DEFINITIONS "slice/**.ice")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/dummy.c "")
-add_library(JderobotInterfaces_Definitions ${CMAKE_CURRENT_BINARY_DIR}/dummy.c ${SLICE_DEFINITIONS})
+add_library(JderobotInterfaces_Definitions ${SLICE_DEFINITIONS})
+set_target_properties(JderobotInterfaces_Definitions PROPERTIES LINKER_LANGUAGE CXX)
 
 
 foreach(slice_rel_path ${SLICE_FILES})
@@ -118,4 +108,3 @@ if (build_interfaces_cpp)
     target_link_libraries(JderobotInterfaces ${ice2_LIBRARIES})
 endif()
 
-endif(NOT DEFINED SLICE_NEW_STYLE)
