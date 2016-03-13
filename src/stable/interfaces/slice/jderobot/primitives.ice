@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1997-2016 JDE Developers Teameldercare.camRGB
+ *  Copyright (C) 1997-2010 JDE Developers Team
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,29 +15,39 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/.
  *
  *  Authors : Jose María Cañas <jmplaza@gsyc.es>
-			Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
-			
+ *            Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
  */
 
-#ifndef POINTCLOUD_ICE
-#define POINTCLOUD_ICE
+#ifndef BODY_ICE
+#define BODY_ICE
 
-#include <jderobot/primitives.ice>
+#include <jderobot/common.ice>
 
+module jderobot{
 
-module jderobot{  
-
-	
-	sequence<RGBPoint> RGBPointsPCL;
-
-	class pointCloudData{
-		RGBPointsPCL p;
+	/**
+	* PCL
+	*/
+	struct RGBPoint{
+      float x;
+      float y;
+      float z;
+      float r;
+      float g;
+      float b;
+	  int id;
 	};
 
-
-	interface pointCloud{
-		idempotent pointCloudData getCloudData();
+	struct Point{
+	    float x;
+	    float y;
+	    float z;
 	};
+
+	struct Segment{
+	    Point from;
+	    Point to;
+	};
+
 };
-#endif 
-
+#endif
