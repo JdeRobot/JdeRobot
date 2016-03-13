@@ -90,6 +90,7 @@ private:
 	void generateSpecificHeaders_py();
 	void generateAutomataClass_py();
 	void generateAutomataInit_py();
+	void generateFunctions_py();
 	void generateStartThreads_py();
 	void generateCreateGuiSubautomataList_py();
 	void generateEnums_py();
