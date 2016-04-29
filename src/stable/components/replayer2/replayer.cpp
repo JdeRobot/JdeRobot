@@ -1203,7 +1203,8 @@ int main(int argc, char** argv) {
 
 		// Naming Service
 		int nsActive = prop->getPropertyAsIntWithDefault("NamingService.Enabled", 0);
-		ns = jderobot::nsPtr(new jderobot::ns(ic,"NamingService.Proxy",nsActive));
+		if (nsActive)
+			ns = jderobot::nsPtr(new jderobot::ns(ic,"NamingService.Proxy",nsActive));
 		if (nsActive && !ns->getIceProxy()){
 			return -1;
 		}
