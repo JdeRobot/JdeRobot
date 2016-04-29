@@ -1,3 +1,0 @@
-#!/bin/bash
-
-python /usr/local/share/jderobot/python/refereeViewer/refereeViewer.py $1
