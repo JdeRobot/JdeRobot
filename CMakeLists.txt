@@ -187,7 +187,7 @@ ENDFOREACH(currentBin)
 
 FOREACH (currentBin ${LIST_TOOLS})
     if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/tools/${currentBin}/${currentBin})
-        INSTALL (PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/src/toolss/${currentBin}/${currentBin} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin OPTIONAL COMPONENT core)
+        INSTALL (PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/src/tools/${currentBin}/${currentBin} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin OPTIONAL COMPONENT core)
     else()
         INSTALL (PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/src/tools/${currentBin}/${currentBin} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin OPTIONAL COMPONENT core)
     endif()
