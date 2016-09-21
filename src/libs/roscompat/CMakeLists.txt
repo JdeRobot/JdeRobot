@@ -7,65 +7,63 @@
 
 cmake_minimum_required(VERSION 2.8.4)
 
-project(roscompat)
+if(roscpp_FOUND)
 
-SET (CATKIN_DEVEL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
+	project(roscompat)
 
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  std_msgs
-  message_generation
-  cv_bridge
-  image_transport
-)
+	SET (CATKIN_DEVEL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_message_files(
-   FILES
-   Num.msg
-   Pose3d.msg
-)
-generate_messages(
-   DEPENDENCIES
-   std_msgs
-)
+	find_package(catkin REQUIRED COMPONENTS
+	  roscpp
+	  std_msgs
+	  message_generation
+	  cv_bridge
+	  image_transport
+	)
 
-catkin_package(
-  CATKIN_DEPENDS roscpp std_msgs message_runtime
-)
+	add_message_files(
+	   FILES
+	   Num.msg
+	   Pose3d.msg
+	)
+	generate_messages(
+	   DEPENDENCIES
+	   std_msgs
+	)
 
-set(binname ${PROJECT_NAME})
+	catkin_package(
+	  CATKIN_DEPENDS roscpp std_msgs message_runtime
+	)
 
-include_directories(
-	${CMAKE_CURRENT_SOURCE_DIR}/include
-)
+	set(binname ${PROJECT_NAME})
 
-## Sources
-set(SOURCES
-	include/roscompat/Num.h
-	include/roscompat/Pose3d.h
-	include/roscompat/roscompat.h
-	include/roscompat/listener.h
+	include_directories(
+		${CMAKE_CURRENT_SOURCE_DIR}/include
+	)
 
-	src/roscompat.cpp
-	src/listener.cpp
-)
+	## Sources
+	set(SOURCES
+		include/roscompat/Num.h
+		include/roscompat/Pose3d.h
+		include/roscompat/roscompat.h
+		include/roscompat/listener.h
 
-add_library(${binname} SHARED ${SOURCES})
-target_link_libraries(${binname} ${catkin_LIBRARIES})
+		src/roscompat.cpp
+		src/listener.cpp
+	)
 
-## Options
-set_target_properties(${binname} PROPERTIES COMPILE_FLAGS "-Wall -Wextra")
+	add_library(${binname} SHARED ${SOURCES})
+	target_link_libraries(${binname} ${catkin_LIBRARIES})
 
-set(${binname}_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include" CACHE PATH "Find(${binname})")
-set(${binname}_LIBRARY_DIRS "${CMAKE_CURRENT_BINARY_DIR}" CACHE PATH "Find(${binname})")
-set(${binname}_LIBRARIES "${binname}" CACHE STRINGS "Find(${binname})")
+	## Options
+	set_target_properties(${binname} PROPERTIES COMPILE_FLAGS "-Wall -Wextra")
 
+	set(${binname}_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include" CACHE PATH "Find(${binname})")
+	set(${binname}_LIBRARY_DIRS "${CMAKE_CURRENT_BINARY_DIR}" CACHE PATH "Find(${binname})")
+	set(${binname}_LIBRARIES "${binname}" CACHE STRINGS "Find(${binname})")
 
-MESSAGE("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ${roscompat_INCLUDE_DIRS}")
-MESSAGE("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB ${roscompat_LIBRARY_DIRS}")
-MESSAGE("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC1111 ${roscompat_LIBRARIES}")
-
-#add_executable(camdriver src/CameraDriver.cpp)
-#include_directories(${OpenCV_INCLUDE_DIRS})
-#target_link_libraries(camdriver ${catkin_LIBRARIES} ${OpenCV_LIBS} ${OpenCV_LIBRARIES})
-#add_dependencies(camdriver roscompat_generate_messages_cpp)
+	#add_executable(camdriver src/CameraDriver.cpp)
+	#include_directories(${OpenCV_INCLUDE_DIRS})
+	#target_link_libraries(camdriver ${catkin_LIBRARIES} ${OpenCV_LIBS} ${OpenCV_LIBRARIES})
+	#add_dependencies(camdriver roscompat_generate_messages_cpp)
+endif()
