@@ -1,4 +1,4 @@
-find_package(roscpp QUIET REQUIRED COMPONENTS std_msgs message_generation cv_bridge image_transport)
+find_package(roscpp QUIET)
 
 if(roscpp_FOUND)
 
