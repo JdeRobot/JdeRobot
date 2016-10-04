@@ -54,10 +54,13 @@ roscomp::translate_pose3d_messages(const roscompat::Pose3d::ConstPtr& msg, std::
         pthread_mutex_unlock(&mutex);
 }
 	
-/*void roscomp::translate_motor_messages(const Motors::ConstPtr& msg, std::vector<float>& motors) {
+void 
+roscomp::translate_motor_messages(const roscompat::Motors::ConstPtr& msg, std::vector<float>& motors) {
+	pthread_mutex_lock(&mutex);
 	motors.push_back(msg->w);
 	motors.push_back(msg->v);
 	motors.push_back(msg->l);
-}*/
+        pthread_mutex_unlock(&mutex);
+}
 
 //}//NS

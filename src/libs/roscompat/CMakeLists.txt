@@ -25,6 +25,7 @@ if(roscpp_FOUND)
 	   FILES
 	   Num.msg
 	   Pose3d.msg
+           Motors.msg
 	)
 	generate_messages(
 	   DEPENDENCIES
@@ -45,6 +46,7 @@ if(roscpp_FOUND)
 	set(SOURCES
 		include/roscompat/Num.h
 		include/roscompat/Pose3d.h
+		include/roscompat/Motors.h
 		include/roscompat/roscompat.h
 		include/roscompat/listener.h
 

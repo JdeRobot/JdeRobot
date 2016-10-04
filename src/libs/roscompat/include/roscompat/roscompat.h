@@ -5,6 +5,7 @@
 
 #include "Num.h"
 #include "Pose3d.h"
+#include "Motors.h"
 
 #include "opencv2/core/core.hpp"
 #include "image_transport/image_transport.h"
@@ -22,7 +23,7 @@ public:
 	void translate_image_messages(const sensor_msgs::ImageConstPtr& msg, cv::Mat& image);
 	void translate_laser_messages(const roscompat::Num::ConstPtr& msg, std::vector<float>& laserdata);
 	void translate_pose3d_messages(const roscompat::Pose3d::ConstPtr& msg, std::vector<float>& pose);
-	//void translate_motor_messages(const roscompat::Motors::ConstPtr& msg, std::vector<float>& motors);
+	void translate_motor_messages(const roscompat::Motors::ConstPtr& msg, std::vector<float>& motors);
 
 private:
 	pthread_mutex_t mutex;
