@@ -140,12 +140,16 @@ add_subdirectory (${CMAKE_CURRENT_SOURCE_DIR}/src)
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/src/interfaces/libJderobotInterfaces.so DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/jderobot COMPONENT core)
 
 # Install python files
-FILE(GLOB_RECURSE HEADERS_FILES ${CMAKE_CURRENT_BINARY_DIR}/src/interfaces/python/*py)
+FILE(GLOB HEADERS_FILES ${CMAKE_CURRENT_BINARY_DIR}/src/interfaces/python/*py)
+LIST(REMOVE_ITEM HEADERS_FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/src/interfaces/python/*/__init__.py)
+
 FOREACH(header ${HEADERS_FILES})
 	INSTALL(FILES ${header} DESTINATION ${PYTHON_MODULE_PATH}/ COMPONENT core)
 ENDFOREACH(header)
 
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/src/interfaces/python/jderobot/__init__.py DESTINATION ${PYTHON_MODULE_PATH}/jderobot/ COMPONENT core)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/src/interfaces/python/RoboCompJointMotor/__init__.py DESTINATION ${PYTHON_MODULE_PATH}/RoboCompJointMotorls/ COMPONENT core)
 
 # install all libraries 
 FILE(GLOB LIB_FILES ${CMAKE_CURRENT_BINARY_DIR}/src/libs/*/*.so*)
