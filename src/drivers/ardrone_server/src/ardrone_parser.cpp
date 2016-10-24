@@ -81,7 +81,7 @@ void ArDroneParser::writeFile(std::string filepath,ArDroneConfig *conf)
 	}
 	rootNode.put("<xmlattr>.name", "ardrone_server");
 	pt.add_child("component", rootNode);
-	boost::property_tree::xml_writer_settings<char> settings('\t', 1);
+	boost::property_tree::xml_writer_settings<std::string> settings('\t', 1);
 	write_xml(filepath, pt, std::locale(), settings);	
 }
 
