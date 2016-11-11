@@ -31,7 +31,7 @@
 #include <sstream>
 #include <fstream>
 #include <climits>
-#include <log/Logger.h>
+#include <logger/Logger.h>
 
 namespace jderobot {
 

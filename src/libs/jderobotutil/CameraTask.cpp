@@ -9,7 +9,7 @@
 #include <openssl/md5.h>
 #include <zlib.h>
 #include <visionlib/colorspaces/colorspacesmm.h>
-#include <log/Logger.h>
+#include <logger/Logger.h>
 #include <iomanip>
 
 

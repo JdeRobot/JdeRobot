@@ -5,7 +5,7 @@
 #include <visionlib/imgAnalyze/image.h>
 #include <visionlib/imgAnalyze/structs.h>
 #include <visionlib/imgAnalyze/linesDetection.h>
-#include <visionlib/cvFast/cvfast.h>
+#include <visionlib/cvfast/cvfast.h>
 #include <progeo/progeo.h>
 
 #endif

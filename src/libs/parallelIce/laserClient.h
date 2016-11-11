@@ -29,7 +29,7 @@
 #include <cv.h>
 #include <sstream>
 #include <fstream>
-#include <log/Logger.h>
+#include <logger/Logger.h>
 
 namespace jderobot {
 

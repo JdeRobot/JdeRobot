@@ -23,7 +23,7 @@
 
 
 #include <namingService.h>
-#include <log/Logger.h>
+#include <logger/Logger.h>
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
 #include <boost/lexical_cast.hpp>
