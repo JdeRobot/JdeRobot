@@ -29,7 +29,7 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include "structs.h"
-#include <visionlib/cvFast/cvfast.h>
+#include <visionlib/cvfast/cvfast.h>
 #include "geometry.h"
 
 #ifndef I_SQUARE

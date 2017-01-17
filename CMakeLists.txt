@@ -43,6 +43,7 @@ SET( LIBS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/libs)
 SET( SLICE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/interfaces/slice)
 # Main libraries
 SET( LIBS_NEEDED  colorspaces jderobotutil progeo pioneer fuzzylib visionlib parallelIce )
+SET( LIBS_EXTRA  easyiceconfig depthLib geometry jderobotHandlers jderobotViewer logger ns resourcelocator xmlParser colorspaces cvblob cvfast imgAnalyze)
 
 # Create directories if necessary
 file(MAKE_DIRECTORY ${INTERFACES_PYTHON_DIR})
@@ -224,6 +225,11 @@ INSTALL (FILES ${GLADE_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Deps DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot)
 
 
+
+
+
+
+
 #file(WRITE dummy_main1.c "int main(int argc, char** argv){return 0;}")
 #add_executable(dummy_main1 dummy_main1.c)
 #INSTALL (FILES ${CMAKE_CURRENT_SOURCE_DIR}/dummy_main1 DESTINATION /tmp COMPONENT deps OPTIONAL PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
@@ -352,3 +358,50 @@ execute_process(
 
 #SET (CPACK_COMPONENTS_ALL Libraries ApplicationData)
 include (CPack Documentation)
+
+
+
+
+SET(JdeRobot_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib/jderobot )
+SET(ALL_LIB ${LIBS_NEEDED} ${LIBS_EXTRA})
+
+foreach (l ${ALL_LIB} )
+	if (TARGET ${l})
+	    	FIND_LIBRARY( TEMP_LIBRARY NAMES ${l} PATHS ${CMAKE_INSTALL_PREFIX}/lib/jderobot)
+		SET(CONF_LIBRARIES ${CONF_LIBRARIES} ${TEMP_LIBRARY})
+		unset(TEMP_LIBRARY CACHE)
+	endif()
+endforeach()
+
+
+
+
+
+
+SET(JdeRobot_VERSION ${CPACK_DEBIAN_PACKAGE_VERSION})
+#cmake config
+configure_file(cmake/JdeRobotConfig.cmake.in "${PROJECT_BINARY_DIR}/JdeRobotConfig.cmake" @ONLY)
+# ... for the install tree
+set(CONF_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include/jderobot")
+configure_file(cmake/JdeRobotConfig.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/JdeRobotConfig.cmake" @ONLY)
+# ... for both
+configure_file(cmake/JdeRobotConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/JdeRobotConfigVersion.cmake" @ONLY)
+
+
+if(WIN32 AND NOT CYGWIN)
+  set(DEF_INSTALL_CMAKE_DIR CMake)
+else()
+  set(DEF_INSTALL_CMAKE_DIR lib/CMake/FooBar)
+endif()
+set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
+  "Installation directory for CMake files")
+
+
+SET(INSTALL_CMAKE_DIR ${CMAKE_INSTALL_PREFIX}/share/jderobot)
+
+install(FILES
+  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/JdeRobotConfig.cmake"
+  "${PROJECT_BINARY_DIR}/JdeRobotConfigVersion.cmake"
+  DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+
+

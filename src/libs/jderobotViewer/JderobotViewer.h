@@ -14,7 +14,7 @@
 #include <pcl/common/common_headers.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
-#include <log/Logger.h>
+#include <logger/Logger.h>
 #include <opencv2/core/core.hpp>
 
 

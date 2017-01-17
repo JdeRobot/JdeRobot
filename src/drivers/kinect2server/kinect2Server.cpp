@@ -40,7 +40,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <signal.h>
-#include <log/Logger.h>
+#include <logger/Logger.h>
 #include <ns/ns.h>
 #include <iostream>
 #include <signal.h>

@@ -43,7 +43,7 @@
 #include <list>
 
 #include <zlib.h>
-#include <log/Logger.h>
+#include <logger/Logger.h>
 #include <jderobotutil/CameraHandler.h>
 #include <jderobotutil/CameraTask.h>
 #include <ns/ns.h>

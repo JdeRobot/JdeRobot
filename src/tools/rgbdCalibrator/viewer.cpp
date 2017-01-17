@@ -24,7 +24,7 @@
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
 #include <boost/filesystem.hpp>
-#include <visionlib/cvBlob/cvblob.h>
+#include <visionlib/cvblob/cvblob.h>
 #include <resourcelocator/gladelocator.hpp>
 
 #define DEGTORAD     (3.14159264 / 180.0)

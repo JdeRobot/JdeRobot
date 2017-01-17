@@ -44,7 +44,7 @@
 #include <opencv2/imgproc/imgproc_c.h>
 #include <opencv2/video/background_segm.hpp>
 #include <signal.h>
-#include <log/Logger.h>
+#include <logger/Logger.h>
 #include <ns/ns.h>
 #include <zlib.h>
 #include <openssl/md5.h>

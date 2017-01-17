@@ -26,7 +26,7 @@
 
 #include "pthread.h"
 #include <signal.h>
-#include <log/Logger.h>
+#include <logger/Logger.h>
 
 #include "NamingServiceJdeRobot.h"
 

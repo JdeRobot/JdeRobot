@@ -1,0 +1,11 @@
+# - Config file for the JdeRobot package
+# It defines the following variables
+#  JdeRobot_INCLUDE_DIRS - include directories for JdeRobot
+#  JdeRobot_LIBRARIES    - libraries to link against
+#  JdeRobot_EXECUTABLE   - the bar executable
+ 
+# Compute paths
+get_filename_component(JdeRobot_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(JdeRobot_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+set(JdeRobot_LIBRARIES "@CONF_LIBRARIES@")
+ 

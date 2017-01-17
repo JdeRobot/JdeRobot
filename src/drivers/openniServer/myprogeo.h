@@ -28,7 +28,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <log/Logger.h>
+#include <logger/Logger.h>
 
 
 #define MAX_CAMERAS 8

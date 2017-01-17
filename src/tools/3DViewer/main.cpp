@@ -49,7 +49,7 @@
 #include <list>
 
 #include <zlib.h>
-#include <log/Logger.h>
+#include <logger/Logger.h>
 #include <jderobot/visualization.h>
 #include <ns/ns.h>
 

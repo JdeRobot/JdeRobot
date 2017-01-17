@@ -19,7 +19,7 @@
  */
 
 #include <jderobot/namingService.h>
-#include <log/Logger.h>
+#include <logger/Logger.h>
 #include <boost/lexical_cast.hpp>
 #include <fstream>
 #include <vector>
