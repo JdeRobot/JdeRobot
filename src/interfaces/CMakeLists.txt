@@ -118,4 +118,6 @@ if (build_interfaces_cpp)
     target_link_libraries(JderobotInterfaces ${ice2_LIBRARIES})
 endif()
 
+set(ice_interfaces_INCLUDE_DIRS "${SLICE_CPP_DIR}" CACHE PATH "Find(ice_interfaces)")
+
 endif(NOT DEFINED SLICE_NEW_STYLE)

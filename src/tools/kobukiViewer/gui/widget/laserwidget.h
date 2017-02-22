@@ -5,19 +5,19 @@
 #include <iostream>
 #include <math.h>
 #include <QtWidgets>
-#include "../../robot/types.h"
+#include <jderobot/types/laserData.h>
 
 class LaserWidget: public QWidget
 {
 public:
     LaserWidget();
-    void update(LaserD laserData);
+    void update(JdeRobotTypes::LaserData laserData);
 
 protected:
     void paintEvent(QPaintEvent *);
 
     QMutex mutex;
-    LaserD laserData;
+    JdeRobotTypes::LaserData laserData;
 
 };
 
