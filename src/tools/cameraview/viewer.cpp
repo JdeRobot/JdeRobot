@@ -31,8 +31,9 @@ namespace cameraview {
   Viewer::Viewer()
     : gtkmain(0, 0), frameCount(0) {
 
+std::cout << gladepath << std::endl;
     std::cout << "Loading glade\n";
-    refXml = Gnome::Glade::Xml::create(gladepath);
+    refXml = Gnome::Glade::Xml::create("cameraview.glade");
     refXml->get_widget("image", gtkimage);
     refXml->get_widget("mainwindow",mainwindow);
     refXml->get_widget("fpslabel",fpslabel);

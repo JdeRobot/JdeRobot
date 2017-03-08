@@ -20,6 +20,11 @@
  *
  */
 
+
+
+
+#include "opencv2/opencv.hpp"
+
 #include <iostream>
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
@@ -28,52 +33,91 @@
 #include "viewer.h"
 #include "parallelIce/cameraClient.h"
 #include "easyiceconfig/EasyIce.h" 
+#include "roscompat/listenerCamera.h"
+
+//Global variables for ROS translation.
+
+cameraview::Viewer* viewer;
+
+void *getInfoAsync(void* l) {
+
+	listenerCamera* li = (listenerCamera*)l;
+
+	while(viewer->isVisible()) {
+	  	viewer->displayFrameRate(li->getNFrame());
+		viewer->display(li->getNewFrame());
+	}
+	
+	li->stop();
+	exit (0);
+
+}
 
 int main(int argc, char** argv){
-	int status;
-	cameraview::Viewer viewer;
-	Ice::CommunicatorPtr ic;
 
+	viewer = new cameraview::Viewer();
+
+	int status;	
 	jderobot::cameraClient* camRGB;
+	cv::Mat cam_frame;
 
-	try{
-		ic = EasyIce::initialize(argc,argv);
-		Ice::ObjectPrx base = ic->propertyToProxy("Cameraview.Camera.Proxy");
-		Ice::PropertiesPtr prop = ic->getProperties();
+	Ice::CommunicatorPtr ic = EasyIce::initialize(argc,argv);;
+	Ice::PropertiesPtr prop = ic->getProperties();
 
-		if (0==base)
-			throw "Could not create proxy";
+	//0: Ice    other:ROS
+	int driver = prop->getPropertyAsIntWithDefault("Cameraview.Server", 0);
+	std::string topic = prop->getPropertyWithDefault("Cameraview.Topic", "usb_cam/image_raw");
+
+	if (driver == 0) {   //Try to connect with ICE
+
+		std::cout << "Receiving data from ICE interfaces" << std::endl;
+		try{
+		
+			Ice::ObjectPrx base = ic->propertyToProxy("Cameraview.Camera.Proxy");
 
 
-		camRGB = new jderobot::cameraClient(ic,"Cameraview.Camera.");
+			if (0==base)
+				throw "Could not create proxy";
 
-		if (camRGB == NULL){
-			throw "Invalid proxy";
+
+			camRGB = new jderobot::cameraClient(ic,"Cameraview.Camera.");
+
+			if (camRGB == NULL){
+				throw "Invalid proxy";
+			}
+			camRGB->start();
+
+			while(viewer->isVisible()){
+				//jderobot::ImageDataPtr data = camRGB->getImageData(format);
+
+				camRGB->getImage(cam_frame);
+				viewer->display(cam_frame);
+				viewer->displayFrameRate(camRGB->getRefreshRate());
+			}
+	
+			camRGB->stop_thread();
+			delete(camRGB);
+
+		}catch (const Ice::Exception& ex) {
+			std::cerr << ex << std::endl;
+			status = 1;
+		} catch (const char* msg) {
+			std::cerr << msg << std::endl;
+			status = 1;
 		}
-		camRGB->start();
+	}else{     //Try to connect ROS
 
-		cv::Mat rgb;
+		std::cout << "Receiving data from ROS messages" << std::endl;
 
-		while(viewer.isVisible()){
-			//jderobot::ImageDataPtr data = camRGB->getImageData(format);
-
-			camRGB->getImage(rgb);
-			viewer.display(rgb);
-			viewer.displayFrameRate(camRGB->getRefreshRate());
-		}
-	}catch (const Ice::Exception& ex) {
-		std::cerr << ex << std::endl;
-		status = 1;
-	} catch (const char* msg) {
-		std::cerr << msg << std::endl;
-		status = 1;
+		listenerCamera* l = new listenerCamera();
+		pthread_t thr_info;
+		pthread_create(&thr_info, NULL, &getInfoAsync, (void*) l);
+		l->listen(argc,argv,topic);
+		
 	}
 
 	if (ic)
 		ic->destroy();
-
-	camRGB->stop_thread();
-	delete(camRGB);
 
 	return status;
 }
