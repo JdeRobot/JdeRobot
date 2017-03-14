@@ -1,0 +1,271 @@
+material Tag36_11_00000
+{
+  receive_shadows off
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00000.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00001
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00001.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00002
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00002.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00003
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00003.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00004
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00004.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00005
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00005.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00006
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00006.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00007
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00007.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00008
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00008.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00009
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00009.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00010
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00010.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00011
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00011.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00012
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00012.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00013
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00013.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00014
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00014.png
+      }
+    }
+  }
+}
+
+material Tag36_11_00015
+{
+  receive_shadows on
+
+  technique
+  {
+    pass
+    {
+      ambient 0.5 0.5 0.5 1.00000
+      texture_unit
+      {
+        texture textures/tag36_11_00015.png
+      }
+    }
+  }
+}
