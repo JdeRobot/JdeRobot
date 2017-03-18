@@ -22,58 +22,33 @@
 
 #include <iostream>
 #include <Ice/Ice.h>
-#include <IceUtil/IceUtil.h>
-#include <jderobot/camera.h>
 #include <visionlib/colorspaces/colorspacesmm.h>
 #include "viewer.h"
-#include "parallelIce/cameraClient.h"
 #include "easyiceconfig/EasyIce.h" 
+#include <jderobot/comm/cameraClient.hpp>
+#include <jderobot/types/image.h>
 
 int main(int argc, char** argv){
+
 	int status;
 	cameraview::Viewer viewer;
 	Ice::CommunicatorPtr ic;
 
-	jderobot::cameraClient* camRGB;
+	JdeRobotComm::CameraClient* camRGB;
 
-	try{
-		ic = EasyIce::initialize(argc,argv);
-		Ice::ObjectPrx base = ic->propertyToProxy("Cameraview.Camera.Proxy");
-		Ice::PropertiesPtr prop = ic->getProperties();
+	ic = EasyIce::initialize(argc,argv);
 
-		if (0==base)
-			throw "Could not create proxy";
+	camRGB = JdeRobotComm::getCameraClient(ic, "Cameraview.Camera");
 
+	JdeRobotTypes::Image rgb;
 
-		camRGB = new jderobot::cameraClient(ic,"Cameraview.Camera.");
+	while(viewer.isVisible()){
+		//jderobot::ImageDataPtr data = camRGB->getImageData(format);
 
-		if (camRGB == NULL){
-			throw "Invalid proxy";
-		}
-		camRGB->start();
-
-		cv::Mat rgb;
-
-		while(viewer.isVisible()){
-			//jderobot::ImageDataPtr data = camRGB->getImageData(format);
-
-			camRGB->getImage(rgb);
-			viewer.display(rgb);
-			viewer.displayFrameRate(camRGB->getRefreshRate());
-		}
-	}catch (const Ice::Exception& ex) {
-		std::cerr << ex << std::endl;
-		status = 1;
-	} catch (const char* msg) {
-		std::cerr << msg << std::endl;
-		status = 1;
+		rgb = camRGB->getImage();
+		viewer.display(rgb.data);
+		viewer.displayFrameRate(0);
 	}
-
-	if (ic)
-		ic->destroy();
-
-	camRGB->stop_thread();
-	delete(camRGB);
 
 	return status;
 }

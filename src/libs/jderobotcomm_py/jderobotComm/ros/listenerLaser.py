@@ -28,8 +28,8 @@ def laserScan2LaserData(scan):
                 |                   |
                 |                   |
     '''
-    laser.minAngle = scan.angle_min  - PI/2
-    laser.maxAngle = scan.angle_max  - PI/2
+    laser.minAngle = scan.angle_min  + PI/2
+    laser.maxAngle = scan.angle_max  + PI/2
     laser.maxRange = scan.range_max
     laser.minRange = scan.range_min
     laser.timeStamp = scan.header.stamp.secs + (scan.header.stamp.nsecs *1e-9)

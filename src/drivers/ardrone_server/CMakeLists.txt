@@ -88,6 +88,9 @@ if(ARDRONE_ALL_DEPS)
 		${CMAKE_THREAD_LIBS_INIT}
     		${easyiceconfig_LIBRARIES})
 
+
+    INSTALL(DIRECTORY config DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/conf)
+
 ELSE()
 	message(WARNING "ardrone_server marked to build, but required dependencies were not met.
 		You should install third party library: ardonelib")

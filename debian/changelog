@@ -1,3 +1,29 @@
+jderobot (5.5.0) unstable; urgency=low
+
+  * release 5.5.0
+  * [PR #627] Included cmake config files for cmake find_package(jderobot)
+  * [PR #631] Added new tool Uav_viewer for python.
+  * [PR #656] Modified laser Ice Interface. Now it offers more and better information.
+  * [PR #658] Added oficial Dockerfile for JdeRobot.
+  * [PR #670] Deleted vtk from dependecy list.
+  * [PR #672] Fix. Fixed cxx flags overwrite.
+  * [PR #675] Added parallelIce motorsClient for c++
+  * [PR #676] Refactor basic_component, now is basic again.
+  * [PR #683] This is the main change for this release. We now support communications between ROS nodes and JdeRobot tools using ROS messages thanks to our new communications library JdeRobotComm. The current version of the library supports communication with cameras, laser, motors and odometry (pose3d). The robots/sensors supported are turtlebot (both real and simulated ones), RPLidar (360 laser scanner), Hokuyo (180 laser scanner) and RGB cameras.
+  * [PR #688] Added more complete world for ardrone with trees and blue sky.
+  * [PR #693] Using Python3 and 2. We now support the compilation of the project using python 2 or 3.
+  * [PR #694] Deleted 3d viewer and stategui from kobukiViewer.
+  * [PR #696] This is the other huge change for this version. We now support ROS communications using ROS python as well. This is the equivalent version of JdeRobotComm in c++ but made for python. This is oriented to work with our python tools as well as with our JdeRobot-Academy exercises.
+  * [PR #697] Deleted colorTuner c++. The python version is now the official tool for colorTuner.
+  * [PR #705] Moved all depencencies to Deps directory.
+  * [PR #710] Added Logo and JderobotComm to basic_component_py.
+  * [PR #711] Added jderobotComm and logo to colorTuner_py.
+  * [PR #714] Changed lines for points in laserWidget of kovbukiViewer. Now the readings are less noisy.
+  * [PR #716] Included parallelIce shared ptrs
+  * [PR #720] Made cameraview bilingual. Now the tool supports both ICE and ROS communications.
+
+-- Francisco Perez <f.perez475@gmail.com>, Wed, 15 Mar 2017 13:20:00 +0100
+
 jderobot (5.4.2) unstable; urgency=low
 
   * release 5.4.2

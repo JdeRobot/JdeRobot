@@ -40,7 +40,7 @@ class ARDroneDriver;
 #define DRIVER_APPNAME "ardrone_server"
 #define CAMERA_QUEUE_SIZE (10)
 #define NAVDATA_QUEUE_SIZE (25)
-#define CONFIG_FILE_PATH "./config/config.xml"
+#define CONFIG_FILE_PATH "/usr/local/share/jderobot/conf/config/config.xml"
 #define CONFIG_FILE_TMP "/tmp"
 #define LOOPRATE 30
 
