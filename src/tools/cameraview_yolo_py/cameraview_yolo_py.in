@@ -1,0 +1,3 @@
+#!/bin/bash
+
+python @CMAKE_INSTALL_PREFIX@/share/jderobot/python/cameraview_yolo_py/cameraview_yolo.py $*
