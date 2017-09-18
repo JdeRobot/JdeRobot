@@ -1,0 +1,41 @@
+Para instalar el tema dark en python con PyQt5 (para el resto mirar instrucciones repo darkstyle: https://github.com/ColinDuquesnoy/QDarkStyleSheet )
+
+instalar el paquete:
+
+$ pip install qdarkstyle
+
+importarlo en python
+
+'''
+	import ...
+	import qdarkstyle
+
+'''
+
+cargarlo en la app de QT
+
+'''
+	app = QApplication(sys.argv)
+	...
+	app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+
+'''
+
+si se quiere customizar el stylesheet, clonar el repo
+
+$ git clone https://github.com/ColinDuquesnoy/QDarkStyleSheet
+
+
+modificar style.qss al gusto
+
+$ gedit QDarkStyleSheey/qdarkstyle/style.qss
+
+
+recompilar los resources
+
+$ cd QDarkStyleSheey/qdarkstyle/
+$ python compile_qrc.py
+
+se generara un fichero llamado pyqt5_style_rc.py con los recursos en array de bytes. Copiarlo en
+/usr/local/lib/python2.7/dist-packages/qdarkstyle/
+

@@ -1,0 +1,8 @@
+prefix=/home/fran/fqez/build/devel
+
+Name: jderobotcomm
+Description: Description of jderobotcomm
+Version: 0.0.1
+Cflags: -I/home/fran/fqez/src/libs/jderobotcomm_cpp/include
+Libs: -L/home/fran/fqez/build/devel/lib -ljderobotcomm
+Requires: roscpp std_msgs message_runtime

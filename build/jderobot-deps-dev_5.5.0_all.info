@@ -1,0 +1,17 @@
+Package: jderobot-deps-dev
+Version: 5.5.0
+Architecture: all
+Provides: jderobot-deps-dev
+Conflicts: jderobot-deps-dev
+Replaces: jderobot-deps-dev
+Section: net
+Priority: extra
+Size: 0
+Installed-Size: 0
+Depends: libeigen3-dev, libdc1394-22-dev, libgazebo7-dev, libgsl-dev, libgtk2.0-bin, libgtk2.0-cil, libgtk2.0-common, libgtk2.0-dev, libgtkgl2.0-dev, libgtkglext1-doc, libgtkglext1-dev, libgtkmm-2.4-dev, libglademm-2.4-dev, libgnomecanvas2-dev, libgnomecanvasmm-2.6-dev, libgtkglextmm-x11-1.2-dev, libgoocanvasmm-2.0-dev, zeroc-ice-slice, libzeroc-ice-dev, libusb-1.0-0-dev, libxml++2.6-dev, nodejs, libogre-1.9-dev, ros-kinetic-opencv3, freeglut3-dev, libglu1-mesa-dev, libopenni2-dev, libpcl-dev, python-matplotlib, python3-matplotlib, python-numpy, python3-numpy, opencv-python, python-pyqt5, python-pyqt5.qtsvg, python3-pyqt5, python3-pyqt5.qtsvg, qfi, libqt5opengl5-dev, libqt5svg5-dev, qtbase5-dev, libtinyxml-dev, git, cmake, make, gcc-5, g++-5, gcc, g++, pkg-config, libgstreamer0.10-dev, libgstreamer-plugins-base0.10-dev, ardronelib, libboost-atomic1.58.0, libboost-chrono1.58.0, libboost-date-time1.58.0, libboost-filesystem1.58.0, libboost-system1.58.0, libboost-thread1.58.0, libdc1394-22, gazebo7, libgsl2, gsl-bin, libgtk2.0-0, libgtkgl2.0-1, libgtkmm-2.4-1v5, libgtkglext1, libglademm-2.4-1v5, libgnomecanvas2-0, libgnomecanvasmm-2.6-1v5, libgtkglextmm-x11-1.2-0v5, libgtkglext1, libgoocanvasmm-2.0-6, libzeroc-ice3.6, zeroc-ice-utils, libzeroc-icestorm3.6, kobukilib, libusb-1.0-0, libxml++2.6-2v5, libxml2, nodejs, libogre-1.9.0v5, ros-kinetic-opencv3, freeglut3, libglu1-mesa, libopenni2-0, libpcl-common1.7, libpcl-kdtree1.7, libpcl-octree1.7, libpcl-search1.7, libpcl-io1.7, libpcl-sample-consensus1.7, libpcl-filters1.7, libpcl-features1.7, libpcl-segmentation1.7, libpcl-surface1.7, libpcl-registration1.7, libpcl-recognition1.7, libpcl-keypoints1.7, libpcl-visualization1.7, libpcl-people1.7, libpcl-outofcore1.7, libpcl-tracking1.7, libpthread-stubs0-dev, libbz2-dev, libssl-dev, python-matplotlib, python-numpy, opencv-python, python-pyqt5, python-pyqt5.qtsvg, qfi, libqt5core5a, libqt5opengl5, libqt5declarative5, libqt5gui5, libqt5svg5, libqt5widgets5, ros-kinetic-roscpp, ros-kinetic-std-msgs, ros-kinetic-cv-bridge, ros-kinetic-image-transport, ros-kinetic-roscpp-core, ros-kinetic-rospy, ros-kinetic-nav-msgs, ros-kinetic-geometry-msgs, libtinyxml2.6.2v5, libxerces-c3.1
+Maintainer: Francisco Perez <f.perez475@gmail.com>
+Private-Original-Maintainer: Victor Arribas <v.arribas.urjc@gmail.com>
+Homepage: http://jderobot.org
+Description: Metapackage that gathers all library headers required to compile JdeRobot framework.
+ Jderobot is a software development suite for robotics applications.
+ Get it from https://github.com/RoboticsURJC/JdeRobot
