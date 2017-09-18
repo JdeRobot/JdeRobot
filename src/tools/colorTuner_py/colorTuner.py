@@ -24,8 +24,10 @@ import easyiceconfig as EasyIce
 from gui.threadGUI import ThreadGUI
 from parallelIce.cameraClient import CameraClient
 from sensors.cameraFilter import CameraFilter
-from gui.GUI import MainWindow
+from gui.gui import MainWindow
 from PyQt5.QtWidgets import QApplication
+from PyQt5 import QtGui
+import qdarkstyle
 
 
 import signal
@@ -42,6 +44,7 @@ if __name__ == '__main__':
     frame = MainWindow()
     frame.setCamera(camera)
     frame.show()
+    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
 
     t2 = ThreadGUI(frame)  
     t2.daemon=True

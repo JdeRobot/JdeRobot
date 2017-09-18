@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="images">
+    <file>image.png</file>
+    <file>rgb.jpg</file>
+    <file>jderobot.svg</file>
+    <file>jderobot250.svg</file>
+  </qresource>
+</RCC>
