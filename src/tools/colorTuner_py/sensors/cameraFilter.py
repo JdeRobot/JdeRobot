@@ -38,8 +38,10 @@ class CameraFilter:
         self.lock = threading.Lock()
         self.client = camera
 
-        self.height= self.client.getHeight()
-        self.width = self.client.getWidth()
+        img = self.client.getImage()
+
+        self.height= img.height
+        self.width = img.width
 
 
         self.kill_event = threading.Event()
@@ -98,7 +100,7 @@ class CameraFilter:
 
 
     def update(self):
-        img = self.client.getImage()
+        img = self.client.getImage().data
         rgb = self.getFilter(RGB).apply(img)
         hsv = self.getFilter(HSV).apply(img)
         yuv = self.getFilter(YUV).apply(img)

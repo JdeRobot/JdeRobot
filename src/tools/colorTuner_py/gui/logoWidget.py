@@ -30,6 +30,7 @@ class LogoWidget(QWidget):
         qimage.load(':images/jderobot250.svg')
         if (width != 0 and height != 0):
         	self.qimage = qimage
+
         	#self.qimage = qimage.scaled(0.8*width, 0.8*height)
         	self.resize(width, height)
         else:

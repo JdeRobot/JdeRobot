@@ -23,8 +23,10 @@ from PyQt5.QtGui import QIntValidator
 from filters.hsvFilter import HSVMAX, HSVMIN
 from filters.rgbFilter import RGBMAX, RGBMIN
 from filters.yuvFilter import YUVMAX, YUVMIN
+from .logoWidget import  LogoWidget
 
-
+WIDTH = 1340
+HEIGTH = 200
 
 class ControlWidget(QWidget):
     
@@ -66,6 +68,7 @@ class ControlWidget(QWidget):
         self.gLayout = QGridLayout(self)
         self.gLayout.setObjectName("gLayout")
 
+
         ''' Vertical Layout for radio buttons '''
         self.radioLayout = QVBoxLayout()
         self.radioLayout.setObjectName("radioLayout")
@@ -94,6 +97,7 @@ class ControlWidget(QWidget):
         self.hminLayout.addWidget(self.hminLabel, Qt.AlignCenter)
         self.hminLayout.addWidget(self.hminValue,Qt.AlignCenter)
         self.hminLayout.addWidget(self.hminSlider)
+        
 
         ''' Vertical Layout for HMAX Slider''' 
         self.hmaxLayout = QVBoxLayout()
@@ -189,6 +193,8 @@ class ControlWidget(QWidget):
         self.gLayout.addLayout(self.vminLayout,2,4,Qt.AlignCenter)
         self.gLayout.addLayout(self.vmaxLayout,2,5,Qt.AlignCenter)
         self.setLayout(self.gLayout)
+
+
 
         '''Signals for sliders value changes'''
         self.hminSlider.valueChanged.connect(self.changeHmin)     
