@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>RosLibJs Client Test</title>
+	<script src="../../build/roslibjs-client.js"></script>
+	<script>
+		var instance = new RosClient({
+			url: "ws://192.168.0.12:9090"
+		});
+
+		var listener1 = instance.topic.subscribe("/robots_status", "std_msgs/String", function() {
+			console.log("Message received");
+		});
+
+		instance.on("roslibjs-client:connected", function() {
+			console.log("Connected!");
+		});		
+	</script>
+</head>
+<body>
+	
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "protoclass",
+  "version": "0.0.2",
+  "homepage": "https://github.com/classdojo/protoclass.js",
+  "authors": [
+    "craig.j.condon@gmail.com"
+  ],
+  "main": "./lib/index.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
