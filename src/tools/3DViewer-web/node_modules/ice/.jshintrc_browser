@@ -1,0 +1,14 @@
+{
+  "extends" : ".jshintrc",
+  "browser" : true,
+  "jquery" : true,
+  "globals":
+  {
+    "Ice" : false,
+    "IceGrid" : false,
+    "IceMX" : false,
+    "IceSSL" : false,
+    "IceStorm" : false,
+    "Glacier2" : false
+  }
+}
