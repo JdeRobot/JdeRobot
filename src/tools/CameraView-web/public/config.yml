@@ -1,0 +1,7 @@
+serv:
+  tech: Ros #Deactivate, Ice , ROS
+  dir: "localhost"
+  port: "11000"
+endpoint: "CameraA"
+topic: "/usb_cam/image_raw/compressed"
+msgs: "sensor_msgs/CompressedImage"
