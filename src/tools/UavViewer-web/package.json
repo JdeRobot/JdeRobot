@@ -1,0 +1,17 @@
+{
+  "name": "NodeUavViewer",
+  "version": "0.1.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron-ipc-server": "^0.1.2",
+    "ice": "^3.7.0",
+    "jquery": "^3.2.1"
+  },
+  "devDependencies": {
+    "electron": "^1.7.9",
+    "slice2js": "^3.7.0"
+  }
+}
