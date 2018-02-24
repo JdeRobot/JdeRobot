@@ -1,10 +1,21 @@
+try{
 const yaml = require('js-yaml');
 const fs = require('fs');
+} catch (e){
+  console.log(e);
+}
+
+//load the yml configuration file
 var config = {};
 try {
-    config = yaml.safeLoad(fs.readFileSync('config.yml', 'utf8'));
+    config = yaml.safeLoad(fs.readFileSync('public/config.yml', 'utf8'));
 } catch (e) {
   console.log(e);
+  config.serv = {};
+  config.serv.dir = "localhost";
+  config.serv.port = "11000";
+  config.topic = '/usb_cam/image_raw/compressed';
+  config.msgs = "sensor_msgs/CompressedImage";
 }
 var cameraTimer;
 // setup connection to the ROS server and prepare the topic
@@ -22,6 +33,12 @@ var cameraTimer;
     messageType : config.msgs
   });
 
+  var cameraInfo = new ROSLIB.Topic({
+    ros: ros,
+    name : "/usb_cam/camera_info",
+    messageType: "sensor_msgs/CameraInfo"
+  })
+
   // request access to the video camera and start the video stream
     var hasRunOnce = false,
         video        = document.querySelector('#video'),
@@ -30,7 +47,7 @@ var cameraTimer;
         height,           // calculated once video stream size is known
         cameraStream;
 
-
+    // access to the webcam by getUserMedia
     function cameraOn() {
             navigator.getMedia = ( navigator.getUserMedia ||
                                    navigator.webkitGetUserMedia ||
@@ -61,13 +78,6 @@ var cameraTimer;
             document.getElementById("activeCam").innerHTML = "CamereServer active in address " + config.serv.dir + " and port " + config.serv.port;
     }
 
-
-    function cameraOff() {
-          cameraStream.stop();
-          hasRunOnce = false;
-          takepicture();                  // blank the screen to prevent last image from staying
-      }
-
   // function that is run once scale the height of the video stream to match the configured target width
     video.addEventListener('canplay', function(ev){
       if (!hasRunOnce) {
@@ -92,13 +102,20 @@ var cameraTimer;
           format : "jpeg",
           data : data.replace("data:image/jpeg;base64,", "")
       });
+      //Send camera info
+      var infoMessage = new ROSLIB.Message({
+        height: canvas.height,
+        width: canvas.width
+      })
 
       imageTopic.publish(imageMessage);
+      cameraInfo.publish(infoMessage);
     }
 
-  // turning on and off the timer that triggers sending pictures and imu information several times a second
+  // turning on the timer that triggers sending pictures information several times a second
     window.addEventListener('load', function(ev){
         if(cameraTimer == null) {
+            console.log(config.serv.dir);
             ros.connect("ws://" + config.serv.dir + ":" + config.serv.port);
             cameraOn();
             cameraTimer = setInterval(function(){
