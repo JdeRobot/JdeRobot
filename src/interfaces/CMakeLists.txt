@@ -73,7 +73,11 @@ foreach(slice_rel_path ${SLICE_FILES})
             WORKING_DIRECTORY ${target_directory}
             COMMAND slice2cpp ${slice_abs_path} -I${SLICE_DIRECTORY} --output-dir ${target_directory} --include-dir ${slice_rel_dir}
             INPUT_FILE ${slice_abs_path}
+	    RESULT_VARIABLE CMD_CPP_RESULT
         )
+	if (NOT CMD_CPP_RESULT EQUAL 0)			# If Command(slice2cpp) not in path
+	    MESSAGE(FATAL_ERROR "slice2cpp executable not present in path! Please Install Ice first and add its executables in path.")
+	endif()
         #LIST(APPEND SLICE_CPP_GENERATED ${target_directory}/${slice_name}.h) # fetching .h files relies on include_directories()
         LIST(APPEND SLICE_CPP_GENERATED ${target_directory}/${slice_name}.cpp)
     endif()
@@ -89,7 +93,11 @@ foreach(slice_rel_path ${SLICE_FILES})
             # __init__.py will be placed at ${target_directory} (creates a directory for each module)
             # tested but invalid: --prefix (not a '--include-dir' equivalent)
             INPUT_FILE ${slice_abs_path}
+	    RESULT_VARIABLE CMD_PY_RESULT 
         )
+	if (NOT CMD_PY_RESULT EQUAL 0)                 # If Command(slice2py) not in path
+            MESSAGE(FATAL_ERROR "slice2py executable not present in path! Please Install Ice first and add its executables in path.")
+        endif()
     endif()
 
     ### Java
@@ -100,7 +108,12 @@ foreach(slice_rel_path ${SLICE_FILES})
             WORKING_DIRECTORY ${SLICE_JAVA_DIR}
             COMMAND slice2java ${slice_abs_path} -I${SLICE_DIRECTORY} --output-dir ${SLICE_JAVA_DIR}
             INPUT_FILE ${slice_abs_path}
+	    RESULT_VARIABLE CMD_JAVA_RESULT
         )
+	if (NOT CMD_JAVA_RESULT EQUAL 0)                 # If Command(slice2java) not in path
+            MESSAGE(FATAL_ERROR "slice2java executable not present in path! Please Install Ice first and add its executables in path.")
+        endif()
+
     endif()
 
 endforeach()
