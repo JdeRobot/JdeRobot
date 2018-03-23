@@ -8,13 +8,20 @@ namespace Comm {
 
 
 	void 
-	depthToRGB(const cv::Mat& float_img, cv::Mat& rgb_img){
+	depthToRGB(const cv::Mat& float_img, cv::Mat& rgb_img, std::string type ){
 	  //Process images
-		cv::Mat mono8_img = cv::Mat(float_img.size(), CV_8UC1);
-	  	if(rgb_img.rows != float_img.rows || rgb_img.cols != float_img.cols){
-	    	rgb_img = cv::Mat(float_img.size(), CV_8UC3);
-	    }
-	  	cv::convertScaleAbs(float_img, mono8_img, 255/MAXRANGEIMGD, 0.0);
+		cv::Mat mono8_img;
+		if (type.substr(type.length() - 3, 1) == "U"){
+			mono8_img = float_img;
+			rgb_img = cv::Mat(float_img.size(), CV_8UC3);
+		}else{
+			cv::Mat mono8_img = cv::Mat(float_img.size(), CV_8UC1);
+		  	if(rgb_img.rows != float_img.rows || rgb_img.cols != float_img.cols){
+		    	rgb_img = cv::Mat(float_img.size(), CV_8UC3);
+		    }
+		  	cv::convertScaleAbs(float_img, mono8_img, 255/MAXRANGEIMGD, 0.0);
+		}
+		
 	  	cv::cvtColor(mono8_img, rgb_img, CV_GRAY2RGB);
 
 	}
@@ -79,10 +86,11 @@ namespace Comm {
 		try {
 
 			//std::cout << image_msg->encoding << std::endl;
+			//if (image_msg->encoding.compare(sensor_msgs::image_encodings::TYPE_32FC1)==0 || image_msg->encoding.compare(sensor_msgs::image_encodings::TYPE_16UC1)==0){
 
-			if (image_msg->encoding.compare(sensor_msgs::image_encodings::TYPE_32FC1)==0){
+			if (image_msg->encoding.substr(image_msg->encoding.length() - 2 ) == "C1"){
 				cv_ptr = cv_bridge::toCvCopy(image_msg);
-				depthToRGB(cv_ptr->image, img_data);
+				depthToRGB(cv_ptr->image, img_data, image_msg->encoding);
 				
 
 			}else{

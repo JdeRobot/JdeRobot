@@ -11,9 +11,9 @@ MAXRANGE = 8 #max length received from imageD
 MINRANGE = 0
 
 
-def depthToRGB8(float_img_buff):
+def depthToRGB8(float_img_buff, encoding):
     '''
-    Translates from 32FC1 Image format to RGB. Inf values are represented by NaN, when converting to RGB, NaN passed to 0 
+    Translates from Distance Image format to RGB. Inf values are represented by NaN, when converting to RGB, NaN passed to 0 
 
     @param float_img_buff: ROS Image to translate
 
@@ -22,11 +22,15 @@ def depthToRGB8(float_img_buff):
     @return a Opencv RGB image
 
     '''
-    float_img = np.zeros((float_img_buff.shape[0], float_img_buff.shape[1], 1), dtype = "float32")
-    float_img.data = float_img_buff.data
+    gray_image = None
+    if (encoding[-3:-2]== "U"):
+        gray_image = float_img_buff
+    else:    
+        float_img = np.zeros((float_img_buff.shape[0], float_img_buff.shape[1], 1), dtype = "float32")
+        float_img.data = float_img_buff.data
+        gray_image=cv2.convertScaleAbs(float_img, alpha=255/MAXRANGE)
 
 
-    gray_image=cv2.convertScaleAbs(float_img, alpha=255/MAXRANGE)
     cv_image = cv2.cvtColor(gray_image, cv2.COLOR_GRAY2RGB)
 
     return cv_image
@@ -52,9 +56,9 @@ def imageMsg2Image(img, bridge):
     image.format = "RGB8"
     image.timeStamp = img.header.stamp.secs + (img.header.stamp.nsecs *1e-9)
     cv_image=0
-    if (img.encoding == "32FC1"):
-        gray_img_buff = bridge.imgmsg_to_cv2(img, "32FC1")
-        cv_image  = depthToRGB8(gray_img_buff)
+    if (img.encoding[-2:] == "C1"):
+        gray_img_buff = bridge.imgmsg_to_cv2(img, img.encoding)
+        cv_image  = depthToRGB8(gray_img_buff, img.encoding)
     else:
         cv_image = bridge.imgmsg_to_cv2(img, "rgb8")
     image.data = cv_image

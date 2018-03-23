@@ -1,0 +1,38 @@
+UAVViewer:
+  Camera:
+    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Proxy: "ardrone_camera:default -h localhost -p 9999"
+    Format: RGB8
+    Topic: "/IntrorobROS/image_raw"
+    Name: UAVViewerCamera
+
+  Pose3D:
+    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Proxy: "ardrone_pose3d:default -h localhost -p 9998"
+    Topic: "/IntrorobROS/Pose3D"
+    Name: UAVViewerPose3d
+
+  CMDVel:
+    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Proxy: "ardrone_cmdvel:tcp -h localhost -p 9995"
+    Topic: "/IntrorobROS/CMDVel"
+    Name: UAVViewerCMDVel
+
+  Navdata:
+    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Proxy: "ardrone_navdata:tcp -h localhost -p 9996"
+    Topic: "/IntrorobROS/Navdata"
+    Name: UAVViewerNavdata
+
+  Extra:
+    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Proxy: "ardrone_extra:tcp -h localhost -p 9994"
+    Topic: "/IntrorobROS/Extra"
+    Name: UAVViewerExtra
+
+  Xmax: 10
+  Ymax: 10
+  Zmax: 5
+  Yawmax: 1 
+
+NodeName: UAVViewer

@@ -84,7 +84,7 @@ void *gui_thread(void* arg){
 				if (camDEPTH){
 					JdeRobotTypes::Image di = camDEPTH->getImage();
 					depth = di.data;
-					std::cout<< di.format << std::endl;
+					//std::cout<< di.format << std::endl;
 
 				}
 			}

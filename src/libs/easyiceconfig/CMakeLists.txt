@@ -16,15 +16,8 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 
-configure_file(
-    include/easyiceconfig/hardcodedlocations.h.in
-    include/easyiceconfig/hardcodedlocations.h
-    @ONLY
-)
-
 set(HEADERS
     include/easyiceconfig/EasyIce.h
-    ${CMAKE_CURRENT_BINARY_DIR}/include/easyiceconfig/hardcodedlocations.h
     include/easyiceconfig/loader.hpp
     include/easyiceconfig/initializer.hpp
     include/easyiceconfig/injector.hpp

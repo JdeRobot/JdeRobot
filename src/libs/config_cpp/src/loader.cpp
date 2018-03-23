@@ -28,7 +28,8 @@ findConfigFile(const std::string& filename){
     if (std::fileexists(filename))
         return filename;
 
-    std::string path_holders[] = {Config::HARDCORED_LOCATIONS};
+    std::string path_holders[] = {getEnvironmentVariable(CONFIG_PATH_NAME)};
+    
     for (int i=0; i<2; i++){
         if (path_holders[i].empty()) continue;
         for (std::string path : std::split(path_holders[i], ":")){

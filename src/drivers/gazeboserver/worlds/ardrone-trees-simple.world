@@ -7,33 +7,6 @@
       <uri>model://sun</uri>
     </include>
 
-
-    <include>
-      <pose>0 -10 0.001 0 0 1.57</pose>
-      <uri>model://logoETSIT</uri>
-    </include>
-
-    <include>
-      <pose>10 5 0.001 0 0 1.57</pose>
-      <uri>model://logoGMV</uri>
-    </include>
-
-    <include>
-      <pose>0 10 0.001 0 0 1.57</pose>
-      <uri>model://logoJdeRobot</uri>
-    </include>
-
-    <include>
-      <pose>-10 0 0.001 0 0 1.57</pose>
-      <uri>model://logoURJC</uri>
-    </include>
-
-    <include>
-      <pose>10 -5 0.001 0 0 1.57</pose>
-      <uri>model://logoDeloitte</uri>
-    </include>
-
-
    <!-- A global light source -->
     <include>
       <name>ardrone-black</name>
