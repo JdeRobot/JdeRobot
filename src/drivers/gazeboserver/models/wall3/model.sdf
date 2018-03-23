@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+<sdf version="1.4">
+<model name="wall3">
+    <link name="pared3">
+        <collision name="collision">
+            <geometry>
+               <mesh>
+                  <uri>model://wall3/meshes/pared3.dae</uri>
+               </mesh>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+               <mesh>
+                  <uri>model://wall3/meshes/pared3.dae</uri>
+               </mesh>
+            </geometry>
+        </visual>
+     </link>
+     <plugin name="wall3plugin" filename="libwall3plugin.so"/>
+</model>
+</sdf>
