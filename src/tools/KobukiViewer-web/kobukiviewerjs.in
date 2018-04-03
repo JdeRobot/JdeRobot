@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd @CMAKE_INSTALL_PREFIX@/share/jderobot/webtools/kobukiviewerjs/
+
+nodejs run.js

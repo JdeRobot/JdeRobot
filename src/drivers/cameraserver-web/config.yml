@@ -1,0 +1,6 @@
+serv:
+  dir: "192.168.1.105"
+  port: "11000"
+topic: '/camera/image/compressed'
+msgs: "sensor_msgs/CompressedImage"
+fps: 6
