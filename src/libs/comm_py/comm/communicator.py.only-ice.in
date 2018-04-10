@@ -1,5 +1,9 @@
 import Ice
 
+
+from .cameraServer import getCameraServer
+
+
 from .laserClient import getLaserClient
 from .cameraClient import getCameraClient
 from .pose3dClient import getPose3dClient
@@ -62,6 +66,25 @@ class Communicator:
 
 	def getConfig(self):
 		return self.config
+
+	def waitForShutdown(self):
+		'''
+		Returns when either interface is shutdown
+		'''
+		if self.__ic:
+			self.__ic.waitForShutdown()
+
+
+	def getCameraServer(self, name):
+		'''
+	    Returns a Camera server with the configration indicated by the name
+
+	    @param name: name of the server in the config
+
+	    @type name: String
+
+	    '''
+		return getCameraServer(self, name)
 
 
 	def getCameraClient(self, name):

@@ -1,0 +1,76 @@
+import sys
+import Ice
+from .ice.cameraIceServer import CameraIceServer
+
+
+
+def __getCameraIceServer(jdrc, prefix):
+    '''
+    Returns a Camera Ice Server. This function should never be used. Use getCameraServer instead of this
+
+    @@param jdrc: Comm Communicator
+    @param prefix: name of server in config file
+
+    @type jdrc: Comm Communicator
+    @type prefix: String
+
+    @return Camera Ice Server
+
+    '''
+    print("Receiving " + prefix + " from ICE interfaces")
+    server = CameraIceServer(jdrc, prefix)
+    server.start()
+    return server
+
+def __getListenerCamera(jdrc, prefix):
+    '''
+    Returns a Camera ROS Subscriber. This function should never be used. Use getCameraServer instead of this
+
+    @param jdrc: Comm Communicator
+    @param prefix: name of server in config file
+
+    @type jdrc: Comm Communicator
+    @type prefix: String
+
+    @return Camera ROS Subscriber
+
+    '''
+    print(prefix + ": ROS msg are diabled")
+    return None
+
+
+def __cameradisabled(jdrc, prefix):
+    '''
+    Prints a warning that the server is disabled. This function should never be used. Use getCameraServer instead of this
+
+    @param jdrc: Comm Communicator
+    @param prefix: name of server in config file
+
+    @type jdrc: Comm Communicator
+    @type prefix: String
+
+    @return None
+
+    '''
+    print(prefix + " Disabled")
+    return None
+
+def getCameraServer (jdrc, prefix):
+    '''
+    Returns a Camera Server.
+
+    @param jdrc: Comm Communicator
+    @param prefix: name of server in config file
+
+    @type jdrc: Comm Communicator
+    @type prefix: String
+
+    @return None if pose3d is disabled
+
+    '''
+    server = jdrc.getConfig().getProperty(prefix+".Server")
+    server = server2int(server)
+
+    cons = [__cameradisabled, __getCameraIceServer, __getListenerCamera]
+
+    return cons[server](jdrc, prefix)

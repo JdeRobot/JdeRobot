@@ -1,0 +1,85 @@
+import sys
+import Ice
+import rospy
+from .ice.cameraIceServer import CameraIceServer
+
+if (sys.version_info[0] == 2):
+    from .ros.listenerCamera import ListenerCamera
+
+
+
+def __getCameraIceServer(jdrc, prefix):
+    '''
+    Returns a Camera Ice Server. This function should never be used. Use getCameraServer instead of this
+
+    @@param jdrc: Comm Communicator
+    @param prefix: name of server in config file
+
+    @type jdrc: Comm Communicator
+    @type prefix: String
+
+    @return Camera Ice Server
+
+    '''
+    print("Receiving " + prefix + " from ICE interfaces")
+    server = CameraIceServer(jdrc, prefix)
+    server.start()
+    return server
+
+def __getListenerCamera(jdrc, prefix):
+    '''
+    Returns a Camera ROS Subscriber. This function should never be used. Use getCameraServer instead of this
+
+    @param jdrc: Comm Communicator
+    @param prefix: name of server in config file
+
+    @type jdrc: Comm Communicator
+    @type prefix: String
+
+    @return Camera ROS Subscriber
+
+    '''
+    if (sys.version_info[0] == 2):
+        print("Receiving " + prefix + " from ROS messages")
+        topic = jdrc.getConfig().getProperty(prefix+".Topic")
+        server = ListenerCamera(topic)
+        return server
+    else:
+        print(prefix + ": ROS msg are diabled for python "+ sys.version_info[0])
+        return None
+
+
+def __cameradisabled(jdrc, prefix):
+    '''
+    Prints a warning that the server is disabled. This function should never be used. Use getCameraServer instead of this
+
+    @param jdrc: Comm Communicator
+    @param prefix: name of server in config file
+
+    @type jdrc: Comm Communicator
+    @type prefix: String
+
+    @return None
+
+    '''
+    print(prefix + " Disabled")
+    return None
+
+def getCameraServer (jdrc, prefix):
+    '''
+    Returns a Camera Server.
+
+    @param jdrc: Comm Communicator
+    @param prefix: name of server in config file
+
+    @type jdrc: Comm Communicator
+    @type prefix: String
+
+    @return None if pose3d is disabled
+
+    '''
+    server = jdrc.getConfig().getPropertyWithDefault(prefix+".Server", 0)
+
+    cons = [__cameradisabled, __getCameraIceServer, __getListenerCamera]
+
+    return cons[server](jdrc, prefix)
