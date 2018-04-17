@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 1997-2016 JDE Developers Team
+ *  Copyright (C) 1997-2010 JDE Developers Team
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,45 +14,40 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses/.
  *
- *  Authors : Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
+ *  Authors : Jose María Cañas <jmplaza@gsyc.es>
+ *            Francisco Miguel Rivas Montero <franciscomiguel.rivas@urjc.es>
  */
 
-#ifndef VISUALIZATION_ICE
-#define VISUALIZATION_ICE
+#ifndef BODY_ICE
+#define BODY_ICE
 
-#include <jderobot/common.ice>
-#include <jderobot/primitives.ice>
-
+#include </home/rperez/TFG/3DViewer-web/test_server/common.ice>
 
 module jderobot{
 
-	struct Color{
-	    float r;
-	    float g;
-	    float b;
+	/**
+	* PCL
+	*/
+	struct RGBPoint{
+      float x;
+      float y;
+      float z;
+      float r;
+      float g;
+      float b;
+	  int id;
 	};
 
-	struct RGBSegment{
-	    Segment seg;
-	    Color c;
-	};
-	
-	sequence<RGBPoint> bufferPoint; 
-	sequence<RGBSegment> bufferSegment;
-  /**
-   * Interface to the Visualization interaction.
-   */
-	interface Visualization
-	{
-        void drawSegment(Segment seg, Color c);
-	bufferSegment getSegment();
-        void drawPoint(Point p, Color c);
-	bufferPoint getPoints();
-        void clearAll();
+	struct Point{
+	    float x;
+	    float y;
+	    float z;
 	};
 
-
-
+	struct Segment{
+	    Point fromPoint;
+	    Point toPoint;
+	};
 
 };
 #endif

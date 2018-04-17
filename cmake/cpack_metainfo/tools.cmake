@@ -1,9 +1,3 @@
-SET(CPACK_DEBIAN_3DVIEWER_PACKAGE_DEPENDS "jderobot-easyice, jderobot-viewer, jderobot-util, jderobot-interfaces, jderobot-logger, jderobot-ns, jderobot-colorspaces")
-SET(CPACK_COMPONENT_3DVIEWER_DESCRIPTION  
-"Generic openGL based 3D viewer for cameras. 
- Manual Page http://jderobot.org/index.php/Tools#3DViewer
- Home page https://jderobot.org")
-
 SET(CPACK_DEBIAN_BASIC-COMPONENT_PACKAGE_DEPENDS "jderobot-config, jderobot-comm")
 SET(CPACK_COMPONENT_BASIC-COMPONENT_DESCRIPTION  
 "Example of tool C++ 
