@@ -5,7 +5,7 @@ from math import pi as PI
 from jderobotTypes import Image
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
-
+import numpy as np
 
 MAXRANGE = 8 #max length received from imageD
 MINRANGE = 0
