@@ -8,6 +8,11 @@
       <uri>model://monacoLine</uri>
       <pose>0 0 0 0 0 0</pose>
     </include>
+    <include>
+      <uri>model://f1</uri>
+      <pose>7.90 2.36 0.006 0 0 1.069</pose>
+    </include>
+
 
     <light name='user_directional_light_0' type='directional'>
       <pose frame=''>0.467439 -3.3788 2.45574 0.487341 -0 0</pose>
