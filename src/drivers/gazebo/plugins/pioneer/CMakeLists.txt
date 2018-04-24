@@ -46,6 +46,6 @@ target_link_libraries(pose3dencoders ${GAZEBO_libraries}
     JderobotInterfaces)
 
 
-INSTALL (TARGETS motors laser camera_dump pose3dencoders pose3d_pioneer DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/gazebo/plugins/pioneer/ COMPONENT gazeboserver)
+INSTALL (TARGETS motors laser camera_dump pose3dencoders pose3d_pioneer DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/gazebo/plugins/pioneer/ COMPONENT gazebo)
 FILE(GLOB_RECURSE CFG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cfg)
-INSTALL (FILES ${CFG_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/conf COMPONENT gazeboserver)
+INSTALL (FILES ${CFG_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/conf COMPONENT gazebo)

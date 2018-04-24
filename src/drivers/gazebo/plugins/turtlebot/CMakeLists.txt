@@ -59,8 +59,8 @@ target_link_libraries(turtlebotplugin
 
 set_target_properties(turtlebotplugin PROPERTIES COMPILE_FLAGS "-Wall -Wextra")
     
-INSTALL (TARGETS turtlebotplugin DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/gazebo/plugins/turtlebot/ COMPONENT gazeboserver)
+INSTALL (TARGETS turtlebotplugin DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/gazebo/plugins/turtlebot/ COMPONENT gazebo)
 FILE(GLOB_RECURSE CFG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/cfg/*.cfg)
-INSTALL (FILES ${CFG_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/conf COMPONENT gazeboserver)
+INSTALL (FILES ${CFG_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/conf COMPONENT gazebo)
 
 #MIO endif()

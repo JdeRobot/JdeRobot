@@ -25,12 +25,12 @@ IF (GAZEBO_INCLUDE_DIRS)
 	## INSTALL ##
 
 	# Install script
-	INSTALL (FILES ${CMAKE_CURRENT_BINARY_DIR}/gazebo-setup.sh DESTINATION share/jderobot/gazebo/ COMPONENT gazeboserver )
+	INSTALL (FILES ${CMAKE_CURRENT_BINARY_DIR}/gazebo-setup.sh DESTINATION share/jderobot/gazebo/ COMPONENT gazebo )
 
 	# Install Gazebo Models
-	INSTALL (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/models DESTINATION share/jderobot/gazebo/ COMPONENT gazeboserver PATTERN .svn EXCLUDE)
+	INSTALL (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/models DESTINATION share/jderobot/gazebo/ COMPONENT gazebo PATTERN .svn EXCLUDE)
 
 	# Install Gazebo Worlds
-	INSTALL (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/worlds DESTINATION share/jderobot/gazebo/ COMPONENT gazeboserver PATTERN .svn EXCLUDE)
+	INSTALL (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/worlds DESTINATION share/jderobot/gazebo/ COMPONENT gazebo PATTERN .svn EXCLUDE)
 
 ENDIF()

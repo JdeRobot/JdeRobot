@@ -12,8 +12,8 @@ link_directories(
     ${easyiceconfig_LIBRARY_DIRS}
 )
 #boost_system 
-add_library(carMotors SHARED carMotors.cc)
-target_link_libraries(carMotors 
+add_library(holoCarMotors SHARED holoCarMotors.cc)
+target_link_libraries(holoCarMotors 
 	${GAZEBO_libraries} 
 	${ZeroCIce_LIBRARIES} 
 
@@ -22,8 +22,8 @@ target_link_libraries(carMotors
     JderobotInterfaces
 )
 
-add_library(carPose3D SHARED pose3d.cc)
-target_link_libraries(carPose3D
+add_library(holoCarPose3D SHARED holoCarPose3d.cc)
+target_link_libraries(holoCarPose3D
 	${GAZEBO_libraries} 
 	${ZeroCIce_LIBRARIES} 
 
@@ -33,9 +33,9 @@ target_link_libraries(carPose3D
 )
 
 
-INSTALL (TARGETS carMotors DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/gazebo/plugins/car/ COMPONENT gazeboserver)
-INSTALL (TARGETS carPose3D DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/gazebo/plugins/car/ COMPONENT gazeboserver)
+INSTALL (TARGETS holoCarMotors DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/gazebo/plugins/holo_car/ COMPONENT gazebo)
+INSTALL (TARGETS holoCarPose3D DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/gazebo/plugins/holo_car/ COMPONENT gazebo)
 FILE(GLOB_RECURSE CFG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cfg)
-INSTALL (FILES ${CFG_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/conf COMPONENT gazeboserver)
+INSTALL (FILES ${CFG_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/conf/ COMPONENT gazebo)
 
 

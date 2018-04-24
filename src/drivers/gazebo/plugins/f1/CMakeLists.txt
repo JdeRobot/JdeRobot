@@ -50,9 +50,9 @@ target_link_libraries(camera_dumpF1 ${GAZEBO_libraries}
 
 INSTALL (TARGETS motorsF1 laserF1 pose3dF1 camera_dumpF1 
 	DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/gazebo/plugins/f1/ 
-	COMPONENT gazeboserver)
+	COMPONENT gazebo)
 
 FILE(GLOB_RECURSE CFG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cfg)
-INSTALL (FILES ${CFG_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/conf COMPONENT gazeboserver)
+INSTALL (FILES ${CFG_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/conf COMPONENT gazebo)
 
 #MIO endif()

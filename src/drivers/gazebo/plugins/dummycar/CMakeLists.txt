@@ -15,9 +15,9 @@ target_link_libraries(carplugin
 )
 
 
-INSTALL (TARGETS carplugin DESTINATION share/jderobot/gazebo/plugins/dummycar/ COMPONENT gazeboserver)
+INSTALL (TARGETS carplugin DESTINATION share/jderobot/gazebo/plugins/dummycar/ COMPONENT gazebo)
 FILE(GLOB_RECURSE CFG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cfg)
-INSTALL (FILES ${CFG_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/conf/ COMPONENT gazeboserver)
+INSTALL (FILES ${CFG_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/jderobot/conf/ COMPONENT gazebo)
 
 
 
