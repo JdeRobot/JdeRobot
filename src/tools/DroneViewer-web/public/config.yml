@@ -1,0 +1,16 @@
+cam1serv:
+  dir: localhost
+  port: 11000
+cam1epname: ardrone_camera
+pose3dserv:
+  dir: localhost
+  port: 11002
+pose3depname: ardrone_cmdvel
+extraserv:
+  dir: localhost
+  port: 11003
+extraepname: ardrone_pose3d
+cmdvelserv:
+  dir: localhost
+  port: 11004
+cmdvelepname: ardrone_extra

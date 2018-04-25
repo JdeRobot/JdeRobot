@@ -34,6 +34,7 @@ include_directories(
 
 set(HEADERS
     include/jderobot/comm/communicator.hpp
+    include/jderobot/comm/tools.hpp
     include/jderobot/comm/laserClient.hpp
     include/jderobot/comm/interfaces/laserClient.hpp
     include/jderobot/comm/ice/laserIceClient.hpp
@@ -65,6 +66,7 @@ set(HEADERS
 
 set(SOURCES
     src/communicator.cpp
+    src/tools.cpp
     src/laserClient.cpp
     src/ice/laserIceClient.cpp
     src/cameraClient.cpp

@@ -151,6 +151,9 @@ rgbdViewergui::rgbdViewergui(bool rgb, bool depth,bool pointCloud , std::string 
     mainwindow->show();
     this->distance = new cv::Mat(cv::Size(myDepthSize.width, myDepthSize.height),CV_32FC1,cv::Scalar(0,0,0));
 
+    /*for (float i=0; i< 10000; i+=1){
+                    world->add_kinect_point(1,1,i,0,0,0);
+                }*/
 }
 
 rgbdViewergui::~rgbdViewergui() {
@@ -185,13 +188,14 @@ rgbdViewergui::updateAll( cv::Mat imageRGB, cv::Mat imageDEPTH, std::vector<jder
         cv::split(imageDEPTH, layers);
 
         cv::cvtColor(layers[0],colorDepth,CV_GRAY2RGB);
-//        cv::imshow("color", colorDepth);
-//        cv::waitKey(1);
+        //cv::imshow("color", colorDepth);
+        //cv::waitKey(1);
 
         this->m_distance.lock();
+        
         for (int x=0; x< layers[1].cols ; x++) {
             for (int y=0; y<layers[1].rows; y++) {
-                distance->at<float>(y,x) = ((int)layers[1].at<unsigned char>(y,x)<<8)|(int)layers[2].at<unsigned char>(y,x);
+                distance->at<float>(y,x) = (((int)layers[1].at<unsigned char>(y,x)<<8)|(int)layers[2].at<unsigned char>(y,x));
 
             }
         }
@@ -215,8 +219,9 @@ rgbdViewergui::updateAll( cv::Mat imageRGB, cv::Mat imageDEPTH, std::vector<jder
         if (reconstructMode==0) {
             add_depth_pointsImage(imageRGB, *distance);
         }
-        else
+        else{
             add_depth_pointsCloud(cloud);
+        }
     }
     world->my_expose_event();
     while (gtkmain.events_pending())
@@ -482,6 +487,7 @@ void rgbdViewergui::add_cameras_position() {
 
 void
 rgbdViewergui::on_reconstruct_depth() {
+    std::cout << std::endl<< std::endl<< std::endl<< w_reconstruct->get_active() << std::endl<< std::endl<< std::endl<< std::endl;
     if (w_reconstruct->get_active()) {
         reconstruct_depth_activate=true;
         world->draw_kinect_points=true;

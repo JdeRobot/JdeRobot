@@ -17,19 +17,18 @@
  *       Aitor Martinez Fernandez <aitor.martinez.fernandez@gmail.com>
  */
 #include <jderobot/comm/cameraClient.hpp>
-#include <jderobot/comm/ice/cameraIceClient.hpp>
-#ifdef JDERROS
-#include <jderobot/comm/ros/listenerCamera.hpp>
-#endif
+
 
 namespace Comm {
 
-CameraClient* 
+CameraClient*
 getCameraClient(Comm::Communicator* jdrc, std::string prefix){
 	CameraClient* client = 0;
 
+	int server;
+	std::string server_name = jdrc->getConfig().asString(prefix+".Server");
+	server = server2int(server_name);
 
-	int server = jdrc->getConfig().asIntWithDefault(prefix+".Server", 0);
 	switch (server){
 		case 0:
 		{

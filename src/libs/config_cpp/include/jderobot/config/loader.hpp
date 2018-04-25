@@ -25,12 +25,14 @@
 #include <jderobot/config/stdutils.hpp>
 #include <yaml-cpp/yaml.h>
 #include <yaml-cpp/exceptions.h>
-#include <jderobot/config/hardcodedlocations.h>
+//#include <jderobot/config/hardcodedlocations.h>
 #include <jderobot/config/properties.hpp>
 
 
 namespace jderobotconfig {
 namespace loader {
+
+const std::string CONFIG_PATH_NAME = "JDEROBOT_CONFIG_PATHS";
 
 
 /**

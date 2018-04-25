@@ -23,6 +23,7 @@
 #include <Ice/Communicator.h>
 #include <Ice/Initialize.h>
 #include <jderobot/config/properties.hpp>
+#include <jderobot/comm/tools.hpp>
 
 
 namespace Comm {

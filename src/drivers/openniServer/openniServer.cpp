@@ -127,6 +127,9 @@ int main(int argc, char** argv){
 
 
     device= ConcurrentDevicePtr(new ConcurrentDevice(deviceFPS,cameraID,config,cv::Size(width,heigth)));
+    if (! device->isValid()){
+        return 0;
+    }
     device->start();
 
 

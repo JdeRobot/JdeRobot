@@ -1,0 +1,30 @@
+Camera:
+  Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+  Proxy: "default -h 0.0.0.0 -p 9999"
+  Format: RGB8
+  Topic: "/MavLink/image_raw"
+  Name: MavLinkCamera
+
+Pose3D:
+  Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+  Proxy: "default -h 0.0.0.0 -p 9998"
+  Topic: "/MavLink/Pose3D"
+  Name: MavLinkPose3d
+
+CMDVel:
+  Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+  Proxy: "default -h 0.0.0.0 -p 9997"
+  Topic: "/MavLink/CMDVel"
+  Name: MavLinkCMDVel
+
+Navdata:
+  Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+  Proxy: "default -h 0.0.0.0 -p 9996"
+  Topic: "/MavLink/Navdata"
+  Name: MavLinkNavdata
+
+Extra:
+  Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+  Proxy: "default -h 0.0.0.0 -p 9995"
+  Topic: "/MavLink/Extra"
+  Name: MavLinkExtra

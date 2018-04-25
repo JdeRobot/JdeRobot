@@ -1,0 +1,9 @@
+/opt/jderobot/bin/colorTuner
+/opt/jderobot/share/jderobot/python/colorTuner_py/colorTuner.py
+/opt/jderobot/share/jderobot/python/colorTuner_py/resources_rc.py
+/opt/jderobot/share/jderobot/python/colorTuner_py/gui
+/opt/jderobot/share/jderobot/python/colorTuner_py/sensors
+/opt/jderobot/share/jderobot/python/colorTuner_py/filters
+/opt/jderobot/share/jderobot/conf/colorTuner_py.yml
+/opt/jderobot/lib/python2.7/python/qdarkstyle/pyqt5_style_rc.py
+/opt/jderobot/lib/python2.7/python/qdarkstyle/__init__.py

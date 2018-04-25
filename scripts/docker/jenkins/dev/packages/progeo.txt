@@ -1,0 +1,3 @@
+/opt/jderobot/lib/libprogeo.so
+/opt/jderobot/lib/libprogeo.a
+/opt/jderobot/include/jderobot/progeo

@@ -35,10 +35,10 @@ RUN apt-get update && apt-get -y  install --only-upgrade\
     jderobot-cameraview \
     && rm -rf /var/lib/apt/lists/*
 
-COPY ./search_files.sh /
+COPY ./search_file.sh /
 COPY ./files.txt /
 
-RUN ./search_files.sh files.txt
+RUN ./search_file.sh files.txt
 
 
 

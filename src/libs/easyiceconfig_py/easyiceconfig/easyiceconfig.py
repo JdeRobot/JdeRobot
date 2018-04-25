@@ -22,8 +22,6 @@ import sys, os
 import re
 import Ice
 
-from .hardcodedpaths import HARDCODED_PATHS
-
 
 ENV_PATH_NAME = "ICE_CONFIG_PATH"
 
@@ -33,8 +31,10 @@ def findConfigFile(filename):
     env_paths = os.getenv(ENV_PATH_NAME)
     if env_paths:
         paths = paths+":"+env_paths
-    if HARDCODED_PATHS:
-        paths = paths+":"+HARDCODED_PATHS
+
+    config_paths = os.getenv("JDEROBOT_CONFIG_PATHS")
+    if config_paths:
+        paths = paths+":"+config_paths
 
     for path in paths.split(":"):
         file_path = os.path.join(path, filename)

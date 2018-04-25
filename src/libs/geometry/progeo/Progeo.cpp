@@ -626,11 +626,11 @@ void Progeo::optical2pixel(Eigen::Vector3d &point)
 	point(0) = aux;
 }
 
-const char* Progeo::double2char(double d)
+std::string Progeo::double2char(double d)
 {
 	std::stringstream ss;
 	ss << d;
-	return ss.str().c_str();
+	return ss.str();
 }
 
 void Progeo::saveToFile (std::string filename, bool updateMatrix)
@@ -660,55 +660,55 @@ void Progeo::saveToFile (std::string filename, bool updateMatrix)
 	xmlDocSetRootElement(doc, root_node);
 
 	// Camera position
-	xmlNewChild(node_position, NULL, BAD_CAST "x", BAD_CAST double2char((double)(position(0))));
-	xmlNewChild(node_position, NULL, BAD_CAST "y", BAD_CAST double2char((double)(position(1))));
-	xmlNewChild(node_position, NULL, BAD_CAST "z", BAD_CAST double2char((double)(position(2))));
+	xmlNewChild(node_position, NULL, BAD_CAST "x", BAD_CAST double2char((double)(position(0))).c_str());
+	xmlNewChild(node_position, NULL, BAD_CAST "y", BAD_CAST double2char((double)(position(1))).c_str());
+	xmlNewChild(node_position, NULL, BAD_CAST "z", BAD_CAST double2char((double)(position(2))).c_str());
 
 	// Foa position
-	xmlNewChild(node_foa, NULL, BAD_CAST "x", BAD_CAST double2char((double)foa(0)));
-	xmlNewChild(node_foa, NULL, BAD_CAST "y", BAD_CAST double2char((double)foa(1)));
-	xmlNewChild(node_foa, NULL, BAD_CAST "z", BAD_CAST double2char((double)foa(2)));
+	xmlNewChild(node_foa, NULL, BAD_CAST "x", BAD_CAST double2char((double)foa(0)).c_str());
+	xmlNewChild(node_foa, NULL, BAD_CAST "y", BAD_CAST double2char((double)foa(1)).c_str());
+	xmlNewChild(node_foa, NULL, BAD_CAST "z", BAD_CAST double2char((double)foa(2)).c_str());
 
 
 	// Intrisic parameters
-	xmlNewChild(root_node, NULL, BAD_CAST "roll", BAD_CAST double2char(roll));
-	xmlNewChild(root_node, NULL, BAD_CAST "fdistx", BAD_CAST double2char(fdistx));
-	xmlNewChild(root_node, NULL, BAD_CAST "fdisty", BAD_CAST double2char(fdisty));
-	xmlNewChild(root_node, NULL, BAD_CAST "u0", BAD_CAST double2char(u0));
-	xmlNewChild(root_node, NULL, BAD_CAST "v0", BAD_CAST double2char(v0));
-	xmlNewChild(root_node, NULL, BAD_CAST "skew", BAD_CAST double2char(skew));
-	xmlNewChild(root_node, NULL, BAD_CAST "rows", BAD_CAST double2char(rows));
-	xmlNewChild(root_node, NULL, BAD_CAST "columns", BAD_CAST double2char(columns));
+	xmlNewChild(root_node, NULL, BAD_CAST "roll", BAD_CAST double2char(roll).c_str());
+	xmlNewChild(root_node, NULL, BAD_CAST "fdistx", BAD_CAST double2char(fdistx).c_str());
+	xmlNewChild(root_node, NULL, BAD_CAST "fdisty", BAD_CAST double2char(fdisty).c_str());
+	xmlNewChild(root_node, NULL, BAD_CAST "u0", BAD_CAST double2char(u0).c_str());
+	xmlNewChild(root_node, NULL, BAD_CAST "v0", BAD_CAST double2char(v0).c_str());
+	xmlNewChild(root_node, NULL, BAD_CAST "skew", BAD_CAST double2char(skew).c_str());
+	xmlNewChild(root_node, NULL, BAD_CAST "rows", BAD_CAST double2char(rows).c_str());
+	xmlNewChild(root_node, NULL, BAD_CAST "columns", BAD_CAST double2char(columns).c_str());
 
 	// K Matrix
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k11", BAD_CAST double2char((double)K(0,0)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k12", BAD_CAST double2char((double)K(0,1)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k13", BAD_CAST double2char((double)K(0,2)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k21", BAD_CAST double2char((double)K(1,0)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k22", BAD_CAST double2char((double)K(1,1)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k23", BAD_CAST double2char((double)K(1,2)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k31", BAD_CAST double2char((double)K(2,0)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k32", BAD_CAST double2char((double)K(2,1)));
-	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k33", BAD_CAST double2char((double)K(2,2)));
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k11", BAD_CAST double2char((double)K(0,0)).c_str());
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k12", BAD_CAST double2char((double)K(0,1)).c_str());
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k13", BAD_CAST double2char((double)K(0,2)).c_str());
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k21", BAD_CAST double2char((double)K(1,0)).c_str());
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k22", BAD_CAST double2char((double)K(1,1)).c_str());
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k23", BAD_CAST double2char((double)K(1,2)).c_str());
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k31", BAD_CAST double2char((double)K(2,0)).c_str());
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k32", BAD_CAST double2char((double)K(2,1)).c_str());
+	xmlNewChild(node_k_matrix, NULL, BAD_CAST "k33", BAD_CAST double2char((double)K(2,2)).c_str());
 
 
 	// RT Matrix
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt11", BAD_CAST double2char((double)RT(0,0)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt12", BAD_CAST double2char((double)RT(0,1)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt13", BAD_CAST double2char((double)RT(0,2)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt14", BAD_CAST double2char((double)RT(0,3)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt21", BAD_CAST double2char((double)RT(1,0)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt22", BAD_CAST double2char((double)RT(1,1)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt23", BAD_CAST double2char((double)RT(1,2)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt24", BAD_CAST double2char((double)RT(1,3)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt31", BAD_CAST double2char((double)RT(2,0)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt32", BAD_CAST double2char((double)RT(2,1)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt33", BAD_CAST double2char((double)RT(2,2)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt34", BAD_CAST double2char((double)RT(2,3)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt41", BAD_CAST double2char((double)RT(3,0)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt42", BAD_CAST double2char((double)RT(3,1)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt43", BAD_CAST double2char((double)RT(3,2)));
-	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt44", BAD_CAST double2char((double)RT(3,3)));
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt11", BAD_CAST double2char((double)RT(0,0)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt12", BAD_CAST double2char((double)RT(0,1)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt13", BAD_CAST double2char((double)RT(0,2)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt14", BAD_CAST double2char((double)RT(0,3)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt21", BAD_CAST double2char((double)RT(1,0)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt22", BAD_CAST double2char((double)RT(1,1)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt23", BAD_CAST double2char((double)RT(1,2)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt24", BAD_CAST double2char((double)RT(1,3)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt31", BAD_CAST double2char((double)RT(2,0)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt32", BAD_CAST double2char((double)RT(2,1)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt33", BAD_CAST double2char((double)RT(2,2)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt34", BAD_CAST double2char((double)RT(2,3)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt41", BAD_CAST double2char((double)RT(3,0)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt42", BAD_CAST double2char((double)RT(3,1)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt43", BAD_CAST double2char((double)RT(3,2)).c_str());
+	xmlNewChild(node_rt_matrix, NULL, BAD_CAST "rt44", BAD_CAST double2char((double)RT(3,3)).c_str());
 
 	xmlSaveFormatFileEnc(filename.c_str(), doc, "UTF-8", 1);
 	xmlFreeDoc(doc);

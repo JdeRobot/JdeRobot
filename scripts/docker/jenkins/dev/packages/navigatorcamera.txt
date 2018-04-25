@@ -1,0 +1,4 @@
+/opt/jderobot/bin/navigatorcamera
+/opt/jderobot/share/jderobot/glade/myimage.png
+/opt/jderobot/share/jderobot/glade/navigatorCamera.glade
+/opt/jderobot/share/jderobot/conf/navigatorCamera.cfg

@@ -1,0 +1,12 @@
+/opt/jderobot/bin/cameraviewjs
+/opt/jderobot/share/jderobot/webtools/cameraviewjs/run.js
+/opt/jderobot/share/jderobot/webtools/cameraviewjs/public
+/opt/jderobot/bin/kobukiviewerjs
+/opt/jderobot/share/jderobot/webtools/kobukiviewerjs/run.js
+/opt/jderobot/share/jderobot/webtools/kobukiviewerjs/public
+/opt/jderobot/bin/rgbdviewerjs
+/opt/jderobot/share/jderobot/webtools/rgbdviewerjs/run.js
+/opt/jderobot/share/jderobot/webtools/rgbdviewerjs/public
+/opt/jderobot/bin/uavviewerjs
+/opt/jderobot/share/jderobot/webtools/uavviewerjs/run.js
+/opt/jderobot/share/jderobot/webtools/uavviewerjs/public

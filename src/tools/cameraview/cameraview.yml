@@ -1,9 +1,9 @@
 Cameraview:
   Camera:
-    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Server: Ice # Deactivate, Ice , ROS
     Proxy: "cameraA:tcp -h localhost -p 9999"
     Format: RGB8
-    Topic: "/TurtlebotROS/cameraL/image_raw"
+    Topic: "/cameraserver/rgb"
     Name: cameraA
     Fps: 30
 

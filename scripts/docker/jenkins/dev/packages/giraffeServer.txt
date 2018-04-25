@@ -1,0 +1,2 @@
+/opt/jderobot/bin/giraffeServer
+/opt/jderobot/share/jderobot/conf/giraffeServer.cfg

@@ -10,12 +10,13 @@
 #include <OniCTypes.h>
 
 
-ConcurrentDevice::ConcurrentDevice(int fps, int cameraIdx, DeviceConfig config, const cv::Size& size):componentAlive(true),fps(fps),cameraIdx(cameraIdx),config(config),workingSize(size),g_bIsDepthOn(false),g_bIsColorOn(false),g_bIsIROn(false),g_depthSensorInfo(NULL),g_colorSensorInfo(NULL),g_irSensorInfo(NULL)     {
+ConcurrentDevice::ConcurrentDevice(int fps, int cameraIdx, DeviceConfig config, const cv::Size& size):componentAlive(true),fps(fps),cameraIdx(cameraIdx),config(config),workingSize(size),g_bIsDepthOn(false),g_bIsColorOn(false),g_bIsIROn(false),g_depthSensorInfo(NULL),g_colorSensorInfo(NULL),g_irSensorInfo(NULL),g_isValid(true)     {
 
     openni::Status nRetVal = openni::OpenNI::initialize();
     if (nRetVal != openni::STATUS_OK)
     {
         LOG(ERROR) << "Cannot initialize openni";
+        g_isValid=false;
         return;
     }
 
@@ -42,6 +43,8 @@ ConcurrentDevice::ConcurrentDevice(int fps, int cameraIdx, DeviceConfig config, 
     {
         LOG(ERROR) <<  "Missing devices";
         openni::OpenNI::shutdown();
+        g_isValid=false;
+        return;
     }
 
 
@@ -53,6 +56,7 @@ ConcurrentDevice::ConcurrentDevice(int fps, int cameraIdx, DeviceConfig config, 
     if (nRetVal != openni::STATUS_OK)
     {
         LOG(ERROR) << "Error openning device";
+        g_isValid=false;
         return;
     }
 
@@ -77,6 +81,7 @@ ConcurrentDevice::ConcurrentDevice(int fps, int cameraIdx, DeviceConfig config, 
     if (rc != openni::STATUS_OK)
     {
         LOG(ERROR) << "Can't frame sync";
+        g_isValid=false;
         return;
     }
 
@@ -458,5 +463,9 @@ void ConcurrentDevice::getSyncData(cv::Mat &rgb, cv::Mat &depth) {
     rgb=this->getRGBImage(false);
     depth=this->getDepthImage(false);
     this->mutex.unlock();
+}
+
+bool ConcurrentDevice::isValid() {
+    return this->g_isValid;
 }
 

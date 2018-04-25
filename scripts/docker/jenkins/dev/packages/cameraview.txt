@@ -1,0 +1,3 @@
+/opt/jderobot/share/jderobot/glade/cameraview.glade
+/opt/jderobot/share/jderobot/conf/cameraview.yml
+/opt/jderobot/bin/cameraview

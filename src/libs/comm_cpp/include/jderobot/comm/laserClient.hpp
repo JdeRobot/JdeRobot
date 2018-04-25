@@ -22,8 +22,13 @@
 
 #include <jderobot/types/laserData.h>
 #include <Ice/Communicator.h>
+#include <jderobot/comm/tools.hpp>
 #include <jderobot/comm/communicator.hpp>
 #include <jderobot/comm/interfaces/laserClient.hpp>
+#include <jderobot/comm/ice/laserIceClient.hpp>
+#ifdef JDERROS
+#include <jderobot/comm/ros/listenerLaser.hpp>
+#endif
 
 
 

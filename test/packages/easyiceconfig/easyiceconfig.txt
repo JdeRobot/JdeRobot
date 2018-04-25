@@ -1,0 +1,3 @@
+/opt/jderobot/lib/libeasyiceconfig.so
+/opt/jderobot/lib/libeasyiceconfig-embedded.a
+/opt/jderobot/include/easyiceconfig

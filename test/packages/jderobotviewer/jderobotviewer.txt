@@ -1,0 +1,3 @@
+/opt/jderobot/lib/libjderobotViewer.so
+/opt/jderobot/lib/libjderobotViewer.a
+/opt/jderobot/include/jderobot/jderobotViewer

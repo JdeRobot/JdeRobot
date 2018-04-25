@@ -1,0 +1,5 @@
+/opt/jderobot/bin/cameraserver_py
+/opt/jderobot/share/jderobot/python/cameraserver_py/cameraserver.py
+/opt/jderobot/share/jderobot/python/cameraserver_py/ImageProviderI.py
+/opt/jderobot/share/jderobot/python/cameraserver_py/threadImage.py
+/opt/jderobot/share/jderobot/conf/cameraserver_py.yml

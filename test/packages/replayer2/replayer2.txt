@@ -1,0 +1,3 @@
+/opt/jderobot/bin/replayer2
+/opt/jderobot/share/jderobot/glade/replayergui.glade
+/opt/jderobot/share/jderobot/conf/replayer.cfg

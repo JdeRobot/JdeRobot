@@ -1,6 +1,7 @@
 import sys
 import Ice
 from .ice.navdataIceClient import NavdataIceClient
+from .tools import server2int
 
 
 
@@ -35,7 +36,7 @@ def __getPublisherNavdata(jdrc, prefix):
     @return Navdata ROS Publisher
 
     '''
-    
+
     print(prefix + ": ROS msg are diabled")
     return None
 
@@ -71,8 +72,7 @@ def getNavdataClient (jdrc, prefix):
 
     '''
     server = jdrc.getConfig().getProperty(prefix+".Server")
-    if not server:
-        server=0
+   server = server2int(server)
 
     cons = [__Navdatadisabled, __getNavdataIceClient, __getPublisherNavdata]
 

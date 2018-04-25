@@ -1,0 +1,4 @@
+/opt/jderobot/bin/ardrone_print_gps_data
+/opt/jderobot/bin/ardrone_server
+/opt/jderobot/share/jderobot/conf/ardrone_interfaces.cfg
+/opt/jderobot/share/jderobot/conf/config

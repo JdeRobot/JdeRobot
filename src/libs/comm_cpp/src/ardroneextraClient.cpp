@@ -1,17 +1,16 @@
 #include <jderobot/comm/ardroneextraClient.hpp>
-#include <jderobot/comm/ice/ardroneextraIceClient.hpp>
-#ifdef JDERROS
-//#include <jderobot/comm/ros/publisherArDroneExtra.hpp>
-#endif
+
 
 namespace Comm {
 
-ArDroneExtraClient* 
+ArDroneExtraClient*
 getArDroneExtraClient(Comm::Communicator* jdrc, std::string prefix){
 	ArDroneExtraClient* client = 0;
 
+	int server;
+	std::string server_name = jdrc->getConfig().asString(prefix+".Server");
+	server = server2int(server_name);
 
-	int server = jdrc->getConfig().asIntWithDefault(prefix+".Server", 0);
 	switch (server){
 		case 0:
 		{

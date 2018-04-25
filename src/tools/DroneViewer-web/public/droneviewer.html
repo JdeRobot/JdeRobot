@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>DroneViewer</title>
+   <meta name="description" content="">
+
+   <!-- core CSS -->
+   <link href="css/bootstrap.min.css" rel="stylesheet">
+   <link href="css/bootstrap-toggle.min.css" rel="stylesheet">
+   <link href="css/flightindicators.min.css" rel="stylesheet">
+   <link href="css/droneviewer.css" rel="stylesheet">
+</head>
+<!--/head-->
+
+<body>
+<header id="header">
+  <nav class="navbar navbar-inverse" role="banner">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#"><i class="fa fa-bolt"></i> Jderobot Web Clients DroneViewer</a> </div>
+    </div>
+    <!--/.container-->
+  </nav>
+  <!--/nav-->
+
+</header>
+<!--/header-->
+<div id="body" class="container">
+   <div class="row">
+      <div id="buttons" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"><p>
+        <button id="start" type="button" class="btn btn-md btn-success">Start</button>
+        <button id="stop" type="button" class="btn btn-md btn-danger">Stop</button>
+        <button id="config" type="button" class="btn btn-info" data-toggle="modal" data-target="#configure">Config</button>
+      </p>
+      </div>
+   </div>
+   <div class="row">
+      <div class=" col-xs-12 col-sm-12 col-md-8 col-lg-6 col-md-offset-2 col-lg-offset-3">
+         <div class="border-carbon panel panel-info">
+            <div id="teleoperator" class="panel-body padding0 border-blue container-fluid">
+               <canvas id="camView" class="col-xs-12 col-sm-12 col-md-12 col-lg-12  padding0 cam">Your browser does not support the HTML5 canvas tag.</canvas>
+               <div class="indicators">
+                  <span class="left" id="attitude"></span>
+                  <span class="left" id="altimeter"></span>
+
+                  <span class="right" id="turn_coordinator"></span>
+                  <span class="right" id="heading"></span>
+						 <!--<span class="center">
+						 	<p class="mtop20"><span class="bold">Delay Network: </span><span id="delay1"></span></p>
+               		<p><span class="bold">Delay Worker: </span><span id="delay2"></span></p>
+						 </span>-->
+               </div>
+               <div class="controls">
+                  <canvas id="control1" class="control" width=150 height=150>Your browser does not support the HTML5 canvas tag.</canvas>
+                  <canvas id="control2" class="control right" width=150 height=150 >Your browser does not support the HTML5 canvas tag.</canvas>
+                  <div class="btn-group-vertical buttons" role="group" aria-label="bextra">
+                     <button id="takeoff" type="button" class="btn btn-info sinBackColor">Takeoff</button>
+                     <button id="land" type="button" class="btn btn-info sinBackColor">Land</button>
+                     <button id="toggle" type="button" class="btn btn-info sinBackColor" >Toggle Camera</button>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <div class="row">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4 col-md-offset-3 col-lg-offset-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading">
+               <span class="panel-title">3D Model</span>   <input id="mod-toggle" disabled type="checkbox" data-toggle="toggle" data-onstyle="info" data-size="mini" data-offstyle="info">
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="model" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 padding0">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!--<div class="row">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4 col-md-offset-3 col-lg-offset-4">
+         <div class="border-carbon panel panel-info">
+            <div class="panel-body padding0 border-blue container-fluid">
+               <textarea id="debug" rows="6" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 padding0"></textarea>
+               <p id="media1" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"></p>
+               <p id="media2" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"></p>
+            </div>
+         </div>
+      </div>
+   </div>-->
+</div>
+
+<div class="modal fade" id="configure" tabindex="-1" role="dialog" aria-labelledby="configLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="configLabel">DroneViewer Config</h4>
+      </div>
+      <div class="modal-body">
+         <label class="" for="globaladdr">Same Address</label>
+         <form class="form-inline">
+            <div class="form-group">
+               <div class="input-group">
+                  <span class="input-group-addon" id="basic-addon1">Addr</span>
+                  <input  id="globaladdr" type="text" class="form-control" placeholder="Address" value="localhost" aria-describedby="basic-addon1">
+               </div>
+            </div>
+            <!--<input id="sa-toggle" type="checkbox" data-toggle="toggle" data-onstyle="info" data-offstyle="info">-->
+            <button id="sa-button" type="button" class="btn btn-info">Put</button>
+         </form>
+         <br>
+         <label class="" for="DfReal">Default EndPoints and Ports</label>
+         <form class="form-inline">
+            <button id="DfReal" type="button" class="btn btn-info">Real</button>
+            <button id="DfGazebo" type="button" class="btn btn-info">Simulated</button>
+         </form>
+         <br>
+         <form>
+            <div class="form-group">
+               <label for="dircam1">Camera</label>
+               <div class="input-group">
+                  <span class="input-group-addon" id="basic-addon1">Addr</span>
+                  <input  id="dircam1" type="text" class="form-control in-addr" placeholder="Address" value="localhost" aria-describedby="basic-addon1">
+               </div>
+               <div class="input-group">
+                  <label class="sr-only" for="portcam1">Camera Port</label>
+                  <span class="input-group-addon" id="basic-addon1">Port</span>
+                  <input  id="portcam1" type="number" class="form-control" value="11000" aria-describedby="basic-addon1">
+               </div>
+               <div class="input-group">
+                  <label class="sr-only" for="epcam1">Camera EP</label>
+                  <span class="input-group-addon" id="basic-addon1">EndPoint</span>
+                  <input id="epcam1" type="text" class="form-control" value="camera" aria-describedby="basic-addon1">
+               </div>
+            </div>
+            <div class="form-group">
+               <label for="dirmotors">CMDVel</label>
+               <div class="input-group">
+                  <span class="input-group-addon" id="basic-addon1">Addr</span>
+                  <input  id="dircmdvel" type="text" class="form-control in-addr" placeholder="Address" value="localhost" aria-describedby="basic-addon1">
+               </div>
+               <div class="input-group">
+                  <label class="sr-only" for="portcmdvel">CMDVel Port</label>
+                  <span class="input-group-addon" id="basic-addon1">Port</span>
+                  <input  id="portcmdvel" type="number" class="form-control" value="11002" aria-describedby="basic-addon1">
+               </div>
+               <div class="input-group">
+                  <label class="sr-only" for="epcmdvel">CMDVel EP</label>
+                  <span class="input-group-addon" id="basic-addon1">EndPoint</span>
+                  <input id="epcmdvel" type="text" class="form-control" value="CMDVel" aria-describedby="basic-addon1">
+               </div>
+            </div>
+            <div class="form-group">
+               <label for="dirpose3d">Pose3D</label>
+               <div class="input-group">
+                  <span class="input-group-addon" id="basic-addon1">Addr</span>
+                  <input  id="dirpose3d" type="text" class="form-control in-addr" placeholder="Address" value="localhost" aria-describedby="basic-addon1">
+               </div>
+               <div class="input-group">
+                  <label class="sr-only" for="portpose3d">Pose3D Port</label>
+                  <span class="input-group-addon" id="basic-addon1">Port</span>
+                  <input  id="portpose3d" type="number" class="form-control" value="11003" aria-describedby="basic-addon1">
+               </div>
+               <div class="input-group">
+                  <label class="sr-only" for="eppose3d">Pose3D EP</label>
+                  <span class="input-group-addon" id="basic-addon1">EndPoint</span>
+                  <input id="eppose3d" type="text" class="form-control" value="Pose3D" aria-describedby="basic-addon1">
+               </div>
+            </div>
+            <div class="form-group">
+               <label for="dirextra">Extra</label>
+               <div class="input-group">
+                  <span class="input-group-addon" id="basic-addon1">Addr</span>
+                  <input  id="dirextra" type="text" class="form-control in-addr" placeholder="Address" value="localhost" aria-describedby="basic-addon1">
+               </div>
+               <div class="input-group">
+                  <label class="sr-only" for="portextra">Extra Port</label>
+                  <span class="input-group-addon" id="basic-addon1">Port</span>
+                  <input  id="portextra" type="number" class="form-control" value="11004" aria-describedby="basic-addon1">
+               </div>
+               <div class="input-group">
+                  <label class="sr-only" for="epextra">Extra EP</label>
+                  <span class="input-group-addon" id="basic-addon1">EndPoint</span>
+                  <input id="epextra" type="text" class="form-control" value="Extra" aria-describedby="basic-addon1">
+               </div>
+            </div>
+         </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
+        <button id="save" type="button" class="btn btn-success" data-dismiss="modal">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+   <script src="js/jquery.min.js"></script>
+   <script src="js/bootstrap.min.js"></script>
+   <script src="js/bootstrap-toggle.min.js"></script>
+   <script src="js/three.min.js"></script>
+   <script src="js/jquery.flightindicators.js"></script>
+   <script src="js/TrackballControls.js"></script>
+   <script src="js/ColladaLoader.js"></script>
+   <script src="js/api.js"></script>
+   <script src="js/gui.js"></script>
+   <script src="js/droneviewer.js"></script>
+   <script src="js/droneviewerWeb.js"></script>
+</body>
+</html>

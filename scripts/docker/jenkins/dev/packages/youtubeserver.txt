@@ -1,0 +1,6 @@
+/opt/jderobot/bin/youtubeserver
+/opt/jderobot/bin/mavLinkServer
+/opt/jderobot/share/jderobot/python/youtubeserver/youtubeserver.py
+/opt/jderobot/share/jderobot/python/youtubeserver/videoTools
+/opt/jderobot/share/jderobot/python/youtubeserver/JdeRobot
+/opt/jderobot/share/jderobot/conf/youtubeserver.yml

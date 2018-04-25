@@ -17,9 +17,15 @@ RUN useradd -p `mkpasswd jenkins` -d /home/jenkins -m -g users -s /bin/bash jenk
 
 RUN echo "source /opt/ros/kinetic/setup.bash" >> /home/jenkins/.bashrc
 
+COPY ./010_jenkins-nopasswd /etc/sudoers.d/
+
 RUN /usr/sbin/sshd
 
 COPY ./compile.sh /bin/
+
+COPY ./search_files.sh /bin/
+
+COPY packages /packages
 
 
 

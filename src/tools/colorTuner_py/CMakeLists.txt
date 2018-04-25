@@ -16,6 +16,8 @@ install(
 INSTALL(FILES colorTuner.py DESTINATION share/jderobot/python/colorTuner_py/ COMPONENT colortuner-python)
 INSTALL(FILES resources_rc.py DESTINATION share/jderobot/python/colorTuner_py/ COMPONENT colortuner-python)
 
+INSTALL(FILES resources/HLSColorSpace.png DESTINATION share/jderobot/python/colorTuner_py/resources COMPONENT colortuner-python)
+
 # Install gui
 INSTALL (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gui DESTINATION share/jderobot/python/colorTuner_py COMPONENT colortuner-python PATTERN .svn EXCLUDE)
 

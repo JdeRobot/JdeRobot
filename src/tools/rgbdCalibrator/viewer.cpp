@@ -44,6 +44,8 @@ Viewer::Viewer()
 : gtkmain(0,0),frameCount(0),
   intrinsicsEnable(0), contPhoto(1), mFrameBlob(NULL), hsvFilter(NULL), 
   MAX_MAPS(25), handlerDepth(true) {
+    x_pos_zoom=-1;
+    y_pos_zoom=-1;
 
 	std::cout << "Loading glade\n";
 
@@ -51,7 +53,8 @@ Viewer::Viewer()
 	refXml = Gnome::Glade::Xml::create(gladepath);
 	refXml->get_widget("color_image", gtkimage_color);
 	refXml->get_widget("color_image2", gtkimage_color2);
-	refXml->get_widget("depth_image", gtkimage_depth);
+    refXml->get_widget("color_imageZoom", gtkimage_color2zoom);
+    refXml->get_widget("depth_image", gtkimage_depth);
 	refXml->get_widget("hsv_image", gtkimage_hsv);
 	refXml->get_widget("blob_image", gtkimage_blob);
 	refXml->get_widget("mainwindow",mainwindow);
@@ -67,6 +70,7 @@ Viewer::Viewer()
 	refXml->get_widget("et_offset_y", etOffsetY);
 	refXml->get_widget("et_offset_z", etOffsetZ);
 	refXml->get_widget("bt_save", btSave);
+    refXml->get_widget("eb_extrinsicsZoom", ebImageExtrinsicsZoom);
 
 	// connect signals
 	btTakePhoto->signal_clicked().connect(sigc::mem_fun(this,&Viewer::on_bt_take_photo_clicked));
@@ -74,7 +78,11 @@ Viewer::Viewer()
 	btIntrinsic->signal_clicked().connect(sigc::mem_fun(this,&Viewer::on_bt_intrinsic));
 	ebImage->signal_button_press_event().connect(sigc::mem_fun(this, &Viewer::on_eventbox_clicked));
 
+	ebImageExtrinsics->add_events(	Gdk::POINTER_MOTION_MASK);
+
 	ebImageExtrinsics->signal_button_press_event().connect(sigc::mem_fun(this, &Viewer::on_eventbox_extrinsics_clicked));
+	ebImageExtrinsics->signal_motion_notify_event().connect(sigc::mem_fun(this, &Viewer::on_eventbox_extrinsics_moved));
+
 
 	btSave->signal_clicked().connect(sigc::mem_fun(this,&Viewer::on_bt_save_clicked));
 	// start the timer for calculating the number of frames per second
@@ -155,7 +163,80 @@ void Viewer::display( const colorspaces::Image& imageColor, const colorspaces::I
 	gtkimage_color2->clear();
 	gtkimage_color2->set(imgBuffColor);
 
-	if (intrinsicsEnable)
+
+
+
+    // set image with zoom
+
+    colorspaces::ImageRGB8 img_rgb888(imageColor);//conversion will happen if needed
+    cv::Mat myImage;
+    cv::Mat(cvSize(img_rgb888.width,img_rgb888.height), CV_8UC3, img_rgb888.data).copyTo(myImage);
+
+
+    //extract center
+
+    int factor=4;
+    int roiSize_x=myImage.size().width/factor;
+    int roiSize_y=myImage.size().height/factor;
+
+
+    cv::Mat finalZoomImage(roiSize_y,roiSize_x,CV_8UC3,cv::Scalar(0,0,0));
+
+
+    int x_roi=this->x_pos_zoom - roiSize_x/2;
+    int y_roi=this->y_pos_zoom - roiSize_y/2;
+
+
+    int x_final_displacent=0;
+    if (x_roi < 0){
+        x_final_displacent=-x_roi;
+        x_roi=0;
+        roiSize_x-=x_final_displacent;
+    }
+    int y_final_displacement=0;
+    if (y_roi <0){
+        y_final_displacement=-y_roi;
+        y_roi=0;
+        roiSize_y-=y_final_displacement;
+    }
+
+
+    if (x_roi + roiSize_x > myImage.size().width){
+        roiSize_x-=(x_roi + roiSize_x) - myImage.size().width;
+    }
+    if (y_roi + roiSize_y > myImage.size().height){
+        roiSize_y -= (y_roi + roiSize_y) - myImage.size().height;
+    }
+
+
+    cv::Rect roi(x_roi,y_roi,roiSize_x,roiSize_y);
+    cv::Rect destinationRoi(x_final_displacent,y_final_displacement,roiSize_x,roiSize_y);
+
+
+
+
+    myImage(roi).copyTo(finalZoomImage(destinationRoi));
+
+    cv::resize(finalZoomImage,finalZoomImage,cv::Size(),factor,factor);
+
+    cv::circle(finalZoomImage,cv::Point(finalZoomImage.size().width/2,finalZoomImage.size().height/2),2,cv::Scalar(0,0,255),-1);
+
+
+
+    Glib::RefPtr<Gdk::Pixbuf> imgBuffColor2 =
+            Gdk::Pixbuf::create_from_data((const guint8*) finalZoomImage.data,
+                                          Gdk::COLORSPACE_RGB,
+                                          false,
+                                          8,
+                                          imageDepth.width,
+                                          imageDepth.height,
+                                          imageDepth.step);
+
+    gtkimage_color2zoom->clear();
+    gtkimage_color2zoom->set(imgBuffColor2);
+
+
+    if (intrinsicsEnable)
 		saveImage(imageColor);
 
 
@@ -357,7 +438,6 @@ Viewer::displayFrameRate()
 
 bool Viewer::on_eventbox_extrinsics_clicked(GdkEventButton * event)
 {
-
 	if (mCalibration){
 
 		pthread_mutex_lock(&mutex);
@@ -368,6 +448,10 @@ bool Viewer::on_eventbox_extrinsics_clicked(GdkEventButton * event)
 		{
 			Eigen::Vector3d p2D ((int) event->x, (int) event->y, 1.0);
 			mCalibration->test(p2D, mDepthVector);
+		}
+		else{
+			std::cout << "Included clicked pixel to compute calibration" << std::endl;
+
 		}
 
 		pthread_mutex_unlock(&mutex);
@@ -598,6 +682,13 @@ void Viewer::on_bt_intrinsic()
 
 
 }
+
+	bool Viewer::on_eventbox_extrinsics_moved(GdkEventMotion *event) {
+        this->x_pos_zoom=(int)event->x-1;
+        this->y_pos_zoom=(int)event->y-1;
+        return true;
+
+	}
 
 
 }//namespace

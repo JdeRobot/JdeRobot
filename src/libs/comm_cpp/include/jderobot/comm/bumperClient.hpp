@@ -22,8 +22,13 @@
 
 #include <jderobot/types/bumperData.h>
 #include <Ice/Communicator.h>
+#include <jderobot/comm/tools.hpp>
 #include <jderobot/comm/communicator.hpp>
 #include <jderobot/comm/interfaces/bumperClient.hpp>
+#include <jderobot/comm/ice/bumperIceClient.hpp>
+#ifdef JDERROS
+#include <jderobot/comm/ros/listenerBumper.hpp>
+#endif
 
 
 

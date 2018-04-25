@@ -1,16 +1,16 @@
-#include <jderobot/comm/interfaces/bumperClient.hpp>
-#include <jderobot/comm/ice/bumperIceClient.hpp>
-#ifdef JDERROS
-#include <jderobot/comm/ros/listenerBumper.hpp>
-#endif
+#include <jderobot/comm/bumperClient.hpp>
+
 
 namespace Comm {
 
-BumperClient* 
+BumperClient*
 getBumperClient(Comm::Communicator* jdrc, std::string prefix){
 	BumperClient* client = 0;
 
-	int server = jdrc->getConfig().asIntWithDefault(prefix+".Server", 0);
+	int server;
+	std::string server_name = jdrc->getConfig().asString(prefix+".Server");
+	server = server2int(server_name);
+
 	switch (server){
 		case 0:
 		{

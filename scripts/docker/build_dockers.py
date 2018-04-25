@@ -3,7 +3,7 @@ import yaml
 import sys
 
 
-
+level = 0
 
 yamlFile = sys.argv[1]
 client = docker.from_env()
@@ -36,13 +36,19 @@ with open(yamlFile, 'r') as stream:
   except yaml.YAMLError as exc:
     print(exc)
 
-
-for image in images:
-  if images[image]["build"]:
-    print "Building " + image 
-    build_image(images[image]["path"], images[image]["tag"])
-  if images[image]["push"]:
-    push_image(images[image]["tag"])
+while images:
+  imgs = dict(images)
+  for image in images:
+    if images[image]["level"] == level:
+      if images[image]["build"]:
+        print "Building " + image 
+        build_image(images[image]["path"], images[image]["tag"])
+      if images[image]["push"]:
+        print "Pushing " + image 
+        push_image(images[image]["tag"])
+      del imgs[image]
+  images = dict(imgs)
+  level = level + 1
   
   
   

@@ -20,6 +20,9 @@ check_result
 make -j6
 check_result
 
+sudo make install
+check_result
+
 # Package Debian
 #cmake .
 #cpack .

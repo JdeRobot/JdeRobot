@@ -1,0 +1,3 @@
+/opt/jderobot/bin/rgbdCalibrator
+/opt/jderobot/share/jderobot/glade/rgbdCalibrator.glade
+/opt/jderobot/share/jderobot/conf/rgbdCalibrator.cfg

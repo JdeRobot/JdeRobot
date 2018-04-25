@@ -1,0 +1,4 @@
+/opt/jderobot/bin/setupMAVLinkServer
+/opt/jderobot/bin/mavLinkServer
+/opt/jderobot/share/jderobot/python/MAVLinkServer/setup.py
+/opt/jderobot/share/jderobot/python/MAVLinkServer/MAVProxy

@@ -1,17 +1,15 @@
 #include <jderobot/comm/motorsClient.hpp>
-#include <jderobot/comm/ice/motorsIceClient.hpp>
-#ifdef JDERROS
-#include <jderobot/comm/ros/publisherMotors.hpp>
-#endif
 
 namespace Comm {
 
-MotorsClient* 
+MotorsClient*
 getMotorsClient(Comm::Communicator* jdrc, std::string prefix){
 	MotorsClient* client = 0;
 
+	int server;
+	std::string server_name = jdrc->getConfig().asString(prefix+".Server");
+	server = server2int(server_name);
 
-	int server = jdrc->getConfig().asIntWithDefault(prefix+".Server", 0);
 	switch (server){
 		case 0:
 		{

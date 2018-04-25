@@ -1,0 +1,3 @@
+/opt/jderobot/lib/libconfig.so
+/opt/jderobot/lib/libconfig-embedded.a
+/opt/jderobot/include/jderobot/config

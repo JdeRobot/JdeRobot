@@ -8,7 +8,7 @@ if(ARDRONE_ALL_DEPS)
 		COMMAND slice2cpp ${CMAKE_CURRENT_SOURCE_DIR}/slice/navdatagps.ice --output-dir=${SLICE_OUTPUT}
 	)
 	include_directories(${SLICE_OUTPUT})
-	JDEROBOT_ADD_LIBRARY(ardrone_server_msgs STATIC ${SLICE_OUTPUT}/navdatagps.cpp)
+	add_library(ardrone_server_msgs STATIC ${SLICE_OUTPUT}/navdatagps.cpp)
 
 
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -lIce -lIceUtil")

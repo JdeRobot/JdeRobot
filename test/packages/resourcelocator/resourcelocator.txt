@@ -1,0 +1,2 @@
+/opt/jderobot/lib/libresourcelocator.so
+/opt/jderobot/include/resourcelocator

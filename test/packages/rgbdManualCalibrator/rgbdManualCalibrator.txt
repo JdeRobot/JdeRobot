@@ -1,0 +1,4 @@
+/opt/jderobot/bin/rgbdManualCalibrator
+/opt/jderobot/share/jderobot/glade/rgbdManualCalibrator.glade
+/opt/jderobot/share/jderobot/conf/rgbdManualCalibrator.cfg
+/opt/jderobot/share/jderobot/conf/cam1-mia.cfg

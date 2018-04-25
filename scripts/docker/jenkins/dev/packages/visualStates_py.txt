@@ -1,0 +1,6 @@
+/opt/jderobot/bin/visualStates_py
+/opt/jderobot/bin/getinterfaces.sh
+/opt/jderobot/lib/visualstates_py/visualStatesRunTime.so
+/opt/jderobot/include/visualstates_py/
+/opt/jderobot/lib/python2.7/visualStates_py/codegen/python/
+/opt/jderobot/lib/python2.7/visualStates_py/gui

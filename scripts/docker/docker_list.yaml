@@ -1,12 +1,14 @@
 ubuntu_base:
   path: ubuntu/xenial/base
   tag: "jderobot/ubuntu:base"
-  build: False
-  push: False           
+  level: 0
+  build: True
+  push: True           
   
 official:
   path: jderobot/official
   tag: "jderobot/jderobot"
+  level: 1
   build: True
   push: True
 
@@ -14,24 +16,28 @@ official:
 dev-only-ice:
   path: jderobot/dev-only-ice
   tag: "jderobot/jderobot:dev-only-ice"
-  build: False
-  push: False
+  level: 1
+  build: True
+  push: True
 
 dev:
   path: jderobot/dev
   tag: "jderobot/jderobot:dev"
-  build: False
-  push: False
+  level: 2
+  build: True
+  push: True
 
 jenkins:
   path: jenkins/dev
   tag: "jderobot/jenkins:dev"
-  build: False 
-  push: False
+  level: 3
+  build: True 
+  push: True
 
 ####### DEMOS #######
 cameraviewjs:
   path: jderobot/demos/cameraviewjs
   tag: "jderobot/demos:cameraviewjs"
-  build: False
-  push: False
+  level: 2
+  build: True
+  push: True

@@ -1,6 +1,7 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
   <model name="tree">
+    <static>true</static>
     <pose>0 0 1 0 0 0</pose>
     <link name="link">
       <inertial>

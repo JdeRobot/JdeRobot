@@ -32,15 +32,12 @@ TARGET_LINK_LIBRARIES(rgbdCalibrator
     ${Boost_LIBRARIES}
     colorspacesmm
     JderobotInterfaces
-    progeo
     geometry
     colorspaces
     cvblob
 	${resourcelocator_LIBRARIES}
-		${GLOG_LIBRARIES}
-
-
-		)
+	${GLOG_LIBRARIES}
+	)
 
 install(TARGETS rgbdCalibrator
     DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/

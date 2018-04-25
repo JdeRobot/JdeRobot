@@ -1,17 +1,17 @@
 #include <jderobot/comm/pose3dClient.hpp>
-#include <jderobot/comm/ice/pose3dIceClient.hpp>
-#ifdef JDERROS
-#include <jderobot/comm/ros/listenerPose.hpp>
-#endif
+
 
 namespace Comm {
 
-Pose3dClient* 
+Pose3dClient*
 getPose3dClient(Comm::Communicator* jdrc, std::string prefix){
 	Pose3dClient* client = 0;
 
+	int server;
+	std::string server_name = jdrc->getConfig().asString(prefix+".Server");
+	std::transform(server_name.begin(), server_name.end(), server_name.begin(), ::tolower);
+	server = server2int(server_name);
 
-	int server = jdrc->getConfig().asIntWithDefault(prefix+".Server", 0);
 	switch (server){
 		case 0:
 		{

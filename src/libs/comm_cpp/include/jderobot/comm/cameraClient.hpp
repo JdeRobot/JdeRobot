@@ -22,8 +22,13 @@
 
 #include <jderobot/types/image.h>
 #include <Ice/Communicator.h>
+#include <jderobot/comm/tools.hpp>
 #include <jderobot/comm/communicator.hpp>
 #include <jderobot/comm/interfaces/cameraClient.hpp>
+#include <jderobot/comm/ice/cameraIceClient.hpp>
+#ifdef JDERROS
+#include <jderobot/comm/ros/listenerCamera.hpp>
+#endif
 
 
 

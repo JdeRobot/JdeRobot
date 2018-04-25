@@ -56,6 +56,8 @@ namespace rgbdCalibrator{
     Glib::RefPtr<Gnome::Glade::Xml> refXml;
     Gtk::Image* gtkimage_color;
     Gtk::Image* gtkimage_color2;
+    Gtk::Image* gtkimage_color2zoom;
+
     Gtk::Image* gtkimage_depth;
     Gtk::Image* gtkimage_hsv;
     Gtk::Image* gtkimage_blob;
@@ -70,6 +72,8 @@ namespace rgbdCalibrator{
     Gtk::TextView* tvStatus;
     Gtk::EventBox* ebImage;
     Gtk::EventBox* ebImageExtrinsics;
+    Gtk::EventBox* ebImageExtrinsicsZoom;
+
     Gtk::Main gtkmain;
     Gtk::Entry* etOffsetX;
     Gtk::Entry* etOffsetY;
@@ -108,6 +112,8 @@ namespace rgbdCalibrator{
     // onclicks
     bool on_eventbox_clicked(GdkEventButton * event);
     bool on_eventbox_extrinsics_clicked(GdkEventButton * event);
+    bool on_eventbox_extrinsics_moved(GdkEventMotion * event);
+
     void on_bt_save_clicked();
     void on_bt_take_photo_clicked ();
     void on_bt_intrinsic();
@@ -116,6 +122,8 @@ namespace rgbdCalibrator{
     void beep();
     void createImageHSV(const colorspaces::Image& imageDepth);
 
+    int x_pos_zoom;
+    int y_pos_zoom;
 
     
   

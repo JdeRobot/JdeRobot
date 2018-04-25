@@ -1,43 +1,49 @@
-import Ice
 import sys
 import config
 import cv2
-from ImageProviderI import ImageProviderI,WorkQueue
-from threadImage import ThreadImage
+import rospy
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+
+from serverImage import ServerImage
 
 
+img_formats = ["bmp", "dib", "gif", "jpeg", "jpg", "jpe", "jp2", "png", "pbm", "pgm", "ppm", "sr", "ras", "tiff", "tif"]
+video_formats = ["mp4", "avi"]
 
 if __name__== "__main__":
+    cfg = config.load(sys.argv[1])
 
-	try:
-		cfg = config.load(sys.argv[1])
-		id = Ice.InitializationData()
-		ic = Ice.initialize(None, id)
+    topic = cfg.getProperty("cameraServer.Topic")
+    fps = cfg.getPropertyWithDefault("cameraServer.FrameRate",12)
+    uri = cfg.getProperty("cameraServer.Uri")
+    name = cfg.getProperty("cameraServer.Name")
 
-		endpoint = cfg.getProperty("cameraServer.Proxy")
-		fps = cfg.getPropertyWithDefault("cameraServer.FrameRate",12)
-		uri = cfg.getProperty("cameraServer.Uri")
-		name = cfg.getProperty("cameraServer.Name")
+    if type(uri) == str and "." in uri and uri.split(".")[-1] in img_formats:
+        print "loading image: ", uri.split("/")[-1]
+        camera = ServerImage(uri)
+    elif type(uri) == int:
+        print "loading camera ..."
+        camera = cv2.VideoCapture(uri)
+    elif type(uri) == str and "." in uri and uri.split(".")[-1] in video_formats:
+        print "loading video: ", uri.split("/")[-1]
+        camera = cv2.VideoCapture(uri)
+    else:
+        print "[Format error]"
+        sys.exit()
+            
+    bridge = CvBridge()
+    pub = rospy.Publisher(topic, Image, queue_size=1)
+    rospy.init_node(name)
+    r = rospy.Rate(fps)
 
-		camera = cv2.VideoCapture(uri)
-		
-		workQueue = WorkQueue()
-		workQueue.setDaemon(True)
+    while not rospy.is_shutdown():
+        retval, img = camera.read()
+        imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        msg = bridge.cv2_to_imgmsg(imgRGB, "rgb8")
 
-		imageThread = ThreadImage(camera, fps)
+        pub.publish(msg)
+        r.sleep()
 
-		imageThread.start()
-		workQueue.start()
 
-		adapter = ic.createObjectAdapterWithEndpoints("youtubeServer",endpoint) #Properties
-		object = ImageProviderI(workQueue, imageThread)
-		adapter.add(object, Ice.stringToIdentity(name))
-		adapter.activate()
-		workQueue.join()
-		print name, ":", endpoint
-		ic.waitForShutdown()
-	except KeyboardInterrupt:
-		imageThread.stop()
-		del(camera)
-		del(ic)
-		sys.exit() 
+

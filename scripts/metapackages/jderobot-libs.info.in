@@ -8,7 +8,7 @@ Section: net
 Priority: extra
 Size: 0
 Installed-Size: 0
-Depends: jderobot-depthlib, jderobot-colorspaces, jderobot-comm, jderobot-cvblob, jderobot-cvfast, jderobot-easyice, jderobot-fuzzylib, jderobot-geometry, jderobot-handlers, jderobot-imganalyze, jderobot-logger, jderobot-ns, jderobot-parallelice, jderobot-pioneer, jderobot-progeo, jderobot-resourcelocator, jderobot-util, jderobot-viewer, jderobot-xmlparser, jderobot-config, jderobot-config-python, jderobot-easyice-python, jderobot-comm-python, jderobot-parallelice-python
+Depends: jderobot-depthlib, jderobot-colorspaces, jderobot-comm, jderobot-cvblob, jderobot-cvfast, jderobot-easyice, jderobot-fuzzylib, jderobot-geometry, jderobot-handlers, jderobot-imganalyze, jderobot-logger, jderobot-ns, jderobot-parallelice, jderobot-progeo, jderobot-resourcelocator, jderobot-util, jderobot-viewer, jderobot-xmlparser, jderobot-config, jderobot-config-python, jderobot-easyice-python, jderobot-comm-python, jderobot-parallelice-python
 Maintainer: Francisco Perez <f.perez475@gmail.com>
 Homepage: http://jderobot.org
 Description: Metapackage that gathers all the static and dynamic C/C++ libraries and also the library headers required to compile and execute JdeRobot framework.

@@ -35,7 +35,6 @@ TARGET_LINK_LIBRARIES(replayController
     JderobotInterfaces
     jderobotutil
     progeo
-    pioneer
     jderobotHandlers
     ${easyiceconfig_LIBRARIES} 
     ${ZeroCIce_LIBRARIES}

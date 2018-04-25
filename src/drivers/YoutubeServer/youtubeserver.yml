@@ -1,6 +1,6 @@
 youtubeServer:
   ImageSrv:
-    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS (Not supported)
+    Server: Ice #Deactivate, Ice , ROS (Not supported)
     Proxy: "default -h 0.0.0.0 -p 9999"
     URL: "https://www.youtube.com/watch?v=zw47_q9wbBE"
     LiveBroadcast: False #True for youtube live events
@@ -10,4 +10,3 @@ youtubeServer:
     Name: youtubeServer_py
 
   NodeName: youtubeServerCfg
-

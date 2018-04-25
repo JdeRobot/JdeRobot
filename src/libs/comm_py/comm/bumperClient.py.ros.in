@@ -2,6 +2,7 @@ import sys
 import Ice
 import rospy
 from .ice.bumperIceClient import BumperIceClient
+from .tools import server2int
 
 if (sys.version_info[0] == 2):
     from .ros.listenerBumper import ListenerBumper
@@ -75,7 +76,8 @@ def getBumperClient (jdrc, prefix):
     @return None if Bumper is disabled
 
     '''
-    server = jdrc.getConfig().getPropertyWithDefault(prefix+".Server", 0)
+    server = jdrc.getConfig().getProperty(prefix+".Server")
+    server = server2int(server)
 
     cons = [__Bumperdisabled, __getBumperIceClient, __getListenerBumper]
 

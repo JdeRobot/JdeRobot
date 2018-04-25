@@ -1,15 +1,14 @@
 pantilt_teleop:
   PTMotors:
-    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS (Not supported)
+    Server: Ice # Deactivate, Ice , ROS (Not supported)
     Proxy: "PanTilt:default -h localhost -p 9977"
     Name: basic_component_pyPTMotors
-  
+
   Camera:
-    Server: 2 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Server: ROS # Deactivate, Ice , ROS
     Proxy: "cameraA:default -h localhost -p 9999"
     Format: RGB8
     Topic: "/usb_cam/image_raw"
     Name: pantilt_teleop_pyCamera
 
   NodeName: pantilt_teleop_py
-

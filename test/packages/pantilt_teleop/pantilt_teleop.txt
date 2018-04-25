@@ -1,0 +1,5 @@
+/opt/jderobot/bin/pantilt_teleop
+/opt/jderobot/share/jderobot/python/pantilt_teleop_py/pantilt_teleop.py
+/opt/jderobot/share/jderobot/python/pantilt_teleop_py/resources_rc.py
+/opt/jderobot/share/jderobot/python/pantilt_teleop_py/gui
+/opt/jderobot/share/jderobot/conf/pantilt_teleop.yml

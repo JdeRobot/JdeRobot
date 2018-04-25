@@ -6,6 +6,232 @@ update_test:
   path: update_test
   run: True  
 
+pantilt_teleop:
+  path: pantilt_teleop
+  run: True
+
+kobukiViewer:
+  path: kobukiViewer
+  run: True
+
+easyiceconfig:
+  path: easyiceconfig
+  run: True
+
+kobukiviewerjs:
+  path: kobukiviewerjs
+  run: True
+
+parallelice:
+  path: parallelice
+  run: True
+
+logger:
+  path: logger
+  run: True
+
+cameraserver:
+  path: cameraserver
+  run: True
+
+rgbdViewer:
+  path: rgbdViewer
+  run: True
+
+easyiceconfig_py:
+  path: easyiceconfig_py
+  run: True
+
+evicam_driver:
+  path: evicam_driver
+  run: True
+
+mavlinkserver:
+  path: mavlinkserver
+  run: True
+
+colorTuner:
+  path: colorTuner
+  run: True
+
+cameraCalibrator:
+  path: cameraCalibrator
+  run: True
+
+jderobotviewer:
+  path: jderobotviewer
+  run: True
+
+namingservice:
+  path: namingservice
+  run: True
+
+xmlparser:
+  path: xmlparser
+  run: True
+
+packages:
+  path: packages
+  run: True
+
+geometry:
+  path: geometry
+  run: True
+
+ardrone_server:
+  path: ardrone_server
+  run: True
+
+giraffeServer:
+  path: giraffeServer
+  run: True
+
+visualStates_py:
+  path: visualStates_py
+  run: True
+
+recorder2:
+  path: recorder2
+  run: True
+
+cameraserver_py:
+  path: cameraserver_py
+  run: True
+
+jderobotHandlers:
+  path: jderobotHandlers
+  run: True
+
+fuzzylib:
+  path: fuzzylib
+  run: True
+
+uav_viewer:
+  path: uav_viewer
+  run: True
+
+jderobotutil:
+  path: jderobotutil
+  run: True
+
+uav_viewer_py:
+  path: uav_viewer_py
+  run: True
+
+comm:
+  path: comm
+  run: True
+
+ns:
+  path: ns
+  run: True
+
+rgbdviewerjs:
+  path: rgbdviewerjs
+  run: True
+
+resourcelocator:
+  path: resourcelocator
+  run: True
+
+pclRGBDServer:
+  path: pclRGBDServer
+  run: True
+
+depthlib:
+  path: depthlib
+  run: True
+
+replayer2:
+  path: replayer2
+  run: True
+
+cameraviewjs:
+  path: cameraviewjs
+  run: True
+
+replayController:
+  path: replayController
+  run: True
+
+parallelice_py:
+  path: parallelice_py
+  run: True
+
+openniserver:
+  path: openniserver
+  run: True
+
+rgbdCalibrator:
+  path: rgbdCalibrator
+  run: True
+
+visionlib:
+  path: visionlib
+  run: True
+
+rgbdManualCalibrator:
+  path: rgbdManualCalibrator
+  run: True
+
+navigatorcamera:
+  path: navigatorcamera
+  run: True
+
+interfaces:
+  path: interfaces
+  run: True
+
+3dviewer:
+  path: 3dviewer
+  run: True
+
+config_py:
+  path: config_py
+  run: True
+
+giraffeClient:
+  path: giraffeClient
+  run: True
+
+youtubeserver:
+  path: youtubeserver
+  run: True
+
+cameraview_py:
+  path: cameraview_py
+  run: True
+
+kinect2Server:
+  path: kinect2Server
+  run: True
+
 cameraview:
   path: cameraview
-  run: True          
+  run: True
+
+config:
+  path: config
+  run: True
+
+uavviewerjs:
+  path: uavviewerjs
+  run: True
+
+progeo:
+  path: progeo
+  run: True
+
+types:
+  path: types
+  run: True
+
+comm_py:
+  path: comm_py
+  run: True
+
+gazeboserver:
+  path: gazeboserver
+  run: True
+
+    

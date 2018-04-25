@@ -145,10 +145,6 @@ RUN apt update && apt install -q -y \
     nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# KOBUKILIB
-RUN apt update && apt install -q -y \
-    kobukilib \
-    && rm -rf /var/lib/apt/lists/*
 
 # ARDRONELIB
 RUN apt update && apt install -q -y \
@@ -161,9 +157,9 @@ RUN apt update && apt install -q -y \
     && rm -rf /var/lib/apt/lists/*
 
 # KURT
-RUN apt update && apt install -q -y \
-    kurt-jderobot \
-    && rm -rf /var/lib/apt/lists/*
+#RUN apt update && apt install -q -y \
+#    kurt-jderobot \
+#    && rm -rf /var/lib/apt/lists/*
 
 # SCRTACH2JDEROBOT DEPS
 RUN  pip2 install termcolor==1.1.0 parse==1.8.2 imutils==0.4.3

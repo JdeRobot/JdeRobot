@@ -15,9 +15,9 @@ SET(CPACK_COMPONENT_CAMERASERVER_DESCRIPTION
  Manual Page http://jderobot.org/index.php/Drivers#cameraserver
  Home page https://jderobot.org")
 
- SET(CPACK_DEBIAN_CAMERASERVER-PYTHON_PACKAGE_DEPENDS "jderobot-config-python, jderobot-interfaces")
-SET(CPACK_COMPONENT_BASIC-COMPONENT-PYTHON_DESCRIPTION  
-"Example of tool Python
+SET(CPACK_DEBIAN_CAMERASERVER-PYTHON_PACKAGE_DEPENDS "jderobot-config-python, jderobot-interfaces")
+SET(CPACK_COMPONENT_CAMERASERVER-PYTHON_DESCRIPTION  
+"Example of cameraserver driver in python
  Manual Page http://jderobot.org/
  Home page https://jderobot.org")
  

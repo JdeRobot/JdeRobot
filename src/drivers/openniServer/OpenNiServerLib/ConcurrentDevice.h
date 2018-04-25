@@ -27,6 +27,8 @@ public:
     void stop();
     DeviceConfig getConfig();
     VideoMode getVideoMode();
+    bool isValid();
+
 
 private:
 
@@ -42,6 +44,7 @@ private:
     bool g_bIsDepthOn;
     bool g_bIsColorOn;
     bool g_bIsIROn;
+    bool g_isValid;
 
     openni::Device g_device;
     openni::PlaybackControl* g_pPlaybackControl;
@@ -72,6 +75,7 @@ private:
     void readFrame();
     int openCommon();
     void changeRegistration(int value);
+
 };
 
 typedef boost::shared_ptr<ConcurrentDevice> ConcurrentDevicePtr;

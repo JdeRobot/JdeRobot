@@ -2,6 +2,9 @@ import rospy
 from kobuki_msgs.msg import BumperEvent
 import threading
 from jderobotTypes import BumperData
+import time
+
+current_milli_time = lambda: int(round(time.time() * 1000))
 
 
 
@@ -47,6 +50,7 @@ class ListenerBumper:
         '''
         self.topic = topic
         self.data = BumperData()
+        self.time = current_milli_time()
         self.sub = None
         self.lock = threading.Lock()
         self.start()
@@ -62,9 +66,11 @@ class ListenerBumper:
         '''
         bump = bumperEvent2BumperData(event)
 
-        self.lock.acquire()
-        self.data = bump
-        self.lock.release()
+        if bump.state == 1:
+            self.lock.acquire()
+            self.time = current_milli_time()
+            self.data = bump
+            self.lock.release()
         
     def stop(self):
         '''
@@ -88,6 +94,9 @@ class ListenerBumper:
 
         '''
         self.lock.acquire()
+        t = current_milli_time()
+        if (t - self.time) > 500:
+            self.data.state = 0
         bump = self.data
         self.lock.release()
         

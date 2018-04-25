@@ -7,7 +7,7 @@ sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C
 
 sudo apt-get update
 
-sudo apt install -y ros-kinetic-roscpp ros-kinetic-std-msgs ros-kinetic-cv-bridge ros-kinetic-image-transport ros-kinetic-roscpp-core ros-kinetic-rospy ros-kinetic-nav-msgs ros-kinetic-geometry-msgs ros-kinetic-opencv3 ros-kinetic-kobuki-gazebo
+sudo apt install -y ros-kinetic-roscpp ros-kinetic-std-msgs ros-kinetic-cv-bridge ros-kinetic-image-transport ros-kinetic-roscpp-core ros-kinetic-rospy ros-kinetic-nav-msgs ros-kinetic-geometry-msgs ros-kinetic-opencv3 ros-kinetic-kobuki-gazebo ros-kinetic-usb_cam
 
 sudo apt-get install -y libpcl-dev
 
@@ -41,7 +41,7 @@ sudo apt-get install -y libdc1394-22 libdc1394-22-dev
 
 sudo apt-get install -y libusb-1.0-0 libusb-1.0-0-dev
 
-sudo apt-get install -y python-matplotlib python-pyqt5 python-pip python-numpy python-pyqt5.qtsvg
+sudo apt-get install -y python-matplotlib python-pyqt5 python-pip python-numpy python-pyqt5.qtsvg python-pyqt5.qsci
 
 sudo apt-get install -y qfi
 
@@ -55,15 +55,13 @@ sudo apt install -y libzeroc-ice3.6 zeroc-ice-utils libzeroc-icestorm3.6 zeroc-i
 
 sudo apt-get install -y libssl-dev libbz2-dev
 sudo pip2 install --upgrade pip
-sudo pip2 install zeroc-ice
+sudo pip2 install zeroc-ice==3.6.4
 
 sudo apt-get install -y libopenni2-dev libopenni-dev
 
 sudo apt-get install -y gazebo7 libgazebo7-dev
 
 sudo apt-get install -y nodejs
-
-sudo apt install -y sophus
 
 sudo apt-get install -y ardronelib libgoogle-glog-dev
 

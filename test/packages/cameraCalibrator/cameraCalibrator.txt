@@ -1,0 +1,2 @@
+/opt/jderobot/bin/cameracalibrator
+/opt/jderobot/share/jderobot/conf/cameraCalibrator.cfg

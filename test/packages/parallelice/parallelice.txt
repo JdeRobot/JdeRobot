@@ -1,0 +1,3 @@
+/opt/jderobot/lib/libparallelIce.so
+/opt/jderobot/lib/libparallelIce.a
+/opt/jderobot/include/jderobot/parallelIce

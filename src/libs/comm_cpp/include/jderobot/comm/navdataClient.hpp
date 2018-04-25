@@ -22,8 +22,13 @@
 
 #include <jderobot/types/navdataData.h>
 #include <Ice/Communicator.h>
+#include <jderobot/comm/tools.hpp>
 #include <jderobot/comm/communicator.hpp>
 #include <jderobot/comm/interfaces/navdataClient.hpp>
+#include <jderobot/comm/ice/navdataIceClient.hpp>
+#ifdef JDERROS
+//#include <jderobot/comm/ros/listenerNavdata.hpp>
+#endif
 
 
 

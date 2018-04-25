@@ -140,7 +140,7 @@ private:
 	/* name */
 	std::string name;
 
-	const char* double2char(double d);
+	std::string double2char(double d);
 };
 }
 

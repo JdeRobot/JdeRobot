@@ -31,10 +31,15 @@
 #include <jderobotutil/utils/CameraUtils.h>
 #include "rgbdViewergui.h"
 #include "pthread.h"
-#include "parallelIce/cameraClient.h"
-#include "parallelIce/pointcloudClient.h"
+#include <jderobot/config/config.h>
+#include <jderobot/comm/communicator.hpp>
+#include <jderobot/comm/cameraClient.hpp>
+#include <jderobot/comm/rgbdClient.hpp>
+#include <jderobot/comm/tools.hpp>
+#include <jderobot/types/image.h>
+#include <jderobot/types/rgbd.h>
+#include <logger/Logger.h>
 
-#include "easyiceconfig/EasyIce.h" 
 
 
 
@@ -42,10 +47,12 @@
 
 rgbdViewer::rgbdViewergui* rgbdViewergui_ptx;
 
-jderobot::CameraClientPtr camRGB;
-jderobot::CameraClientPtr camDEPTH;
-jderobot::PointcloudClientPtr pcClient;
-jderobot::rgbdPrx rgbClient;
+
+//jderobot::PointcloudClientPtr pcClient;
+
+Comm::RgbdClient* rgbClient;
+Comm::CameraClient* camRGB;
+Comm::CameraClient* camDEPTH;
 bool cameraRGBDActive=false;
 
 
@@ -65,20 +72,26 @@ void *gui_thread(void* arg){
 		while(rgbdViewergui_ptx->isVisible() && ! rgbdViewergui_ptx->isClosed()){
 
 			if (cameraRGBDActive) {
-				auto data = rgbClient->getData();
-				rgb = CameraUtils::getImageFromCameraProxy(data.color);
-				depth = CameraUtils::getImageFromCameraProxy(data.depth);
+				JdeRobotTypes::Rgbd data = rgbClient->getRgbd();
+				rgb = data.color.data;
+				depth = data.depth.data;
 			}
 			else {
-				if (camRGB)
-					camRGB->getImage(rgb);
-				if (camDEPTH)
-					camDEPTH->getImage(depth);
+				if (camRGB){
+					JdeRobotTypes::Image rgbi = camRGB->getImage();
+					rgb = rgbi.data;
+				}
+				if (camDEPTH){
+					JdeRobotTypes::Image di = camDEPTH->getImage();
+					depth = di.data;
+					//std::cout<< di.format << std::endl;
+
+				}
 			}
-			if (pcClient)
+			/*if (pcClient)
 				pcClient->getData(cloud);
 
-
+*/
 			if ((rgb.rows!=0)&&(depth.rows!=0)){
 				rgbdViewergui_ptx->updateAll(rgb,depth, cloud);
 			}
@@ -93,7 +106,7 @@ void *gui_thread(void* arg){
 			}
 			if (((IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()) > rgbdViewergui_ptx->getCycle() )){
 				if (debug)
-					std::cout<<"-------- rgbdViewer: timeout-" << std::endl;
+					;//std::cout<<"-------- rgbdViewer: timeout-" << std::endl;
 			}
 			else{
 				usleep(rgbdViewergui_ptx->getCycle() - (IceUtil::Time::now().toMicroSeconds() - lastIT.toMicroSeconds()));
@@ -135,6 +148,9 @@ int main(int argc, char** argv){
 	bool cameraRGBActive=false;
 	bool cameraDepthActive=false;
 
+	Config::Properties cfg = Config::load(argc, argv);
+	Comm::Communicator* jdrc = new Comm::Communicator(cfg);
+
 
 
 
@@ -142,8 +158,7 @@ int main(int argc, char** argv){
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 	try{
-		ic = EasyIce::initialize(argc,argv);
-		prop = ic->getProperties();
+		ic = Ice::initialize(argc, argv);
 	}catch (const Ice::Exception& ex) {
 		std::cerr << ex << std::endl;
 		return 1;
@@ -152,9 +167,11 @@ int main(int argc, char** argv){
 		std::cerr <<"Error :" << msg << std::endl;
 		return 1;
 	}
-	cameraRGBActive=(bool)prop->getPropertyAsIntWithDefault("rgbdViewer.CameraRGBActive",0);
-	cameraDepthActive=(bool)prop->getPropertyAsIntWithDefault("rgbdViewer.CameraDEPTHActive",0);
-	cameraRGBDActive=(bool)prop->getPropertyAsIntWithDefault("rgbdViewer.RGBDActive",0);
+
+
+	cameraRGBActive=(bool)Comm::server2int(cfg.asStringWithDefault("rgbdViewer.CameraRGB.Server","0"));
+	cameraDepthActive=(bool)Comm::server2int(cfg.asStringWithDefault("rgbdViewer.CameraDEPTH.Server","0"));
+	cameraRGBDActive=(bool)Comm::server2int(cfg.asStringWithDefault("rgbdViewer.RGBD.Server","0"));
 
 	if (cameraRGBDActive && (cameraRGBActive ||  cameraDepthActive)){
 		LOG(ERROR) << "RGBD and single cameras cannot be selected at the same time";
@@ -163,34 +180,20 @@ int main(int argc, char** argv){
 
 
 	if (cameraRGBDActive) {
-		std::string prefix = "rgbdViewer.RGBD.";
-		try{
-			auto base = ic->propertyToProxy(prefix+"Proxy");
-			if (0==base){
-				throw prefix + "Could not create proxy with RGBD";
+		rgbClient = Comm::getRgbdClient(jdrc, "rgbdViewer.RGBD");
+		if (rgbClient != NULL) {
+				rgbCamSelected = true;
+				create_gui = true;
+				depthCamSelected=true;
+			} else {
+				throw "rgbdViewer: failed to load RGBD interface";
 			}
-			else {
-				rgbClient = jderobot::rgbdPrx::checkedCast(base);
-				if (0==rgbClient)
-					throw "Invalid " + prefix + ".Proxy";
-			}
-		}catch (const Ice::Exception& ex) {
-			std::cerr << ex << std::endl;
-		}
-		catch (const char* msg) {
-			std::cerr << msg << std::endl;
-			LOG(FATAL) << prefix + " Not camera provided";
-		}
-		create_gui = true;
-		rgbCamSelected=true;
-		depthCamSelected=true;
 	}
 	else{
 		if (cameraRGBActive) {
-			camRGB = jderobot::CameraClientPtr(new jderobot::cameraClient(ic, "rgbdViewer.CameraRGB."));
+			camRGB = Comm::getCameraClient(jdrc, "rgbdViewer.CameraRGB");
 			if (camRGB != NULL) {
 				rgbCamSelected = true;
-				camRGB->start();
 				create_gui = true;
 			} else {
 				throw "rgbdViewer: failed to load RGB Camera";
@@ -198,10 +201,9 @@ int main(int argc, char** argv){
 
 		}
 		if (cameraDepthActive) {
-			camDEPTH =jderobot::CameraClientPtr( new jderobot::cameraClient(ic, "rgbdViewer.CameraDEPTH."));
+			camDEPTH =Comm::getCameraClient(jdrc, "rgbdViewer.CameraDEPTH");
 			if (camDEPTH != NULL) {
 				depthCamSelected = true;
-				camDEPTH->start();
 				create_gui = true;
 			} else {
 				throw "rgbdViewer: failed to load DEPTH Camera";
@@ -210,7 +212,7 @@ int main(int argc, char** argv){
 	}
 
 
-	if (prop->getPropertyAsIntWithDefault("rgbdViewer.pointCloudActive",0)){
+	/*if (prop->getPropertyAsIntWithDefault("rgbdViewer.pointCloudActive",0)){
 		pcClient = jderobot::PointcloudClientPtr(new jderobot::pointcloudClient(ic,"rgbdViewer.pointCloud."));
 		if (pcClient!= NULL){
 			pcClient->start();
@@ -221,44 +223,50 @@ int main(int argc, char** argv){
 			throw "rgbdViewer: failed to load pointCloud";
 		}
 	}
-
+*/
 	//set the sizes of each image
 	cv::Size rgbSize(0,0);
 	cv::Size depthSize(0,0);
+	JdeRobotTypes::Image temp;
 	//rgb
 	if (cameraRGBDActive) {
 		while ((rgbSize == cv::Size(0, 0)) && (depthSize == cv::Size(0, 0))) {
-			auto data = rgbClient->getData();
-			rgbSize = CameraUtils::getImageFromCameraProxy(data.color).size();
-			depthSize = CameraUtils::getImageFromCameraProxy(data.depth).size();
+			JdeRobotTypes::Rgbd data = rgbClient->getRgbd();
+			rgbSize = data.color.data.size();
+			depthSize = data.depth.data.size();
 		}
 	}
 	else {
 		if (rgbCamSelected) {
-			while (rgbSize == cv::Size(0, 0)) {
-				cv::Mat temp;
-				camRGB->getImage(temp, true);
-				rgbSize = temp.size();
+			while (rgbSize == cv::Size(0, 0) || rgbSize == cv::Size(3, 3)) {
+				temp = camRGB->getImage();
+				rgbSize = temp.data.size();
 
 			}
 		}
 		//depth
 		if (depthCamSelected) {
-			while (depthSize == cv::Size(0, 0)) {
-				cv::Mat temp;
-				camDEPTH->getImage(temp, true);
-				depthSize = temp.size();
+			while (depthSize == cv::Size(0, 0) || depthSize == cv::Size(3, 3)) {
+				temp = camDEPTH->getImage();
+				depthSize = temp.data.size();
+				//depthSize = cv::Size(temp.width, temp.height);
 
 			}
 		}
 	}
 
 
-	debug=prop->getPropertyAsIntWithDefault("rgbdViewer.Debug",320);
-	int fps=prop->getPropertyAsIntWithDefault("rgbdViewer.Fps",0);
+
+	debug=cfg.asIntWithDefault("rgbdViewer.Debug",320);
+	int fps=cfg.asIntWithDefault("rgbdViewer.Fps",0);
 	float cycle=(float)(1/(float)fps)*1000000;
 
-	rgbdViewergui_ptx = new rgbdViewer::rgbdViewergui(rgbCamSelected,depthCamSelected, pointCloudSelected, prop->getProperty("rgbdViewer.WorldFile"), prop->getProperty("rgbdViewer.camRGB"), prop->getProperty("rgbdViewer.camIR"),rgbSize,depthSize, cycle);
+	std::string worldfile = cfg.asStringWithDefault("rgbdViewer.WorldFile", "");
+	std::string camRGBFile = cfg.asStringWithDefault("rgbdViewer.camRGB", "");
+	std::string camIRFile = cfg.asStringWithDefault("rgbdViewer.camIR", "");
+
+
+	rgbdViewergui_ptx = new rgbdViewer::rgbdViewergui(rgbCamSelected,depthCamSelected, pointCloudSelected, worldfile, camRGBFile, camIRFile,rgbSize,depthSize, cycle);
 	
 	std::cout << create_gui << std::endl;
 	if (create_gui){

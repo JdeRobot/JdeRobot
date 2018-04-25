@@ -1,0 +1,3 @@
+/opt/jderobot/bin/recorder2
+/opt/jderobot/share/jderobot/glade/recordergui.glade
+/opt/jderobot/share/jderobot/conf/recorder.cfg

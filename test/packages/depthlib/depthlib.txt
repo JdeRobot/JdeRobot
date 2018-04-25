@@ -1,0 +1,3 @@
+/opt/jderobot/lib/libdepthLib.so
+/opt/jderobot/lib/libdepthLib.a
+/opt/jderobot/include/jderobot/depthLib
