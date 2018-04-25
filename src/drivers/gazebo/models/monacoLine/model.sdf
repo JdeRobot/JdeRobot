@@ -1,0 +1,25 @@
+<?xml version='1.0'?>
+<sdf version="1.4">
+<model name="monaco">
+  <static>true</static>
+    <link name="monaco">
+    	<pose>0 0 -1.5 0 0 0</pose>
+        <collision name="collision">
+            <geometry>
+               <mesh>
+                  <scale>20 20 20</scale>
+                  <uri>model://monacoLine/meshes/CircuitoMonacoLinea.dae</uri>
+               </mesh>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+               <mesh>
+                  <scale>20 20 20</scale>
+                  <uri>model://monacoLine/meshes/CircuitoMonacoLinea.dae</uri>
+               </mesh>
+            </geometry>
+        </visual>
+     </link>
+</model>
+</sdf>
