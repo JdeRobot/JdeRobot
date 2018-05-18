@@ -1,0 +1,3 @@
+/opt/jderobot/bin/kobukiviewerjs
+/opt/jderobot/share/jderobot/webtools/kobukiviewerjs/run.js
+/opt/jderobot/share/jderobot/webtools/kobukiviewerjs/public

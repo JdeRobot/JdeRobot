@@ -34,7 +34,7 @@ INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/codegen/cpp/
 
 # install cpp sources for ros node generation
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/codegen/cpp/
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/visualstates_py/ COMPONENT visualState-python)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/visualstates_py/ COMPONENT visualStates-python)
 
 #install python runtime dependencies
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/codegen/python/

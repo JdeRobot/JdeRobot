@@ -1,0 +1,91 @@
+<?xml version='1.0'?>
+<sdf version="1.4">
+<model name="hangar">
+  <static>true</static>
+    <link name="hangar">
+    	<pose>0 0 0 0 0 0</pose>
+        <collision name="collision">
+            <geometry>
+	       <plane>
+		   <size>100 100</size>
+    	       </plane>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+               <mesh>
+                  <uri>model://hangar/meshes/hangar.dae</uri>
+               </mesh>
+            </geometry>
+        </visual>
+     </link>
+
+     <link name="roof">
+	<collision name="collision2">
+            <pose>0 2 6 0 1.57 0</pose>
+            <geometry>
+	       <box>
+		   <size>0.1 20 14</size>
+    	       </box>
+            </geometry>
+        </collision>
+     </link>
+
+
+     <link name="hangar_wall5">
+	<collision name="collision2">
+            <pose>-4.9 -7.0 3 0 0 1.85</pose>
+            <geometry>
+	       <box>
+		   <size>0.1 4 6</size>
+    	       </box>
+            </geometry>
+        </collision>
+     </link>
+
+     <link name="hangar_wall4">
+	<collision name="collision2">
+            <pose>4.9 -7.0 3 0 0 1.35</pose>
+            <geometry>
+	       <box>
+		   <size>0.1 4 6</size>
+    	       </box>
+            </geometry>
+        </collision>
+     </link>
+
+     <link name="hangar_wall3">
+	<collision name="collision2">
+            <pose>0 12.3 3 0 0 1.57</pose>
+            <geometry>
+	       <box>
+		   <size>0.1 13.5 6</size>
+    	       </box>
+            </geometry>
+        </collision>
+     </link>
+
+
+     <link name="hangar_wall2">
+	<collision name="collision2">
+            <pose>-6.8 2.5 3 0 0 0 </pose>
+            <geometry>
+	       <box>
+		   <size>0.1 20 6</size>
+    	       </box>
+            </geometry>
+        </collision>
+     </link>
+
+     <link name="hangar_wall1">
+	<collision name="collision2">
+            <pose>6.8 2.5 3 0 0 0 </pose>
+            <geometry>
+	       <box>
+		   <size>0.1 20 6</size>
+    	       </box>
+            </geometry>
+        </collision>
+     </link>
+</model>
+</sdf>

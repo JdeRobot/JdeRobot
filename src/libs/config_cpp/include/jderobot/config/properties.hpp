@@ -46,7 +46,7 @@ public:
 	/**
 	 * @brief returns as string the propery given 
 	 *
-	 * @param route to element separated by dots (example: "kobukiViewer.Camera.proxy")
+	 * @param route to element separated by dots (example: "carViz.Camera.proxy")
 	 * 
 	 */
 	std::string asString(std::string element);
@@ -55,7 +55,7 @@ public:
 	/**
 	 * @brief returns as string the propery given 
 	 *
-	 * @param route to element separated by dots (example: "kobukiViewer.Camera.proxy")
+	 * @param route to element separated by dots (example: "carViz.Camera.proxy")
 	 * @param default value
 	 * 
 	 */
@@ -64,7 +64,7 @@ public:
 	/**
 	 * @brief returns as float the propery given 
 	 *
-	 * @param route to element separated by dots (example: "kobukiViewer.Camera.proxy")
+	 * @param route to element separated by dots (example: "carViz.Camera.proxy")
 	 * 
 	 */
 	float asFloat(std::string element);
@@ -72,7 +72,7 @@ public:
 	/**
 	 * @brief returns as float the propery given 
 	 *
-	 * @param route to element separated by dots (example: "kobukiViewer.Camera.proxy")
+	 * @param route to element separated by dots (example: "carViz.Camera.proxy")
 	 * @param default value
 	 * 
 	 */
@@ -81,7 +81,7 @@ public:
 	/**
 	 * @brief returns as integer the propery given 
 	 *
-	 * @param route to element separated by dots (example: "kobukiViewer.Camera.proxy")
+	 * @param route to element separated by dots (example: "carViz.Camera.proxy")
 	 * 
 	 */
 	int asInt(std::string element);
@@ -89,7 +89,7 @@ public:
 	/**
 	 * @brief returns as integer the propery given 
 	 *
-	 * @param route to element separated by dots (example: "kobukiViewer.Camera.proxy")
+	 * @param route to element separated by dots (example: "carViz.Camera.proxy")
 	 * @param default value
 	 * 
 	 */
@@ -98,7 +98,7 @@ public:
 	/**
 	 * @brief returns as double the propery given 
 	 *
-	 * @param route to element separated by dots (example: "kobukiViewer.Camera.proxy")
+	 * @param route to element separated by dots (example: "carViz.Camera.proxy")
 	 * 
 	 */
 	double asDouble(std::string element);
@@ -106,7 +106,7 @@ public:
 	/**
 	 * @brief returns as double the propery given 
 	 *
-	 * @param route to element separated by dots (example: "kobukiViewer.Camera.proxy")
+	 * @param route to element separated by dots (example: "carViz.Camera.proxy")
 	 * @param default value
 	 * 
 	 */

@@ -1,16 +1,16 @@
-#include <jderobot/comm/interfaces/laserClient.hpp>
-#include <jderobot/comm/ice/laserIceClient.hpp>
-#ifdef JDERROS
-#include <jderobot/comm/ros/listenerLaser.hpp>
-#endif
+#include <jderobot/comm/laserClient.hpp>
+
 
 namespace Comm {
 
-LaserClient* 
+LaserClient*
 getLaserClient(Comm::Communicator* jdrc, std::string prefix){
 	LaserClient* client = 0;
 
-	int server = jdrc->getConfig().asIntWithDefault(prefix+".Server", 0);
+	int server;
+	std::string server_name = jdrc->getConfig().asString(prefix+".Server");
+	server = server2int(server_name);
+
 	switch (server){
 		case 0:
 		{

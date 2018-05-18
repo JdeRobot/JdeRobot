@@ -1,0 +1,3 @@
+/opt/jderobot/share/jderobot/glade/camviz.glade
+/opt/jderobot/share/jderobot/conf/camviz.yml
+/opt/jderobot/bin/camviz

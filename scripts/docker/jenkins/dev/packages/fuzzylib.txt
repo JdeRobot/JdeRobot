@@ -1,0 +1,3 @@
+/opt/jderobot/lib/libfuzzyshare.so
+/opt/jderobot/lib/libfuzzylib.a
+/opt/jderobot/include/jderobot/fuzzylib

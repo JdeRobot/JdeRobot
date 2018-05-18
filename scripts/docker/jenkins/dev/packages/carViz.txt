@@ -1,0 +1,2 @@
+/opt/jderobot/bin/carViz
+/opt/jderobot/share/jderobot/conf/carViz.yml

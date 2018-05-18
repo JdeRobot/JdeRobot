@@ -1,0 +1,633 @@
+<?xml version='1.0'?>
+<sdf version="1.4">
+<model name="f1">
+  <pose>0 0 0 0 0 0</pose>
+  <static>false</static>
+    <link name="f1">
+    	<pose>0 0 0 0 0 0</pose>
+	<inertial>
+        <mass>10</mass>
+        <inertia>
+          <ixx>1</ixx>
+          <ixy>0.0</ixy>
+          <iyy>1</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>1.0</izz>
+      </inertia>
+    </inertial>
+
+      <collision name="collision">
+            <geometry>
+              <mesh>
+            		<uri>model://f1ROS/meshes/F1.dae</uri>
+          		</mesh>
+          </geometry>
+     </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://f1ROS/meshes/F1.dae</uri>
+        </mesh>
+      </geometry>
+    </visual>
+  </link>
+    <link name="front_right_wheel">
+        <pose>0 -0.16 0.06 0 1.5707 0</pose>
+         <inertial>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.5</ixx>
+          <ixy>0.0</ixy>
+          <iyy>0.5</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>1.0</izz>
+      </inertia>
+    </inertial>
+
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>.06</radius>
+              <length>.07</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+    </link>
+      <link name="front_left_wheel">
+        <pose>0 0.16 0.06 0 1.5707 0</pose>
+        <inertial>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.5</ixx>
+          <ixy>0.0</ixy>
+          <iyy>0.5</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>1.0</izz>
+      </inertia>
+    </inertial>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>.06</radius>
+              <length>.07</length>
+          </cylinder>
+        </geometry>
+      </collision>
+    </link>
+
+      <link name="front_left_steering_wheel_block">
+        <pose>0 0.16 0.06 0 1.5707 0</pose>
+        <inertial>
+        <mass>1</mass>
+        <inertia>
+          <ixx>1.0</ixx>
+          <ixy>0.0</ixy>
+          <iyy>1.0</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>1.0</izz>
+      </inertia>
+    </inertial>
+
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.1</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+<!--        <visual name="visual">
+          <geometry>
+            <mesh>
+            		<uri>model://f1/meshes/left_wheel.dae</uri>
+          		</mesh>
+        </geometry>
+      </visual>-->
+
+		</link>     
+        
+        <link name="front_right_steering_wheel_block">
+        <pose>0 -0.16 0.06 0 1.5707 0</pose>
+        <inertial>
+        <mass>1</mass>
+        <inertia>
+          <ixx>1.0</ixx>
+          <ixy>0.0</ixy>
+          <iyy>1.0</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>1.0</izz>
+      </inertia>
+    </inertial>
+
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.1</length>
+          </cylinder>
+        </geometry>
+      </collision>
+
+       <!-- <visual name="visual">
+          <geometry>
+            <mesh>
+            		<uri>model://f1/meshes/right_wheel.dae</uri>
+          		</mesh>
+        </geometry>
+      </visual>-->
+
+    </link>
+      <link name="rear_left_wheel">
+        <pose>-0.58 0.16 0.06 0 1.5707 0</pose>
+         <inertial>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.5</ixx>
+          <ixy>0.0</ixy>
+          <iyy>0.5</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>1.0</izz>
+      </inertia>
+      </inertial>
+        <collision name="collision">
+
+          <geometry>
+            <cylinder>
+              <radius>.06</radius>
+              <length>.07</length>
+          </cylinder>
+        </geometry>
+
+          <max_contacts>1</max_contacts>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+              <fdir1>0 0 1</fdir1>
+              <slip1>0.0</slip1>
+              <slip2>0.0</slip2>
+          </ode>
+        </friction>
+          <contact>
+            <ode>
+              <min_depth>0.005</min_depth>
+              <kp>1e8</kp>
+          </ode>
+        </contact>
+      </surface>
+      </collision>
+
+        <!--<visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.06</radius>
+              <length>.07</length>
+          </cylinder>
+        </geometry>
+      </visual>-->
+
+    </link>
+     
+      <link name="rear_right_wheel">
+        <pose>-0.58 -0.16 0.06 0 1.5707 0</pose>
+         <inertial>
+        <mass>1</mass>
+        <inertia>
+          <ixx>0.5</ixx>
+          <ixy>0.0</ixy>
+          <iyy>0.5</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>1.0</izz>
+      </inertia>
+      </inertial>
+        <collision name="collision">
+
+          <geometry>
+            <cylinder>
+              <radius>.06</radius>
+              <length>.07</length>
+          </cylinder>
+        </geometry>
+
+          <max_contacts>1</max_contacts>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+              <fdir1>0 0 1</fdir1>
+              <slip1>0.0</slip1>
+              <slip2>0.0</slip2>
+          </ode>
+        </friction>
+          <contact>
+            <ode>
+              <min_depth>0.005</min_depth>
+              <kp>1e8</kp>
+          </ode>
+        </contact>
+      </surface>
+      </collision>
+
+        <!--<visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>.06</radius>
+              <length>.07</length>
+          </cylinder>
+        </geometry>
+      </visual>-->
+
+    </link>
+
+<link name='camera_top_body_left'>
+        <pose>0.09000 0.050000 0.1442400 0.000000 -0.000000 0.000000</pose>
+        <inertial>
+          <mass>2</mass>
+          <inertia>
+            <ixx>1.000000</ixx>
+            <ixy>0.000000</ixy>
+            <ixz>0.000000</ixz>
+            <iyy>1.000000</iyy>
+            <iyz>0.000000</iyz>
+            <izz>1.000000</izz>
+        </inertia>
+      </inertial>
+        <sensor name='cam_f1_left' type='camera'>
+          <pose>0.000000 0.000000 0.000000  0.00000 0.00000 0.00000</pose>
+          <update_rate>20.000000</update_rate>
+          <camera name='cleft'>
+            <horizontal_fov>1.570000</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+          </image>
+            <clip>
+              <near>0.100000</near>
+              <far>15.000000</far>
+          </clip>
+        </camera>
+		<plugin name="camera_controller_left" filename="libgazebo_ros_camera.so">
+			<alwaysOn>true</alwaysOn>
+			<updateRate>0.0</updateRate>
+			<cameraName>F1ROS/cameraL</cameraName>
+			<imageTopicName>image_raw</imageTopicName>
+			<cameraInfoTopicName>camera_info</cameraInfoTopicName>
+			<frameName>camera_top_body_left</frameName>
+			<hackBaseline>0.07</hackBaseline>
+			<distortionK1>0.0</distortionK1>
+			<distortionK2>0.0</distortionK2>
+			<distortionK3>0.0</distortionK3>
+			<distortionT1>0.0</distortionT1>
+			<distortionT2>0.0</distortionT2>
+		</plugin>
+      </sensor>
+        <visual name='visual'>
+          <geometry>
+<sphere>
+                          <radius>.005</radius>
+</sphere>
+        </geometry>
+      </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.100000 0.100000 0.100000</size>
+          </box>
+        </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100000.000000</mu>
+                <mu2>100000.000000</mu2>
+                <slip1>0.000000</slip1>
+                <slip2>0.000000</slip2>
+            </ode>
+          </friction>
+            <bounce/>
+            <contact>
+              <ode/>
+          </contact>
+        </surface>
+          <max_contacts>10</max_contacts>
+      </collision>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+      </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+    </link>
+
+<link name='camera_top_body_right'>
+        <pose>0.09000 -0.050000 0.1442400 0.000000 -0.000000 0.0000000</pose>
+        <inertial>
+          <mass>2</mass>
+          <inertia>
+            <ixx>1.000000</ixx>
+            <ixy>0.000000</ixy>
+            <ixz>0.000000</ixz>
+            <iyy>1.000000</iyy>
+            <iyz>0.000000</iyz>
+            <izz>1.000000</izz>
+        </inertia>
+      </inertial>
+        <sensor name='cam_f1_right' type='camera'>
+          <pose>0.000000 0.000000 0.000000 0.000000 0.00000 0.00000</pose>
+          <update_rate>20.000000</update_rate>
+          <camera name='cright'>
+            <horizontal_fov>1.570000</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+          </image>
+            <clip>
+              <near>0.100000</near>
+              <far>15.000000</far>
+          </clip>
+        </camera>
+		<plugin name="camera_controller_right" filename="libgazebo_ros_camera.so">
+			<alwaysOn>true</alwaysOn>
+			<updateRate>0.0</updateRate>
+			<cameraName>F1ROS/cameraR</cameraName>
+			<imageTopicName>image_raw</imageTopicName>
+			<cameraInfoTopicName>camera_info</cameraInfoTopicName>
+			<frameName>camera_top_body_right</frameName>
+			<hackBaseline>0.07</hackBaseline>
+			<distortionK1>0.0</distortionK1>
+			<distortionK2>0.0</distortionK2>
+			<distortionK3>0.0</distortionK3>
+			<distortionT1>0.0</distortionT1>
+			<distortionT2>0.0</distortionT2>
+		</plugin>
+      </sensor>
+        <visual name='visual'>
+         <geometry>
+<sphere>
+                          <radius>.005</radius>
+</sphere>
+        </geometry>
+      </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.100000 0.100000 0.100000</size>
+          </box>
+        </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100000.000000</mu>
+                <mu2>100000.000000</mu2>
+                <slip1>0.000000</slip1>
+                <slip2>0.000000</slip2>
+            </ode>
+          </friction>
+            <bounce/>
+            <contact>
+              <ode/>
+          </contact>
+        </surface>
+          <max_contacts>10</max_contacts>
+      </collision>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+      </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+    </link>
+
+<link name='laser'>
+        <pose>0.190000 0.000000 0.072000 0.000000 0.000000 0.00000</pose>
+        <gravity>0</gravity>
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>1.000000</ixx>
+            <ixy>0.000000</ixy>
+            <ixz>0.000000</ixz>
+            <iyy>1.000000</iyy>
+            <iyz>0.000000</iyz>
+            <izz>1.000000</izz>
+        </inertia>
+      </inertial>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://f1ROS/meshes/hokuyo.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+        <collision name='collision-base'>
+          <pose>0.000000 0.000000 -0.014500 0.000000 0.000000 0.000000</pose>
+          <geometry>
+            <box>
+              <size>0.050000 0.050000 0.041000</size>
+          </box>
+        </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+          </friction>
+            <contact>
+              <ode/>
+          </contact>
+        </surface>
+      </collision>
+        <collision name='collision-top'>
+          <pose>0.000000 0.000000 0.020500 0.000000 0.000000 0.000000</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.021000</radius>
+              <length>0.029000</length>
+          </cylinder>
+        </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+          </friction>
+            <contact>
+              <ode/>
+          </contact>
+        </surface>
+      </collision>
+        <sensor name='laser' type='ray'>
+          <ray>
+            <scan>
+              <horizontal>
+                <samples>180</samples>
+                <resolution>1.000000</resolution>
+                <min_angle>-1.570000</min_angle>
+                <max_angle>1.570000</max_angle>
+            </horizontal>
+          </scan>
+            <range>
+              <min>0.080000</min>
+              <max>10.000000</max>
+              <resolution>0.010000</resolution>
+          </range>
+        </ray>
+          <update_rate>20.000000</update_rate>
+		<plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
+			<topicName>/F1ROS/laser/scan</topicName>
+			<frameName>laser</frameName>
+		</plugin>
+          <always_on>1</always_on>
+          <visualize>1</visualize>
+      </sensor>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+      </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+    </link>
+      
+       <joint type="revolute" name="front_left_wheel_hinge">
+        <pose>0 0 0 0 0 0</pose>
+        <child>front_left_wheel</child>
+        <parent>front_left_steering_wheel_block</parent>
+        <axis>
+          <xyz>1 0 0</xyz>
+      </axis>
+    </joint>
+      <joint type="revolute" name="front_right_wheel_hinge">
+        <pose>0 0 0 0 0 0</pose>
+        <child>front_right_wheel</child>
+        <parent>front_right_steering_wheel_block</parent>
+        <axis>
+          <xyz>1 0 0</xyz>
+      </axis>
+    </joint>
+
+ 	  <joint type="revolute" name="camera_left">
+        <pose>0 0 0 0 0 0</pose>
+        <child>camera_top_body_left</child>
+        <parent>f1</parent>
+        <axis>
+          <xyz>0 0 0</xyz>
+      </axis>
+    </joint>
+
+	  <joint type="revolute" name="camera_right">
+        <pose>0 0 0 0 0 0</pose>
+        <child>camera_top_body_right</child>
+        <parent>f1</parent>
+        <axis>
+          <xyz>0 0 0</xyz>
+      </axis>
+    </joint>
+
+	  <joint type="revolute" name="laser_joint">
+        <pose>0 0 0 0 0 0</pose>
+        <child>laser</child>
+        <parent>f1</parent>
+        <axis>
+          <xyz>0 0 0</xyz>
+      </axis>
+    </joint>
+      
+      <joint type="revolute" name="front_left_steering_wheel">
+        <pose>0 0 0 0 0 0</pose>
+        <child>front_left_steering_wheel_block</child>
+        <parent>f1</parent>
+        <axis>
+        	 <xyz>0 0 1</xyz>
+  	 			<dynamics>
+          		<damping>500.0</damping>
+        		</dynamics>
+        	 <limit>
+        	 		<lower>-0.52359</lower>
+              <upper>0.52359</upper>
+        </limit>
+      </axis>
+        <physics>
+        <ode>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0.000000</cfm>
+            <erp>0.900000</erp>
+        </limit>
+      </ode>
+    </physics>
+    </joint>
+      <joint type="revolute" name="front_right_steering_wheel">
+        <pose>0 0 0 0 0 0</pose>
+        <child>front_right_steering_wheel_block</child>
+        <parent>f1</parent>
+        <axis>
+        <xyz>0 0 1</xyz>
+        		<dynamics>
+          		<damping>500.0</damping>
+        		</dynamics>
+     		 <limit>
+              <lower>-0.52359</lower>
+              <upper>0.52359</upper>
+        </limit>
+      </axis>
+        <physics>
+        <ode>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0.000000</cfm>
+            <erp>0.900000</erp>
+        </limit>
+      </ode>
+    </physics>
+    </joint>
+      
+      <joint type="revolute" name="rear_right_wheel_hinge">
+        <pose>0 0 0 0 0 0</pose>
+        <child>rear_right_wheel</child>
+        <parent>f1</parent>
+        <axis>
+          <xyz>1 0 0</xyz>
+      </axis>
+    </joint>
+      
+      <joint type="revolute" name="rear_left_wheel_hinge">
+        <pose>0 0 0 0 0 0</pose>
+        <child>rear_left_wheel</child>
+        <parent>f1</parent>
+        <axis>
+          <xyz>1 0 0</xyz>
+      </axis>
+    </joint>
+     <!--<plugin filename="libgazebo_ros_imu_sensor.so" name="pose3d">
+        <topicName>/F1ROS/imu</topicName>
+        <bodyName>f1</bodyName>
+        <updateRateHZ>10.0</updateRateHZ>
+        <gaussianNoise>0.0</gaussianNoise>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+        <frameName>imu_link</frameName>
+      </plugin>-->
+
+    <plugin name="object_controller" filename="libgazebo_ros_planar_move.so">
+      <commandTopic>F1ROS/cmd_vel</commandTopic>
+      <odometryTopic>F1ROS/odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <odometryRate>20.0</odometryRate>
+      <robotBaseFrame>f1</robotBaseFrame>
+    </plugin>
+</model>
+</sdf>

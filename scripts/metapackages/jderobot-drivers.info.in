@@ -8,7 +8,7 @@ Section: net
 Priority: extra
 Size: 0
 Installed-Size: 0
-Depends: jderobot-ardrone-server, jderobot-cameraserver, jderobot-gazeboserver, jderobot-mavlinkserver, jderobot-openni1server, jderobot-openniserver, jderobot-pclrgbdserver,jderobot-evicamdriver, jderobot-cameraserver-python, jderobot-youtubeserver-python
+Depends: jderobot-ardrone-server, jderobot-camserver, jderobot-gazebo, jderobot-mavlinkserver, jderobot-openni1server, jderobot-openniserver, jderobot-pclrgbdserver,jderobot-evicamdriver, jderobot-camserver-python, jderobot-youtubeserver-python
 Maintainer: Francisco Perez <f.perez475@gmail.com>
 Homepage: http://jderobot.org
 Description: Metapackage that gathers all the drivers of JdeRobot framework.

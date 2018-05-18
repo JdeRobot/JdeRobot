@@ -1,0 +1,5 @@
+camServer:
+  Topic: "camserver/rgb"
+  Uri: 0 #0 corresponds to /dev/video0, 1 to /dev/video1, and so on...
+  FrameRate: 12 #FPS readed from device
+  Name: camserver

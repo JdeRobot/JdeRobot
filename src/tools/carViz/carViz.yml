@@ -1,0 +1,38 @@
+carViz:
+  Motors:
+    Server: ROS # Deactivate, Ice , ROS
+    Proxy: "Motors:default -h localhost -p 9001"
+    Topic: "/turtlebotROS/mobile_base/commands/velocity"
+    Name: carVizMotors
+    maxV: 3
+    maxW: 0.7
+
+  Camera1:
+    Server: ROS # Deactivate, Ice , ROS
+    Proxy: "CameraL:default -h localhost -p 9001"
+    Format: RGB8
+    Topic: "/TurtlebotROS/cameraL/image_raw"
+    Name: carVizCamera1
+
+  Camera2:
+    Server: ROS # Deactivate, Ice , ROS
+    Proxy: "CameraR:default -h localhost -p 9001"
+    Format: RGB8
+    Topic: "/TurtlebotROS/cameraR/image_raw"
+    Name: carVizCamera2
+
+  Pose3D:
+    Server: ROS # Deactivate, Ice , ROS
+    Proxy: "Pose3D:default -h localhost -p 9001"
+    Topic: "//turtlebotROS/odom"
+    Name: carVizPose3d
+
+  Laser:
+    Server: ROS # Deactivate, Ice , ROS
+    Proxy: "Laser:default -h localhost -p 9001"
+    Topic: "/turtlebotROS/laser/scan"
+    Name: carVizLaser
+
+  Vmax: 3
+  Wmax: 0.7
+  NodeName: carViz

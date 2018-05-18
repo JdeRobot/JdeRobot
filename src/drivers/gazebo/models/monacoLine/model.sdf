@@ -1,0 +1,41 @@
+<?xml version='1.0'?>
+<sdf version="1.4">
+<model name="monaco">
+  <static>true</static>
+    <link name="monaco">
+        <collision name="collision">
+            <geometry>
+              <plane>
+		<normal>0 0 1</normal>
+                <size>200 200</size>
+                </plane>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+               <mesh>
+                  <uri>model://monacoLine/meshes/CircuitoMonacoLinea.dae</uri>
+               </mesh>
+            </geometry>
+        </visual>
+     </link>
+    <link name="pared">
+        <collision name="collision">
+            <geometry>
+               <mesh>
+                  <uri>model://monacoLine/meshes/pared.dae</uri>
+               </mesh>
+            </geometry>
+        </collision>
+        <visual name="visual">
+            <geometry>
+               <mesh>
+                  <uri>model://monacoLine/meshes/pared.dae</uri>
+               </mesh>
+            </geometry>
+        </visual>
+     </link>
+
+</model>
+</sdf>
+

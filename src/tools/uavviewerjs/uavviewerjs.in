@@ -1,5 +1,0 @@
-#!/bin/bash
-
-cd @CMAKE_INSTALL_PREFIX@/share/jderobot/webtools/uavviewerjs/
-
-nodejs run.js

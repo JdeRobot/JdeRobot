@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>CamVizWeb</title>
+   <meta name="description" content="">
+
+   <!-- core CSS -->
+   <link href="css/bootstrap.min.css" rel="stylesheet">
+   <link href="css/cameraview.css" rel="stylesheet">
+</head>
+<!--/head-->
+
+<body>
+<header id="header">
+  <nav class="navbar navbar-inverse" role="banner">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand " href="#"><i class="fa fa-bolt"></i> JdeRobot App CamViz</a>
+     </div>
+    </div>
+    <!--/.container-->
+  </nav>
+  <!--/nav-->
+</header>
+<!--/header-->
+
+<div id="body" class="container">
+   <div class="row">
+      <div id="buttons" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+         <p>
+            <button id="start" type="button" class="btn btn-md btn-success">Start</button>
+            <button id="stop" type="button" class="btn btn-md btn-danger">Stop</button>
+            <button id="config" type="button" class="btn btn-info" data-toggle="modal" data-target="#configure">Config</button>
+         </p>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4 col-lg-offset-4 col-md-offset-2">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Camera</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="camView" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 cam">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+      <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Information</span>
+            </div>
+            <div class="panel-body border-blue container-fluid">
+               <p><span class="bold">FPS: </span><span id="fps"></span></p>
+               <p><span class="bold">Size: </span><span id="size"></span></p>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+<div class="modal fade" id="configure" tabindex="-1" role="dialog" aria-labelledby="configLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="configLabel">CameraView Config</h4>
+      </div>
+      <div id = "confignav" class="modal-body">
+        <div class="input-group">
+           <span class="input-group-addon" id="basic-addon1">Server</span>
+          <input  id="serv" type="text" class="form-control" placeholder="Server" value="Ice" aria-describedby="basic-addon1">
+        </div>
+        <br>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Addr</span>
+           <input  id="dir" type="text" class="form-control" placeholder="Address" value="localhost" aria-describedby="basic-addon1">
+         </div>
+         <br>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Port</span>
+            <input  id="port" type="number" class="form-control" value="11000" aria-describedby="basic-addon1">
+         </div>
+         <br>
+         <div id = "endpoint" class="input-group">
+            <span class="input-group-addon" id="basic-addon1">EndPoint</span>
+            <input id="ep" type="text" class="form-control" value="cameraA" aria-describedby="basic-addon1">
+         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
+        <button id="save" type="button" class="btn btn-success" data-dismiss="modal">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script>
+    try {
+    window.$ = window.jQuery = require('jquery');
+  } catch(e){
+    console.log(e);
+  }
+  </script>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/apiIce.js"></script>
+  <script src="js/camVizIce.js"></script>
+  <script src="js/camVizWeb.js"></script>
+  <script src="js/camVizRos.js"></script>
+  <script src="js/apiRos.js"></script>
+  <script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+  <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+</body>
+</html>

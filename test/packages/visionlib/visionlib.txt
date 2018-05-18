@@ -1,0 +1,10 @@
+/opt/jderobot/lib/libcolorspaces.so
+/opt/jderobot/lib/libcolorspacesmm.so
+/opt/jderobot/lib/libcolorspaces.a
+/opt/jderobot/include/jderobot/visionlib/colorspaces
+/opt/jderobot/lib/libcvblob.so
+/opt/jderobot/include/jderobot/visionlib/cvblob
+/opt/jderobot/lib/libcvfast.so
+/opt/jderobot/include/jderobot/visionlib/cvfast
+/opt/jderobot/lib/libimgAnalyze.so
+/opt/jderobot/include/jderobot/visionlib/imgAnalyze

@@ -99,10 +99,10 @@ SET(CPACK_COMPONENT_PARALLELICE-PYTHON_DESCRIPTION
 "Library for  
  Home page https://jderobot.org")
 
-SET(CPACK_DEBIAN_PIONEER_PACKAGE_DEPENDS "jderobot-setup")
-SET(CPACK_COMPONENT_PIONEER_DESCRIPTION  
-"Library for  
- Home page https://jderobot.org")
+#SET(CPACK_DEBIAN_PIONEER_PACKAGE_DEPENDS "jderobot-setup")
+#SET(CPACK_COMPONENT_PIONEER_DESCRIPTION  
+#"Library for  
+# Home page https://jderobot.org")
 
 SET(CPACK_DEBIAN_PROGEO_PACKAGE_DEPENDS "jderobot-setup")
 SET(CPACK_COMPONENT_PROGEO_DESCRIPTION  

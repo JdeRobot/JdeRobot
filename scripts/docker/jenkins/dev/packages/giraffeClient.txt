@@ -1,0 +1,3 @@
+/opt/jderobot/bin/giraffeClient
+/opt/jderobot/share/jderobot/glade/giraffeClient.glade
+/opt/jderobot/share/jderobot/conf/giraffeClient.cfg

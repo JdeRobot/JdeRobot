@@ -1,0 +1,2 @@
+/opt/jderobot/bin/pclRGBDServer
+/opt/jderobot/share/jderobot/conf/kinectServer.cfg

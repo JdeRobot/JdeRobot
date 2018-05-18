@@ -1,0 +1,49 @@
+rgbdViz:
+  CameraRGB:
+    Server: 2 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Proxy: "cameraA:tcp -h localhost -p 9998"
+    Format: RGB8
+    Topic: "/camera/rgb/image_raw"
+    Name: cameraA
+    Fps: 30
+
+  CameraDEPTH:
+    Server: 2 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Proxy: "cameraB:tcp -h localhost -p 9998"
+    Format: RGB8
+    Topic: "/camera/depth_registered/sw_registered/image_rect"
+    Name: cameraB
+    Fps: 30
+
+  PointCloud:
+    Server: 0 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Proxy: "pointcloud1:tcp -h localhost -p 9999"
+    Topic: "/TurtlebotROS/cameraL/image_raw"
+    Name: pointcloud
+    Fps: 30
+
+  RGBD:
+    Server: 0 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Proxy: "rgbd1:tcp -h localhost -p 9999"
+    Topic: "/TurtlebotROS/cameraL/image_raw"
+    Name: RGBD
+    Fps: 30
+
+  Pose3DMotors:
+    Server: 0 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Proxy: "Pose3DMotors1:tcp -h 193.147.14.20 -p 9999"
+    Topic: "/TurtlebotROS/cameraL/image_raw"
+    Name: Pose3DMotors
+
+  KinectLeds:
+    Server: 0 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Proxy: "kinectleds1:tcp -h 193.147.14.20 -p 9999"
+    Topic: "/TurtlebotROS/cameraL/image_raw"
+    Name: KinectLeds
+
+
+  NodeName: rgbdViz
+  Width: 640
+  Height: 480
+  Fps: 15
+  Debug: 1

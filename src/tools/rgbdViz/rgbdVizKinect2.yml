@@ -1,0 +1,52 @@
+rgbdViz:
+  CameraRGB:
+    Server: ROS # Deactivate, Ice , ROS
+    Proxy: "cameraA:tcp -h localhost -p 9999"
+    Format: RGB8
+    Topic: "/kinect2/hd/image_color_rect"
+    Name: cameraA
+    Fps: 30
+
+  CameraDEPTH:
+    Server: ROS # Deactivate, Ice, ROS
+    Proxy: "cameraB:tcp -h localhost -p 9999"
+    Format: RGB8
+    Topic: "/kinect2/hd/image_depth_rect"
+    Name: cameraB
+    Fps: 30
+
+  PointCloud:
+    Server: Deactivate # Deactivate, Ice, ROS
+    Proxy: "pointcloud1:tcp -h localhost -p 9999"
+    Topic: "/TurtlebotROS/cameraL/image_raw"
+    Name: pointcloud
+    Fps: 30
+
+  RGBD:
+    Server: Deactivate # Deactivate, Ice, ROS
+    Proxy: "rgbd1:tcp -h localhost -p 9999"
+    Topic: "/TurtlebotROS/cameraL/image_raw"
+    Name: RGBD
+    Fps: 30
+
+  Pose3DMotors:
+    Server: Deactivate # Deactivate, Ice, ROS
+    Proxy: "Pose3DMotors1:tcp -h 193.147.14.20 -p 9999"
+    Topic: "/TurtlebotROS/cameraL/image_raw"
+    Name: Pose3DMotors
+
+  KinectLeds:
+    Server: Deactivate # Deactivate, Ice, ROS
+    Proxy: "kinectleds1:tcp -h 193.147.14.20 -p 9999"
+    Topic: "/TurtlebotROS/cameraL/image_raw"
+    Name: KinectLeds
+
+
+  NodeName: rgbdViz
+  #camRGB: "./config/joseMaria/CameraAEsquina.xml"
+  #camIR: "./config/joseMaria/CameraAEsquina.xml"
+  #WorldFile: "./config/fempsa/fempsa.cfg"
+  Width: 640
+  Height: 480
+  Fps: 15
+  Debug: 1

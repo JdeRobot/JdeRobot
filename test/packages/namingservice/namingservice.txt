@@ -1,0 +1,2 @@
+/opt/jderobot/bin/namingservice
+/opt/jderobot/share/jderobot/conf/namingService.cfg

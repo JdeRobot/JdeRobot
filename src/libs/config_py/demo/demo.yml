@@ -1,18 +1,17 @@
 Demo:
   Motors:
-    Server: 2 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Server: ROS # Deactivate, Ice , ROS
     Proxy: Motors:default -h localhost -p 9001
     Topic: '/turtlebotROS/mobile_base/commands/velocity'
     Name: basic_component_pyCamera
     maxW: 0.7
     maxV: 4
-  
+
   Camera:
-    Server: 2 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Server: ROS # Deactivate, Ice , ROS
     Proxy: "CameraL:default -h localhost -p 9001"
     Format: RGB8
     Topic: "/TurtlebotROS/cameraL/image_raw"
     Name: basic_component_pyCamera
 
   NodeName: demo
-

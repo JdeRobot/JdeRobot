@@ -1,3 +1,22 @@
+jderobot (5.6.3) unstable; urgency=low
+
+  * release 5.6.3
+  * Solved some bugs related with installation and other minor bugs in components.
+  * Added some little improvements in some tools. 
+  * YoutubeServer is now working from debian package installation, it only works with python clients for the moment.
+  * [PR #1017] Added support for synchronized RGBD
+  * [PR #1024] Added new tests to jenkins dockers
+  * [PR #1031] Added new component rgbdViewer_py
+  * [PR #1032] Added support for MBOT in gazebo 
+  * [PR #1040] Added a new widget with zoom to rgbdcalibrator
+  * [PR #1049] New tests for packages installation.
+  * [PR #1050] First approach. Deleted discontinuity in HSV filter of colorTuner
+  * [PR #1053] Added comm to rgbdViewer 
+  * [PR #1054] Ported MAVLINKServer to python 2.7 and integrated with comm 
+  * [PR #1035] [PR #1063] Improved scratch2JdeRobot tool.
+
+-- Francisco Perez <f.perez475@gmail.com>, Wed, 19 Feb 2018 17:15:00 +0100
+
 
 jderobot (5.6.2) unstable; urgency=low
 

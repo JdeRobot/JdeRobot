@@ -6,7 +6,7 @@ This is the official Docker image of [JdeRobot project](http://jderobot.org), a 
 It contains all the necessary components to be used with [Teaching Robotics](http://jderobot.org/Teaching_robotics_with_JdeRobot):
 * JdeRobot package installed
 * Gzweb prepare to use
-* Videos for be used with cameraserver component
+* Videos for be used with camserver component
 * Nano TextEditor installed ...
 
 # Usage
@@ -14,7 +14,7 @@ It contains all the necessary components to be used with [Teaching Robotics](htt
 ```sh
 docker run -tiP --rm -p 7681:7681 jderobot/jderobot
 ```
-* Cameraserver with video: 
+* Camserver with video: 
 ```sh
 docker run -tiP --rm -p 9000:9000 jderobot/jderobot video [video_name]
 ```

@@ -1,3 +1,4 @@
 #!/bin/sh
 
 pip2 uninstall zeroc-ice
+pip2 uninstall imutils

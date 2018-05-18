@@ -1,0 +1,2 @@
+/opt/jderobot/lib/libgeometry.so
+/opt/jderobot/include/jderobot/geometry

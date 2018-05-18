@@ -32,14 +32,22 @@ module jderobot{
 	    float b;
 	};
 
-
+	struct RGBSegment{
+	    Segment seg;
+	    Color c;
+	};
+	
+	sequence<RGBPoint> bufferPoint; 
+	sequence<RGBSegment> bufferSegment;
   /**
    * Interface to the Visualization interaction.
    */
 	interface Visualization
 	{
         void drawSegment(Segment seg, Color c);
+	bufferSegment getSegment();
         void drawPoint(Point p, Color c);
+	bufferPoint getPoints();
         void clearAll();
 	};
 

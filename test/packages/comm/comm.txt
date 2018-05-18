@@ -1,0 +1,3 @@
+/opt/jderobot/lib/libcomm.so
+/opt/jderobot/lib/libcomm-embedded.a
+/opt/jderobot/include/jderobot/comm

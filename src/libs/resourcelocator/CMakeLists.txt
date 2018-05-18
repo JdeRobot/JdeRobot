@@ -18,17 +18,11 @@ include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}/include
 )
 
-configure_file(
-    include/resourcelocator/gladelocator.hpp.in
-    include/resourcelocator/gladelocator.hpp
-    @ONLY
-)
-
 ## Sources
 set(SOURCES
 	include/resourcelocator/stdutils.hpp
 	include/resourcelocator/resourcelocator.hpp
-	${CMAKE_CURRENT_BINARY_DIR}/include/resourcelocator/gladelocator.hpp
+	include/resourcelocator/gladelocator.hpp
 
 	src/resourcelocator.cpp
 )
@@ -56,9 +50,5 @@ install(TARGETS ${PROJECT_NAME}
 )
 install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_PREFIX}/include
-    COMPONENT resourcelocator
-)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/resourcelocator/gladelocator.hpp
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/resourcelocator/
     COMPONENT resourcelocator
 )

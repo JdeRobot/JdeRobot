@@ -6,7 +6,7 @@ LABEL manteiner Aitor Martínez Fernández+aitor.martinez.fernandez@gmail.com
 ########## USAGE ##############
 
 LABEL Usage.run="docker run -itP --rm -p 7681:7681 jderobot/jderobot"
-LABEL Usage.cameraserver="docker run -itP --rm jderobot/jderobot video [video_name]"
+LABEL Usage.camserver="docker run -itP --rm jderobot/jderobot video [video_name]"
 LABEL Usage.listVideos="docker run --rm jderobot/jderobot lsvideo"
 
 

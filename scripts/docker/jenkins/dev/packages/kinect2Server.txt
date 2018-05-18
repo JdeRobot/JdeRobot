@@ -1,0 +1,2 @@
+/opt/jderobot/bin/kinect2Server
+/opt/jderobot/share/jderobot/conf/kinect2server.cfg

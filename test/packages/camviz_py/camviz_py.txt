@@ -1,0 +1,3 @@
+/opt/jderobot/bin/camviz_py
+/opt/jderobot/share/jderobot/python/camviz_py/camviz.py
+/opt/jderobot/share/jderobot/conf/camviz_py.cfg

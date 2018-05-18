@@ -1,0 +1,2 @@
+/opt/jderobot/bin/openniServer
+/opt/jderobot/share/jderobot/conf/openniServer.cfg

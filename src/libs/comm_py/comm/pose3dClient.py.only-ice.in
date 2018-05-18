@@ -1,6 +1,7 @@
 import sys
 import Ice
 from .ice.pose3dIceClient import Pose3dIceClient
+from .tools import server2int
 
 
 def __getPoseIceClient(jdrc, prefix):
@@ -67,7 +68,8 @@ def getPose3dClient (jdrc, prefix):
     @return None if pose3d is disabled
 
     '''
-    server = jdrc.getConfig().getPropertyWithDefault(prefix+".Server", 0)
+    server = jdrc.getConfig().getProperty(prefix+".Server")
+    server = server2int(server)
 
     cons = [__Posedisabled, __getPoseIceClient, __getListenerPose]
 

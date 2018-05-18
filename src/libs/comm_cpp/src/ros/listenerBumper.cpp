@@ -45,17 +45,28 @@ namespace Comm {
 
 	void 
 	ListenerBumper::bumpercallback(const kobuki_msgs::BumperEventConstPtr& bumper_msg){
-		pthread_mutex_lock(&mutex);
-		this->bumperData = Comm::translate_bumper_messages(bumper_msg);
-		pthread_mutex_unlock(&mutex);
+		timeval curTime;
+		if (this->bumperData.state > 0){
+			pthread_mutex_lock(&mutex);
+				gettimeofday(&curTime, NULL);
+				this->current_time = curTime.tv_usec / 1000;
+				this->bumperData = Comm::translate_bumper_messages(bumper_msg);
+			pthread_mutex_unlock(&mutex);
+		}
 
 	}
 
 	JdeRobotTypes::BumperData  
 	ListenerBumper::getBumperData(){
+		timeval curTime;
 		JdeRobotTypes::BumperData ld;
 		pthread_mutex_lock(&mutex);
-		ld = this->bumperData;
+			gettimeofday(&curTime, NULL);
+			int t = curTime.tv_usec / 1000;
+			if ((t - this->current_time) > 500){
+				this->bumperData.state = 0;
+			}
+			ld = this->bumperData;
 		pthread_mutex_unlock(&mutex);
 		return ld;
 	}

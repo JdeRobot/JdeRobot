@@ -27,6 +27,7 @@
 #include <jderobot/types/bumperData.h>
 #include <jderobot/comm/interfaces/bumperClient.hpp>
 #include <jderobot/comm/ros/translators.hpp>
+#include <sys/time.h>
 
 namespace Comm {
 	class ListenerBumper: public Comm::BumperClient {
@@ -45,6 +46,7 @@ namespace Comm {
 		ros::Subscriber sub;
 		std::string topic;
 		std::string nodeName;
+		int current_time;
 
 		ros::AsyncSpinner* spinner;
 		

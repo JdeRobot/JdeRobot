@@ -1,17 +1,16 @@
 #include <jderobot/comm/cmdvelClient.hpp>
-#include <jderobot/comm/ice/cmdvelIceClient.hpp>
-#ifdef JDERROS
-//#include <jderobot/comm/ros/publisherCMDVel.hpp>
-#endif
+
 
 namespace Comm {
 
-CMDVelClient* 
+CMDVelClient*
 getCMDVelClient(Comm::Communicator* jdrc, std::string prefix){
 	CMDVelClient* client = 0;
 
+	int server;
+	std::string server_name = jdrc->getConfig().asString(prefix+".Server");
+	server = server2int(server_name);
 
-	int server = jdrc->getConfig().asIntWithDefault(prefix+".Server", 0);
 	switch (server){
 		case 0:
 		{

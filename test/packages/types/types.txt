@@ -1,0 +1,3 @@
+/opt/jderobot/lib/jderobot/libjderobottypes.so
+/opt/jderobot/include/jderobot/types
+/opt/jderobot/lib/python2.7/jderobotTypes

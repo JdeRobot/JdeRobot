@@ -7,15 +7,8 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}/include
 )
 
-configure_file(
-    include/jderobot/config/hardcodedlocations.h.in
-    include/jderobot/config/hardcodedlocations.h
-    @ONLY
-)
-
 set(HEADERS
     include/jderobot/config/config.h
-    ${CMAKE_CURRENT_BINARY_DIR}/include/jderobot/config/hardcodedlocations.h
     include/jderobot/config/loader.hpp
     include/jderobot/config/properties.hpp
     include/jderobot/config/stdutils.hpp

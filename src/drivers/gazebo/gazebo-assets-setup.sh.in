@@ -1,0 +1,8 @@
+# gazebo-setup fixed by varribas at 2016-04-08
+
+# official Gazebo resources
+. /usr/share/gazebo/setup.sh
+
+# JdeRobot resources
+export GAZEBO_RESOURCE_PATH=$GAZEBO_RESOURCE_PATH:@MODELS@:@WORLDS@
+export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:@MODELS@

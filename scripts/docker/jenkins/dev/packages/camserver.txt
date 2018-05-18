@@ -1,0 +1,2 @@
+/opt/jderobot/bin/camserver
+/opt/jderobot/share/jderobot/conf/camserver.cfg

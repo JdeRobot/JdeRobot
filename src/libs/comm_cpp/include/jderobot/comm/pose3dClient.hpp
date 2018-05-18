@@ -22,8 +22,13 @@
 
 #include <jderobot/types/laserData.h>
 #include <Ice/Communicator.h>
+#include <jderobot/comm/tools.hpp>
 #include <jderobot/comm/communicator.hpp>
 #include <jderobot/comm/interfaces/pose3dClient.hpp>
+#include <jderobot/comm/ice/pose3dIceClient.hpp>
+#ifdef JDERROS
+#include <jderobot/comm/ros/listenerPose.hpp>
+#endif
 
 
 
@@ -36,7 +41,7 @@ namespace Comm {
 	 *
 	 *
 	 * @param communicator that contains properties
-	 * @param prefix of client Propierties (example: "kobukiViewer.Pose3d")
+	 * @param prefix of client Propierties (example: "carViz.Pose3d")
 	 * 
 	 *
 	 * @return null if propierties are wrong

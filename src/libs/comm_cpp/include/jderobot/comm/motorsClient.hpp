@@ -22,8 +22,14 @@
 
 #include <jderobot/types/cmdvel.h>
 #include <Ice/Communicator.h>
+#include <jderobot/comm/tools.hpp>
 #include <jderobot/comm/communicator.hpp>
 #include <jderobot/comm/interfaces/motorsClient.hpp>
+#include <jderobot/comm/ice/motorsIceClient.hpp>
+#include <jderobot/comm/tools.hpp>
+#ifdef JDERROS
+#include <jderobot/comm/ros/publisherMotors.hpp>
+#endif
 
 
 
@@ -36,7 +42,7 @@ namespace Comm {
 	 *
 	 *
 	 * @param communicator that contains properties
-	 * @param prefix of client Propierties (example: "kobukiViewer.Motors")
+	 * @param prefix of client Propierties (example: "carViz.Motors")
 	 * 
 	 *
 	 * @return null if propierties are wrong

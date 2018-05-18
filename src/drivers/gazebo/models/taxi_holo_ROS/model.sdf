@@ -1,0 +1,42 @@
+<?xml version='1.0'?>
+<sdf version="1.5">
+<model name="taxi_holo">
+  <pose>0 0 0 0 0 0</pose>
+  <static>false</static>
+    <link name="taxi_holo">
+      <gravity>false</gravity>
+      <inertial>
+        <mass>750.0</mass>
+        <inertia> 
+          <ixx>1</ixx>      
+          <ixy>0.0</ixy>        
+          <ixz>0.0</ixz>        
+          <iyy>1</iyy>      
+          <iyz>0.0</iyz>         
+          <izz>1</izz>      
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+	  <mesh>
+	    <uri>model://taxi_holo_ROS/meshes/taxi_holo.dae</uri>
+	  </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://taxi_holo_ROS/meshes/taxi_holo.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <plugin name="object_controller" filename="libgazebo_ros_planar_move.so">
+      <commandTopic>taxi_holo/cmd_vel</commandTopic>
+      <odometryTopic>taxi_holo/odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <odometryRate>20.0</odometryRate>
+      <robotBaseFrame>taxi_holo</robotBaseFrame>
+</plugin>
+  </model>
+</sdf>

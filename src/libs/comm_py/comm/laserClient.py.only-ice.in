@@ -1,6 +1,7 @@
 import sys
 import Ice
 from .ice.laserIceClient import LaserIceClient
+from .tools import server2int
 
 
 def __getLaserIceClient(jdrc, prefix):
@@ -66,7 +67,8 @@ def getLaserClient (jdrc, prefix):
     @return None if Laser is disabled
 
     '''
-    server = jdrc.getConfig().getPropertyWithDefault(prefix+".Server", 0)
+    server = jdrc.getConfig().getProperty(prefix+".Server")
+    server = server2int(server)
 
     cons = [__Laserdisabled, __getLaserIceClient, __getListenerLaser]
 

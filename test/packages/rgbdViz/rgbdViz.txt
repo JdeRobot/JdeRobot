@@ -1,0 +1,4 @@
+/opt/jderobot/bin/rgbdViz
+/opt/jderobot/share/jderobot/glade/rgbdVizgui.glade
+/opt/jderobot/share/jderobot/conf/rgbdViz.cfg
+/opt/jderobot/share/jderobot/conf/camera-0.cfg

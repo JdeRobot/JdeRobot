@@ -36,6 +36,9 @@ namespace loader {
 
 const std::string ENV_PATH_NAME = "ICE_CONFIG_PATH";
 
+const std::string CONFIG_PATH_NAME = "JDEROBOT_CONFIG_PATHS";
+
+
 
 /**
  * @brief Find filename into all defined search paths.

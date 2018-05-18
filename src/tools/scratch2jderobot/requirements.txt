@@ -1,4 +1,0 @@
-termcolor==1.1.0
-parse==1.8.2
-imutils==0.4.3
--e git+https://github.com/raulperula/kurt.git#egg=kurt

@@ -1,6 +1,6 @@
 Test:
   Motors:
-    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Server: Ice # Deactivate, Ice , ROS
     Proxy: "Motors:default -h localhost -p 9001"
     Topic: "/turtlebotROS/mobile_base/commands/velocity"
     Name: testMotors
@@ -8,45 +8,51 @@ Test:
     maxW: 0.7
 
   Camera1:
-    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Server: Ice # Deactivate, Ice , ROS
     Proxy: "CameraL:default -h localhost -p 9001"
     Format: RGB8
     Topic: "/TurtlebotROS/cameraL/image_raw"
     Name: testCamera1
 
   Camera2:
-    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Server: Ice # Deactivate, Ice , ROS
     Proxy: "CameraR:default -h localhost -p 9001"
     Format: RGB8
     Topic: "/TurtlebotROS/cameraR/image_raw"
     Name: testCamera2
 
   Pose3D:
-    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Server: Ice # Deactivate, Ice , ROS
     Proxy: "Pose3D:default -h localhost -p 9001"
     Topic: "/turtlebotROS/odom"
     Name: testPose3d
 
   Laser:
-    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Server: Ice # Deactivate, Ice , ROS
     Proxy: "Laser:default -h localhost -p 9001"
     Topic: "/turtlebotROS/laser/scan"
     Name: testLaser
 
+  Sonar:
+    Server: Ice # Deactivate, Ice , ROS
+    Proxy: "Sonar:default -h localhost -p 8993"
+    Topic: "/turtlebotROS/laser/scan"
+    Name: testSonar
+
   CMDVel:
-    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Server: Ice # Deactivate, Ice , ROS
     Proxy: "CMDVel:default -h 0.0.0.0 -p 9000"
 
   Navdata:
-    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Server: Ice # Deactivate, Ice , ROS
     Proxy: Navdata:default -h 0.0.0.0 -p 9000
 
   Extra:
-    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Server: Ice # Deactivate, Ice , ROS
     Proxy: Extra:default -h 0.0.0.0 -p 9000
 
   Bumper:
-    Server: 1 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Server: Ice # Deactivate, Ice , ROS
     Proxy: Extra:default -h 0.0.0.0 -p 9000
     Topic: "/turtlebotROS/mobile_base/events/bumper"
     Name: testPose3d

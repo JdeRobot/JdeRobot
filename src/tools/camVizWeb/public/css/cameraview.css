@@ -1,0 +1,128 @@
+/*azul: #58D9FF
+  naranja: #e67e22
+  blanco: #FBFBFB
+  carbon: #333333
+*/
+
+/*
+@btn-success-color #fff
+@btn-success-bg @brand-success
+@btn-success-border darken(@btn-success-bg, 5%)
+@btn-info-color #fff
+@btn-info-bg @brand-info
+@btn-info-border darken(@btn-info-bg, 5%)
+*/
+
+#body{ width: inherit;
+}
+
+.color-light, .input-group-addon{
+/*   color:#eee;*/
+   color:#58D9FF;
+}
+.border-light{
+    border-style: solid;
+    border-color: #eee;
+   border-width: 2px;
+}
+
+.padding0 {
+    padding: 0px 0px 0px 0px;
+}
+
+.letrero{
+    padding: 2px 15px;
+}
+
+.border-carbon{
+   border-color: #333;
+}
+.border-blue{
+   border: 1px solid #58D9FF;
+}
+
+.row{
+   margin-bottom: 3px;
+}
+
+.width100{
+   width:100%;
+}
+.right{
+   text-align: right;
+}
+
+.row {
+   margin-bottom: 10px;
+
+}
+
+
+/* toggle button navbar*/
+.navbar-default .navbar-toggle:hover, .navbar-default .navbar-toggle:focus,
+.navbar-inverse .navbar-toggle:hover, .navbar-inverse .navbar-toggle:focus {
+    background-color: #58D9FF;
+}
+
+.navbar-default .navbar-toggle:hover .icon-bar, .navbar-default .navbar-toggle:focus .icon-bar,
+.navbar-inverse .navbar-toggle:hover .icon-bar, .navbar-inverse .navbar-toggle:focus .icon-bar{
+    background-color: #FBFBFB;
+}
+
+.navbar-inverse .navbar-collapse, .navbar-inverse .navbar-form {
+    border-color: #58D9FF;
+}
+
+.nav-tabs li a{
+   color: #58D9FF;
+}
+.nav-tabs li a:hover{
+   color: #333;
+}
+
+.nav-tabs li.active a{
+   color: #FBFBFB;
+}
+
+/* Buttons */
+
+.btn-success:hover{
+   background-color: #5cb85c;
+   color: #FBFBFB;
+   
+}
+.btn-info:hover{
+   background-color: #58D9FF;
+   color: #FBFBFB;
+   
+}
+.btn-warning:hover{
+   background-color: #f0ad4e;
+   color: #FBFBFB;
+   
+}
+.btn-danger:hover{
+   background-color: #d9534f;
+   color: #FBFBFB;
+   
+}
+.btn-primary:hover{
+   background-color: #337ab7;
+   color: #FBFBFB;
+   
+}
+
+@media (max-width: 767px) {
+  
+}
+@media (min-width: 768px) and (max-width: 991px) {
+ 
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  
+}
+
+@media (min-width: 1200px) {
+
+}

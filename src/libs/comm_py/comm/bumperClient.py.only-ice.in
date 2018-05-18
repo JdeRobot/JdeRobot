@@ -1,6 +1,7 @@
 import sys
 import Ice
 from .ice.bumperIceClient import BumperIceClient
+from .tools import server2int
 
 
 def __getBumperIceClient(jdrc, prefix):
@@ -66,7 +67,8 @@ def getBumperClient (jdrc, prefix):
     @return None if Bumper is disabled
 
     '''
-    server = jdrc.getConfig().getPropertyWithDefault(prefix+".Server", 0)
+    server = jdrc.getConfig().getProperty(prefix+".Server")
+    server = server2int(server)
 
     cons = [__Bumperdisabled, __getBumperIceClient, __getListenerBumper]
 

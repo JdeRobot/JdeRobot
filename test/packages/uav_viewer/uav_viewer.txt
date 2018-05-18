@@ -1,0 +1,3 @@
+/opt/jderobot/bin/uav_viewer
+/opt/jderobot/share/jderobot/conf/uav_viewer.cfg
+/opt/jderobot/share/jderobot/conf/uav_viewer_simulated.cfg

@@ -1,0 +1,22 @@
+camrightserv:
+  dir: localhost
+  port: 11010
+camrightepname: CameraR
+camleftserv:
+  dir: localhost
+  port: 11010
+camleftepname: CameraL
+motorserv:
+  dir: locahost
+  port: 11010
+motorsepname: Motors
+pose3dserv:
+  dir: localhost
+  port: 11010
+pose3depname: Pose3D
+laserserv:
+  dir: localhost
+  port: 11010
+laserepname: Laser
+maxv: 3
+maxw: 0.7

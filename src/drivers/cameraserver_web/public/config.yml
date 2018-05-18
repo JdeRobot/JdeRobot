@@ -1,0 +1,6 @@
+serv:
+  dir: "localhost"
+  port: "9090"
+topic: '/usb_cam/image_raw/compressed'
+msgs: "sensor_msgs/CompressedImage"
+fps: 20

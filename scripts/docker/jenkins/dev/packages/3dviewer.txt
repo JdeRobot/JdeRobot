@@ -1,0 +1,2 @@
+/opt/jderobot/bin/3dviewer
+/opt/jderobot/share/jderobot/conf/3DViewer.cfg

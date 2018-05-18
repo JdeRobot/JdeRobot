@@ -1,6 +1,7 @@
 import sys
 import Ice
 from .ice.motorsIceClient import MotorsIceClient
+from .tools import server2int
 
 
 
@@ -35,7 +36,7 @@ def __getPublisherMotors(jdrc, prefix):
     @return Motors ROS Publisher
 
     '''
-    
+
     print(prefix + ": ROS msg are diabled")
     return None
 
@@ -70,7 +71,8 @@ def getMotorsClient (jdrc, prefix):
     @return None if Motors is disabled
 
     '''
-    server = jdrc.getConfig().getPropertyWithDefault(prefix+".Server", 0)
+    server = jdrc.getConfig().getProperty(prefix+".Server")
+    server = server2int(server)
 
     cons = [__Motorsdisabled, __getMotorsIceClient, __getPublisherMotors]
 

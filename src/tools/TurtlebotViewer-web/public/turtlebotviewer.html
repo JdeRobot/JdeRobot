@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>TurtlebotViewer</title>
+   <meta name="description" content="">
+
+   <!-- core CSS -->
+   <link href="css/bootstrap.min.css" rel="stylesheet">
+   <link href="css/bootstrap-toggle.min.css" rel="stylesheet">
+   <link href="css/turtlebotviewer.css" rel="stylesheet">
+</head>
+<!--/head-->
+
+<body>
+<header id="header">
+  <nav class="navbar navbar-inverse" role="banner">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#"><i class="fa fa-bolt"></i> JdeRobot Web Clients TurtlebotViewer</a> </div>
+    </div>
+    <!--/.container-->
+  </nav>
+  <!--/nav-->
+
+</header>
+<!--/header-->
+<div id="body" class="container">
+   <div class="row">
+      <div id="buttons" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <p>
+           <button id="start" type="button" class="btn btn-md btn-success">Start</button>
+           <button id="stop" type="button" class="btn btn-md btn-danger">Stop</button>
+           <button id="config" type="button" class="btn btn-info" data-toggle="modal" data-target="#configure">Config</button>
+        </p>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Camera Left</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="camView" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 cam">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Camera Right</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="camView2" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 cam">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Laser</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="laser" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="row">
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading">
+               <span class="panel-title">3D Model</span>   <input id="mod-toggle" disabled type="checkbox" data-toggle="toggle" data-onstyle="info" data-size="mini" data-offstyle="info">
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="model" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+      <div class="col-xs-12 col-sm-8 col-md-6 col-lg-4">
+         <div class="border-carbon panel panel-info">
+            <div class=" letrero panel-heading hidden-sm hidden-xs">
+               <span class="panel-title">Control</span>
+            </div>
+            <div class="panel-body padding0 border-blue container-fluid">
+               <canvas id="control" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">Your browser does not support the HTML5 canvas tag.</canvas>
+            </div>
+         </div>
+      </div>
+      <div class="col-xs-6 col-sm-4 col-md-2 col-lg-2">
+         <button id="stopR" type="button" class="btn btn-info" >Stop Bot</button>
+      </div>
+   </div>
+</div>
+
+<div class="modal fade" id="configure" tabindex="-1" role="dialog" aria-labelledby="configLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="configLabel">Introrob Config</h4>
+      </div>
+      <div class="modal-body">
+         <label for="dirleft">Camera Left</label>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Addr</span>
+           <input  id="dirleft" type="text" class="form-control" placeholder="Address" value="localhost" aria-describedby="basic-addon1">
+         </div>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Port</span>
+            <input  id="portleft" type="number" class="form-control" value="11000" aria-describedby="basic-addon1">
+         </div>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">EndPoint</span>
+            <input id="epleft" type="text" class="form-control" value="cam_sensor_left" aria-describedby="basic-addon1">
+         </div>
+         <br>
+         <label for="dirright">Camera Right</label>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Addr</span>
+           <input  id="dirright" type="text" class="form-control" placeholder="Address" value="localhost" aria-describedby="basic-addon1">
+         </div>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Port</span>
+            <input  id="portright" type="number" class="form-control" value="11001" aria-describedby="basic-addon1">
+         </div>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">EndPoint</span>
+            <input id="epright" type="text" class="form-control" value="cam_sensor_right" aria-describedby="basic-addon1">
+         </div>
+          <br>
+         <label for="dirmotors">Motors</label>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Addr</span>
+           <input  id="dirmotors" type="text" class="form-control" placeholder="Address" value="localhost" aria-describedby="basic-addon1">
+         </div>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Port</span>
+            <input  id="portmotors" type="number" class="form-control" value="11002" aria-describedby="basic-addon1">
+         </div>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">EndPoint</span>
+            <input id="epmotors" type="text" class="form-control" value="Motors" aria-describedby="basic-addon1">
+         </div>
+         <div class="row">
+            <div class="col-lg-6 padding-right0">
+              <div class="input-group">
+                <span class="input-group-addon">MaxV</span>
+                <input id="maxv" type="text" class="form-control" value="3">
+              </div>
+            </div>
+            <div class="col-lg-6 padding-left0">
+              <div class="input-group">
+                <span class="input-group-addon">MaxW</span>
+                <input id="maxw" type="text" class="form-control" value="0.7">
+              </div>
+            </div>
+          </div>
+          <br>
+         <label for="dirpose3d">Pose3D</label>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Addr</span>
+           <input  id="dirpose3d" type="text" class="form-control" placeholder="Address" value="localhost" aria-describedby="basic-addon1">
+         </div>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Port</span>
+            <input  id="portpose3d" type="number" class="form-control" value="11003" aria-describedby="basic-addon1">
+         </div>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">EndPoint</span>
+            <input id="eppose3d" type="text" class="form-control" value="Pose3D" aria-describedby="basic-addon1">
+         </div>
+         <label for="dirlaser">Laser</label>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Addr</span>
+           <input  id="dirlaser" type="text" class="form-control" placeholder="Address" value="localhost" aria-describedby="basic-addon1">
+         </div>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">Port</span>
+            <input  id="portlaser" type="number" class="form-control" value="11008" aria-describedby="basic-addon1">
+         </div>
+         <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">EndPoint</span>
+            <input id="eplaser" type="text" class="form-control" value="Laser" aria-describedby="basic-addon1">
+         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
+        <button id="save" type="button" class="btn btn-success" data-dismiss="modal">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+   <script src="js/jquery.min.js"></script>
+   <script src="js/bootstrap.min.js"></script>
+   <script src="js/bootstrap-toggle.min.js"></script>
+   <script src="js/three.min.js"></script>
+   <script src="js/JoyStickControls.js"></script>
+   <script src="js/TrackballControls.js"></script>
+   <script src="js/ColladaLoader.js"></script>
+   <script src="js/api.js"></script>
+   <script src="js/gui.js"></script>
+   <script src="js/turtlebotviewer.js"></script>
+   <script src="js/turtlebotviewerWeb.js"></script>
+</body>
+</html>

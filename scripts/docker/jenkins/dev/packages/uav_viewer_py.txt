@@ -1,0 +1,5 @@
+/opt/jderobot/bin/uav_viewer_py
+/opt/jderobot/share/jderobot/python/pantilt_teleop_py/uav_viewer.py
+/opt/jderobot/share/jderobot/python/pantilt_teleop_py/resources_rc.py
+/opt/jderobot/share/jderobot/python/pantilt_teleop_py/gui
+/opt/jderobot/share/jderobot/conf/uav_viewer_py.yml

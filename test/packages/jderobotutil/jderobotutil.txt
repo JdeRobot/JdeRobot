@@ -1,0 +1,3 @@
+/opt/jderobot/lib/libjderobotutil.so
+/opt/jderobot/lib/libjderobotutil.a
+/opt/jderobot/include/jderobot/jderobotutil

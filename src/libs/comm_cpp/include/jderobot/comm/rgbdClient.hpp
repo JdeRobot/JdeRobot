@@ -22,8 +22,13 @@
 
 #include <jderobot/types/rgbd.h>
 #include <Ice/Communicator.h>
+#include <jderobot/comm/tools.hpp>
 #include <jderobot/comm/communicator.hpp>
 #include <jderobot/comm/interfaces/rgbdClient.hpp>
+#include <jderobot/comm/ice/rgbdIceClient.hpp>
+#ifdef JDERROS
+//#include <jderobot/comm/ros/listenerRgbd.hpp>
+#endif
 
 
 
@@ -36,7 +41,7 @@ namespace Comm {
 	 *
 	 *
 	 * @param communicator that contains properties
-	 * @param prefix of client Propierties (example: "kobukiViewer.Rgbd")
+	 * @param prefix of client Propierties (example: "carViz.Rgbd")
 	 * 
 	 *
 	 * @return null if propierties are wrong

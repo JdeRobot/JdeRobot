@@ -1,0 +1,2 @@
+/opt/jderobot/bin/evicam_driver
+/opt/jderobot/share/jderobot/conf/evicam_driver.cfg

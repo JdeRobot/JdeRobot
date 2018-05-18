@@ -1,0 +1,106 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <world name="default">
+
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+   <!-- A global light source -->
+    <include>
+      <name>ardrone-black</name>
+      <uri>model://ArDrone2</uri>
+      <pose>0 0 0.1 0 0 0</pose>
+    </include>
+
+    <!-- A global light source -->
+    <include>
+      <name>ardrone-red</name>
+      <uri>model://RedArDrone2</uri>
+      <pose>2 0 0.1 0 0 0</pose>
+    </include>
+
+    <!-- A ground plane -->
+    <include>
+      <uri>model://grass_plane</uri>
+    </include>
+
+    <scene>
+	<sky>
+	    <clouds>
+		<speed>12</speed>
+	    </clouds>
+        </sky>
+     </scene>
+
+    <!-- Testing the automatic population of objects -->
+    <population name="tree_population1">
+       <include>
+          <static>true</static>
+          <uri>model://tree</uri>
+       </include>
+      <pose>-75 0 -0.5 0 0 0</pose>
+      <box>
+        <size>30 100 .01</size>
+      </box>
+      <model_count>10</model_count>
+      <distribution>
+        <type>random</type>
+      </distribution>
+    </population>
+
+<!-- Testing the automatic population of objects -->
+    <population name="tree_population2">
+       <include>
+          <static>true</static>
+          <uri>model://tree</uri>
+       </include>
+      <pose>0 75 -0.5 0 0 0</pose>
+      <box>
+        <size>100 30 .01</size>
+      </box>
+      <model_count>10</model_count>
+      <distribution>
+        <type>random</type>
+      </distribution>
+    </population>
+
+<!-- Testing the automatic population of objects -->
+    <population name="tree_population3">
+       <include>
+          <static>true</static>
+          <uri>model://tree</uri>
+       </include>
+      <pose>75 0 -0.5 0 0 0</pose>
+      <box>
+        <size>30 100 .01</size>
+      </box>
+      <model_count>10</model_count>
+      <distribution>
+        <type>random</type>
+      </distribution>
+    </population>
+
+<!-- Testing the automatic population of objects -->
+    <population name="tree_population4">
+       <include>
+          <static>true</static>
+          <uri>model://tree</uri>
+       </include>
+      <pose>0 -75 -0.5 0 0 0</pose>
+      <box>
+        <size>100 30 .01</size>
+      </box>
+      <model_count>10</model_count>
+      <distribution>
+        <type>random</type>
+      </distribution>
+    </population>
+
+
+
+    
+
+  </world>
+</sdf>

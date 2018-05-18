@@ -2,6 +2,7 @@ import sys
 import Ice
 import rospy
 from .ice.motorsIceClient import MotorsIceClient
+from .tools import server2int
 
 if (sys.version_info[0] == 2):
     from .ros.publisherMotors import PublisherMotors
@@ -45,14 +46,14 @@ def __getPublisherMotors(jdrc, prefix):
         if not maxW:
             maxW = 0.5
             print (prefix+".maxW not provided, the default value is used: "+ repr(maxW))
-                
+
 
         maxV = jdrc.getConfig().getPropertyWithDefault(prefix+".maxV", 5)
         if not maxV:
             maxV = 5
             print (prefix+".maxV not provided, the default value is used: "+ repr(maxV))
 
-        
+
         client = PublisherMotors(topic, maxV, maxW)
         return client
     else:
@@ -90,7 +91,8 @@ def getMotorsClient (jdrc, prefix):
     @return None if Motors is disabled
 
     '''
-    server = jdrc.getConfig().getPropertyWithDefault(prefix+".Server", 0)
+    server = jdrc.getConfig().getProperty(prefix+".Server")
+    server = server2int(server)
 
     cons = [__Motorsdisabled, __getMotorsIceClient, __getPublisherMotors]
 

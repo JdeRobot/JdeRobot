@@ -1,0 +1,3 @@
+/opt/jderobot/lib/libjderobotHandlers.so
+/opt/jderobot/lib/libjderobotHandlers.a
+/opt/jderobot/include/jderobot/jderobotHandlers

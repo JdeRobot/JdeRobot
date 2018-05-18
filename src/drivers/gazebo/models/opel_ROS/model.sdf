@@ -1,0 +1,274 @@
+<?xml version='1.0'?>
+<sdf version="1.5">
+<model name="opel">
+  <pose>0 0 0.5 0 0 0</pose>
+    <link name="opel">
+        <gravity>1</gravity>
+        <inertial>
+            <mass>500</mass>
+        </inertial>
+    <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://opel/meshes/model.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://opel/meshes/model.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <plugin name="object_controller" filename="libgazebo_ros_planar_move.so">
+      <commandTopic>opel/cmd_vel</commandTopic>
+      <odometryTopic>opel/odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <odometryRate>20.0</odometryRate>
+      <robotBaseFrame>f1</robotBaseFrame>
+</plugin>
+    
+    <link name='camera_center'>
+        <pose>-0.3000 -0.3000 1.400 0.000000 0.000000 0.000000</pose>
+        
+        <sensor name='cam_opel_center' type='camera'>
+          <pose>0.000000 0.000000 0.000000  0.00000 0.00000 -1.570000</pose>
+          <update_rate>20.000000</update_rate>
+          <camera name='ccenter'>
+            <horizontal_fov>1.570000</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+          </image>
+            <clip>
+              <near>0.100000</near>
+              <far>35.000000</far>
+          </clip>
+        </camera>
+          <plugin name="camera_controller_center" filename="libgazebo_ros_camera.so">
+			<alwaysOn>true</alwaysOn>
+			<updateRate>0.0</updateRate>
+			<cameraName>opel/cameraC</cameraName>
+			<imageTopicName>image_raw</imageTopicName>
+			<cameraInfoTopicName>camera_info</cameraInfoTopicName>
+			<frameName>camera_center</frameName>
+			<hackBaseline>0.07</hackBaseline>
+			<distortionK1>0.0</distortionK1>
+			<distortionK2>0.0</distortionK2>
+			<distortionK3>0.0</distortionK3>
+			<distortionT1>0.0</distortionT1>
+			<distortionT2>0.0</distortionT2>
+		</plugin>
+      </sensor>
+        <visual name='visual'>
+          <geometry>
+<sphere>
+                          <radius>.01</radius>
+</sphere>
+        </geometry>
+      </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.100000 0.100000 0.100000</size>
+          </box>
+        </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100000.000000</mu>
+                <mu2>100000.000000</mu2>
+                <slip1>0.000000</slip1>
+                <slip2>0.000000</slip2>
+            </ode>
+          </friction>
+            <bounce/>
+            <contact>
+              <ode/>
+          </contact>
+        </surface>
+          <max_contacts>10</max_contacts>
+      </collision>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+      </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+    </link>
+    
+     <link name='camera_left'>
+        <pose>0.7000 -2.200 0.500 0.000000 0.000000 1.000000</pose>
+        
+        <sensor name='cam_opel_left' type='camera'>
+          <pose>0.000000 0.000000 0.000000  0.00000 0.00000 -1.570000</pose>
+          <update_rate>20.000000</update_rate>
+          <camera name='cleft'>
+            <horizontal_fov>1.570000</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+          </image>
+            <clip>
+              <near>0.100000</near>
+              <far>35.000000</far>
+          </clip>
+        </camera>
+          <plugin name="camera_controller_left" filename="libgazebo_ros_camera.so">
+			<alwaysOn>true</alwaysOn>
+			<updateRate>0.0</updateRate>
+			<cameraName>opel/cameraL</cameraName>
+			<imageTopicName>image_raw</imageTopicName>
+			<cameraInfoTopicName>camera_info</cameraInfoTopicName>
+			<frameName>camera_left</frameName>
+			<hackBaseline>0.07</hackBaseline>
+			<distortionK1>0.0</distortionK1>
+			<distortionK2>0.0</distortionK2>
+			<distortionK3>0.0</distortionK3>
+			<distortionT1>0.0</distortionT1>
+			<distortionT2>0.0</distortionT2>
+</plugin>
+      </sensor>
+        <visual name='visual'>
+          <geometry>
+<sphere>
+                          <radius>.01</radius>
+</sphere>
+        </geometry>
+      </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.100000 0.100000 0.100000</size>
+          </box>
+        </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100000.000000</mu>
+                <mu2>100000.000000</mu2>
+                <slip1>0.000000</slip1>
+                <slip2>0.000000</slip2>
+            </ode>
+          </friction>
+            <bounce/>
+            <contact>
+              <ode/>
+          </contact>
+        </surface>
+          <max_contacts>10</max_contacts>
+      </collision>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+      </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+    </link>
+    
+     <link name='camera_right'>
+        <pose>-0.7000 -2.200 0.500 0.000000 0.000000 -1.000000</pose>
+        
+        <sensor name='cam_opel_right' type='camera'>
+          <pose>0.000000 0.000000 0.000000  0.00000 0.00000 -1.570000</pose>
+          <update_rate>20.000000</update_rate>
+          <camera name='cright'>
+            <horizontal_fov>1.570000</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+          </image>
+            <clip>
+              <near>0.100000</near>
+              <far>35.000000</far>
+          </clip>
+        </camera>
+          <plugin name="camera_controller_left" filename="libgazebo_ros_camera.so">
+			<alwaysOn>true</alwaysOn>
+			<updateRate>0.0</updateRate>
+			<cameraName>opel/cameraR</cameraName>
+			<imageTopicName>image_raw</imageTopicName>
+			<cameraInfoTopicName>camera_info</cameraInfoTopicName>
+			<frameName>camera_right</frameName>
+			<hackBaseline>0.07</hackBaseline>
+			<distortionK1>0.0</distortionK1>
+			<distortionK2>0.0</distortionK2>
+			<distortionK3>0.0</distortionK3>
+			<distortionT1>0.0</distortionT1>
+			<distortionT2>0.0</distortionT2>
+</plugin>
+      </sensor>
+        <visual name='visual'>
+          <geometry>
+<sphere>
+                          <radius>.01</radius>
+</sphere>
+        </geometry>
+      </visual>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.100000 0.100000 0.100000</size>
+          </box>
+        </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100000.000000</mu>
+                <mu2>100000.000000</mu2>
+                <slip1>0.000000</slip1>
+                <slip2>0.000000</slip2>
+            </ode>
+          </friction>
+            <bounce/>
+            <contact>
+              <ode/>
+          </contact>
+        </surface>
+          <max_contacts>10</max_contacts>
+      </collision>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+      </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+    </link>
+    
+    
+    <joint type="revolute" name="camera_center">
+        <pose>0 0 0 0 0 0</pose>
+        <child>camera_center</child>
+        <parent>opel</parent>
+        <axis>
+          <xyz>0 0 0</xyz>
+      </axis>
+    </joint>
+    
+    <joint type="revolute" name="camera_left">
+        <pose>0 0 0 0 0 0</pose>
+        <child>camera_left</child>
+        <parent>opel</parent>
+        <axis>
+          <xyz>0 0 0</xyz>
+      </axis>
+    </joint>
+    
+    <joint type="revolute" name="camera_right">
+        <pose>0 0 0 0 0 0</pose>
+        <child>camera_right</child>
+        <parent>opel</parent>
+        <axis>
+          <xyz>0 0 0</xyz>
+      </axis>
+    </joint>
+  </model>
+</sdf>

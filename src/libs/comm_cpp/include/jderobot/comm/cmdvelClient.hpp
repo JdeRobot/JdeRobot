@@ -22,8 +22,13 @@
 
 #include <jderobot/types/cmdvel.h>
 #include <Ice/Communicator.h>
+#include <jderobot/comm/tools.hpp>
 #include <jderobot/comm/communicator.hpp>
 #include <jderobot/comm/interfaces/cmdvelClient.hpp>
+#include <jderobot/comm/ice/cmdvelIceClient.hpp>
+#ifdef JDERROS
+//#include <jderobot/comm/ros/publisherCMDVel.hpp>
+#endif
 
 
 

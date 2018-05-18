@@ -1,0 +1,4 @@
+#!/bin/sh
+
+pip2 install --upgrade pip
+pip2 install imutils

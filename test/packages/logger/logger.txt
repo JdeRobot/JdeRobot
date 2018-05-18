@@ -1,0 +1,2 @@
+/opt/jderobot/lib/liblogger.so
+/opt/jderobot/include/jderobot/logger

@@ -8,7 +8,7 @@ Section: net
 Priority: extra
 Size: 0
 Installed-Size: 0
-Depends: jderobot-3dviewer, jderobot-cameracalibrator, jderobot-cameraview, jderobot-cameraview-python, jderobot-colortuner-python, jderobot-giraffeclient, jderobot-kobukiviewer, jderobot-namingservice, jderobot-navigatorcamera, jderobot-pantiltteleop-python, jderobot-recorder2, jderobot-replaycontroller, jderobot-replayer2, jderobot-rgbdcalibrator, jderobot-rgbdmanualcalibrator, jderobot-rgbdviewer, jderobot-uav-viewer, jderobot-uav-viewer-python, jderobot-scratch2jderobot, jderobot-visualstates-python, jderobot-webtools
+Depends: jderobot-cameracalibrator, jderobot-camviz, jderobot-camviz-python, jderobot-colortuner-python, jderobot-giraffeclient, jderobot-carviz, jderobot-namingservice, jderobot-navigatorcamera, jderobot-pantiltteleop-python, jderobot-recorder2, jderobot-replaycontroller, jderobot-replayer2, jderobot-rgbdcalibrator, jderobot-rgbdmanualcalibrator, jderobot-rgbdviz, jderobot-uav-viewer, jderobot-uav-viewer-python, jderobot-scratch2jderobot, jderobot-visualstates-python, jderobot-webtools
 Maintainer: Francisco Perez <f.perez475@gmail.com>
 Homepage: http://jderobot.org
 Description: Metapackage that gathers all the tools of JdeRobot framework.
