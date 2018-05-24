@@ -21,7 +21,7 @@ set(SOURCES src/warehouserobotplugin.cc
 
         src/warehouserobotice.cc
         src/warehouserobotcontrol.cc
-        src/warehouserobotsensors.cc
+        src/warehousesensors.cc
 				src/cameraproxy.cc
 
         src/interfaces/motorsi.cpp
