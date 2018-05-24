@@ -48,7 +48,7 @@ target_link_libraries(warehouserobotplugin
 )
 
 # Application
-target_link_libraries(warehouserobotaplugin
+target_link_libraries(warehouserobotplugin
         colorspacesmm
 )
 
