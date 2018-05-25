@@ -1,0 +1,15 @@
+{
+  "name": "camVizWeb",
+  "version": "0.1.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^1.8.4",
+    "js-yaml": "^3.10.0"
+  },
+  "dependencies": {
+    "jquery": "^3.3.1"
+  }
+}

@@ -10,73 +10,8 @@
     </include>
     <include>
       <uri>model://f1</uri>
-      <pose>-66.75 13.25 0.006 0 0 2.44</pose>
+      <pose>-70.87 10.29 0.00096 0 0 2.44</pose>
     </include>
-
-
-    <light name='user_directional_light_0' type='directional'>
-      <pose frame=''>0.467439 -3.3788 2.45574 0.487341 -0 0</pose>
-      <diffuse>0.5 0.5 0.5 1</diffuse>
-      <specular>0.1 0.1 0.1 1</specular>
-      <direction>0.1 0.1 -0.9</direction>
-      <attenuation>
-        <range>20</range>
-        <constant>0.5</constant>
-        <linear>0.01</linear>
-        <quadratic>0.001</quadratic>
-      </attenuation>
-      <cast_shadows>1</cast_shadows>
-    </light>
-    <light name='user_directional_light_1' type='directional'>
-      <pose frame=''>0.467439 -3.3788 2.45574 0.487341 -0 0</pose>
-      <diffuse>0.5 0.5 0.5 1</diffuse>
-      <specular>0.1 0.1 0.1 1</specular>
-      <direction>0.1 0.1 -0.9</direction>
-      <attenuation>
-        <range>20</range>
-        <constant>0.5</constant>
-        <linear>0.01</linear>
-        <quadratic>0.001</quadratic>
-      </attenuation>
-      <cast_shadows>1</cast_shadows>
-    </light>
-
-	<light name='user_spot_light_0' type='spot'>
-      <pose frame=''>-66.1036 12.4154 1 0 -0 0</pose>
-      <diffuse>0.5 0.5 0.5 1</diffuse>
-      <specular>0.1 0.1 0.1 1</specular>
-      <direction>0 0 -1</direction>
-      <attenuation>
-        <range>20</range>
-        <constant>0.5</constant>
-        <linear>0.01</linear>
-        <quadratic>0.001</quadratic>
-      </attenuation>
-      <cast_shadows>0</cast_shadows>
-      <spot>
-        <inner_angle>0.6</inner_angle>
-        <outer_angle>1</outer_angle>
-        <falloff>1</falloff>
-      </spot>
-    </light>
-    <light name='user_spot_light_1' type='spot'>
-      <pose frame=''>-67.6259 13.7177 1 0 -0 0</pose>
-      <diffuse>0.5 0.5 0.5 1</diffuse>
-      <specular>0.1 0.1 0.1 1</specular>
-      <direction>0 0 -1</direction>
-      <attenuation>
-        <range>20</range>
-        <constant>0.5</constant>
-        <linear>0.01</linear>
-        <quadratic>0.001</quadratic>
-      </attenuation>
-      <cast_shadows>0</cast_shadows>
-      <spot>
-        <inner_angle>0.6</inner_angle>
-        <outer_angle>1</outer_angle>
-        <falloff>1</falloff>
-      </spot>
-    </light>
 
 
 	<scene>
@@ -87,9 +22,23 @@
 		</sky>
 	</scene>
 
+	<light name='user_directional_light_0' type='directional'>
+      <pose frame=''>-66.7051 8.89401 1 0 -0 0</pose>
+      <diffuse>0.5 0.5 0.5 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <direction>0.1 0.1 -0.9</direction>
+      <attenuation>
+        <range>20</range>
+        <constant>0.5</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <cast_shadows>1</cast_shadows>
+    </light>
+
 	<gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>-69.3423 10.2869 1.48365 -0 0.271643 0.628195</pose>
+        <pose frame=''>-74.455 2.97512 1.7909 -0 0.231643 1.00819</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>

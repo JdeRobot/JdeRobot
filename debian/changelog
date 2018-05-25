@@ -1,3 +1,30 @@
+jderobot (5.6.4) unstable; urgency=low
+
+  * release 5.6.4
+  * Solved some bugs related with installation and other minor bugs in components.
+  * Added some little improvements in some tools. 
+  * [PR #1070] Now server value on yml files are more intuitive.
+  * [PR #1080] Change in movement blocks and added math blocks
+  * [PR #1082] Added support for kinect1's ROS driver
+  * [PR #1091] HSV color disk added to colorTuner tool
+  * [PR #1106] Added support for kinect2's ROS driver  
+  * [PR #1111] Moved scratch2jderobot away from the oficial repo. Now this tool has its own one.
+  * [PR #1119] Added turtlebot ROS launchers
+  * [PR #1123] Added 3dViewer-web tool
+  * [PR #1124] New tool cameraview-web
+  * [PR #1125] Deleted 3dViewer tool.
+  * [PR #1126] Cameraserver python full ROS based and full OpenCV
+  * [PR #1127] Added new world for IIROS drone championship
+  * [PR #1132] Better support for bumper sensor in comm
+  * [PR #1133] Web tool kobukiviewer renamed and electron based  
+  * [PR #1134] Web tool uavviewer renamed and electron based
+  * [PR #1141] Added new ROS based formula1 model for simulation
+  * [PR #1148] Renamed several components 
+  * [PR #1150] New models for holo taxi and opel car ROS based.
+  * [PR #1154] Deleted old webtools 
+
+-- Francisco Perez <f.perez475@gmail.com>, Wed, 18 May 2018 14:20:00 +0100
+
 jderobot (5.6.3) unstable; urgency=low
 
   * release 5.6.3

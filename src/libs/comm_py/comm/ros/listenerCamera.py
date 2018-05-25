@@ -4,6 +4,7 @@ import threading
 from math import pi as PI
 from jderobotTypes import Image
 import cv2
+import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 
 

@@ -10,12 +10,14 @@ SET(CPACK_COMPONENT_BASIC-SERVER_DESCRIPTION
  Home page https://jderobot.org") 
 
 SET(CPACK_DEBIAN_CAMSERVER_DEPENDS "jderobot-easyice, jderobot-util, jderobot-interfaces, jderobot-logger, jderobot-ns, jderobot-colorspaces")
+SET(CPACK_DEBIAN_CAMSERVER_PACKAGE_REPLACES "jderobot-cameraserver")
 SET(CPACK_COMPONENT_CAMSERVER_DESCRIPTION  
 "Generic server for RGB cameras. 
  Manual Page http://jderobot.org/index.php/Drivers#camserver
  Home page https://jderobot.org")
 
 SET(CPACK_DEBIAN_CAMSERVER-PYTHON_PACKAGE_DEPENDS "jderobot-config-python, jderobot-interfaces")
+SET(CPACK_DEBIAN_CAMSERVER-PYTHON_PACKAGE_REPLACES "jderobot-cameraserver-python")
 SET(CPACK_COMPONENT_CAMSERVER-PYTHON_DESCRIPTION  
 "Example of camserver driver in python
  Manual Page http://jderobot.org/
@@ -34,8 +36,16 @@ SET(CPACK_COMPONENT_EVICAMDRIVER_DESCRIPTION
  Home page https://jderobot.org")
 
 SET(CPACK_DEBIAN_GAZEBO_PACKAGE_DEPENDS "jderobot-easyice, jderobot-util, jderobot-interfaces, jderobot-colorspaces, gazebo7")
+SET(CPACK_DEBIAN_GAZEBO_PACKAGE_REPLACES "jderobot-gazeboserver")
 SET(CPACK_COMPONENT_GAZEBO_DESCRIPTION  
 "Collection of plugins, worlds and models made by JdeRobot. 
+ Manual Page http://jderobot.org/index.php/Drivers (sections 3-9)
+ Home page https://jderobot.org")
+
+SET(CPACK_DEBIAN_GAZEBO-ASSETS_PACKAGE_DEPENDS "gazebo7")
+SET(CPACK_DEBIAN_GAZEBO-ASSETS_PACKAGE_REPLACES "jderobot-gazeboserver")
+SET(CPACK_COMPONENT_GAZEBO-ASSETS_DESCRIPTION  
+"Collection of worlds and models made by JdeRobot. 
  Manual Page http://jderobot.org/index.php/Drivers (sections 3-9)
  Home page https://jderobot.org")
 
