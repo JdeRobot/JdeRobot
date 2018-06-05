@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="default">
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <!-- A ground plane -->
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <!-- A modified table as a warehouse pallet -->
+    <include>
+      <uri>model://warehouse_pallet</uri>
+    </include>
+    <!-- Our Robot model -->
+    <model name="amazon_warehouse_robot">
+      <include>
+        <uri>model://amazon_warehouse_robot</uri>
+      </include>
+
+      <!-- Attach the plugin to this model -->
+      <plugin name="prismatic_joint_control" filename="libgazebo_ros_screw_plugin.so">
+	<jointForce>0</jointForce>
+      </plugin>
+    </model>
+
+  </world>
+</sdf>
