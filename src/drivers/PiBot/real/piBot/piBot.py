@@ -9,7 +9,7 @@ import config
 import progeo
 
 class PiBot:
-<<<<<<< HEAD
+
 	'''
 	Controlador para el Robot PiBot de JdeRobot-Kids
 	Actualmente incluye dos funciones de procesamiento visual:
@@ -215,7 +215,6 @@ class PiBot:
 	def mostrarImagen (self)
 		cv2.imshow("Imagen", self._frame)
 
-
 	def damePosicionDeObjetoDeColor():
 		'''
 		Función que devuelve el centro del objeto que tiene un color verde en el rango [GREEN_MIN, GREEN_MAX] para ser detectado
@@ -316,126 +315,6 @@ class PiBot:
 			j = j + 5
 
 		return fronteraArray
-=======
-    '''
-    Controlador para el Robot PiBot de JdeRobot-Kids
-    '''
-    def __init__(self):
-	 # Libreria RPi.GPIO
-        import RPi.GPIO as GPIO
-        import pigpio # Libreria para manejar los servos
-        JdeRobotKids.__init__(self)
-        self._GPIO = GPIO
-        self._tipo = "PiBot"
-	self._dit = pigpio.pi()
-        '''
-        props = Ice.createProperties()
-        props.setProperty("JdeRobotKids.Motors.Proxy", "Motors:default -h localhost -p 9999")
-        props.setProperty("JdeRobotKids.Motors.maxV", "1")
-        props.setProperty("JdeRobotKids.Motors.maxW", "0.5")
-        id = Ice.InitializationData()
-        id.properties = props
-        ic = Ice.initialize(id)
-        self.motors = Motors (ic, "JdeRobotKids.Motors")
-        '''
-
-    def moverServo(self, *args):
-        '''
-        Función que hace girar al servo motor a un angulo dado como parámetro.
-        @type args: lista
-        @param args: lista de argumentos:
-        args[0]: puerto al que esta conectado el controlador del servo
-        args[1]: banco al que esta conectado el servo en el controlador
-        args[2]: angulo de giro del servo. 0-180 grados. ¡PROBAR GIRO ANTES DE MONTAR EL SERVO!
-        '''
-        puerto = args[0]
-        banco = args[1]
-        angulo = args[2]/10
-
-        self._GPIO.setmode(GPIO.BOARD)   #Ponemos la Raspberry en modo BOARD
-        self._GPIO.setup(puerto,GPIO.OUT)    #Ponemos el pin args[0] como salida
-        p = self._GPIO.PWM(puerto,50)        #Ponemos el pin args[0] en modo PWM y enviamos 50 pulsos por segundo
-        p.start(7.5)               #Enviamos un pulso del 7.5% para centrar el servo
-        p.ChangeDutyCycle(angulo)
-        time.sleep(0.5)  
-
-    def avanzar(self, vel):
-        '''
-        Función que hace avanzar al robot en línea recta a una velocidad dada como parámetro.
-        @type vel: entero
-        @param vel: velocidad de avance del robot (máximo 255)
-        '''
-	# Puertos de datos para servos izquierdo y derecho
-        puertoL = 4 
-        puertoR = 18
-        #servos = pigpio.pi()
-        self._dit.set_servo_pulsewidth(puertoL, 1700)
-        self._dit.set_servo_pulsewidth(puertoR, 1300)
-
-    def retroceder(self, vel):
-        '''
-        Función que hace retroceder al robot en línea recta a una velocidad dada como parámetro.
-        @type vel: entero
-        @param vel: velocidad de retroceso del robot (máximo 255)
-        '''
-	# Puertos de datos para servos izquierdo y derecho
-        puertoL = 4 
-        puertoR = 18
-        #servos = pigpio.pi()
-        self._dit.set_servo_pulsewidth(puertoL, 1300)
-        self._dit.set_servo_pulsewidth(puertoR, 1700)
-
-    def parar(self):
-        '''
-        Función que hace detenerse al robot.
-        '''
-	# Puertos de datos para servos izquierdo y derecho
-        puertoL = 4 
-        puertoR = 18
-        #servos = pigpio.pi()
-        self._dit.set_servo_pulsewidth(puertoL, 1550)
-        self._dit.set_servo_pulsewidth(puertoR, 1490)
-
-    def girarIzquierda(self, vel):
-        '''
-        Función que hace rotar al robot sobre sí mismo hacia la izquierda a una velocidad dada como parámetro.
-        @type vel: entero
-        @param vel: velocidad de giro del robot (máximo 255)
-        '''
-	# Puertos de datos para servos izquierdo y derecho
-        puertoL = 4 
-        puertoR = 18
-        #servos = pigpio.pi()
-        self._dit.set_servo_pulsewidth(puertoL, 1400)
-        self._dit.set_servo_pulsewidth(puertoR, 1490)
-
-    def girarDerecha(self, vel):
-        '''
-        Función que hace rotar al robot sobre sí mismo hacia la derecha a una velocidad dada como parámetro.
-        @type vel: entero
-        @param vel: velocidad de giro del robot (máximo 255)
-        '''
-	# Puertos de datos para servos izquierdo y derecho
-        puertoL = 4 
-        puertoR = 18
-        #servos = pigpio.pi()
-        self._dit.set_servo_pulsewidth(puertoL, 1600)
-        self._dit.set_servo_pulsewidth(puertoR, 1550)
-
-    def move(self, velV, velW):
-        '''
-        Función que hace avanzar y girar al robot al mismo tiempo, según las velocidades V,W dadas como parámetro.
-
-        @type velV, velW: entero
-        @param velV, velW: velocidades de avance de motores izquierdo y derecho
-        '''
-	# Puertos de datos para servos izquierdo y derecho
-        puertoL = 4 
-        puertoR = 18
-        #servos = pigpio.pi()
-        self._dit.set_servo_pulsewidth(puertoL, velV)
-        self._dit.set_servo_pulsewidth(puertoR, velW)
->>>>>>> 9055aa8edfb064a945b84ff01e3ba62c7cccb222
 
 	def quienSoy(self):
 		print ("Yo soy un robot real PiBot")

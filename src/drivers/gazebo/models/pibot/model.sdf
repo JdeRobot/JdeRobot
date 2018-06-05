@@ -1,0 +1,468 @@
+<?xml version='1.0'?> <sdf version='1.6'> 
+<model name="pibot">
+    <link name="chasis">
+    	<pose>0 0 0 0 0 0</pose>
+    	<inertial>
+          	<mass>10</mass>
+          <inertia>
+            <ixx>1</ixx>
+          	<ixy>0</ixy>
+          	<iyy>1</iyy>
+          	<ixz>0</ixz>
+          	<iyz>0</iyz>
+          	<izz>1</izz>
+          </inertia>
+      	</inertial>
+      	<collision name="collision">
+          <geometry>
+            <mesh>
+              <uri>model://pibot/meshes/chasis.dae</uri>
+          	</mesh>
+          </geometry>
+		
+       	</collision>
+      	<visual name="visual">
+          <geometry>
+            <mesh>
+              <uri>model://pibot/meshes/chasis.dae</uri>
+            </mesh>
+          </geometry>
+      	</visual>
+    </link>
+
+    <!--<link name="us">
+    	<pose>0 0 0 0 0 0</pose>
+    	<inertial>
+          	<mass>0.05</mass>
+          <inertia>
+            <ixx>1</ixx>
+          	<ixy>0</ixy>
+          	<iyy>1</iyy>
+          	<ixz>0</ixz>
+          	<iyz>0</iyz>
+          	<izz>1</izz>
+          </inertia>
+      	</inertial>
+      	<collision name="collision">
+          <geometry>
+            <mesh>
+              <uri>model://pibot/meshes/us_sensor.dae</uri>
+          	</mesh>
+          </geometry>
+		
+       	</collision>
+      	<visual name="visual">
+          <geometry>
+            <mesh>
+              <uri>model://pibot/meshes/us_sensor.dae</uri>
+            </mesh>
+          </geometry>
+      	</visual>
+	<sensor name="sonar" type="sonar">
+          <pose>0.083 -0.004 0.058 0 -1.5707 0</pose>
+          <sonar>
+            <min>0.03</min>
+            <max>4.00</max>
+            <radius>0.01</radius>
+          </sonar>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <visualize>true</visualize>
+          <plugin name='camera_dump' filename='libsonarMBOT.so'/>
+        </sensor>
+    </link>-->
+
+    <link name="picam">
+    	<pose>0.066 0.010 0.053 0 0 0</pose>
+    	<inertial>
+          	<mass>0.01</mass>
+          <inertia>
+            <ixx>1</ixx>
+          	<ixy>0</ixy>
+          	<iyy>1</iyy>
+          	<ixz>0</ixz>
+          	<iyz>0</iyz>
+          	<izz>1</izz>
+          </inertia>
+      	</inertial>
+      	<collision name="collision">
+          <geometry>
+            <mesh>
+              <uri>model://pibot/meshes/picam.dae</uri>
+          	</mesh>
+          </geometry>
+		
+       	</collision>
+      	<visual name="visual">
+          <geometry>
+            <mesh>
+              <uri>model://pibot/meshes/picam.dae</uri>
+            </mesh>
+          </geometry>
+      	</visual>
+        <sensor name='picam' type='camera'>
+          <pose>0.072 0.012 0.106 0 0 0</pose>	
+          <camera>
+            <!--<save enabled="true">
+              <path>/tmp/camera_save_tutorial</path>
+            </save>-->
+            <horizontal_fov>1.047</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>10</far>
+            </clip>
+          </camera>
+          <always_on>1</always_on>
+          <plugin name='camera_dump' filename='libcamera_dumpMBOT.so'/>
+          <update_rate>30</update_rate>
+        </sensor>
+    </link>
+
+    <link name="ir">
+    	<pose>0.056 0 0.010 0 0 0</pose>
+	<inertial>
+          	<mass>0.0001</mass>
+          <inertia>
+            <ixx>1</ixx>
+          	<ixy>0</ixy>
+          	<iyy>1</iyy>
+          	<ixz>0</ixz>
+          	<iyz>0</iyz>
+          	<izz>1</izz>
+          </inertia>
+      	</inertial>
+      	<!--<collision name="collision">
+          <geometry>
+            <mesh>
+              <uri>model://pibot/meshes/ir_sensor.dae</uri>
+          	</mesh>
+		<sphere><radius>0.01</radius></sphere>
+          </geometry>
+		
+       	</collision>-->
+      	<visual name="visual_L">
+	<pose>0 0.007 0 0 0 0</pose>
+          <geometry>
+            <!--<mesh>
+              <uri>model://pibot/meshes/ir_sensor.dae</uri>
+            </mesh>-->
+		<sphere><radius>0.001</radius></sphere>
+          </geometry>
+      	</visual>
+	<visual name="visual_R">
+	<pose>0 -0.007 0 0 0 0</pose>
+          <geometry>
+            <!--<mesh>
+              <uri>model://pibot/meshes/ir_sensor.dae</uri>
+            </mesh>-->
+		<sphere><radius>0.001</radius></sphere>
+          </geometry>
+      	</visual>
+        <sensor name='irLeft' type='camera'>
+          <pose>0 0.007 0 0 1.5707 0</pose>	
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image>
+              <width>4</width>
+              <height>4</height>
+            </image>
+            <clip>
+              <near>0.0001</near>
+              <far>0.2</far>
+            </clip>
+          </camera>
+          <always_on>1</always_on>
+          <plugin name='camera_dump' filename='libirMBOT.so'/>
+          <update_rate>30</update_rate>
+        </sensor>
+        <sensor name='irRight' type='camera'>
+          <pose>0 -0.007 0 0 1.5707 0</pose>	
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image>
+              <width>4</width>
+              <height>4</height>
+            </image>
+            <clip>
+              <near>0.0001</near>
+              <far>0.2</far>
+            </clip>
+          </camera>
+          <always_on>1</always_on>
+          <plugin name='camera_dump' filename='libirMBOT.so'/>
+          <update_rate>30</update_rate>
+        </sensor>
+    </link>
+
+     <link name="ball">
+          <pose>-0.064 0 0.012 0 0 0</pose>
+          <inertial>
+          	<mass>2</mass>
+          <inertia>
+            <ixx>1</ixx>
+            <ixy>0</ixy>
+            <iyy>1</iyy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+            <izz>1</izz>
+          </inertia>
+      	</inertial>
+        <collision name="collision">
+          <pose>0 0 0 0 0 0 </pose>
+          <geometry>
+                          <mesh>
+              <uri>model://pibot/meshes/ball.dae</uri>
+          	</mesh>
+                        </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <uri>model://pibot/meshes/ball.dae</uri>
+          	</mesh>
+          </geometry>
+        </visual>
+    </link>
+
+    <link name="left_wheel">
+          <pose>0.032 -0.052 0.033 0 0 0</pose>
+          <inertial>
+          	<mass>0.08</mass>
+          <inertia>
+            <ixx>1</ixx>
+            <ixy>0</ixy>
+            <iyy>1</iyy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+            <izz>1</izz>
+          </inertia>
+      	</inertial>
+        <collision name="collision">
+          <pose>0 0 0 0 0 0 </pose>
+          <geometry>
+                          <mesh>
+              <uri>model://pibot/meshes/left_wheel.dae</uri>
+          	</mesh>
+                        </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <uri>model://pibot/meshes/left_wheel.dae</uri>
+          	</mesh>
+          </geometry>
+        </visual>
+    </link>
+    <link name="right_wheel">
+          <pose>0.032 0.052 0.033 0 0 0</pose>
+          <inertial>
+            <mass>0.08</mass>
+          <inertia>
+            <ixx>1</ixx>
+            <ixy>0</ixy>
+            <iyy>1</iyy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+            <izz>1</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <pose>0 0 0 0 0 0 </pose>
+          <geometry>
+                       <mesh>
+              <uri>model://pibot/meshes/right_wheel.dae</uri>
+            </mesh>
+                        </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <uri>model://pibot/meshes/right_wheel.dae</uri>
+            </mesh>
+          </geometry>
+        </visual>
+    </link>
+
+    <!--<link name="palm">
+            <pose>0 0 0 0 0 0</pose>
+            <inertial>
+                <inertia>
+                    <ixx>0.01</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.01</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.01</izz>
+                </inertia>
+                <mass>0.5</mass>
+            </inertial>
+            <collision name="collision">
+                <geometry>
+                    <mesh>
+			<uri>model://pibot/meshes/palm_grip.dae</uri>
+		    </mesh>
+                </geometry>
+            </collision>
+            <visual name="visual">
+                <geometry>
+                    <mesh>
+			<uri>model://pibot/meshes/palm_grip.dae</uri>
+		    </mesh>
+                </geometry>
+            </visual>
+        </link>
+        <link name="left_finger">
+            <pose>0 0 0 0 0 0</pose>
+            <inertial>
+                <inertia>
+                    <ixx>0.01</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.01</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.01</izz>
+                </inertia>
+                <mass>0.1</mass>
+            </inertial>
+            <collision name="collision">
+                <geometry>
+                    <mesh>
+			<uri>model://pibot/meshes/left_grip.dae</uri>
+		    </mesh>
+                </geometry>
+            </collision>
+            <visual name="visual">
+                <geometry>
+                    <mesh>
+			<uri>model://pibot/meshes/left_grip.dae</uri>
+		    </mesh>
+                </geometry>
+	    </visual>
+        </link>
+        <link name="right_finger">
+            <pose>0 0 0 0 0 0</pose>
+            <inertial>
+                <inertia>
+                    <ixx>0.01</ixx>
+                    <ixy>0</ixy>
+                    <ixz>0</ixz>
+                    <iyy>0.01</iyy>
+                    <iyz>0</iyz>
+                    <izz>0.01</izz>
+                </inertia>
+                <mass>0.1</mass>
+            </inertial>
+            <collision name="collision">
+                <geometry>
+                    <mesh>
+			<uri>model://pibot/meshes/right_grip.dae</uri>
+		    </mesh>
+                </geometry>
+            </collision>
+            <visual name="visual">
+                <geometry>
+                    <mesh>
+			<uri>model://pibot/meshes/right_grip.dae</uri>
+		    </mesh>
+                </geometry>
+	    </visual>
+        </link>-->
+
+    <joint type="revolute" name="ball">
+        <pose>0 0 0 0 0 0</pose>
+        <child>ball</child>
+        <parent>chasis</parent>
+        <axis>
+          <xyz>1 1 1</xyz>
+        </axis>
+    </joint>
+    <joint type="revolute" name="right_wheel_hinge">
+        <pose>0 0 0 0 0 0</pose>
+        <child>right_wheel</child>
+        <parent>chasis</parent>
+        <axis>
+          <xyz>0 1 0</xyz>
+        </axis>
+    </joint>
+    <joint type="revolute" name="left_wheel_hinge">
+      <pose>0 0 0 0 0 0</pose>
+      <child>left_wheel</child>
+      <parent>chasis</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+      </axis>
+    </joint>
+    <!--<joint type="revolute" name="us_fix">
+        <pose>0 0 0 0 0 0</pose>
+        <child>us</child>
+        <parent>chasis</parent>
+        <axis>
+          <xyz>0 0 0</xyz>
+        </axis>
+    </joint>-->
+    <joint type="revolute" name="ir_fix">
+        <pose>0 0 0 0 0 0</pose>
+        <child>ir</child>
+        <parent>chasis</parent>
+        <axis>
+          <xyz>0 0 0</xyz>
+        </axis>
+    </joint>
+    <joint type="revolute" name="picam_fix">
+        <pose>0 0 0 0 0 0</pose>
+        <child>picam</child>
+        <parent>chasis</parent>
+        <axis>
+          <xyz>0 0 1</xyz>
+        </axis>
+    </joint>
+
+
+    <!--<joint name="palm_left_finger" type="revolute">
+            <pose>0.120 0.036 0.039 0 0 0</pose>
+            <child>left_finger</child>
+            <parent>palm</parent>
+            <axis>
+                <limit>
+                    <lower>-0.4</lower>
+                    <upper>0.4</upper>
+                </limit>
+                <xyz>0 0 1</xyz>
+            </axis>
+        </joint>
+
+        <joint name="palm_right_finger" type="revolute">
+            <pose>0.120 -0.043 0.039 0 0 0</pose>
+            <child>right_finger</child>
+            <parent>palm</parent>
+            <axis>
+                <limit>
+                    <lower>-0.4</lower>
+                    <upper>0.4</upper>
+                </limit>
+                <xyz>0 0 1</xyz>
+            </axis>
+        </joint>
+
+        <joint name="palm_riser" type="prismatic">
+            <child>palm</child>
+            <parent>chasis</parent>
+            <axis>
+                <limit>
+                    <lower>0</lower>
+                    <upper>0</upper>
+                </limit>
+                <xyz>0 0 0</xyz>
+            </axis>
+        </joint>-->
+
+<plugin name="carMotors" filename="libmotorsMBOT.so"/>
+<plugin name="pose3d" filename="libpose3dMBOT.so"/>
+            
+  </model>
+</sdf>
+

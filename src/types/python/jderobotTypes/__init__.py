@@ -6,3 +6,4 @@ from .rgbd import Rgbd
 from .navdataData import NavdataData
 from .bumper import BumperData
 from .sonar import SonarData
+from .ir import IRData
