@@ -206,14 +206,36 @@ class PiBot:
 			elif (velW < -3): # ...mientras gira rapido a izquierda
 				self._dit.set_servo_pulsewidth(puertoL, 1530)
 				self._dit.set_servo_pulsewidth(puertoR, 1300)
+	
+	def leerIRSigueLineas(self):
+		self._GPIO.setmode(self._GPIO.BOARD)
+		self._GPIO.setup(12, self._GPIO.IN)
+		self._GPIO.setup(14, self._GPIO.IN)
+		right_value = self._GPIO.input(12)
+		left_value = self._GPIO.input(14)
+		#0: ambos sobre la linea
+		#1: izquierdo sobre la linea
+		#2: derecho sobre la linea
+		#3: ambos fuera de la linea
+		
+		if(right_value == 1 and left_value == 1):
+			state = 0
+		elif(right_value == 0 and left_value == 1):
+			state = 1
+		elif(right_value == 1 and left_value == 0):
+			state = 2
+		else:
+			state = 3
 
-        def dameImagen (self):
-                self._frame = self._videostream.read()
-                self._frame = imutils.resize(self._frame, width=400)
-                return self._frame
+		return state
 
-        def mostrarImagen (self):
-                cv2.imshow("Imagen", self._frame)
+    def dameImagen (self):
+        self._frame = self._videostream.read()
+        self._frame = imutils.resize(self._frame, width=400)
+        return self._frame
+
+    def mostrarImagen (self):
+        cv2.imshow("Imagen", self._frame)
 
 	def damePosicionDeObjetoDeColor():
 		'''

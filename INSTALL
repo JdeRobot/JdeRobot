@@ -1,7 +1,0 @@
-
-cmake -G"Eclipse CDT4 - Unix Makefiles" -D CMAKE_BUILD_TYPE=Debug .
-
-Installation Instructions
-*************************
-
-Please see the following url: http://jderobot.org/Manual-5

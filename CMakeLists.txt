@@ -19,7 +19,7 @@ cmake_minimum_required(VERSION 3.3)
 if (EXISTS buildpresets_userdefined.cmake)
 	include(buildpresets_userdefined.cmake)
 endif()
-include(buildpresets.cmake)
+include(cmake/buildpresets.cmake)
 
 #include jderobot macros
 include(cmake/jderobot.cmake)
@@ -219,8 +219,8 @@ INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/setup.bash DESTINATION ${CMAKE_INSTALL
 ###################
 
 configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake"
     IMMEDIATE @ONLY)
 
 add_custom_target(uninstall

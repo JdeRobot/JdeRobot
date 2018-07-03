@@ -43,6 +43,7 @@ class PiBot:
         @type vel: entero
         @param vel: velocidad de avance del robot (máximo 255)
         '''
+        self.motors.sendW(0)
         self.motors.sendV(vel)
 
     def retroceder(self, vel):
@@ -51,6 +52,7 @@ class PiBot:
         @type vel: entero
         @param vel: velocidad de retroceso del robot (máximo 255)
         '''
+        self.motors.sendW(0)
         self.motors.sendV(-vel)
 
     def parar(self):
@@ -66,6 +68,7 @@ class PiBot:
         @type vel: entero
         @param vel: velocidad de giro del robot (máximo 255)
         '''
+        self.motors.sendV(0)
         self.motors.sendW(vel)
         
 
@@ -75,6 +78,7 @@ class PiBot:
         @type vel: entero
         @param vel: velocidad de giro del robot (máximo 255)
         '''
+        self.motors.sendV(0)
         self.motors.sendW(-vel)
 
     def move(self, velV, velW):
@@ -83,8 +87,8 @@ class PiBot:
         @type velV, velW: entero
         @param velV, velW: velocidades de avance de motores izquierdo y derecho
         '''
-        self.motors.sendV(vel)
-        self.motors.sendW(vel)
+        self.motors.sendV(velV)
+        self.motors.sendW(velW)
 
     def dameImagen(self):
         '''

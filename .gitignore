@@ -10,6 +10,7 @@ Makefile
 src/interfaces/cpp/
 src/interfaces/java/
 src/interfaces/python/
+!src/interfaces/python/JdeRobotKids.py
 
 *.qrc.depends
 
@@ -20,5 +21,6 @@ src/interfaces/python/
 __pycache__/
 *.py[cod]
 /build/
+.vscode/
 
 src/tools/colorTuner_py/build/
