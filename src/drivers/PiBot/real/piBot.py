@@ -9,6 +9,7 @@ import cv2
 import time
 import math
 import yaml
+import RPi.GPIO as GPIO
 
 from imutils.video import VideoStream
 import imutils
@@ -27,7 +28,6 @@ class PiBot:
 	def __init__(self, camara):
 		# Libreria RPi.GPIO
 		print("real")
-		import RPi.GPIO as GPIO
 		import pigpio # Libreria para manejar los servos
 		JdeRobotKids.__init__(self)
 		self._GPIO = GPIO
@@ -40,27 +40,22 @@ class PiBot:
 			self._videostream = VideoStream(usePiCamera=False).start()
 		time.sleep(2)
 
-	self.lock = threading.Lock()
-	#creo el objeto odom de la clase Odometry
-	self.odom = self.Odometry(self)
+		#creo el objeto odom de la clase Odometry
+		self.odom = self.Odometry()
 
 	class Odometry:
 		'''
 		controlador de la odometria robot
 		'''
 		def __init__(self, selfpadre):
-			#Aqui se podria indicar que lea de un fichero la poscion actual
+			#Defino la libreria GPIO
+			self._GPIO = GPIO
+
+			self.lock = threading.Lock()
 
 			self.posx = 0 #posicion en x
 			self.posy = 0 #posicion en y
 			self.postheta = 0 #posicion en theta (angular)
-
-			#Declaro el evento que me servira para matar el hilo
-			self.kill_event = threading.Event()
-
-			#Inicializo el hilo y lo arranco
-			self.hilo = threading.Thread(target=self.readOdometry, args=(self.kill_event, selfpadre))
-			self.hilo.start()
 
 		class Angles:
 			def __init__(self):
@@ -68,6 +63,12 @@ class PiBot:
 				actual = 0
 				dif = 0
 
+		def startOdometry(self):
+			#Declaro el evento que me servira para matar el hilo
+			self.kill_event = threading.Event()
+			#Inicializo el hilo y lo arranco
+			self.hilo = threading.Thread(target=self.readOdometry, args=(self.kill_event,))
+			self.hilo.start()
 
 		def readOdometry(self, kill_event, selfpadre):
 			'''
@@ -113,24 +114,21 @@ class PiBot:
 					selfpadre.lock.acquire()
 					self.posx = self.posx + x
 					self.posy = self.posy + y
-					#self.postheta = self.postheta + math.atan(y / x)
 					self.postheta  = self.postheta + dtheta
 					selfpadre.lock.release()
 
 				def diferencialtheta(difizq, difdcho):
 
 					#Hayo la longitud de arco que ha trazado cada una de las ruedas:
-					longarcoizq = angleizq.dif * Rrueda
-					longarcodcho = (-1) * angledcho.dif * Rrueda #Por convenio, si avanza hacia adelante, la distancia recorrida es positiva
-					#longarcoizq = difizq * Rrueda
-					#longarcodcho = difdcho * Rrueda
+					longarcoizq = difizq * Rrueda
+					longarcodcho = (-1) * difdcho * Rrueda #Por convenio, si avanza hacia adelante, la distancia recorrida es positiva
 
 					return (longarcodcho - longarcoizq) / DistRuedas
 
 				#calculo el diferencial de theta:
 				dtheta = diferencialtheta(difizq, difdcho)
 				#calculo la distancia en linea recta que el robot ha recorrido:
-				d = dist_recorrida(angleizq.dif, angledcho.dif)
+				d = dist_recorrida(difizq, difdcho)
 				#calculo x e y:
 				x = d * math.cos(dtheta)
 				y = d * math.sin(dtheta)
@@ -139,7 +137,7 @@ class PiBot:
 			#Pines de los encoders:
 			EncoderL = 6
 			EncoderR = 24
-			sample_time = 0.03 #Intervalo entre mediciones
+			sample_time = 0.025 #Intervalo entre mediciones
 			#Creo los dos ojetos de la clase Angles
 			angleizq = self.Angles()
 			angledcho = self.Angles()
@@ -157,6 +155,112 @@ class PiBot:
 
 				(angleizq.prev, angledcho.prev) = (angleizq.actual, angledcho.actual) #los angulos actuales son los previos para la siguiente vuelta
 				time.sleep(sample_time)
+
+		def _leerangulorueda(self, Encoder):
+			'''
+			devuelve el angulo en el que se encuentra la rueda cuyo pin de feedback se encuentra en el
+			pin Encoder en el momento en que se llama a la funcion
+			'''
+
+			#Constantes:
+			Pi = 3.1416
+			DcMin = 29
+			DcMax = 971
+			FullCircle = 2 * Pi #360
+			DutyScale = 1000
+			Q2Min = FullCircle / 4 #angulo minimo perteneciente al segundo cuadrante
+			Q3Max = Q2Min * 3 #angulo maximo perteneciente al tercer cuadrante
+
+			turns = 0
+
+			def pulse_in(inp, bit):
+
+			    def readuntil(inp, bit):
+				rec = self._GPIO.input(inp)
+				if(rec == bit):
+				    #esperar hasta terminar de leer unos
+				    while(rec == bit):
+					rec = self._GPIO.input(inp)
+				#leer ceros hasta que me llegue el primer uno
+				if(bit == 1):
+				    while(rec == 0):
+					rec = self._GPIO.input(inp)
+				    #ahora me acaba de llegar el primer uno despues de los ceros
+				else:
+				    while(rec == 1):
+					rec = self._GPIO.input(inp)
+				    #ahora me acaba de llegar el primer cero despues de los unos
+
+			    if(bit != 0 and bit != 1):
+				    return 0
+			    else:
+			    	readuntil(inp, bit) #leo hasta que me llega ese bit
+			    	start = time.time() #guardo la hora actual
+				if(bit == 1):
+				    readuntil(inp, 0) #leo hasta que me llega un bit contrario al anterior
+				else:
+				    readuntil(inp, 1)
+				finish = time.time()
+				elapsed = (finish - start) * 1000000 #tiempo en microsegundos
+
+				return elapsed #todavia esto no son microsegundos. Hay que pasarlo
+
+			def initangle():
+			    timeHigh = pulse_in(Encoder, 1) #devuelve el tiempo en microsegundos
+			    timeLow = pulse_in(Encoder, 0) #devuelve el tiempo en microsegundos
+			    timeCycle = timeHigh + timeLow
+			    dutyCycle = (DutyScale * timeHigh) / timeCycle #calculo el ciclo de trabajo
+			    return (FullCircle - 1) - ((dutyCycle - DcMin) * FullCircle) / (DcMax - DcMin + 1)
+
+
+			#se inicializa la configuracion de los pines correspondientes:
+			self._GPIO.setmode(self._GPIO.BCM)
+			self._GPIO.setup(Encoder, self._GPIO.IN)
+
+
+			#calculo el angulo inicial
+			angle = initangle()
+			p_angle = angle
+
+			finish = False
+			while(not finish):
+			    timeHigh = pulse_in(Encoder, 1) #devuelve el tiempo en microsegundos
+			    timeLow = pulse_in(Encoder, 0) #devuelve el tiempo en microsegundos
+
+			    timeCycle = timeHigh + timeLow
+
+			    if((timeCycle > 1000) and (timeCycle < 1200)):
+				finish = True
+
+			dutyCycle = (DutyScale * timeHigh)/ timeCycle #calculo el ciclo de trabajo
+
+			angle = (FullCircle - 1) - ((dutyCycle - DcMin) * FullCircle) / (DcMax - DcMin + 1)
+			if(angle < 0):
+			   	angle = 0
+		 	elif(angle > (FullCircle - 1)):
+			    angle = FullCircle - 1
+
+			#If transition from quadrant 4 to quadrant 1, increase turns count.
+			if((angle < Q2Min) and (p_angle > Q3Max)):
+			    turns = turns + 1
+			#If transition from quadrant 1 to  quadrant 4, decrease turns count.
+			elif((p_angle < Q2Min) and (angle > Q3Max)):
+			    turns = turns - 1
+
+			#Construct the angle measurement from the turns count and current angle value.
+			if(turns >= 0):
+			    angle = (turns * FullCircle) + angle
+			elif(turns <  0):
+			    angle = ((turns + 1) * FullCircle) - (FullCircle - angle)
+			#Esto lo hago para que cuando repita la vuelta se ponga a cero de nuevo
+			if(angle >= FullCircle):
+			    angle = angle - FullCircle
+			    turns = 0
+			elif(angle <= -FullCircle):
+			    angle = angle + FullCircle
+			    turns = 0
+
+			return angle
 
 		def stopOdometry(self):
 			self.kill_event.set()
@@ -226,7 +330,7 @@ class PiBot:
 		'''
 		Avanza o retrocede a una posicion dada
 		'''
-		Timeout = 20 #[s] Tiempo maximo que va a estar bloqueada la funcion
+		Timeout = 10 #[s] Tiempo maximo que va a estar bloqueada la funcion
 		ErrorRange = 0.02 #Margen de error para la posicion que ha de alcanzar
 		Vel = 0.08 #Velocidad a la que se movera el robot
 
@@ -235,6 +339,7 @@ class PiBot:
 		def timeout_excedido(elapsed):
 			return elapsed >= Timeout
 
+		self.odom.startOdometry()
 		finish = False
 		(x0, y0, t0) = self.getOdometry()
 		time0 = time.time() #Guardo el instante de comienzo de la funcion bloqueante
@@ -244,7 +349,8 @@ class PiBot:
 				self.move(Vel, 0)
 			else:
 				self.move(-Vel, 0)
-			time.sleep(0.015)
+			time.sleep(0.095)
+
 			(xf, yf, tf) = self.getOdometry()
 			dif = xf - x0
 			timef = time.time() #guardo el instante actual en cada vuelta del bucle
@@ -255,7 +361,7 @@ class PiBot:
 			if(timeout_excedido(elapsed)):
 				print("No se pudo alcanzar la posicion deseada")
 				finish = True
-		self.parar()
+		self.fin()
 
 	def girarHasta(self, angle):
 		'''
@@ -263,8 +369,8 @@ class PiBot:
 		del signo de 'angle'
 		'''
 
-		ErrorRange = 0.04
-		Timeout = 20
+		ErrorRange = 0.06
+		Timeout = 10
 		Pi = 3.1416
 
 		timeout_exceded = False
@@ -285,8 +391,7 @@ class PiBot:
 					self.move(0, 1)
 				else:
 					self.move(0, -1)
-				time.sleep(0.015)
-
+				time.sleep(0.095)
 				(xf, yf, tf) = self.getOdometry()
 
 				dif = tf - t0
@@ -299,6 +404,7 @@ class PiBot:
 			if(timeout_excedido(time_start, time_finish)):
 				print("No se pudo alcanzar la posicion deseada")
 
+		self.odom.startOdometry()
 		nvueltas = angle / (Pi / 2)
 		parte_entera = int(nvueltas) #Son las vueltas completas que tiene que dar
 		parte_decimal = nvueltas - parte_entera #Parte de vuelta que tendra que dar
@@ -318,7 +424,7 @@ class PiBot:
 		else:
 			alcanzarposicion(angle)
 
-		self.parar()
+		self.fin()
 
 	def fin(self):
 		self.parar()
@@ -416,11 +522,11 @@ class PiBot:
 		if(escero(velV) and not escero(velW)):
 			#Motor izquierdo hacia atras y motor derecho hacia adelante a velocidad maxima
 			if(espositivo(velW)):
-				movermotordcho(0.1)
-				movermotorizq(-0.1)
+				movermotordcho(0.08)
+				movermotorizq(-0.08)
 			else:
-				movermotordcho(-0.1)
-				movermotorizq(0.1)
+				movermotordcho(-0.08)
+				movermotorizq(0.08)
 
 		elif(not escero(velV) and escero(velW)):
 			#Avanza hacia el frente a la velocidad lineal dada
@@ -440,112 +546,20 @@ class PiBot:
 			movermotorizq(velV)
 			movermotordcho(-velmotorgiro)
 
-	def leerangulorueda(self, Encoder):
-	#devuelve el angulo en el que se encuentra la rueda cuyo pin de feedback
-	#se encuentra en el pin "Encoder" en el momento en que se llama a la funcion
+	def getOdometry(self):
+		'''
+		Devuelve el valor de las variables posx, posy y postheta
+		'''
+		self.odom.lock.acquire()
+		(aux1, aux2, aux3) = (self.odom.posx, self.odom.posy, self.odom.postheta)
+		self.odom.lock.release()
 
-		#Constantes:
-		DcMin = 29
-		DcMax = 971
-		Pi = 3.1416
-		FullCircle = 2 * Pi
-		DutyScale = 1000
-		Q2Min = FullCircle / 4 #angulo minimo perteneciente al segundo cuadrante
-		Q3Max = Q2Min * 3 #angulo maximo perteneciente al tercer cuadrante
+		return (aux1, aux2, aux3)
 
-		turns = 0
-
-		def pulse_in(inp, bit):
-
-		    def readuntil(inp, bit):
-				rec = self._GPIO.input(inp)
-				if(rec == bit):
-				    #esperar hasta terminar de leer unos
-				    while(rec == bit):
-					rec = self._GPIO.input(inp)
-				#leer ceros hasta que me llegue el primer uno
-				if(bit == 1):
-				    while(rec == 0):
-					rec = self._GPIO.input(inp)
-				    #ahora me acaba de llegar el primer uno despues de los ceros
-				else:
-				    while(rec == 1):
-					rec = self._GPIO.input(inp)
-				    #ahora me acaba de llegar el primer cero despues de los unos
-
-		    if(bit != 0 and bit != 1):
-			    return 0
-		    else:
-		    	readuntil(inp, bit) #leo hasta que me llega ese bit
-		    	start = time.time() #guardo la hora actual
-			if(bit == 1):
-			    readuntil(inp, 0) #leo hasta que me llega un bit contrario al anterior
-			else:
-			    readuntil(inp, 1)
-			finish = time.time()
-			elapsed = (finish - start) * 1000000 #tiempo en microsegundos
-
-			return elapsed #todavia esto no son microsegundos. Hay que pasarlo
-
-		def initangle():
-		    timeHigh = pulse_in(Encoder, 1) #devuelve el tiempo en microsegundos
-		    timeLow = pulse_in(Encoder, 0) #devuelve el tiempo en microsegundos
-		    timeCycle = timeHigh + timeLow
-		    dutyCycle = (DutyScale * timeHigh) / timeCycle #calculo el ciclo de trabajo
-		    return (FullCircle - 1) - ((dutyCycle - DcMin) * FullCircle) / (DcMax - DcMin + 1)
-
-
-		#se inicializa la configuracion de los pines correspondientes:
-		self._GPIO.setmode(self._GPIO.BCM)
-		self._GPIO.setup(Encoder, self._GPIO.IN)
-
-
-		#calculo el angulo inicial
-		angle = initangle()
-		p_angle = angle
-
-		finish = False
-		while(not finish):
-		    timeHigh = pulse_in(Encoder, 1) #devuelve el tiempo en microsegundos
-		    timeLow = pulse_in(Encoder, 0) #devuelve el tiempo en microsegundos
-
-		    timeCycle = timeHigh + timeLow
-
-		    if((timeCycle > 1000) and (timeCycle < 1200)):
-			finish = True
-
-		dutyCycle = (DutyScale * timeHigh)/ timeCycle #calculo el ciclo de trabajo
-
-		angle = (FullCircle - 1) - ((dutyCycle - DcMin) * FullCircle) / (DcMax - DcMin + 1)
-		if(angle < 0):
-		   	angle = 0
-	 	elif(angle > (FullCircle - 1)):
-		    angle = FullCircle - 1
-
-		#Si la transicion va del cuarto cuadrante al primero, incremento 'turns'
-		if((angle < Q2Min) and (p_angle > Q3Max)):
-		    turns = turns + 1
-		#Si la transicion va del primer cuadrante al cuarto, incremento 'turns'
-		elif((p_angle < Q2Min) and (angle > Q3Max)):
-		    turns = turns - 1
-
-		#Calculo el angulo
-		if(turns >= 0):
-		    angle = (turns * FullCircle) + angle
-		elif(turns <  0):
-		    angle = ((turns + 1) * FullCircle) - (FullCircle - angle)
-		#Esto lo hago para que cuando repita la vuelta se ponga a cero de nuevo
-		if(angle >= FullCircle):
-		    angle = angle - FullCircle
-		    turns = 0
-		elif(angle <= -FullCircle):
-		    angle = angle + FullCircle
-		    turns = 0
-
-		return angle
-
-	def leerIRSigueLineas(self): #devuelve el estado de los sensores IR
-
+	def leerIRSigueLineas(self):
+		'''
+		devuelve el estado de los sensores IR
+		'''
 		right_sensor_port = 22
 		left_sensor_port = 27
 
@@ -570,7 +584,10 @@ class PiBot:
 
 		return state
 
-	def leerUltrasonido(self): #devuelve la distancia a un objeto en metros
+	def leerUltrasonido(self):
+		'''
+		devuelve la distancia a un objeto en metros
+		'''
 
 		inp = 3
 		out = 2
