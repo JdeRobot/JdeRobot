@@ -47,7 +47,7 @@ class PiBot:
 		'''
 		controlador de la odometria robot
 		'''
-		def __init__(self, selfpadre):
+		def __init__(self):
 			#Defino la libreria GPIO
 			self._GPIO = GPIO
 
@@ -70,7 +70,7 @@ class PiBot:
 			self.hilo = threading.Thread(target=self.readOdometry, args=(self.kill_event,))
 			self.hilo.start()
 
-		def readOdometry(self, kill_event, selfpadre):
+		def readOdometry(self, kill_event):
 			'''
 			Esta leyendo los angulos de ambos motores llamando a la funcion 'leerangulorueda'
 			y va modificando las variables posx, posy, postheta
@@ -82,7 +82,7 @@ class PiBot:
 			Rrueda = float(config['Radio_Rueda']) #Radio de la rueda
 
 			def leerangulos(L, R):
-				return (selfpadre.leerangulorueda(L), selfpadre.leerangulorueda(R))
+				return (self.leerangulorueda(L), self.leerangulorueda(R))
 
 			def diferenciaangulos(izq, dcho):
 
@@ -428,7 +428,10 @@ class PiBot:
 
 	def fin(self):
 		self.parar()
-		self.odom.stopOdometry()
+		try:
+			self.odom.stopOdometry()
+		except AttributeError:
+			pass
 
 	def move(self, velV, velW):
 		'''
