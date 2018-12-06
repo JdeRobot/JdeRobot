@@ -360,7 +360,6 @@ class PiBot:
 				finish = True
 			if(timeout_excedido(elapsed)):
 				print("No se pudo alcanzar la posicion deseada")
-				finish = True
 		self.fin()
 
 	def girarHasta(self, angle):
