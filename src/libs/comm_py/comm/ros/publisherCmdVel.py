@@ -43,7 +43,6 @@ class PublisherCMDVel:
         @type jdrc: jderobot Communicator
 
         '''
-        rospy.init_node("ss")
         self.topic = topic
         self.jdrc = jdrc
         self.vel = CMDVel()
