@@ -134,6 +134,13 @@ For more information follow [this link](https://hub.docker.com/r/jderobot/jderob
 
 <a name="manual"/>
 
+### Common Errors
+Could not find a package configuration file provided by "parameter_assertions" with any of the following names:
+parameter_assertions comes from a git submodule. Initialize the submodules by doing git submodule update --init --recursive
+Could not find a package configuration file provided by "XXXX" with any of the following names:"
+Make sure you have ran rosdep install --from-paths src --ignore-src in the catkin_ws folder already
+If you still get this error after installing all dependencies, then that means that we forgot to include that package in our dependencies list.
+
 ### Manual installation
 
 Downloading the source code from the GitHub is strongly NOT RECOMMENDED for new users unless you know what you are doing. 
