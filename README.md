@@ -5,6 +5,11 @@ JdeRobot
 <!--[![Build Status](http://jenkins.jderobot.org/buildStatus/icon?job=JdeRobot-GitHub)](http://jenkins.jderobot.org/job/JdeRobot-GitHub/)-->
 [![Current Release Version](https://img.shields.io/github/release/jderobot/base?style=flat-square&logo=github)](https://github.com/explosion/spaCy/releases)
 
+
+THIS REPOSITORY HAS BEEN ARCHIVED AND IS DEPRECATED. Since 2020 we have adopted ROS as our main framework for developing Robotics, AI and ComputerVision applications and tools.
+
+
+
 # Introduction
 
 
